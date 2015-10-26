@@ -2,13 +2,13 @@
 fileVersion=1
 
 # font settings
-fontName=Courier
-fontFile=
-charSet=204
+fontName=CourierTTF
+fontFile=courier_ttf.ttf
+charSet=0
 fontSize=13
 aa=1
 scaleH=100
-useSmoothing=1
+useSmoothing=0
 isBold=0
 isItalic=0
 useUnicode=1
@@ -20,10 +20,10 @@ renderFromOutline=0
 useClearType=1
 
 # character alignment
-paddingDown=0
-paddingUp=0
-paddingRight=0
-paddingLeft=0
+paddingDown=1
+paddingUp=1
+paddingRight=1
+paddingLeft=1
 spacingHoriz=1
 spacingVert=1
 useFixedHeight=0
@@ -50,6 +50,6 @@ invB=0
 outlineThickness=0
 
 # selected chars
-chars=32-127,152,160,164,166-167,169,171-174,176-177,181-183,187
+chars=32-127,160-255
 
 # imported icon images
