@@ -3,13 +3,13 @@
 
     <ItemGroup>
         <FusionOutputFiles Include="$(OutDir)*.dll;$(OutDir)*.exe"/>
-        <ThirdPartyFiles Include="$(SolutionDir)SDKs\FbxSdk\lib\x64\$(ConfigurationName)\libfbxsdk.dll"/>
-        <ToolBoxFiles Include="$(SolutionDir)Tools\*.com;$(SolutionDir)Tools\*.exe;$(SolutionDir)Tools\*.dll;"/>
-        <ContentFiles Include="$(SolutionDir)FusionContent\*.*"/>
+        <ThirdPartyFiles Include="$(ProjectDir)..\SDKs\FbxSdk\lib\x64\$(ConfigurationName)\libfbxsdk.dll"/>
+        <ToolBoxFiles Include="$(ProjectDir)..\Tools\*.com;$(SolutionDir)Tools\*.exe;$(SolutionDir)Tools\*.dll;"/>
+        <ContentFiles Include="$(ProjectDir)..\FusionContent\*.*"/>
     </ItemGroup>
 
 	<Target Name="AfterBuild">
-		<Exec Command='echo Copying Fusion Framework files...'/>
+		<Exec Command='echo Copying Fusion Engine files...'/>
 		<Copy SourceFiles="@(FusionOutputFiles)" DestinationFolder="$(FUSION_BIN)" SkipUnchangedFiles="false"/>
 		<Copy SourceFiles="@(ThirdPartyFiles)" DestinationFolder="$(FUSION_BIN)" SkipUnchangedFiles="false"/>
 		<Copy SourceFiles="@(ToolBoxFiles)" DestinationFolder="$(FUSION_BIN)" SkipUnchangedFiles="false"/>
