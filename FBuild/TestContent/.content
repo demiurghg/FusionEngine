@@ -1,0 +1,41 @@
+[Ignore]
+References\*
+RTI/Core/NE2_50M_SR_W_4096.jpg
+
+[BinaryDirectories]
+%FUSION_BIN%
+
+[ContentDirectories]
+%FUSION_CONTENT%
+
+[Shaders]
+*.hlsl
+stereo.hlsl /nopt
+
+[Textures]
+*.tga /compression:bc3
+*.png /fast /compression:bc2
+*.jpg /fast
+lena.tga /compression:rgb
+##RTI/Core/NE2_50M_SR_W_4096.jpg /compression:bc1 /fast
+
+[Fonts]
+*.bmfc
+
+[Sounds]
+sounds\*.wav -resample:22050 -mono
+sounds\*.ogg -resample:22050 -mono
+sounds\*.mp3 -resample:22050 -mono
+
+[Scripts]
+*.mtrl
+*.sfx 
+*.trigger
+*.entity
+
+[Scenes]
+*.fbx /geom
+
+[Copy]
+*.cube
+
