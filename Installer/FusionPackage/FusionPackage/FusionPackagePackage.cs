@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 
-namespace Fusion.FusionTemplate
+namespace ITMOUniversity.FusionPackage
 {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
@@ -27,8 +27,8 @@ namespace Fusion.FusionTemplate
     // This attribute is used to register the information needed to show this package
     // in the Help/About dialog of Visual Studio.
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
-    [Guid(GuidList.guidFusionTemplatePkgString)]
-    public sealed class FusionTemplatePackage : Package
+    [Guid(GuidList.guidFusionPackagePkgString)]
+    public sealed class FusionPackagePackage : Package
     {
         /// <summary>
         /// Default constructor of the package.
@@ -37,7 +37,7 @@ namespace Fusion.FusionTemplate
         /// not sited yet inside Visual Studio environment. The place to do all the other 
         /// initialization is the Initialize method.
         /// </summary>
-        public FusionTemplatePackage()
+        public FusionPackagePackage()
         {
             Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
         }

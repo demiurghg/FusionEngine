@@ -15,10 +15,6 @@ using Fusion.Framework;
 namespace TestGame2 {
 	class CustomGameInterface : Fusion.Engine.Common.GameInterface {
 
-		
-		[Config]
-		public UIConfig	UIConfig { get; set; }
-
 		[GameModule("Console", "con")]
 		public GameConsole Console { get { return console; } }
 		public GameConsole console;
@@ -36,7 +32,6 @@ namespace TestGame2 {
 		/// <param name="engine"></param>
 		public CustomGameInterface ( GameEngine gameEngine ) : base(gameEngine)
 		{
-			UIConfig			=	new UIConfig();
 			console				=	new GameConsole( gameEngine, "courier", "conback");
 		}
 
@@ -84,7 +79,7 @@ namespace TestGame2 {
 		{
 			console.Update( gameTime );
 
-			testLayer.Color	=	UIConfig.LenaColor;
+			testLayer.Color	=	Color.White;
 
 			/*if ( gameEngine.Keyboard.IsKeyDown(Keys.R) ) {
 				testLayer.Clear();
