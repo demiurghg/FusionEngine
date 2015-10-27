@@ -32,7 +32,7 @@ namespace TestGame2 {
 		/// <param name="engine"></param>
 		public CustomGameInterface ( GameEngine gameEngine ) : base(gameEngine)
 		{
-			console				=	new GameConsole( gameEngine, "courier", "conback");
+			console				=	new GameConsole( gameEngine, "conchars", "conback");
 		}
 
 

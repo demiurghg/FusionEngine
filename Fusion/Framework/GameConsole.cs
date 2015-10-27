@@ -35,8 +35,9 @@ namespace Fusion.Framework {
 		List<string> lines = new List<string>();
 
 
-		SpriteFont	consoleFont;
+		//SpriteFont	consoleFont;
 		DiscTexture consoleBackground;
+		DiscTexture	consoleFont;
 		SpriteLayer consoleLayer;
 		SpriteLayer editLayer;
 		
@@ -104,8 +105,10 @@ namespace Fusion.Framework {
 		}
 
 
-		int charHeight { get { return consoleFont.LineHeight; } }
-		int charWidth { get { return consoleFont.SpaceWidth; } }
+		int charHeight { get { return 8; } }
+		int charWidth { get { return 8; } }
+		/*int charHeight { get { return consoleFont.LineHeight; } }
+		int charWidth { get { return consoleFont.SpaceWidth; } }*/
 
 
 		/// <summary>
@@ -113,7 +116,7 @@ namespace Fusion.Framework {
 		/// </summary>
 		void LoadContent ()
 		{
-			consoleFont			=	GameEngine.Content.Load<SpriteFont>(font);
+			consoleFont			=	GameEngine.Content.Load<DiscTexture>(font);
 			consoleBackground	=	GameEngine.Content.Load<DiscTexture>(conback);
 		}
 
@@ -163,8 +166,10 @@ namespace Fusion.Framework {
 
 			editLayer.Clear();
 
-			consoleFont.DrawString( editLayer, "]" + editBox.Text, 0,0, Config.CmdLineColor );
-			consoleFont.DrawString( editLayer, "_", charWidth + charWidth * editBox.Cursor, 0, cursorColor );
+			//consoleFont.DrawString( editLayer, "]" + editBox.Text, 0,0, Config.CmdLineColor );
+			//consoleFont.DrawString( editLayer, "_", charWidth + charWidth * editBox.Cursor, 0, cursorColor );
+			editLayer.DrawDebugString( consoleFont, 0, 0,										"]" + editBox.Text, Config.CmdLineColor );
+			editLayer.DrawDebugString( consoleFont, charWidth + charWidth * editBox.Cursor,	0,  "_", cursorColor );
 		}
 
 
@@ -214,7 +219,8 @@ namespace Fusion.Framework {
 				}
 				
 
-				consoleFont.DrawString( consoleLayer, line.Message, 0, vp.Height/2 - (count+2) * charHeight, color );
+				consoleLayer.DrawDebugString( consoleFont, 0, vp.Height/2 - (count+2) * charHeight, line.Message, color );
+				//consoleFont.DrawString( consoleLayer, line.Message, , color );
 
 				if (count>rows) {
 					break;
