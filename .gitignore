@@ -10,6 +10,9 @@ fbxsdk.exe
 *.tar
 [Tt]emp/
 
+# installer result
+FusionEngine*.exe
+
 # User-specific files
 *.suo
 *.user

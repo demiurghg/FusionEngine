@@ -4,30 +4,42 @@
     <ItemGroup>
         <FusionOutputFiles Include="$(OutDir)*.dll;$(OutDir)*.exe"/>
         <ThirdPartyFiles Include="$(ProjectDir)..\SDKs\FbxSdk\lib\x64\$(ConfigurationName)\libfbxsdk.dll"/>
-        <ToolBoxFiles Include="$(ProjectDir)..\Tools\*.com;$(SolutionDir)Tools\*.exe;$(SolutionDir)Tools\*.dll;"/>
+        <ToolBoxFiles Include="$(ProjectDir)..\Tools\*.com;$(ProjectDir)..\Tools\*.exe;$(ProjectDir)..\Tools\*.dll;"/>
         <ContentFiles Include="$(ProjectDir)..\FusionContent\*.*"/>
     </ItemGroup>
 
-	<Target Name="AfterBuild">
-		<Exec Command='echo Copying Fusion Engine files...'/>
-		<Copy SourceFiles="@(FusionOutputFiles)" DestinationFolder="$(FUSION_BIN)" SkipUnchangedFiles="false"/>
-		<Copy SourceFiles="@(ThirdPartyFiles)" DestinationFolder="$(FUSION_BIN)" SkipUnchangedFiles="false"/>
-		<Copy SourceFiles="@(ToolBoxFiles)" DestinationFolder="$(FUSION_BIN)" SkipUnchangedFiles="false"/>
-		<Copy SourceFiles="@(ContentFiles)" DestinationFolder="$(FUSION_CONTENT)" SkipUnchangedFiles="false"/>
+	<Target Name="AfterBuild" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+		<Exec Command='echo Copying Fusion Engine files (DEBUG)...'/>
+		<Copy SourceFiles="@(FusionOutputFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)" SkipUnchangedFiles="false"/>
+		<Copy SourceFiles="@(ThirdPartyFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)" SkipUnchangedFiles="false"/>
+		<Copy SourceFiles="@(ToolBoxFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@ToolsDir)" SkipUnchangedFiles="false"/>
+		<Copy SourceFiles="@(ContentFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@ContentDir)" SkipUnchangedFiles="false"/>
 		<Exec Command='echo Done.'/>
-
-		<!--Exec Command='"$(SolutionDir)\Source\Bin\SharpCLI.exe" "$(TargetPath)"'/>
-
-		<GetFrameworkSdkPath>
-		  <Output TaskParameter="Path" PropertyName="FrameworkSdkPath" />
-		</GetFrameworkSdkPath>
-
-		<Exec Command='"$(FrameworkSdkPath)\bin\NETFX 4.5.1 Tools\x64\sn.exe" -Ra $(TargetPath) $(SolutionDir)sharpdx.snk' Condition="'$(SharpDXSign)' == 'true'"/-->
-
-		<!-- Copy back *.dll from bin/Debug|Release to obj/Debug/Release directory -->
-		<!--Copy SourceFiles="@(MainAssembly)" DestinationFolder="$(IntermediateOutputPath)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"/-->
-		<!-- Copy back *.pdb from bin/Debug|Release to obj/Debug/Release directory -->
-		<!--Copy SourceFiles="@(_DebugSymbolsOutputPath)" DestinationFiles="@(_DebugSymbolsIntermediatePath)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)" Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true'"/-->
-
+	</Target>
+	
+	<Target Name="AfterBuild" Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+		<Exec Command='echo Copying Fusion Engine files (RELEASE)...'/>
+		<Copy SourceFiles="@(FusionOutputFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)" SkipUnchangedFiles="false"/>
+		<Copy SourceFiles="@(ThirdPartyFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)" SkipUnchangedFiles="false"/>
+		<Copy SourceFiles="@(ToolBoxFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@ToolsDir)" SkipUnchangedFiles="false"/>
+		<Copy SourceFiles="@(ContentFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@ContentDir)" SkipUnchangedFiles="false"/>
+		<Exec Command='echo Done.'/>
 	</Target>
 </Project>
+
+
+
+
+	<!--Exec Command='"$(SolutionDir)\Source\Bin\SharpCLI.exe" "$(TargetPath)"'/>
+
+	<GetFrameworkSdkPath>
+	  <Output TaskParameter="Path" PropertyName="FrameworkSdkPath" />
+	</GetFrameworkSdkPath>
+
+	<Exec Command='"$(FrameworkSdkPath)\bin\NETFX 4.5.1 Tools\x64\sn.exe" -Ra $(TargetPath) $(SolutionDir)sharpdx.snk' Condition="'$(SharpDXSign)' == 'true'"/-->
+
+	<!-- Copy back *.dll from bin/Debug|Release to obj/Debug/Release directory -->
+	<!--Copy SourceFiles="@(MainAssembly)" DestinationFolder="$(IntermediateOutputPath)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"/-->
+	<!-- Copy back *.pdb from bin/Debug|Release to obj/Debug/Release directory -->
+	<!--Copy SourceFiles="@(_DebugSymbolsOutputPath)" DestinationFiles="@(_DebugSymbolsIntermediatePath)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)" Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true'"/-->
+

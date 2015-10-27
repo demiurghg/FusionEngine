@@ -9,20 +9,21 @@
 !include "MUI.nsh"
   !define MUI_ABORTWARNING
 
-
+RequestExecutionLevel user
+  
 ; The name of the installer
-Name "Fusion Game Library (v1.0)"
+Name "Fusion Engine (v0.1)"
 XPStyle on
 
 ; The file to write
-OutFile "FusionInstaller-1.0.exe"
+OutFile "FusionEngineSetup-0.1.exe"
 
 ; The default installation directory
-InstallDir $PROGRAMFILES\FusionGameLib
+InstallDir $PROFILE\FusionEngine
 
 ; Registry key to check for directory (so if you install again, it will 
 ; overwrite the old one automatically)
-InstallDirRegKey HKLM "Software\FusionGameLib" "Install_Dir"
+InstallDirRegKey HKCU "Software\FusionEngine" "Install_Dir"
 
 ; Request application privileges for Windows Vista
 ;RequestExecutionLevel admin
@@ -35,7 +36,7 @@ Function .onInit
 	#optional
 	#File /oname=$PLUGINSDIR\splash.wav "C:\myprog\sound.wav"
 
-	splash::show 3000 $PLUGINSDIR\splash
+	splash::show 2500 $PLUGINSDIR\splash
 
 	Pop $0 ; $0 has '1' if the user closed the splash screen early,
 			; '0' if everything closed normally, and '-1' if some error occurred.
@@ -66,18 +67,31 @@ FunctionEnd
 
 
 	
-Section "Fusion Game Library Core" Section1
+Section "Fusion Engine Core" Section1
 
   SectionIn RO
   
-  
   ; Set output path to the installation directory.
-  SetOutPath "$INSTDIR\Bin"
-  
   ; Binary stuff :
+  SetOutPath "$INSTDIR\Bin\Release"
+  
   File "..\Fusion\bin\x64\Release\*.dll"
-  File "..\FbxTool\x64\Release\*.exe"
-  File "..\Libs\FbxSdk\lib\vs2012\x64\release\*.dll"
+  File "..\Fusion.Build\bin\x64\Release\*.dll"
+  File "..\FBuild\bin\x64\Release\FBuild.exe"
+  File "..\FScene\bin\x64\Release\*.exe"
+  File "..\SDKs\FbxSdk\lib\x64\release\*.dll"
+  File "..\Tools\*.dll"
+  File "..\Tools\*.exe"
+  File "..\Tools\*.com"
+
+  ; Binary stuff :
+  SetOutPath "$INSTDIR\Bin\Debug"
+  
+  File "..\Fusion\bin\x64\Debug\*.dll"
+  File "..\Fusion.Build\bin\x64\Debug\*.dll"
+  File "..\FBuild\bin\x64\Debug\FBuild.exe"
+  File "..\FScene\bin\x64\Debug\*.exe"
+  File "..\SDKs\FbxSdk\lib\x64\debug\*.dll"
   File "..\Tools\*.dll"
   File "..\Tools\*.exe"
   File "..\Tools\*.com"
@@ -89,71 +103,27 @@ Section "Fusion Game Library Core" Section1
   ; Build stuff :
   SetOutPath "$INSTDIR\Build"
   File "..\FusionProject.targets"
-  File "..\FusionFramework.targets"
   
   ; Write the installation path into the registry
-  WriteRegStr HKLM SOFTWARE\FusionGameLib "Install_Dir" "$INSTDIR"
+  WriteRegStr HKCU SOFTWARE\FusionEngine "Install_Dir" "$INSTDIR"
   
   ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\FusionGameLib" "DisplayName" "FusionGameLib"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\FusionGameLib" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\FusionGameLib" "NoModify" 1
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\FusionGameLib" "NoRepair" 1
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\FusionEngine" "DisplayName" "FusionEngine"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\FusionEngine" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\FusionEngine" "NoModify" 1
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\FusionEngine" "NoRepair" 1
   WriteUninstaller "uninstall.exe"
   
 SectionEnd
 
 
 
-Section "Fusion Game Library Samples"
-	
-	SetOutPath "$INSTDIR\Samples"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\FusionSamples.sln"
+Section "Fusion Engine Samples"
 
-	SetOutPath "$INSTDIR\Samples\AnimationDemo"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\AnimationDemo\*.*"
-
-	SetOutPath "$INSTDIR\Samples\ComputeDemo"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\ComputeDemo\*.*"
-
-	SetOutPath "$INSTDIR\Samples\DeferredDemo"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\DeferredDemo\*.*"
-
-	SetOutPath "$INSTDIR\Samples\DescriptorDemo"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\DescriptorDemo\*.*"
-
-	SetOutPath "$INSTDIR\Samples\InputDemo"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\InputDemo\*.*"
-
-	SetOutPath "$INSTDIR\Samples\SpriteDemo"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\SpriteDemo\*.*"
-
-	SetOutPath "$INSTDIR\Samples\QuadDemo"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\QuadDemo\*.*"
-
-	SetOutPath "$INSTDIR\Samples\InstancingDemo"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\InstancingDemo\*.*"
-
-	SetOutPath "$INSTDIR\Samples\InstancingDemo2"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\InstancingDemo2\*.*"
-
-	SetOutPath "$INSTDIR\Samples\SoundDemo"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\SoundDemo\*.*"
-
-	SetOutPath "$INSTDIR\Samples\SkinningDemo"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\SkinningDemo\*.*"
-
-	SetOutPath "$INSTDIR\Samples\SceneDemo"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\SceneDemo\*.*"
-
-	SetOutPath "$INSTDIR\Samples\ParticleDemo"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\ParticleDemo\*.*"
-
-	SetOutPath "$INSTDIR\Samples\ParticleDemo2"
-	File /r /x bin /x obj /x Temp "..\FusionSamples\ParticleDemo2\*.*"
+	SetOutPath "$INSTDIR\Samples\TestGame2"
+	File /r /x bin /x obj /x Temp "..\Samples\TestGame2\*.*"
 
 SectionEnd
-
 
   
 Section "Install DirectX End-User Runtimes (June 2010)" Section2
@@ -163,7 +133,7 @@ Section "Install DirectX End-User Runtimes (June 2010)" Section2
   StrCmp $R0 success success
     SetDetailsView show
     DetailPrint "Download failed : $R0"
-    Abort
+	Abort
   success:
     ExecWait '"$INSTDIR\DirectX\dxsetup.exe" /q /t:"$INSTDIR\DirectX\Temp"'
 	ExecWait '"$INSTDIR\DirectX\Temp\DXSETUP.exe" /silent'
@@ -172,17 +142,24 @@ Section "Install DirectX End-User Runtimes (June 2010)" Section2
 SectionEnd
 
 
-
 Section "Install Visual Studio Project Template"
 	File /oname=$PLUGINSDIR\FusionTemplate.vsix "FusionTemplate.vsix"
 	ExecShell "open" '$PLUGINSDIR\FusionTemplate.vsix'
 SectionEnd
 
-Section "Add Environment Variables"
-	ExecWait 'setx FUSION_BIN "$INSTDIR\Bin" /M'
-	ExecWait 'setx FUSION_BUILD "$INSTDIR\Build" /M'
-	ExecWait 'setx FUSION_CONTENT "$INSTDIR\Content" /M'
+Section "Write Registry Variables"
+  SectionIn RO
+  WriteRegStr HKCU "Software\FusionEngine"  "BinaryDirRelease" "$INSTDIR\Bin\Release"
+  WriteRegStr HKCU "Software\FusionEngine"  "BinaryDirDebug" "$INSTDIR\Bin\Debug"
+  WriteRegStr HKCU "Software\FusionEngine"  "ToolsDir" "$INSTDIR\Bin\Release"
+  WriteRegStr HKCU "Software\FusionEngine"  "ContentDir" "$INSTDIR\Content"
+  WriteRegStr HKCU "Software\FusionEngine"  "BuildDir" "$INSTDIR\Build"
 SectionEnd
+;Section "Add Environment Variables"
+;	ExecWait 'setx FUSION_BIN "$INSTDIR\Bin" /M'
+;	ExecWait 'setx FUSION_BUILD "$INSTDIR\Build" /M'
+;	ExecWait 'setx FUSION_CONTENT "$INSTDIR\Content" /M'
+;SectionEnd
 
 
 ;--------------------------------
@@ -192,18 +169,23 @@ SectionEnd
 Section "Uninstall"
   
   ; Remove registry keys
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\FusionGameLib"
-  DeleteRegKey HKLM SOFTWARE\FusionGameLib
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\FusionEngine"
+  DeleteRegKey HKCU SOFTWARE\FusionEngine
 
+  DeleteRegKey HKCU "Software\FusionEngine"
+  
   ; Remove files and uninstaller
+  Delete $INSTDIR\Bin\Release*.*
+  Delete $INSTDIR\Bin\Debug*.*
   Delete $INSTDIR\Bin\*.*
   Delete $INSTDIR\Content\*.*
+  Delete $INSTDIR\Build\*.*
   Delete $INSTDIR\*.*
   RMDir /r "$INSTDIR"
 
   ; Remove shortcuts, if any
-  ;-------!! Delete "$SMPROGRAMS\FusionGameLib\*.*"
+  ;-------!! Delete "$SMPROGRAMS\FusionEngine\*.*"
   ; Remove directories used
-  ;-------!! RMDir "$SMPROGRAMS\FusionGameLib"
+  ;-------!! RMDir "$SMPROGRAMS\FusionEngine"
 
 SectionEnd

@@ -3,11 +3,11 @@
 *.psd
 
 [BinaryDirectories]
-%FUSION_BIN%
+HKEY_CURRENT_USER\Software\FusionEngine@ToolsDir
 
 [ContentDirectories]
 ..\..\..\..\..\FusionContent
-%FUSION_CONTENT%
+HKEY_CURRENT_USER\Software\FusionEngine@ContentDir
 
 [Textures]
 *.tga

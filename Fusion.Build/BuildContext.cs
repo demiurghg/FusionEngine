@@ -126,7 +126,7 @@ namespace Fusion.Build {
 
 			if ( dir.StartsWith("HKEY_") ) {
 
-				var keyValue	=	dir.Split(new[]{':'}, 2);
+				var keyValue	=	dir.Split(new[]{'@'}, 2);
 				var key			=	keyValue[0];
 				var value		=	keyValue.Length == 2 ? keyValue[1] : "";
 

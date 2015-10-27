@@ -1,16 +1,23 @@
 <Project DefaultTargets="Compile"
     xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-	<!-- Include core assemblies --> 
-    <ItemGroup>
+	<!-- Include core RELEASE assemblies --> 
+    <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
 		<Reference Include="Fusion">
-		  <HintPath>$(FUSION_BIN)\Fusion.dll</HintPath>
+		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\Fusion.dll</HintPath>
 		</Reference>
-		<Reference Include="BEPUphysics">
-		  <HintPath>$(FUSION_BIN)\BEPUphysics.dll</HintPath>
+		<Reference Include="Fusion.Build">
+		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\Fusion.Build.dll</HintPath>
 		</Reference>
-		<Reference Include="BEPUutilities">
-		  <HintPath>$(FUSION_BIN)\BEPUutilities.dll</HintPath>
+    </ItemGroup>
+
+	<!-- Include core DEBUG assemblies --> 
+    <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+		<Reference Include="Fusion">
+		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)\Fusion.dll</HintPath>
+		</Reference>
+		<Reference Include="Fusion.Build">
+		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)\Fusion.Build.dll</HintPath>
 		</Reference>
     </ItemGroup>
 
