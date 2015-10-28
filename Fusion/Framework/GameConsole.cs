@@ -170,6 +170,10 @@ namespace Fusion.Framework {
 			//consoleFont.DrawString( editLayer, "_", charWidth + charWidth * editBox.Cursor, 0, cursorColor );
 			editLayer.DrawDebugString( consoleFont, 0, 0,										"]" + editBox.Text, Config.CmdLineColor );
 			editLayer.DrawDebugString( consoleFont, charWidth + charWidth * editBox.Cursor,	0,  "_", cursorColor );
+
+
+			var version = GameEngine.GetReleaseInfo();
+			editLayer.DrawDebugString( consoleFont, vp.Width - charWidth * version.Length, -charHeight, version, Config.VersionColor);
 		}
 
 

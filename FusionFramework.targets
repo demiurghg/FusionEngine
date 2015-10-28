@@ -7,24 +7,28 @@
         <ToolBoxFiles Include="$(ProjectDir)..\Tools\*.com;$(ProjectDir)..\Tools\*.exe;$(ProjectDir)..\Tools\*.dll;"/>
         <ContentFiles Include="$(ProjectDir)..\FusionContent\*.*"/>
     </ItemGroup>
+	
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+		<FusionBinaryTargetFolder>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)</FusionBinaryTargetFolder>
+		<FusionContentTargetFolder>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@ContentDir)</FusionContentTargetFolder>
+	</PropertyGroup>
 
-	<Target Name="AfterBuild" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-		<Exec Command='echo Copying Fusion Engine files (DEBUG)...'/>
-		<Copy SourceFiles="@(FusionOutputFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)" SkipUnchangedFiles="false"/>
-		<Copy SourceFiles="@(ThirdPartyFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)" SkipUnchangedFiles="false"/>
-		<Copy SourceFiles="@(ToolBoxFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@ToolsDir)" SkipUnchangedFiles="false"/>
-		<Copy SourceFiles="@(ContentFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@ContentDir)" SkipUnchangedFiles="false"/>
-		<Exec Command='echo Done.'/>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+		<FusionBinaryTargetFolder>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)</FusionBinaryTargetFolder>
+		<FusionContentTargetFolder>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@ContentDir)</FusionContentTargetFolder>
+	</PropertyGroup>
+
+	<Target Name="AfterBuild" >
+		<Message Text="echo Copying Fusion Engine files" Importance="high"/>
+		<Message Text="Binary Output  : $(FusionBinaryTargetFolder)" Importance="high"/>
+		<Message Text="Content Output : $(FusionContentTargetFolder)" Importance="high"/>
+		<Copy SourceFiles="@(FusionOutputFiles)" DestinationFolder="$(FusionBinaryTargetFolder)" SkipUnchangedFiles="false"/>
+		<Copy SourceFiles="@(ThirdPartyFiles)" DestinationFolder="$(FusionBinaryTargetFolder)" SkipUnchangedFiles="false"/>
+		<Copy SourceFiles="@(ToolBoxFiles)" DestinationFolder="$(FusionBinaryTargetFolder)" SkipUnchangedFiles="false"/>
+		<Copy SourceFiles="@(ContentFiles)" DestinationFolder="$(FusionContentTargetFolder)" SkipUnchangedFiles="false"/>
+		<Message Text="echo Done." Importance="high"/>
 	</Target>
 	
-	<Target Name="AfterBuild" Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-		<Exec Command='echo Copying Fusion Engine files (RELEASE)...'/>
-		<Copy SourceFiles="@(FusionOutputFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)" SkipUnchangedFiles="false"/>
-		<Copy SourceFiles="@(ThirdPartyFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)" SkipUnchangedFiles="false"/>
-		<Copy SourceFiles="@(ToolBoxFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@ToolsDir)" SkipUnchangedFiles="false"/>
-		<Copy SourceFiles="@(ContentFiles)" DestinationFolder="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@ContentDir)" SkipUnchangedFiles="false"/>
-		<Exec Command='echo Done.'/>
-	</Target>
 </Project>
 
 

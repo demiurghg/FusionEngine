@@ -23,6 +23,7 @@ namespace Fusion.Framework {
 		public Color ErrorColor		{ get; set; }
 		public Color WarningColor	{ get; set; }
 		public Color CmdLineColor	{ get; set; }
+		public Color VersionColor	{ get; set; }
 
 		public GameConsoleConfig ()
 		{
@@ -34,6 +35,7 @@ namespace Fusion.Framework {
 			ErrorColor		=	Color.Red;
 			WarningColor	=	Color.Yellow;
 			CmdLineColor	=	Color.Orange;
+			VersionColor	=	new Color(255,255,255,64);
 		}
 	}
 }
