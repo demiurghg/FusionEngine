@@ -58,8 +58,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".content" />
+    <None Include="CustomGameClient.cs" />
+    <None Include="CustomGameInterface.cs" />
+    <None Include="CustomGameServer.cs" />
+    <None Include="Program.cs" />
     <None Include="AssemblyInfo.cs" />
-    <None Include="Class1.cs" />
     <None Include="ProjectTemplate.csproj" />
     <None Include="FusionGame.ico" />
   </ItemGroup>

@@ -12,6 +12,7 @@ fbxsdk.exe
 
 # installer result
 FusionEngine*.exe
+*.vsix
 
 # User-specific files
 *.suo

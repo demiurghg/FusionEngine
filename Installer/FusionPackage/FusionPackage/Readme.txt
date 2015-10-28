@@ -1,4 +1,9 @@
 ﻿
-To debug extension type in "Debug - Command line arguments" the following text:
+Template debugging
+------------------
 
-/rootsuffix Exp
+Start external program:
+	C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\devenv.exe
+
+Command line argument:
+	/rootsuffix Exp
