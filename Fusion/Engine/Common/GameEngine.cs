@@ -327,6 +327,7 @@ namespace Fusion.Engine.Common {
 			Log.Message("");
 			Log.Message("---------- GameEngine Shutting Down ----------");
 
+			cl.Wait();
 			sv.Wait();
 
 			if (Exiting!=null) {

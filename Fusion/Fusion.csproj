@@ -315,6 +315,8 @@
     <Compile Include="Engine\Input\Events.cs" />
     <Compile Include="Engine\Input\Keys.cs" />
     <Compile Include="Engine\Input\Mouse.cs" />
+    <Compile Include="Engine\Network\NetClient.cs" />
+    <Compile Include="Engine\Network\NetServer.cs" />
     <Compile Include="Engine\Network\NetworkConfig.cs" />
     <Compile Include="Engine\Network\NetworkEngine.cs" />
     <Compile Include="Framework\GameConsoleConfig.cs" />

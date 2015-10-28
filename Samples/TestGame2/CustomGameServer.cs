@@ -67,7 +67,7 @@ namespace TestGame2 {
 
 			foreach ( var msg in messages ) {
 				Log.Message("INIT: {0}...", msg);
-				Thread.Sleep( rand.Next(10,50) );
+				Thread.Sleep( rand.Next(10,10) );
 			}
 
 
@@ -86,7 +86,7 @@ namespace TestGame2 {
 
 			foreach ( var msg in messages ) {
 				Log.Message("KILL: {0}...", msg);
-				Thread.Sleep( rand.Next(100,250) );
+				Thread.Sleep( rand.Next(10,10) );
 			}
 
 

@@ -3,28 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Lidgren.Network;
 using System.Threading;
+using Fusion.Engine.Network;
 
 
 namespace Fusion.Engine.Common {
 	public abstract partial class GameClient : GameModule {
 
-		NetClient	client;
-		GameTime	clTime;
-
 		Task	clientTask;
 		CancellationTokenSource	disconnectToken;
 
+		object lockObj = new object();
 
-		/*internal bool IsRunning {
+
+
+		/// <summary>
+		/// Gets whether server is still alive.
+		/// </summary>
+		internal bool IsAlive {
 			get {
-				if (clientTask==null) {
-					return false;
-				}
-				if (clientTask.
+				return clientTask != null; 
 			}
-		} */
+		}
 
 		
 		/// <summary>
@@ -34,29 +34,51 @@ namespace Fusion.Engine.Common {
 		/// <param name="port"></param>
 		internal void ConnectInternal ( string host, int port )
 		{		
-			clientTask	=	new Task( () => ClientTaskFunc( host, port ) );
-			clientTask.Start();
+			lock (lockObj) {
+
+				disconnectToken	=	new CancellationTokenSource();
+
+				clientTask	=	new Task( () => ClientTaskFunc( host, port ), disconnectToken.Token );
+				clientTask.Start();
+			}
 		}
 
 
 
 		/// <summary>
-		/// Internal disconnect
+		/// Internal disconnect.
 		/// </summary>
 		internal void DisconnectInternal (bool wait)
 		{
-			if (disconnectToken!=null) {
-				disconnectToken.Cancel();
-			}
-
-			if (wait) {
-				if (clientTask!=null) {
-					clientTask.Wait();
+			lock (lockObj) {
+				if (!IsAlive) {
+					Log.Warning("Not connected.");
+					return;
+				}
+				if (disconnectToken!=null) {
+					disconnectToken.Cancel();
 				}
 			}
 		}
 		
 
+
+		/// <summary>
+		/// Waits for client thread.
+		/// </summary>
+		internal void Wait ()
+		{
+			lock (lockObj) {
+				if (disconnectToken!=null) {
+					disconnectToken.Cancel();
+				}
+
+				if (clientTask!=null) {
+					Log.Message("Waiting for client task...");
+					clientTask.Wait();
+				}
+			}
+		}
 
 
 		/// <summary>
@@ -64,77 +86,38 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		void ClientTaskFunc ( string host, int port )
 		{
-			var	peerCfg = new NetPeerConfiguration("Server");
-			peerCfg.AutoFlushSendQueue	=	false;
+			NetClient client = null;
 
-			client	=	new NetClient(peerCfg);
-			client.Start();
-			client.Connect( host, port, client.CreateMessage("Hail!") );
+			try {
+				client	=	new NetClient(host, port);
 
-			client.RegisterReceivedCallback(new SendOrPostCallback(GotMessage)); 
+				Connect( host, port );
 
-
-			Connect( host, port );
+				var clTime	=	new GameTime();
 
 
-			clTime	=	new GameTime();
+				while (!disconnectToken.IsCancellationRequested) {
 
+					clTime.Update();
 
-			while (!disconnectToken.IsCancellationRequested) {
+					Thread.Sleep(500);
 
-				clTime.Update();
-
-				Update( clTime );
-
-			}
-
-			disconnectToken.Dispose();
-			disconnectToken = null;
-
-		}
-
-
-
-
-		public void GotMessage(object peer)
-		{
-			NetIncomingMessage im;
-			while ((im = client.ReadMessage()) != null)
-			{
-				// handle incoming message
-				switch (im.MessageType)
-				{
-					case NetIncomingMessageType.DebugMessage:
-					case NetIncomingMessageType.ErrorMessage:
-					case NetIncomingMessageType.WarningMessage:
-					case NetIncomingMessageType.VerboseDebugMessage:
-						string text = im.ReadString();
-						Log.Message(text);
-						break;
-					case NetIncomingMessageType.StatusChanged:
-						NetConnectionStatus status = (NetConnectionStatus)im.ReadByte();
-
-						/*if (status == NetConnectionStatus.Connected)
-							s_form.EnableInput();
-						else
-							s_form.DisableInput();
-
-						if (status == NetConnectionStatus.Disconnected)
-							s_form.button2.Text = "Connect";*/
-
-						string reason = im.ReadString();
-						Log.Message(status.ToString() + ": " + reason);
-
-						break;
-					case NetIncomingMessageType.Data:
-						string chat = im.ReadString();
-						Log.Message(chat);
-						break;
-					default:
-						Log.Message("Unhandled type: " + im.MessageType + " " + im.LengthBytes + " bytes");
-						break;
+					client.SendMessage("OLOLO!");
+					
+					Update( clTime );
 				}
-				client.Recycle(im);
+
+
+			} catch ( Exception e ) {
+				Log.Error("Client error: {0}", e.ToString());
+
+			} finally {
+
+				//	try...catch???
+				Disconnect();
+
+				SafeDispose( ref client );
+				clientTask	=	null;
 			}
 		}
 

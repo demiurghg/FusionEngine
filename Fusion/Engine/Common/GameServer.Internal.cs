@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Lidgren.Network;
+//using Lidgren.Network;
 using System.Threading;
+using Fusion.Engine.Network;
 
 namespace Fusion.Engine.Common {
 
@@ -93,26 +94,21 @@ namespace Fusion.Engine.Common {
 		/// <param name="map"></param>
 		void ServerTaskFunc ( string map, string postCommand )
 		{
-			NetServer server = null;
+			NetServer	server = null;
+
 			//
 			//	configure & start server :
 			//
 			try {
 
-				var	peerCfg = new NetPeerConfiguration("Server");
-
-				peerCfg.Port				=	GameEngine.Network.Config.Port;
-				peerCfg.MaximumConnections	=	GameEngine.Network.Config.MaxClients;
-
-				server	=	new NetServer( peerCfg );
-				server.Start();
+				server	=	new NetServer( GameEngine.Network.Config.Port );
 
 				//
 				//	start game specific stuff :
 				//
 				Start( map );
 
-				Log.Message("Server started : port = {0}", peerCfg.Port );
+				//Log.Message("Server started : port = {0}", peerCfg.Port );
 
 
 				//
@@ -135,7 +131,7 @@ namespace Fusion.Engine.Common {
 
 					svTime.Update();
 
-					DispatchIM(server);
+					server.GetMessages();
 
 					Update( svTime );
 
@@ -148,15 +144,14 @@ namespace Fusion.Engine.Common {
 
 				//
 				//	kill game specific stuff :
+				//	try...catch???
 				//
 				Kill();
 
 				//
 				//	shutdown connection :
 				//
-				if (server!=null) {
-					server.Shutdown("shutdown");
-				}
+				SafeDispose( ref server );
 
 				killToken	=	null;
 				serverTask	=	null;
@@ -169,57 +164,8 @@ namespace Fusion.Engine.Common {
 		/// Dispatches input messages from all the clients.
 		/// </summary>
 		/// <param name="server"></param>
-		void DispatchIM (NetServer server)
+		void DispatchIM ()
 		{
-			NetIncomingMessage im;
-			while ((im = server.ReadMessage()) != null)
-			{
-				Log.Message("IM!");
-				// handle incoming message
-				switch (im.MessageType)
-				{
-					case NetIncomingMessageType.DebugMessage:
-					case NetIncomingMessageType.ErrorMessage:
-					case NetIncomingMessageType.WarningMessage:
-					case NetIncomingMessageType.VerboseDebugMessage:
-						string text = im.ReadString();
-						Log.Message(text);
-						break;
-
-					case NetIncomingMessageType.StatusChanged:
-						NetConnectionStatus status = (NetConnectionStatus)im.ReadByte();
-
-						string reason = im.ReadString();
-						Log.Message(NetUtility.ToHexString(im.SenderConnection.RemoteUniqueIdentifier) + " " + status + ": " + reason);
-
-						if (status == NetConnectionStatus.Connected)
-							Log.Message("Remote hail: " + im.SenderConnection.RemoteHailMessage.ReadString());
-
-						//UpdateConnectionsList();
-						break;
-					case NetIncomingMessageType.Data:
-						// incoming chat message from a client
-						string chat = im.ReadString();
-
-						Log.Message("Broadcasting '" + chat + "'");
-
-						// broadcast this to all connections, except sender
-						/*List<NetConnection> all = server.Connections; // get copy
-						all.Remove(im.SenderConnection);
-
-						if (all.Count > 0)
-						{
-							NetOutgoingMessage om = s_server.CreateMessage();
-							om.Write(NetUtility.ToHexString(im.SenderConnection.RemoteUniqueIdentifier) + " said: " + chat);
-							s_server.SendMessage(om, all, NetDeliveryMethod.ReliableOrdered, 0);
-						} */
-						break;
-					default:
-						Log.Message("Unhandled type: " + im.MessageType + " " + im.LengthBytes + " bytes " + im.DeliveryMethod + "|" + im.SequenceChannel);
-						break;
-				}
-				server.Recycle(im);
-			}
 		}
 	}
 }
