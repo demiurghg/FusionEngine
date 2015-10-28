@@ -32,7 +32,7 @@ InstallDirRegKey HKCU "Software\FusionEngine" "Install_Dir"
 Function .onInit
 	# the plugins dir is automatically deleted when the installer exits
 	InitPluginsDir
-	File /oname=$PLUGINSDIR\splash.bmp "splash.bmp"
+	File /oname=$PLUGINSDIR\splash.bmp "splash2.bmp"
 	#optional
 	#File /oname=$PLUGINSDIR\splash.wav "C:\myprog\sound.wav"
 
@@ -143,8 +143,8 @@ SectionEnd
 
 
 Section "Install Visual Studio Project Template"
-	File /oname=$PLUGINSDIR\FusionTemplate.vsix "FusionTemplate.vsix"
-	ExecShell "open" '$PLUGINSDIR\FusionTemplate.vsix'
+	File /oname=$PLUGINSDIR\FusionPackage.vsix "FusionPackage.vsix"
+	ExecShell "open" '$PLUGINSDIR\FusionPackage.vsix'
 SectionEnd
 
 Section "Write Registry Variables"
