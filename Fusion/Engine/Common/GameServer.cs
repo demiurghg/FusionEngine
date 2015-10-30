@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Threading;
+using Fusion.Core.Shell;
 
 namespace Fusion.Engine.Common {
 

@@ -51,26 +51,12 @@ namespace Fusion.Core.Shell {
 		/// Creates instance of Invoker.
 		/// </summary>
 		/// <param name="game">GameEngine instance</param>
-		public Invoker ( GameEngine game )
+		public Invoker ( GameEngine game, CommandAffinity affinity )
 		{
-			Initialize( game, Command.GatherCommands() );
+			Initialize( game, Command.GatherCommands(affinity) );
 		}
 
 
-
-		/// <summary>
-		/// Creates instance of Invoker with specified command types.
-		/// </summary>
-		/// <param name="game">GameEngine instance</param>
-		/// <param name="types">Specified Command types</param>
-		/// <param name="context">Invoker's context</param>
-		public Invoker ( GameEngine game, Type[] types, object context = null )
-		{
-			Initialize( game, types );
-			Context = context;
-		}
-
-		
 
 		/// <summary>
 		/// 
@@ -104,21 +90,6 @@ namespace Fusion.Core.Shell {
 				this.variables	=	variables.ToDictionary( var1 => var1.Prefix + "." + var1.Name );
 			}
 		}
-
-
-		
-
-
-		/// <summary>
-		/// Immediatly executes command line.
-		/// </summary>
-		/// <param name="commandLine"></param>
-		/*public string Execute ( string commandLine )
-		{
-			var cmd = Push( commandLine );
-			ExecuteQueue( new GameTime(), false );
-			return cmd.GetStringResult();
-		} */
 
 
 

@@ -69,8 +69,24 @@ namespace Fusion.Engine.Network {
 			serverSocket			=	new Socket( SocketType.Dgram, ProtocolType.Udp );
 			serverSocket.Blocking	=	false;
 
-			serverSocket.Bind( new IPEndPoint( IPAddress.Any, Config.Port ) );
-			Log.Message("  server   : {0}", serverSocket.LocalEndPoint );
+			int port = Config.Port;
+
+			for (int i=0; i<10; i++) {
+				try {			   
+					Log.Message("  try port : {0}", port );
+					serverSocket.Bind( new IPEndPoint( IPAddress.Any, port ) );
+					Log.Message("  server   : {0}", serverSocket.LocalEndPoint );
+					break;
+
+				} catch ( SocketException ne ) {
+					if (ne.SocketErrorCode==SocketError.AddressAlreadyInUse) {
+						port++;
+					}
+					if (i>=9) {
+						throw;
+					}
+				}
+			}
 
 			//	create client socket :
 			clientSocket			=	new Socket( SocketType.Dgram, ProtocolType.Udp );

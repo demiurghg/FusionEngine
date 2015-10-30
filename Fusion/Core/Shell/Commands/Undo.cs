@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fusion.Core.Shell.Commands {
 	
-	[Command("undo", "Undo")]
+	[Command("undo", CommandAffinity.Default)]
 	public class Undo : Command {
 
 		/// <summary>

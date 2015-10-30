@@ -16,11 +16,17 @@ namespace Fusion.Engine.Network {
 		public int Port { get; set; }
 		public int MaxClients { get; set; }
 
+		public bool ShowPackets { get; set; }
+
+		public float SimulatePacketsLoss { get; set; }
+
 
 		public NetworkConfig ()
 		{
-			Port		=	28100;
-			MaxClients	=	8;
+			Port				=	28100;
+			MaxClients			=	8;
+			SimulatePacketsLoss	=	0;
+			ShowPackets			=	false;
 		}
 
 	}

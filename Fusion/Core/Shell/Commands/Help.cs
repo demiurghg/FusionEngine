@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fusion.Core.Shell.Commands {
 	
-	[Command("help", "Exit")]
+	[Command("help", CommandAffinity.Default)]
 	public class Help : Command {
 
 

@@ -16,31 +16,20 @@ namespace Fusion.Core.Shell {
 		/// </summary>
 		public string Name { get; private set; }
 
-		/// <summary>
-		/// Command name
-		/// </summary>
-		public string NiceName { get; private set; }
-
 
 		/// <summary>
-		///
+		/// Command affinity.
 		/// </summary>
-		/// <param name="name"></param>
-		public CommandAttribute ( string name )
-		{
-			this.Name = name;
-			NiceName = name;
-		}
+		public CommandAffinity Affinity { get; private set; }
 
 
 		/// <summary>
 		///
 		/// </summary>
 		/// <param name="name"></param>
-		public CommandAttribute ( string name, string niceName )
+		public CommandAttribute ( string name, CommandAffinity affinity )
 		{
 			this.Name = name;
-			NiceName = niceName;
 		}
 	}
 }

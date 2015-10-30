@@ -8,7 +8,7 @@ using Fusion.Core.Configuration;
 
 namespace Fusion.Core.Shell.Commands {
 	
-	[Command("set")]
+	[Command("set", CommandAffinity.Default)]
 	public class Set : Command {
 
 		[CommandLineParser.Required]

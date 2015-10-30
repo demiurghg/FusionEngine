@@ -233,7 +233,7 @@ namespace Fusion.Engine.Common {
 			network				=	new NetworkEngine( this );
 			content				=	new ContentManager( this );
 			gameTimeInternal	=	new GameTime();
-			invoker				=	new Invoker(this);
+			invoker				=	new Invoker(this, CommandAffinity.Default);
 
 			keyboard			=	new Keyboard(this);
 			mouse				=	new Mouse(this);
@@ -541,7 +541,7 @@ namespace Fusion.Engine.Common {
 		 * 
 		-----------------------------------------------------------------------------------------*/
 
-		[Command("map")]
+		[Command("map", CommandAffinity.Default)]
 		public class MapCommand : NoRollbackCommand {
 
 			[CommandLineParser.Required()]
@@ -559,7 +559,7 @@ namespace Fusion.Engine.Common {
 		}
 
 
-		[Command("killServer")]
+		[Command("killServer", CommandAffinity.Default)]
 		public class KillServerCommand : NoRollbackCommand {
 			
 			public KillServerCommand ( Invoker invoker ) : base(invoker) 
@@ -573,7 +573,7 @@ namespace Fusion.Engine.Common {
 		}
 
 
-		[Command("connect")]
+		[Command("connect", CommandAffinity.Default)]
 		public class ConnectCommand : NoRollbackCommand {
 
 			[CommandLineParser.Required()]
@@ -595,7 +595,7 @@ namespace Fusion.Engine.Common {
 		}
 
 
-		[Command("disconnect")]
+		[Command("disconnect", CommandAffinity.Default)]
 		public class DisconnectCommand : NoRollbackCommand {
 
 			public DisconnectCommand ( Invoker invoker ) : base(invoker) 

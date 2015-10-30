@@ -5,11 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 //using Lidgren.Network;
 using System.Threading;
+using System.Net;
 using Fusion.Engine.Network;
 
 namespace Fusion.Engine.Common {
 
 	public abstract partial class GameServer : GameModule {
+
+		
+
 
 		Task serverTask;
 		CancellationTokenSource killToken;
@@ -94,14 +98,12 @@ namespace Fusion.Engine.Common {
 		/// <param name="map"></param>
 		void ServerTaskFunc ( string map, string postCommand )
 		{
-			NetServer	server = null;
+			NetChan	netChan = new NetChan( GameEngine, GameEngine.Network.ServerSocket, "SV" );
 
 			//
 			//	configure & start server :
 			//
 			try {
-
-				server	=	new NetServer( GameEngine.Network.Config.Port );
 
 				//
 				//	start game specific stuff :
@@ -131,7 +133,7 @@ namespace Fusion.Engine.Common {
 
 					svTime.Update();
 
-					server.GetMessages();
+					DispatchServerIM( netChan );
 
 					Update( svTime );
 
@@ -151,7 +153,7 @@ namespace Fusion.Engine.Common {
 				//
 				//	shutdown connection :
 				//
-				SafeDispose( ref server );
+				SafeDispose( ref netChan );
 
 				killToken	=	null;
 				serverTask	=	null;
@@ -159,13 +161,38 @@ namespace Fusion.Engine.Common {
 		}
 
 
+		List<IPEndPoint> clients = new List<IPEndPoint>();
+
 
 		/// <summary>
 		/// Dispatches input messages from all the clients.
 		/// </summary>
 		/// <param name="server"></param>
-		void DispatchIM ()
+		void DispatchServerIM ( NetChan netChan )
 		{
+			Datagram datagram = null;
+
+			while ( netChan.Dispatch( out datagram ) ) {
+
+				if (datagram==null) {
+					continue;
+				}
+
+				//datagram.Print();
+
+				if (!clients.Contains(datagram.Sender)) {
+					clients.Add( datagram.Sender );
+				}
+				
+				if (datagram.Header.MsgType==NetChanMsgType.OOB_StringData) {
+					var s = datagram.ASCII;
+
+					foreach ( var cl in clients ) {
+						netChan.OutOfBandASCII( cl, string.Format("[{0}] says: {1}", datagram.Sender, s ) );
+					}
+				}
+
+			}
 		}
 	}
 }

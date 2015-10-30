@@ -101,10 +101,11 @@ namespace Fusion.Core.Shell {
 		/// Command must be inherited from Command class and have attribute [Command]
 		/// </summary>
 		/// <returns></returns>
-		internal static Type[] GatherCommands ()
+		internal static Type[] GatherCommands ( CommandAffinity affinity )
 		{
 			return Misc.GetAllSubclassedOf( typeof(Command) )
 				.Where( t => t.HasAttribute<CommandAttribute>() )
+				.Where( t1 => t1.GetCustomAttribute<CommandAttribute>().Affinity == affinity )
 				.ToArray();
 		}
 	}

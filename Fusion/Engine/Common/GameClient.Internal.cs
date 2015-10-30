@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using Fusion.Engine.Network;
+using System.Net;
+using Fusion.Core.Shell;
 
 
 namespace Fusion.Engine.Common {
@@ -81,15 +83,22 @@ namespace Fusion.Engine.Common {
 		}
 
 
+		NetChan chatNetChan = null;
+		IPEndPoint serverEP;
+
 		/// <summary>
 		/// 
 		/// </summary>
 		void ClientTaskFunc ( string host, int port )
 		{
-			NetClient client = null;
+			NetChan netChan = null;
 
 			try {
-				client	=	new NetClient(host, port);
+				netChan	=	new NetChan( GameEngine, GameEngine.Network.ClientSocket, "CL" );
+
+				chatNetChan = netChan;
+
+				serverEP = new IPEndPoint( IPAddress.Parse(host), port );
 
 				Connect( host, port );
 
@@ -102,7 +111,7 @@ namespace Fusion.Engine.Common {
 
 					Thread.Sleep(500);
 
-					client.SendMessage("OLOLO!");
+					DispatchClientIM(netChan);
 					
 					Update( clTime );
 				}
@@ -116,12 +125,63 @@ namespace Fusion.Engine.Common {
 				//	try...catch???
 				Disconnect();
 
-				SafeDispose( ref client );
+				chatNetChan = null;
+
+				SafeDispose( ref netChan );
 				clientTask	=	null;
 			}
 		}
 
 
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="message"></param>
+		internal void Chat ( string message )
+		{
+			if (chatNetChan!=null) {
+				chatNetChan.OutOfBand( serverEP, NetChanMsgType.OOB_StringData, Encoding.ASCII.GetBytes(message) );
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="netChan"></param>
+		void DispatchClientIM ( NetChan netChan )
+		{
+			Datagram datagram = null;
+
+			while ( netChan.Dispatch( out datagram ) ) {
+
+				//datagram.Print();
+				
+				if (datagram.Header.MsgType==NetChanMsgType.OOB_StringData) {
+					Log.Warning("chat: {0}", datagram.ASCII);
+				}
+
+			}
+		}
+
+
+
+		[Command("chat", CommandAffinity.Default)]
+		public class ChatCmd : NoRollbackCommand {
+
+			[CommandLineParser.Required]
+			public string Message { get; set; }
+
+			public ChatCmd ( Invoker invoker ) : base(invoker)
+			{
+			}
+
+			public override void Execute ()
+			{
+				Invoker.GameEngine.GameClient.Chat(Message);
+			}
+		}
 	}
 }

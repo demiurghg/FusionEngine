@@ -12,38 +12,34 @@ namespace Fusion.Engine.Network {
 	public class Datagram {
 
 		/// <summary>
-		/// 
+		/// NetChan header.
 		/// </summary>
-		public IPEndPoint From {
-			get; private set;
-		}
+		public NetChanHeader Header { get; private set; }
 
 
 		/// <summary>
-		/// Indicates, hat this datagram contains reliable data.
+		/// Sender.
 		/// </summary>
-		public bool Reliable {
-			get; private set;
-		}
+		public IPEndPoint Sender { get; private set; }
+
+
+		/// <summary>
+		/// Message data.
+		/// </summary>
+		public byte[] Data { get; private set; }
 
 		
+
 		/// <summary>
-		/// Sequence number.
+		/// Converts Data to ASCII string.
 		/// </summary>
-		public int Sequence {
-			get; private set;
+		public string ASCII { 
+			get {
+				return Encoding.ASCII.GetString( Data );
+			}
 		}
 
 
-		/// <summary>
-		/// Datagram's data
-		/// </summary>
-		public byte[] Data {
-			get; private set;
-		}
-
-
-		
 		/// <summary>
 		/// 
 		/// </summary>
@@ -51,14 +47,29 @@ namespace Fusion.Engine.Network {
 		/// <param name="reliable"></param>
 		/// <param name="sequenceNumber"></param>
 		/// <param name="data"></param>
-		internal Datagram ( IPEndPoint from, bool reliable, int sequence, byte[] data )
+		internal Datagram ( NetChanHeader header, IPEndPoint sender, byte[] recievedData, int receivedSize )
 		{		
-			From		=	from;
+			Header		=	header;
+			Sender		=	sender;
 
-			Reliable	=	reliable;
-			Sequence	=	sequence;
+			int	length	=	receivedSize - NetChanHeader.SizeInBytes;
 
-			Data		=	data;
+			Data		=	new byte[length];
+
+			Buffer.BlockCopy( recievedData, NetChanHeader.SizeInBytes, Data, 0, length );
+		}	   
+
+
+		internal void Print ()
+		{
+			Log.Message("Datagram:");
+			Log.Message("  sequence   = {0}", Header.Sequence		);
+			Log.Message("  ack        = {0}", Header.AckSequence	);
+			Log.Message("  frag       = {0}", Header.Fragment		);
+			Log.Message("  frag count = {0}", Header.FragmentCount	);
+			Log.Message("  msg type   = {0}", Header.MsgType		);
+			Log.Message("  length     = {0}", Data.Length );
+
 		}
 	}
 }

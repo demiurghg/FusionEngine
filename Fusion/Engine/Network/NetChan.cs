@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using Fusion.Core.Mathematics;
+using Fusion.Engine.Common;
+using Fusion.Core;
 
 
 namespace Fusion.Engine.Network {
@@ -27,7 +30,13 @@ namespace Fusion.Engine.Network {
 	///		[PAYLOAD......................................]
 	///		
 	/// </summary>
-	public class NetChan {
+	public class NetChan : DisposableBase {
+
+		readonly GameEngine GameEngine;
+
+		readonly Socket Socket;
+
+		object lockObject = new object();
 
 		/// <summary>
 		/// Port
@@ -45,10 +54,25 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		/// <param name="socket">Socket which NetChan bound to.</param>
 		/// <param name="name">NetChan name</param>
-		public NetChan ( Socket socket, string name )
+		public NetChan ( GameEngine engine, Socket socket, string name )
 		{
-			QPort	=	(ushort)(socket.LocalEndPoint as IPEndPoint).Port;
+			GameEngine	=	engine;
+			Socket		=	socket;
+			QPort		=	(ushort)(socket.LocalEndPoint as IPEndPoint).Port;
 			Log.Message("Netchan {0} : {1}", name, QPort );
+		}
+
+
+
+		/// <summary>
+		/// Disposes stuff
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void Dispose ( bool disposing )
+		{
+			if (disposing) {
+			}
+			base.Dispose( disposing );
 		}
 
 
@@ -59,10 +83,24 @@ namespace Fusion.Engine.Network {
 		/// <param name="socket"></param>
 		/// <param name="target"></param>
 		/// <param name="data"></param>
-		public void OutOfBand ( Socket socket, IPEndPoint remoteEP, byte[] data )
+		public void OutOfBand ( IPEndPoint remoteEP, NetChanMsgType msgType, byte[] data )
 		{		
-			var header = new NetChanHeader( QPort );
-			socket.SendTo( header.MakeDatagram(data), remoteEP );
+			lock (lockObject) {
+				var header = new NetChanHeader( QPort, msgType );
+				Socket.SendTo( header.MakeDatagram(data), remoteEP );
+			}
+		}
+
+
+
+		/// <summary>
+		/// Sends OOB string.
+		/// </summary>
+		/// <param name="remoteEP"></param>
+		/// <param name="text"></param>
+		public void OutOfBandASCII ( IPEndPoint remoteEP, string text )
+		{		
+			OutOfBand( remoteEP, NetChanMsgType.OOB_StringData, Encoding.ASCII.GetBytes(text) );
 		}
 
 
@@ -71,19 +109,82 @@ namespace Fusion.Engine.Network {
 		/// 
 		/// </summary>
 		/// <param name="data"></param>
-		public void Transmit ( Socket socket, IPEndPoint to, byte[] data, bool reliable )
+		public void Transmit ( IPEndPoint to, byte[] data, bool reliable )
 		{
 		}
 
 
 
+		Random rand = new Random();
+
+
 		/// <summary>
-		/// 
+		/// Dispatches incoming NetChan packets.
+		/// Call this method until it return False.
 		/// </summary>
-		/// <param name="data"></param>
-		public Datagram Recv ()
+		/// <param name="datagram">Return null if bad packet was received.</param>
+		/// <returns>True if packet (even bad one) received. Otherwice returns False.</returns>
+		public bool Dispatch ( out Datagram datagram )
 		{
-			throw new NotImplementedException();
+			lock (lockObject) {
+
+				datagram	= null;
+
+				var buffer = new byte[MTU];
+
+				EndPoint	remoteEP = new IPEndPoint( IPAddress.Any, 0 );
+
+				try {
+					int size = Socket.ReceiveFrom( buffer, ref remoteEP );
+
+					//	simulate packet loss :
+					if (rand.NextFloat(0,1) < GameEngine.Network.Config.SimulatePacketsLoss) {
+						datagram = null;
+						return true;
+					}
+
+					if (size<NetChanHeader.SizeInBytes) {
+						throw new NetChanException("Bad packet: size < NetChan header size");
+					}
+
+					var header = NetChanHeader.ReadFrom( buffer );
+
+					//
+					//	out of band - do nothing:
+					//
+					if (header.IsOutOfBand) {
+						datagram = new Datagram( header, (IPEndPoint)remoteEP, buffer, size );
+						return true;
+					}
+
+
+					//
+					//	non reliable message
+					//
+
+					//
+					//	reliable message
+					//
+
+				} catch ( NetChanException ne ) {
+					Log.Warning( "NetChan.Dispatch() : {0}", ne.Message );
+
+					datagram = null;
+					return true;
+
+				} catch ( SocketException se ) {
+					if (se.SocketErrorCode==SocketError.WouldBlock) {
+						//	that's OK - no incoming messages, return false.
+						return false;
+					}
+					Log.Warning( "NetChan.Dispatch() : {0}", se.ToString() );
+					return false;
+				}
+
+
+				Log.Warning("NetChan.Dispatch() : Something is wrong. This code should not be reached.");
+				return false;
+			}
 		}
 
 

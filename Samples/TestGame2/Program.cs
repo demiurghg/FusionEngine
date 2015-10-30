@@ -26,7 +26,12 @@ namespace TestGame2 {
 				Builder.Build( @"..\..\..\Content", @"Content", @"..\..\..\Temp", false );
 			} catch ( Exception e ) {
 				Log.Error( e.Message );
-				return 1;
+
+				Log.Message("Continue? [Y/N]");
+
+				if (Console.ReadKey().Key==ConsoleKey.N) {
+					return 1;
+				}
 			}
 
 

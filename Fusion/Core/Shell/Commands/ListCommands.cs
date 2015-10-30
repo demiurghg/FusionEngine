@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fusion.Core.Shell.Commands {
 	
-	[Command("listCmds", "Exit")]
+	[Command("listCmds", CommandAffinity.Default)]
 	public class ListCommands : Command {
 
 		/// <summary>
