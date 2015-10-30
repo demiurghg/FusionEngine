@@ -30,6 +30,7 @@ namespace Fusion.Engine.Network {
 			endPoint	=	new IPEndPoint( ipAddr, port );
 
 			socket			=	new Socket( SocketType.Dgram, ProtocolType.Udp );
+			//socket.Bind( localEP );
 			socket.Blocking	=	false;
 		}
 

@@ -315,6 +315,10 @@
     <Compile Include="Engine\Input\Events.cs" />
     <Compile Include="Engine\Input\Keys.cs" />
     <Compile Include="Engine\Input\Mouse.cs" />
+    <Compile Include="Engine\Network\NetChan.cs" />
+    <Compile Include="Engine\Network\NetChanException.cs" />
+    <Compile Include="Engine\Network\Datagram.cs" />
+    <Compile Include="Engine\Network\NetChanHeader.cs" />
     <Compile Include="Engine\Network\NetClient.cs" />
     <Compile Include="Engine\Network\NetServer.cs" />
     <Compile Include="Engine\Network\NetworkConfig.cs" />
