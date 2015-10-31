@@ -216,6 +216,9 @@
     <Compile Include="Drivers\Graphics\Resources\Texture2D.cs" />
     <Compile Include="Drivers\Graphics\Scene\MeshMaterial.cs" />
     <Compile Include="Core\DisposableBase.cs" />
+    <Compile Include="Engine\Common\ConnState.cs" />
+    <Compile Include="Engine\Common\GameClient.Network.cs" />
+    <Compile Include="Engine\Common\GameServer.Network.cs" />
     <Compile Include="Engine\Common\GameClient.Internal.cs" />
     <Compile Include="Engine\Common\GameServer.Internal.cs" />
     <Compile Include="Engine\Common\GameModuleAttribute.cs" />
@@ -223,6 +226,7 @@
     <Compile Include="Engine\Common\GameParameters.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Engine\Common\Protocol.cs" />
     <Compile Include="Engine\Common\UserCmd.cs" />
     <Compile Include="Engine\Common\GameException.cs" />
     <Compile Include="Drivers\Graphics\GraphicsException.cs" />
@@ -316,10 +320,9 @@
     <Compile Include="Engine\Input\Events.cs" />
     <Compile Include="Engine\Input\Keys.cs" />
     <Compile Include="Engine\Input\Mouse.cs" />
-    <Compile Include="Engine\Network\NetChanMsgType.cs" />
     <Compile Include="Engine\Network\NetChan.cs" />
     <Compile Include="Engine\Network\NetChanException.cs" />
-    <Compile Include="Engine\Network\Datagram.cs" />
+    <Compile Include="Engine\Network\NetMessage.cs" />
     <Compile Include="Engine\Network\NetChanHeader.cs" />
     <Compile Include="Engine\Network\NetworkConfig.cs" />
     <Compile Include="Engine\Network\NetworkEngine.cs" />

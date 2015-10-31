@@ -119,6 +119,17 @@ namespace Fusion {
 
 
 
+		public static void PrintException ( Exception e, string format, params object[] args )
+		{
+			Log.Error( format, args );
+
+			var lines = e.ToString().Split('\n');
+
+			foreach (var line in lines) {
+				Log.Error(line);
+			}
+		}
+
 
 		/// <summary>
 		/// 

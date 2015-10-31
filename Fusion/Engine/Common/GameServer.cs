@@ -52,5 +52,18 @@ namespace Fusion.Engine.Common {
 		/// <param name="clientId"></param>
 		public abstract void FeedCommand ( UserCmd[] commands, int clientId );
 
+
+		/// <summary>
+		/// Called when client connected.
+		/// </summary>
+		/// <param name="clientIP">Client IP in format 123.45.67.89:PORT. Could be used as client identifier.</param>
+		/// <param name="userInfo">User information. Cann't be used as client identifier.</param>
+		public abstract void ClientConnected ( string clientIP, string userInfo );
+
+		/// <summary>
+		/// Called when client connected.
+		/// </summary>
+		/// <param name="clientIP">Client IP in format 123.45.67.89:PORT. Could be used as client identifier.</param>
+		public abstract void ClientDisconnected ( string clientIP );
 	}
 }

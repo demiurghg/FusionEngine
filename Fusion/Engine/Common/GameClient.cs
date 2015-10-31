@@ -61,5 +61,11 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		/// <returns></returns>
 		public abstract UserCmd[] GetCommands ();
+
+		/// <summary>
+		/// Gets user information.
+		/// </summary>
+		/// <returns>User information</returns>
+		public abstract string UserInfo ();
 	}
 }

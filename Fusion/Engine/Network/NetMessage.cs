@@ -9,7 +9,7 @@ using System.Net.Sockets;
 
 namespace Fusion.Engine.Network {
 
-	public class Datagram {
+	public class NetMessage {
 
 		/// <summary>
 		/// NetChan header.
@@ -20,7 +20,7 @@ namespace Fusion.Engine.Network {
 		/// <summary>
 		/// Sender.
 		/// </summary>
-		public IPEndPoint Sender { get; private set; }
+		public IPEndPoint SenderEP { get; private set; }
 
 
 		/// <summary>
@@ -31,26 +31,16 @@ namespace Fusion.Engine.Network {
 		
 
 		/// <summary>
-		/// Converts Data to ASCII string.
-		/// </summary>
-		public string ASCII { 
-			get {
-				return Encoding.ASCII.GetString( Data );
-			}
-		}
-
-
-		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="from"></param>
 		/// <param name="reliable"></param>
 		/// <param name="sequenceNumber"></param>
 		/// <param name="data"></param>
-		internal Datagram ( NetChanHeader header, IPEndPoint sender, byte[] recievedData, int receivedSize )
+		internal NetMessage ( NetChanHeader header, IPEndPoint sender, byte[] recievedData, int receivedSize )
 		{		
 			Header		=	header;
-			Sender		=	sender;
+			SenderEP		=	sender;
 
 			int	length	=	receivedSize - NetChanHeader.SizeInBytes;
 
@@ -60,16 +50,31 @@ namespace Fusion.Engine.Network {
 		}	   
 
 
+		/// <summary>
+		/// 
+		/// </summary>
 		internal void Print ()
 		{
 			Log.Message("Datagram:");
-			Log.Message("  sequence   = {0}", Header.Sequence		);
-			Log.Message("  ack        = {0}", Header.AckSequence	);
-			Log.Message("  frag       = {0}", Header.Fragment		);
-			Log.Message("  frag count = {0}", Header.FragmentCount	);
-			Log.Message("  msg type   = {0}", Header.MsgType		);
-			Log.Message("  length     = {0}", Data.Length );
+			Log.Message("  sequence    = {0}", Header.Sequence		);
+			Log.Message("  ack         = {0}", Header.AckSequence	);
+			Log.Message("  frag        = {0}", Header.Fragment		);
+			Log.Message("  frag count  = {0}", Header.FragmentCount	);
+			Log.Message("  out-of-band = {0}", Header.IsOutOfBand	);
+			Log.Message("  length      = {0}", Data.Length );
 
 		}
+
+
+		/// <summary>
+		/// Converts Data to ASCII string.
+		/// </summary>
+		public string GetString()
+		{ 
+			return Encoding.ASCII.GetString( Data );
+		}
+
+
+
 	}
 }

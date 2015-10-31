@@ -61,25 +61,6 @@ namespace Fusion.Engine.Network {
 
 
 		/// <summary>
-		/// Gets message type
-		/// </summary>
-		public NetChanMsgType MsgType {
-			get {
-				if (IsOutOfBand) {
-					return (NetChanMsgType)AckSequence;
-				} else {
-					if ( (Sequence & ReliabilityBit) == ReliabilityBit ) {
-						return NetChanMsgType.IB_Reliable;
-					} else {
-						return NetChanMsgType.IB_NonReliable;
-					}
-				}
-			}
-		}
-
-
-
-		/// <summary>
 		/// Creates in-band non-fragmented header.
 		/// </summary>
 		/// <param name="sequence"></param>
@@ -101,14 +82,10 @@ namespace Fusion.Engine.Network {
 		/// <param name="sequence"></param>
 		/// <param name="ack"></param>
 		/// <param name="qport"></param>
-		public NetChanHeader( ushort qport, NetChanMsgType msgType )
+		public NetChanHeader( ushort qport )
 		{
-			if ( msgType==NetChanMsgType.IB_NonReliable || msgType==NetChanMsgType.IB_Reliable ) {
-				throw new NetChanException("Bad message type for out-of-band packet header");
-			}
-
 			Sequence		=	OutOfBand;
-			AckSequence		=	(uint)msgType;
+			AckSequence		=	OutOfBand;
 			QPort			=	qport;
 			Fragment		=	0;
 			FragmentCount	=	1;
@@ -122,19 +99,19 @@ namespace Fusion.Engine.Network {
 		/// <param name="destination"></param>
 		public byte[] MakeDatagram ( byte[] dataToSend )
 		{
-			var datagram = new byte[ SizeInBytes + dataToSend.Length ];
+			var message = new byte[ SizeInBytes + dataToSend.Length ];
 
 			var intPtr = Marshal.AllocHGlobal( SizeInBytes );
 
 			Marshal.StructureToPtr( this, intPtr, false );
 
-			Marshal.Copy(  intPtr, datagram, 0, SizeInBytes );
+			Marshal.Copy(  intPtr, message, 0, SizeInBytes );
 
 			Marshal.FreeHGlobal(intPtr);
 
-			Buffer.BlockCopy( dataToSend, 0, datagram, SizeInBytes, dataToSend.Length );
+			Buffer.BlockCopy( dataToSend, 0, message, SizeInBytes, dataToSend.Length );
 
-			return datagram;
+			return message;
 		}
 
 

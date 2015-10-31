@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
@@ -9,6 +10,7 @@ using System.Runtime.InteropServices;
 using Fusion.Core.Mathematics;
 using Fusion.Engine.Common;
 using Fusion.Core;
+
 
 
 namespace Fusion.Engine.Network {
@@ -83,10 +85,10 @@ namespace Fusion.Engine.Network {
 		/// <param name="socket"></param>
 		/// <param name="target"></param>
 		/// <param name="data"></param>
-		public void OutOfBand ( IPEndPoint remoteEP, NetChanMsgType msgType, byte[] data )
+		public void OutOfBand ( IPEndPoint remoteEP, byte[] data )
 		{		
 			lock (lockObject) {
-				var header = new NetChanHeader( QPort, msgType );
+				var header = new NetChanHeader( QPort );
 				Socket.SendTo( header.MakeDatagram(data), remoteEP );
 			}
 		}
@@ -98,9 +100,9 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		/// <param name="remoteEP"></param>
 		/// <param name="text"></param>
-		public void OutOfBandASCII ( IPEndPoint remoteEP, string text )
+		public void OutOfBand ( IPEndPoint remoteEP, string text )
 		{		
-			OutOfBand( remoteEP, NetChanMsgType.OOB_StringData, Encoding.ASCII.GetBytes(text) );
+			OutOfBand( remoteEP, Encoding.ASCII.GetBytes(text) );
 		}
 
 
@@ -122,13 +124,13 @@ namespace Fusion.Engine.Network {
 		/// Dispatches incoming NetChan packets.
 		/// Call this method until it return False.
 		/// </summary>
-		/// <param name="datagram">Return null if bad packet was received.</param>
+		/// <param name="message">Return null if bad packet was received.</param>
 		/// <returns>True if packet (even bad one) received. Otherwice returns False.</returns>
-		public bool Dispatch ( out Datagram datagram )
+		public bool Dispatch ( out NetMessage message )
 		{
 			lock (lockObject) {
 
-				datagram	= null;
+				message	= null;
 
 				var buffer = new byte[MTU];
 
@@ -139,7 +141,7 @@ namespace Fusion.Engine.Network {
 
 					//	simulate packet loss :
 					if (rand.NextFloat(0,1) < GameEngine.Network.Config.SimulatePacketsLoss) {
-						datagram = null;
+						message = null;
 						return true;
 					}
 
@@ -153,7 +155,7 @@ namespace Fusion.Engine.Network {
 					//	out of band - do nothing:
 					//
 					if (header.IsOutOfBand) {
-						datagram = new Datagram( header, (IPEndPoint)remoteEP, buffer, size );
+						message = new NetMessage( header, (IPEndPoint)remoteEP, buffer, size );
 						return true;
 					}
 
@@ -169,7 +171,7 @@ namespace Fusion.Engine.Network {
 				} catch ( NetChanException ne ) {
 					Log.Warning( "NetChan.Dispatch() : {0}", ne.Message );
 
-					datagram = null;
+					message = null;
 					return true;
 
 				} catch ( SocketException se ) {
@@ -187,6 +189,35 @@ namespace Fusion.Engine.Network {
 			}
 		}
 
+
+
+		/// <summary>
+		/// Waits for message which meet given criteria.
+		/// If there are no datagrams, NetChan will sleep for given time.
+		/// If attemptCount is hit - function will return null;
+		/// </summary>
+		/// <param name="criteria">Criteria function</param>
+		/// <param name="sleepTime">Sleep time between attemptrs (10 msec, is ok)</param>
+		/// <param name="attemptCount">Attempts count</param>
+		/// <returns></returns>
+		public NetMessage Wait ( Func<NetMessage,bool> criteria, int sleepTime = 10, int attemptCount = 100 )
+		{
+			NetMessage message;
+
+			for (int i=0; i<attemptCount; i++) {
+
+				while ( Dispatch( out message ) ) {
+					
+					if (criteria(message)) {
+						return message;
+					}
+				}
+
+				Thread.Sleep(sleepTime);
+			}
+
+			return null;
+		}
 
 
 		/// <summary>

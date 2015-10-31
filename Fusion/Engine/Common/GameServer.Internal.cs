@@ -12,9 +12,6 @@ namespace Fusion.Engine.Common {
 
 	public abstract partial class GameServer : GameModule {
 
-		
-
-
 		Task serverTask;
 		CancellationTokenSource killToken;
 
@@ -98,20 +95,17 @@ namespace Fusion.Engine.Common {
 		/// <param name="map"></param>
 		void ServerTaskFunc ( string map, string postCommand )
 		{
-			NetChan	netChan = new NetChan( GameEngine, GameEngine.Network.ServerSocket, "SV" );
-
 			//
 			//	configure & start server :
 			//
 			try {
 
+				NetStart();
+
 				//
 				//	start game specific stuff :
 				//
 				Start( map );
-
-				//Log.Message("Server started : port = {0}", peerCfg.Port );
-
 
 				//
 				//	invoke post-start command :
@@ -121,27 +115,24 @@ namespace Fusion.Engine.Common {
 				}
 
 
-				//
-				//	start server loop :
-				//
 				var svTime = new GameTime();
 
 				//
-				//	do stuff :
+				//	server loop :
 				//	
 				while ( !killToken.IsCancellationRequested ) {
 
 					svTime.Update();
 
-					DispatchServerIM( netChan );
+					NetDispatchIM(svTime);
 
 					Update( svTime );
 
 				}
 
 			} catch ( Exception e ) {
-				Log.Error("Server error: {0}", e.ToString());
-				
+				Log.PrintException( e, "Server error: {0}", e.Message );
+
 			} finally {
 
 				//
@@ -153,45 +144,10 @@ namespace Fusion.Engine.Common {
 				//
 				//	shutdown connection :
 				//
-				SafeDispose( ref netChan );
+				NetShutdown();
 
 				killToken	=	null;
 				serverTask	=	null;
-			}
-		}
-
-
-		List<IPEndPoint> clients = new List<IPEndPoint>();
-
-
-		/// <summary>
-		/// Dispatches input messages from all the clients.
-		/// </summary>
-		/// <param name="server"></param>
-		void DispatchServerIM ( NetChan netChan )
-		{
-			Datagram datagram = null;
-
-			while ( netChan.Dispatch( out datagram ) ) {
-
-				if (datagram==null) {
-					continue;
-				}
-
-				//datagram.Print();
-
-				if (!clients.Contains(datagram.Sender)) {
-					clients.Add( datagram.Sender );
-				}
-				
-				if (datagram.Header.MsgType==NetChanMsgType.OOB_StringData) {
-					var s = datagram.ASCII;
-
-					foreach ( var cl in clients ) {
-						netChan.OutOfBandASCII( cl, string.Format("[{0}] says: {1}", datagram.Sender, s ) );
-					}
-				}
-
 			}
 		}
 	}

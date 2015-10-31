@@ -122,5 +122,16 @@ namespace TestGame2 {
 		public override void FeedCommand ( UserCmd[] commands, int clientId )
 		{
 		}
+
+
+		public override void ClientConnected ( string clientIP, string userInfo )
+		{
+			Log.Message("CONNECTED: {0} - {1}", clientIP, userInfo );
+		}
+
+		public override void ClientDisconnected ( string clientIP )
+		{
+			Log.Message("DISCONNECTED: {0}", clientIP );
+		}
 	}
 }

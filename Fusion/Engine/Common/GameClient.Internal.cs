@@ -83,27 +83,19 @@ namespace Fusion.Engine.Common {
 		}
 
 
-		NetChan chatNetChan = null;
-		IPEndPoint serverEP;
 
 		/// <summary>
 		/// 
 		/// </summary>
 		void ClientTaskFunc ( string host, int port )
 		{
-			NetChan netChan = null;
-
 			try {
-				netChan	=	new NetChan( GameEngine, GameEngine.Network.ClientSocket, "CL" );
 
-				chatNetChan = netChan;
-
-				serverEP = new IPEndPoint( IPAddress.Parse(host), port );
-
+				NetConnect( host, port );
+				
 				Connect( host, port );
 
 				var clTime	=	new GameTime();
-
 
 				while (!disconnectToken.IsCancellationRequested) {
 
@@ -111,76 +103,23 @@ namespace Fusion.Engine.Common {
 
 					Thread.Sleep(500);
 
-					DispatchClientIM(netChan);
+					NetDispatchIM(clTime);
 					
 					Update( clTime );
 				}
 
 
 			} catch ( Exception e ) {
-				Log.Error("Client error: {0}", e.ToString());
+				Log.PrintException( e, "Client error: {0}", e.Message );
 
 			} finally {
+
+				NetDisconnect();
 
 				//	try...catch???
 				Disconnect();
 
-				chatNetChan = null;
-
-				SafeDispose( ref netChan );
 				clientTask	=	null;
-			}
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="message"></param>
-		internal void Chat ( string message )
-		{
-			if (chatNetChan!=null) {
-				chatNetChan.OutOfBand( serverEP, NetChanMsgType.OOB_StringData, Encoding.ASCII.GetBytes(message) );
-			}
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="netChan"></param>
-		void DispatchClientIM ( NetChan netChan )
-		{
-			Datagram datagram = null;
-
-			while ( netChan.Dispatch( out datagram ) ) {
-
-				//datagram.Print();
-				
-				if (datagram.Header.MsgType==NetChanMsgType.OOB_StringData) {
-					Log.Warning("chat: {0}", datagram.ASCII);
-				}
-
-			}
-		}
-
-
-
-		[Command("chat", CommandAffinity.Default)]
-		public class ChatCmd : NoRollbackCommand {
-
-			[CommandLineParser.Required]
-			public string Message { get; set; }
-
-			public ChatCmd ( Invoker invoker ) : base(invoker)
-			{
-			}
-
-			public override void Execute ()
-			{
-				Invoker.GameEngine.GameClient.Chat(Message);
 			}
 		}
 	}

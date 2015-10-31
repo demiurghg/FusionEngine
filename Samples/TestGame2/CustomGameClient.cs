@@ -85,5 +85,15 @@ namespace TestGame2 {
 		{
 			return null;
 		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public override string UserInfo ()
+		{
+			return "[Alice and Bob]";
+		}
 	}
 }
