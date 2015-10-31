@@ -140,17 +140,20 @@ SectionEnd
 	; Delete   '$INSTDIR\DirectX\Temp\*.*'
 	; RMDir    '$INSTDIR\DirectX\Temp'
 ; SectionEnd
-  
+
 Section "Install DirectX End-User Runtimes (June 2010)" Section2
-  File /oname=$INSTDIR\DirectX\dxsetup.exe "dxsetup.exe"
-  ExecWait '"$INSTDIR\DirectX\dxsetup.exe" /q /t:"$INSTDIR\DirectX\Temp"'
+  CreateDirectory $INSTDIR\DirectX
+  File /oname=$INSTDIR\DirectX\dxsetup_jun2010.exe "dxsetup_jun2010.exe"
+  ExecWait '"$INSTDIR\DirectX\dxsetup_jun2010.exe" /q /t:"$INSTDIR\DirectX\Temp"'
   ExecWait '"$INSTDIR\DirectX\Temp\DXSETUP.exe"'
+  Delete   '"$INSTDIR\DirectX\Temp\*.*"'
+  RMDir    '"$INSTDIR\DirectX\Temp"'
 SectionEnd
 
   
 Section "Install Visual C++ Redistributable for Visual Studio 2012" Section3
-  File /oname=$PLUGINSDIR\vcredist.exe "vcredist.exe"
-  ExecWait '$PLUGINSDIR\vcredist.exe /passive'
+  File /oname=$PLUGINSDIR\vcredist_x64.exe "vcredist_x64.exe"
+  ExecWait '$PLUGINSDIR\vcredist_x64.exe /passive'
 SectionEnd
 
 
@@ -160,6 +163,14 @@ Section "Install Visual Studio Project Template"
 SectionEnd
 
 
+Section "DirectX and VC++ Redistributables"
+  SectionIn RO
+  SetOutPath "$INSTDIR\Redist"
+  File "dxsetup_jun2010.exe"
+  File "vcredist_x64.exe"
+SectionEnd
+
+  
 Section "Write Registry Variables"
   SectionIn RO
   WriteRegStr HKCU "Software\FusionEngine"  "BinaryDirRelease" "$INSTDIR\Bin\Release"
