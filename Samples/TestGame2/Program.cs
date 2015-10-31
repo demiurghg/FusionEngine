@@ -24,7 +24,7 @@ namespace TestGame2 {
 			//
 			try {
 				Builder.Build( @"..\..\..\Content", @"Content", @"..\..\..\Temp", false );
-			} catch ( Exception e ) {
+			} catch ( BuildException e ) {
 				Log.Error( e.Message );
 
 				Log.Message("Continue? [Y/N]");

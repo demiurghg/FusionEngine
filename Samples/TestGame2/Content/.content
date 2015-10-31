@@ -9,6 +9,9 @@ HKEY_CURRENT_USER\Software\FusionEngine@ToolsDir
 ..\..\..\..\..\FusionContent
 HKEY_CURRENT_USER\Software\FusionEngine@ContentDir
 
+[Download]
+lenaWeb.tiff = http://www.cs.cmu.edu/~chuck/lennapg/lena_std.tiff
+
 [Textures]
 *.tga
 *.png

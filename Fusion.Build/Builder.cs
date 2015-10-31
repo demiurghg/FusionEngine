@@ -10,6 +10,7 @@ using Fusion.Core.IniParser.Model;
 using Fusion;
 using Fusion.Core.Shell;
 using Fusion.Core.Content;
+using System.Net;
 
 namespace Fusion.Build {
 	public class Builder {
@@ -142,6 +143,11 @@ namespace Fusion.Build {
 			}
 
 
+			if ( iniData.Sections.ContainsSection("Download") ) {
+				Download( context, iniData.Sections["Download"] );
+			}
+
+
 			//
 			//	gather files on source folder 
 			//
@@ -192,6 +198,9 @@ namespace Fusion.Build {
 				if (section.SectionName=="BinaryDirectories") {
 					continue;
 				}
+				if (section.SectionName=="Download") {
+					continue;
+				}
 
 				Log.Message("-------- {0} --------", section.SectionName );
 
@@ -232,6 +241,34 @@ namespace Fusion.Build {
 			}
 
 			return result;
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="section"></param>
+		void Download ( BuildContext context, KeyDataCollection section )
+		{
+			Log.Message("Downloading...");
+
+			foreach ( var keyValue in section ) {
+				
+				var fileName	=	keyValue.KeyName;
+				var urlName		=	keyValue.Value;
+
+				if (context.ContentFileExists( fileName ) && !context.Options.ForceRebuild ) {
+					Log.Message("  {0} already exists", fileName);
+					continue;
+				}
+
+				var fullPath	=	Path.Combine( context.Options.FullInputDirectory, fileName );
+
+				WebClient webClient = new WebClient();
+				Log.Message("  {0} -> {1}", urlName, fileName );
+				webClient.DownloadFile( urlName, fileName );
+			}
 		}
 
 

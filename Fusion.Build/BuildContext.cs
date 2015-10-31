@@ -214,6 +214,18 @@ namespace Fusion.Build {
 
 
 
+		public bool ContentFileExists ( string path )
+		{
+			try {
+				ResolveContentPath( path );
+				return true;
+			} catch ( BuildException ) {
+				return false;
+			}
+		}
+
+
+
 		/// <summary>
 		/// Generates temporary file name for given key with given extension. 
 		/// </summary>

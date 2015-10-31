@@ -12,6 +12,8 @@ fbxsdk.exe
 
 # installer result
 FusionEngine*.exe
+vcredist.exe
+dxsetup.exe
 *.vsix
 
 # User-specific files

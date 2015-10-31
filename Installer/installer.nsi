@@ -126,19 +126,31 @@ Section "Fusion Engine Samples"
 SectionEnd
 
   
+; Section "Install DirectX End-User Runtimes (June 2010)" Section2
+  ; SetOutPath "$INSTDIR\DirectX"
+  ; NSISdl::download /TIMEOUT=30000 "http://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" "$INSTDIR\DirectX\dxsetup.exe"
+  ; Pop $R0
+  ; StrCmp $R0 success success
+    ; SetDetailsView show
+    ; DetailPrint "Download failed : $R0"
+	; Abort
+  ; success:
+    ; ExecWait '"$INSTDIR\DirectX\dxsetup.exe" /q /t:"$INSTDIR\DirectX\Temp"'
+	; ExecWait '"$INSTDIR\DirectX\Temp\DXSETUP.exe" /silent'
+	; Delete   '$INSTDIR\DirectX\Temp\*.*'
+	; RMDir    '$INSTDIR\DirectX\Temp'
+; SectionEnd
+  
 Section "Install DirectX End-User Runtimes (June 2010)" Section2
-  SetOutPath "$INSTDIR\DirectX"
-  NSISdl::download /TIMEOUT=30000 "http://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" "$INSTDIR\DirectX\dxsetup.exe"
-  Pop $R0
-  StrCmp $R0 success success
-    SetDetailsView show
-    DetailPrint "Download failed : $R0"
-	Abort
-  success:
-    ExecWait '"$INSTDIR\DirectX\dxsetup.exe" /q /t:"$INSTDIR\DirectX\Temp"'
-	ExecWait '"$INSTDIR\DirectX\Temp\DXSETUP.exe" /silent'
-	Delete   '$INSTDIR\DirectX\Temp\*.*'
-	RMDir    '$INSTDIR\DirectX\Temp'
+  File /oname=$INSTDIR\DirectX\dxsetup.exe "dxsetup.exe"
+  ExecWait '"$INSTDIR\DirectX\dxsetup.exe" /q /t:"$INSTDIR\DirectX\Temp"'
+  ExecWait '"$INSTDIR\DirectX\Temp\DXSETUP.exe"'
+SectionEnd
+
+  
+Section "Install Visual C++ Redistributable for Visual Studio 2012" Section3
+  File /oname=$PLUGINSDIR\vcredist.exe "vcredist.exe"
+  ExecWait '$PLUGINSDIR\vcredist.exe /passive'
 SectionEnd
 
 
@@ -146,6 +158,7 @@ Section "Install Visual Studio Project Template"
 	File /oname=$PLUGINSDIR\FusionPackage.vsix "FusionPackage.vsix"
 	ExecShell "open" '$PLUGINSDIR\FusionPackage.vsix'
 SectionEnd
+
 
 Section "Write Registry Variables"
   SectionIn RO
@@ -155,6 +168,7 @@ Section "Write Registry Variables"
   WriteRegStr HKCU "Software\FusionEngine"  "ContentDir" "$INSTDIR\Content"
   WriteRegStr HKCU "Software\FusionEngine"  "BuildDir" "$INSTDIR\Build"
 SectionEnd
+
 ;Section "Add Environment Variables"
 ;	ExecWait 'setx FUSION_BIN "$INSTDIR\Bin" /M'
 ;	ExecWait 'setx FUSION_BUILD "$INSTDIR\Build" /M'
