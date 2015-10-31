@@ -44,5 +44,11 @@ namespace Fusion.Engine.Network {
 		SystemNotification,
 		ChallengeRequest,
 		ChallengeResponse,
+
+		Ping,
+		Hearbeat,
+
+		DiscoveryRequest,
+		DiscoveryResponse,
 	}
 }
