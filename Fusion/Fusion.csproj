@@ -226,7 +226,6 @@
     <Compile Include="Engine\Common\GameParameters.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Engine\Common\Protocol.cs" />
     <Compile Include="Engine\Common\UserCmd.cs" />
     <Compile Include="Engine\Common\GameException.cs" />
     <Compile Include="Drivers\Graphics\GraphicsException.cs" />
@@ -322,6 +321,7 @@
     <Compile Include="Engine\Input\Mouse.cs" />
     <Compile Include="Engine\Network\NetChan.cs" />
     <Compile Include="Engine\Network\NetChanException.cs" />
+    <Compile Include="Engine\Network\NetCommand.cs" />
     <Compile Include="Engine\Network\NetMessage.cs" />
     <Compile Include="Engine\Network\NetChanHeader.cs" />
     <Compile Include="Engine\Network\NetworkConfig.cs" />

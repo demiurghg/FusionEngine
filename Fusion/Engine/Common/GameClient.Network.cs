@@ -35,7 +35,7 @@ namespace Fusion.Engine.Common {
 
 			serverEP	=	new IPEndPoint( IPAddress.Parse(host), port );
 
-			ConnectToServer(10);
+			ConnectToServer(5);
 		}
 
 
@@ -45,7 +45,9 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		void NetDisconnect ()
 		{
-			netChan.OutOfBand( serverEP, Protocol.ClientDisconnect);
+			if (netChan!=null) {
+				netChan.OutOfBand( serverEP, NetCommand.Disconnect, "" );
+			}
 
 			SafeDispose( ref netChan );
 		}
@@ -61,8 +63,8 @@ namespace Fusion.Engine.Common {
 			for (int i=0; i<attemptCount; i++) {
 				Log.Message("  sending connect ({0})...", i);
 
-				netChan.OutOfBand( serverEP, Protocol.ClientConnect + " \"" + UserInfo() + "\"");
-				var message	=	netChan.Wait( (d) => d.GetString().StartsWith( Protocol.ServerConnectAck ), 10, 100 );
+				netChan.OutOfBand( serverEP, NetCommand.Connect, UserInfo() );
+				var message	=	netChan.Wait( (d) => d.Header.Command == NetCommand.Accepted, 10, 100 );
 
 				if (message!=null) {
 					Log.Message("  connection established.");

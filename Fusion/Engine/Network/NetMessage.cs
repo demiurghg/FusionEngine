@@ -28,6 +28,25 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		public byte[] Data { get; private set; }
 
+
+		/// <summary>
+		/// Gets sender's endpoint as string.
+		/// </summary>
+		public string Address {
+			get {
+				return SenderEP.ToString();
+			}
+		}
+		
+
+		/// <summary>
+		/// Gets data as a text (e.g. converts byte array to string).
+		/// </summary>
+		public string Text {
+			get {
+				return Encoding.ASCII.GetString( Data );
+			}
+		}
 		
 
 		/// <summary>
@@ -40,7 +59,7 @@ namespace Fusion.Engine.Network {
 		internal NetMessage ( NetChanHeader header, IPEndPoint sender, byte[] recievedData, int receivedSize )
 		{		
 			Header		=	header;
-			SenderEP		=	sender;
+			SenderEP	=	sender;
 
 			int	length	=	receivedSize - NetChanHeader.SizeInBytes;
 
@@ -61,20 +80,9 @@ namespace Fusion.Engine.Network {
 			Log.Message("  frag        = {0}", Header.Fragment		);
 			Log.Message("  frag count  = {0}", Header.FragmentCount	);
 			Log.Message("  out-of-band = {0}", Header.IsOutOfBand	);
+			Log.Message("  command     = {0}", Header.Command		);
 			Log.Message("  length      = {0}", Data.Length );
 
 		}
-
-
-		/// <summary>
-		/// Converts Data to ASCII string.
-		/// </summary>
-		public string GetString()
-		{ 
-			return Encoding.ASCII.GetString( Data );
-		}
-
-
-
 	}
 }

@@ -63,13 +63,7 @@ namespace Fusion.Engine.Common {
 
 			while ( netChan.Dispatch( out message ) ) {
 
-				if (message.Header.IsOutOfBand) {
-
-					NetDispatchOobIM(message);
-
-				} else {
-					//	...
-				}
+				NetDispatchIM(message);
 				
 			} 
 		}
@@ -80,15 +74,11 @@ namespace Fusion.Engine.Common {
 		/// Dispatches out-of-band (e.g. service) messages.
 		/// </summary>
 		/// <param name="message"></param>
-		void NetDispatchOobIM ( NetMessage message )
+		void NetDispatchIM ( NetMessage message )
 		{
-			var args = CommandLineParser.SplitCommandLine( message.GetString() ).ToArray();
-
-			if (args[0]==Protocol.ClientConnect) {
-				NetRegClient( message, args[1] );
-			} else
-			if (args[0]==Protocol.ClientDisconnect) {
-				NetUnregClient( message );
+			switch ( message.Header.Command ) {
+				case NetCommand.Connect		: NetRegClient( message );		break;
+				case NetCommand.Disconnect	: NetUnregClient( message );	break;
 			}
 		}
 
@@ -99,23 +89,24 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		/// <param name="msg"></param>
 		/// <param name="userInfo"></param>
-		void NetRegClient ( NetMessage msg, string userInfo )
+		void NetRegClient ( NetMessage msg )
 		{
-			if ( clients.Any( cl => cl.EndPoint == msg.SenderEP ) ) {
+			if ( clients.Any( cl => cl.EndPoint.Equals( msg.SenderEP ) ) ) {
 				
 				Log.Warning("Duplicate connect from {0}. Ignored.", msg.SenderEP);
 
 			} else {
 				
 				// add client :
-				clients.Add( new ClientDesc( msg.SenderEP, userInfo ) );
+				clients.Add( new ClientDesc( msg.SenderEP, msg.Text ) );
 
-				//	send ack :
-				netChan.OutOfBand(msg.SenderEP, Protocol.ServerConnectAck);
-				Log.Message("Client connected: {0}", userInfo );
+				//	send accept :
+				netChan.OutOfBand(msg.SenderEP, NetCommand.Accepted);
+
+				//Log.Message("Client connected: {0}", userInfo );
 
 				//	notify game about new client.
-				ClientConnected( msg.SenderEP.Address.ToString() + ":" + msg.SenderEP.Port.ToString(), userInfo );
+				ClientConnected( msg.Address, msg.Text );
 			}
 		}
 
@@ -128,13 +119,13 @@ namespace Fusion.Engine.Common {
 		/// <param name="userInfo"></param>
 		void NetUnregClient ( NetMessage msg )
 		{
-			if ( !clients.Any( cl => cl.EndPoint == msg.SenderEP ) ) {
+			if ( !clients.Any( cl => cl.EndPoint.Equals( msg.SenderEP ) ) ) {
 				
 				Log.Warning("Duplicate disconnect from {0}. Ignored.", msg.SenderEP);
 
 			} else {
 
-				clients.RemoveAll( cl => cl.EndPoint == msg.SenderEP );
+				clients.RemoveAll( cl => cl.EndPoint.Equals( msg.SenderEP ) );
 
 				ClientDisconnected( msg.SenderEP.Address.ToString() + ":" + msg.SenderEP.Port.ToString() );
 			}

@@ -37,6 +37,10 @@ namespace Fusion.Engine.Common {
 		internal void ConnectInternal ( string host, int port )
 		{		
 			lock (lockObj) {
+				if (IsAlive) {
+					Log.Warning("Can not connect, connected or connecting.");
+					return;
+				}
 
 				disconnectToken	=	new CancellationTokenSource();
 

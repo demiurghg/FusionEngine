@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Network {
 
-	[StructLayout(LayoutKind.Explicit, Size=12)]
+	[StructLayout(LayoutKind.Explicit, Size=16)]
 	public struct NetChanHeader {
 
 		public static readonly int SizeInBytes	=	Marshal.SizeOf(typeof(NetChanHeader));
@@ -31,21 +31,27 @@ namespace Fusion.Engine.Network {
 		public uint	AckSequence;
 
 		/// <summary>
-		/// QPort
+		/// Network protocol command.
 		/// </summary>
 		[FieldOffset(8)]
+		public NetCommand	Command;
+
+		/// <summary>
+		/// QPort
+		/// </summary>
+		[FieldOffset(12)]
 		public ushort QPort;
 
 		/// <summary>
 		/// Fragment number
 		/// </summary>
-		[FieldOffset(10)]
+		[FieldOffset(14)]
 		public byte Fragment;
 
 		/// <summary>
 		/// Fragment count
 		/// </summary>
-		[FieldOffset(11)]
+		[FieldOffset(15)]
 		public byte FragmentCount;
 
 
@@ -66,13 +72,14 @@ namespace Fusion.Engine.Network {
 		/// <param name="sequence"></param>
 		/// <param name="ack"></param>
 		/// <param name="qport"></param>
-		public NetChanHeader( bool reliable, uint sequence, uint ack, ushort qport )
+		public NetChanHeader( bool reliable, uint sequence, uint ack, NetCommand cmd, ushort qport )
 		{
 			Sequence		=	sequence | ( reliable ? ReliabilityBit : 0 );
 			AckSequence		=	ack;
 			QPort			=	qport;
 			Fragment		=	0;
 			FragmentCount	=	1;
+			Command			=	cmd;
 		}
 
 
@@ -82,13 +89,14 @@ namespace Fusion.Engine.Network {
 		/// <param name="sequence"></param>
 		/// <param name="ack"></param>
 		/// <param name="qport"></param>
-		public NetChanHeader( ushort qport )
+		public NetChanHeader( ushort qport, NetCommand cmd )
 		{
 			Sequence		=	OutOfBand;
 			AckSequence		=	OutOfBand;
 			QPort			=	qport;
 			Fragment		=	0;
 			FragmentCount	=	1;
+			Command			=	cmd;
 		}
 
 

@@ -85,10 +85,10 @@ namespace Fusion.Engine.Network {
 		/// <param name="socket"></param>
 		/// <param name="target"></param>
 		/// <param name="data"></param>
-		public void OutOfBand ( IPEndPoint remoteEP, byte[] data )
+		public void OutOfBand ( IPEndPoint remoteEP, NetCommand cmd, byte[] data )
 		{		
 			lock (lockObject) {
-				var header = new NetChanHeader( QPort );
+				var header = new NetChanHeader( QPort, cmd );
 				Socket.SendTo( header.MakeDatagram(data), remoteEP );
 			}
 		}
@@ -100,9 +100,21 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		/// <param name="remoteEP"></param>
 		/// <param name="text"></param>
-		public void OutOfBand ( IPEndPoint remoteEP, string text )
+		public void OutOfBand ( IPEndPoint remoteEP, NetCommand cmd, string text )
 		{		
-			OutOfBand( remoteEP, Encoding.ASCII.GetBytes(text) );
+			OutOfBand( remoteEP, cmd, Encoding.ASCII.GetBytes(text) );
+		}
+
+
+
+		/// <summary>
+		/// Sends OOB string.
+		/// </summary>
+		/// <param name="remoteEP"></param>
+		/// <param name="text"></param>
+		public void OutOfBand ( IPEndPoint remoteEP, NetCommand cmd )
+		{		
+			OutOfBand( remoteEP, cmd, new byte[0] );
 		}
 
 
