@@ -144,7 +144,7 @@ namespace Fusion.Build {
 
 
 			if ( iniData.Sections.ContainsSection("Download") ) {
-				Download( context, iniData.Sections["Download"] );
+				Download( context, iniData.Sections["Download"], result );
 			}
 
 
@@ -249,7 +249,7 @@ namespace Fusion.Build {
 		/// 
 		/// </summary>
 		/// <param name="section"></param>
-		void Download ( BuildContext context, KeyDataCollection section )
+		void Download ( BuildContext context, KeyDataCollection section, BuildResult result )
 		{
 			Log.Message("Downloading...");
 
@@ -265,9 +265,14 @@ namespace Fusion.Build {
 
 				var fullPath	=	Path.Combine( context.Options.FullInputDirectory, fileName );
 
-				WebClient webClient = new WebClient();
-				Log.Message("  {0} -> {1}", urlName, fileName );
-				webClient.DownloadFile( urlName, fileName );
+				try {
+					WebClient webClient = new WebClient();
+					Log.Message("  {0} -> {1}", urlName, fileName );
+					webClient.DownloadFile( urlName, fileName );
+				} catch ( WebException wex ) {
+					Log.Error("{0} : {1}", fileName, wex.Message );
+					result.Failed++;
+				}
 			}
 		}
 

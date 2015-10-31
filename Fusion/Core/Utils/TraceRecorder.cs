@@ -26,6 +26,8 @@ namespace Fusion.Core.Utils {
 
 		public static event EventHandler	TraceRecorded;
 
+		static object lockObj = new object();
+
 
 		/// <summary>
 		/// Max recorded line count
@@ -48,8 +50,40 @@ namespace Fusion.Core.Utils {
 
 		void NotifyTraceRecord ()
 		{
-			if (TraceRecorded!=null) {
-				TraceRecorded(null, EventArgs.Empty);
+		}
+			   
+
+		static TraceRecorder ()
+		{
+			MaxLineCount	=	1024;
+		}
+
+
+
+		void AddMessage ( Line line )
+		{
+			lock (lockObj) {
+				lines.Add( line );
+
+				while (lines.Count>MaxLineCount) {
+					lines.RemoveAt(0);
+				}
+				if (TraceRecorded!=null) {
+					TraceRecorded(null, EventArgs.Empty);
+				}
+			}
+		}
+
+
+
+		public static void Clear ()
+		{
+			lock (lockObj) {
+				lines.Clear();
+
+				if (TraceRecorded!=null) {
+					TraceRecorded(null, EventArgs.Empty);
+				}
 			}
 		}
 
@@ -71,36 +105,31 @@ namespace Fusion.Core.Utils {
 
 		public override void TraceEvent ( TraceEventCache eventCache, string source, TraceEventType eventType, int id )
 		{
-			lines.Add( new Line( eventType, "" ) );
-			NotifyTraceRecord();
+			AddMessage( new Line( eventType, "" ) );
 		}
 
 
 		public override void TraceEvent ( TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args )
 		{
-			lines.Add( new Line( eventType, string.Format( format, args ) ) );
-			NotifyTraceRecord();
+			AddMessage( new Line( eventType, string.Format( format, args ) ) );
 		}
 
 
 		public override void TraceEvent ( TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message )
 		{
-			lines.Add( new Line( eventType, message ) );
-			NotifyTraceRecord();
+			AddMessage( new Line( eventType, message ) );
 		}
 
 
 
 		public override void Write ( string message )
 		{
-			lines.Add( new Line( TraceEventType.Information, message ) );
-			NotifyTraceRecord();
+			AddMessage( new Line( TraceEventType.Information, message ) );
 		}
 
 		public override void WriteLine ( string message )
 		{
-			lines.Add( new Line( TraceEventType.Information, message ) );
-			NotifyTraceRecord();
+			AddMessage( new Line( TraceEventType.Information, message ) );
 		}
 	}
 }
