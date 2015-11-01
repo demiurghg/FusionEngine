@@ -1,9 +1,5 @@
-; example2.nsi
-;
-; This script is based on example1.nsi, but it remember the directory, 
-; has uninstall support and (optionally) installs start menu shortcuts.
-;
-; It will install example2.nsi into a directory that the user selects,
+;--------------------------------
+; installer.nsi
 ;--------------------------------
 
 !include "MUI.nsh"
@@ -153,7 +149,7 @@ SectionEnd
   
 Section "Install Visual C++ Redistributable for Visual Studio 2012" Section3
   File /oname=$PLUGINSDIR\vcredist_x64.exe "vcredist_x64.exe"
-  ExecWait '$PLUGINSDIR\vcredist_x64.exe /passive'
+  ExecWait '"$PLUGINSDIR\vcredist_x64.exe" /passive'
 SectionEnd
 
 
@@ -195,8 +191,6 @@ Section "Uninstall"
   
   ; Remove registry keys
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\FusionEngine"
-  DeleteRegKey HKCU SOFTWARE\FusionEngine
-
   DeleteRegKey HKCU "Software\FusionEngine"
   
   ; Remove files and uninstaller
