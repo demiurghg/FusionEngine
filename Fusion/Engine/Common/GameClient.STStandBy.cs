@@ -33,7 +33,7 @@ namespace Fusion.Engine.Common {
 			/// <param name="port"></param>
 			public override void Connect ( string host, int port )
 			{
-				client.SetState( new Connecting(client, host, port) );
+				client.SetState( new STConnecting(client, host, port) );
 			}
 
 

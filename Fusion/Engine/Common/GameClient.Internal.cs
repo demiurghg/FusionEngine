@@ -13,7 +13,7 @@ namespace Fusion.Engine.Common {
 	public abstract partial class GameClient : GameModule {
 
 		NetChan	netChan		=	null;
-		State	state;
+		STState	state;
 
 		IPEndPoint	serverEP	=	null;
 
@@ -22,7 +22,7 @@ namespace Fusion.Engine.Common {
 		/// 
 		/// </summary>
 		/// <param name="newState"></param>
-		void SetState ( State newState )
+		void SetState ( STState newState )
 		{
 			state	=	newState;
 		}

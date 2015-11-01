@@ -75,7 +75,7 @@ namespace Fusion.Engine.Common {
 			/// <param name="gameTime"></param>
 			public override void Update ( GameTime gameTime )
 			{
-				client.SetState( new Active(client) );
+				client.SetState( new STActive(client) );
 				//	do nothing
 			}
 		}

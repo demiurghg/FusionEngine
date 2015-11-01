@@ -96,7 +96,7 @@ namespace Fusion.Engine.Common {
 			{
 				if (msg.Command==NetCommand.Accepted) {
 					Log.Message("Connection established.");
-					client.SetState( new Connected(client, msg.Text) );
+					client.SetState( new STConnected(client, msg.Text) );
 					return;
 				}
 
