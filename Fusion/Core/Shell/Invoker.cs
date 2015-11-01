@@ -53,7 +53,7 @@ namespace Fusion.Core.Shell {
 		/// <param name="game">GameEngine instance</param>
 		public Invoker ( GameEngine game, CommandAffinity affinity )
 		{
-			Initialize( game, Command.GatherCommands(affinity) );
+			Initialize( game, Command.GatherCommands() );
 		}
 
 
@@ -181,7 +181,7 @@ namespace Fusion.Core.Shell {
 		/// Executes enqueued commands. Updates delayed commands.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public void ExecuteQueue ( GameTime gameTime, bool forceDelayed = false )
+		public void ExecuteQueue ( GameTime gameTime, CommandAffinity affinity, bool forceDelayed = false )
 		{
 			var delta = (int)gameTime.Elapsed.TotalMilliseconds;
 
@@ -193,22 +193,31 @@ namespace Fusion.Core.Shell {
 					
 					var cmd = queue.Dequeue();
 
-					if (cmd.Delay<=0 || forceDelayed) {
-						//	execute :
-						cmd.Execute();
+					if ( cmd.Affinity == affinity ) {
 
-						if (cmd.Result!=null) {
-							Log.Message( "// Result: {0} //", cmd.GetStringResult() );
+						if ( cmd.Delay<=0 || forceDelayed ) {
+							//	execute :
+							cmd.Execute();
+
+							if (cmd.Result!=null) {
+								Log.Message( "// Result: {0} //", cmd.GetStringResult() );
+							}
+
+							//	push to history :
+							if (!cmd.NoRollback && cmd.Affinity==CommandAffinity.Default) {
+								history.Push( cmd );
+							}
+
+						} else {
+
+							cmd.Delay -= delta;
+
+							delayed.Enqueue( cmd );
+
 						}
 
-						//	push to history :
-						if (!cmd.NoRollback) {
-							history.Push( cmd );
-						}
 					} else {
-
-						cmd.Delay -= delta;
-
+						
 						delayed.Enqueue( cmd );
 
 					}

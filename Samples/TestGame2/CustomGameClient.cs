@@ -30,7 +30,7 @@ namespace TestGame2 {
 		/// Client could start loading models, textures, models etc.
 		/// </summary>
 		/// <param name="map"></param>
-		public override void Connect ( string host, int port )
+		public override void LoadLevel ( string serverInfo )
 		{
 		}
 
@@ -39,7 +39,7 @@ namespace TestGame2 {
 		///	Client must purge all level-associated content.
 		///	Reason???
 		/// </summary>
-		public override void Disconnect ()
+		public override void UnloadLevel ()
 		{
 		}
 
@@ -51,17 +51,6 @@ namespace TestGame2 {
 		{
 			
 		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="gameTime"></param>
-		public override void UpdateGfx (GameTime gameTime )
-		{
-		}
-
 
 
 		/// <summary>
@@ -93,7 +82,7 @@ namespace TestGame2 {
 		/// <returns></returns>
 		public override string UserInfo ()
 		{
-			return "[Alice and Bob]";
+			return "Bob";
 		}
 	}
 }

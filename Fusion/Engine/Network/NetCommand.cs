@@ -23,7 +23,8 @@ namespace Fusion.Engine.Network {
 
 		/// <summary>
 		/// Server sends this command when client connection was accepted.
-		/// No additional data.
+		/// Data contains server information which required for client to load the game data 
+		/// (i.g. map name, game type etc).
 		/// </summary>
 		Accepted,
 
@@ -39,8 +40,19 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		Dropped,
 
+		/// <summary>
+		/// Servers sends this command when killed.
+		/// </summary>
+		ServerDisconnected,
 
-		GameNotification,
+		/// <summary>
+		/// Server notifies clients about something. 
+		/// Like client connection, drop, kick and so on.
+		/// Data contains string notification.
+		/// </summary>
+		Notification,
+
+
 		SystemNotification,
 		ChallengeRequest,
 		ChallengeResponse,
@@ -50,5 +62,7 @@ namespace Fusion.Engine.Network {
 
 		DiscoveryRequest,
 		DiscoveryResponse,
+
+		ChatMessage,
 	}
 }

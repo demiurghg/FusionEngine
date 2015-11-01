@@ -100,8 +100,8 @@ namespace TestGame2 {
 		/// <param name="gameTime"></param>
 		public override void Update ( GameTime gameTime )
 		{
-			Thread.Sleep(333);
-			Log.Message("SV: [{0}]", gameTime.ElapsedSec );
+			//Thread.Sleep(333);
+			//Log.Message("SV: [{0}]", gameTime.ElapsedSec );
 		}
 
 		/// <summary>
@@ -121,6 +121,16 @@ namespace TestGame2 {
 		/// <param name="clientId"></param>
 		public override void FeedCommand ( UserCmd[] commands, int clientId )
 		{
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public override string ServerInfo ()
+		{
+			return "Alice";
 		}
 
 

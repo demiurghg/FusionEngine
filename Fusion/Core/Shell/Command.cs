@@ -66,6 +66,13 @@ namespace Fusion.Core.Shell {
 
 
 		/// <summary>
+		/// Command affinity.
+		/// </summary>
+		[CommandLineParser.Ignore]
+		public CommandAffinity Affinity { get; private set; }
+
+
+		/// <summary>
 		/// Gets result string.
 		/// Converts result object using type converter.
 		/// </summary>
@@ -93,6 +100,7 @@ namespace Fusion.Core.Shell {
 			Result		=	null;
 
 			Name		=	GetType().GetCustomAttribute<CommandAttribute>().Name;
+			Affinity	=	GetType().GetCustomAttribute<CommandAttribute>().Affinity;
 		}
 
 
@@ -101,11 +109,10 @@ namespace Fusion.Core.Shell {
 		/// Command must be inherited from Command class and have attribute [Command]
 		/// </summary>
 		/// <returns></returns>
-		internal static Type[] GatherCommands ( CommandAffinity affinity )
+		internal static Type[] GatherCommands ()
 		{
 			return Misc.GetAllSubclassedOf( typeof(Command) )
 				.Where( t => t.HasAttribute<CommandAttribute>() )
-				.Where( t1 => t1.GetCustomAttribute<CommandAttribute>().Affinity == affinity )
 				.ToArray();
 		}
 	}

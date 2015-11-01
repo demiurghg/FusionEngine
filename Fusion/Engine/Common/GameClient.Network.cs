@@ -12,6 +12,8 @@ using Fusion.Core.Shell;
 namespace Fusion.Engine.Common {
 	public abstract partial class GameClient : GameModule {
 
+	#if false
+
 		const int ReconnectPeriod	=	3000;
 		const int ReconnectAttempts	=	10;
 
@@ -67,7 +69,7 @@ namespace Fusion.Engine.Common {
 				var message	=	netChan.Wait( (d) => d.Header.Command == NetCommand.Accepted, 10, 100 );
 
 				if (message!=null) {
-					Log.Message("  connection established.");
+					Log.Message("  connection established: {0}", message.Text);
 					return 0;
 				}
 			}
@@ -83,5 +85,7 @@ namespace Fusion.Engine.Common {
 		{
 			
 		}
+
+		#endif
 	}
 }

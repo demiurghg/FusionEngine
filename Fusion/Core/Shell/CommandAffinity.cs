@@ -13,6 +13,7 @@ namespace Fusion.Core.Shell {
 
 		/// <summary>
 		/// Command will be dispatched in UI thread.
+		/// Only Default commands are undoable.
 		/// </summary>
 		Default,
 

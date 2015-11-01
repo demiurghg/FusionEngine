@@ -21,12 +21,26 @@ namespace Fusion.Engine.Network {
 		public float SimulatePacketsLoss { get; set; }
 
 
+		/// <summary>
+		/// Client connection resend timeout.
+		/// </summary>
+		public int ResendTimeout { get; set; }
+
+		/// <summary>
+		/// Client connection max resend count.
+		/// </summary>
+		public int ResendMaxCount { get; set; }
+
+
 		public NetworkConfig ()
 		{
 			Port				=	28100;
 			MaxClients			=	8;
 			SimulatePacketsLoss	=	0;
 			ShowPackets			=	false;
+
+			ResendTimeout		=	1000;
+			ResendMaxCount		=	10;
 		}
 
 	}

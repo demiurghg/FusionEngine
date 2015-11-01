@@ -216,7 +216,13 @@
     <Compile Include="Drivers\Graphics\Resources\Texture2D.cs" />
     <Compile Include="Drivers\Graphics\Scene\MeshMaterial.cs" />
     <Compile Include="Core\DisposableBase.cs" />
-    <Compile Include="Engine\Common\ConnState.cs" />
+    <Compile Include="Engine\Common\Commands\Connect.cs" />
+    <Compile Include="Engine\Common\Commands\Disconnect.cs" />
+    <Compile Include="Engine\Common\Commands\KillServer.cs" />
+    <Compile Include="Engine\Common\Commands\Map.cs" />
+    <Compile Include="Engine\Common\Commands\ServerInfo.cs" />
+    <Compile Include="Engine\Common\Commands\ServerDrop.cs" />
+    <Compile Include="Engine\Common\GameClient.State.cs" />
     <Compile Include="Engine\Common\GameClient.Network.cs" />
     <Compile Include="Engine\Common\GameServer.Network.cs" />
     <Compile Include="Engine\Common\GameClient.Internal.cs" />
@@ -226,6 +232,7 @@
     <Compile Include="Engine\Common\GameParameters.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Engine\Common\NetUtils.cs" />
     <Compile Include="Engine\Common\UserCmd.cs" />
     <Compile Include="Engine\Common\GameException.cs" />
     <Compile Include="Drivers\Graphics\GraphicsException.cs" />

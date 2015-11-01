@@ -52,6 +52,13 @@ namespace Fusion.Engine.Common {
 		/// <param name="clientId"></param>
 		public abstract void FeedCommand ( UserCmd[] commands, int clientId );
 
+		/// <summary>
+		/// Gets server information that required for client to load the game.
+		/// This information usually contains map name and game type.
+		/// This information is also used for discovery response.
+		/// </summary>
+		/// <returns></returns>
+		public abstract string ServerInfo ();
 
 		/// <summary>
 		/// Called when client connected.

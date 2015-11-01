@@ -37,6 +37,16 @@ namespace Fusion.Engine.Network {
 				return SenderEP.ToString();
 			}
 		}
+
+
+		/// <summary>
+		/// Gets header command.
+		/// </summary>
+		public NetCommand Command {
+			get {
+				return Header.Command;
+			}
+		}
 		
 
 		/// <summary>

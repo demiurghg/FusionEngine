@@ -327,9 +327,11 @@ namespace Fusion.Engine.Common {
 			Log.Message("");
 			Log.Message("---------- GameEngine Shutting Down ----------");
 
-			cl.Wait();
+			//	wait for server 
+			//	if it is still running :
 			sv.Wait();
-
+			
+			//	call exit event :
 			if (Exiting!=null) {
 				Exiting(this, EventArgs.Empty);
 			}
@@ -463,7 +465,7 @@ namespace Fusion.Engine.Common {
 			}
 
 			try {
-				invoker.ExecuteQueue( gameTimeInternal );
+				invoker.ExecuteQueue( gameTimeInternal, CommandAffinity.Default );
 			} catch ( Exception e ) {
 				Log.Error( e.Message );
 			}
@@ -541,74 +543,6 @@ namespace Fusion.Engine.Common {
 		 * 
 		-----------------------------------------------------------------------------------------*/
 
-		[Command("map", CommandAffinity.Default)]
-		public class MapCommand : NoRollbackCommand {
-
-			[CommandLineParser.Required()]
-			[CommandLineParser.Name("mapname")]
-			public string MapName { get; set; }
-			
-			public MapCommand ( Invoker invoker ) : base(invoker) 
-			{
-			}
-
-			public override void Execute ()
-			{
-				Invoker.GameEngine.StartServer( MapName );
-			}
-		}
-
-
-		[Command("killServer", CommandAffinity.Default)]
-		public class KillServerCommand : NoRollbackCommand {
-			
-			public KillServerCommand ( Invoker invoker ) : base(invoker) 
-			{
-			}
-
-			public override void Execute ()
-			{
-				Invoker.GameEngine.KillServer();
-			}
-		}
-
-
-		[Command("connect", CommandAffinity.Default)]
-		public class ConnectCommand : NoRollbackCommand {
-
-			[CommandLineParser.Required()]
-			[CommandLineParser.Name("host")]
-			public string Host { get; set; }
-
-			[CommandLineParser.Required()]
-			[CommandLineParser.Name("port")]
-			public int Port { get; set; }
-			
-			public ConnectCommand ( Invoker invoker ) : base(invoker) 
-			{
-			}
-
-			public override void Execute ()
-			{
-				Invoker.GameEngine.Connect( Host, Port );
-			}
-		}
-
-
-		[Command("disconnect", CommandAffinity.Default)]
-		public class DisconnectCommand : NoRollbackCommand {
-
-			public DisconnectCommand ( Invoker invoker ) : base(invoker) 
-			{
-			}
-
-			public override void Execute ()
-			{
-				Invoker.GameEngine.Disconnect();
-			}
-		}
-
-
 
 		
 		/// <summary>
@@ -617,33 +551,35 @@ namespace Fusion.Engine.Common {
 		/// <param name="gameTime"></param>
 		void UpdateClientServerGame ( GameTime gameTime )
 		{
+			cl.UpdateInternal( gameTime );
+
 			gi.Update( gameTime );
 		}
 
 
 
-		void StartServer ( string map )
+		internal void StartServer ( string map )
 		{
 			GameServer.StartInternal( map, null );
 		}
 
 
-		void KillServer ()
+		internal void KillServer ()
 		{
 			GameServer.KillInternal();
 		}
 
 
 
-		void Connect ( string host, int port )
+		internal void Connect ( string host, int port )
 		{
 			GameClient.ConnectInternal(host, port);
 		}
 
 
-		void Disconnect ()
+		internal void Disconnect ()
 		{
-			GameClient.DisconnectInternal(false);
+			GameClient.DisconnectInternal();
 		}
 	}
 }

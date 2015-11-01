@@ -105,7 +105,7 @@ namespace Fusion.Framework {
 		}
 
 
-		int charHeight { get { return 8; } }
+		int charHeight { get { return 9; } }
 		int charWidth { get { return 8; } }
 		/*int charHeight { get { return consoleFont.LineHeight; } }
 		int charWidth { get { return consoleFont.SpaceWidth; } }*/

@@ -49,6 +49,10 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		void NetShutdown()
 		{
+			foreach ( var cl in clients ) {
+				netChan.OutOfBand( cl.EndPoint, NetCommand.ServerDisconnected );
+			}
+
 			SafeDispose( ref netChan );
 		}
 
@@ -84,6 +88,15 @@ namespace Fusion.Engine.Common {
 
 
 
+		void NotifyClients ( string message )
+		{
+			foreach ( var cl in clients ) {
+				netChan.OutOfBand( cl.EndPoint, NetCommand.Notification, message );
+			}
+		}
+
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -98,15 +111,19 @@ namespace Fusion.Engine.Common {
 			} else {
 				
 				// add client :
-				clients.Add( new ClientDesc( msg.SenderEP, msg.Text ) );
+				var client = new ClientDesc( msg.SenderEP, msg.Text );
+
+				clients.Add( client );
 
 				//	send accept :
-				netChan.OutOfBand(msg.SenderEP, NetCommand.Accepted);
+				netChan.OutOfBand(msg.SenderEP, NetCommand.Accepted, ServerInfo() );
 
 				//Log.Message("Client connected: {0}", userInfo );
 
 				//	notify game about new client.
 				ClientConnected( msg.Address, msg.Text );
+
+				NotifyClients( string.Format("{0} connected.", client.UserInfo) );
 			}
 		}
 
@@ -119,19 +136,71 @@ namespace Fusion.Engine.Common {
 		/// <param name="userInfo"></param>
 		void NetUnregClient ( NetMessage msg )
 		{
-			if ( !clients.Any( cl => cl.EndPoint.Equals( msg.SenderEP ) ) ) {
+			var client = clients.FirstOrDefault( cl => cl.EndPoint.Equals( msg.SenderEP ) );
+
+			if ( client == null ) {
 				
 				Log.Warning("Duplicate disconnect from {0}. Ignored.", msg.SenderEP);
 
 			} else {
 
-				clients.RemoveAll( cl => cl.EndPoint.Equals( msg.SenderEP ) );
+				clients.Remove( client );
 
 				ClientDisconnected( msg.SenderEP.Address.ToString() + ":" + msg.SenderEP.Port.ToString() );
+
+				NotifyClients( string.Format("{0} disconnected.", client.UserInfo) );
 			}
 		}
 
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		internal void PrintServerInfo ()
+		{
+			Log.Message("");
+			Log.Message("-------- Server Info --------");
+			Log.Message("{0}", ServerInfo() );
+
+			foreach ( var cl in clients ) {
+				Log.Message("  {1} : {0}", cl.UserInfo, cl.EndPoint.ToString() );
+			}
+
+			Log.Message("{0} clients are connected", clients.Count );
+			Log.Message("-----------------------------");
+			Log.Message("");
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="clientName"></param>
+		/// <param name="reason"></param>
+		internal void Drop ( string clientName, string reason )
+		{
+			IPAddress ip;
+			ClientDesc client = null;
+
+			if ( IPAddress.TryParse( clientName, out ip ) ) {
+				client	=	clients.FirstOrDefault( cl => cl.EndPoint.Address.Equals( ip ) );
+			} else {
+				client = clients.FirstOrDefault( cl => cl.UserInfo.Contains( clientName ) );
+			}
+
+			if (client==null) {
+				Log.Warning("No such client: {0}", client );
+			} else {
+
+				clients.Remove( client );
+
+				netChan.OutOfBand( client.EndPoint, NetCommand.Dropped, reason );
+
+				NotifyClients( string.Format("{0} was dropped.", client.UserInfo) );
+
+			}
+		}
 
 	}
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 //using Lidgren.Network;
 using System.Threading;
 using System.Net;
+using Fusion.Core.Shell;
 using Fusion.Engine.Network;
 
 namespace Fusion.Engine.Common {
@@ -127,6 +128,8 @@ namespace Fusion.Engine.Common {
 					NetDispatchIM(svTime);
 
 					Update( svTime );
+
+					GameEngine.Invoker.ExecuteQueue( svTime, CommandAffinity.Server );
 
 				}
 

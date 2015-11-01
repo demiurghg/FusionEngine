@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Threading;
+using Fusion.Engine.Network;
 
 
 namespace Fusion.Engine.Common {
@@ -16,34 +17,28 @@ namespace Fusion.Engine.Common {
 		/// <param name="gameEngine"></param>
 		public GameClient ( GameEngine gameEngine ) : base(gameEngine) 
 		{
+			state	=	new StandBy(this);
 		}
 
 		/// <summary>
 		/// Called when connection request accepted by server.
 		/// Client could start loading models, textures, models etc.
+		/// The method can be invoked in parallel task.
 		/// </summary>
 		/// <param name="host"></param>
-		public abstract void Connect ( string host, int port );
+		public abstract void LoadLevel ( string serverInfo );
 
 		/// <summary>
 		///	Called when client disconnected, dropped, kicked or timeouted.
 		///	Client must purge all level-associated content.
-		///	Reason???
 		/// </summary>
-		public abstract void Disconnect ();
+		public abstract void UnloadLevel ();
 
 		/// <summary>
 		/// Runs one step of client-side simulation and render world state.
 		/// </summary>
 		/// <param name="gameTime"></param>
 		public abstract void Update ( GameTime gameTime );
-
-		/// <summary>
-		/// Performs update of visual and audial objects.
-		/// The method is synchronized with UI/Graphics thread.
-		/// </summary>
-		/// <param name="gameTime"></param>
-		public abstract void UpdateGfx ( GameTime gameTime );
 
 		/// <summary>
 		/// Feed server snapshot to client.

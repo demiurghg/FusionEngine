@@ -12,78 +12,19 @@ using Fusion.Core.Shell;
 namespace Fusion.Engine.Common {
 	public abstract partial class GameClient : GameModule {
 
-		Task	clientTask;
-		CancellationTokenSource	disconnectToken;
+		NetChan	netChan		=	null;
+		State	state;
 
-		object lockObj = new object();
-
-
-
-		/// <summary>
-		/// Gets whether server is still alive.
-		/// </summary>
-		internal bool IsAlive {
-			get {
-				return clientTask != null; 
-			}
-		}
-
-		
-		/// <summary>
-		/// Connects client.
-		/// </summary>
-		/// <param name="host"></param>
-		/// <param name="port"></param>
-		internal void ConnectInternal ( string host, int port )
-		{		
-			lock (lockObj) {
-				if (IsAlive) {
-					Log.Warning("Can not connect, connected or connecting.");
-					return;
-				}
-
-				disconnectToken	=	new CancellationTokenSource();
-
-				clientTask	=	new Task( () => ClientTaskFunc( host, port ), disconnectToken.Token );
-				clientTask.Start();
-			}
-		}
-
+		IPEndPoint	serverEP	=	null;
 
 
 		/// <summary>
-		/// Internal disconnect.
+		/// 
 		/// </summary>
-		internal void DisconnectInternal (bool wait)
+		/// <param name="newState"></param>
+		void SetState ( State newState )
 		{
-			lock (lockObj) {
-				if (!IsAlive) {
-					Log.Warning("Not connected.");
-					return;
-				}
-				if (disconnectToken!=null) {
-					disconnectToken.Cancel();
-				}
-			}
-		}
-		
-
-
-		/// <summary>
-		/// Waits for client thread.
-		/// </summary>
-		internal void Wait ()
-		{
-			lock (lockObj) {
-				if (disconnectToken!=null) {
-					disconnectToken.Cancel();
-				}
-
-				if (clientTask!=null) {
-					Log.Message("Waiting for client task...");
-					clientTask.Wait();
-				}
-			}
+			state	=	newState;
 		}
 
 
@@ -91,40 +32,51 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// 
 		/// </summary>
-		void ClientTaskFunc ( string host, int port )
+		/// <param name="host"></param>
+		/// <param name="port"></param>
+		internal void ConnectInternal ( string host, int port )
 		{
-			try {
+			//	recreate NetChan to reset counters and internal state.
+			SafeDispose( ref netChan );
+			netChan	=	new NetChan( GameEngine, GameEngine.Network.ClientSocket, "CL" );
 
-				NetConnect( host, port );
-				
-				Connect( host, port );
-
-				var clTime	=	new GameTime();
-
-				while (!disconnectToken.IsCancellationRequested) {
-
-					clTime.Update();
-
-					Thread.Sleep(500);
-
-					NetDispatchIM(clTime);
-					
-					Update( clTime );
-				}
-
-
-			} catch ( Exception e ) {
-				Log.PrintException( e, "Client error: {0}", e.Message );
-
-			} finally {
-
-				NetDisconnect();
-
-				//	try...catch???
-				Disconnect();
-
-				clientTask	=	null;
-			}
+			state.Connect( host, port );
 		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="host"></param>
+		/// <param name="port"></param>
+		internal void DisconnectInternal ()
+		{
+			state.Disconnect(); 
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="gameTime"></param>
+		internal void UpdateInternal ( GameTime gameTime )
+		{
+			NetMessage msg;
+
+			while ( netChan!=null && netChan.Dispatch(out msg) ) {
+
+				//	dispatch messages only from server :
+				if (NetUtils.IsIPsEqual( msg.SenderEP, serverEP ) ) {
+					state.DispatchIM( msg );
+				} else {
+					Log.Warning("{0} sends commands. Expected from: {1}", msg.SenderEP, serverEP );
+				}
+			}
+
+			state.Update( gameTime );
+		}
+
 	}
 }
