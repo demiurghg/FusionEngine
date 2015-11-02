@@ -15,37 +15,23 @@ namespace Fusion.Engine.Common {
 
 		NetChan netChan;
 
-
-		class ClientDesc {
-			
-			public ClientDesc ( IPEndPoint ep, string userInfo )
-			{
-				EndPoint	= ep;
-				UserInfo	= userInfo;
-			}
-
-			public IPEndPoint	EndPoint;
-			public string		UserInfo;
-		}
-
-
-		List<ClientDesc>	clients;
+		List<ClientState>	clients;
 
 
 
 		/// <summary>
-		/// 
+		/// Starts network stuff.
 		/// </summary>
 		void NetStart ()
 		{
-			clients	=	new List<ClientDesc>();
+			clients	=	new List<ClientState>();
 			netChan =	new NetChan(GameEngine, GameEngine.Network.ServerSocket, "SV");
 		}
 
 
 
 		/// <summary>
-		/// 
+		/// Shuts down network stuff.
 		/// </summary>
 		void NetShutdown()
 		{
@@ -59,13 +45,15 @@ namespace Fusion.Engine.Common {
 
 
 		/// <summary>
-		/// 
+		/// Dispatches incoming messages.
 		/// </summary>
 		void NetDispatchIM ( GameTime gameTime )
 		{
 			NetMessage message = null;
 
 			while ( netChan.Dispatch( out message ) ) {
+
+				if (message==null) continue;
 
 				NetDispatchIM(message);
 				
@@ -75,20 +63,25 @@ namespace Fusion.Engine.Common {
 
 
 		/// <summary>
-		/// Dispatches out-of-band (e.g. service) messages.
+		/// Dispatches message.
 		/// </summary>
 		/// <param name="message"></param>
 		void NetDispatchIM ( NetMessage message )
 		{
 			switch ( message.Header.Command ) {
-				case NetCommand.Connect		: NetRegClient( message );		break;
-				case NetCommand.Disconnect	: NetUnregClient( message );	break;
+				case NetCommand.Connect		: NetRegisterClient( message );		break;
+				case NetCommand.Disconnect	: NetUnregisterClient( message );	break;
+				case NetCommand.UserCommand	: FeedCommand( message );			break;
 			}
 		}
 
 
 
-		void NotifyClients ( string message )
+		/// <summary>
+		/// Notifies all clients.
+		/// </summary>
+		/// <param name="message"></param>
+		public void NotifyClientsInternal ( string message )
 		{
 			foreach ( var cl in clients ) {
 				netChan.OutOfBand( cl.EndPoint, NetCommand.Notification, message );
@@ -98,32 +91,72 @@ namespace Fusion.Engine.Common {
 
 
 		/// <summary>
+		/// Gets client by EndPoint.
+		/// </summary>
+		/// <param name="ep"></param>
+		/// <returns></returns>
+		ClientState GetClient( IPEndPoint ep )
+		{
+			return clients.FirstOrDefault( cl => cl.EndPoint.Equals( ep ) );
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="msg"></param>
+		void FeedCommand ( NetMessage msg )
+		{
+			var cl = GetClient(msg.SenderEP);
+			
+			if (cl==null) {
+				//	ignore
+				return;
+			}	
+
+			using ( var reader = msg.OpenReader() ) {
+
+				int count = reader.ReadInt32();
+
+				var cmds = new UserCmd[count];
+
+				for (int i=0; i<count; i++) {
+					cmds[i] = UserCmd.Read( reader );
+				}
+
+				FeedCommand( cmds, cl.ID );
+			}
+		}
+
+
+
+
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="msg"></param>
 		/// <param name="userInfo"></param>
-		void NetRegClient ( NetMessage msg )
+		void NetRegisterClient ( NetMessage msg )
 		{
-			if ( clients.Any( cl => cl.EndPoint.Equals( msg.SenderEP ) ) ) {
+			var cl = GetClient( msg.SenderEP );
+
+			if ( cl!=null ) {
 				
 				Log.Warning("Duplicate connect from {0}. Ignored.", msg.SenderEP);
 
 			} else {
 				
 				// add client :
-				var client = new ClientDesc( msg.SenderEP, msg.Text );
+				var client = new ClientState( msg.SenderEP, msg.Text );
 
 				clients.Add( client );
 
 				//	send accept :
 				netChan.OutOfBand(msg.SenderEP, NetCommand.Accepted, ServerInfo() );
 
-				//Log.Message("Client connected: {0}", userInfo );
-
 				//	notify game about new client.
-				ClientConnected( msg.Address, msg.Text );
-
-				NotifyClients( string.Format("{0} connected.", client.UserInfo) );
+				ClientConnected( client.ID, client.UserInfo );
 			}
 		}
 
@@ -134,7 +167,7 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		/// <param name="msg"></param>
 		/// <param name="userInfo"></param>
-		void NetUnregClient ( NetMessage msg )
+		void NetUnregisterClient ( NetMessage msg )
 		{
 			var client = clients.FirstOrDefault( cl => cl.EndPoint.Equals( msg.SenderEP ) );
 
@@ -146,16 +179,14 @@ namespace Fusion.Engine.Common {
 
 				clients.Remove( client );
 
-				ClientDisconnected( msg.SenderEP.Address.ToString() + ":" + msg.SenderEP.Port.ToString() );
-
-				NotifyClients( string.Format("{0} disconnected.", client.UserInfo) );
+				ClientDisconnected( client.ID, client.UserInfo );
 			}
 		}
 
 
 
 		/// <summary>
-		/// 
+		/// Prints server info.
 		/// </summary>
 		internal void PrintServerInfo ()
 		{
@@ -173,15 +204,16 @@ namespace Fusion.Engine.Common {
 		}
 
 
+
 		/// <summary>
-		/// 
+		/// Drops client.
 		/// </summary>
 		/// <param name="clientName"></param>
 		/// <param name="reason"></param>
 		internal void Drop ( string clientName, string reason )
 		{
 			IPAddress ip;
-			ClientDesc client = null;
+			ClientState client = null;
 
 			if ( IPAddress.TryParse( clientName, out ip ) ) {
 				client	=	clients.FirstOrDefault( cl => cl.EndPoint.Address.Equals( ip ) );

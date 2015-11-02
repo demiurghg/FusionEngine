@@ -72,7 +72,7 @@ namespace Fusion.Engine.Network {
 		/// <param name="sequence"></param>
 		/// <param name="ack"></param>
 		/// <param name="qport"></param>
-		public NetChanHeader( bool reliable, uint sequence, uint ack, NetCommand cmd, ushort qport )
+		public NetChanHeader( ushort qport, NetCommand cmd, uint sequence, uint ack, bool reliable )
 		{
 			Sequence		=	sequence | ( reliable ? ReliabilityBit : 0 );
 			AckSequence		=	ack;
@@ -118,6 +118,38 @@ namespace Fusion.Engine.Network {
 			Marshal.FreeHGlobal(intPtr);
 
 			Buffer.BlockCopy( dataToSend, 0, message, SizeInBytes, dataToSend.Length );
+
+			return message;
+		}
+
+
+
+		/// <summary>
+		/// Writes header to byte array.
+		/// </summary>
+		/// <param name="destination"></param>
+		public byte[] MakeDatagram<T> ( T[] dataToSend ) where T: struct
+		{
+			var stride	=	Marshal.SizeOf( typeof(T) );
+			var count	=	dataToSend.Length;
+
+			var message = new byte[ SizeInBytes + stride * count ];
+
+			var intPtr = Marshal.AllocHGlobal( message.Length );
+			var freePtr = intPtr;
+
+			Marshal.StructureToPtr( this, intPtr, false );
+
+			intPtr	=	IntPtr.Add( intPtr, SizeInBytes );
+
+			for ( int i=0; i<count; i++) {
+				Marshal.StructureToPtr( dataToSend[i], intPtr, false );
+				intPtr	=	IntPtr.Add( intPtr, stride );
+			}
+
+			Marshal.Copy( freePtr, message, 0, message.Length );
+
+			Marshal.FreeHGlobal(freePtr);
 
 			return message;
 		}

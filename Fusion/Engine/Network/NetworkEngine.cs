@@ -68,6 +68,7 @@ namespace Fusion.Engine.Network {
 			//	create server socket :
 			serverSocket			=	new Socket( SocketType.Dgram, ProtocolType.Udp );
 			serverSocket.Blocking	=	false;
+			Log.Message("  recv buf : {0}", serverSocket.ReceiveBufferSize );
 
 			int port = Config.Port;
 

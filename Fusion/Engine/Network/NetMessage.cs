@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using System.IO;
 
 
 namespace Fusion.Engine.Network {
@@ -92,7 +93,28 @@ namespace Fusion.Engine.Network {
 			Log.Message("  out-of-band = {0}", Header.IsOutOfBand	);
 			Log.Message("  command     = {0}", Header.Command		);
 			Log.Message("  length      = {0}", Data.Length );
+		}
 
+
+		
+		/// <summary>
+		/// Opens memory stream for reading.
+		/// </summary>
+		/// <returns></returns>
+		internal Stream OpenRead ()
+		{
+			return new MemoryStream( Data, false );
+		}
+
+
+		
+		/// <summary>
+		/// Creates BinaryReader over memory stream.
+		/// </summary>
+		/// <returns></returns>
+		internal BinaryReader OpenReader ()
+		{
+			return new BinaryReader( OpenRead() );
 		}
 	}
 }

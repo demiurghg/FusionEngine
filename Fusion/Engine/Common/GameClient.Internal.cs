@@ -67,6 +67,8 @@ namespace Fusion.Engine.Common {
 
 			while ( netChan!=null && netChan.Dispatch(out msg) ) {
 
+				if (msg==null) continue;
+
 				//	dispatch messages only from server :
 				if (NetUtils.IsIPsEqual( msg.SenderEP, serverEP ) ) {
 					state.DispatchIM( msg );

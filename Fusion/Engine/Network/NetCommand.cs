@@ -52,6 +52,11 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		Notification,
 
+		/// <summary>
+		/// User commands.
+		/// </summary>
+		UserCommand,
+
 
 		SystemNotification,
 		ChallengeRequest,

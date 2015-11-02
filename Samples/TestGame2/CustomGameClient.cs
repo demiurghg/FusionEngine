@@ -62,6 +62,9 @@ namespace TestGame2 {
 		{
 		}
 
+
+		int sequenceCounter	=	0;
+
 		/// <summary>
 		/// Gets command from client.
 		/// Returns null if no command is available.
@@ -72,7 +75,10 @@ namespace TestGame2 {
 		/// <returns></returns>
 		public override UserCmd[] GetCommands ()
 		{
-			return null;
+			var cmd = new UserCmd( sequenceCounter++, (int)0x0CFFAACC );
+			cmd.X = (short)GameEngine.Mouse.Position.X;
+			cmd.Y = (short)GameEngine.Mouse.Position.Y;
+			return new[]{ cmd };
 		}
 
 

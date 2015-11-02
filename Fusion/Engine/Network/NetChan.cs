@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -38,6 +39,8 @@ namespace Fusion.Engine.Network {
 
 		readonly Socket Socket;
 
+		readonly string Name;
+
 		object lockObject = new object();
 
 		/// <summary>
@@ -58,6 +61,7 @@ namespace Fusion.Engine.Network {
 		/// <param name="name">NetChan name</param>
 		public NetChan ( GameEngine engine, Socket socket, string name )
 		{
+			Name		=	name;
 			GameEngine	=	engine;
 			Socket		=	socket;
 			QPort		=	(ushort)(socket.LocalEndPoint as IPEndPoint).Port;
@@ -79,6 +83,15 @@ namespace Fusion.Engine.Network {
 
 
 
+		void ShowPacket ( string action, int dataSize )
+		{
+			if (GameEngine.Network.Config.ShowPackets) {
+				Log.Message("  {0} {1} [{2,5}]", Name, action, dataSize );
+			}
+		}
+
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -88,8 +101,12 @@ namespace Fusion.Engine.Network {
 		public void OutOfBand ( IPEndPoint remoteEP, NetCommand cmd, byte[] data )
 		{		
 			lock (lockObject) {
-				var header = new NetChanHeader( QPort, cmd );
-				Socket.SendTo( header.MakeDatagram(data), remoteEP );
+				var header		=	new NetChanHeader( QPort, cmd );
+				var datagram	=	header.MakeDatagram(data);
+
+				Socket.SendTo( datagram, remoteEP );
+
+				ShowPacket("send", datagram.Length );
 			}
 		}
 
@@ -119,12 +136,41 @@ namespace Fusion.Engine.Network {
 
 
 
+		uint sequenceCounter = 0;
+		uint receivedSequence = 0;
+
+
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="data"></param>
-		public void Transmit ( IPEndPoint to, byte[] data, bool reliable )
+		public void Transmit ( IPEndPoint remoteEP, NetCommand cmd, byte[] data )
 		{
+			lock (lockObject) {
+
+				var header		=	new NetChanHeader( QPort, cmd, sequenceCounter++, 0, false );
+				var datagram	=	header.MakeDatagram( data );
+
+				Socket.SendTo( datagram, remoteEP );
+
+				ShowPacket("send", datagram.Length );
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="data"></param>
+		public void Transmit ( IPEndPoint remoteEP, NetCommand cmd, Stream stream )
+		{
+			var count	=	(int)stream.Length;
+			var data	=	new byte[ count ];
+			stream.Position = 0;
+			stream.Read( data, 0, count );
+
+			Transmit( remoteEP, cmd,  data );
 		}
 
 
@@ -148,8 +194,14 @@ namespace Fusion.Engine.Network {
 
 				EndPoint	remoteEP = new IPEndPoint( IPAddress.Any, 0 );
 
+				if (Socket.Available<=0) {
+					return false;
+				}
+
 				try {
 					int size = Socket.ReceiveFrom( buffer, ref remoteEP );
+
+					ShowPacket("recv", size); 
 
 					//	simulate packet loss :
 					if (rand.NextFloat(0,1) < GameEngine.Network.Config.SimulatePacketsLoss) {
@@ -175,6 +227,17 @@ namespace Fusion.Engine.Network {
 					//
 					//	non reliable message
 					//
+					if (receivedSequence>=header.Sequence) {	
+						message = null;
+						return true;
+					}
+					if (header.Sequence - receivedSequence > 1) {
+						Log.Warning("Lost packet: {0} - {1}", receivedSequence, header.Sequence );
+					}
+					receivedSequence = header.Sequence;
+
+					message	=	new NetMessage( header, (IPEndPoint)remoteEP, buffer, size );
+					return true;
 
 					//
 					//	reliable message
@@ -229,27 +292,6 @@ namespace Fusion.Engine.Network {
 			}
 
 			return null;
-		}
-
-
-		/// <summary>
-		/// 
-		/// raise exception, if discovery in progress.
-		/// </summary>
-		/// <param name="timeoutMSec"></param>
-		public void RequestDiscovery ( int timeoutMSec )
-		{
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		public string DiscoveryResponce ()
-		{
-			throw new NotImplementedException();
 		}
 	}
 }

@@ -61,7 +61,7 @@ namespace TestGame2 {
 		/// Starts server with given map/level.
 		/// </summary>
 		/// <param name="map"></param>
-		public override void Start ( string map )
+		public override void LoadLevel ( string map )
 		{
 			var rand = new Random();
 
@@ -78,7 +78,7 @@ namespace TestGame2 {
 		/// <summary>
 		/// Kills server
 		/// </summary>
-		public override void Kill ()
+		public override void UnloadLevel ()
 		{
 			var rand = new Random();
 
@@ -100,7 +100,7 @@ namespace TestGame2 {
 		/// <param name="gameTime"></param>
 		public override void Update ( GameTime gameTime )
 		{
-			//Thread.Sleep(333);
+			Thread.Sleep(20);
 			//Log.Message("SV: [{0}]", gameTime.ElapsedSec );
 		}
 
@@ -109,7 +109,7 @@ namespace TestGame2 {
 		/// </summary>
 		/// <param name="clientId"></param>
 		/// <returns></returns>
-		public override byte[] GetSnapshot ( int clientId = -1 )
+		public override byte[] GetSnapshot ()
 		{
 			return Encoding.ASCII.GetBytes("[SNAPSHOT]");
 		}
@@ -119,8 +119,11 @@ namespace TestGame2 {
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="clientId"></param>
-		public override void FeedCommand ( UserCmd[] commands, int clientId )
+		public override void FeedCommand ( UserCmd[] commands, string clientIP )
 		{
+			foreach ( var cmd in commands ) {
+				Log.Message("  -- {0} {1} --", cmd.X, cmd.Y );
+			}
 		}
 
 
@@ -136,12 +139,12 @@ namespace TestGame2 {
 
 		public override void ClientConnected ( string clientIP, string userInfo )
 		{
-			Log.Message("CONNECTED: {0} - {1}", clientIP, userInfo );
+			NotifyClients("CONNECTED: {0} - {1}", clientIP, userInfo);
 		}
 
-		public override void ClientDisconnected ( string clientIP )
+		public override void ClientDisconnected ( string clientIP, string userInfo )
 		{
-			Log.Message("DISCONNECTED: {0}", clientIP );
+			NotifyClients("DISCONNECTED: {0} - {1}", clientIP, userInfo );
 		}
 	}
 }

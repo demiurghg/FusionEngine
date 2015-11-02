@@ -7,6 +7,7 @@ using System.Threading;
 using Fusion.Engine.Network;
 using System.Net;
 using Fusion.Core.Shell;
+using System.IO;
 
 
 namespace Fusion.Engine.Common {
@@ -88,7 +89,23 @@ namespace Fusion.Engine.Common {
 			/// <param name="gameTime"></param>
 			public override void Update ( GameTime gameTime )
 			{
-				//	do nothing
+				var cmds	=	client.GetCommands();
+
+				using ( var stream = new MemoryStream() ) {
+					using ( var writer = new BinaryWriter(stream) ) {
+						writer.Write( cmds.Length );
+
+						foreach ( var cmd in cmds ) {
+							cmd.Write( writer );
+						}
+
+						//writer.Flush();
+
+						netChan.Transmit( client.serverEP, NetCommand.UserCommand, stream );
+					}
+				}
+
+				//netChan.Transmit( client.serverEP, NetCommand.UserCommand, cmds );
 			}
 		}
 	}
