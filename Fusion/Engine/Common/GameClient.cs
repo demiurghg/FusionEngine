@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Threading;
 using Fusion.Engine.Network;
+using System.IO;
 
 
 namespace Fusion.Engine.Common {
@@ -37,25 +38,17 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Runs one step of client-side simulation and render world state.
 		/// </summary>
-		/// <param name="gameTime"></param>
-		public abstract void Update ( GameTime gameTime );
+		/// <param name="gameTime">Game time.</param>
+		/// <param name="commandStream">Stream to write user's command. 
+		/// Should not exceed 1024 bytes. Good size for user commands is about 8-12 bytes.</param>
+		public abstract void Update ( GameTime gameTime, Stream commandStream );
 
 		/// <summary>
 		/// Feed server snapshot to client.
 		/// Called when fresh snapshot arrived.
 		/// </summary>
-		/// <param name="snapshot"></param>
-		public abstract void FeedSnapshot ( byte[] snapshot );
-
-		/// <summary>
-		/// Gets command from client.
-		/// Returns null if no command is available.
-		/// Called on each frame. 
-		/// This method should not send command twice, 
-		/// i.e. after call command must be purged.
-		/// </summary>
-		/// <returns></returns>
-		public abstract UserCmd[] GetCommands ();
+		/// <param name="snapshotStream">Snapshot data stream.</param>
+		public abstract void FeedSnapshot ( Stream snapshotStream );
 
 		/// <summary>
 		/// Gets user information.

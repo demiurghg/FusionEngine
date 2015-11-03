@@ -7,6 +7,7 @@ using Fusion.Engine.Common;
 using Fusion;
 using System.ComponentModel;
 using System.Threading;
+using System.IO;
 
 namespace TestGame2 {
 	class CustomGameServer : Fusion.Engine.Common.GameServer {
@@ -98,20 +99,13 @@ namespace TestGame2 {
 		/// Runs one step of server-side world simulation.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public override void Update ( GameTime gameTime )
+		public override void Update ( GameTime gameTime, Stream outputSnapshotStream )
 		{
 			Thread.Sleep(20);
-			//Log.Message("SV: [{0}]", gameTime.ElapsedSec );
-		}
 
-		/// <summary>
-		/// Gets world snapshot for particular client.
-		/// </summary>
-		/// <param name="clientId"></param>
-		/// <returns></returns>
-		public override byte[] GetSnapshot ()
-		{
-			return Encoding.ASCII.GetBytes("[SNAPSHOT]");
+			using (var writer = new BinaryWriter(outputSnapshotStream)) {
+				writer.Write(string.Format("SV: [{0}]", gameTime.ElapsedSec ));
+			}
 		}
 
 		/// <summary>
@@ -119,11 +113,11 @@ namespace TestGame2 {
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="clientId"></param>
-		public override void FeedCommand ( UserCmd[] commands, string clientIP )
+		public override void FeedCommand ( string clientIP, Stream inputCommandStream )
 		{
-			foreach ( var cmd in commands ) {
+			/*foreach ( var cmd in commands ) {
 				Log.Message("  -- {0} {1} --", cmd.X, cmd.Y );
-			}
+			} */
 		}
 
 

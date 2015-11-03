@@ -10,7 +10,7 @@ using System.IO;
 
 namespace Fusion.Engine.Network {
 
-	public class NetMessage {
+	public class NetIMessage {
 
 		/// <summary>
 		/// NetChan header.
@@ -19,7 +19,7 @@ namespace Fusion.Engine.Network {
 
 
 		/// <summary>
-		/// Sender.
+		/// Sender's end point.
 		/// </summary>
 		public IPEndPoint SenderEP { get; private set; }
 
@@ -60,6 +60,7 @@ namespace Fusion.Engine.Network {
 		}
 		
 
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -67,33 +68,21 @@ namespace Fusion.Engine.Network {
 		/// <param name="reliable"></param>
 		/// <param name="sequenceNumber"></param>
 		/// <param name="data"></param>
-		internal NetMessage ( NetChanHeader header, IPEndPoint sender, byte[] recievedData, int receivedSize )
+		internal NetIMessage ( IPEndPoint sender, byte[] recievedData, int receivedSize )
 		{		
-			Header		=	header;
-			SenderEP	=	sender;
-
 			int	length	=	receivedSize - NetChanHeader.SizeInBytes;
 
-			Data		=	new byte[length];
+			SenderEP	=	sender;
+			Header		=	new NetChanHeader();
+			Data		=	new byte[ length ];
 
+			using ( var stream = new MemoryStream(recievedData) ) {
+				using ( var reader = new BinaryReader(stream) ) {
+					Header.Read( reader );
+				}
+			}
 			Buffer.BlockCopy( recievedData, NetChanHeader.SizeInBytes, Data, 0, length );
 		}	   
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		internal void Print ()
-		{
-			Log.Message("Datagram:");
-			Log.Message("  sequence    = {0}", Header.Sequence		);
-			Log.Message("  ack         = {0}", Header.AckSequence	);
-			Log.Message("  frag        = {0}", Header.Fragment		);
-			Log.Message("  frag count  = {0}", Header.FragmentCount	);
-			Log.Message("  out-of-band = {0}", Header.IsOutOfBand	);
-			Log.Message("  command     = {0}", Header.Command		);
-			Log.Message("  length      = {0}", Data.Length );
-		}
 
 
 		

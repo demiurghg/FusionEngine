@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Threading;
 using Fusion.Core.Shell;
+using System.IO;
 
 namespace Fusion.Engine.Common {
 
 	public abstract partial class GameServer : GameModule {
+
+		public const int SnapshotSize	=	1024 * 128;
 
 		/// <summary>
 		/// 
@@ -36,21 +39,14 @@ namespace Fusion.Engine.Common {
 		/// Runs one step of server-side world simulation.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public abstract void Update ( GameTime gameTime );
+		public abstract void Update ( GameTime gameTime, Stream outputSnapshotStream );
 
 		/// <summary>
-		/// Gets world snapshot for particular client.
+		/// Feed server with commands from particular client.
 		/// </summary>
-		/// <param name="clientId"></param>
-		/// <returns></returns>
-		public abstract byte[] GetSnapshot ();
-
-		/// <summary>
-		/// Feed client commands from particular client.
-		/// </summary>
-		/// <param name="command"></param>
-		/// <param name="clientId"></param>
-		public abstract void FeedCommand ( UserCmd[] commands, string id );
+		/// <param name="id">Client's ID</param>
+		/// <param name="command">Client's user command stream</param>
+		public abstract void FeedCommand ( string id, Stream inputCommandStream );
 
 		/// <summary>
 		/// Gets server information that required for client to load the game.

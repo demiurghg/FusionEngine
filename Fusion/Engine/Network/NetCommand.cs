@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace Fusion.Engine.Network {
 	public enum NetCommand : uint {
+
+		/// <summary>
+		/// No command, just empty packet.
+		/// </summary>
+		None,
 		
 		/// <summary>
 		/// Client sends this command 
@@ -57,6 +62,10 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		UserCommand,
 
+		/// <summary>
+		/// Snapshot
+		/// </summary>
+		Snapshot,
 
 		SystemNotification,
 		ChallengeRequest,

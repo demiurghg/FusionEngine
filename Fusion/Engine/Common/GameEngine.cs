@@ -560,7 +560,15 @@ namespace Fusion.Engine.Common {
 
 		internal void StartServer ( string map )
 		{
-			GameServer.StartInternal( map, null );
+			var postCmd = string.Format("connect 127.0.0.1 {0}", Network.Config.Port );
+
+			//	Disconnect!
+
+			if (GameClient!=null) {
+				GameServer.StartInternal( map, postCmd );
+			} else {
+				GameServer.StartInternal( map, null );
+			}
 		}
 
 
@@ -574,12 +582,14 @@ namespace Fusion.Engine.Common {
 		internal void Connect ( string host, int port )
 		{
 			GameClient.ConnectInternal(host, port);
+			//	Kill server!
 		}
 
 
 		internal void Disconnect ()
 		{
 			GameClient.DisconnectInternal();
+			//	Kill server!
 		}
 	}
 }

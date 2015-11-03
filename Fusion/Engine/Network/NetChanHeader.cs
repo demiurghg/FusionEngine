@@ -6,52 +6,46 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.IO;
 
 
 namespace Fusion.Engine.Network {
 
-	[StructLayout(LayoutKind.Explicit, Size=16)]
-	public struct NetChanHeader {
+	public class NetChanHeader {
 
-		public static readonly int SizeInBytes	=	Marshal.SizeOf(typeof(NetChanHeader));
-		public const uint ReliabilityBit		=	0x80000000;
-		public const uint OutOfBand				=	0xFFFFFFFF;
+		public const int SizeInBytes		=	16;
+		public const uint ReliabilityBit	=	0x80000000;
+		public const uint OutOfBand			=	0xFFFFFFFF;
 
 		/// <summary>
 		/// Reliability bit and Sequence number.
 		/// 0xFFFFFFFF means out of band message.
 		/// </summary>
-		[FieldOffset(0)]
 		public uint	Sequence;
 
 		/// <summary>
 		/// Acknoledgement sequence.
 		/// </summary>
-		[FieldOffset(4)]
 		public uint	AckSequence;
 
 		/// <summary>
 		/// Network protocol command.
 		/// </summary>
-		[FieldOffset(8)]
 		public NetCommand	Command;
 
 		/// <summary>
 		/// QPort
 		/// </summary>
-		[FieldOffset(12)]
 		public ushort QPort;
 
 		/// <summary>
 		/// Fragment number
 		/// </summary>
-		[FieldOffset(14)]
 		public byte Fragment;
 
 		/// <summary>
 		/// Fragment count
 		/// </summary>
-		[FieldOffset(15)]
 		public byte FragmentCount;
 
 
@@ -62,6 +56,22 @@ namespace Fusion.Engine.Network {
 			get {
 				return (Sequence == OutOfBand);
 			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="receivedDat"></param>
+		public NetChanHeader ()
+		{
+			Sequence		=	0;
+			AckSequence		=	0;
+			QPort			=	0;
+			Fragment		=	0;
+			FragmentCount	=	0;
+			Command			=	NetCommand.None;
 		}
 
 
@@ -101,6 +111,31 @@ namespace Fusion.Engine.Network {
 
 
 
+
+		public void Write ( BinaryWriter writer )
+		{
+			writer.Write( Sequence		);
+			writer.Write( AckSequence	);
+			writer.Write( (uint)Command	);
+			writer.Write( QPort			);
+			writer.Write( Fragment		);
+			writer.Write( FragmentCount	);
+		}
+
+
+
+		public void Read ( BinaryReader reader )
+		{
+			Sequence		=	reader.ReadUInt32();
+			AckSequence		=	reader.ReadUInt32();
+			Command			=	(NetCommand)reader.ReadUInt32();
+			QPort			=	reader.ReadUInt16();
+			Fragment		=	reader.ReadByte();
+			FragmentCount	=	reader.ReadByte();
+		}
+
+
+		/*
 		/// <summary>
 		/// Writes header to byte array.
 		/// </summary>
@@ -171,6 +206,6 @@ namespace Fusion.Engine.Network {
 			Marshal.FreeHGlobal(intPtr);
 
 			return header;
-		}
+		}	  */
 	}
 }

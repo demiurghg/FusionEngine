@@ -63,7 +63,7 @@ namespace Fusion.Engine.Common {
 		/// <param name="gameTime"></param>
 		internal void UpdateInternal ( GameTime gameTime )
 		{
-			NetMessage msg;
+			NetIMessage msg;
 
 			while ( netChan!=null && netChan.Dispatch(out msg) ) {
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Fusion.Engine.Common;
+using System.IO;
 
 namespace TestGame2 {
 	class CustomGameClient : Fusion.Engine.Common.GameClient {
@@ -47,7 +48,7 @@ namespace TestGame2 {
 		/// Runs one step of client-side simulation and render world state.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public override void Update ( GameTime gameTime )
+		public override void Update ( GameTime gameTime, Stream commandStream )
 		{
 			
 		}
@@ -58,28 +59,10 @@ namespace TestGame2 {
 		/// Called when fresh snapshot arrived.
 		/// </summary>
 		/// <param name="snapshot"></param>
-		public override void FeedSnapshot ( byte[] snapshot ) 
+		public override void FeedSnapshot ( Stream inputSnapshotStream ) 
 		{
 		}
 
-
-		int sequenceCounter	=	0;
-
-		/// <summary>
-		/// Gets command from client.
-		/// Returns null if no command is available.
-		/// Called on each frame. 
-		/// This method should not send command twice, 
-		/// i.e. after call command must be purged.
-		/// </summary>
-		/// <returns></returns>
-		public override UserCmd[] GetCommands ()
-		{
-			var cmd = new UserCmd( sequenceCounter++, (int)0x0CFFAACC );
-			cmd.X = (short)GameEngine.Mouse.Position.X;
-			cmd.Y = (short)GameEngine.Mouse.Position.Y;
-			return new[]{ cmd };
-		}
 
 
 		/// <summary>

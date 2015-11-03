@@ -57,6 +57,7 @@ namespace Fusion.Engine.Common {
 			{
 				if (attemptCount>=maxAttempts) {
 					client.SetState( new STStandBy(client) );
+					Log.Message("Server does not respond.");
 					client.GameEngine.GameInterface.ShowError( "Server does not respond." );
 				}
 
@@ -83,7 +84,7 @@ namespace Fusion.Engine.Common {
 			/// </summary>
 			public override void Disconnect ()
 			{
-				Log.Warning("Connection interrupted by user.");
+				Log.Message("Connection interrupted by user.");
 				client.SetState( new STStandBy(client) );
 			}
 
@@ -92,7 +93,7 @@ namespace Fusion.Engine.Common {
 			/// 
 			/// </summary>
 			/// <param name="msg"></param>
-			public override void DispatchIM ( NetMessage msg )
+			public override void DispatchIM ( NetIMessage msg )
 			{
 				if (msg.Command==NetCommand.Accepted) {
 					Log.Message("Connection established.");

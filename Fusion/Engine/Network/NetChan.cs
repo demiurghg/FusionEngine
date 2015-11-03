@@ -24,16 +24,10 @@ namespace Fusion.Engine.Network {
 	///		2. Fragmentation
 	///		3. Encryption
 	///		
-	/// 
-	/// Net Channel header structure :
-	/// 
-	///		[RELIABLE (1)] [SEQUENCE NUMBER (31)          ]	- 0xFFFFFFFF means out of band message
-	///		[ACKNOLEDGMENT                                ]
-	///		[QPORT (16)  ] [FRAGMENT COUNT|TOTAL FRAGMENTS]	- QPort is Quake legacy. Fragment ID???
-	///		[PAYLOAD......................................]
-	///		
 	/// </summary>
 	public class NetChan : DisposableBase {
+
+		Random rand = new Random();
 
 		readonly GameEngine GameEngine;
 
@@ -83,10 +77,16 @@ namespace Fusion.Engine.Network {
 
 
 
-		void ShowPacket ( string action, int dataSize )
+		/// <summary>
+		/// Prints packet info.
+		/// </summary>
+		/// <param name="action"></param>
+		/// <param name="dataSize"></param>
+		void ShowPacket ( string action, int dataSize, byte[] data )
 		{
 			if (GameEngine.Network.Config.ShowPackets) {
-				Log.Message("  {0} {1} [{2,5}]", Name, action, dataSize );
+				var dataStr = string.Join( " ", data.Skip(16).Take(16).Select( b=> b.ToString("X2") ) );
+				Log.Message("  {0} {1} [{2,5}] {3}", Name, action, dataSize, dataStr );
 			}
 		}
 
@@ -101,12 +101,16 @@ namespace Fusion.Engine.Network {
 		public void OutOfBand ( IPEndPoint remoteEP, NetCommand cmd, byte[] data )
 		{		
 			lock (lockObject) {
-				var header		=	new NetChanHeader( QPort, cmd );
-				var datagram	=	header.MakeDatagram(data);
 
-				Socket.SendTo( datagram, remoteEP );
+				var message	=	new NetOMessage( data.Length );
+				var header	=	new NetChanHeader( QPort, cmd );
 
-				ShowPacket("send", datagram.Length );
+				message.WriteHeader( header );
+				message.SetData( data, 0, data.Length );
+
+				Socket.SendTo( message.Bytes, remoteEP );
+
+				ShowPacket("send", message.Bytes.Length, message.Bytes );
 			}
 		}
 
@@ -149,33 +153,18 @@ namespace Fusion.Engine.Network {
 			lock (lockObject) {
 
 				var header		=	new NetChanHeader( QPort, cmd, sequenceCounter++, 0, false );
-				var datagram	=	header.MakeDatagram( data );
+				var message		=	new NetOMessage( data.Length );
 
-				Socket.SendTo( datagram, remoteEP );
+				message.WriteHeader( header );
 
-				ShowPacket("send", datagram.Length );
+				Socket.SendTo( message.Bytes, remoteEP );
+
+				ShowPacket("send", message.Bytes.Length, message.Bytes );
 			}
 		}
 
 
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="data"></param>
-		public void Transmit ( IPEndPoint remoteEP, NetCommand cmd, Stream stream )
-		{
-			var count	=	(int)stream.Length;
-			var data	=	new byte[ count ];
-			stream.Position = 0;
-			stream.Read( data, 0, count );
-
-			Transmit( remoteEP, cmd,  data );
-		}
-
-
-
-		Random rand = new Random();
 
 
 		/// <summary>
@@ -184,7 +173,7 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		/// <param name="message">Return null if bad packet was received.</param>
 		/// <returns>True if packet (even bad one) received. Otherwice returns False.</returns>
-		public bool Dispatch ( out NetMessage message )
+		public bool Dispatch ( out NetIMessage message )
 		{
 			lock (lockObject) {
 
@@ -201,25 +190,20 @@ namespace Fusion.Engine.Network {
 				try {
 					int size = Socket.ReceiveFrom( buffer, ref remoteEP );
 
-					ShowPacket("recv", size); 
+					ShowPacket("recv", size, buffer); 
 
-					//	simulate packet loss :
-					if (rand.NextFloat(0,1) < GameEngine.Network.Config.SimulatePacketsLoss) {
-						message = null;
+					if (size<NetChanHeader.SizeInBytes) {
+						Log.Warning("Bad packet from {0}: size < NetChan header size", remoteEP);
 						return true;
 					}
 
-					if (size<NetChanHeader.SizeInBytes) {
-						throw new NetChanException("Bad packet: size < NetChan header size");
-					}
 
-					var header = NetChanHeader.ReadFrom( buffer );
+					message	=	new NetIMessage( (IPEndPoint)remoteEP, buffer, size );
 
 					//
 					//	out of band - do nothing:
 					//
-					if (header.IsOutOfBand) {
-						message = new NetMessage( header, (IPEndPoint)remoteEP, buffer, size );
+					if (message.Header.IsOutOfBand) {
 						return true;
 					}
 
@@ -227,16 +211,16 @@ namespace Fusion.Engine.Network {
 					//
 					//	non reliable message
 					//
-					if (receivedSequence>=header.Sequence) {	
+					if (receivedSequence>=message.Header.Sequence) {	
 						message = null;
 						return true;
 					}
-					if (header.Sequence - receivedSequence > 1) {
-						Log.Warning("Lost packet: {0} - {1}", receivedSequence, header.Sequence );
-					}
-					receivedSequence = header.Sequence;
 
-					message	=	new NetMessage( header, (IPEndPoint)remoteEP, buffer, size );
+					if (message.Header.Sequence - receivedSequence > 1) {
+						Log.Warning("Lost packet: {0} - {1}", receivedSequence, message.Header.Sequence );
+					}
+					receivedSequence = message.Header.Sequence;
+
 					return true;
 
 					//
@@ -259,8 +243,8 @@ namespace Fusion.Engine.Network {
 				}
 
 
-				Log.Warning("NetChan.Dispatch() : Something is wrong. This code should not be reached.");
-				return false;
+				/*Log.Warning("NetChan.Dispatch() : Something is wrong. This code should not be reached.");
+				return false;*/
 			}
 		}
 
@@ -275,9 +259,9 @@ namespace Fusion.Engine.Network {
 		/// <param name="sleepTime">Sleep time between attemptrs (10 msec, is ok)</param>
 		/// <param name="attemptCount">Attempts count</param>
 		/// <returns></returns>
-		public NetMessage Wait ( Func<NetMessage,bool> criteria, int sleepTime = 10, int attemptCount = 100 )
+		public NetIMessage Wait ( Func<NetIMessage,bool> criteria, int sleepTime = 10, int attemptCount = 100 )
 		{
-			NetMessage message;
+			NetIMessage message;
 
 			for (int i=0; i<attemptCount; i++) {
 

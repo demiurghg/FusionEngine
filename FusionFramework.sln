@@ -28,6 +28,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusion.Build", "Fusion.Build\Fusion.Build.csproj", "{EBDD2FD0-EC00-45D9-B38B-C7E674016FAB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGame2", "Samples\TestGame2\TestGame2.csproj", "{D96959A0-C84A-4843-94CD-07371ACB752A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{085C9E62-CDDF-4B95-994D-085C74FA90FC} = {085C9E62-CDDF-4B95-994D-085C74FA90FC}
+		{EBDD2FD0-EC00-45D9-B38B-C7E674016FAB} = {EBDD2FD0-EC00-45D9-B38B-C7E674016FAB}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

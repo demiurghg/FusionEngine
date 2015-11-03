@@ -8,6 +8,7 @@ using System.Threading;
 using System.Net;
 using Fusion.Engine.Network;
 using Fusion.Core.Shell;
+using System.IO;
 
 namespace Fusion.Engine.Common {
 
@@ -15,7 +16,7 @@ namespace Fusion.Engine.Common {
 
 		NetChan netChan;
 
-		List<ClientState>	clients;
+		List<SVClientState>	clients;
 
 
 
@@ -24,7 +25,7 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		void NetStart ()
 		{
-			clients	=	new List<ClientState>();
+			clients	=	new List<SVClientState>();
 			netChan =	new NetChan(GameEngine, GameEngine.Network.ServerSocket, "SV");
 		}
 
@@ -47,17 +48,32 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Dispatches incoming messages.
 		/// </summary>
-		void NetDispatchIM ( GameTime gameTime )
+		void NetUpdate ( GameTime gameTime )
 		{
-			NetMessage message = null;
-
+			NetIMessage message = null;
+			
+			//
+			//	get clients' packets :
+			//
 			while ( netChan.Dispatch( out message ) ) {
-
 				if (message==null) continue;
-
 				NetDispatchIM(message);
-				
 			} 
+
+
+			//
+			//	update and feed clients back :
+			//	
+			var buffer = new byte[1024];
+
+			using ( var stream = new MemoryStream( buffer ) ) {
+				
+				Update( gameTime, stream );
+			
+				foreach ( var cl in clients ) {
+					cl.SendSnapshot( stream );
+				}
+			}
 		}
 
 
@@ -66,12 +82,19 @@ namespace Fusion.Engine.Common {
 		/// Dispatches message.
 		/// </summary>
 		/// <param name="message"></param>
-		void NetDispatchIM ( NetMessage message )
+		void NetDispatchIM ( NetIMessage message )
 		{
-			switch ( message.Header.Command ) {
-				case NetCommand.Connect		: NetRegisterClient( message );		break;
-				case NetCommand.Disconnect	: NetUnregisterClient( message );	break;
-				case NetCommand.UserCommand	: FeedCommand( message );			break;
+			if (message.Header.IsOutOfBand) {
+
+				switch ( message.Header.Command ) {
+					case NetCommand.Connect		: NetRegisterClient( message );		break;
+					case NetCommand.Disconnect	: NetUnregisterClient( message );	break;
+				}
+
+			} else {
+				switch ( message.Header.Command ) {
+					case NetCommand.UserCommand	: DispatchUserCmd( message );		break;
+				}				
 			}
 		}
 
@@ -95,7 +118,7 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		/// <param name="ep"></param>
 		/// <returns></returns>
-		ClientState GetClient( IPEndPoint ep )
+		SVClientState GetClient( IPEndPoint ep )
 		{
 			return clients.FirstOrDefault( cl => cl.EndPoint.Equals( ep ) );
 		}
@@ -106,16 +129,18 @@ namespace Fusion.Engine.Common {
 		/// 
 		/// </summary>
 		/// <param name="msg"></param>
-		void FeedCommand ( NetMessage msg )
+		void DispatchUserCmd ( NetIMessage msg )
 		{
 			var cl = GetClient(msg.SenderEP);
 			
 			if (cl==null) {
-				//	ignore
+				Log.Warning("Command from unregistered client: {0}", msg.SenderEP);
 				return;
 			}	
 
-			using ( var reader = msg.OpenReader() ) {
+			cl.NeedSnapshot = true;
+
+			/*using ( var reader = msg.OpenReader() ) {
 
 				int count = reader.ReadInt32();
 
@@ -126,7 +151,7 @@ namespace Fusion.Engine.Common {
 				}
 
 				FeedCommand( cmds, cl.ID );
-			}
+			} */
 		}
 
 
@@ -137,7 +162,7 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		/// <param name="msg"></param>
 		/// <param name="userInfo"></param>
-		void NetRegisterClient ( NetMessage msg )
+		void NetRegisterClient ( NetIMessage msg )
 		{
 			var cl = GetClient( msg.SenderEP );
 
@@ -148,7 +173,7 @@ namespace Fusion.Engine.Common {
 			} else {
 				
 				// add client :
-				var client = new ClientState( msg.SenderEP, msg.Text );
+				var client = new SVClientState( this, msg.SenderEP, msg.Text );
 
 				clients.Add( client );
 
@@ -167,7 +192,7 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		/// <param name="msg"></param>
 		/// <param name="userInfo"></param>
-		void NetUnregisterClient ( NetMessage msg )
+		void NetUnregisterClient ( NetIMessage msg )
 		{
 			var client = clients.FirstOrDefault( cl => cl.EndPoint.Equals( msg.SenderEP ) );
 
@@ -213,7 +238,7 @@ namespace Fusion.Engine.Common {
 		internal void Drop ( string clientName, string reason )
 		{
 			IPAddress ip;
-			ClientState client = null;
+			SVClientState client = null;
 
 			if ( IPAddress.TryParse( clientName, out ip ) ) {
 				client	=	clients.FirstOrDefault( cl => cl.EndPoint.Address.Equals( ip ) );

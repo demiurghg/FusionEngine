@@ -51,7 +51,7 @@ namespace Fusion.Engine.Common {
 			/// 
 			/// </summary>
 			/// <param name="msg"></param>
-			public override void DispatchIM ( NetMessage msg )
+			public override void DispatchIM ( NetIMessage msg )
 			{
 				//	do nothing.
 			}

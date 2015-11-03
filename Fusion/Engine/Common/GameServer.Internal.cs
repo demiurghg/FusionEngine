@@ -125,9 +125,7 @@ namespace Fusion.Engine.Common {
 
 					svTime.Update();
 
-					NetDispatchIM(svTime);
-
-					Update( svTime );
+					NetUpdate(svTime);
 
 					GameEngine.Invoker.ExecuteQueue( svTime, CommandAffinity.Server );
 

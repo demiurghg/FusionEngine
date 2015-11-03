@@ -22,7 +22,7 @@ namespace Fusion.Engine.Common {
 			/// 
 			/// </summary>
 			/// <param name="client"></param>
-			public STActive ( GameClient	client ) : base(client)
+			public STActive ( GameClient client ) : base(client)
 			{
 			}
 
@@ -57,7 +57,7 @@ namespace Fusion.Engine.Common {
 			/// 
 			/// </summary>
 			/// <param name="msg"></param>
-			public override void DispatchIM ( NetMessage msg )
+			public override void DispatchIM ( NetIMessage msg )
 			{
 				if ( msg.Command==NetCommand.Dropped ) {
 					Log.Message("Dropped: {0}", msg.Text);
@@ -80,6 +80,12 @@ namespace Fusion.Engine.Common {
 					Log.Message( "Chat: " + msg.Text );
 					client.GameEngine.GameInterface.ShowMessage( msg.Text );
 				}
+
+				if ( msg.Command==NetCommand.Snapshot ) {
+					//	assemble snapshot 
+					//	and feed it to game when ready
+					AssembleSnapshot( msg );
+				}
 			}
 
 
@@ -89,23 +95,48 @@ namespace Fusion.Engine.Common {
 			/// <param name="gameTime"></param>
 			public override void Update ( GameTime gameTime )
 			{
-				var cmds	=	client.GetCommands();
+				NetOMessage message = new NetOMessage(1024 + 16);
 
-				using ( var stream = new MemoryStream() ) {
+				using ( var stream = message.OpenWrite() ) {
 					using ( var writer = new BinaryWriter(stream) ) {
-						writer.Write( cmds.Length );
 
-						foreach ( var cmd in cmds ) {
-							cmd.Write( writer );
-						}
+						writer.Write( commandCounter );
 
-						//writer.Flush();
-
-						netChan.Transmit( client.serverEP, NetCommand.UserCommand, stream );
+						client.Update( gameTime, stream );
 					}
 				}
+			}
 
-				//netChan.Transmit( client.serverEP, NetCommand.UserCommand, cmds );
+
+
+			/*-------------------------------------------------------------------------------------
+			 * 
+			 *	Snapshot stuff
+			 * 
+			-------------------------------------------------------------------------------------*/
+
+			int commandCounter	=	0;
+			int lastSnapshotId	=	0;
+
+
+			/// <summary>
+			/// Snapshot which is ready to feed client-side game.
+			/// </summary>
+			byte[] builtSnapshot	=	new byte[ GameServer.SnapshotSize ];
+
+			/// <summary>
+			/// Currently assembling snapshot
+			/// </summary>
+			byte[] recvingSnapshot	=	new byte[ GameServer.SnapshotSize ];
+
+
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="message"></param>
+			void AssembleSnapshot ( NetIMessage message )
+			{	
+				
 			}
 		}
 	}
