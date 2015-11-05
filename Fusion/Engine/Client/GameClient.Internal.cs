@@ -64,18 +64,27 @@ namespace Fusion.Engine.Client {
 		/// <param name="gameTime"></param>
 		internal void UpdateInternal ( GameTime gameTime )
 		{
-			NetIMessage msg;
+			NetMessage msg;
 
-			while ( netChan!=null && netChan.Dispatch(out msg) ) {
+			try {
+				
+				while ( netChan!=null && netChan.Dispatch(out msg) ) {
 
-				if (msg==null) continue;
+					if (msg==null) continue;
 
-				//	dispatch messages only from server :
-				if (NetUtils.IsIPsEqual( msg.SenderEP, serverEP ) ) {
-					state.DispatchIM( msg );
-				} else {
-					Log.Warning("{0} sends commands. Expected from: {1}", msg.SenderEP, serverEP );
+					//	dispatch messages only from server :
+					if (NetUtils.IsIPsEqual( msg.SenderEP, serverEP ) ) {
+						state.DispatchIM( msg );
+					} else {
+						Log.Warning("{0} sends commands. Expected from: {1}", msg.SenderEP, serverEP );
+					}
 				}
+
+			} catch ( NetChanException ne ) {
+				Log.Error(ne.Message);
+				GameEngine.GameInterface.ShowError(ne.Message);
+				SetState( new STStandBy(this) );
+				return;
 			}
 
 			state.Update( gameTime );

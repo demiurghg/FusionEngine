@@ -24,6 +24,9 @@ namespace Fusion.Engine.Client {
 			/// <param name="client"></param>
 			public STStandBy ( GameClient	client ) : base(client)
 			{
+				if (netChan!=null) {
+					netChan.Clear();
+				}
 			}
 
 
@@ -52,7 +55,7 @@ namespace Fusion.Engine.Client {
 			/// 
 			/// </summary>
 			/// <param name="msg"></param>
-			public override void DispatchIM ( NetIMessage msg )
+			public override void DispatchIM ( NetMessage msg )
 			{
 				//	do nothing.
 			}

@@ -94,19 +94,24 @@ namespace Fusion.Engine.Client {
 			/// 
 			/// </summary>
 			/// <param name="msg"></param>
-			public override void DispatchIM ( NetIMessage msg )
+			public override void DispatchIM ( NetMessage msg )
 			{
 				if (msg.Command==NetCommand.Accepted) {
+
 					Log.Message("Connection established.");
+
+					netChan.Add( msg.SenderEP );
 					client.SetState( new STConnected(client, msg.Text) );
 					return;
 				}
 
 				if (msg.Command==NetCommand.Refused) {
+
 					Log.Message("Connection refused: {0}", msg.Text);
 
 					client.SetState( new STStandBy(client) );
 					client.GameEngine.GameInterface.ShowError( msg.Text );
+					netChan.Clear();
 					return;
 				}
 			}

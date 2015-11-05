@@ -54,18 +54,24 @@ namespace Fusion.Engine.Client {
 			/// 
 			/// </summary>
 			/// <param name="msg"></param>
-			public override void DispatchIM ( NetIMessage msg )
+			public override void DispatchIM ( NetMessage msg )
 			{
 				if ( msg.Command==NetCommand.Dropped ) {
+					
 					Log.Message("Dropped.");
+
 					client.GameEngine.GameInterface.ShowMessage( msg.Text );
 					client.SetState( new STStandBy(client) );
+					netChan.Clear();
 				}
 
 				if ( msg.Command==NetCommand.ServerDisconnected ) {
+					
 					Log.Message("Server disconnected.");
+
 					client.GameEngine.GameInterface.ShowMessage("Server disconnected.");
 					client.SetState( new STStandBy(client) );
+					netChan.Clear();
 				}
 			}
 

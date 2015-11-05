@@ -59,17 +59,23 @@ namespace Fusion.Engine.Client {
 			/// 
 			/// </summary>
 			/// <param name="msg"></param>
-			public override void DispatchIM ( NetIMessage msg )
+			public override void DispatchIM ( NetMessage msg )
 			{
 				if ( msg.Command==NetCommand.Dropped ) {
+					
 					Log.Message("Dropped: {0}", msg.Text);
+					
 					client.GameEngine.GameInterface.ShowMessage( msg.Text );
+					netChan.Clear();
 					client.SetState( new STStandBy(client) );
 				}
 
 				if ( msg.Command==NetCommand.ServerDisconnected ) {
+					
 					Log.Message("Server disconnected.");
+
 					client.GameEngine.GameInterface.ShowMessage("Server disconnected.");
+					netChan.Clear();
 					client.SetState( new STStandBy(client) );
 				}
 
@@ -97,16 +103,22 @@ namespace Fusion.Engine.Client {
 			/// <param name="gameTime"></param>
 			public override void Update ( GameTime gameTime )
 			{
-				NetOMessage message = new NetOMessage(1024 + 16);
+				var buffer = new byte[1024 + 16];
+				int length = 0;
 
-				using ( var stream = message.OpenWrite() ) {
+				using ( var stream = new MemoryStream(buffer) ) {
 					using ( var writer = new BinaryWriter(stream) ) {
 
 						writer.Write( commandCounter );
 
 						client.Update( gameTime, stream );
+
+						length = (int)stream.Position;
 					}
+
 				}
+
+				netChan.Transmit( client.serverEP, NetCommand.UserCommand, buffer, length );
 			}
 
 
@@ -136,9 +148,15 @@ namespace Fusion.Engine.Client {
 			/// 
 			/// </summary>
 			/// <param name="message"></param>
-			void AssembleSnapshot ( NetIMessage message )
+			void AssembleSnapshot ( NetMessage message )
 			{	
-				
+				using ( var stream = new MemoryStream(message.Data) ) {	
+					using ( var reader = new BinaryReader(stream) ) {
+
+						client.FeedSnapshot( stream );
+
+					}
+				}
 			}
 		}
 	}

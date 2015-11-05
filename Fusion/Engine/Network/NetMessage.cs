@@ -10,7 +10,7 @@ using System.IO;
 
 namespace Fusion.Engine.Network {
 
-	public class NetIMessage {
+	public class NetMessage {
 
 		/// <summary>
 		/// NetChan header.
@@ -68,7 +68,7 @@ namespace Fusion.Engine.Network {
 		/// <param name="reliable"></param>
 		/// <param name="sequenceNumber"></param>
 		/// <param name="data"></param>
-		internal NetIMessage ( IPEndPoint sender, byte[] recievedData, int receivedSize )
+		internal NetMessage ( IPEndPoint sender, byte[] recievedData, int receivedSize )
 		{		
 			int	length	=	receivedSize - NetChanHeader.SizeInBytes;
 
@@ -83,27 +83,5 @@ namespace Fusion.Engine.Network {
 			}
 			Buffer.BlockCopy( recievedData, NetChanHeader.SizeInBytes, Data, 0, length );
 		}	   
-
-
-		
-		/// <summary>
-		/// Opens memory stream for reading.
-		/// </summary>
-		/// <returns></returns>
-		internal Stream OpenRead ()
-		{
-			return new MemoryStream( Data, false );
-		}
-
-
-		
-		/// <summary>
-		/// Creates BinaryReader over memory stream.
-		/// </summary>
-		/// <returns></returns>
-		internal BinaryReader OpenReader ()
-		{
-			return new BinaryReader( OpenRead() );
-		}
 	}
 }

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Fusion;
+using Fusion.Core;
 using Fusion.Engine.Common;
 using Fusion.Engine.Client;
 using Fusion.Engine.Server;
@@ -49,11 +51,16 @@ namespace TestGame2 {
 
 		/// <summary>
 		/// Runs one step of client-side simulation and render world state.
+		/// Do not close the stream.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public override void Update ( GameTime gameTime, Stream commandStream )
+		public override void Update ( GameTime gameTime, Stream outputCommand )
 		{
+			var mouse = GameEngine.Mouse;
 			
+			using ( var writer = new BinaryWriter(outputCommand, Encoding.UTF8, true) ) {
+				writer.Write(string.Format("[{0} {1}]", mouse.Position.X, mouse.Position.Y ));
+			}
 		}
 
 
@@ -62,8 +69,12 @@ namespace TestGame2 {
 		/// Called when fresh snapshot arrived.
 		/// </summary>
 		/// <param name="snapshot"></param>
-		public override void FeedSnapshot ( Stream inputSnapshotStream ) 
+		public override void FeedSnapshot ( Stream inputSnapshot ) 
 		{
+			using ( var reader = new BinaryReader(inputSnapshot, Encoding.UTF8, true) ) {
+				string s = reader.ReadString();
+				Log.Message("SNAPSHOT: {0}", s );
+			}
 		}
 
 

@@ -18,7 +18,7 @@ namespace Fusion.Engine.Server {
 
 		NetChan netChan;
 
-		List<SVClientState>	clients;
+		List<GameClientState>	clients;
 
 
 
@@ -27,7 +27,7 @@ namespace Fusion.Engine.Server {
 		/// </summary>
 		void NetStart ()
 		{
-			clients	=	new List<SVClientState>();
+			clients	=	new List<GameClientState>();
 			netChan =	new NetChan(GameEngine, GameEngine.Network.ServerSocket, "SV");
 		}
 
@@ -52,7 +52,7 @@ namespace Fusion.Engine.Server {
 		/// </summary>
 		void NetUpdate ( GameTime gameTime )
 		{
-			NetIMessage message = null;
+			NetMessage message = null;
 			
 			//
 			//	get clients' packets :
@@ -71,9 +71,11 @@ namespace Fusion.Engine.Server {
 			using ( var stream = new MemoryStream( buffer ) ) {
 				
 				Update( gameTime, stream );
+
+				int length = (int)stream.Position;
 			
 				foreach ( var cl in clients ) {
-					cl.SendSnapshot( stream );
+					cl.SendSnapshot( buffer, length );
 				}
 			}
 		}
@@ -84,7 +86,7 @@ namespace Fusion.Engine.Server {
 		/// Dispatches message.
 		/// </summary>
 		/// <param name="message"></param>
-		void NetDispatchIM ( NetIMessage message )
+		void NetDispatchIM ( NetMessage message )
 		{
 			if (message.Header.IsOutOfBand) {
 
@@ -120,7 +122,7 @@ namespace Fusion.Engine.Server {
 		/// </summary>
 		/// <param name="ep"></param>
 		/// <returns></returns>
-		SVClientState GetClient( IPEndPoint ep )
+		GameClientState GetClient( IPEndPoint ep )
 		{
 			return clients.FirstOrDefault( cl => cl.EndPoint.Equals( ep ) );
 		}
@@ -131,7 +133,7 @@ namespace Fusion.Engine.Server {
 		/// 
 		/// </summary>
 		/// <param name="msg"></param>
-		void DispatchUserCmd ( NetIMessage msg )
+		void DispatchUserCmd ( NetMessage msg )
 		{
 			var cl = GetClient(msg.SenderEP);
 			
@@ -142,18 +144,14 @@ namespace Fusion.Engine.Server {
 
 			cl.NeedSnapshot = true;
 
-			/*using ( var reader = msg.OpenReader() ) {
+			using ( var stream = new MemoryStream(msg.Data) ) {
+				using ( var reader = new BinaryReader(stream) ) {
+				
+					int commandCounter = reader.ReadInt32();
 
-				int count = reader.ReadInt32();
-
-				var cmds = new UserCmd[count];
-
-				for (int i=0; i<count; i++) {
-					cmds[i] = UserCmd.Read( reader );
+					FeedCommand( cl.ID, stream );
 				}
-
-				FeedCommand( cmds, cl.ID );
-			} */
+			}
 		}
 
 
@@ -164,7 +162,7 @@ namespace Fusion.Engine.Server {
 		/// </summary>
 		/// <param name="msg"></param>
 		/// <param name="userInfo"></param>
-		void NetRegisterClient ( NetIMessage msg )
+		void NetRegisterClient ( NetMessage msg )
 		{
 			var cl = GetClient( msg.SenderEP );
 
@@ -175,8 +173,9 @@ namespace Fusion.Engine.Server {
 			} else {
 				
 				// add client :
-				var client = new SVClientState( this, msg.SenderEP, msg.Text );
+				var client = new GameClientState( netChan, this, msg.SenderEP, msg.Text );
 
+				netChan.Add( msg.SenderEP );
 				clients.Add( client );
 
 				//	send accept :
@@ -194,7 +193,7 @@ namespace Fusion.Engine.Server {
 		/// </summary>
 		/// <param name="msg"></param>
 		/// <param name="userInfo"></param>
-		void NetUnregisterClient ( NetIMessage msg )
+		void NetUnregisterClient ( NetMessage msg )
 		{
 			var client = clients.FirstOrDefault( cl => cl.EndPoint.Equals( msg.SenderEP ) );
 
@@ -204,6 +203,7 @@ namespace Fusion.Engine.Server {
 
 			} else {
 
+				netChan.Remove( msg.SenderEP );
 				clients.Remove( client );
 
 				ClientDisconnected( client.ID, client.UserInfo );
@@ -240,7 +240,7 @@ namespace Fusion.Engine.Server {
 		internal void Drop ( string clientName, string reason )
 		{
 			IPAddress ip;
-			SVClientState client = null;
+			GameClientState client = null;
 
 			if ( IPAddress.TryParse( clientName, out ip ) ) {
 				client	=	clients.FirstOrDefault( cl => cl.EndPoint.Address.Equals( ip ) );

@@ -30,7 +30,7 @@ namespace Fusion.Engine.Client {
 
 			public abstract void Connect ( string host, int port );
 			public abstract void Disconnect ();
-			public abstract void DispatchIM ( NetIMessage msg );
+			public abstract void DispatchIM ( NetMessage msg );
 			public abstract void Update( GameTime gameTime );
 		}
 

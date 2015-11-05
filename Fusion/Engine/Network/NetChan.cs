@@ -25,7 +25,7 @@ namespace Fusion.Engine.Network {
 	///		3. Encryption
 	///		
 	/// </summary>
-	public class NetChan : DisposableBase {
+	internal partial class NetChan : DisposableBase {
 
 		Random rand = new Random();
 
@@ -37,6 +37,9 @@ namespace Fusion.Engine.Network {
 
 		object lockObject = new object();
 
+		Dictionary<IPEndPoint, State> channels = new Dictionary<IPEndPoint,State>();
+
+
 		/// <summary>
 		/// Port
 		/// </summary>
@@ -46,6 +49,7 @@ namespace Fusion.Engine.Network {
 		/// Maximal transmition unit.
 		/// </summary>
 		public const int MTU	=	1400;
+
 
 
 		/// <summary>
@@ -76,6 +80,76 @@ namespace Fusion.Engine.Network {
 		}
 
 
+		/*-----------------------------------------------------------------------------------------
+		 *	Channel stuff :
+		-----------------------------------------------------------------------------------------*/
+
+		/// <summary>
+		/// Adds channel to given endpoint, 
+		/// so NetChan can process in-band messages from given endpuint.
+		/// 
+		/// 
+		/// </summary>
+		/// <param name="endPoint"></param>
+		public void Add ( IPEndPoint endPoint )
+		{
+			lock (lockObject) {
+				channels.Add( endPoint, new State(this, QPort, Socket, endPoint) );
+				Log.Message("Netchan {0} : new channel to {1}", Name, endPoint );
+			}
+		}
+
+
+
+		/// <summary>
+		/// Removes channel to given ednpoint endpoint.
+		/// </summary>
+		/// <param name="endPoint"></param>
+		public void Remove ( IPEndPoint endPoint )
+		{
+			lock (lockObject) {
+				if (channels.ContainsKey(endPoint)) {
+					channels.Remove( endPoint );
+					Log.Message("Netchan {0} : channel to {1} removed.", Name, endPoint );
+				} else {
+					Log.Warning("Netchan {0} : no channel to {1}.", Name, endPoint );
+				}
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="?"></param>
+		/// <returns></returns>
+		State GetChannel ( IPEndPoint endPoint )
+		{
+			lock (lockObject) {
+				State state;
+				if (!channels.TryGetValue(endPoint, out state)) {
+					throw new NetChanException(string.Format("{0} : no channel to {1}.", Name, endPoint));
+				}
+				return state;				
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public void Clear ()
+		{
+			channels.Clear();
+		}
+
+
+
+		/*-----------------------------------------------------------------------------------------
+		 *	Out-of-band stuff
+		-----------------------------------------------------------------------------------------*/
 
 		/// <summary>
 		/// Prints packet info.
@@ -101,16 +175,26 @@ namespace Fusion.Engine.Network {
 		public void OutOfBand ( IPEndPoint remoteEP, NetCommand cmd, byte[] data )
 		{		
 			lock (lockObject) {
+				
+				var length	=	data.Length;
 
-				var message	=	new NetOMessage( data.Length );
+				if (length>MTU) {	
+					throw new NetChanException(string.Format("Message length > {0}", MTU));
+				}
+
 				var header	=	new NetChanHeader( QPort, cmd );
+				var buffer	=	new byte[ length + NetChanHeader.SizeInBytes ];
 
-				message.WriteHeader( header );
-				message.SetData( data, 0, data.Length );
+				using ( var stream = new MemoryStream(buffer) ) {
+					using ( var writer = new BinaryWriter(stream) ) {
+						header.Write( writer );
+						writer.Write( data );
+					}
+				}
 
-				Socket.SendTo( message.Bytes, remoteEP );
+				Socket.SendTo( buffer, remoteEP );
 
-				ShowPacket("send", message.Bytes.Length, message.Bytes );
+				ShowPacket("send", buffer.Length, buffer );
 			}
 		}
 
@@ -140,30 +224,21 @@ namespace Fusion.Engine.Network {
 
 
 
-		uint sequenceCounter = 0;
-		uint receivedSequence = 0;
-
+		/*-----------------------------------------------------------------------------------------
+		 *	In-band stuff :
+		-----------------------------------------------------------------------------------------*/
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="data"></param>
-		public void Transmit ( IPEndPoint remoteEP, NetCommand cmd, byte[] data )
+		public void Transmit ( IPEndPoint remoteEP, NetCommand command, byte[] data, int length )
 		{
 			lock (lockObject) {
-
-				var header		=	new NetChanHeader( QPort, cmd, sequenceCounter++, 0, false );
-				var message		=	new NetOMessage( data.Length );
-
-				message.WriteHeader( header );
-
-				Socket.SendTo( message.Bytes, remoteEP );
-
-				ShowPacket("send", message.Bytes.Length, message.Bytes );
+				var state	=	GetChannel( remoteEP );
+				state.Transmit( command, data, length );
 			}
 		}
-
-
 
 
 
@@ -173,7 +248,7 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		/// <param name="message">Return null if bad packet was received.</param>
 		/// <returns>True if packet (even bad one) received. Otherwice returns False.</returns>
-		public bool Dispatch ( out NetIMessage message )
+		public bool Dispatch ( out NetMessage message )
 		{
 			lock (lockObject) {
 
@@ -198,84 +273,31 @@ namespace Fusion.Engine.Network {
 					}
 
 
-					message	=	new NetIMessage( (IPEndPoint)remoteEP, buffer, size );
+					message	=	new NetMessage( (IPEndPoint)remoteEP, buffer, size );
+
 
 					//
 					//	out of band - do nothing:
 					//
 					if (message.Header.IsOutOfBand) {
 						return true;
-					}
-
-
-					//
-					//	non reliable message
-					//
-					if (receivedSequence>=message.Header.Sequence) {	
-						message = null;
+					} else {
+						var state	=	GetChannel( (IPEndPoint)remoteEP );
+						state.Dispatch( ref message );
 						return true;
 					}
 
-					if (message.Header.Sequence - receivedSequence > 1) {
-						Log.Warning("Lost packet: {0} - {1}", receivedSequence, message.Header.Sequence );
-					}
-					receivedSequence = message.Header.Sequence;
-
-					return true;
-
-					//
-					//	reliable message
-					//
-
-				} catch ( NetChanException ne ) {
-					Log.Warning( "NetChan.Dispatch() : {0}", ne.Message );
-
-					message = null;
-					return true;
 
 				} catch ( SocketException se ) {
+
 					if (se.SocketErrorCode==SocketError.WouldBlock) {
 						//	that's OK - no incoming messages, return false.
 						return false;
 					}
-					Log.Warning( "NetChan.Dispatch() : {0}", se.ToString() );
-					return false;
+
+					throw new NetChanException(string.Format("{0}", se.SocketErrorCode));
 				}
-
-
-				/*Log.Warning("NetChan.Dispatch() : Something is wrong. This code should not be reached.");
-				return false;*/
 			}
-		}
-
-
-
-		/// <summary>
-		/// Waits for message which meet given criteria.
-		/// If there are no datagrams, NetChan will sleep for given time.
-		/// If attemptCount is hit - function will return null;
-		/// </summary>
-		/// <param name="criteria">Criteria function</param>
-		/// <param name="sleepTime">Sleep time between attemptrs (10 msec, is ok)</param>
-		/// <param name="attemptCount">Attempts count</param>
-		/// <returns></returns>
-		public NetIMessage Wait ( Func<NetIMessage,bool> criteria, int sleepTime = 10, int attemptCount = 100 )
-		{
-			NetIMessage message;
-
-			for (int i=0; i<attemptCount; i++) {
-
-				while ( Dispatch( out message ) ) {
-					
-					if (criteria(message)) {
-						return message;
-					}
-				}
-
-				Thread.Sleep(sleepTime);
-			}
-
-			return null;
 		}
 	}
 }

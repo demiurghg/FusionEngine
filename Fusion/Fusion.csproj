@@ -222,7 +222,8 @@
     <Compile Include="Engine\Common\Commands\Map.cs" />
     <Compile Include="Engine\Common\Commands\ServerInfo.cs" />
     <Compile Include="Engine\Common\Commands\ServerDrop.cs" />
-    <Compile Include="Engine\Server\GameServer.SVClientState.cs" />
+    <Compile Include="Engine\Network\NetChan.State.cs" />
+    <Compile Include="Engine\Server\GameClientState.cs" />
     <Compile Include="Engine\Client\GameClient.STActive.cs" />
     <Compile Include="Engine\Client\GameClient.STConnected.cs" />
     <Compile Include="Engine\Client\GameClient.STConnecting.cs" />
@@ -329,11 +330,10 @@
     <Compile Include="Engine\Input\Events.cs" />
     <Compile Include="Engine\Input\Keys.cs" />
     <Compile Include="Engine\Input\Mouse.cs" />
-    <Compile Include="Engine\Network\NetOMessage.cs" />
     <Compile Include="Engine\Network\NetChan.cs" />
     <Compile Include="Engine\Network\NetChanException.cs" />
     <Compile Include="Engine\Network\NetCommand.cs" />
-    <Compile Include="Engine\Network\NetIMessage.cs" />
+    <Compile Include="Engine\Network\NetMessage.cs" />
     <Compile Include="Engine\Network\NetChanHeader.cs" />
     <Compile Include="Engine\Network\NetworkConfig.cs" />
     <Compile Include="Engine\Network\NetworkEngine.cs" />

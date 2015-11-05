@@ -99,27 +99,36 @@ namespace TestGame2 {
 
 		/// <summary>
 		/// Runs one step of server-side world simulation.
+		/// Do not close the stream.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public override void Update ( GameTime gameTime, Stream outputSnapshotStream )
+		public override void Update ( GameTime gameTime, Stream outputSnapshot )
 		{
 			Thread.Sleep(20);
 
-			using (var writer = new BinaryWriter(outputSnapshotStream)) {
-				writer.Write(string.Format("SV: [{0}]", gameTime.ElapsedSec ));
+			using (var writer = new BinaryWriter(outputSnapshot, Encoding.UTF8, true)) {
+
+				var str = string.Join( " | ", state.Select(s1=>s1.Value) );
+
+				writer.Write(string.Format("SV: {1}", gameTime.ElapsedSec, str ));
 			}
 		}
+
+
+		Dictionary<string, string> state = new Dictionary<string,string>();
 
 		/// <summary>
 		/// Feed client commands from particular client.
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="clientId"></param>
-		public override void FeedCommand ( string clientIP, Stream inputCommandStream )
+		public override void FeedCommand ( string clientIP, Stream inputCommand )
 		{
-			/*foreach ( var cmd in commands ) {
-				Log.Message("  -- {0} {1} --", cmd.X, cmd.Y );
-			} */
+			using ( var reader = new BinaryReader(inputCommand) ) {
+				var s = reader.ReadString();
+				state[clientIP] = s;
+				//Log.Message("FeedCommand: {0} -> {1}", clientIP, s );
+			}
 		}
 
 
@@ -136,11 +145,13 @@ namespace TestGame2 {
 		public override void ClientConnected ( string clientIP, string userInfo )
 		{
 			NotifyClients("CONNECTED: {0} - {1}", clientIP, userInfo);
+			state.Add( clientIP, " --- " );
 		}
 
 		public override void ClientDisconnected ( string clientIP, string userInfo )
 		{
 			NotifyClients("DISCONNECTED: {0} - {1}", clientIP, userInfo );
+			state.Remove( clientIP );
 		}
 	}
 }
