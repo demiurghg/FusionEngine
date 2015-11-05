@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Fusion.Engine.Common;
 using System.IO;
+using Fusion.Engine.Common;
+using Fusion.Engine.Client;
+using Fusion.Engine.Server;
+
 
 namespace TestGame2 {
-	class CustomGameClient : Fusion.Engine.Common.GameClient {
+	class CustomGameClient : GameClient {
 
 		/// <summary>
 		/// Ctor

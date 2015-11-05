@@ -7,26 +7,24 @@ using System.Threading;
 using Fusion.Engine.Network;
 using System.Net;
 using Fusion.Core.Shell;
+using Fusion.Engine.Common;
 
 
-namespace Fusion.Engine.Common {
+namespace Fusion.Engine.Client {
 	public abstract partial class GameClient : GameModule {
 
 		/// <summary>
-		/// Client has connected, we need load game stuff.
+		/// StandBy client state - no connection, no game.
 		/// </summary>
-		class STConnected : STState {
+		class STStandBy : STState {
 
 			/// <summary>
 			/// 
 			/// </summary>
 			/// <param name="client"></param>
-			public STConnected ( GameClient client, string serverInfo ) : base(client)
+			public STStandBy ( GameClient	client ) : base(client)
 			{
-				Log.Message("Load level: {0}", serverInfo );
-				client.LoadLevel( serverInfo );
 			}
-
 
 
 			/// <summary>
@@ -36,8 +34,9 @@ namespace Fusion.Engine.Common {
 			/// <param name="port"></param>
 			public override void Connect ( string host, int port )
 			{
-				Log.Warning("Already connected.");
+				client.SetState( new STConnecting(client, host, port) );
 			}
+
 
 
 			/// <summary>
@@ -45,7 +44,7 @@ namespace Fusion.Engine.Common {
 			/// </summary>
 			public override void Disconnect ()
 			{
-				Log.Warning("Can not interrupt game loading.");
+				Log.Warning("Not connected.");
 			}
 
 
@@ -55,17 +54,7 @@ namespace Fusion.Engine.Common {
 			/// <param name="msg"></param>
 			public override void DispatchIM ( NetIMessage msg )
 			{
-				if ( msg.Command==NetCommand.Dropped ) {
-					Log.Message("Dropped.");
-					client.GameEngine.GameInterface.ShowMessage( msg.Text );
-					client.SetState( new STStandBy(client) );
-				}
-
-				if ( msg.Command==NetCommand.ServerDisconnected ) {
-					Log.Message("Server disconnected.");
-					client.GameEngine.GameInterface.ShowMessage("Server disconnected.");
-					client.SetState( new STStandBy(client) );
-				}
+				//	do nothing.
 			}
 
 
@@ -75,8 +64,7 @@ namespace Fusion.Engine.Common {
 			/// <param name="gameTime"></param>
 			public override void Update ( GameTime gameTime )
 			{
-				client.SetState( new STActive(client) );
-				//	do nothing
+				//	do nothing.
 			}
 		}
 	}

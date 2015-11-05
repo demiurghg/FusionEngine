@@ -8,8 +8,10 @@ using System.Threading;
 using System.Net;
 using Fusion.Core.Shell;
 using Fusion.Engine.Network;
+using Fusion.Engine.Common;
 
-namespace Fusion.Engine.Common {
+
+namespace Fusion.Engine.Server {
 
 	public abstract partial class GameServer : GameModule {
 

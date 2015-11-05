@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Fusion.Engine.Common;
-using Fusion;
-using System.ComponentModel;
 using System.Threading;
-using System.IO;
+using System.Threading.Tasks;
+using Fusion;
+using Fusion.Engine.Client;
+using Fusion.Engine.Common;
+using Fusion.Engine.Server;
 
 namespace TestGame2 {
-	class CustomGameServer : Fusion.Engine.Common.GameServer {
+	class CustomGameServer : GameServer {
 
 		string[] messages = new[] {
 			"Locating hamsters"								,

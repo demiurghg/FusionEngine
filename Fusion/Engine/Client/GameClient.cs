@@ -7,9 +7,10 @@ using Lidgren.Network;
 using System.Threading;
 using Fusion.Engine.Network;
 using System.IO;
+using Fusion.Engine.Common;
 
 
-namespace Fusion.Engine.Common {
+namespace Fusion.Engine.Client {
 	public abstract partial class GameClient : GameModule {
 
 		/// <summary>

@@ -9,9 +9,10 @@ using Fusion.Core.Shell;
 using System.Net;
 using System.IO;
 using Fusion.Engine.Network;
+using Fusion.Engine.Common;
 
 
-namespace Fusion.Engine.Common {
+namespace Fusion.Engine.Server {
 
 	public abstract partial class GameServer : GameModule {
 

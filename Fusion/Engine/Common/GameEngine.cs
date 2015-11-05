@@ -24,6 +24,8 @@ using Fusion.Core.IniParser;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Input;
 using Fusion.Engine.Network;
+using Fusion.Engine.Client;
+using Fusion.Engine.Server;
 using Lidgren.Network;
 
 

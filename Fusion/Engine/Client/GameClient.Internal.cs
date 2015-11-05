@@ -7,9 +7,10 @@ using System.Threading;
 using Fusion.Engine.Network;
 using System.Net;
 using Fusion.Core.Shell;
+using Fusion.Engine.Common;
 
 
-namespace Fusion.Engine.Common {
+namespace Fusion.Engine.Client {
 	public abstract partial class GameClient : GameModule {
 
 		NetChan	netChan		=	null;

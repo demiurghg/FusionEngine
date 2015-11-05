@@ -222,15 +222,15 @@
     <Compile Include="Engine\Common\Commands\Map.cs" />
     <Compile Include="Engine\Common\Commands\ServerInfo.cs" />
     <Compile Include="Engine\Common\Commands\ServerDrop.cs" />
-    <Compile Include="Engine\Common\GameServer.SVClientState.cs" />
-    <Compile Include="Engine\Common\GameClient.STActive.cs" />
-    <Compile Include="Engine\Common\GameClient.STConnected.cs" />
-    <Compile Include="Engine\Common\GameClient.STConnecting.cs" />
-    <Compile Include="Engine\Common\GameClient.STStandBy.cs" />
-    <Compile Include="Engine\Common\GameClient.STState.cs" />
-    <Compile Include="Engine\Common\GameServer.Network.cs" />
-    <Compile Include="Engine\Common\GameClient.Internal.cs" />
-    <Compile Include="Engine\Common\GameServer.Internal.cs" />
+    <Compile Include="Engine\Server\GameServer.SVClientState.cs" />
+    <Compile Include="Engine\Client\GameClient.STActive.cs" />
+    <Compile Include="Engine\Client\GameClient.STConnected.cs" />
+    <Compile Include="Engine\Client\GameClient.STConnecting.cs" />
+    <Compile Include="Engine\Client\GameClient.STStandBy.cs" />
+    <Compile Include="Engine\Client\GameClient.STState.cs" />
+    <Compile Include="Engine\Server\GameServer.Network.cs" />
+    <Compile Include="Engine\Client\GameClient.Internal.cs" />
+    <Compile Include="Engine\Server\GameServer.Internal.cs" />
     <Compile Include="Engine\Common\GameModuleAttribute.cs" />
     <Compile Include="Engine\Common\GameEngine.cs" />
     <Compile Include="Engine\Common\GameParameters.cs">
@@ -299,8 +299,8 @@
     <Compile Include="Engine\Common\GameModule.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Engine\Common\GameClient.cs" />
-    <Compile Include="Engine\Common\GameServer.cs" />
+    <Compile Include="Engine\Client\GameClient.cs" />
+    <Compile Include="Engine\Server\GameServer.cs" />
     <Compile Include="Engine\Common\GameInterface.cs" />
     <Compile Include="Engine\Graphics\Camera.cs" />
     <Compile Include="Engine\Graphics\Sprites\SpriteEngine.cs" />

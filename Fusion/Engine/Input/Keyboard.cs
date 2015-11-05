@@ -36,7 +36,8 @@ namespace Fusion.Engine.Input {
 		/// </summary>
 		public override void Initialize ()
 		{
-		}
+		}
+
 
 
 		/// <summary>

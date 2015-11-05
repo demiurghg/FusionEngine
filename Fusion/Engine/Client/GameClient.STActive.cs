@@ -8,9 +8,11 @@ using Fusion.Engine.Network;
 using System.Net;
 using Fusion.Core.Shell;
 using System.IO;
+using Fusion.Engine.Common;
+using Fusion.Engine.Server;
 
 
-namespace Fusion.Engine.Common {
+namespace Fusion.Engine.Client {
 	public abstract partial class GameClient : GameModule {
 
 		/// <summary>
