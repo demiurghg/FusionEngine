@@ -13,7 +13,7 @@ namespace Fusion.Engine.Network {
 
 	public class NetChanHeader {
 
-		public const int SizeInBytes		=	14;
+		public const int SizeInBytes		=	16;
 		public const uint ReliabilityBit	=	0x80000000;
 		public const uint OutOfBand			=	0xFFFFFFFF;
 
@@ -38,6 +38,15 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		public ushort QPort;
 
+		/// <summary>
+		/// Total number of fragments.
+		/// </summary>
+		public byte FragmentCount;
+
+		/// <summary>
+		/// Fragment ID.
+		/// </summary>
+		public byte FragmentID;
 
 		/// <summary>
 		/// Indicates, is this header is out of band message.
@@ -76,6 +85,8 @@ namespace Fusion.Engine.Network {
 			AckSequence		=	ack;
 			QPort			=	qport;
 			Command			=	cmd;
+			FragmentID		=	0;
+			FragmentCount	=	1;
 		}
 
 
@@ -91,6 +102,8 @@ namespace Fusion.Engine.Network {
 			AckSequence		=	OutOfBand;
 			QPort			=	qport;
 			Command			=	cmd;
+			FragmentID		=	0;
+			FragmentCount	=	1;
 		}
 
 
@@ -102,6 +115,8 @@ namespace Fusion.Engine.Network {
 			writer.Write( AckSequence	);
 			writer.Write( (uint)Command	);
 			writer.Write( QPort			);
+			writer.Write( FragmentCount	);
+			writer.Write( FragmentID	);
 		}
 
 
@@ -112,6 +127,8 @@ namespace Fusion.Engine.Network {
 			AckSequence		=	reader.ReadUInt32();
 			Command			=	(NetCommand)reader.ReadUInt32();
 			QPort			=	reader.ReadUInt16();
+			FragmentCount	=	reader.ReadByte();
+			FragmentID		=	reader.ReadByte();
 		}
 
 

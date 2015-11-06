@@ -41,6 +41,16 @@ namespace Fusion.Engine.Network {
 
 
 		/// <summary>
+		/// Indicates that message is fragmented.
+		/// </summary>
+		public bool IsFragmented {
+			get {
+				return Header.FragmentCount > 1;
+			}
+		}
+
+
+		/// <summary>
 		/// Gets header command.
 		/// </summary>
 		public NetCommand Command {
@@ -82,6 +92,61 @@ namespace Fusion.Engine.Network {
 				}
 			}
 			Buffer.BlockCopy( recievedData, NetChanHeader.SizeInBytes, Data, 0, length );
-		}	   
+		}	 
+		
+
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="header"></param>
+		/// <param name="data"></param>
+		NetMessage ( NetChanHeader header, IPEndPoint sender, byte[] data )
+		{
+			this.Header		=	header;
+			this.SenderEP	=	sender;
+			this.Data		=	data;
+		}
+
+		
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="fragments"></param>
+		/// <returns></returns>
+		static internal NetMessage Compose ( IEnumerable<NetMessage> fragments )
+		{
+			if (fragments==null) {
+				throw new ArgumentNullException("fragments");
+			}
+			if (!fragments.Any()) {
+				return null;
+			}
+
+			NetChanHeader	header	=	fragments.First().Header;
+
+			int totalSize	=	fragments.Sum( f => f.Data.Length );
+			var buffer		=	new byte[ totalSize ];
+
+			int offset		=	0;
+			var fragCount	=	fragments.First().Header.FragmentCount;
+
+			foreach ( var fragment in fragments ) {
+				if (fragCount!=fragment.Header.FragmentCount) {
+					Log.Warning("Bad fragmented packet sequence");
+					return null;
+				}
+				Buffer.BlockCopy( fragment.Data, 0, buffer, offset, fragment.Data.Length );
+				offset += fragment.Data.Length;
+			}
+
+			
+			header.FragmentCount	=	1;
+			header.FragmentID		=	0;
+
+			return new NetMessage( header, fragments.First().SenderEP, buffer );
+		}
+		  
 	}
 }

@@ -66,8 +66,9 @@ namespace Fusion.Engine.Network {
 			Log.Message("  network  : {0}", System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable() );
 
 			//	create server socket :
-			serverSocket			=	new Socket( SocketType.Dgram, ProtocolType.Udp );
-			serverSocket.Blocking	=	false;
+			serverSocket				=	new Socket( AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp );
+			serverSocket.Blocking		=	false;
+			serverSocket.DontFragment	=	true;
 			Log.Message("  recv buf : {0}", serverSocket.ReceiveBufferSize );
 
 			int port = Config.Port;
@@ -90,8 +91,9 @@ namespace Fusion.Engine.Network {
 			}
 
 			//	create client socket :
-			clientSocket			=	new Socket( SocketType.Dgram, ProtocolType.Udp );
+			clientSocket			=	new Socket( AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp );
 			clientSocket.Blocking	=	false;
+			serverSocket.DontFragment	= true;
 
 			clientSocket.Bind( new IPEndPoint(IPAddress.Any, 0) );
 			Log.Message("  client   : {0}", clientSocket.LocalEndPoint );

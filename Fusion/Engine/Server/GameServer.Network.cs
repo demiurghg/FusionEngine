@@ -66,16 +66,14 @@ namespace Fusion.Engine.Server {
 			//
 			//	update and feed clients back :
 			//	
-			var buffer = new byte[1024];
-
-			using ( var stream = new MemoryStream( buffer ) ) {
+			using ( var stream = new MemoryStream() ) {
 				
 				Update( gameTime, stream );
 
-				int length = (int)stream.Position;
+				int length = (int)stream.Length;
 			
 				foreach ( var cl in clients ) {
-					cl.SendSnapshot( buffer, length );
+					cl.SendSnapshot( stream.GetBuffer(), length );
 				}
 			}
 		}
@@ -168,7 +166,9 @@ namespace Fusion.Engine.Server {
 
 			if ( cl!=null ) {
 				
-				Log.Warning("Duplicate connect from {0}. Ignored.", msg.SenderEP);
+				//	probably accept commands has not been received.
+				//	send it again.
+				netChan.OutOfBand(msg.SenderEP, NetCommand.Accepted, ServerInfo() );
 
 			} else {
 				
@@ -199,7 +199,7 @@ namespace Fusion.Engine.Server {
 
 			if ( client == null ) {
 				
-				Log.Warning("Duplicate disconnect from {0}. Ignored.", msg.SenderEP);
+				//Log.Warning("Duplicate disconnect from {0}. Ignored.", msg.SenderEP);
 
 			} else {
 
@@ -252,6 +252,7 @@ namespace Fusion.Engine.Server {
 				Log.Warning("No such client: {0}", client );
 			} else {
 
+				netChan.Remove( client.EndPoint );
 				clients.Remove( client );
 
 				netChan.OutOfBand( client.EndPoint, NetCommand.Dropped, reason );

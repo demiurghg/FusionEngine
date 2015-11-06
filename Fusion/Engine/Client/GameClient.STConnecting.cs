@@ -40,8 +40,6 @@ namespace Fusion.Engine.Client {
 					return;
 				}
 
-				ip	=	ip.MapToIPv6();
-
 				Log.Message("Connecting to {0} {1}...", ip.ToString(), port );
 
 				client.serverEP	=	new IPEndPoint( ip, port );
@@ -87,6 +85,13 @@ namespace Fusion.Engine.Client {
 			{
 				Log.Message("Connection interrupted by user.");
 				client.SetState( new STStandBy(client) );
+
+				//	send disconnect to server, if we already registered on it.
+				//	send several time to be sure, that packet sent :
+				netChan.OutOfBand( client.serverEP, NetCommand.Disconnect );
+				netChan.OutOfBand( client.serverEP, NetCommand.Disconnect );
+				netChan.OutOfBand( client.serverEP, NetCommand.Disconnect );
+				netChan.OutOfBand( client.serverEP, NetCommand.Disconnect );
 			}
 
 

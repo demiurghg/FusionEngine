@@ -156,11 +156,11 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		/// <param name="action"></param>
 		/// <param name="dataSize"></param>
-		void ShowPacket ( string action, int dataSize, byte[] data )
+		void ShowPacket ( string action, int dataSize, byte[] data, int seq, int ack )
 		{
 			if (GameEngine.Network.Config.ShowPackets) {
 				var dataStr = string.Join( " ", data.Skip(16).Take(16).Select( b=> b.ToString("X2") ) );
-				Log.Message("  {0} {1} [{2,5}] {3}", Name, action, dataSize, dataStr );
+				Log.Message("  {0} {1} [{2,5}] {4} {5}", Name, action, dataSize, dataStr, seq, ack );
 			}
 		}
 
@@ -194,7 +194,7 @@ namespace Fusion.Engine.Network {
 
 				Socket.SendTo( buffer, remoteEP );
 
-				ShowPacket("send", buffer.Length, buffer );
+				ShowPacket("send", buffer.Length, buffer,-1,-1 );
 			}
 		}
 
@@ -254,7 +254,7 @@ namespace Fusion.Engine.Network {
 
 				message	= null;
 
-				var buffer = new byte[MTU];
+				var buffer = new byte[MTU+100];
 
 				EndPoint	remoteEP = new IPEndPoint( IPAddress.Any, 0 );
 
@@ -265,7 +265,10 @@ namespace Fusion.Engine.Network {
 				try {
 					int size = Socket.ReceiveFrom( buffer, ref remoteEP );
 
-					ShowPacket("recv", size, buffer); 
+					if (rand.NextFloat(0,1)<GameEngine.Network.Config.SimulatePacketsLoss) {
+						message = null;
+						return true;
+					}
 
 					if (size<NetChanHeader.SizeInBytes) {
 						Log.Warning("Bad packet from {0}: size < NetChan header size", remoteEP);
@@ -275,6 +278,8 @@ namespace Fusion.Engine.Network {
 
 					message	=	new NetMessage( (IPEndPoint)remoteEP, buffer, size );
 
+					ShowPacket("recv", size, buffer, (int)message.Header.Sequence, (int)message.Header.AckSequence); 
+
 
 					//
 					//	out of band - do nothing:
@@ -283,7 +288,7 @@ namespace Fusion.Engine.Network {
 						return true;
 					} else {
 						var state	=	GetChannel( (IPEndPoint)remoteEP );
-						state.Dispatch( ref message );
+						message		=	state.Dispatch( message );
 						return true;
 					}
 

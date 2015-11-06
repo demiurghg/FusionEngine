@@ -71,9 +71,31 @@ namespace TestGame2 {
 		/// <param name="snapshot"></param>
 		public override void FeedSnapshot ( Stream inputSnapshot ) 
 		{
+			var bb = new byte[1500];
+			
+			/*using ( var reader = new BinaryReader(inputSnapshot, Encoding.UTF8, true) ) {
+				reader.Read(bb, 0, 1500);	
+			} */
+
+
 			using ( var reader = new BinaryReader(inputSnapshot, Encoding.UTF8, true) ) {
+
+				int last = -1;
+				for (int i=0; i<10000; i++) {
+					var curr = reader.ReadInt32();
+					if (curr!=last+1) {
+						Log.Warning("{0} {1}", curr, last);
+						break;
+					}
+					last = curr;
+				}
+
+				/*for (int i=0; i<250; i++) {
+					reader.ReadString();
+				}
+
 				string s = reader.ReadString();
-				Log.Message("SNAPSHOT: {0}", s );
+				Log.Message("SNAPSHOT: {1} : {0}", s, inputSnapshot.Length );*/
 			}
 		}
 

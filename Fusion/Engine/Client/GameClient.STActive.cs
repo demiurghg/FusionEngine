@@ -46,6 +46,10 @@ namespace Fusion.Engine.Client {
 			/// </summary>
 			public override void Disconnect ()
 			{
+				//	send several time to be sure, that packet sent :
+				netChan.OutOfBand( client.serverEP, NetCommand.Disconnect );
+				netChan.OutOfBand( client.serverEP, NetCommand.Disconnect );
+				netChan.OutOfBand( client.serverEP, NetCommand.Disconnect );
 				netChan.OutOfBand( client.serverEP, NetCommand.Disconnect );
 				Log.Message("Disconnected.");
 

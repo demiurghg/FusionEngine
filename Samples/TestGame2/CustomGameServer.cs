@@ -108,9 +108,14 @@ namespace TestGame2 {
 
 			using (var writer = new BinaryWriter(outputSnapshot, Encoding.UTF8, true)) {
 
-				var str = string.Join( " | ", state.Select(s1=>s1.Value) );
+				for (int i=0; i<10000; i++) {
+					writer.Write(i);
+				}
+				/*var str = string.Join( " | ", state.Select(s1=>s1.Value) );
 
-				writer.Write(string.Format("SV: {1}", gameTime.ElapsedSec, str ));
+				for (int i = 0; i<2050; i++) {
+					writer.Write(string.Format("SV: {1}", gameTime.ElapsedSec, str ));
+				} */
 			}
 		}
 
