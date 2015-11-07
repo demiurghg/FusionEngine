@@ -70,7 +70,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="target"></param>
 		/// <param name="camera"></param>
-		public void RenderScene ( RenderFrame target, Camera camera )
+		public void RenderScene ( TargetTexture target, Camera camera )
 		{
 		}
 
@@ -79,7 +79,7 @@ namespace Fusion.Engine.Graphics {
 		/// Renders all sprites to specified target
 		/// </summary>
 		/// <param name="target"></param>
-		public void RenderSprites (	RenderFrame target )
+		public void RenderSprites (	TargetTexture target )
 		{
 		}
 

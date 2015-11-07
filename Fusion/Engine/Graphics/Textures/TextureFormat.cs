@@ -5,6 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Fusion.Engine.Graphics {
-	public class RenderFrame {
+	
+	/// <summary>
+	/// Defines target texture formats
+	/// </summary>
+	public enum TargetTextureFormat {
+		LowDynamicRange,
+		HighDynamicRange,
 	}
 }

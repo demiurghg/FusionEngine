@@ -9,13 +9,17 @@ using Fusion.Core.Content;
 using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Graphics {
+
+	/// <summary>
+	/// Creates texture from file on disk or in memory.
+	/// </summary>
 	public class UserTexture : Texture {
 
 		Texture2D texture;
 
 
 		/// <summary>
-		///
+		/// Creates texture from stream.
 		/// </summary>
 		/// <param name="ge"></param>
 		/// <param name="texture"></param>
@@ -29,7 +33,7 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
-		///
+		/// Creates texture from file in memory 
 		/// </summary>
 		/// <param name="ge"></param>
 		/// <param name="texture"></param>

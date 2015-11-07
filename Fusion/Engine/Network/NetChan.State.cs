@@ -149,7 +149,7 @@ namespace Fusion.Engine.Network {
 			/// <param name="message"></param>
 			NetMessage DispatchFragmented ( NetMessage message, bool drop )
 			{
-				Log.Message("FRAG: {0} {1}", message.Header.FragmentID, message.Header.FragmentCount );
+				///Log.Message("FRAG: {0} {1}", message.Header.FragmentID, message.Header.FragmentCount );
 				
 				//	fragment packet was dropped.
 				//	stop receiving framents.

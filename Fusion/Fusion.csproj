@@ -222,6 +222,7 @@
     <Compile Include="Engine\Common\Commands\Map.cs" />
     <Compile Include="Engine\Common\Commands\ServerInfo.cs" />
     <Compile Include="Engine\Common\Commands\ServerDrop.cs" />
+    <Compile Include="Engine\Graphics\Textures\TextureFormat.cs" />
     <Compile Include="Engine\Network\NetChan.State.cs" />
     <Compile Include="Engine\Server\GameClientState.cs" />
     <Compile Include="Engine\Client\GameClient.STActive.cs" />
@@ -320,7 +321,7 @@
     <Compile Include="Engine\Graphics\MeshInstance.cs" />
     <Compile Include="Engine\Graphics\Lights\OmniLight.cs" />
     <Compile Include="Engine\Graphics\Lights\SpotLight.cs" />
-    <Compile Include="Engine\Graphics\Textures\RenderFrame.cs" />
+    <Compile Include="Engine\Graphics\Textures\TargetTexture.cs" />
     <Compile Include="Engine\Graphics\Textures\Texture.cs" />
     <Compile Include="Engine\Graphics\Textures\UserTexture.cs" />
     <Compile Include="Engine\Input\GamepadButtons.cs" />
