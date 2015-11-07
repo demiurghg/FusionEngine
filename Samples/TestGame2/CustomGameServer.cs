@@ -104,11 +104,11 @@ namespace TestGame2 {
 		/// <param name="gameTime"></param>
 		public override void Update ( GameTime gameTime, Stream outputSnapshot )
 		{
-			Thread.Sleep(20);
+			//Thread.Sleep(20);
 
 			using (var writer = new BinaryWriter(outputSnapshot, Encoding.UTF8, true)) {
 
-				for (int i=0; i<10000; i++) {
+				for (int i=0; i<3000; i++) {
 					writer.Write(i);
 				}
 				/*var str = string.Join( " | ", state.Select(s1=>s1.Value) );

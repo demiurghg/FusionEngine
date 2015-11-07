@@ -81,7 +81,7 @@ namespace TestGame2 {
 			using ( var reader = new BinaryReader(inputSnapshot, Encoding.UTF8, true) ) {
 
 				int last = -1;
-				for (int i=0; i<10000; i++) {
+				for (int i=0; i<3000; i++) {
 					var curr = reader.ReadInt32();
 					if (curr!=last+1) {
 						Log.Warning("{0} {1}", curr, last);
