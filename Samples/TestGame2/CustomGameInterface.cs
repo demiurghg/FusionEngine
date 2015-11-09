@@ -47,12 +47,12 @@ namespace TestGame2 {
 		{
 			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
-			debugFont	=	GameEngine.Content.Load<DiscTexture>( "debugFont" );
+			//debugFont	=	GameEngine.Content.Load<DiscTexture>( "debugFont" );
 
 			testLayer.Clear();
 			testLayer.Draw( texture, 10,10 + 384,256,256, Color.White );
 
-			testLayer.DrawDebugString( debugFont, 10,276, "Lenna Soderberg", Color.White );
+			//testLayer.DrawDebugString( debugFont, 10,276, "Lenna Soderberg", Color.White );
 
 			GameEngine.GraphicsEngine.SpriteLayers.Add( testLayer );
 		}

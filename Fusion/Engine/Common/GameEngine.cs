@@ -65,6 +65,9 @@ namespace Fusion.Engine.Common {
 		[GameModule("Network", "net")]
 		public NetworkEngine Network { get { return network; } }
 
+		[GameModule("GIS", "gis")]
+		public GIS.GIS GIS { get { return gis; } }
+
 		/// <summary>
 		/// Gets current content manager
 		/// </summary>
@@ -141,6 +144,8 @@ namespace Fusion.Engine.Common {
 		Keyboard			keyboard		;
 		Mouse				mouse			;
 		GamepadCollection	gamepads		;
+		GIS.GIS				gis				;
+
 
 		GameTime	gameTimeInternal;
 
@@ -241,6 +246,7 @@ namespace Fusion.Engine.Common {
 			mouse				=	new Mouse(this);
 			gamepads			=	new GamepadCollection(this);
 
+			gis					=	new GIS.GIS(this);
 		}
 
 
@@ -438,6 +444,8 @@ namespace Fusion.Engine.Common {
 
 				InputDevice.UpdateInput();
 
+				//GIS.Update(gameTimeInternal);
+
 				UpdateClientServerGame( gameTimeInternal );
 
 
@@ -485,6 +493,8 @@ namespace Fusion.Engine.Common {
 		/// <param name="stereoEye"></param>
 		protected virtual void Draw ( GameTime gameTime, StereoEye stereoEye )
 		{
+			//GIS.Draw(gameTime, stereoEye);
+
 			GraphicsEngine.Draw( gameTime, stereoEye );
 
 			GraphicsDevice.ResetStates();
