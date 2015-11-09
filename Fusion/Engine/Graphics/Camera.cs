@@ -48,19 +48,19 @@ namespace Fusion.Engine.Graphics {
 			float nearWidth		=	width;
 
 			//	Projection :
-			projMatrix		=	Matrix.PerspectiveOffCenterRH( -nearWidth/2, nearWidth/2, -nearHeight/2, nearHeight/2, near, far );
-			projMatrixR		=	Matrix.PerspectiveOffCenterRH( -nearWidth/2 - offset, nearWidth/2 - offset, -nearHeight/2, nearHeight/2, near, far );
-			projMatrixL		=	Matrix.PerspectiveOffCenterRH( -nearWidth/2 + offset, nearWidth/2 + offset, -nearHeight/2, nearHeight/2, near, far );
+			this.projMatrix		=	Matrix.PerspectiveOffCenterRH( -nearWidth/2, nearWidth/2, -nearHeight/2, nearHeight/2, near, far );
+			this.projMatrixR	=	Matrix.PerspectiveOffCenterRH( -nearWidth/2 - offset, nearWidth/2 - offset, -nearHeight/2, nearHeight/2, near, far );
+			this.projMatrixL	=	Matrix.PerspectiveOffCenterRH( -nearWidth/2 + offset, nearWidth/2 + offset, -nearHeight/2, nearHeight/2, near, far );
 																					
 			//	View :
-			viewMatrix		=	viewMatrix;
-			viewMatrixL		=	viewMatrix	*	Matrix.Translation( Vector3.UnitX * separation / 2 );
-			viewMatrixR		=	viewMatrix	*	Matrix.Translation( -Vector3.UnitX * separation / 2 );
+			this.viewMatrix		=	viewMatrix;
+			this.viewMatrixL	=	viewMatrix	*	Matrix.Translation( Vector3.UnitX * separation / 2 );
+			this.viewMatrixR	=	viewMatrix	*	Matrix.Translation( -Vector3.UnitX * separation / 2 );
 
 			//	Camera :
-			cameraMatrix	=	Matrix.Invert( viewMatrix );
-			cameraMatrixL	=	Matrix.Invert( viewMatrixL );
-			cameraMatrixR	=	Matrix.Invert( viewMatrixR );
+			this.cameraMatrix	=	Matrix.Invert( viewMatrix );
+			this.cameraMatrixL	=	Matrix.Invert( viewMatrixL );
+			this.cameraMatrixR	=	Matrix.Invert( viewMatrixR );
 
 			//	Camera velocity :
 			this.velocity	=	velocity;

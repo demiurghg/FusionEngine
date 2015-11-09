@@ -24,6 +24,7 @@ namespace TestGame2 {
 		DiscTexture	debugFont;
 
 
+		Composition	master;
 
 
 		/// <summary>
@@ -32,7 +33,7 @@ namespace TestGame2 {
 		/// <param name="engine"></param>
 		public CustomGameInterface ( GameEngine gameEngine ) : base(gameEngine)
 		{
-			console				=	new GameConsole( gameEngine, "conchars", "conback");
+			console		=	new GameConsole( gameEngine, "conchars", "conback");
 		}
 
 
@@ -45,6 +46,12 @@ namespace TestGame2 {
 		/// </summary>
 		public override void Initialize ()
 		{
+			Console.Initialize();
+
+			master		=	new Composition(GameEngine);
+
+			GameEngine.GraphicsEngine.Compositions.Add( master );
+
 			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
 			//debugFont	=	GameEngine.Content.Load<DiscTexture>( "debugFont" );
@@ -54,7 +61,8 @@ namespace TestGame2 {
 
 			//testLayer.DrawDebugString( debugFont, 10,276, "Lenna Soderberg", Color.White );
 
-			GameEngine.GraphicsEngine.SpriteLayers.Add( testLayer );
+			master.SpriteLayers.Add( testLayer );
+			master.SpriteLayers.Add( console.ConsoleSpriteLayer );
 		}
 
 

@@ -33,6 +33,8 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		/// <param name="niceName"></param>
 		/// <param name="shortName"></param>
+		/// <param name="initOrder">Initialization order. Negative value means that module will be initilized befor parent module.
+		/// Positive value means that module will be initialized after parent module.</param>
 		public GameModuleAttribute( string niceName, string shortName )
 		{
 			NiceName	=	niceName;

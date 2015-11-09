@@ -89,8 +89,6 @@ namespace Fusion.Framework {
 			consoleLayer.Order = 9999;
 			consoleLayer.Layers.Add( editLayer );
 
-			GameEngine.GraphicsEngine.SpriteLayers.Add( consoleLayer );
-
 			LoadContent();
 			GameEngine.Reloading += (s,e) => LoadContent();
 
@@ -109,6 +107,16 @@ namespace Fusion.Framework {
 		int charWidth { get { return 8; } }
 		/*int charHeight { get { return consoleFont.LineHeight; } }
 		int charWidth { get { return consoleFont.SpaceWidth; } }*/
+
+
+		/// <summary>
+		/// Gets root console's sprite layer
+		/// </summary>
+		public SpriteLayer ConsoleSpriteLayer {
+			get {
+				return consoleLayer;
+			}
+		}
 
 
 		/// <summary>

@@ -254,6 +254,8 @@
     <Compile Include="Engine\GIS\TilesBatch.cs" />
     <Compile Include="Engine\GIS\TilesBatch.MapSources.cs" />
     <Compile Include="Engine\GIS\TilesBatch.Tile.cs" />
+    <Compile Include="Engine\Graphics\Composition.cs" />
+    <Compile Include="Engine\Graphics\Lights\LightSet.cs" />
     <Compile Include="Engine\Graphics\Textures\TextureFormat.cs" />
     <Compile Include="Engine\Network\NetChan.State.cs" />
     <Compile Include="Engine\Server\GameClientState.cs" />

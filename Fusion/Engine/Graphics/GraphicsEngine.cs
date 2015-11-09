@@ -25,7 +25,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			this.Device	=	gameEngine.GraphicsDevice;
 
-			SpriteLayers	=	new List<SpriteLayer>();
+			Compositions	=	new List<Composition>();
 			spriteEngine	=	new SpriteEngine( this );
 		}
 
@@ -61,59 +61,22 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="stereoEye"></param>
 		internal void Draw ( GameTime gameTime, StereoEye stereoEye )
 		{
-			spriteEngine.DrawSprites( gameTime, stereoEye, SpriteLayers );
+			var comps = Compositions
+				.OrderBy( c1 => c1.Order )
+				.Where( c2 => c2.Visible );
+
+			foreach ( var composition in Compositions ) {
+				spriteEngine.DrawSprites( gameTime, stereoEye, composition.SpriteLayers );
+			}
 		}
 
 
+
 		/// <summary>
-		/// Renders current scene to given target and camera
+		/// Gets collection of Composition.
 		/// </summary>
-		/// <param name="target"></param>
-		/// <param name="camera"></param>
-		public void RenderScene ( TargetTexture target, Camera camera )
-		{
+		public ICollection<Composition> Compositions {
+			get; private set;
 		}
-
-
-		/// <summary>
-		/// Renders all sprites to specified target
-		/// </summary>
-		/// <param name="target"></param>
-		public void RenderSprites (	TargetTexture target )
-		{
-		}
-
-
-		/// <summary>
-		/// Clears all instances, sprites and lights.
-		/// </summary>
-		public void ClearAll ()
-		{
-			SpriteLayers.Clear();
-		}
-
-
-		/// <summary>
-		/// Mesh instances
-		/// </summary>
-		ICollection<MeshInstance> Instances { get; set; }
-
-
-		/// <summary>
-		/// Sprites 
-		/// </summary>
-		public ICollection<SpriteLayer> SpriteLayers { get; set; }
-
-
-		/// <summary>
-		/// Omni-lights
-		/// </summary>
-		ICollection<OmniLight> OmniLights { get; set; }
-
-
-		/// <summary>
-		/// Spotlights
-		/// </summary>
-		ICollection<SpotLight> SpotLights { get; set; }
 	}
 }

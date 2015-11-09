@@ -9,6 +9,7 @@ using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
 using Fusion.Drivers.Graphics;
 using Fusion.Core;
+using Fusion.Framework;
 
 
 namespace Fusion.Engine.Common {
@@ -93,6 +94,10 @@ namespace Fusion.Engine.Common {
 		{
 			foreach ( var bind in Enumerate(rootObj) ) {
 				Log.Message( "---- Init : {0} ----", bind.NiceName );
+
+				if (bind.Module is GameConsole) {
+					continue;
+				}
 
 				bind.Module.Initialize();
 			}
