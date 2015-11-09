@@ -138,7 +138,7 @@ namespace Fusion.Engine.GIS.DataSystem.MapSources
 				System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(response.GetResponseStream());
 				bitmap.Save(tile.Path, System.Drawing.Imaging.ImageFormat.Jpeg);
 				return true;
-			} catch (Exception e) {
+			} catch (Exception) {
 #if DEBUG
 				Log.Warning(e.Message);
 #endif
@@ -179,7 +179,7 @@ namespace Fusion.Engine.GIS.DataSystem.MapSources
 					ct.IsLoaded = true;
 
 					tex = null;
-				} catch (WebException e) {
+				} catch (WebException) {
 #if DEBUG
 					Log.Warning(e.Message);
 #endif
