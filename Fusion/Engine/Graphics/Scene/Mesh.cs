@@ -11,7 +11,7 @@ using System.ComponentModel.Design;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 
-namespace Fusion.Drivers.Graphics {
+namespace Fusion.Engine.Graphics.Scene {
 
 	public sealed partial class Mesh : IEquatable<Mesh> {
 

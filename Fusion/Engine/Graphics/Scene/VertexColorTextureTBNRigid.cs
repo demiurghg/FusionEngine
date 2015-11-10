@@ -8,8 +8,8 @@ using Fusion;
 using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
 
-namespace Fusion.Drivers.Graphics {
-	public struct VertexColorTextureTBN {
+namespace Fusion.Engine.Graphics.Scene {
+	public struct VertexColorTextureTBNRigid {
 
 		[Vertex("POSITION")]	public Vector3	Position;
 		[Vertex("TANGENT")]		public Half4	Tangent	;
@@ -20,14 +20,14 @@ namespace Fusion.Drivers.Graphics {
 
 		static public VertexInputElement[] Elements {
 			get {
-				return VertexInputElement.FromStructure( typeof(VertexColorTextureTBN) );
+				return VertexInputElement.FromStructure( typeof(VertexColorTextureTBNRigid) );
 			}
 		}
 
 
-		public static VertexColorTextureTBN Convert ( MeshVertex meshVertex )
+		public static VertexColorTextureTBNRigid Convert ( MeshVertex meshVertex )
 		{
-			VertexColorTextureTBN v;
+			VertexColorTextureTBNRigid v;
 			v.Position	=	meshVertex.Position;
 			v.Tangent	=	MathUtil.ToHalf4( meshVertex.Tangent,	0 );
 			v.Binormal	=	MathUtil.ToHalf4( meshVertex.Binormal,	0 );	

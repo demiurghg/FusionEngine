@@ -8,7 +8,7 @@ using Fusion;
 using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
 
-namespace Fusion.Drivers.Graphics {
+namespace Fusion.Engine.Graphics.Scene {
 	public struct VertexColorTextureNormal {
 
 		[Vertex("POSITION")]	public Vector3	Position;

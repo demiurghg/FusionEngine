@@ -7,7 +7,7 @@ using SharpDX;
 using Fusion.Core.Mathematics;
 
 
-namespace Fusion.Drivers.Graphics {
+namespace Fusion.Engine.Graphics.Scene {
 
 	public struct MeshTriangle : IEquatable<MeshTriangle> {
 

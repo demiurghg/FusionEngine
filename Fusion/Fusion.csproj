@@ -182,6 +182,7 @@
     <Compile Include="Drivers\Graphics\Resources\FormattedBuffer.cs" />
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
     <Compile Include="Drivers\Graphics\Resources\UnorderedAccess.cs" />
+    <Compile Include="Engine\Graphics\Scene\VertexColorTextureTBNSkinned.cs" />
     <Compile Include="Drivers\Graphics\States\StateFactory.cs" />
     <Compile Include="Drivers\Graphics\UbershaderLoader.cs" />
     <Compile Include="Drivers\Graphics\Display\BaseDisplay.cs" />
@@ -192,11 +193,11 @@
     <Compile Include="Drivers\Graphics\Display\OculusRiftDisplay.cs" />
     <Compile Include="Drivers\Graphics\Display\StereoDualHeadDisplay.cs" />
     <Compile Include="Drivers\Graphics\Display\StereoInterlacedDisplay.cs" />
-    <Compile Include="Drivers\Graphics\Scene\AnimMode.cs" />
+    <Compile Include="Engine\Graphics\Scene\AnimMode.cs" />
     <Compile Include="Drivers\Graphics\Resources\TextureAtlas.cs" />
-    <Compile Include="Drivers\Graphics\Scene\VertexColorTextureNormal.cs" />
-    <Compile Include="Drivers\Graphics\Scene\SceneLoader.cs" />
-    <Compile Include="Drivers\Graphics\Scene\MeshSubset.cs" />
+    <Compile Include="Engine\Graphics\Scene\VertexColorTextureNormal.cs" />
+    <Compile Include="Engine\Graphics\Scene\SceneLoader.cs" />
+    <Compile Include="Engine\Graphics\Scene\MeshSubset.cs" />
     <Compile Include="Drivers\Graphics\States\BlendState.cs" />
     <Compile Include="Drivers\Graphics\States\RasterizerState.cs" />
     <Compile Include="Drivers\Graphics\States\PipelineState.cs" />
@@ -214,7 +215,7 @@
     <Compile Include="Drivers\Graphics\Enums.cs" />
     <Compile Include="Drivers\Graphics\Resources\StructuredBuffer.cs" />
     <Compile Include="Drivers\Graphics\Resources\Texture2D.cs" />
-    <Compile Include="Drivers\Graphics\Scene\MeshMaterial.cs" />
+    <Compile Include="Engine\Graphics\Scene\MeshMaterial.cs" />
     <Compile Include="Core\DisposableBase.cs" />
     <Compile Include="Engine\Common\Commands\Connect.cs" />
     <Compile Include="Engine\Common\Commands\Disconnect.cs" />
@@ -382,8 +383,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Drivers\Graphics\Scene\VertexColorTexture.cs" />
-    <Compile Include="Drivers\Graphics\Scene\VertexColorTextureTBN.cs" />
+    <Compile Include="Engine\Graphics\Scene\VertexColorTexture.cs" />
+    <Compile Include="Engine\Graphics\Scene\VertexColorTextureTBNRigid.cs" />
     <Compile Include="Core\Shell\CommandLineParser.cs" />
     <Compile Include="Core\Shell\Command.cs" />
     <Compile Include="Core\Shell\CommandAttribute.cs" />
@@ -413,11 +414,11 @@
     <Compile Include="Core\Utils\PerlinNoiseGenerator.cs" />
     <Compile Include="Core\Utils\Pix.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Drivers\Graphics\Scene\Mesh.cs" />
-    <Compile Include="Drivers\Graphics\Scene\MeshTriangle.cs" />
-    <Compile Include="Drivers\Graphics\Scene\MeshVertex.cs" />
-    <Compile Include="Drivers\Graphics\Scene\Node.cs" />
-    <Compile Include="Drivers\Graphics\Scene\Scene.cs" />
+    <Compile Include="Engine\Graphics\Scene\Mesh.cs" />
+    <Compile Include="Engine\Graphics\Scene\MeshTriangle.cs" />
+    <Compile Include="Engine\Graphics\Scene\MeshVertex.cs" />
+    <Compile Include="Engine\Graphics\Scene\Node.cs" />
+    <Compile Include="Engine\Graphics\Scene\Scene.cs" />
     <Compile Include="Core\Utils\Serializer.cs" />
     <Compile Include="Core\Mathematics\Temperature.cs" />
     <Compile Include="Core\Utils\Wildcard.cs" />

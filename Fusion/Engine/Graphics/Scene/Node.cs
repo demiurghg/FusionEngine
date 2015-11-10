@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SharpDX;
-using Fusion.Drivers.Graphics;
+using Fusion.Engine.Graphics.Scene;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 
 
-namespace Fusion.Drivers.Graphics {
+namespace Fusion.Engine.Graphics.Scene {
 
 	public sealed class Node : IEquatable<Node> {
 
@@ -26,7 +26,6 @@ namespace Fusion.Drivers.Graphics {
 		/// Scene mesh index. Negative value means no mesh reference.
 		/// </summary>
 		public int MeshIndex	{ get; set; }
-
 
 		/// <summary>
 		/// Scene animation track index.

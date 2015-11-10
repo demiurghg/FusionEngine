@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fusion.Drivers.Graphics {
+namespace Fusion.Engine.Graphics.Scene {
 
 	/// <summary>
 	/// Represents the group of primitives with specified material.

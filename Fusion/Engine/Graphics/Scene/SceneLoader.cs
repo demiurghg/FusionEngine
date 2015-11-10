@@ -9,12 +9,12 @@ using System.Runtime.Serialization.Formatters.Binary;
 using SharpDX;
 using Fusion;
 using Fusion.Core.Mathematics;
-using Fusion.Drivers.Graphics;
+using Fusion.Engine.Graphics.Scene;
 using Fusion.Core.Content;
 using Fusion.Engine.Common;
 
 
-namespace Fusion.Drivers.Graphics {
+namespace Fusion.Engine.Graphics.Scene {
 
 	/// <summary>
 	/// Scene loader

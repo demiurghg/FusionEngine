@@ -8,7 +8,7 @@ using Fusion.Core;
 using Fusion.Core.Mathematics;
 
 
-namespace Fusion.Drivers.Graphics {
+namespace Fusion.Engine.Graphics.Scene {
 
 	public struct MeshVertex : IEquatable<MeshVertex> {
 

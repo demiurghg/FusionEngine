@@ -47,7 +47,7 @@ namespace Fusion.Drivers.Graphics {
 				if (array.Length==0) {
 					return null;
 				}
-				return new ShaderBytecode( array );;
+				return new ShaderBytecode( array );
 			}
 		}
 

@@ -14,12 +14,15 @@ using Fusion.Core;
 using Fusion.Core.Content;
 
 
-namespace Fusion.Drivers.Graphics {
+namespace Fusion.Engine.Graphics.Scene {
 	public class Scene {
 
 		List<Node>			nodes		= new List<Node>();
 		List<Mesh>			meshes		= new List<Mesh>();
 		List<MeshMaterial>	materials	= new List<MeshMaterial>();
+
+		List<VertexBuffer>	vertexBuffers	=	new List<VertexBuffer>();
+		List<IndexBuffer>	indexBuffers	=	new List<IndexBuffer>();
 
 		int firstFrame = 0;
 		int lastFrame = 0;
@@ -45,6 +48,28 @@ namespace Fusion.Drivers.Graphics {
 				return meshes;
 			}
 		}
+
+
+		/// <summary>
+		/// List of vertex buffers.
+		/// </summary>
+		public IList<VertexBuffer> VertexBuffers { 
+			get {
+				return vertexBuffers;
+			}
+		}
+
+
+
+		/// <summary>
+		/// List if index buffers
+		/// </summary>
+		public IList<IndexBuffer> IndexBuffers {
+			get {
+				return indexBuffers;
+			}
+		}
+
 
 
 		/// <summary>
