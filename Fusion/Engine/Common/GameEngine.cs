@@ -25,6 +25,7 @@ using Fusion.Engine.Graphics;
 using Fusion.Engine.Input;
 using Fusion.Engine.Network;
 using Fusion.Engine.Client;
+using Fusion.Engine.Graphics.GIS;
 using Fusion.Engine.Server;
 using Lidgren.Network;
 
@@ -66,7 +67,7 @@ namespace Fusion.Engine.Common {
 		public NetworkEngine Network { get { return network; } }
 
 		[GameModule("GIS", "gis", InitOrder.After)]
-		public GIS.GIS GIS { get { return gis; } }
+		public GIS GIS { get { return gis; } }
 
 		/// <summary>
 		/// Gets current content manager
@@ -144,7 +145,7 @@ namespace Fusion.Engine.Common {
 		Keyboard			keyboard		;
 		Mouse				mouse			;
 		GamepadCollection	gamepads		;
-		GIS.GIS				gis				;
+		GIS					gis				;
 
 
 		GameTime	gameTimeInternal;
@@ -246,7 +247,7 @@ namespace Fusion.Engine.Common {
 			mouse				=	new Mouse(this);
 			gamepads			=	new GamepadCollection(this);
 
-			gis					=	new GIS.GIS(this);
+			gis					=	new GIS(this);
 		}
 
 

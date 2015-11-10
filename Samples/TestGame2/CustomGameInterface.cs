@@ -14,7 +14,7 @@ using Fusion.Framework;
 
 namespace TestGame2 {
 
-	class SomeModule  : GameModule {
+	/*class SomeModule  : GameModule {
 		public SomeModule(GameEngine e): base(e) {}
 		public override void Initialize ()	{}
 		protected override void Dispose ( bool disposing )	{}
@@ -31,7 +31,7 @@ namespace TestGame2 {
 		public SomeModule2(GameEngine e): base(e) { Boo = new SomeModule(e); Boo2 = new SomeModule(e); }
 		public override void Initialize ()	{}
 		protected override void Dispose ( bool disposing )	{}
-	}
+	} */
 
 
 	class CustomGameInterface : Fusion.Engine.Common.GameInterface {
@@ -41,11 +41,11 @@ namespace TestGame2 {
 		public GameConsole console;
 
 
-		[GameModule("BarBefore", "bar", InitOrder.Before)]
+		/*[GameModule("BarBefore", "bar", InitOrder.Before)]
 		public SomeModule2 Bar { get; set; }
 
 		[GameModule("BarAfter", "bar", InitOrder.After)]
-		public SomeModule2 Bar2 { get; set; }
+		public SomeModule2 Bar2 { get; set; }*/
 
 		
 		SpriteLayer testLayer;
@@ -64,8 +64,8 @@ namespace TestGame2 {
 		{
 			console		=	new GameConsole( gameEngine, "conchars", "conback");
 
-			Bar = new SomeModule2(gameEngine);
-			Bar2 = new SomeModule2(gameEngine);
+			/*Bar = new SomeModule2(gameEngine);
+			Bar2 = new SomeModule2(gameEngine);*/
 		}
 
 
