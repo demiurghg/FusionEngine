@@ -13,7 +13,7 @@ namespace Fusion.Engine.Graphics {
 
 		internal readonly GraphicsDevice Device;
 
-		[GameModule("Sprites", "sprite")]
+		[GameModule("Sprites", "sprite", InitOrder.After)]
 		public SpriteEngine	SpriteEngine { get { return spriteEngine; } }
 		SpriteEngine	spriteEngine;
 

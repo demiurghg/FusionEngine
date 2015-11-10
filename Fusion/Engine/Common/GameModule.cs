@@ -40,74 +40,121 @@ namespace Fusion.Engine.Common {
 			public readonly string NiceName;
 			public readonly string ShortName;
 			public readonly GameModule Module;
+			public readonly InitOrder InitOrder;
 			
-			public ModuleBinding ( GameModule module, string niceName, string shortName )
+			public ModuleBinding ( GameModule module, string niceName, string shortName, InitOrder initOrder )
 			{
 				Module		=	module;
 				NiceName	=	niceName;
 				ShortName	=	shortName;
+				InitOrder	=	initOrder;
 			}
 		}
 
 
 		/// <summary>
-		/// 
+		/// Enumerates all modules and submodules in BFS order.
 		/// </summary>
 		/// <param name="rootObj"></param>
 		/// <returns></returns>
-		static void GetAllR ( object rootObj, ref List<ModuleBinding> bindings )
-		{
-			if (bindings==null) {
-				bindings = new List<ModuleBinding>();
-			}
-
-			var binds = rootObj.GetType()
-						.GetProperties()
-						.Where( prop => prop.GetCustomAttribute<GameModuleAttribute>() != null )
-						.Select( prop1 => new ModuleBinding((GameModule)prop1.GetValue( rootObj ), 
-							prop1.GetCustomAttribute<GameModuleAttribute>().NiceName, 
-							prop1.GetCustomAttribute<GameModuleAttribute>().ShortName ) )
-						.ToList();
-
-			bindings.AddRange( binds );
-
-			foreach ( var bind in binds ) {
-				GetAllR( bind.Module, ref bindings );
-			}
-		}
-
-
 		internal static IEnumerable<ModuleBinding> Enumerate ( object rootObj )
 		{
-			List<ModuleBinding> bindings = null;
-			GetAllR( rootObj, ref bindings );
-			return bindings;
+			var list = new List<ModuleBinding>();
+
+			var queue = new LinkedList<ModuleBinding>();
+
+			foreach ( var module in GetModuleBindings(rootObj).Reverse() ) {
+				queue.AddFirst( module );
+			}
+
+			while (queue.Any()) {
+				var module = queue.First();
+				queue.RemoveFirst();
+
+				list.Add(module);
+
+				foreach ( var childModule in GetModuleBindings(module.Module) ) {
+					queue.AddFirst( childModule );
+				}
+			}
+
+			return list;
 		}
 
+
+
+		/// <summary>
+		/// Gets module binding for each module declared in parentModule.
+		/// </summary>
+		/// <param name="parentModule"></param>
+		/// <returns></returns>
+		static IEnumerable<ModuleBinding> GetModuleBindings ( object parentModule )
+		{
+			return parentModule.GetType()
+						.GetProperties()
+						.Where( prop => prop.GetCustomAttribute<GameModuleAttribute>() != null )
+						.Select( prop1 => new ModuleBinding((GameModule)prop1.GetValue( parentModule ), 
+							prop1.GetCustomAttribute<GameModuleAttribute>().NiceName, 
+							prop1.GetCustomAttribute<GameModuleAttribute>().ShortName,
+							prop1.GetCustomAttribute<GameModuleAttribute>().InitOrder ) )
+						;
+		}
+
+
+
+
+
+		/// <summary>
+		/// Perform recursive module initialization.
+		/// </summary>
+		/// <param name="root"></param>
+		static void InitRecursive ( ModuleBinding root, string prefix )
+		{
+			var children = GetModuleBindings( root.Module );
+
+			foreach ( var child in children ) {
+				if (child.InitOrder==InitOrder.Before) {
+					InitRecursive( child, prefix + root.NiceName + "/" );
+				}
+			}
+
+			Log.Message( "---- Init : {0} ----", prefix + root.NiceName );
+			root.Module.Initialize();
+
+			disposeList.Add( root );
+
+			foreach ( var child in children ) {
+				if (child.InitOrder==InitOrder.After) {
+					InitRecursive( child, prefix + root.NiceName + "/" );
+				}
+			}
+		}
+
+
+
+		/// <summary>
+		/// Calls 'Initialize' method on all modules starting from top one tree.
+		/// </summary>
+		/// <param name="obj"></param>
+		static internal void InitializeAll ( object rootObj )
+		{
+			foreach ( var m in GetModuleBindings(rootObj) ) {
+				InitRecursive(m,"");
+			}
+		}
+
+
+		static List<ModuleBinding> disposeList = new List<ModuleBinding>();
 
 
 		/// <summary>
 		/// Calls 'Initialize' method on all services starting from top one tree.
 		/// </summary>
-		/// <param name="obj"></param>
-		static internal void InitializeAll ( object rootObj )
-		{
-			foreach ( var bind in Enumerate(rootObj) ) {
-				Log.Message( "---- Init : {0} ----", bind.NiceName );
-
-				if (bind.Module is GameConsole) {
-					continue;
-				}
-
-				bind.Module.Initialize();
-			}
-		}
-
-
-
+		/// <param name="rootObj"></param>
 		static internal void DisposeAll ( object rootObj )
 		{
-			foreach ( var bind in Enumerate(rootObj).Reverse() ) {
+			disposeList.Reverse();
+			foreach ( var bind in disposeList ) {
 				Log.Message( "---- Dispose : {0} ----", bind.NiceName );
 
 				bind.Module.Dispose();

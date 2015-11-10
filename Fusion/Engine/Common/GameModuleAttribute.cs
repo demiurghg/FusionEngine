@@ -29,16 +29,23 @@ namespace Fusion.Engine.Common {
 
 
 		/// <summary>
+		/// Sets and gets init order
+		/// </summary>
+		public InitOrder InitOrder { get; private set; }
+
+
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="niceName"></param>
 		/// <param name="shortName"></param>
 		/// <param name="initOrder">Initialization order. Negative value means that module will be initilized befor parent module.
 		/// Positive value means that module will be initialized after parent module.</param>
-		public GameModuleAttribute( string niceName, string shortName )
+		public GameModuleAttribute( string niceName, string shortName, InitOrder initOrder )
 		{
 			NiceName	=	niceName;
 			ShortName	=	shortName;
+			InitOrder	=	initOrder;
 		}
 	}
 }

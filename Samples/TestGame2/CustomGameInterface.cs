@@ -13,11 +13,40 @@ using Fusion.Core.Configuration;
 using Fusion.Framework;
 
 namespace TestGame2 {
+
+	class SomeModule  : GameModule {
+		public SomeModule(GameEngine e): base(e) {}
+		public override void Initialize ()	{}
+		protected override void Dispose ( bool disposing )	{}
+	}
+
+	class SomeModule2  : GameModule {
+
+		[GameModule("BooBefore", "boo", InitOrder.Before)]
+		public SomeModule Boo { get; set; }
+
+		[GameModule("BooAfter", "boo", InitOrder.After)]
+		public SomeModule Boo2 { get; set; }
+
+		public SomeModule2(GameEngine e): base(e) { Boo = new SomeModule(e); Boo2 = new SomeModule(e); }
+		public override void Initialize ()	{}
+		protected override void Dispose ( bool disposing )	{}
+	}
+
+
 	class CustomGameInterface : Fusion.Engine.Common.GameInterface {
 
-		[GameModule("Console", "con")]
+		[GameModule("Console", "con", InitOrder.Before)]
 		public GameConsole Console { get { return console; } }
 		public GameConsole console;
+
+
+		[GameModule("BarBefore", "bar", InitOrder.Before)]
+		public SomeModule2 Bar { get; set; }
+
+		[GameModule("BarAfter", "bar", InitOrder.After)]
+		public SomeModule2 Bar2 { get; set; }
+
 		
 		SpriteLayer testLayer;
 		DiscTexture	texture;
@@ -34,6 +63,9 @@ namespace TestGame2 {
 		public CustomGameInterface ( GameEngine gameEngine ) : base(gameEngine)
 		{
 			console		=	new GameConsole( gameEngine, "conchars", "conback");
+
+			Bar = new SomeModule2(gameEngine);
+			Bar2 = new SomeModule2(gameEngine);
 		}
 
 
@@ -46,8 +78,6 @@ namespace TestGame2 {
 		/// </summary>
 		public override void Initialize ()
 		{
-			Console.Initialize();
-
 			master		=	new Composition(GameEngine);
 
 			GameEngine.GraphicsEngine.Compositions.Add( master );

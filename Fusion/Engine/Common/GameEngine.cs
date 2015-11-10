@@ -59,13 +59,13 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Gets the current graphics engine
 		/// </summary>
-		[GameModule("Graphics", "ge")]
+		[GameModule("Graphics", "ge", InitOrder.After)]
 		public	GraphicsEngine GraphicsEngine { get { return graphicsEngine; } }
 
-		[GameModule("Network", "net")]
+		[GameModule("Network", "net", InitOrder.After)]
 		public NetworkEngine Network { get { return network; } }
 
-		[GameModule("GIS", "gis")]
+		[GameModule("GIS", "gis", InitOrder.After)]
 		public GIS.GIS GIS { get { return gis; } }
 
 		/// <summary>
@@ -76,13 +76,13 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Gets keyboard.
 		/// </summary>
-		[GameModule("Keyboard", "kb")]
+		[GameModule("Keyboard", "kb", InitOrder.After)]
 		public Keyboard Keyboard { get { return keyboard; } }
 
 		/// <summary>
 		/// Gets mouse.
 		/// </summary>
-		[GameModule("Mouse", "mouse")]
+		[GameModule("Mouse", "mouse", InitOrder.After)]
 		public Mouse Mouse { get { return mouse; } }
 
 		/// <summary>
@@ -157,19 +157,19 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Current game server.
 		/// </summary>
-		[GameModule("Server", "sv")]
+		[GameModule("Server", "sv", InitOrder.After)]
 		public GameServer GameServer { get { return sv; } set { sv = value; } }
 		
 		/// <summary>
 		/// Current game client.
 		/// </summary>
-		[GameModule("Client", "cl")]
+		[GameModule("Client", "cl", InitOrder.After)]
 		public GameClient GameClient { get { return cl; } set { cl = value; } }
 
 		/// <summary>
 		/// Current game interface.
 		/// </summary>
-		[GameModule("Interface", "ui")]
+		[GameModule("Interface", "ui", InitOrder.After)]
 		public GameInterface GameInterface { get { return gi; } set { gi = value; } }
 
 

@@ -222,6 +222,7 @@
     <Compile Include="Engine\Common\Commands\Map.cs" />
     <Compile Include="Engine\Common\Commands\ServerInfo.cs" />
     <Compile Include="Engine\Common\Commands\ServerDrop.cs" />
+    <Compile Include="Engine\Common\InitOrder.cs" />
     <Compile Include="Engine\GIS\DataSystem\MapSources\BaseMapSource.cs" />
     <Compile Include="Engine\GIS\DataSystem\MapSources\GoogleMaps\BaseGoogleMapSource.cs" />
     <Compile Include="Engine\GIS\DataSystem\MapSources\GoogleMaps\GoogleSatelliteMap.cs" />
