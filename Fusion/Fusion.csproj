@@ -224,6 +224,7 @@
     <Compile Include="Engine\Common\Commands\ServerDrop.cs" />
     <Compile Include="Engine\Common\InitOrder.cs" />
     <Compile Include="Engine\Graphics\Composition.cs" />
+    <Compile Include="Engine\Graphics\GraphicsEngineConfig.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BaseMapSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\GoogleMaps\BaseGoogleMapSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\GoogleMaps\GoogleSatelliteMap.cs" />

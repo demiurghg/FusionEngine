@@ -271,7 +271,7 @@ namespace Fusion.Drivers.Graphics.Display {
 			Log.Message("Mode : {0}x{1} {3} MS:{2} Stereo:{5} {4}", 
 				parameters.Width, 
 				parameters.Height, 
-				parameters.MsaaLevel,
+				0,
 				parameters.FullScreen ? "FS" : "W", 
 				parameters.UseDebugDevice ? "(Debug)" : "",
 				parameters.StereoMode );

@@ -55,7 +55,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem
 
 				return doc;
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 #if DEBUG
 				Log.Warning(e.Message);

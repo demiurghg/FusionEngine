@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core;
+using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 
@@ -17,16 +18,37 @@ namespace Fusion.Engine.Graphics {
 		public SpriteEngine	SpriteEngine { get { return spriteEngine; } }
 		SpriteEngine	spriteEngine;
 
+
+		[Config]
+		public  GraphicsEngineConfig Config { get; private set; }
+
+
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="engine"></param>
 		public GraphicsEngine ( GameEngine gameEngine ) : base(gameEngine)
 		{
+			Config		=	new GraphicsEngineConfig();
 			this.Device	=	gameEngine.GraphicsDevice;
 
 			Compositions	=	new List<Composition>();
 			spriteEngine	=	new SpriteEngine( this );
+		}
+
+
+										  
+		/// <summary>
+		/// Applies graphics parameters.
+		/// </summary>
+		/// <param name="p"></param>
+		internal void ApplyParameters ( ref GameParameters p )
+		{
+			p.Width				=	Config.Width;
+			p.Height			=	Config.Height;
+			p.FullScreen		=	Config.Fullscreen;
+			p.StereoMode		=	Config.StereoMode;
+			p.InterlacingMode	=	Config.InterlacingMode;
 		}
 
 

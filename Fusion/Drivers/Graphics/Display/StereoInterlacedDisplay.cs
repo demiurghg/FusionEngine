@@ -66,7 +66,7 @@ namespace Fusion.Drivers.Graphics.Display {
 				ModeDescription		=	new ModeDescription( parameters.Width, parameters.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm ),
 				IsWindowed			=	true,
 				OutputHandle		=	window.Handle,
-				SampleDescription	=	new SampleDescription(parameters.MsaaLevel, 0),
+				SampleDescription	=	new SampleDescription(1, 0),
 				SwapEffect			=	SwapEffect.Discard,
 				Usage				=	Usage.RenderTargetOutput,
 				Flags				=	SwapChainFlags.None,

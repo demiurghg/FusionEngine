@@ -71,11 +71,6 @@ namespace Fusion.Engine.Common {
 		public InterlacingMode	InterlacingMode		{ get; set; }
 
 		[Category("Graphics")]
-		[Description("MSAA level. Acceptable values are 1,2,4,8 or 16.")]
-		[CommandLineParser.Name("msaa")]
-		public int	MsaaLevel		{ get; set; }
-
-		[Category("Graphics")]
 		[Description("Hardware profile (Reach, HiDef)\r\n/hardware:<value>")]
 		[CommandLineParser.Name("hardware")]
 		public GraphicsProfile	GraphicsProfile		{ get; set; }
@@ -100,7 +95,6 @@ namespace Fusion.Engine.Common {
 		{
 			Title			=	Path.GetFileNameWithoutExtension( Process.GetCurrentProcess().ProcessName );
 			
-			MsaaLevel		=	1;
 			Width			=	800;
 			Height			=	600;
 			FullScreen		=	false;

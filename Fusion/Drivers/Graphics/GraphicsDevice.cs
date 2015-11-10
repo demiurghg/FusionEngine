@@ -350,7 +350,7 @@ namespace Fusion.Drivers.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		internal void Present ()
+		internal void Present ( int syncInterval )
 		{
 			lock (deviceContext) {
 				if (requestScreenShotPath != null ) {
@@ -361,7 +361,7 @@ namespace Fusion.Drivers.Graphics {
 					BackbufferColor.SaveToFile( path );
 				}
 
-				display.SwapBuffers( 1 );
+				display.SwapBuffers( syncInterval );
 
 				display.Update();
 			}

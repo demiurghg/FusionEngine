@@ -190,6 +190,10 @@ namespace Fusion.Engine.Common {
 
 
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
 		public string GetReleaseInfo ()
 		{
 			return string.Format("{0} {1} {2}", 
@@ -297,8 +301,7 @@ namespace Fusion.Engine.Common {
 			Log.Message("---------- GameEngine Initializing ----------");
 
 			var p = new GameParameters();
-			p.Width	=	800;
-			p.Height =	600;
+			GraphicsEngine.ApplyParameters( ref p );
 
 			GraphicsDevice.Initialize( p );
 			InputDevice.Initialize();
@@ -470,7 +473,7 @@ namespace Fusion.Engine.Common {
 					gameTimeInternal.AddSubframe();
 				}
 
-				GraphicsDevice.Present();
+				GraphicsDevice.Present(1);
 
 				InputDevice.EndUpdateInput();
 			}

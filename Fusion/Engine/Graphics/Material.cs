@@ -8,3 +8,4 @@ namespace Fusion.Engine.Graphics {
 	class Material {
 	}
 }
+																	    
