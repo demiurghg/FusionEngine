@@ -34,6 +34,10 @@ namespace Fusion.Engine.Scene {
 		{																			
 			var scene = Scene.Load( stream );
 
+			foreach ( var mesh in scene.Meshes ) {	
+				mesh.CreateVertexAndIndexBuffers( game.GraphicsDevice );
+			}
+
 			return scene;
 		}
 	}

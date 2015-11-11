@@ -9,7 +9,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// Defines target texture formats
 	/// </summary>
-	public enum TargetTextureFormat {
+	public enum TargetFormat {
 		LowDynamicRange,
 		HighDynamicRange,
 	}

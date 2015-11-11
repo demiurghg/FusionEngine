@@ -15,7 +15,7 @@ using Fusion.Core.Content;
 
 
 namespace Fusion.Engine.Scene {
-	public class Scene {
+	public class Scene : DisposableBase {
 
 		List<Node>			nodes		= new List<Node>();
 		List<Mesh>			meshes		= new List<Mesh>();
@@ -144,6 +144,24 @@ namespace Fusion.Engine.Scene {
 		}
 
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void Dispose ( bool disposing )
+		{
+			if (disposing) {
+				foreach ( var mesh in Meshes ) {
+					if (mesh!=null) {
+						mesh.Dispose();
+					}
+				}
+			}
+			base.Dispose();
+		}
+
+
 		/*---------------------------------------------------------------------
 		 * 
 		 *	Topology stuff :
@@ -234,23 +252,6 @@ namespace Fusion.Engine.Scene {
 				destination[i] = Matrix.Invert( Nodes[i].BindPose ) * destination[i];
 			}
 		}
-
-
-
-		/// <summary>
-		/// Creates array of vertex and index buffers for entire scene.
-		/// The number of array entries is equal to number of meshes in scene.
-		/// </summary>
-		/// <param name="device">Graphics device.</param>
-		/// <param name="convert">Convertion function.</param>
-		/// <param name="vertexBuffers">Output vertex buffer array.</param>
-		/// <param name="indexBuffers">Output index buffer array.</param>
-		public void Bake<TVertex> ( GraphicsDevice device, Func<MeshVertex,TVertex> convert, out VertexBuffer[] vertexBuffers, out IndexBuffer[] indexBuffers ) where TVertex: struct
-		{		
-			vertexBuffers	=	Meshes.Select( m => m.CreateVertexBuffer<TVertex>( device, convert ) ).ToArray();
-			indexBuffers	=	Meshes.Select( m => m.CreateIndexBuffer( device ) ).ToArray();
-		}
-
 
 		/*-----------------------------------------------------------------------------------------
 		 * 

@@ -13,7 +13,7 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Engine.Scene {
 
-	public sealed partial class Mesh : IEquatable<Mesh> {
+	public sealed partial class Mesh : DisposableBase, IEquatable<Mesh> {
 
 		public List<MeshVertex>		Vertices		{ get; private set; }	
 		public List<MeshTriangle>	Triangles		{ get; private set; }	
@@ -22,6 +22,11 @@ namespace Fusion.Engine.Scene {
 		public int					VertexCount		{ get { return Vertices.Count; } }
 		public int					IndexCount		{ get { return TriangleCount * 3; } }
 
+		public VertexBuffer			VertexBuffer	{ get { return vertexBuffer; } }
+		public IndexBuffer			IndexBuffer		{ get { return indexBuffer; } }
+
+		VertexBuffer vertexBuffer;
+		IndexBuffer	 indexBuffer;
 
 
 		/// <summary>
@@ -32,6 +37,21 @@ namespace Fusion.Engine.Scene {
 			Vertices		=	new List<MeshVertex>();
 			Triangles		=	new List<MeshTriangle>();
 			Subsets			=	new List<MeshSubset>();
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void Dispose ( bool disposing )
+		{
+			if (disposing) {
+				SafeDispose( ref vertexBuffer );
+				SafeDispose( ref indexBuffer );
+			}
+			base.Dispose( disposing );
 		}
 
 
@@ -69,28 +89,27 @@ namespace Fusion.Engine.Scene {
 
 
 
-
 		/// <summary>
-		/// Creates index buffer for given mesh.
+		/// 
 		/// </summary>
-		/// <returns></returns>
-		public IndexBuffer CreateIndexBuffer ( GraphicsDevice device )
+		internal void CreateVertexAndIndexBuffers ( GraphicsDevice device )
 		{
-			return IndexBuffer.Create( device, GetIndices() );
-		}
+			indexBuffer		=	IndexBuffer.Create( device, GetIndices() );
 
+			bool skinned	=	false;
 
+			foreach ( var v in Vertices ) {
+				if (v.SkinIndices!=Int4.Zero) {
+					skinned = true;
+					break;
+				}
+			}
 
-		/// <summary>
-		/// Creates vertex buffer for given mesh.
-		/// </summary>
-		/// <typeparam name="TVertex"></typeparam>
-		/// <param name="device"></param>
-		/// <param name="convert"></param>
-		/// <returns></returns>
-		public VertexBuffer CreateVertexBuffer<TVertex> ( GraphicsDevice device, Func<MeshVertex,TVertex> convert )	where TVertex: struct
-		{
-			return VertexBuffer.Create<TVertex>( device, Vertices.Select( v => convert(v) ).ToArray() );
+			if (skinned) {
+				vertexBuffer = VertexBuffer.Create( device, Vertices.Select( v => VertexColorTextureTBNSkinned.Convert(v) ).ToArray() );
+			} else {
+				vertexBuffer = VertexBuffer.Create( device, Vertices.Select( v => VertexColorTextureTBNRigid.Convert(v) ).ToArray() );
+			}
 		}
 
 

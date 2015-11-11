@@ -16,7 +16,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Gets target texture's format
 		/// </summary>
-		public TargetTextureFormat Format { get; private set; }
+		public TargetFormat Format { get; private set; }
 
 		RenderTarget2D	renderTarget;
 
@@ -27,7 +27,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="width"></param>
 		/// <param name="height"></param>
 		/// <param name="format"></param>
-		public TargetTexture ( GraphicsEngine ge, int width, int height, TargetTextureFormat format )
+		public TargetTexture ( GraphicsEngine ge, int width, int height, TargetFormat format )
 		{
 			this.Width	=	width;
 			this.Height	=	height;
@@ -36,8 +36,8 @@ namespace Fusion.Engine.Graphics {
 			var clrFrmt	=	 ColorFormat.Unknown;
 
 			switch (format) {
-				case TargetTextureFormat.LowDynamicRange  : clrFrmt = ColorFormat.Rgba8;	break;
-				case TargetTextureFormat.HighDynamicRange : clrFrmt = ColorFormat.Rgba16F;	break;
+				case TargetFormat.LowDynamicRange  : clrFrmt = ColorFormat.Rgba8;	break;
+				case TargetFormat.HighDynamicRange : clrFrmt = ColorFormat.Rgba16F;	break;
 				default: throw new ArgumentException("format");
 			}
 
