@@ -38,11 +38,6 @@ namespace Fusion.Drivers.Graphics {
 		public bool FullScreen { get; set; }
 
 		/// <summary>
-		/// Initial VSync interval
-		/// </summary>
-		public int VSyncInterval { get; set; }
-
-		/// <summary>
 		/// Stereo mode
 		/// </summary>
 		public StereoMode	StereoMode		{ get; set; }
@@ -80,8 +75,8 @@ namespace Fusion.Drivers.Graphics {
 			Width			=	800;
 			Height			=	600;
 			FullScreen		=	false;
-			VSyncInterval	=	1;
 			StereoMode		=	StereoMode.Disabled;
+			MsaaLevel		=	1;
 		}
 	}
 }

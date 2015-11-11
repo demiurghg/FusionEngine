@@ -5,7 +5,7 @@
 using namespace System;
 using namespace Fusion;
 using namespace msclr::interop;
-using namespace Fusion::Engine::Graphics::Scene;
+using namespace Fusion::Engine::Scene;
 using namespace Fusion::Core::Mathematics;
 
 namespace Native {
@@ -25,7 +25,7 @@ namespace Native {
 				FbxGeometryConverter	*fbxGConv	;	
 				FbxTime::EMode			timeMode;
 
-				void IterateChildren		( FbxNode *fbxNode, FbxScene *fbxScene, Fusion::Engine::Graphics::Scene::Scene ^scene, int parentIndex );
+				void IterateChildren		( FbxNode *fbxNode, FbxScene *fbxScene, Fusion::Engine::Scene::Scene ^scene, int parentIndex );
 				void HandleMesh				( Scene ^scene, Node ^node, FbxNode *fbxNode );
 				void HandleSkinning			( Mesh ^nodeMesh, Scene ^scene, Node ^node, FbxNode *fbxNode, Matrix^ meshTransform, array<Int4> ^skinIndices, array<Vector4>	^skinWeights );
 				void HandleCamera			( Scene ^scene, Node ^node, FbxNode *fbxNode );
@@ -35,7 +35,7 @@ namespace Native {
 				void GetTextureForVertex	( MeshVertex *vertex, FbxMesh *fbxMesh, int vertexIdCount, int vertexId );
 				void GetColorForVertex		( MeshVertex *vertex, FbxMesh *fbxMesh, int vertexIdCount, int vertexId );
 
-				void GetCustomProperties	( Fusion::Engine::Graphics::Scene::Node ^node, FbxNode *fbxNode );
+				void GetCustomProperties	( Fusion::Engine::Scene::Node ^node, FbxNode *fbxNode );
 			
 				// Animation stuff
 		};

@@ -22,17 +22,7 @@ namespace TestGame2 {
 			//
 			//	Build content on startup :
 			//
-			try {
-				Builder.Build( @"..\..\..\Content", @"Content", @"..\..\..\Temp", false );
-			} catch ( BuildException e ) {
-				Log.Error( e.Message );
-
-				Log.Message("Continue? [Y/N]");
-
-				if (Console.ReadKey().Key==ConsoleKey.N) {
-					return 1;
-				}
-			}
+			Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", false );
 
 
 			//

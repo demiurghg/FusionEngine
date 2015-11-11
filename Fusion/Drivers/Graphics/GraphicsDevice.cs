@@ -241,7 +241,7 @@ namespace Fusion.Drivers.Graphics {
 				if (parameters.StereoMode==StereoMode.Interlaced)	display	=	new StereoInterlacedDisplay( GameEngine, this, parameters ); else 
 				//if (parameters.StereoMode==StereoMode.OculusRift)	display	=	new OculusRiftDisplay( GameEngine, this, parameters ); else 
 					throw new ArgumentException("parameters.StereoMode");
-			} catch ( Exception e ) {
+			} catch ( GraphicsException e ) {
 				Log.Warning("Failed to intialize graphics device.");
 				Log.Warning("{0}", e.Message );
 				Log.Warning("Attempt to use default parameters...");

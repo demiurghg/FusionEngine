@@ -386,7 +386,7 @@ namespace Fusion.Engine.Common {
 			}
 
 			Log.Message("");
-			Log.Message("---------- GameEngine Shutting Down ----------");
+			Log.Message("-------- GameEngine Shutting Down --------");
 
 			//	wait for server 
 			//	if it is still running :
@@ -415,7 +415,7 @@ namespace Fusion.Engine.Common {
 
 			base.Dispose(disposing);
 
-			Log.Message("----------------------------------------");
+			Log.Message("------------------------------------------");
 			Log.Message("");
 
 			ReportActiveComObjects();
@@ -522,7 +522,7 @@ namespace Fusion.Engine.Common {
 					gameTimeInternal.AddSubframe();
 				}
 
-				GraphicsDevice.Present(1);
+				GraphicsDevice.Present(GraphicsEngine.Config.VSyncInterval);
 
 				InputDevice.EndUpdateInput();
 			}

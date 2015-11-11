@@ -126,6 +126,8 @@ namespace Fusion.Framework {
 		{
 			consoleFont			=	GameEngine.Content.Load<DiscTexture>(font);
 			consoleBackground	=	GameEngine.Content.Load<DiscTexture>(conback);
+
+			RefreshConsole();
 		}
 
 

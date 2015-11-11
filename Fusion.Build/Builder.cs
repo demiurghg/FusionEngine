@@ -62,6 +62,35 @@ namespace Fusion.Build {
 		}
 
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="inputDirectory"></param>
+		/// <param name="outputDirectory"></param>
+		/// <param name="temporaryDirectory"></param>
+		/// <param name="force"></param>
+		/// <returns></returns>
+		public static bool SafeBuild ( string inputDirectory, string outputDirectory, string temporaryDirectory, bool force )
+		{
+			try {
+				
+				var contentFile = Path.Combine(inputDirectory, ".content");
+
+				if (File.Exists(contentFile)) {
+					Build( inputDirectory, outputDirectory, temporaryDirectory, force );
+					return true;
+				} else {
+					Log.Message("{0} does not exist. Build skipped.", contentFile );
+					return false;
+				}
+
+			} catch ( BuildException be ) {
+				Log.Error("{0}", be.Message);
+				return false;
+			}
+		}
+
+
 
 		/// <summary>
 		/// 

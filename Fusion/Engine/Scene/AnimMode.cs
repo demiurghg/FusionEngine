@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fusion.Engine.Graphics.Scene {
+namespace Fusion.Engine.Scene {
 	public enum AnimationMode {
 		Clamp,
 		Repeat,

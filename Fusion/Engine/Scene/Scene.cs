@@ -14,7 +14,7 @@ using Fusion.Core;
 using Fusion.Core.Content;
 
 
-namespace Fusion.Engine.Graphics.Scene {
+namespace Fusion.Engine.Scene {
 	public class Scene {
 
 		List<Node>			nodes		= new List<Node>();

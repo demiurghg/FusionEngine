@@ -37,6 +37,11 @@ namespace Fusion.Engine.Graphics {
 		public InterlacingMode InterlacingMode { get; set; }
 
 		/// <summary>
+		/// Vertical synchronization interval.
+		/// </summary>
+		public int VSyncInterval { get; set; }
+
+		/// <summary>
 		/// 
 		/// </summary>
 		public bool UseDebugDevice { get; set; }
@@ -60,6 +65,7 @@ namespace Fusion.Engine.Graphics {
 			InterlacingMode	=	InterlacingMode.HorizontalLR;
 			UseDebugDevice	=	false;
 			TrackObjects	=	true;
+			VSyncInterval	=	1;
 		}
 
 	}

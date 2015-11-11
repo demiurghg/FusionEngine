@@ -7,7 +7,7 @@ using Fusion.Engine.Graphics.Lights;
 using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Graphics {
-	public class Composition {
+	public class View {
 
 		
 		readonly GameEngine		GameEngine;
@@ -68,7 +68,7 @@ namespace Fusion.Engine.Graphics {
 		/// Creates composition's instance.
 		/// </summary>
 		/// <param name="ge"></param>
-		public Composition ( GameEngine gameEngine )
+		public View ( GameEngine gameEngine )
 		{
 			GameEngine	=	gameEngine;
 			this.ge		=	gameEngine.GraphicsEngine;

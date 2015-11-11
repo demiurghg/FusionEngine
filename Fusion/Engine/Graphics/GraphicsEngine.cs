@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core;
+using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
@@ -32,8 +33,15 @@ namespace Fusion.Engine.Graphics {
 			Config		=	new GraphicsEngineConfig();
 			this.Device	=	gameEngine.GraphicsDevice;
 
-			Compositions	=	new List<Composition>();
+			Compositions	=	new List<View>();
 			spriteEngine	=	new SpriteEngine( this );
+
+			Device.DisplayBoundsChanged += (s,e) => {
+				var handler = DisplayBoundsChanged;
+				if (handler!=null) {
+					handler(s,e);
+				}
+			};
 		}
 
 
@@ -97,8 +105,32 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Gets collection of Composition.
 		/// </summary>
-		public ICollection<Composition> Compositions {
+		public ICollection<View> Compositions {
 			get; private set;
 		}
+
+
+
+		/*-----------------------------------------------------------------------------------------
+		 * 
+		 *	Display stuff :
+		 * 
+		-----------------------------------------------------------------------------------------*/
+		
+		/// <summary>
+		/// Gets display bounds.
+		/// </summary>
+		public Rectangle DisplayBounds {
+			get {
+				return Device.DisplayBounds;
+			}
+		}
+
+
+		/// <summary>
+		/// Raises when display bound changes.
+		/// DisplayBounds property is already has actual value when this event raised.
+		/// </summary>
+		public event EventHandler	DisplayBoundsChanged;
 	}
 }

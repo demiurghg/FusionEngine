@@ -11,7 +11,8 @@ using Fusion.Engine.Graphics;
 using Fusion.Core;
 using Fusion.Core.Configuration;
 using Fusion.Framework;
-using Fusion.Engine.Graphics.Scene;
+using Fusion.Engine.Scene;
+using Fusion.Build;
 
 namespace TestGame2 {
 
@@ -32,7 +33,7 @@ namespace TestGame2 {
 		DiscTexture	texture;
 
 
-		Composition	master;
+		View	master;
 
 
 		/// <summary>
@@ -57,7 +58,7 @@ namespace TestGame2 {
 		/// </summary>
 		public override void Initialize ()
 		{
-			master		=	new Composition(GameEngine);
+			master		=	new View(GameEngine);
 
 			GameEngine.GraphicsEngine.Compositions.Add( master );
 
@@ -72,6 +73,20 @@ namespace TestGame2 {
 
 			master.SpriteLayers.Add( testLayer );
 			master.SpriteLayers.Add( console.ConsoleSpriteLayer );
+
+			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
+		}
+
+
+
+		void Keyboard_KeyDown ( object sender, KeyEventArgs e )
+		{
+			if (e.Key==Keys.F5) {
+
+				Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", false );
+
+				GameEngine.Reload();
+			}
 		}
 
 
