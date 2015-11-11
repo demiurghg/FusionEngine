@@ -272,7 +272,7 @@
     <Compile Include="Engine\Server\GameServer.Internal.cs" />
     <Compile Include="Engine\Common\GameModuleAttribute.cs" />
     <Compile Include="Engine\Common\GameEngine.cs" />
-    <Compile Include="Engine\Common\GameParameters.cs">
+    <Compile Include="Drivers\Graphics\GraphicsParameters.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Engine\Common\NetUtils.cs" />
@@ -463,8 +463,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Engine\Audio\" />
-    <Folder Include="Engine\Graphics\Buffers\" />
-    <Folder Include="Engine\Graphics\Displays\" />
     <Folder Include="Engine\Physics\" />
     <Folder Include="Engine\Triggers\" />
     <Folder Include="Engine\UserInterface\" />

@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Fusion.Drivers.Audio;
 using System.Globalization;
 using System.Threading;
-using System.Windows.Forms;
 using Fusion.Drivers.Input;
 using System.IO;
 using System.Diagnostics;
