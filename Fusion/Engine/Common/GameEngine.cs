@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Fusion.Drivers.Audio;
 using System.Globalization;
 using System.Threading;
+using System.Windows.Forms;
 using Fusion.Drivers.Input;
 using System.IO;
 using System.Diagnostics;
@@ -95,6 +96,55 @@ namespace Fusion.Engine.Common {
 		/// Gets current content manager
 		/// </summary>
 		public	Invoker Invoker { get { return invoker; } }
+
+		/// <summary>
+		/// Sets and gets game window icon.
+		/// </summary>
+		public System.Drawing.Icon Icon {
+			get {
+				return windowIcon;
+			}
+			set {
+				if (IsInitialized) {
+					throw new InvalidOperationException("Can not set Icon after game engine initialization");
+				}
+				windowIcon = value;
+			}
+		}
+		System.Drawing.Icon windowIcon = null;
+
+		/// <summary>
+		/// Gets and sets game window title.
+		/// </summary>
+		public string GameTitle { 
+			get {
+				return gameTitle;
+			} 
+			set {
+				if (value==null) {
+					throw new ArgumentNullException();
+				}
+				if (IsInitialized) {
+					throw new InvalidOperationException("Can not set GameTitle after game engine initialization");
+				}
+				gameTitle = value;
+			} 
+		}
+		string gameTitle = Path.GetFileNameWithoutExtension( Process.GetCurrentProcess().ProcessName );
+
+
+		/// <summary>
+		/// Enable COM object tracking
+		/// </summary>
+		public bool TrackObjects {
+			get {
+				return SharpDX.Configuration.EnableObjectTracking;
+			} 
+			set {
+				SharpDX.Configuration.EnableObjectTracking = value;
+			}
+		}
+
 
 		/// <summary>
 		/// Indicates whether the game is initialized.
@@ -298,9 +348,9 @@ namespace Fusion.Engine.Common {
 		internal bool InitInternal ()
 		{
 			Log.Message("");
-			Log.Message("---------- GameEngine Initializing ----------");
+			Log.Message("-------- GameEngine Initializing --------");
 
-			var p = new GameParameters();
+			var p = new GraphicsParameters();
 			GraphicsEngine.ApplyParameters( ref p );
 
 			GraphicsDevice.Initialize( p );
@@ -316,7 +366,7 @@ namespace Fusion.Engine.Common {
 
 			initialized	=	true;
 
-			Log.Message("---------------------------------------");
+			Log.Message("-----------------------------------------");
 			Log.Message("");
 
 			return true;

@@ -42,7 +42,7 @@ namespace Fusion.Engine.Graphics {
 		/// Applies graphics parameters.
 		/// </summary>
 		/// <param name="p"></param>
-		internal void ApplyParameters ( ref GameParameters p )
+		internal void ApplyParameters ( ref GraphicsParameters p )
 		{
 			p.Width				=	Config.Width;
 			p.Height			=	Config.Height;

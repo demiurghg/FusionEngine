@@ -39,7 +39,7 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// 
 		/// </summary>
 		/// <param name="parameters"></param>
-		public BaseDisplay( GameEngine game, GraphicsDevice device, GameParameters parameters ) : base(device)
+		public BaseDisplay( GameEngine game, GraphicsDevice device, GraphicsParameters parameters ) : base(device)
 		{
 			this.GameEngine	=	game;
 
@@ -205,13 +205,13 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// </summary>
 		/// <param name="parameters"></param>
 		/// <returns></returns>
-		public Form CreateForm ( GameParameters parameters, Output output )
+		public Form CreateForm ( GraphicsParameters parameters, Output output )
 		{
 			var form = new Form() {
-				Text			=	parameters.Title,
+				Text			=	GameEngine.GameTitle,
 				BackColor		=	System.Drawing.Color.Black,
 				ClientSize		=	new System.Drawing.Size( parameters.Width, parameters.Height ),
-				Icon			=	parameters.Icon ?? Fusion.Properties.Resources.fusionIcon,
+				Icon			=	GameEngine.Icon ?? Fusion.Properties.Resources.fusionIcon,
 				ControlBox		=	false,
 				StartPosition	=	output==null ? FormStartPosition.CenterScreen : FormStartPosition.Manual,
 			};
@@ -266,7 +266,7 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// <summary>
 		/// 
 		/// </summary>
-		protected void ShowAdapterInfo ( GameParameters parameters )
+		protected void ShowAdapterInfo ( GraphicsParameters parameters )
 		{
 			Log.Message("Mode : {0}x{1} {3} MS:{2} Stereo:{5} {4}", 
 				parameters.Width, 

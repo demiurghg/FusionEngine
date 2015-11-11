@@ -38,7 +38,6 @@ namespace TestGame2 {
 			//
 			//	Parse command line :
 			//
-
 			using ( var engine = new GameEngine() ) {
 
 				engine.GameServer		=	new CustomGameServer(engine);
@@ -46,6 +45,10 @@ namespace TestGame2 {
 				engine.GameInterface	=	new CustomGameInterface(engine);
 
 				engine.LoadConfiguration("Config.ini");
+
+				engine.TrackObjects		=	true;
+				engine.GameTitle		=	"Test Game 2";
+
 
 				//	apply command-line options here:
 				//	...

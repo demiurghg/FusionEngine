@@ -463,6 +463,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Engine\Audio\" />
+    <Folder Include="Engine\Graphics\Buffers\" />
+    <Folder Include="Engine\Graphics\Displays\" />
     <Folder Include="Engine\Physics\" />
     <Folder Include="Engine\Triggers\" />
     <Folder Include="Engine\UserInterface\" />

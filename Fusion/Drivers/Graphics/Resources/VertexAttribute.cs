@@ -11,7 +11,7 @@ namespace Fusion.Drivers.Graphics {
 	/// A description of a single element for the input-assembler stage.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Field)]
-	public sealed class VertexAttribute : Attribute {
+	internal sealed class VertexAttribute : Attribute {
 
 		public const string	Position        =	"POSITION"		;
 		public const string	Color           =	"COLOR"			;

@@ -15,26 +15,7 @@ using Fusion.Core.Shell;
 
 namespace Fusion.Engine.Common {
 
-	public class GameParameters {
-
-		[Category("GameEngine")]
-		[Description("GameEngine window caption\r\n/title:<title>")]
-		[CommandLineParser.Name("title")]
-		public string		Title			{ get; set; }
-
-		[Browsable(false)]
-		[CommandLineParser.Ignore]
-		public Icon 	Icon		{ get; set; }
-
-
-		[Category("Development")]
-		[Description("Enable device object tracking\r\n/trackobj")]
-		[CommandLineParser.Name("trackobj")]
-		public bool 	TrackObjects	{ 
-			get { return SharpDX.Configuration.EnableObjectTracking; } 
-			set { SharpDX.Configuration.EnableObjectTracking = value; } 
-		}
-
+	public class GraphicsParameters {
 
 		[Category("Development")]
 		[Description("Enable graphics device debugging\r\n/dxdebug")]
@@ -77,7 +58,7 @@ namespace Fusion.Engine.Common {
 
 
 
-		public GameParameters()
+		public GraphicsParameters()
 		{
 			SetDefault();
 		}
@@ -93,15 +74,11 @@ namespace Fusion.Engine.Common {
 
 		void SetDefault ()
 		{
-			Title			=	Path.GetFileNameWithoutExtension( Process.GetCurrentProcess().ProcessName );
-			
 			Width			=	800;
 			Height			=	600;
 			FullScreen		=	false;
 			VSyncInterval	=	1;
 			StereoMode		=	StereoMode.Disabled;
-
-			TrackObjects	=	true;
 		}
 	}
 }

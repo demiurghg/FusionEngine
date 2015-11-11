@@ -230,7 +230,7 @@ namespace Fusion.Drivers.Graphics {
 		/// <summary>
 		/// Initializes graphics device
 		/// </summary>
-		internal void Initialize ( GameParameters parameters )
+		internal void Initialize ( GraphicsParameters parameters )
 		{
 			this.GraphicsProfile	=	parameters.GraphicsProfile;
 

@@ -11,27 +11,9 @@ using Fusion.Engine.Graphics;
 using Fusion.Core;
 using Fusion.Core.Configuration;
 using Fusion.Framework;
+using Fusion.Engine.Graphics.Scene;
 
 namespace TestGame2 {
-
-	/*class SomeModule  : GameModule {
-		public SomeModule(GameEngine e): base(e) {}
-		public override void Initialize ()	{}
-		protected override void Dispose ( bool disposing )	{}
-	}
-
-	class SomeModule2  : GameModule {
-
-		[GameModule("BooBefore", "boo", InitOrder.Before)]
-		public SomeModule Boo { get; set; }
-
-		[GameModule("BooAfter", "boo", InitOrder.After)]
-		public SomeModule Boo2 { get; set; }
-
-		public SomeModule2(GameEngine e): base(e) { Boo = new SomeModule(e); Boo2 = new SomeModule(e); }
-		public override void Initialize ()	{}
-		protected override void Dispose ( bool disposing )	{}
-	} */
 
 
 	class CustomGameInterface : Fusion.Engine.Common.GameInterface {
@@ -40,17 +22,14 @@ namespace TestGame2 {
 		public GameConsole Console { get { return console; } }
 		public GameConsole console;
 
-
 		/*[GameModule("BarBefore", "bar", InitOrder.Before)]
 		public SomeModule2 Bar { get; set; }
 
 		[GameModule("BarAfter", "bar", InitOrder.After)]
 		public SomeModule2 Bar2 { get; set; }*/
 
-		
 		SpriteLayer testLayer;
 		DiscTexture	texture;
-		DiscTexture	debugFont;
 
 
 		Composition	master;
