@@ -9,7 +9,7 @@ using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Graphics.GIS
 {
-	public class PolyBatch : GIS.Batch
+	public class PolyGisBatch : GIS.GisBatch
 	{
 		Ubershader shader;
 
@@ -38,7 +38,7 @@ namespace Fusion.Engine.Graphics.GIS
 		public GIS.GeoPoint[] PointsCpu { get; protected set; }
 
 
-		public PolyBatch(GameEngine engine) : base(engine)
+		public PolyGisBatch(GameEngine engine) : base(engine)
 		{
 			
 		}

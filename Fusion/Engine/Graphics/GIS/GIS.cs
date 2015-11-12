@@ -11,6 +11,7 @@ using Fusion.Drivers.Graphics;
 using Fusion.Drivers.Input;
 using Fusion.Engine.Common;
 using Fusion.Engine.Graphics.GIS.GlobeMath;
+using Lidgren.Network;
 
 namespace Fusion.Engine.Graphics.GIS
 {
@@ -57,7 +58,7 @@ namespace Fusion.Engine.Graphics.GIS
 			Cartesian
 		}
 
-	    public class Batch
+	    public class GisBatch
 	    {
 		    protected GameEngine GameEngine;
 
@@ -71,15 +72,14 @@ namespace Fusion.Engine.Graphics.GIS
 			public virtual void Dispose	() {}
 
 
-		    public Batch(GameEngine engine)
+		    public GisBatch(GameEngine engine)
 		    {
 			    GameEngine = engine;
 		    }
 	    }
 
 
-		List<Batch> allBatches		= new List<Batch>(); // for dispose
-	    List<Batch> currentBatches	= new List<Batch>(); // TODO: move to Context
+	    List<GisBatch> currentBatches	= new List<GisBatch>();
 
 
 	    Context currentContext;
@@ -90,14 +90,14 @@ namespace Fusion.Engine.Graphics.GIS
 	    // Context stuff
 		public class Context
 		{
-			public List<Batch> Batches;
+			public List<GisBatch> Batches;
 
 			//public Settings Config;
 
 		}
 
-		TilesBatch Globe;
-
+		TilesGisBatch  Globe;
+	    //PointsGisBatch Points;
 
 
 	    public GIS(GameEngine gameEngine) : base(gameEngine)
@@ -109,7 +109,7 @@ namespace Fusion.Engine.Graphics.GIS
 	    public override void Initialize()
 	    {
 			constBuffer = new ConstantBuffer(GameEngine.GraphicsDevice, typeof(ConstData));
-			Globe		= new TilesBatch(GameEngine);
+			Globe		= new TilesGisBatch(GameEngine);
 			Camera		= new GlobeCamera(GameEngine);
 
 			Camera.Viewport = new Viewport(0, 0, GameEngine.GraphicsDevice.DisplayBounds.Width, GameEngine.GraphicsDevice.DisplayBounds.Height);
@@ -145,6 +145,27 @@ namespace Fusion.Engine.Graphics.GIS
 
 				previousMousePosition = new Vector2(args.Position.X, args.Position.Y);
 		    };
+
+
+
+			//Points = new PointsGisBatch(GameEngine, 100)
+			//{
+			//	ImageSizeInAtlas	= new Vector2(36, 36),
+			//	TextureAtlas		= GameEngine.Content.Load<Texture2D>("circles.tga")
+			//};
+			//
+			//var r = new Random();
+			//
+			//for (int i = 0; i < Points.PointsCpu.Length; i++) {
+			//    Points.PointsCpu[i] = new GeoPoint {
+			//		Lon		= DMathUtil.DegreesToRadians(30.301419 + 0.125 * r.NextDouble()),
+			//		Lat		= DMathUtil.DegreesToRadians(59.942562 + 0.125 * r.NextDouble()),
+			//		Color	= Color.White,
+			//		Tex0	= new Vector4(r.Next(0, 10), 0, 0.5f, 3.14f)
+			//    };
+		    //}
+			//Points.UpdatePointsBuffer();
+		    
 	    }
 
 
@@ -159,15 +180,16 @@ namespace Fusion.Engine.Graphics.GIS
 	    }
 
 
-	    internal void Update(GameTime gameTime)
+	    public void Update(GameTime gameTime)
 	    {
 		    Camera.Update(gameTime);
 
 			Globe.Update(gameTime);
+			//Points.Update(gameTime);
 	    }
 
 
-	    internal void Draw(GameTime gameTime, StereoEye stereoEye)
+	    public  void Draw(GameTime gameTime, StereoEye stereoEye)
 	    {
 			constantData.ViewProj		= Camera.ViewMatrixFloat * Camera.ProjMatrixFloat;
 			constantData.ViewPositionX	= Camera.FreeCamPosition.X;
@@ -184,13 +206,14 @@ namespace Fusion.Engine.Graphics.GIS
 		    foreach (var batch in batches) {
 				batch.Draw(gameTime, constBuffer);
 		    }
+
+			//Points.Draw(gameTime, constBuffer);
 	    }
 
 
-	    public void AddBatch(Batch batch)
+	    public void AddBatch(GisBatch gisBatch)
 	    {
-		    if (!allBatches.Contains(batch))		allBatches.Add(batch);
-			if (!currentBatches.Contains(batch))	currentBatches.Add(batch);
+			if (!currentBatches.Contains(gisBatch))	currentBatches.Add(gisBatch);
 	    }
 
 

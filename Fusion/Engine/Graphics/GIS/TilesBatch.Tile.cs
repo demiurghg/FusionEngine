@@ -10,7 +10,7 @@ using Fusion.Engine.Graphics.GIS.GlobeMath;
 
 namespace Fusion.Engine.Graphics.GIS
 {
-	partial class TilesBatch
+	partial class TilesGisBatch
 	{
 		int lowestLod	= 9;
 		int minLod		= 3;
@@ -65,19 +65,19 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			var ms = CurrentMapSource;
 
-			var d = Math.Log((GameEngine.GIS.Camera.CameraDistance - GameEngine.GIS.Camera.EarthRadius) * 1000.0, 2.0);
+			var d = Math.Log((GameEngine.GraphicsEngine.GIS.Camera.CameraDistance - GameEngine.GraphicsEngine.GIS.Camera.EarthRadius) * 1000.0, 2.0);
 			double lod = 29.3 - d;
 
 
-			if (GameEngine.GIS.Camera.Viewport.Width != 0) {
+			if (GameEngine.GraphicsEngine.GIS.Camera.Viewport.Width != 0) {
 				int closestZoom = 3;
 				double closestRadius = 100;
 
 				for (int zoom = 3; zoom < ms.MaxZoom; zoom++) {
 					double eps	= 256.0 / (1 << zoom);
-					double xx	= GameEngine.GIS.Camera.Viewport.Height;
-					double dd	= GameEngine.GIS.Camera.CameraDistance - GameEngine.GIS.Camera.EarthRadius;
-					double eta	= DMathUtil.DegreesToRadians(GameEngine.GIS.Camera.camFov);
+					double xx	= GameEngine.GraphicsEngine.GIS.Camera.Viewport.Height;
+					double dd	= GameEngine.GraphicsEngine.GIS.Camera.CameraDistance - GameEngine.GraphicsEngine.GIS.Camera.EarthRadius;
+					double eta	= DMathUtil.DegreesToRadians(GameEngine.GraphicsEngine.GIS.Camera.camFov);
 
 					double p = (eps * xx) / (2 * dd * Math.Tan(eta));
 
@@ -104,7 +104,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 			// Get camera mercator position 
-			var lonLat = GameEngine.GIS.Camera.GetCameraLonLat();
+			var lonLat = GameEngine.GraphicsEngine.GIS.Camera.GetCameraLonLat();
 			lonLat.X = DMathUtil.RadiansToDegrees(lonLat.X);
 			lonLat.Y = DMathUtil.RadiansToDegrees(lonLat.Y);
 
@@ -246,13 +246,11 @@ namespace Fusion.Engine.Graphics.GIS
 			{
 
 				GlobeTile tile;
-				if (tilesFree.ContainsKey(key))
-				{
+				if (tilesFree.ContainsKey(key)) {
 					tile = tilesFree[key];
 					tilesFree.Remove(key);
 				}
-				else
-				{
+				else {
 					var temp = tilesFree.First();
 					tile = temp.Value;
 					tilesFree.Remove(temp.Key);

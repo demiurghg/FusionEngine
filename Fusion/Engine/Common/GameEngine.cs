@@ -66,8 +66,6 @@ namespace Fusion.Engine.Common {
 		[GameModule("Network", "net", InitOrder.After)]
 		public NetworkEngine Network { get { return network; } }
 
-		[GameModule("GIS", "gis", InitOrder.After)]
-		public GIS GIS { get { return gis; } }
 
 		/// <summary>
 		/// Gets current content manager
@@ -194,7 +192,6 @@ namespace Fusion.Engine.Common {
 		Keyboard			keyboard		;
 		Mouse				mouse			;
 		GamepadCollection	gamepads		;
-		GIS					gis				;
 
 
 		GameTime	gameTimeInternal;
@@ -300,7 +297,6 @@ namespace Fusion.Engine.Common {
 			mouse				=	new Mouse(this);
 			gamepads			=	new GamepadCollection(this);
 
-			gis					=	new GIS(this);
 		}
 
 
