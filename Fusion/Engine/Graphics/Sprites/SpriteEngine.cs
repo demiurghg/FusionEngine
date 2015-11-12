@@ -118,7 +118,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="gameTime"></param>
 		/// <param name="stereoEye"></param>
 		/// <param name="layers"></param>
-		public void DrawSpritesRecursive ( GameTime gameTime, StereoEye stereoEye, IEnumerable<SpriteLayer> layers, Matrix parentTransform, Color4 parentColor )
+		void DrawSpritesRecursive ( GameTime gameTime, StereoEye stereoEye, IEnumerable<SpriteLayer> layers, Matrix parentTransform, Color4 parentColor )
 		{
 			int	w	=	device.DisplayBounds.Width;
 			int h	=	device.DisplayBounds.Height;

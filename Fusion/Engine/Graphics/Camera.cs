@@ -27,6 +27,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public Camera ()
 		{
+			SetupCameraFov(Matrix.Identity, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.125f, 1024f, 0, 0, 1 );
 		}
 
 

@@ -33,7 +33,7 @@ namespace Fusion.Engine.Graphics {
 			Config		=	new GraphicsEngineConfig();
 			this.Device	=	gameEngine.GraphicsDevice;
 
-			Compositions	=	new List<View>();
+			ViewLayers	=	new List<ViewLayer>();
 			spriteEngine	=	new SpriteEngine( this );
 
 			Device.DisplayBoundsChanged += (s,e) => {
@@ -91,12 +91,12 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="stereoEye"></param>
 		internal void Draw ( GameTime gameTime, StereoEye stereoEye )
 		{
-			var comps = Compositions
+			var layersToDraw = ViewLayers
 				.OrderBy( c1 => c1.Order )
 				.Where( c2 => c2.Visible );
 
-			foreach ( var composition in Compositions ) {
-				spriteEngine.DrawSprites( gameTime, stereoEye, composition.SpriteLayers );
+			foreach ( var viewLayer in layersToDraw ) {
+				viewLayer.RenderView( gameTime, stereoEye );
 			}
 		}
 
@@ -105,7 +105,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Gets collection of Composition.
 		/// </summary>
-		public ICollection<View> Compositions {
+		public ICollection<ViewLayer> ViewLayers {
 			get; private set;
 		}
 

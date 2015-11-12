@@ -352,6 +352,8 @@ namespace Fusion.Drivers.Graphics {
 		/// </summary>
 		internal void Present ( int syncInterval )
 		{
+			syncInterval	=	MathUtil.Clamp( syncInterval, 0, 3 );
+
 			lock (deviceContext) {
 				if (requestScreenShotPath != null ) {
 

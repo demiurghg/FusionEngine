@@ -11,6 +11,16 @@
 		</Reference>
     </ItemGroup>
 
+	<!-- Include core RELEASE assemblies (HYBRID) --> 
+    <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Hybrid|x64'">
+		<Reference Include="Fusion">
+		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\Fusion.dll</HintPath>
+		</Reference>
+		<Reference Include="Fusion.Build">
+		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\Fusion.Build.dll</HintPath>
+		</Reference>
+    </ItemGroup>
+
 	<!-- Include core DEBUG assemblies --> 
     <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
 		<Reference Include="Fusion">

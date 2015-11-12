@@ -3,16 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using Fusion;
+using Fusion.Core;
 using Fusion.Engine.Common;
+using Fusion.Engine.Client;
+using Fusion.Engine.Server;
+
 
 namespace $safeprojectname$ {
-	class CustomGameClient : Fusion.Engine.Common.GameClient {
+	class $safeprojectname$GameClient : GameClient {
 
 		/// <summary>
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public CustomGameClient ( GameEngine gameEngine )	: base(gameEngine)
+		public $safeprojectname$GameClient ( GameEngine gameEngine )	: base(gameEngine)
 		{
 		}
 
@@ -30,7 +36,7 @@ namespace $safeprojectname$ {
 		/// Client could start loading models, textures, models etc.
 		/// </summary>
 		/// <param name="map"></param>
-		public override void Connect ( string host, int port )
+		public override void LoadLevel ( string serverInfo )
 		{
 		}
 
@@ -39,29 +45,23 @@ namespace $safeprojectname$ {
 		///	Client must purge all level-associated content.
 		///	Reason???
 		/// </summary>
-		public override void Disconnect ()
+		public override void UnloadLevel ()
 		{
 		}
 
 		/// <summary>
 		/// Runs one step of client-side simulation and render world state.
+		/// Do not close the stream.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public override void Update ( GameTime gameTime )
+		public override void Update ( GameTime gameTime, Stream outputCommand )
 		{
+			var mouse = GameEngine.Mouse;
 			
+			using ( var writer = new BinaryWriter(outputCommand, Encoding.UTF8, true) ) {
+				writer.Write(string.Format("[{0} {1}]", mouse.Position.X, mouse.Position.Y ));
+			}
 		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="gameTime"></param>
-		public override void UpdateGfx (GameTime gameTime )
-		{
-		}
-
 
 
 		/// <summary>
@@ -69,21 +69,33 @@ namespace $safeprojectname$ {
 		/// Called when fresh snapshot arrived.
 		/// </summary>
 		/// <param name="snapshot"></param>
-		public override void FeedSnapshot ( byte[] snapshot ) 
+		public override void FeedSnapshot ( Stream inputSnapshot ) 
 		{
+			var bb = new byte[1500];
+
+			using ( var reader = new BinaryReader(inputSnapshot, Encoding.UTF8, true) ) {
+
+				int last = -1;
+				for (int i=0; i<3000; i++) {
+					var curr = reader.ReadInt32();
+					if (curr!=last+1) {
+						Log.Warning("{0} {1}", curr, last);
+						break;
+					}
+					last = curr;
+				}
+			}
 		}
 
+
+
 		/// <summary>
-		/// Gets command from client.
-		/// Returns null if no command is available.
-		/// Called on each frame. 
-		/// This method should not send command twice, 
-		/// i.e. after call command must be purged.
+		/// 
 		/// </summary>
 		/// <returns></returns>
-		public override UserCmd[] GetCommands ()
+		public override string UserInfo ()
 		{
-			return null;
+			return "Bob";
 		}
 	}
 }

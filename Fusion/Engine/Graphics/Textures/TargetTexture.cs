@@ -18,7 +18,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public TargetFormat Format { get; private set; }
 
-		RenderTarget2D	renderTarget;
+		internal readonly RenderTarget2D	RenderTarget;
 
 		
 		/// <summary>
@@ -41,8 +41,8 @@ namespace Fusion.Engine.Graphics {
 				default: throw new ArgumentException("format");
 			}
 
-			renderTarget	=	new RenderTarget2D( ge.Device, clrFrmt, width, height ); 
-			Srv	=	renderTarget;
+			RenderTarget	=	new RenderTarget2D( ge.Device, clrFrmt, width, height ); 
+			Srv	=	RenderTarget;
 		}	
 		
 	}

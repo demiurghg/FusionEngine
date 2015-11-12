@@ -223,7 +223,7 @@
     <Compile Include="Engine\Common\Commands\ServerInfo.cs" />
     <Compile Include="Engine\Common\Commands\ServerDrop.cs" />
     <Compile Include="Engine\Common\InitOrder.cs" />
-    <Compile Include="Engine\Graphics\View.cs" />
+    <Compile Include="Engine\Graphics\ViewLayer.cs" />
     <Compile Include="Engine\Graphics\GraphicsEngineConfig.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BaseMapSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\GoogleMaps\BaseGoogleMapSource.cs" />
@@ -353,8 +353,7 @@
     <Compile Include="Engine\Graphics\Textures\DynamicTexture.cs" />
     <Compile Include="Engine\Graphics\Textures\LightProbe.cs" />
     <Compile Include="Engine\Graphics\Material.cs" />
-    <Compile Include="Engine\Graphics\Mesh.cs" />
-    <Compile Include="Engine\Graphics\MeshInstance.cs" />
+    <Compile Include="Engine\Graphics\Instance.cs" />
     <Compile Include="Engine\Graphics\Lights\OmniLight.cs" />
     <Compile Include="Engine\Graphics\Lights\SpotLight.cs" />
     <Compile Include="Engine\Graphics\Textures\TargetTexture.cs" />

@@ -39,9 +39,9 @@ namespace $safeprojectname$ {
 			using ( var engine = new GameEngine() ) {
 
 				//	create SV, CL and UI instances :
-				engine.GameServer		=	new CustomGameServer(engine);
-				engine.GameClient		=	new CustomGameClient(engine);
-				engine.GameInterface	=	new CustomGameInterface(engine);
+				engine.GameServer		=	new $safeprojectname$GameServer(engine);
+				engine.GameClient		=	new $safeprojectname$GameClient(engine);
+				engine.GameInterface	=	new $safeprojectname$GameInterface(engine);
 
 				//	load configuration.
 				//	first run will cause warning, 

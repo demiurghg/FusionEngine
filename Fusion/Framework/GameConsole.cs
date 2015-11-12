@@ -184,6 +184,9 @@ namespace Fusion.Framework {
 
 			var version = GameEngine.GetReleaseInfo();
 			editLayer.DrawDebugString( consoleFont, vp.Width - charWidth * version.Length, -charHeight, version, Config.VersionColor);
+
+			var frameRate = string.Format("fps = {0,7:0.00}", gameTime.Fps);
+			editLayer.DrawDebugString( consoleFont, vp.Width - charWidth * frameRate.Length, 0, frameRate, Config.VersionColor);
 		}
 
 

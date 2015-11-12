@@ -22,6 +22,19 @@ namespace Fusion.Engine.Graphics {
 	}
 
 
+
+	/// <summary>
+	/// Defines set of applied to instance surface effects.
+	/// </summary>
+	public enum InstanceFX {
+		None,
+		Wet,
+		Frozen,
+		XRay,
+		Selection,
+	}
+
+
 	/// <summary>
 	/// Sprite layer filtering mode.
 	/// </summary>

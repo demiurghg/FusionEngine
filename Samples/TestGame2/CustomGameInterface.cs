@@ -33,7 +33,7 @@ namespace TestGame2 {
 		DiscTexture	texture;
 
 
-		View	master;
+		ViewLayer	master;
 
 
 		/// <summary>
@@ -58,9 +58,9 @@ namespace TestGame2 {
 		/// </summary>
 		public override void Initialize ()
 		{
-			master		=	new View(GameEngine);
+			master		=	new ViewLayer(GameEngine);
 
-			GameEngine.GraphicsEngine.Compositions.Add( master );
+			GameEngine.GraphicsEngine.ViewLayers.Add( master );
 
 			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );

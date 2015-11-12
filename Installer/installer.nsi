@@ -73,7 +73,7 @@ Section "Fusion Engine Core" Section1
   
   File "..\Fusion\bin\x64\Release\*.dll"
   File "..\Fusion.Build\bin\x64\Release\*.dll"
-  File "..\FBuild\bin\x64\Release\FBuild.exe"
+  File "..\FBuild\bin\x64\Release\*.exe"
   File "..\FScene\bin\x64\Release\*.exe"
   File "..\SDKs\FbxSdk\lib\x64\release\*.dll"
   File "..\Tools\*.dll"
@@ -85,12 +85,18 @@ Section "Fusion Engine Core" Section1
   
   File "..\Fusion\bin\x64\Debug\*.dll"
   File "..\Fusion.Build\bin\x64\Debug\*.dll"
-  File "..\FBuild\bin\x64\Debug\FBuild.exe"
+  File "..\FBuild\bin\x64\Debug\*.exe"
   File "..\FScene\bin\x64\Debug\*.exe"
   File "..\SDKs\FbxSdk\lib\x64\debug\*.dll"
   File "..\Tools\*.dll"
   File "..\Tools\*.exe"
   File "..\Tools\*.com"
+
+  File "..\Fusion\bin\x64\Debug\*.pdb"
+  File "..\Fusion.Build\bin\x64\Debug\*.pdb"
+  File "..\FBuild\bin\x64\Debug\*.pdb"
+  File "..\FScene\bin\x64\Debug\*.pdb"
+  File "..\SDKs\FbxSdk\lib\x64\debug\*.pdb"
 
   ; Content stuff :
   SetOutPath "$INSTDIR\Content"
