@@ -166,7 +166,7 @@ namespace Fusion.Framework {
 			}
 
 			//Log.Message("{0} {1}", showFactor, Show);
-			float offset	=	(int)(- (vp.Height / 2) * (1 - showFactor));
+			float offset	=	(int)(- (vp.Height / 2+1) * (1 - showFactor));
 
 			consoleLayer.SetTransform( new Vector2(0, offset), Vector2.Zero, 0 );
 			editLayer.SetTransform( 0, vp.Height/2 - 8 );
@@ -217,7 +217,8 @@ namespace Fusion.Framework {
 
 			consoleLayer.Clear();
 
-			consoleLayer.Draw( consoleBackground, 0,0, vp.Width, vp.Height/2, Color.White );
+			//	add small gap below command line...
+			consoleLayer.Draw( consoleBackground, 0,0, vp.Width, vp.Height/2+1, Color.White );
 
 			scroll	=	MathUtil.Clamp( scroll, 0, TraceRecorder.Lines.Count() );
 

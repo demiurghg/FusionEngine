@@ -19,6 +19,11 @@ namespace Fusion.Engine.Graphics {
 		public SpriteEngine	SpriteEngine { get { return spriteEngine; } }
 		SpriteEngine	spriteEngine;
 
+		[GameModule("GIS", "gis", InitOrder.After)]
+		public GIS.GIS GIS { get { return gis; } }
+		GIS.GIS gis;
+
+
 
 		[Config]
 		public  GraphicsEngineConfig Config { get; private set; }
@@ -35,6 +40,7 @@ namespace Fusion.Engine.Graphics {
 
 			ViewLayers	=	new List<ViewLayer>();
 			spriteEngine	=	new SpriteEngine( this );
+			gis				=	new GIS.GIS(gameEngine);
 
 			Device.DisplayBoundsChanged += (s,e) => {
 				var handler = DisplayBoundsChanged;
@@ -91,6 +97,9 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="stereoEye"></param>
 		internal void Draw ( GameTime gameTime, StereoEye stereoEye )
 		{
+			GIS.Update(gameTime);
+			GIS.Draw(gameTime, StereoEye.Mono);
+
 			var layersToDraw = ViewLayers
 				.OrderBy( c1 => c1.Order )
 				.Where( c2 => c2.Visible );

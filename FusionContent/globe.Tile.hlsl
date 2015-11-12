@@ -1,12 +1,17 @@
-/*-----------------------------------------------------------------------------
-	CONSTANT Tables
------------------------------------------------------------------------------*/
+#include "globe.Include.hlsl"
+
+
+
+Texture2D		DiffuseMap		: register(t0);
+Texture2D		FrameMap		: register(t1);
+SamplerState	Sampler			: register(s0);
+
 struct ConstData {
 	float4x4	ViewProj;
 	uint2		CameraX	;
 	uint2		CameraY	;
 	uint4		CameraZ	;
-	float4		FRTT	; // Factor, Radius
+	float4		Dummy	; // Factor, Radius
 };
 
 
@@ -28,30 +33,10 @@ struct VS_OUTPUT {
 	float3 XAxis		: TEXCOORD2		;
 };
 
-struct GS_OUTPUT {
-    float4 Position		: SV_POSITION	;
-	float4 Color		: COLOR			;
-	float2 Tex			: TEXCOORD0		;
-	float3 Normal		: TEXCOORD1		;
-};
-
-
-struct GS_ARC_OUTPUT {
-    float4 Position		: SV_POSITION	;
-	float4 Color		: COLOR			;
-};
 
 
 cbuffer CBStage		: register(b0) 	{	ConstData	Stage		: 	packoffset( c0 );	}
 
-Texture2D		DiffuseMap		: register(t0);
-Texture2D		FrameMap		: register(t1);
-SamplerState	Sampler			: register(s0);
-
-
-/*-------------------------------------------------------------------------------------------------
-	Globe rendering :
--------------------------------------------------------------------------------------------------*/
 
 double dDiv(double a, double b) // 
 {
@@ -64,7 +49,8 @@ double dDiv(double a, double b) //
 }
 
 
-double sine_limited(double x) {
+double sine_limited(double x) 
+{
   double r = x, mxx = -x*x;
   // Change dDiv to multiply to constants 
   r += (x *= dDiv(mxx, 6.0	)); // i=3
@@ -76,8 +62,11 @@ double sine_limited(double x) {
   return r;
 }
 
+
+
 // works properly only for x >= 0
-double sine_positive(double x) {
+double sine_positive(double x) 
+{
 	double PI		=	3.141592653589793;
 	double PI2		=	2.0*PI;
 	double PI_HALF	=	0.5*PI;
@@ -94,11 +83,13 @@ double sine_positive(double x) {
 	}
 }
 
-double sine(double x) {
+double sine(double x) 
+{
 	return x < 0.0 ? -sine_positive(-x) : sine_positive(x);
 }
 
-double cosine(double x) {
+double cosine(double x) 
+{
 	double PI=3.141592653589793;
 	double PI_HALF=0.5*PI;
 	return sine(PI_HALF - x);
@@ -125,11 +116,11 @@ double3 SphericalToDecart(double2 pos, double r)
 	return res;
 }
 
+
 #if 0
-$ubershader VERTEX_SHADER DRAW_POLY DRAW_VERTEX_POLY DRAW_TEXTURED +SHOW_FRAMES
+$ubershader +SHOW_FRAMES
 #endif
 
-#ifdef VERTEX_SHADER
 VS_OUTPUT VSMain ( VS_INPUT v )
 {
 	VS_OUTPUT	output = (VS_OUTPUT)0;
@@ -152,27 +143,20 @@ VS_OUTPUT VSMain ( VS_INPUT v )
 	double posY = cPos.y - cameraPos.y;
 	double posZ = cPos.z - cameraPos.z;
 
-	
-#ifdef DRAW_VERTEX_POLY
 	output.Position	=	mul(float4(posX, posY, posZ, 1), Stage.ViewProj);
 	output.Normal	=	normal;
-#endif
 
 	output.Color	=	v.Color;
 	output.Tex		=	v.Tex;
 	
 	return output;
 }
-#endif
-
 
 
 
 ////////////////////////// Draw map tiles and polygons
-#ifdef DRAW_POLY
 float4 PSMain ( VS_OUTPUT input ) : SV_Target
 {
-	#ifdef DRAW_TEXTURED
 		float4 color	= DiffuseMap.Sample(Sampler, input.Tex.xy);
 		float3 ret		= color.rgb;
 		
@@ -182,6 +166,4 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 		#endif
 		
 		return float4(ret, color.a);
-	#endif
 }
-#endif
