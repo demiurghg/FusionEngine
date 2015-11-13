@@ -22,24 +22,20 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 		/// <summary>
 		/// minimum level of zoom
 		/// </summary>
-		public int MinZoom;
-
-		public float TimeUntilRemove = 600;
+		public int		MinZoom;
+		public float	TimeUntilRemove = 600;
 
 		/// <summary>
 		/// maximum level of zoom
 		/// </summary>
-		public int? MaxZoom = 21;
-
-		public int TileSize = 256;
-
-		public static Texture2D	EmptyTile;
+		public int?		MaxZoom		= 21;
+		public int		TileSize	= 256;
+		public static	Texture2D	EmptyTile;
 
 		List<string> ToRemove = new List<string>();
 		
-		ConcurrentQueue<MapTile> cacheQueue = new ConcurrentQueue<MapTile>();
-		//List<MapTile> cacheQueue = new List<MapTile>();
-		public Dictionary<string, MapTile> RamCache = new Dictionary<string, MapTile>();
+		ConcurrentQueue<MapTile>			cacheQueue	= new ConcurrentQueue<MapTile>();
+		public Dictionary<string, MapTile>	RamCache	= new Dictionary<string, MapTile>();
 
 		Random r = new Random();
 
@@ -49,6 +45,8 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 		string	requestAccept	= "*/*";
 
 		public abstract MapProjection Projection { get; }
+
+		bool isDisposed = false;
 
 
 		protected BaseMapSource(GameEngine game)
@@ -60,6 +58,8 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 			}
 
 			UserAgent = string.Format("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:{0}.0) Gecko/{2}{3:00}{4:00} Firefox/{0}.0.{1}", r.Next(3, 14), r.Next(1, 10), r.Next(DateTime.Today.Year - 4, DateTime.Today.Year), r.Next(12), r.Next(30));
+
+			killToken = new CancellationTokenSource();
 		}
 
 		public abstract string Name {
@@ -75,31 +75,25 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 
 		public virtual void Update(GameTime gameTime)
 		{
-			//var cfg = Game.GetService<Settings>().UserConfig;
-			//if (cfg.TimeUntilRemove < 1)
-			//{
-			//	cfg.TimeUntilRemove = 1;
-			//}
+			foreach (var cachedTile in RamCache) {
+				cachedTile.Value.Time += gameTime.ElapsedSec;
 
-				foreach (var cachedTile in RamCache) {
-					cachedTile.Value.Time += gameTime.ElapsedSec;
-
-					if (cachedTile.Value.Time > TimeUntilRemove) {
-						try {
-							if (cachedTile.Value.IsLoaded) {
-								//cachedTile.Value.Tile.Dispose();
-								ToRemove.Add(cachedTile.Key);
-							}
-						} catch (Exception e) {
-							Log.Warning(e.Message);
+				if (cachedTile.Value.Time > TimeUntilRemove) {
+					try {
+						if (cachedTile.Value.IsLoaded) {
+							//cachedTile.Value.Tile.Dispose();
+							ToRemove.Add(cachedTile.Key);
 						}
+					} catch (Exception e) {
+						Log.Warning(e.Message);
 					}
 				}
+			}
 
-				foreach (var e in ToRemove) {
-					RamCache[e].Tile.Dispose();
-					RamCache.Remove(e);
-				}
+			foreach (var e in ToRemove) {
+				RamCache[e].Tile.Dispose();
+				RamCache.Remove(e);
+			}
 			
 
 			ToRemove.Clear();
@@ -146,16 +140,13 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 			}
 		}
 
-		bool downloadStopRequest = false;
 		bool threadStopped = true;
-		void TileStreamingThreadFunc()
+		void TileStreamingThreadFunc(CancellationToken cancellationToken)
 		{
 			MapTile ct = null;
 			threadStopped = false;
 
-			while (!downloadStopRequest) {
-					//cacheQueue.Sort(compLru);
-
+			while (!cancellationToken.IsCancellationRequested) {
 				cacheQueue.TryDequeue(out ct);
 
 				if (ct == null) {
@@ -195,7 +186,11 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 			threadStopped = true;
 		}
 
-		Task tileStreamingTask;
+
+		Task					tileStreamingTask;
+		CancellationTokenSource killToken;
+
+
 		MapTile CheckTileInMemory(int m, int n, int level)
 		{
 			string key	= string.Format(ShortName + "{0:00}{1:0000}{2:0000}", level, m, n);
@@ -217,9 +212,8 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 				cacheQueue.Enqueue(ct);
 			}
 
-			if (tileStreamingTask == null) {
-				tileStreamingTask = new Task(TileStreamingThreadFunc);
-				tileStreamingTask.Start();
+			if (tileStreamingTask == null && !isDisposed) {
+				tileStreamingTask = Task.Run(() => TileStreamingThreadFunc(killToken.Token), killToken.Token);
 			}
 
 			RamCache[key].LruIndex	= level;
@@ -232,9 +226,10 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 
 		public void Dispose()
 		{
-			downloadStopRequest = true;
+			if (killToken != null)			killToken.Cancel();
+			if (tileStreamingTask != null)	tileStreamingTask.Wait();
 
-			while (!threadStopped) ;
+			isDisposed = true;
 
 			foreach (var tile in RamCache) {
 				tile.Value.Tile.Dispose();
