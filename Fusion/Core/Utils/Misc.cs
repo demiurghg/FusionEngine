@@ -12,6 +12,11 @@ using System.ComponentModel;
 namespace Fusion.Core {
 	public static class Misc {
 
+		// Ex: collection.TakeLast(5);
+		public static IEnumerable<T> TakeLast<T>(this IEnumerable<T> source, int count)
+		{
+			return source.Skip(Math.Max(0, source.Count() - count));
+		}
 
 		/// <summary>
 		/// https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Longest_common_substring#Retrieve_the_Longest_Substring

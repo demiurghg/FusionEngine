@@ -74,7 +74,7 @@ namespace Fusion.Framework {
 			this.font		=	font;
 			this.conback	=	conback;
 
-			editBox		=	new EditBox();
+			editBox		=	new EditBox(this);
 		}
 
 
@@ -84,6 +84,8 @@ namespace Fusion.Framework {
 		/// </summary>
 		public override void Initialize ()
 		{
+			editBox.FeedHistory( Config.GetHistory() );
+
 			consoleLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			editLayer		=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			consoleLayer.Order = 9999;

@@ -8,11 +8,12 @@ using Fusion.Core.Mathematics;
 namespace Fusion.Framework {
 	internal class EditBox {
 
+		GameConsole console;
 		StringBuilder text;
 		int cursor;
 
 		List<string> history = new List<string>();
-		int historyCursor = 0;
+		int historyCursor = -1;
 
 
 		public string Text {
@@ -37,10 +38,24 @@ namespace Fusion.Framework {
 		/// <summary>
 		/// 
 		/// </summary>
-		public EditBox ()
+		public EditBox ( GameConsole console )
 		{
-			text	=	new StringBuilder();
-			cursor	=	0;
+			this.console	=	console;
+			text			=	new StringBuilder();
+			cursor			=	0;
+
+			history	=	new List<string>( console.Config.GetHistory() );
+
+			foreach (var s in history) {
+				Log.Message(" ---- {0}", s );
+			}
+		}
+
+
+		public void FeedHistory ( string[] history )
+		{
+			this.history.AddRange(history);
+			historyCursor = -1;
 		}
 
 
@@ -61,6 +76,7 @@ namespace Fusion.Framework {
 		{
 			if (Text!="") {
 				history.Insert( 0, Text );
+				console.Config.UpdateHistory( history );
 				historyCursor = -1;
 				Text = "";
 			}
