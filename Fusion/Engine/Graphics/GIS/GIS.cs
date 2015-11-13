@@ -98,7 +98,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		TilesGisBatch  Globe;
 	    //PointsGisBatch Points;
-
+	    LinesGisBatch lines;
 
 	    public GIS(GameEngine gameEngine) : base(gameEngine)
 	    {
@@ -147,25 +147,42 @@ namespace Fusion.Engine.Graphics.GIS
 		    };
 
 
-
-			//Points = new PointsGisBatch(GameEngine, 100)
-			//{
-			//	ImageSizeInAtlas	= new Vector2(36, 36),
-			//	TextureAtlas		= GameEngine.Content.Load<Texture2D>("circles.tga")
-			//};
-			//
-			//var r = new Random();
-			//
-			//for (int i = 0; i < Points.PointsCpu.Length; i++) {
-			//    Points.PointsCpu[i] = new GeoPoint {
-			//		Lon		= DMathUtil.DegreesToRadians(30.301419 + 0.125 * r.NextDouble()),
-			//		Lat		= DMathUtil.DegreesToRadians(59.942562 + 0.125 * r.NextDouble()),
-			//		Color	= Color.White,
-			//		Tex0	= new Vector4(r.Next(0, 10), 0, 0.5f, 3.14f)
-			//    };
+		    //Points = new PointsGisBatch(GameEngine, 100)
+		    //{
+		    //	ImageSizeInAtlas	= new Vector2(36, 36),
+		    //	TextureAtlas		= GameEngine.Content.Load<Texture2D>("circles.tga")
+		    //};
+		    //
+		    //var r = new Random();
+		    //
+		    //for (int i = 0; i < Points.PointsCpu.Length; i++) {
+		    //    Points.PointsCpu[i] = new GeoPoint {
+		    //		Lon		= DMathUtil.DegreesToRadians(30.301419 + 0.125 * r.NextDouble()),
+		    //		Lat		= DMathUtil.DegreesToRadians(59.942562 + 0.125 * r.NextDouble()),
+		    //		Color	= Color.White,
+		    //		Tex0	= new Vector4(r.Next(0, 10), 0, 0.5f, 3.14f)
+		    //    };
 		    //}
-			//Points.UpdatePointsBuffer();
-		    
+		    //Points.UpdatePointsBuffer();
+
+
+			//lines = new LinesGisBatch(GameEngine, 2, true);
+			//
+			//lines.PointsCpu[0] = new GeoPoint
+			//{
+			//	Lon		= DMathUtil.DegreesToRadians(29),
+			//	Lat		= DMathUtil.DegreesToRadians(59),
+			//	Color	= Color.White,
+			//	Tex0	= new Vector4(1, 1, 1, 1)
+			//};
+			//lines.PointsCpu[1] = new GeoPoint
+			//{
+			//	Lon		= DMathUtil.DegreesToRadians(30),
+			//	Lat		= DMathUtil.DegreesToRadians(60),
+			//	Color	= Color.White,
+			//	Tex0	= new Vector4(1, 1, 1, 1)
+			//};
+			//lines.UpdatePointsBuffer();
 	    }
 
 
@@ -208,6 +225,7 @@ namespace Fusion.Engine.Graphics.GIS
 		    }
 
 			//Points.Draw(gameTime, constBuffer);
+			//lines.Draw(gameTime, constBuffer);
 	    }
 
 

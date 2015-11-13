@@ -97,8 +97,8 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="stereoEye"></param>
 		internal void Draw ( GameTime gameTime, StereoEye stereoEye )
 		{
-			GIS.Update(gameTime);
-			GIS.Draw(gameTime, StereoEye.Mono);
+			//GIS.Update(gameTime);
+			//GIS.Draw(gameTime, StereoEye.Mono);
 
 			var layersToDraw = ViewLayers
 				.OrderBy( c1 => c1.Order )
