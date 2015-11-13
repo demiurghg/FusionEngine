@@ -21,14 +21,12 @@ namespace Fusion.Engine.Graphics {
 			get; set;
 		}
 
-
 		/// <summary>
 		/// Instance world matrix. Default value is Matrix.Identity.
 		/// </summary>
 		public Matrix World {
 			get; set;
 		}
-
 
 		/// <summary>
 		/// Instance color. Default value 0,0,0,0
@@ -37,6 +35,12 @@ namespace Fusion.Engine.Graphics {
 			get; set;
 		}
 
+		/// <summary>
+		/// Instance material layer blending. Default value 1,0,0,0
+		/// </summary>
+		public Vector4 Blending {
+			get; set;
+		}
 
 		/// <summary>
 		/// Gets and sets mesh.
@@ -45,7 +49,6 @@ namespace Fusion.Engine.Graphics {
 			get; private set;
 		}
 
-
 		/// <summary>
 		/// Gets and sets surface effect.
 		/// </summary>
@@ -53,6 +56,12 @@ namespace Fusion.Engine.Graphics {
 			get; set;
 		}
 
+		/// <summary>
+		/// Gets whether mesh is skinned.
+		/// </summary>
+		public bool IsSkinned {
+			get; private set;
+		}
 
 		/// <summary>
 		/// Gets array of bone transforms.
@@ -62,7 +71,6 @@ namespace Fusion.Engine.Graphics {
 			get; private set;
 		}
 
-
 		/// <summary>
 		/// Gets array of bone colors.
 		/// If skinning is not applied to mesh, this array is Null.
@@ -71,14 +79,13 @@ namespace Fusion.Engine.Graphics {
 			get; private set;
 		}
 
-
 		/// <summary>
-		/// Gets whether mesh is skinned.
+		/// Gets array of bone material blend options..
+		/// If skinning is not applied to mesh, this array is Null.
 		/// </summary>
-		public bool IsSkinned {
+		public Color4[] BoneBlending {
 			get; private set;
 		}
-
 
 		/// <summary>
 		/// Creates instance from mesh in scene.
@@ -87,9 +94,10 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="mesh"></param>
 		public Instance ( GraphicsEngine ge, Mesh mesh )
 		{
-			Visible	=	true;
-			World	=	Matrix.Identity;
-			Color	=	Color4.Zero;
+			Visible		=	true;
+			World		=	Matrix.Identity;
+			Color		=	Color4.Zero;
+			Blending	=	new Vector4(1,0,0,0);
 		}
 
 

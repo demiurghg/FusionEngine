@@ -181,6 +181,8 @@
     <Compile Include="Drivers\Graphics\Resources\FormattedBuffer.cs" />
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
     <Compile Include="Drivers\Graphics\Resources\UnorderedAccess.cs" />
+    <Compile Include="Engine\Graphics\MaterialOptions.cs" />
+    <Compile Include="Engine\Graphics\MaterialLayer.cs" />
     <Compile Include="Engine\Scene\VertexColorTextureTBNSkinned.cs" />
     <Compile Include="Drivers\Graphics\States\StateFactory.cs" />
     <Compile Include="Drivers\Graphics\UbershaderLoader.cs" />
