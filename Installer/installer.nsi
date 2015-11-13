@@ -1,30 +1,34 @@
-;--------------------------------
-; installer.nsi
-;--------------------------------
+#--------------------------------
+# installer.nsi
+#--------------------------------
 
 !include "MUI.nsh"
   !define MUI_ABORTWARNING
 
 RequestExecutionLevel user
   
-; The name of the installer
+# The name of the installer
 Name "Fusion Engine (v0.1)"
 XPStyle on
 
-; The file to write
+# The file to write
+!ifdef PATCH
+OutFile "FusionEnginePatch-0.1.exe"
+!else
 OutFile "FusionEngineSetup-0.1.exe"
+!endif
 
-; The default installation directory
+# The default installation directory
 InstallDir $PROFILE\FusionEngine
 
-; Registry key to check for directory (so if you install again, it will 
-; overwrite the old one automatically)
+# Registry key to check for directory (so if you install again, it will 
+# overwrite the old one automatically)
 InstallDirRegKey HKCU "Software\FusionEngine" "Install_Dir"
 
-; Request application privileges for Windows Vista
-;RequestExecutionLevel admin
+# Request application privileges for Windows Vista
+#RequestExecutionLevel admin
 
-; Splash screen
+# Splash screen
 Function .onInit
 	# the plugins dir is automatically deleted when the installer exits
 	InitPluginsDir
@@ -92,11 +96,11 @@ Section "Fusion Engine Core" Section1
   File "..\Tools\*.exe"
   File "..\Tools\*.com"
 
-  File "..\Fusion\bin\x64\Debug\*.pdb"
-  File "..\Fusion.Build\bin\x64\Debug\*.pdb"
-  File "..\FBuild\bin\x64\Debug\*.pdb"
-  File "..\FScene\bin\x64\Debug\*.pdb"
-  File "..\SDKs\FbxSdk\lib\x64\debug\*.pdb"
+  #File "..\Fusion\bin\x64\Debug\*.pdb"
+  #File "..\Fusion.Build\bin\x64\Debug\*.pdb"
+  #File "..\FBuild\bin\x64\Debug\*.pdb"
+  #File "..\FScene\bin\x64\Debug\*.pdb"
+  #File "..\SDKs\FbxSdk\lib\x64\debug\*.pdb"
 
   ; Content stuff :
   SetOutPath "$INSTDIR\Content"
@@ -118,7 +122,7 @@ Section "Fusion Engine Core" Section1
   
 SectionEnd
 
-
+!ifndef PATCH
 
 Section "Fusion Engine Samples"
 
@@ -172,6 +176,7 @@ Section "DirectX and VC++ Redistributables"
   File "vcredist_x64.exe"
 SectionEnd
 
+!endif
   
 Section "Write Registry Variables"
   SectionIn RO
