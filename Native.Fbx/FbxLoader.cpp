@@ -128,19 +128,25 @@ Fusion::Engine::Scene::Scene ^ FbxLoader::LoadScene( string ^filename, Options ^
 		Console::WriteLine("Total nodes         : {0}",			fbxScene->GetNodeCount() ); 
 	}
 
-	IterateChildren( rootNode, fbxScene, scene, -1 );
+	Console::WriteLine("Traversing hierarchy...");
 
+	IterateChildren( rootNode, fbxScene, scene, -1, 1 );
+
+
+	Console::WriteLine("Import Geometry...");
 
 	if (options->ImportGeometry) {
 		for each ( Node ^node in scene->Nodes ) {
+			Console::WriteLine( "  {0}",node->Name);
+
 			FbxNode *fbxNode	=	(FbxNode*)(((IntPtr)node->Tag).ToPointer());
 			HandleMesh( scene, node, fbxNode );
 		}
 	}
 
+	//	do not destroy...
+	// 	stack overflow happens...
 	fbxImporter->Destroy(true);
-
-	//scene->PrepareParallel();
 
 	return scene;
 }
@@ -150,7 +156,7 @@ Fusion::Engine::Scene::Scene ^ FbxLoader::LoadScene( string ^filename, Options ^
 /*
 **	Fusion::Fbx::FbxLoader::IterateChildren
 */
-void Native::Fbx::FbxLoader::IterateChildren( FbxNode *fbxNode, FbxScene *fbxScene, Fusion::Engine::Scene::Scene ^scene, int parentIndex )
+void Native::Fbx::FbxLoader::IterateChildren( FbxNode *fbxNode, FbxScene *fbxScene, Fusion::Engine::Scene::Scene ^scene, int parentIndex, int depth )
 {
 	auto node			=	gcnew Node();
 	node->Name			= 	gcnew string( fbxNode->GetName() );
@@ -165,7 +171,7 @@ void Native::Fbx::FbxLoader::IterateChildren( FbxNode *fbxNode, FbxScene *fbxSce
 	node->TrackIndex	=	trackId;
 
 
-	Console::WriteLine("{0}", node->Name);
+	Console::WriteLine("{0}{1}", gcnew String(' ', depth*2), node->Name);
 
 	//	Animate :
 	if (options->ImportAnimation) {
@@ -207,7 +213,7 @@ void Native::Fbx::FbxLoader::IterateChildren( FbxNode *fbxNode, FbxScene *fbxSce
 	//	Iterate children :
 	for ( int i=0; i<fbxNode->GetChildCount(); i++) {
 		FbxNode *fbxChild	=	fbxNode->GetChild(i);
-		IterateChildren( fbxChild, fbxScene, scene, index );		
+		IterateChildren( fbxChild, fbxScene, scene, index, depth+1 );		
 	}
 }
 

@@ -158,7 +158,7 @@ namespace Fusion.Engine.Scene {
 					}
 				}
 			}
-			base.Dispose();
+			base.Dispose(disposing);
 		}
 
 

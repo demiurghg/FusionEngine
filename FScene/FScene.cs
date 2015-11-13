@@ -40,20 +40,25 @@ namespace FScene {
 
 				//	run fbx loader :
 				var loader = new FbxLoader();
-				var scene  = loader.LoadScene( options.Input, options );
+				using ( var scene  = loader.LoadScene( options.Input, options ) ) {
 				
-				//	prepare meshed :
-				foreach ( var mesh in scene.Meshes ) {
-					if (mesh!=null) {
-						mesh.Prepare( scene, options.MergeTolerance );
+					//	prepare meshed :
+					Log.Message("Preparation...");
+					foreach ( var mesh in scene.Meshes ) {
+						if (mesh!=null) {
+							mesh.Prepare( scene, options.MergeTolerance );
+						}
 					}
-				}
 					
-				//	save scene :
-				using ( var stream = File.OpenWrite( options.Output ) ) {
-					scene.Save( stream );
+					Log.Message("Writing binary file: {0}", options.Output);
+					//	save scene :
+					using ( var stream = File.OpenWrite( options.Output ) ) {
+						scene.Save( stream );
+					}
+
 				}
 
+				Log.Message("Done!");
 
 			} catch ( Exception e ) {
 				parser.ShowError( "{0}", e.Message );

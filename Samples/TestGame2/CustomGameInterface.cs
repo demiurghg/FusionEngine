@@ -35,6 +35,8 @@ namespace TestGame2 {
 
 		ViewLayer	master;
 
+		Scene		scene;
+
 
 		/// <summary>
 		/// Ctor
@@ -64,7 +66,7 @@ namespace TestGame2 {
 
 			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
-			//debugFont	=	GameEngine.Content.Load<DiscTexture>( "debugFont" );
+			scene		=	GameEngine.Content.Load<Scene>( "testScene" );
 
 			testLayer.Clear();
 			testLayer.Draw( texture, 10,10 + 384,256,256, Color.White );
