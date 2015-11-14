@@ -13,9 +13,24 @@ namespace Fusion.Engine.Graphics {
 	public enum MaterialOptions {
 		
 		/// <summary>
-		/// No options.
+		/// Single layer material.
 		/// </summary>
-		None,
+		SingleLayer,
+		
+		/// <summary>
+		/// Double layer material
+		/// </summary>
+		DoubleLayer,
+		
+		/// <summary>
+		/// Triple layer material
+		/// </summary>
+		TripleLayer,
+		
+		/// <summary>
+		/// Quadruple layer material
+		/// </summary>
+		QuadLayer,
 		
 		/// <summary>
 		/// Use vertex color as blend weights 

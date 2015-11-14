@@ -28,6 +28,7 @@ namespace Fusion.Engine.Graphics {
 
 		/// <summary>
 		/// Material options for mapping and layer blending.
+		/// Default value is SingleLayer.
 		/// </summary>
 		public MaterialOptions Options;
 
