@@ -44,6 +44,9 @@ namespace Fusion.Engine.Common {
 			
 			public ModuleBinding ( GameModule module, string niceName, string shortName, InitOrder initOrder )
 			{
+				if (module==null) {
+					throw new ArgumentNullException(string.Format("Module \"{0}\" is null.", niceName));
+				}
 				Module		=	module;
 				NiceName	=	niceName;
 				ShortName	=	shortName;

@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core.Mathematics;
-using Fusion.Engine.Graphics.Lights;
-using Fusion.Engine.Common;
+using Fusion.Core;
 using Fusion.Drivers.Graphics;
+using Fusion.Engine.Common;
+using Fusion.Engine.Scene;
 
 namespace Fusion.Engine.Graphics {
 	public class ViewLayer {
@@ -106,8 +107,6 @@ namespace Fusion.Engine.Graphics {
 
 			Camera		=	new Camera();
 			Target		=	null;
-
-			LightSet	=	new LightSet();
 
 			SpriteLayers	=	new List<SpriteLayer>();
 		}

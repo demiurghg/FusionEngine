@@ -29,6 +29,7 @@ public ref class Options {
 		mergeTolerance	=	0;
 		wait			=	false;
 		geom			=	false;
+		anim			=	false;
 	}
 
 	[CommandLineParser::Name("in", "input FBX file")]

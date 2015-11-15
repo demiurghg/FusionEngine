@@ -89,9 +89,9 @@ Native::Fbx::FbxLoader::FbxLoader()
 /*
 **	Fusion::Fbx::FbxLoader::LoadScene
 */
-Fusion::Engine::Scene::Scene ^ FbxLoader::LoadScene( string ^filename, Options ^options )
+Fusion::Engine::Scene::Scene ^ FbxLoader::LoadScene( string ^filename, Options ^options2 )
 {
-	this->options	=	options;
+	this->options	=	options2;
 
 	if ( !fbxImporter->Initialize( StringHelper::ToNative(filename) ) ) {
 		throw gcnew Exception( string::Format( "Failed to initialise the FBX importer") );
@@ -481,6 +481,10 @@ void Native::Fbx::FbxLoader::HandleSkinning ( Mesh ^nodeMesh, Scene ^scene, Node
 							Log::Warning("Vertex has more than 4 influences");
 						}
 
+						// PVS-Studio : 
+						// V550 An odd precise comparison: weight == 0.0. 
+						// It's probably better to use a comparison with defined precision: 
+						//	fabs(A - B) < Epsilon. fbxloader.cpp 484
 						if (weight == 0.0) {
 							continue;
 						}

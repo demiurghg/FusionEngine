@@ -23,6 +23,13 @@ namespace Fusion.Engine.Graphics {
 		public GIS.GIS GIS { get { return gis; } }
 		GIS.GIS gis;
 
+		[GameModule("Filter", "filter", InitOrder.After)]
+		public DeferredDemo.Filter Filter { get{ return filter; } }
+		public DeferredDemo.Filter filter;
+
+		[GameModule("HdrFilter", "hdr", InitOrder.After)]
+		public DeferredDemo.HdrFilter HdrFilter { get{ return hdrFilter; } }
+		public DeferredDemo.HdrFilter hdrFilter;
 
 
 		[Config]
@@ -41,6 +48,8 @@ namespace Fusion.Engine.Graphics {
 			ViewLayers	=	new List<ViewLayer>();
 			spriteEngine	=	new SpriteEngine( this );
 			gis				=	new GIS.GIS(gameEngine);
+			filter			=	new DeferredDemo.Filter( gameEngine );
+			hdrFilter		=	new DeferredDemo.HdrFilter( gameEngine );
 
 			Device.DisplayBoundsChanged += (s,e) => {
 				var handler = DisplayBoundsChanged;
