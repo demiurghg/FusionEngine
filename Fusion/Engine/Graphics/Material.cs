@@ -55,6 +55,33 @@ namespace Fusion.Engine.Graphics {
 		/// Null value means no layer.
 		/// </summary>
 		public MaterialLayer	Layer3;
+
+
+		/// <summary>
+		/// Creates non-transparent material that casts shadow from color texture.
+		/// Method search for existing textures with postfixes like "_s", "_n", "_e" 
+		/// and substitutes them into material.
+		/// </summary>
+		/// <param name="path"></param>
+		public static Material CreateFromTexture ( string path )
+		{
+			var mtrl = new Material();
+			mtrl.Layer0	=	new MaterialLayer();
+			mtrl.Layer0.ColorTexture		=	path + "|srgb";
+			mtrl.Layer0.SurfaceTexture		=	path + "_s";
+			mtrl.Layer0.NormalMapTexture	=	path + "_n";
+			mtrl.Layer0.EmissionTexture		=	path + "_e|srgb";
+
+			mtrl.Layer1	=	null;
+			mtrl.Layer2	=	null;
+			mtrl.Layer3	=	null;
+
+			mtrl.UseDisplacement	=	false;
+			mtrl.Transparent		=	false;
+			mtrl.CastShadow			=	true;
+
+			return mtrl;
+		}
 	}
 }
 																	    

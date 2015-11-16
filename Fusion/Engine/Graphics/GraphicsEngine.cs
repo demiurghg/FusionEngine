@@ -30,10 +30,21 @@ namespace Fusion.Engine.Graphics {
 		[GameModule("HdrFilter", "hdr", InitOrder.After)]
 		public DeferredDemo.HdrFilter HdrFilter { get{ return hdrFilter; } }
 		public DeferredDemo.HdrFilter hdrFilter;
-
-
+		
+		[GameModule("LightRenderer", "light", InitOrder.After)]
+		public LightRenderer	LightRenderer { get { return lightRenderer; } }
+		public LightRenderer	lightRenderer;
+		
+		[GameModule("SceneRendere", "scene", InitOrder.After)]
+		public SceneRenderer	SceneRenderer { get { return sceneRenderer; } }
+		public SceneRenderer	sceneRenderer;
+		
 		[Config]
 		public  GraphicsEngineConfig Config { get; private set; }
+
+
+
+		RenderTarget2D	hdrTarget;
 
 
 		/// <summary>
@@ -50,6 +61,8 @@ namespace Fusion.Engine.Graphics {
 			gis				=	new GIS.GIS(gameEngine);
 			filter			=	new DeferredDemo.Filter( gameEngine );
 			hdrFilter		=	new DeferredDemo.HdrFilter( gameEngine );
+			lightRenderer	=	new Graphics.LightRenderer( gameEngine );
+			sceneRenderer	=	new Graphics.SceneRenderer( gameEngine );
 
 			Device.DisplayBoundsChanged += (s,e) => {
 				var handler = DisplayBoundsChanged;
@@ -72,6 +85,7 @@ namespace Fusion.Engine.Graphics {
 			p.FullScreen		=	Config.Fullscreen;
 			p.StereoMode		=	Config.StereoMode;
 			p.InterlacingMode	=	Config.InterlacingMode;
+			p.UseDebugDevice	=	Config.UseDebugDevice;
 		}
 
 

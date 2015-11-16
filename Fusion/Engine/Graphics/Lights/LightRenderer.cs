@@ -11,7 +11,7 @@ using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
-	class LightRenderer : GameModule {
+	public class LightRenderer : GameModule {
 
 		const int	BlockSizeX		=	16;
 		const int	BlockSizeY		=	16;
@@ -35,31 +35,13 @@ namespace Fusion.Engine.Graphics {
 		List<SpotLight>	spotLights = new List<SpotLight>();
 
 
-		public class ShadowRenderContext {
-			public Matrix				ShadowView;
-			public Matrix				ShadowProjection;
-			public DepthStencilSurface	DepthBuffer;
-			public RenderTargetSurface	ColorBuffer;
-			public Viewport				ShadowViewport;
-			public float				DepthBias;
-			public float				SlopeBias;
-			public float				FarDistance;
-		}
-
-
-
-		public interface IShadowCaster {
-			void RenderShadowMapCascade ( ShadowRenderContext shadowRenderCtxt );
-			void RenderShadowMapSpot	( ShadowRenderContext shadowRenderCtxt );
-		}
-		
-
 		DepthStencil2D		csmDepth		;
 		RenderTarget2D		csmColor		;
 		DepthStencil2D		spotDepth		;
 		RenderTarget2D		spotColor		;
 
 		DepthStencil2D		depthBuffer		;
+		RenderTarget2D		hdrBuffer		;
 		RenderTarget2D		diffuseBuffer	;
 		RenderTarget2D		specularBuffer	;
 		RenderTarget2D		normalMapBuffer	;
@@ -77,10 +59,17 @@ namespace Fusion.Engine.Graphics {
 		public RenderTarget2D	SpotColor { get { return spotColor; } }
 		public DepthStencil2D	SpotDepth { get { return spotDepth; } }
 
+		public RenderTarget2D	HdrBuffer		{ get { return hdrBuffer; } }
 		public DepthStencil2D	DepthBuffer		{ get { return depthBuffer; } }
 		public RenderTarget2D	DiffuseBuffer	{ get { return diffuseBuffer; } }
 		public RenderTarget2D	SpecularBuffer	{ get { return specularBuffer; } }
 		public RenderTarget2D	NormalMapBuffer	{ get { return normalMapBuffer; } }
+
+
+		public TargetTexture	HdrTexture			{ get; private set; }
+		public TargetTexture	DiffuseTexture		{ get; private set; }
+		public TargetTexture	SpecularTexturer	{ get; private set; }
+		public TargetTexture	NormalMapTexture	{ get; private set; }
 
 
 
@@ -188,6 +177,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void CreateGBuffer ()
 		{
+			SafeDispose( ref hdrBuffer		);
 			SafeDispose( ref depthBuffer	 );
 			SafeDispose( ref diffuseBuffer	 );
 			SafeDispose( ref specularBuffer	 );
@@ -196,11 +186,17 @@ namespace Fusion.Engine.Graphics {
 
 			var vp		=	GameEngine.GraphicsDevice.DisplayBounds;
 
-			depthBuffer			=	new DepthStencil2D( GameEngine.GraphicsDevice, DepthFormat.D24S8,		vp.Width, vp.Height );
-			diffuseBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8,		vp.Width, vp.Height );
-			specularBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8,		vp.Width, vp.Height );
+			hdrBuffer			=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, vp.Width, vp.Height );
+			depthBuffer			=	new DepthStencil2D( GameEngine.GraphicsDevice, DepthFormat.D24S8,	vp.Width, vp.Height );
+			diffuseBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8,	vp.Width, vp.Height );
+			specularBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8,	vp.Width, vp.Height );
 			normalMapBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgb10A2,	vp.Width, vp.Height );
 			lightAccumBuffer	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F,	vp.Width, vp.Height, true );
+
+			HdrTexture			=	new TargetTexture( hdrBuffer );
+			DiffuseTexture		=	new TargetTexture( diffuseBuffer );
+			SpecularTexturer	=	new TargetTexture( specularBuffer );
+			NormalMapTexture	=	new TargetTexture( normalMapBuffer );
 		}
 
 
@@ -238,6 +234,7 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref spotDepth );
 				SafeDispose( ref spotColor );
 
+				SafeDispose( ref hdrBuffer	 );
 				SafeDispose( ref depthBuffer	 );
 				SafeDispose( ref diffuseBuffer	 );
 				SafeDispose( ref specularBuffer	 );
@@ -260,9 +257,10 @@ namespace Fusion.Engine.Graphics {
 		public void ClearGBuffer ()
 		{
 			GameEngine.GraphicsDevice.Clear( depthBuffer.Surface,		1, 0 );
-			GameEngine.GraphicsDevice.Clear( diffuseBuffer.Surface,	Color4.Black );
-			GameEngine.GraphicsDevice.Clear( specularBuffer.Surface,	Color4.Black );
-			GameEngine.GraphicsDevice.Clear( normalMapBuffer.Surface, Color4.Black );
+			GameEngine.GraphicsDevice.Clear( hdrBuffer.Surface,			Color4.Black );
+			GameEngine.GraphicsDevice.Clear( diffuseBuffer.Surface,		Color.Magenta.ToColor4() );
+			GameEngine.GraphicsDevice.Clear( specularBuffer.Surface,	Color.Maroon.ToColor4() );
+			GameEngine.GraphicsDevice.Clear( normalMapBuffer.Surface,	Color.Violet.ToColor4() );
 		}
 
 
@@ -274,8 +272,11 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="view"></param>
 		/// <param name="projection"></param>
-		public void RenderLighting ( Matrix view, Matrix projection, RenderTargetSurface hdrTarget, ShaderResource occlusionMap )
+		public void RenderLighting ( Camera camera, StereoEye stereoEye, RenderTargetSurface hdrTarget, ShaderResource occlusionMap )
 		{
+			var view		=	camera.GetViewMatrix( stereoEye );
+			var projection	=	camera.GetProjectionMatrix( stereoEye );
+
 			var device = GameEngine.GraphicsDevice;
 			device.ResetStates();
 
@@ -424,7 +425,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="?"></param>
-		public void RenderShadows ( Matrix view, Matrix projection, IShadowCaster shadowCaster )
+		internal void RenderShadows ( Matrix view, Matrix projection, IShadowCaster shadowCaster )
 		{
 			if (Config.SkipShadows) {
 				return;

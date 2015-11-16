@@ -10,10 +10,8 @@ using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
 
-namespace DeferredDemo
-{
-	public enum SkyType
-	{
+namespace Fusion.Engine.Graphics {
+	public enum SkyType {
 		Procedural,
 		Panoramic_Half,
 		Panoramic_Full,
@@ -28,8 +26,7 @@ namespace DeferredDemo
 	}
 
 
-	public class Config
-	{
+	public class SkyConfig {
 		public float	SkyIntensity { get; set; }
 		public Vector3	SunDirection { get; set; }
 		public float	SunGlowIntensity { get; set; }
@@ -42,7 +39,7 @@ namespace DeferredDemo
 		public RgbSpace	RgbSpace { get; set; }
 
 
-		public Config()
+		public SkyConfig()
 		{
 			RgbSpace	= RgbSpace.sRGB;
 			AerialFogDensity = 0.001f;

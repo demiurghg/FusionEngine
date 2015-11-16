@@ -7,7 +7,6 @@ using Fusion.Core.Mathematics;
 using Fusion.Core;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
-using Fusion.Engine.Scene;
 
 namespace Fusion.Engine.Graphics {
 	public class ViewLayer {
@@ -15,7 +14,6 @@ namespace Fusion.Engine.Graphics {
 		readonly GameEngine		GameEngine;
 		readonly GraphicsEngine	ge;
 
-		
 		/// <summary>
 		/// Indicates whether view should be drawn.
 		/// Default value is True.
@@ -24,16 +22,12 @@ namespace Fusion.Engine.Graphics {
 			get; set;
 		}
 
-		
-
 		/// <summary>
 		/// Indicates whether view should be drawn.
 		/// </summary>
 		public int Order {
 			get; set;
 		}
-
-
 
 		/// <summary>
 		/// Gets and sets view's camera.
@@ -42,8 +36,6 @@ namespace Fusion.Engine.Graphics {
 		public Camera Camera {
 			get; set;
 		}
-
-
 
 		/// <summary>
 		/// Gets and sets view target.
@@ -54,26 +46,12 @@ namespace Fusion.Engine.Graphics {
 			get; set;
 		}
 
-
-
-		/// <summary>
-		/// Gets and sets view light set.
-		/// This value is already initialized when View object is created.
-		/// </summary>
-		public LightSet LightSet {
-			get; set;
-		}
-
-
-
 		/// <summary>
 		/// Gets and sets view bounds.
 		/// </summary>
 		public Rectangle ViewBounds {
 			get; set;
 		}
-
-
 
 		/// <summary>
 		/// Indicated whether target buffer should be cleared before rendering.
@@ -82,8 +60,6 @@ namespace Fusion.Engine.Graphics {
 			get; set;
 		}
 
-
-
 		/// <summary>
 		/// Gets and sets clear color
 		/// </summary>
@@ -91,6 +67,25 @@ namespace Fusion.Engine.Graphics {
 			get; set;
 		}
 
+		/// <summary>
+		/// Gets and sets view light set.
+		/// This value is already initialized when View object is created.
+		/// </summary>
+		public LightSet LightSet {
+			get; private set;
+		}
+
+		/// <summary>
+		/// Gets collection of sprite layers.
+		/// </summary>
+		public ICollection<SpriteLayer>	SpriteLayers {
+			get; private set;
+		}
+
+
+		public ICollection<Instance> Instances {
+			get; private set;
+		}
 
 
 		/// <summary>
@@ -109,15 +104,8 @@ namespace Fusion.Engine.Graphics {
 			Target		=	null;
 
 			SpriteLayers	=	new List<SpriteLayer>();
-		}
-
-
-
-		/// <summary>
-		/// Gets collection of sprite layers.
-		/// </summary>
-		public ICollection<SpriteLayer>	SpriteLayers {
-			get; private set;
+			Instances		=	new List<Instance>();
+			LightSet		=	new LightSet( gameEngine.GraphicsEngine );
 		}
 
 
@@ -134,7 +122,13 @@ namespace Fusion.Engine.Graphics {
 				ge.Device.Clear( targetRT.Surface, ClearColor );
 			}
 
-			#warning TODO: set render target!
+
+			ge.LightRenderer.ClearGBuffer();
+			
+			//	render g-buffer :
+			ge.SceneRenderer.RenderGBuffer( Camera, stereoEye, Instances );
+
+			//ge.LightRenderer.RenderLighting( 
 
 			//	draw sprites :
 			ge.SpriteEngine.DrawSprites( gameTime, stereoEye, SpriteLayers );

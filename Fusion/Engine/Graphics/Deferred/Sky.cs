@@ -10,8 +10,8 @@ using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
 
-namespace DeferredDemo
-{
+namespace Fusion.Engine.Graphics {
+
 	public class Sky : GameModule {
 		[Flags]
 		enum SkyFlags : int
@@ -59,7 +59,7 @@ namespace DeferredDemo
 		public Vector3	SkyAmbientLevel { get; protected set; }
 
 		[Config]
-		public Config Params { get; set; }
+		public SkyConfig Params { get; set; }
 
 		Vector3[]		randVectors;
 
@@ -189,13 +189,6 @@ namespace DeferredDemo
 		Random	rand = new Random();
 
 
-		VertexBuffer[]	vertexBuffers;
-		IndexBuffer[]	indexBuffers;
-
-		VertexBuffer[]	cloudVertexBuffers;
-		IndexBuffer[]	cloudIndexBuffers;
-
-
 		/// <summary>
 		/// Constructor
 		/// </summary>
@@ -203,7 +196,7 @@ namespace DeferredDemo
 		public Sky ( GameEngine game ) : base( game )
 		{
 			rs	=	GameEngine.GraphicsDevice;
-			Params = new Config();
+			Params = new SkyConfig();
 		}
 
 
@@ -249,26 +242,8 @@ namespace DeferredDemo
 			noise		=	GameEngine.Content.Load<Texture2D>("cloudNoise");
 			arrows		=	GameEngine.Content.Load<Texture2D>("arrowsAll");
 
-
-			vertexBuffers	=	skySphere.Meshes
-							.Select( mesh => VertexBuffer.Create( GameEngine.GraphicsDevice, mesh.Vertices.Select( v => VertexColorTextureTBN.Convert( v ) ).ToArray() ) )
-							.ToArray();
-
-			indexBuffers	=	skySphere.Meshes
-							.Select( mesh => IndexBuffer.Create( GameEngine.GraphicsDevice, mesh.GetIndices() ) )
-							.ToArray();
-
-			cloudVertexBuffers	=	cloudSphere.Meshes
-							.Select( mesh => VertexBuffer.Create( GameEngine.GraphicsDevice, mesh.Vertices.Select( v => VertexColorTextureTBN.Convert( v ) ).ToArray() ) )
-							.ToArray();
-
-			cloudIndexBuffers	=	cloudSphere.Meshes
-							.Select( mesh => IndexBuffer.Create( GameEngine.GraphicsDevice, mesh.GetIndices() ) )
-							.ToArray();
-
 			sky		=	GameEngine.Content.Load<Ubershader>("sky");
 			factory	=	new StateFactory( sky, typeof(SkyFlags), (ps,i) => EnumFunc(ps, (SkyFlags)i) );
-
 		}
 
 
@@ -280,7 +255,7 @@ namespace DeferredDemo
 		/// <param name="flags"></param>
 		void EnumFunc ( PipelineState ps, SkyFlags flags )
 		{
-			ps.VertexInputElements	=	VertexInputElement.FromStructure<VertexColorTextureTBN>();
+			ps.VertexInputElements	=	VertexInputElement.FromStructure<VertexColorTextureTBNRigid>();
 			ps.RasterizerState		=	RasterizerState.CullNone;
 			ps.BlendState			=	BlendState.Opaque;
 			ps.DepthStencilState	=	flags.HasFlag(SkyFlags.FOG) ? DepthStencilState.None : DepthStencilState.Readonly;
@@ -304,17 +279,6 @@ namespace DeferredDemo
 				SafeDispose( ref skyConstsCB );
 			}
 			base.Dispose( disposing );
-		}
-
-
-
-		/// <summary>
-		/// Does nothing
-		/// </summary>
-		/// <param name="gameTime"></param>
-		public override void Update( GameTime gameTime )
-		{
-			//filteredSunPosition	=	Vector3.Lerp( filteredSunPosition, Params.SunDirection.Normalized(), 0.01f );
 		}
 
 
@@ -369,7 +333,7 @@ namespace DeferredDemo
 				for ( int j=0; j<skySphere.Meshes.Count; j++) {
 					var mesh = skySphere.Meshes[j];
 
-					rs.SetupVertexInput( vertexBuffers[j], indexBuffers[j] );
+					rs.SetupVertexInput( mesh.VertexBuffer, mesh.IndexBuffer );
 					rs.DrawIndexed( mesh.IndexCount, 0, 0 );
 				}
 			}
@@ -386,10 +350,8 @@ namespace DeferredDemo
 		/// </summary>
 		/// <param name="rendCtxt"></param>
 		/// <param name="techName"></param>
-		public void Render( GameTime gameTime, DepthStencilSurface depthBuffer, RenderTargetSurface hdrTarget, Matrix view, Matrix projection )
+		public void Render( Camera camera, GameTime gameTime, DepthStencilSurface depthBuffer, RenderTargetSurface hdrTarget, Matrix view, Matrix projection )
 		{
-			var camera = GameEngine.GetService<Camera>();
-
 			var scale		=	Matrix.Scaling( Params.SkySphereSize );
 			var rotation	=	Matrix.Identity;
 
@@ -432,10 +394,9 @@ namespace DeferredDemo
 			for ( int j=0; j<skySphere.Meshes.Count; j++) {
 				var mesh = skySphere.Meshes[j];
 
-				rs.SetupVertexInput( vertexBuffers[j], indexBuffers[j] );
+				rs.SetupVertexInput( mesh.VertexBuffer, mesh.IndexBuffer );
 				rs.DrawIndexed( mesh.IndexCount, 0, 0 );
 			}
-
 
 
 			//
@@ -475,7 +436,7 @@ namespace DeferredDemo
 				for ( int j=0; j<cloudSphere.Meshes.Count; j++) {
 					var mesh = cloudSphere.Meshes[j];
 
-					rs.SetupVertexInput( cloudVertexBuffers[j], cloudIndexBuffers[j] );
+					rs.SetupVertexInput( mesh.VertexBuffer, mesh.IndexBuffer );
 					rs.DrawIndexed( mesh.IndexCount, 0, 0 );
 				}
 			}

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SharpDX;
-using Fusion.Engine.Scene;
+using Fusion.Engine.Graphics;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 
 
-namespace Fusion.Engine.Scene {
+namespace Fusion.Engine.Graphics {
 
 	public sealed class Node : IEquatable<Node> {
 

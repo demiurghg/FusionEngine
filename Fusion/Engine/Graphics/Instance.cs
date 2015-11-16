@@ -7,7 +7,6 @@ using Fusion.Core.Mathematics;
 using Fusion.Core;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
-using Fusion.Engine.Scene;
 
 namespace Fusion.Engine.Graphics {
 	
@@ -39,7 +38,7 @@ namespace Fusion.Engine.Graphics {
 		}
 
 		/// <summary>
-		/// Instance material layer blending. Default value 1,0,0,0
+		/// Instance material layer blending. Default value 1,1,1,1
 		/// </summary>
 		public Vector4 Blending {
 			get; set;
@@ -90,6 +89,16 @@ namespace Fusion.Engine.Graphics {
 			get; private set;
 		}
 
+
+		readonly internal VertexBuffer	vb;
+		readonly internal IndexBuffer	ib;
+
+		readonly internal int indexCount;
+		readonly internal int vertexCount;
+
+
+
+
 		/// <summary>
 		/// Creates instance from mesh in scene.
 		/// </summary>
@@ -100,8 +109,15 @@ namespace Fusion.Engine.Graphics {
 			Visible		=	true;
 			World		=	Matrix.Identity;
 			Color		=	Color4.Zero;
-			Blending	=	new Vector4(1,0,0,0);
+			Blending	=	new Vector4(1,1,1,1);
+
+			vb			=	mesh.VertexBuffer;
+			ib			=	mesh.IndexBuffer;
+			
+			vertexCount	=	mesh.VertexCount;
+			indexCount	=	mesh.IndexCount;
 		}
+
 
 
 

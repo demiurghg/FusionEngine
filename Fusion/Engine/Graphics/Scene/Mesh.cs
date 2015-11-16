@@ -11,7 +11,7 @@ using System.ComponentModel.Design;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 
-namespace Fusion.Engine.Scene {
+namespace Fusion.Engine.Graphics {
 
 	public sealed partial class Mesh : DisposableBase, IEquatable<Mesh> {
 

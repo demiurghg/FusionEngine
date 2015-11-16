@@ -11,7 +11,6 @@ using Fusion.Engine.Graphics;
 using Fusion.Core;
 using Fusion.Core.Configuration;
 using Fusion.Framework;
-using Fusion.Engine.Scene;
 using Fusion.Build;
 
 namespace TestGame2 {
@@ -68,8 +67,29 @@ namespace TestGame2 {
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
 			scene		=	GameEngine.Content.Load<Scene>( "testScene" );
 
+			var transforms = new Matrix[ scene.Nodes.Count ];
+			scene.ComputeAbsoluteTransforms( transforms );
+			
+			for ( int i=0; i<scene.Nodes.Count; i++ ) {
+
+				var meshIndex  = scene.Nodes[i].MeshIndex;
+
+				if (meshIndex<0) {
+					continue;
+				}
+				
+				var inst = new Instance( GameEngine.GraphicsEngine, scene.Meshes[meshIndex] );
+				inst.World = transforms[ i ];
+
+				master.Instances.Add( inst );
+			}
+
 			testLayer.Clear();
 			testLayer.Draw( texture, 10,10 + 384,256,256, Color.White );
+
+			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.DiffuseTexture,     0,  0, 200,150, Color.White );
+			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.SpecularTexturer, 200,  0, 200,150, Color.White );
+			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.NormalMapTexture, 400,  0, 200,150, Color.White );
 
 			//testLayer.DrawDebugString( debugFont, 10,276, "Lenna Soderberg", Color.White );
 
@@ -114,6 +134,8 @@ namespace TestGame2 {
 			console.Update( gameTime );
 
 			testLayer.Color	=	Color.White;
+
+			master.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 0,0, 1 );
 
 			/*if ( gameEngine.Keyboard.IsKeyDown(Keys.R) ) {
 				testLayer.Clear();

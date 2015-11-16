@@ -121,7 +121,7 @@ namespace Fusion.Engine.Graphics {
 
 			SafeDispose( ref vertexBuffer );
 
-			vertexBuffer	=	new VertexBuffer( ge.Device, typeof(SpriteVertex), capacity * VertexPerSprite );
+			vertexBuffer	=	new VertexBuffer( ge.Device, typeof(SpriteVertex), capacity * VertexPerSprite, VertexBufferOptions.Dynamic );
 		}
 
 

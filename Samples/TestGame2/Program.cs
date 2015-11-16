@@ -36,6 +36,7 @@ namespace TestGame2 {
 
 				engine.LoadConfiguration("Config.ini");
 
+				engine.GraphicsEngine.Config.UseDebugDevice = false;
 				engine.TrackObjects		=	true;
 				engine.GameTitle		=	"Test Game 2";
 

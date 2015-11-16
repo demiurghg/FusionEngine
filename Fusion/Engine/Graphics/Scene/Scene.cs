@@ -14,15 +14,15 @@ using Fusion.Core;
 using Fusion.Core.Content;
 
 
-namespace Fusion.Engine.Scene {
+namespace Fusion.Engine.Graphics {
 	public class Scene : DisposableBase {
 
 		List<Node>			nodes		= new List<Node>();
 		List<Mesh>			meshes		= new List<Mesh>();
 		List<MeshMaterial>	materials	= new List<MeshMaterial>();
 
-		List<VertexBuffer>	vertexBuffers	=	new List<VertexBuffer>();
-		List<IndexBuffer>	indexBuffers	=	new List<IndexBuffer>();
+		VertexBuffer[]	vertexBuffers	=	null;
+		IndexBuffer[]	indexBuffers	=	null;
 
 		int firstFrame = 0;
 		int lastFrame = 0;
@@ -48,28 +48,6 @@ namespace Fusion.Engine.Scene {
 				return meshes;
 			}
 		}
-
-
-		/// <summary>
-		/// List of vertex buffers.
-		/// </summary>
-		public IList<VertexBuffer> VertexBuffers { 
-			get {
-				return vertexBuffers;
-			}
-		}
-
-
-
-		/// <summary>
-		/// List if index buffers
-		/// </summary>
-		public IList<IndexBuffer> IndexBuffers {
-			get {
-				return indexBuffers;
-			}
-		}
-
 
 
 		/// <summary>
@@ -187,7 +165,7 @@ namespace Fusion.Engine.Scene {
 		/// Copies absolute transform to provided array.
 		/// </summary>
 		/// <param name="destination"></param>
-		public void CopyAbsoluteTransformsTo ( Matrix[] destination )
+		public void ComputeAbsoluteTransforms ( Matrix[] destination )
 		{
 			for ( int i=0; i<Nodes.Count; i++) {
 				

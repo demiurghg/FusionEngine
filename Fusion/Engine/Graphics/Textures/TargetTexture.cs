@@ -18,7 +18,9 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public TargetFormat Format { get; private set; }
 
-		internal readonly RenderTarget2D	RenderTarget;
+		internal RenderTarget2D	RenderTarget;
+
+		bool createdFromRT = false;
 
 		
 		/// <summary>
@@ -44,6 +46,42 @@ namespace Fusion.Engine.Graphics {
 			RenderTarget	=	new RenderTarget2D( ge.Device, clrFrmt, width, height ); 
 			Srv	=	RenderTarget;
 		}	
+		
+
+		
+		/// <summary>
+		/// Create target texture with specified size and format
+		/// </summary>
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		/// <param name="format"></param>
+		internal TargetTexture ( RenderTarget2D renderTarget )
+		{
+			createdFromRT	=	true;
+
+			this.Width	=	renderTarget.Width;
+			this.Height	=	renderTarget.Height;
+			this.Format	=	TargetFormat.LowDynamicRange;
+
+			RenderTarget	=	renderTarget; 
+			Srv				=	RenderTarget;
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void Dispose ( bool disposing )
+		{
+			if (disposing) {
+				if (!createdFromRT) {
+					SafeDispose( ref RenderTarget );
+				}
+			}
+			base.Dispose( disposing );
+		}
 		
 	}
 }

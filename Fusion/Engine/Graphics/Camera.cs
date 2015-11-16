@@ -156,6 +156,34 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		/// <summary>
+		/// Returns camera position as Vector3
+		/// </summary>
+		/// <param name="stereoEye"></param>
+		/// <returns></returns>
+		public Vector3 GetCameraPosition ( StereoEye stereoEye )
+		{
+			if (stereoEye==StereoEye.Mono)  return cameraMatrix .TranslationVector;
+			if (stereoEye==StereoEye.Left)  return cameraMatrixL.TranslationVector;
+			if (stereoEye==StereoEye.Right) return cameraMatrixR.TranslationVector;
+			throw new ArgumentException("stereoEye");
+		}
+
+
+		/// <summary>
+		/// Returns camera position as Vector4
+		/// </summary>
+		/// <param name="stereoEye"></param>
+		/// <returns></returns>
+		public Vector4 GetCameraPosition4 ( StereoEye stereoEye )
+		{
+			if (stereoEye==StereoEye.Mono)  return new Vector4(cameraMatrix .TranslationVector, 1);
+			if (stereoEye==StereoEye.Left)  return new Vector4(cameraMatrixL.TranslationVector, 1);
+			if (stereoEye==StereoEye.Right) return new Vector4(cameraMatrixR.TranslationVector, 1);
+			throw new ArgumentException("stereoEye");
+		}
+
+
 
 		/// <summary>
 		/// Gets bounding frustum for camera

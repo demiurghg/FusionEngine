@@ -7,7 +7,6 @@ using Fusion.Core.Mathematics;
 using Fusion.Core;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
-using Fusion.Engine.Scene;
 
 namespace Fusion.Engine.Graphics {
 	public class LightSet {
@@ -33,8 +32,8 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
-		/// Due to technical limitations only one 
-		/// source of direct light foreach LightSet is avaiable.
+		/// Due to technical limitations only one source of direct 
+		/// light is avaiable foreach LightSet.
 		/// </summary>
 		public DirectLight DirectLight {
 			get {
