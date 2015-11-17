@@ -1,7 +1,6 @@
 
-
 #if 0
-$ubershader  PROCEDURAL_SKY|FOG|(CLOUDS A|B|C) SRGB|CIERGB
+$ubershader  SKY|FOG SRGB|CIERGB
 #endif
 
 cbuffer Constants : register(b0)
@@ -201,91 +200,16 @@ float overlay(float a, float b)
 
 
 
-float4 SampleNoise ( Texture2D tex, float2 uv, int level = 0 )
-{
-	float4 result = 0;
-	float weight = 0.5f;
-	float scale  = 1.0f;
-	
-	float2 offset[] = {
-		float2( 0.091683f, 0.498368f ),
-	#ifdef A
-		float2( 0.199773f, 0.461658f ),
-		float2( 0.822414f, 0.099000f ),
-		float2( 0.558276f, 0.040172f ),
-		float2( 0.532656f, 0.879633f ),
-		float2( 0.339746f, 0.301596f ),
-		float2( 0.658573f, 0.710984f ),
-		float2( 0.966779f, 0.170014f )
-	#endif
-	#ifdef B
-		float2( 0.532656f, 0.879633f ),
-		float2( 0.199773f, 0.461658f ),
-		float2( 0.822414f, 0.099000f ),
-		float2( 0.966779f, 0.170014f ),
-		float2( 0.339746f, 0.301596f ),
-		float2( 0.658573f, 0.710984f ),
-		float2( 0.091683f, 0.498368f )
-	#endif
-	#ifdef C
-		float2( 0.199773f, 0.461658f ),
-		float2( 0.822414f, 0.099000f ),
-		float2( 0.091683f, 0.498368f ),
-		float2( 0.339746f, 0.301596f ),
-		float2( 0.658573f, 0.710984f ),
-		float2( 0.558276f, 0.040172f ),
-		float2( 0.532656f, 0.879633f )
-	#endif
-	};
-	
-	//for (int i=7; i>=0; i--) {
-	for (int i=0; i<8; i++) {
-		#ifdef A
-		float4 sample = tex.SampleLevel( SamplerLinear, uv * scale * 0.20f + offset[i] + 0.5*Time * 0.0003, level );
-		uv += sample.rg*0.002;
-		sample.xyz = sample.xyz * 2 - 1;
-		result += sample * weight;
-		weight *= 0.6;
-		scale *= 2.0;
-		#endif
-
-		#ifdef B
-		float4 sample = tex.SampleLevel( SamplerLinear, uv * scale * 0.14f + offset[i] + 0.5*Time * 0.0005, level );
-		uv += sample.rg*0.001;
-		sample.xyz = sample.xyz * 2 - 1;
-		result += sample * weight;
-		weight *= 0.6;
-		scale *= 2.0;
-		#endif
-
-		#ifdef C
-		float4 sample = tex.SampleLevel( SamplerLinear, uv * scale * 0.09f + offset[i] + 0.5*Time * 0.0007, level );
-		uv += sample.rg*0.001;
-		sample.xyz = sample.xyz * 2 - 1;
-		result += sample * weight;
-		weight *= 0.6;
-		scale *= 2.0;
-		#endif
-	}
-	
-	//result.xyz = normalize(result.xyz);
-	result.z = sqrt(1 - (result.x * result.x) + (result.y * result.y));
-
-	return result;
-}
-
-
-
 float4 PSMain( PS_INPUT input ) : SV_TARGET0
 {
 	float3 view = normalize(input.worldPos);
 	float3 sky = 0.0f;
 
-	#if defined(PROCEDURAL_SKY) || defined(FOG)
+	#if defined(SKY) || defined(FOG)
 		sky = YxyToRGB( input.skyColor ).xyz;// * Temperature * 1;
 		sky *= SkyIntensity;
 
-		#ifdef PROCEDURAL_SKY
+		#ifdef SKY
 			float  ldv = dot ( normalize(SunPosition), view );
 			float sunFactor = smoothstep( 0.9999f, 0.99991f, ldv );
 			sky.rgb += SunColor * sunFactor;
@@ -293,57 +217,6 @@ float4 PSMain( PS_INPUT input ) : SV_TARGET0
 		
 		return float4( sky, 1.0f);
 	#endif
-	
-	#ifdef CLOUDS
-	
-		float fog	=	pow(1 - saturate(length( input.worldPos.xz ) / 3), 2);
-		
-		float3x3 tbnToWorld	= float3x3(
-				input.tangent.x,	input.tangent.y,	input.tangent.z,	
-				input.binormal.x,	input.binormal.y,	input.binormal.z,	
-				input.normal.x,		input.normal.y,		input.normal.z		
-			);
-
-		float  ldv2		= 	saturate(1 - dot( normalize(SunPosition), view ));
-		
-		//return float4(ldv2,ldv2,ldv2,1);
-			
-		float4 clouds = SampleNoise( CloudNoise, input.texcoord.xy, 0 );
-			
-			float shadow = 0;
-			for ( float t=0; t<1; t+=0.07f) {
-				float sm = saturate(SampleNoise( CloudNoise, input.texcoord.xy + float2(1,-1)*(0.002f+t*0.02f) * ldv2*clouds.a, 0 ).a * 2 - 0);
-				
-				shadow += sm * 0.07;
-			}
-			shadow = saturate(1-shadow);
-			shadow = pow(shadow,16);
-
-			/*float3 normalMap	=	Arrows.SampleLevel( SamplerLinear, input.texcoord.xy*4, 0 ).xyz * 2 - 1;
-		float  alpha		=	saturate(Arrows.SampleLevel( SamplerLinear, input.texcoord.xy*4, 0 ).a*8-4);*/
-		
-		float alpha		=	smoothstep(0,1,saturate(clouds.a * 2 - 0));
-		#ifdef B 
-			alpha *= 0.7;
-		#endif
-		#ifdef A
-			alpha *= 0.5;
-		#endif
-		
-		float  ldv 		= 	saturate( pow(saturate(0.5 + 0.5*dot ( normalize(SunPosition), view )), 1 ) )
-						+	saturate( pow(saturate(0.0 + 1.0*dot ( normalize(SunPosition), view )), 8 ) ) * 16;
-		//float3 trans	=	pow( saturate(1 - alpha), 4 ) * SunColor.rgb * ldv * 50;
-		float3 trans	=	SunColor.rgb * ldv * 3;
-		
-		float3	normal	=	mul( clouds.xyz, tbnToWorld );
-		float3	light	=	SunColor * saturate(dot(normal, normalize(SunPosition)));
-		
-		float3 final  = shadow * (light + trans) + Ambient.xyz;
-		
-		
-	return  float4(final.xyz,alpha * fog);		
-	#endif
-
 }
 
 

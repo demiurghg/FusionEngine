@@ -36,6 +36,9 @@ namespace TestGame2 {
 
 		Scene		scene;
 
+		Vector3		position = new Vector3(0,5,0);
+		float		yaw = 0, pitch = 0;
+
 
 		/// <summary>
 		/// Ctor
@@ -148,15 +151,49 @@ namespace TestGame2 {
 				testLayer.DrawDebugString( debugFont, 10, 276, rand.Next().ToString(), Color.White );
 			} */
 
-			if ( GameEngine.Keyboard.IsKeyDown(Keys.Left) ) {
+			if ( GameEngine.Keyboard.IsKeyDown(Keys.PageDown) ) {
 				angle -= 0.01f;
 			}
-			if ( GameEngine.Keyboard.IsKeyDown(Keys.Right) ) {
+			if ( GameEngine.Keyboard.IsKeyDown(Keys.PageUp) ) {
 				angle += 0.01f;
 			}
 
 			testLayer.SetTransform( new Vector2(100,0), new Vector2(128+5,128+5), angle );
+
+			var m = UpdateCam( gameTime );
+			
+			master.Camera.SetupCameraFov( m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 0,0, 1 );
 		}
+
+
+
+		Matrix UpdateCam ( GameTime gameTime )
+		{
+			var kb = GameEngine.Keyboard;
+
+			if (!Console.Show) {
+				if (kb.IsKeyDown( Keys.Left  )) yaw   += gameTime.ElapsedSec * 2f;
+				if (kb.IsKeyDown( Keys.Right )) yaw   -= gameTime.ElapsedSec * 2f;
+				if (kb.IsKeyDown( Keys.Up    )) pitch -= gameTime.ElapsedSec * 2f;
+				if (kb.IsKeyDown( Keys.Down  )) pitch += gameTime.ElapsedSec * 2f;
+			}
+
+			var m = Matrix.RotationYawPitchRoll( yaw, pitch, 0 );
+
+			if (!Console.Show) {
+				if (kb.IsKeyDown( Keys.S )) position += m.Forward  * gameTime.ElapsedSec * 10;
+				if (kb.IsKeyDown( Keys.Z )) position += m.Backward * gameTime.ElapsedSec * 10;
+				if (kb.IsKeyDown( Keys.A )) position += m.Left     * gameTime.ElapsedSec * 10;
+				if (kb.IsKeyDown( Keys.X )) position += m.Right    * gameTime.ElapsedSec * 10;
+				if (kb.IsKeyDown( Keys.Space ))		position += Vector3.Up   * gameTime.ElapsedSec * 5;
+				if (kb.IsKeyDown( Keys.LeftAlt ))   position += Vector3.Down * gameTime.ElapsedSec * 5;
+			}
+
+			m.TranslationVector = position;
+
+			return m;
+		}
+
 
 
 		/// <summary>

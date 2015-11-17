@@ -133,9 +133,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 				bitmap.Save(tile.Path, System.Drawing.Imaging.ImageFormat.Jpeg);
 				return true;
 			} catch (Exception e) {
-#if DEBUG
 				Log.Warning(e.Message);
-#endif
 				return false;
 			}
 		}
@@ -171,9 +169,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 
 					tex = null;
 				} catch (WebException e) {
-#if DEBUG
 					Log.Warning(e.Message);
-#endif
 				} catch (Exception e) {
 					Console.WriteLine("Exception : {0}", e.Message);
 					ct.LruIndex = 0;

@@ -16,17 +16,10 @@ namespace Fusion.Engine.Graphics {
 		[Flags]
 		enum SkyFlags : int
 		{
-			PROCEDURAL_SKY		= 1 << 0,
-			PANORAMIC_SKY_HALF	= 1 << 1,
-			PANORAMIC_SKY_FULL	= 1 << 2,
-			CUBEMAP_SKY			= 1 << 3,
-			FOG					= 1 << 4,
-			SRGB				= 1 << 5,
-			CIERGB				= 1 << 6,
-			CLOUDS				= 1 << 7,
-			A					= 1 << 8,
-			B					= 1 << 9,
-			C					= 1 << 10,
+			SKY		= 1 << 0,
+			FOG		= 1 << 1,
+			SRGB	= 1 << 2,
+			CIERGB	= 1 << 3,
 		}
 
 		//	row_major float4x4 MatrixWVP;      // Offset:    0 Size:    64 [unused]
@@ -50,7 +43,6 @@ namespace Fusion.Engine.Graphics {
 
 		GraphicsDevice	rs;
 		Scene			skySphere;
-		Scene			cloudSphere;
 		Ubershader		sky;
 		ConstantBuffer	skyConstsCB;
 		SkyConsts		skyConstsData;
@@ -66,9 +58,6 @@ namespace Fusion.Engine.Graphics {
 		public RenderTargetCube	SkyCube { get { return skyCube; } }
 		RenderTargetCube	skyCube;
 		Texture2D			clouds;
-		Texture2D			cirrus;
-		Texture2D			noise;
-		Texture2D			arrows;
 
 		#region Sky model
 		float dot ( Vector3 a, Vector3 b ) { return Vector3.Dot(a, b); }
@@ -236,14 +225,8 @@ namespace Fusion.Engine.Graphics {
 			SafeDispose( ref factory );
 
 			skySphere	=	GameEngine.Content.Load<Scene>("skySphere");
-			cloudSphere	=	GameEngine.Content.Load<Scene>("cloudSphere");
-			clouds		=	GameEngine.Content.Load<Texture2D>("clouds|srgb");
-			cirrus		=	GameEngine.Content.Load<Texture2D>("cirrus|srgb");
-			noise		=	GameEngine.Content.Load<Texture2D>("cloudNoise");
-			arrows		=	GameEngine.Content.Load<Texture2D>("arrowsAll");
-
-			sky		=	GameEngine.Content.Load<Ubershader>("sky");
-			factory	=	new StateFactory( sky, typeof(SkyFlags), (ps,i) => EnumFunc(ps, (SkyFlags)i) );
+			sky			=	GameEngine.Content.Load<Ubershader>("sky");
+			factory		=	new StateFactory( sky, typeof(SkyFlags), (ps,i) => EnumFunc(ps, (SkyFlags)i) );
 		}
 
 
@@ -259,10 +242,6 @@ namespace Fusion.Engine.Graphics {
 			ps.RasterizerState		=	RasterizerState.CullNone;
 			ps.BlendState			=	BlendState.Opaque;
 			ps.DepthStencilState	=	flags.HasFlag(SkyFlags.FOG) ? DepthStencilState.None : DepthStencilState.Readonly;
-
-			if (flags.HasFlag(SkyFlags.CLOUDS)) {
-				ps.BlendState	=	BlendState.AlphaBlend;
-			}
 		}
 
 
@@ -274,7 +253,6 @@ namespace Fusion.Engine.Graphics {
 		{
 			if( disposing ) {
 				SafeDispose( ref factory );
-				SafeDispose( ref sky );
 				SafeDispose( ref skyCube );
 				SafeDispose( ref skyConstsCB );
 			}
@@ -296,7 +274,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Renders fog look-up table
 		/// </summary>
-		public void RenderFogTable()
+		internal void RenderFogTable()
 		{
 			var	sunPos		= GetSunDirection();
 			var sunColor	= GetSunLightColor();
@@ -350,7 +328,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="rendCtxt"></param>
 		/// <param name="techName"></param>
-		public void Render( Camera camera, GameTime gameTime, DepthStencilSurface depthBuffer, RenderTargetSurface hdrTarget, Matrix view, Matrix projection )
+		internal void Render( Camera camera, StereoEye stereoEye,GameTime gameTime, DepthStencilSurface depthBuffer, RenderTargetSurface hdrTarget )
 		{
 			var scale		=	Matrix.Scaling( Params.SkySphereSize );
 			var rotation	=	Matrix.Identity;
@@ -366,8 +344,8 @@ namespace Fusion.Engine.Graphics {
 
 			rs.SetTargets( depthBuffer, hdrTarget );
 
-			var viewMatrix = view;
-			var projMatrix = projection;
+			var viewMatrix = camera.GetViewMatrix( stereoEye );
+			var projMatrix = camera.GetProjectionMatrix( stereoEye );
 
 			skyConstsData.MatrixWVP		= scale * rotation * MathUtil.Transformation( viewMatrix.Right, viewMatrix.Up, viewMatrix.Backward ) * projMatrix;
 			skyConstsData.SunPosition	= sunPos;
@@ -385,7 +363,7 @@ namespace Fusion.Engine.Graphics {
 			//
 			//	Sky :
 			//
-			SkyFlags flags = SkyFlags.PROCEDURAL_SKY;
+			SkyFlags flags = SkyFlags.SKY;
 
 			ApplyColorSpace( ref flags );
 				
@@ -396,49 +374,6 @@ namespace Fusion.Engine.Graphics {
 
 				rs.SetupVertexInput( mesh.VertexBuffer, mesh.IndexBuffer );
 				rs.DrawIndexed( mesh.IndexCount, 0, 0 );
-			}
-
-
-			//
-			//	Clouds :
-			//
-			scale		=	Matrix.Scaling( Params.SkySphereSize, Params.SkySphereSize, Params.SkySphereSize );
-			//scale		=	Matrix.Scaling( Params.SkySphereSize, Params.SkySphereSize * 0.1f, Params.SkySphereSize );
-			skyConstsData.MatrixWVP		= scale * rotation * MathUtil.Transformation( viewMatrix.Right, viewMatrix.Up, viewMatrix.Backward ) * projMatrix;
-			skyConstsData.SunPosition	= sunPos;
-			skyConstsData.SunColor		= GetSunLightColor();
-			skyConstsData.Turbidity		= Params.SkyTurbidity;
-			skyConstsData.Temperature	= Temperature.Get( Params.SunTemperature ); 
-			skyConstsData.SkyIntensity	= Params.SkyIntensity;
-			skyConstsData.Ambient		= GetAmbientLevel().ToVector3();
-			skyConstsData.Time			= (float)gameTime.Total.TotalSeconds;
-	
-			skyConstsCB.SetData( skyConstsData );
-
-
-			flags = SkyFlags.CLOUDS;
-
-			for (int i=0; i<3; i++) {
-
-				 if (i==0) flags = SkyFlags.CLOUDS| SkyFlags.A;
-				 if (i==1) flags = SkyFlags.CLOUDS| SkyFlags.B;
-				 if (i==2) flags = SkyFlags.CLOUDS| SkyFlags.C;
-
-				ApplyColorSpace( ref flags );
-			
-				rs.PipelineState			=	factory[(int)flags];
-				rs.PixelShaderResources[0]	=	clouds;
-				rs.PixelShaderResources[1]	=	cirrus;
-				rs.PixelShaderResources[2]	=	noise;
-				rs.PixelShaderResources[3]	=	arrows;
-				rs.PixelShaderSamplers[0]	=	SamplerState.AnisotropicWrap;
-					
-				for ( int j=0; j<cloudSphere.Meshes.Count; j++) {
-					var mesh = cloudSphere.Meshes[j];
-
-					rs.SetupVertexInput( mesh.VertexBuffer, mesh.IndexBuffer );
-					rs.DrawIndexed( mesh.IndexCount, 0, 0 );
-				}
 			}
 
 			rs.ResetStates();

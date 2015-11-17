@@ -45,10 +45,6 @@ namespace Fusion.Framework {
 			cursor			=	0;
 
 			history	=	new List<string>( console.Config.GetHistory() );
-
-			foreach (var s in history) {
-				Log.Message(" ---- {0}", s );
-			}
 		}
 
 

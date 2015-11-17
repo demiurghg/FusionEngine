@@ -39,6 +39,10 @@ namespace Fusion.Engine.Graphics {
 		public SceneRenderer	SceneRenderer { get { return sceneRenderer; } }
 		public SceneRenderer	sceneRenderer;
 		
+		[GameModule("Sky", "sky", InitOrder.After)]
+		public Sky	Sky { get { return sky; } }
+		public Sky	sky;
+		
 		[Config]
 		public  GraphicsEngineConfig Config { get; private set; }
 
@@ -73,6 +77,7 @@ namespace Fusion.Engine.Graphics {
 			hdrFilter		=	new DeferredDemo.HdrFilter( gameEngine );
 			lightRenderer	=	new Graphics.LightRenderer( gameEngine );
 			sceneRenderer	=	new Graphics.SceneRenderer( gameEngine );
+			sky				=	new Graphics.Sky( gameEngine );
 
 			Device.DisplayBoundsChanged += (s,e) => {
 				var handler = DisplayBoundsChanged;

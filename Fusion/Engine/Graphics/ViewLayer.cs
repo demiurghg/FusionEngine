@@ -123,15 +123,23 @@ namespace Fusion.Engine.Graphics {
 			}
 
 
+			//	clear g-buffer :
 			ge.LightRenderer.ClearGBuffer();
 
+			//	render shadows :
 			ge.LightRenderer.RenderShadows( Camera, Instances );
 			
 			//	render g-buffer :
 			ge.SceneRenderer.RenderGBuffer( Camera, stereoEye, Instances );
 
+			//	render sky :
+			ge.Sky.Render( Camera, stereoEye, gameTime, ge.LightRenderer.DepthBuffer.Surface, ge.LightRenderer.HdrBuffer.Surface );
+
 			//	render lights :
 			ge.LightRenderer.RenderLighting( Camera, stereoEye, LightSet, GameEngine.GraphicsEngine.WhiteTexture );
+
+			//	apply tonemapping and bloom :
+			ge.HdrFilter.Render( gameTime, ge.Device.BackbufferColor.Surface, ge.LightRenderer.HdrBuffer );
 
 			//	draw sprites :
 			ge.SpriteEngine.DrawSprites( gameTime, stereoEye, SpriteLayers );

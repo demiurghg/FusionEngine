@@ -23,6 +23,8 @@ namespace Fusion.Core.Shell {
 
 			string output = input;
 
+			Log.Message("");
+
 			var cmd  =	input.Trim().ToLower();
 
 			var list =	CommandList
