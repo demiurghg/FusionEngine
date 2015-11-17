@@ -57,9 +57,24 @@ namespace Fusion.Engine.Graphics {
 			texture			=	new Texture2D( ge.Device, width, height, format, mips, srgb );
 			Srv				=	texture;
 		}
-			
 
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void Dispose ( bool disposing )
+		{
+			if (disposing) {
+				SafeDispose( ref texture );
+			}
+
+			base.Dispose( disposing );
+		}
+
+
+		
 		/// <summary>
 		/// Set's texture data
 		/// </summary>
@@ -69,7 +84,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="data"></param>
 		/// <param name="startIndex"></param>
 		/// <param name="elementCount"></param>
-		void SetData<T> ( int level, Rectangle? rect, T[] data, int startIndex, int elementCount ) where T: struct
+		public void SetData<T> ( int level, Rectangle? rect, T[] data, int startIndex, int elementCount ) where T: struct
 		{
 			texture.SetData<T>( level, rect, data, startIndex, elementCount );
 		}
@@ -81,7 +96,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="data"></param>
-		void SetData<T> ( T[] data, int startIndex, int elementCount ) where T: struct
+		public void SetData<T> ( T[] data, int startIndex, int elementCount ) where T: struct
 		{
 			texture.SetData<T>( data, startIndex, elementCount );
 		}
@@ -93,7 +108,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="data"></param>
-		void SetData<T> ( T[] data ) where T: struct
+		public void SetData<T> ( T[] data ) where T: struct
 		{
 			texture.SetData<T>( data );
 		}

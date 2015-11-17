@@ -15,7 +15,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// Shadow render context
 	/// </summary>
-	internal class ShadowRenderContext {
+	internal class ShadowContext {
 		public Matrix				ShadowView;
 		public Matrix				ShadowProjection;
 		public DepthStencilSurface	DepthBuffer;

@@ -178,12 +178,53 @@ namespace Fusion.Engine.Graphics {
 				device.VertexShaderConstants[0]	= constBuffer ;
 
 				device.SetupVertexInput( instance.vb, instance.ib );
-
 				device.DrawIndexed( instance.indexCount, 0, 0 );
 			}
-
 		}
 
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="context"></param>
+		internal void RenderShadowMapCascade ( ShadowContext shadowRenderCtxt, IEnumerable<Instance> instances )
+		{
+			if (surfaceShader==null) {
+				return;
+			}
+
+			var device			= GameEngine.GraphicsDevice;
+
+			var cbData			= new CBSurfaceData();
+
+			var viewPosition	= Matrix.Invert( shadowRenderCtxt.ShadowView ).TranslationVector;
+
+			device.SetTargets( shadowRenderCtxt.DepthBuffer, shadowRenderCtxt.ColorBuffer );
+			device.SetViewport( shadowRenderCtxt.ShadowViewport );
+
+			device.PipelineState	=	factory[ (int)SurfaceFlags.SHADOW ];
+
+			device.PixelShaderConstants[0]	= constBuffer ;
+			device.VertexShaderConstants[0]	= constBuffer ;
+			device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
+
+
+			cbData.Projection	=	shadowRenderCtxt.ShadowProjection;
+			cbData.View			=	shadowRenderCtxt.ShadowView;
+			cbData.ViewPos		=	new Vector4( viewPosition, 1 );
+			cbData.BiasSlopeFar	=	new Vector4( shadowRenderCtxt.DepthBias, shadowRenderCtxt.SlopeBias, shadowRenderCtxt.FarDistance, 0 );
+
+
+			foreach ( var instance in instances ) {
+				
+				cbData.World		=	instance.World;
+
+				constBuffer.SetData( cbData );
+
+				device.SetupVertexInput( instance.vb, instance.ib );
+				device.DrawIndexed( instance.indexCount, 0, 0 );
+			}
+		}
 	}
 }

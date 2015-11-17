@@ -67,6 +67,11 @@ namespace TestGame2 {
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
 			scene		=	GameEngine.Content.Load<Scene>( "testScene" );
 
+			master.LightSet.SpotAtlas	=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
+			master.LightSet.DirectLight.Position	=	new Vector3(1,2,3);
+			master.LightSet.DirectLight.Intensity	=	Color4.White;
+			master.LightSet.DirectLight.Enabled		=	true;
+
 			var transforms = new Matrix[ scene.Nodes.Count ];
 			scene.ComputeAbsoluteTransforms( transforms );
 			
@@ -90,6 +95,7 @@ namespace TestGame2 {
 			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.DiffuseTexture,     0,  0, 200,150, Color.White );
 			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.SpecularTexturer, 200,  0, 200,150, Color.White );
 			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.NormalMapTexture, 400,  0, 200,150, Color.White );
+			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.HdrTexture,		  600,  0, 400,300, Color.White );
 
 			//testLayer.DrawDebugString( debugFont, 10,276, "Lenna Soderberg", Color.White );
 

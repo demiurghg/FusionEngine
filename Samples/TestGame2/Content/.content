@@ -1,6 +1,7 @@
 [Ignore]
 *.ma
 *.psd
+spots/*.tga
 
 [BinaryDirectories]
 HKEY_CURRENT_USER\Software\FusionEngine@ToolsDir
@@ -11,6 +12,9 @@ HKEY_CURRENT_USER\Software\FusionEngine@ContentDir
 
 [Download]
 #lenaWeb.tiff = http://www.cs.cmu.edu/~chuck/lennapg/lena_std.tiff
+
+[TextureAtlas]
+*.atlas /width:512 /height:512
 
 [Textures]
 *.tga

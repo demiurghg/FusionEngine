@@ -1,5 +1,5 @@
 #if 0
-$ubershader FXAA|COPY|DOWNSAMPLE_4
+$ubershader FXAA|COPY|DOWNSAMPLE_4|OVERLAY_ADDITIVE
 $ubershader (DOWNSAMPLE_2_2x2..TO_CUBE_FACE)|(DOWNSAMPLE_2_4x4..TO_CUBE_FACE)
 $ubershader GAUSS_BLUR_3x3 PASS1|PASS2
 $ubershader GAUSS_BLUR PASS1|PASS2
@@ -8,7 +8,7 @@ $ubershader LINEARIZE_DEPTH|RESOLVE_AND_LINEARIZE_DEPTH_MSAA
 
 
 //-------------------------------------------------------------------------------
-#ifdef COPY
+#if defined(COPY) || defined(OVERLAY_ADDITIVE)
 
 Texture2D	Source : register(t0);
 

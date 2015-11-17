@@ -26,11 +26,6 @@ namespace Fusion.Engine.Graphics {
 		public Color4	DirectLightIntensity	=	new Color4(10,10,10,1);
 		public Color4	AmbientLevel			=	new Color4(0,0,0,0);
 
-		public TextureAtlas		MaskAtlas { get; set; }
-
-		public ICollection<OmniLight>	OmniLights { get { return omniLights; } }
-		public ICollection<SpotLight>	SpotLights { get { return spotLights; } }
-
 		List<OmniLight>	omniLights = new List<OmniLight>();
 		List<SpotLight>	spotLights = new List<SpotLight>();
 
@@ -258,9 +253,9 @@ namespace Fusion.Engine.Graphics {
 		{
 			GameEngine.GraphicsDevice.Clear( depthBuffer.Surface,		1, 0 );
 			GameEngine.GraphicsDevice.Clear( hdrBuffer.Surface,			Color4.Black );
-			GameEngine.GraphicsDevice.Clear( diffuseBuffer.Surface,		Color.Magenta.ToColor4() );
-			GameEngine.GraphicsDevice.Clear( specularBuffer.Surface,	Color.Maroon.ToColor4() );
-			GameEngine.GraphicsDevice.Clear( normalMapBuffer.Surface,	Color.Violet.ToColor4() );
+			GameEngine.GraphicsDevice.Clear( diffuseBuffer.Surface,		Color4.Black );
+			GameEngine.GraphicsDevice.Clear( specularBuffer.Surface,	Color4.Black );
+			GameEngine.GraphicsDevice.Clear( normalMapBuffer.Surface,	Color4.Black );
 		}
 
 
@@ -272,7 +267,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="view"></param>
 		/// <param name="projection"></param>
-		public void RenderLighting ( Camera camera, StereoEye stereoEye, RenderTargetSurface hdrTarget, ShaderResource occlusionMap )
+		public void RenderLighting ( Camera camera, StereoEye stereoEye, LightSet lightSet, Texture occlusionMap )
 		{
 			var view		=	camera.GetViewMatrix( stereoEye );
 			var projection	=	camera.GetProjectionMatrix( stereoEye );
@@ -337,15 +332,15 @@ namespace Fusion.Engine.Graphics {
 				cbData.InverseViewProjection	=	invVP;
 				cbData.CSMFilterRadius			=	new Vector4( Config.CSMFilterSize );
 
-				cbData.AmbientColor				=	AmbientLevel;
+				cbData.AmbientColor				=	new Color4(0.0f, 0.0f, 0.0f, 1);
 
-				PrepareOmniLights( view, projection );
-				PrepareSpotLights( view, projection );
+				PrepareOmniLights( view, projection, lightSet );
+				PrepareSpotLights( view, projection, lightSet );
 
 				//
 				//	set states :
 				//
-				device.SetTargets( null, hdrTarget );
+				device.SetTargets( null, HdrBuffer.Surface );
 
 				lightingCB.SetData( cbData );
 
@@ -359,10 +354,10 @@ namespace Fusion.Engine.Graphics {
 				device.ComputeShaderResources[3]	=	depthBuffer;
 				device.ComputeShaderResources[4]	=	csmColor;
 				device.ComputeShaderResources[5]	=	spotColor;
-				device.ComputeShaderResources[6]	=	MaskAtlas.Texture;
+				device.ComputeShaderResources[6]	=	lightSet.SpotAtlas.Texture.Srv;
 				device.ComputeShaderResources[7]	=	omniLightBuffer;
 				device.ComputeShaderResources[8]	=	spotLightBuffer;
-				device.ComputeShaderResources[9]	=	occlusionMap;
+				device.ComputeShaderResources[9]	=	occlusionMap.Srv;
 
 				device.ComputeShaderConstants[0]	=	lightingCB;
 
@@ -371,7 +366,8 @@ namespace Fusion.Engine.Graphics {
 				//
 				//	Dispatch :
 				//
-				device.Dispatch( MathUtil.IntDivUp( hdrTarget.Width, BlockSizeX ), MathUtil.IntDivUp( hdrTarget.Height, BlockSizeY ), 1 );
+				device.Dispatch( MathUtil.IntDivUp( HdrBuffer.Width, BlockSizeX ), MathUtil.IntDivUp( HdrBuffer.Height, BlockSizeY ), 1 );
+
 			} catch ( UbershaderException e ) {
 				e.Report();
 			}
@@ -382,22 +378,11 @@ namespace Fusion.Engine.Graphics {
 			//
 			//	Add accumulated light  :
 			//
-			#if false
-			device.ResetStates();
-			device.SetTargets( null, hdrTarget );
+			var	ge	=	GameEngine.GraphicsEngine;
 
-			var sb = GameEngine.GetService<SpriteBatch>();
-
-			sb.Begin( SpriteBlend.Additive );
-
-				sb.Draw( lightAccumBuffer, 0, 0, lightAccumBuffer.Width, lightAccumBuffer.Height, Color.White ); 
-
-			sb.End();
+			ge.Filter.OverlayAdditive( HdrBuffer.Surface, lightAccumBuffer );
 
 			device.ResetStates();
-			#endif
-
-
 
 			
 			/*if ( Config.ShowSpotLightExtents ) {			
@@ -425,7 +410,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="?"></param>
-		internal void RenderShadows ( Matrix view, Matrix projection, IShadowCaster shadowCaster )
+		internal void RenderShadows ( Camera camera, IEnumerable<Instance> instances )
 		{
 			if (Config.SkipShadows) {
 				return;
@@ -444,12 +429,15 @@ namespace Fusion.Engine.Graphics {
 
 			Matrix[] shadowViews, shadowProjections;
 
+			//	shadow is computed for both eyes :
+			var view = camera.GetViewMatrix( StereoEye.Mono );
+
 			ComputeCSMMatricies( view, out shadowViews, out shadowProjections, out csmViewProjections );
 
 			for (int i=0; i<4; i++) {
 
 				var smSize = Config.CSMSize;
-				var context = new ShadowRenderContext();
+				var context = new ShadowContext();
 				context.ShadowView			=	shadowViews[i];
 				context.ShadowProjection	=	shadowProjections[i];
 				context.ShadowViewport		=	new Viewport( smSize * i, 0, smSize, smSize );
@@ -459,7 +447,7 @@ namespace Fusion.Engine.Graphics {
 				context.ColorBuffer			=	csmColor.Surface;
 				context.DepthBuffer			=	csmDepth.Surface;
 
-				shadowCaster.RenderShadowMapCascade( context );
+				GameEngine.GraphicsEngine.SceneRenderer.RenderShadowMapCascade( context, instances );
 			}
 
 
@@ -473,7 +461,7 @@ namespace Fusion.Engine.Graphics {
 
 				var spot	= spotLights[i];
 				var smSize	= Config.SpotShadowSize;
-				var context = new ShadowRenderContext();
+				var context = new ShadowContext();
 				var dx      = i % 4;
 				var dy		= i / 4;
 				var far		= spot.Projection.GetFarPlaneDistance();
@@ -487,7 +475,7 @@ namespace Fusion.Engine.Graphics {
 				context.ColorBuffer			=	spotColor.Surface;
 				context.DepthBuffer			=	spotDepth.Surface;
 
-				shadowCaster.RenderShadowMapCascade( context );
+				GameEngine.GraphicsEngine.SceneRenderer.RenderShadowMapCascade( context, instances );
 			}
 		}
 
@@ -540,7 +528,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		void PrepareOmniLights ( Matrix view, Matrix proj )
+		void PrepareOmniLights ( Matrix view, Matrix proj, LightSet lightSet )
 		{
 			//t totalTileTo//
 
@@ -591,7 +579,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		void PrepareSpotLights ( Matrix view, Matrix projection )
+		void PrepareSpotLights ( Matrix view, Matrix projection, LightSet lightSet )
 		{
 			var znear	=	projection.M34 * projection.M43 / projection.M33;
 			var vp		=	GameEngine.GraphicsDevice.DisplayBounds;
@@ -606,16 +594,16 @@ namespace Fusion.Engine.Graphics {
 			int index	=	0;
 
 			
-			foreach ( var spot in spotLights ) {
+			foreach ( var spot in lightSet.SpotLights ) {
 
 				var spotId		=	spotLights.IndexOf( spot );
 				var shadowSO	=	new Vector4( 0.125f, -0.125f, 0.25f*(spotId % 4)+0.125f, 0.25f*(spotId / 4)+0.125f );
 				
-				var maskRect	=	MaskAtlas.GetSubImageRectangle( spot.MaskName );
-				var maskX		=	maskRect.Left   / (float)MaskAtlas.Texture.Width;
-				var maskY		=	maskRect.Top    / (float)MaskAtlas.Texture.Height;
-				var maskW		=	maskRect.Width  / (float)MaskAtlas.Texture.Width;
-				var maskH		=	maskRect.Height / (float)MaskAtlas.Texture.Height;
+				var maskRect	=	lightSet.SpotAtlas.GetSubImageRectangle( spot.MaskName );
+				var maskX		=	maskRect.Left   / (float)lightSet.SpotAtlas.Texture.Width;
+				var maskY		=	maskRect.Top    / (float)lightSet.SpotAtlas.Texture.Height;
+				var maskW		=	maskRect.Width  / (float)lightSet.SpotAtlas.Texture.Width;
+				var maskH		=	maskRect.Height / (float)lightSet.SpotAtlas.Texture.Height;
 				var maskSO		=	new Vector4( maskW*0.5f, -maskH*0.5f, maskX + maskW/2f, maskY + maskH/2f );
 
 				var bf = new BoundingFrustum( spot.SpotView * spot.Projection );

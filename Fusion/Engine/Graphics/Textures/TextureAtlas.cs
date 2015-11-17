@@ -5,18 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using DXGI = SharpDX.DXGI;
-using D3D = SharpDX.Direct3D11;
-using SharpDX;
-using SharpDX.Direct3D11;
 using System.Runtime.InteropServices;
 using Fusion.Core.Content;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
+using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
 
 
-namespace Fusion.Drivers.Graphics {
+namespace Fusion.Engine.Graphics {
 
 	[ContentLoader(typeof(TextureAtlas))]
 	public class TextureAtlasLoader : ContentLoader {
@@ -24,7 +21,7 @@ namespace Fusion.Drivers.Graphics {
 		public override object Load ( GameEngine game, Stream stream, Type requestedType, string assetPath )
 		{
 			bool srgb = assetPath.ToLowerInvariant().Contains("|srgb");
-			return new TextureAtlas( game.GraphicsDevice, stream, srgb );
+			return new TextureAtlas( game.GraphicsEngine, stream, srgb );
 		}
 	}
 		
@@ -35,7 +32,7 @@ namespace Fusion.Drivers.Graphics {
 	/// </summary>
 	public class TextureAtlas : DisposableBase {
 
-		private	Texture2D	texture;
+		private	Texture	texture;
 
 		struct Element {
 			public string Name;
@@ -52,7 +49,7 @@ namespace Fusion.Drivers.Graphics {
 		/// <summary>
 		/// Atlas texture.
 		/// </summary>
-		public Texture2D Texture { 
+		public Texture Texture { 
 			get { 
 				return texture; 
 			} 
@@ -64,8 +61,10 @@ namespace Fusion.Drivers.Graphics {
 		/// Creates texture atlas from stream.
 		/// </summary>
 		/// <param name="device"></param>
-		public TextureAtlas ( GraphicsDevice device, Stream stream, bool useSRgb = false )
+		public TextureAtlas ( GraphicsEngine ge, Stream stream, bool useSRgb = false )
 		{
+			var device = ge.GameEngine.GraphicsDevice;
+
 			using ( var br = new BinaryReader(stream) ) {
 			
 				if (!br.CheckMagic("ATLS")) {
@@ -89,7 +88,7 @@ namespace Fusion.Drivers.Graphics {
 				
 				var ddsImageBytes	=	br.ReadBytes( ddsFileLength );
 
-				texture	=	new Texture2D( device, ddsImageBytes, useSRgb );
+				texture	=	new UserTexture( ge, ddsImageBytes, useSRgb );
 			}
 
 

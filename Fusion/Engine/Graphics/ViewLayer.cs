@@ -124,11 +124,14 @@ namespace Fusion.Engine.Graphics {
 
 
 			ge.LightRenderer.ClearGBuffer();
+
+			ge.LightRenderer.RenderShadows( Camera, Instances );
 			
 			//	render g-buffer :
 			ge.SceneRenderer.RenderGBuffer( Camera, stereoEye, Instances );
 
-			//ge.LightRenderer.RenderLighting( 
+			//	render lights :
+			ge.LightRenderer.RenderLighting( Camera, stereoEye, LightSet, GameEngine.GraphicsEngine.WhiteTexture );
 
 			//	draw sprites :
 			ge.SpriteEngine.DrawSprites( gameTime, stereoEye, SpriteLayers );

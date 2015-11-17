@@ -32,17 +32,10 @@ namespace DeferredDemo
 			DOWNSAMPLE_4						= 1 << 6,
 			GAUSS_BLUR_3x3						= 1 << 7,
 			GAUSS_BLUR							= 1 << 8,
-			TAPS_2								= 1 << 9,
-			TAPS_3								= 1 << 10,
-			TAPS_4								= 1 << 11,
-			TAPS_5								= 1 << 12,
-			TAPS_6								= 1 << 13,
-			TAPS_7								= 1 << 14,
-			TAPS_8								= 1 << 15,
-			TAPS_9								= 1 << 16,
-			TO_CUBE_FACE						= 1 << 17,
-			LINEARIZE_DEPTH						= 1 << 18,
-			RESOLVE_AND_LINEARIZE_DEPTH_MSAA	= 1 << 19,
+			TO_CUBE_FACE						= 1 << 9,
+			LINEARIZE_DEPTH						= 1 << 10,
+			RESOLVE_AND_LINEARIZE_DEPTH_MSAA	= 1 << 11,
+			OVERLAY_ADDITIVE					= 1 << 12,
 		}
 
 		[StructLayout( LayoutKind.Explicit )]
@@ -85,7 +78,26 @@ namespace DeferredDemo
 		{
 			SafeDispose( ref factory );
 			shaders = GameEngine.Content.Load<Ubershader>( "filter" );
-			factory	= new StateFactory( shaders, typeof(ShaderFlags), Primitive.TriangleList, VertexInputElement.Empty, BlendState.Opaque, RasterizerState.CullNone, DepthStencilState.None );
+			factory	= new StateFactory( shaders, typeof(ShaderFlags), (ps,i) => Enum(ps, (ShaderFlags)i) );
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="ps"></param>
+		/// <param name="flags"></param>
+		void Enum ( PipelineState ps, ShaderFlags flags )
+		{
+			ps.Primitive			=	Primitive.TriangleList;
+			ps.VertexInputElements	=	VertexInputElement.Empty;
+			ps.BlendState			=	BlendState.Opaque;
+			ps.RasterizerState		=	RasterizerState.CullNone;
+			ps.DepthStencilState	=	DepthStencilState.None;
+
+			if (flags==ShaderFlags.OVERLAY_ADDITIVE) {
+				ps.BlendState = BlendState.Additive;
+			}
 		}
 
 
@@ -255,6 +267,34 @@ namespace DeferredDemo
 				}
 
 				rs.PipelineState			=	factory[ (int)ShaderFlags.COPY ];
+				rs.PixelShaderResources[0]	= src;
+
+				rs.Draw( 3, 0 );
+			}
+			rs.ResetStates();
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="dst">target to copy to</param>
+		/// <param name="src">target to copy from</param>
+		public void OverlayAdditive( RenderTargetSurface dst, ShaderResource src )
+		{
+			SetDefaultRenderStates();
+
+			using( new PixEvent("OverlayAdditive") ) {
+
+				if(dst == null) {
+					rs.RestoreBackbuffer();
+				} else {
+					SetViewport(dst);
+					rs.SetTargets( null, dst );
+				}
+
+				rs.PipelineState			=	factory[ (int)ShaderFlags.OVERLAY_ADDITIVE ];
 				rs.PixelShaderResources[0]	= src;
 
 				rs.Draw( 3, 0 );

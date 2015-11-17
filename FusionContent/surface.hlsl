@@ -86,7 +86,7 @@ GBuffer PSMain( PSInput input )
 	float3	white		=	float3(1,1,1);
 	float3 	diffuse		=	DiffuseTexture.Sample( Sampler, input.TexCoord ).xyz;
 	float3 	specular	=	SpecularTexture.Sample( Sampler, input.TexCoord ).xyz;
-	float3 	normal		=	NormalMapTexture.Sample( Sampler, input.TexCoord ).xyz * 2 - 1;// input.WNormal.xyz;
+	float3 	normal		=	float3(0,0,1);// NormalMapTexture.Sample( Sampler, input.TexCoord ).xyz * 2 - 1;// input.WNormal.xyz;
 	float3 	normalBias	=	NormalMapTexture.SampleBias( Sampler, input.TexCoord,0 ).xyz * 2 - 1;// input.WNormal.xyz;
 	float3 	emission	=	EmissionTexture.Sample( Sampler, input.TexCoord ).xyz * 100;// input.WNormal.xyz;
 	
@@ -108,7 +108,7 @@ GBuffer PSMain( PSInput input )
 	output.hdr		=	float4( emission, 0 );
 	output.diffuse	=	float4( diffuse, 1 );
 	output.specular =	float4( specular2, roughness );
-	output.normals	=	float4( worldNormal * 0.5 + 0.5, 0 );
+	output.normals	=	float4( worldNormal * 0.5 + 0.5, 1 );
 	
 	return output;
 }

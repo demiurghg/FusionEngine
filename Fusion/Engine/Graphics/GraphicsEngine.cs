@@ -46,6 +46,16 @@ namespace Fusion.Engine.Graphics {
 
 		RenderTarget2D	hdrTarget;
 
+		public Texture	WhiteTexture { get { return whiteTexture; } }
+		public Texture	BlackTexture { get { return blackTexture; } }
+		public Texture	FlatNormalMap { get { return flatNormalMap; } }
+
+		DynamicTexture whiteTexture;
+		DynamicTexture blackTexture;
+		DynamicTexture flatNormalMap;
+
+
+
 
 		/// <summary>
 		/// 
@@ -95,6 +105,14 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize ()
 		{
+			whiteTexture	=	new DynamicTexture( this, 4,4, typeof(Color), false, false );
+			whiteTexture.SetData( Enumerable.Range(0,16).Select( i => Color.White ).ToArray() );
+
+			blackTexture	=	new DynamicTexture( this, 4,4, typeof(Color), false, false );
+			blackTexture.SetData( Enumerable.Range(0,16).Select( i => Color.Black ).ToArray() );
+
+			flatNormalMap	=	new DynamicTexture( this, 4,4, typeof(Color), false, false );
+			flatNormalMap.SetData( Enumerable.Range(0,16).Select( i => new Color(127,127,255,127) ).ToArray() );
 		}
 
 
@@ -107,6 +125,10 @@ namespace Fusion.Engine.Graphics {
 		{
 			if (disposing) {
 				SafeDispose( ref spriteEngine );
+
+				SafeDispose( ref whiteTexture );
+				SafeDispose( ref blackTexture );
+				SafeDispose( ref flatNormalMap );
 			}
 			base.Dispose( disposing );
 		}

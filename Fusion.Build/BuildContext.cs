@@ -227,7 +227,8 @@ namespace Fusion.Build {
 
 
 		/// <summary>
-		/// Generates temporary file name for given key with given extension. 
+		/// Generates temporary file name for given key with given extension
+		/// and return full path to this file.
 		/// </summary>
 		/// <param name="key">unique key string value</param>
 		/// <param name="ext">Desired extension with leading dot</param>
@@ -242,7 +243,7 @@ namespace Fusion.Build {
 
 
 		/// <summary>
-		/// Copies file file to stream.
+		/// Copies file to stream.
 		/// </summary>
 		/// <param name="fullSourceFileName"></param>
 		/// <param name="targetStream"></param>

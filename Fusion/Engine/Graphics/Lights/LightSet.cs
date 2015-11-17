@@ -43,6 +43,13 @@ namespace Fusion.Engine.Graphics {
 		
 
 
+		/// <summary>
+		/// Spot-light mask atlas.
+		/// </summary>
+		public TextureAtlas SpotAtlas {
+			get; set;
+		}
+
 
 		DirectLight		directLight = new DirectLight();
 		List<OmniLight> omniLights = new List<OmniLight>();
