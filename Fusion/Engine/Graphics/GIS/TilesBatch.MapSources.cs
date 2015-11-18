@@ -11,7 +11,7 @@ using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.YandexMaps;
 
 namespace Fusion.Engine.Graphics.GIS
 {
-    partial class TilesGisBatch
+    partial class TilesGisLayer
 	{
 		public static List<BaseMapSource> MapSources = new List<BaseMapSource>();
 

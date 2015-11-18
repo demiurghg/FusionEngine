@@ -10,7 +10,7 @@ using Fusion.Engine.Graphics.GIS.GlobeMath;
 
 namespace Fusion.Engine.Graphics.GIS
 {
-	partial class TilesGisBatch
+	partial class TilesGisLayer
 	{
 		int lowestLod	= 9;
 		int minLod		= 3;
@@ -65,19 +65,19 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			var ms = CurrentMapSource;
 
-			var d = Math.Log((GameEngine.GraphicsEngine.GIS.Camera.CameraDistance - GameEngine.GraphicsEngine.GIS.Camera.EarthRadius) * 1000.0, 2.0);
+			var d = Math.Log((GameEngine.GraphicsEngine.Gis.Camera.CameraDistance - GameEngine.GraphicsEngine.Gis.Camera.EarthRadius) * 1000.0, 2.0);
 			double lod = 29.3 - d;
 
 
-			if (GameEngine.GraphicsEngine.GIS.Camera.Viewport.Width != 0) {
+			if (GameEngine.GraphicsEngine.Gis.Camera.Viewport.Width != 0) {
 				int closestZoom = 3;
 				double closestRadius = 100;
 
 				for (int zoom = 3; zoom < ms.MaxZoom; zoom++) {
 					double eps	= 256.0 / (1 << zoom);
-					double xx	= GameEngine.GraphicsEngine.GIS.Camera.Viewport.Height;
-					double dd	= GameEngine.GraphicsEngine.GIS.Camera.CameraDistance - GameEngine.GraphicsEngine.GIS.Camera.EarthRadius;
-					double eta	= DMathUtil.DegreesToRadians(GameEngine.GraphicsEngine.GIS.Camera.camFov);
+					double xx	= GameEngine.GraphicsEngine.Gis.Camera.Viewport.Height;
+					double dd	= GameEngine.GraphicsEngine.Gis.Camera.CameraDistance - GameEngine.GraphicsEngine.Gis.Camera.EarthRadius;
+					double eta	= DMathUtil.DegreesToRadians(GameEngine.GraphicsEngine.Gis.Camera.camFov);
 
 					double p = (eps * xx) / (2 * dd * Math.Tan(eta));
 
@@ -104,7 +104,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 			// Get camera mercator position 
-			var lonLat = GameEngine.GraphicsEngine.GIS.Camera.GetCameraLonLat();
+			var lonLat = GameEngine.GraphicsEngine.Gis.Camera.GetCameraLonLat();
 			lonLat.X = DMathUtil.RadiansToDegrees(lonLat.X);
 			lonLat.Y = DMathUtil.RadiansToDegrees(lonLat.Y);
 
@@ -267,7 +267,7 @@ namespace Fusion.Engine.Graphics.GIS
 				tile.bottom = y1;
 
 				int[] indexes;
-				GIS.GeoPoint[] vertices;
+				Gis.GeoPoint[] vertices;
 
 				CalculateVertices(out vertices, out indexes, tileDensity, x0, x1, y0, y1, zoom);
 
@@ -302,20 +302,20 @@ namespace Fusion.Engine.Graphics.GIS
 		void GenerateTileGrid(int density, ref VertexBuffer vb, out IndexBuffer ib, double left, double right, double top, double bottom, int zoom)
 		{
 			int[]			indexes;
-			GIS.GeoPoint[]	vertices;
+			Gis.GeoPoint[]	vertices;
 
 			DisposableBase.SafeDispose(ref vb);
 
 			CalculateVertices(out vertices, out indexes, density, left, right, top, bottom, zoom);
 
-			vb = new VertexBuffer(GameEngine.GraphicsDevice, typeof(GIS.GeoPoint), vertices.Length);
+			vb = new VertexBuffer(GameEngine.GraphicsDevice, typeof(Gis.GeoPoint), vertices.Length);
 			ib = new IndexBuffer(GameEngine.GraphicsDevice, indexes.Length);
 			ib.SetData(indexes);
 			vb.SetData(vertices, 0, vertices.Length);
 		}
 
 
-		void CalculateVertices(out GIS.GeoPoint[] vertices, out int[] indeces, int density, double left, double right, double top, double bottom, int zoom)
+		void CalculateVertices(out Gis.GeoPoint[] vertices, out int[] indeces, int density, double left, double right, double top, double bottom, int zoom)
 		{
 			int RowsCount		= density + 2;
 			int ColumnsCount	= RowsCount;
@@ -323,7 +323,7 @@ namespace Fusion.Engine.Graphics.GIS
 			//var el = Game.GetService<LayerService>().ElevationLayer;
 			var ms = CurrentMapSource;
 
-			var		verts	= new List<GIS.GeoPoint>();
+			var		verts	= new List<Gis.GeoPoint>();
 			float	step	= 1.0f / (density + 1);
 			double	dStep	= 1.0 / (double)(density + 1);
 
@@ -343,7 +343,7 @@ namespace Fusion.Engine.Graphics.GIS
 					lat = sc.Y * Math.PI / 180.0;
 
 
-					verts.Add(new GIS.GeoPoint {
+					verts.Add(new Gis.GeoPoint {
 						Tex0 = new Vector4(step * col, step * row, 0, 0),
 						Lon = lon,
 						Lat = lat

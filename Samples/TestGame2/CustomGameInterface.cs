@@ -13,6 +13,7 @@ using Fusion.Core.Configuration;
 using Fusion.Framework;
 using Fusion.Build;
 using Fusion.Engine.UserInterface;
+using Fusion.Engine.Graphics.GIS;
 
 namespace TestGame2 {
 
@@ -82,21 +83,21 @@ namespace TestGame2 {
 			master.LightSet.DirectLight.Position	=	new Vector3(1,2,3);
 			master.LightSet.DirectLight.Intensity	=	Color4.White;
 			master.LightSet.DirectLight.Enabled		=	true;
-
+			
 			var transforms = new Matrix[ scene.Nodes.Count ];
 			scene.ComputeAbsoluteTransforms( transforms );
 			
 			for ( int i=0; i<scene.Nodes.Count; i++ ) {
-
+			
 				var meshIndex  = scene.Nodes[i].MeshIndex;
-
+			
 				if (meshIndex<0) {
 					continue;
 				}
 				
 				var inst = new Instance( GameEngine.GraphicsEngine, scene.Meshes[meshIndex] );
 				inst.World = transforms[ i ];
-
+			
 				master.Instances.Add( inst );
 			}
 
@@ -113,6 +114,8 @@ namespace TestGame2 {
 			master.SpriteLayers.Add( testLayer );
 			master.SpriteLayers.Add( console.ConsoleSpriteLayer );
 			master.SpriteLayers.Add( uiLayer );
+
+			//master.GisLayers.Add(new TilesGisLayer(GameEngine));
 
 			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
 

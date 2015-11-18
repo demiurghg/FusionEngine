@@ -8,6 +8,7 @@ using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
+using Fusion.Engine.Graphics.GIS;
 
 namespace Fusion.Engine.Graphics {
 
@@ -20,8 +21,8 @@ namespace Fusion.Engine.Graphics {
 		SpriteEngine	spriteEngine;
 
 		[GameModule("GIS", "gis", InitOrder.After)]
-		public GIS.GIS GIS { get { return gis; } }
-		GIS.GIS gis;
+		public Gis Gis { get { return gis; } }
+		Gis gis;
 
 		[GameModule("Filter", "filter", InitOrder.After)]
 		public DeferredDemo.Filter Filter { get{ return filter; } }
@@ -72,7 +73,7 @@ namespace Fusion.Engine.Graphics {
 
 			ViewLayers	=	new List<ViewLayer>();
 			spriteEngine	=	new SpriteEngine( this );
-			gis				=	new GIS.GIS(gameEngine);
+			gis				=	new Gis(gameEngine);
 			filter			=	new DeferredDemo.Filter( gameEngine );
 			hdrFilter		=	new DeferredDemo.HdrFilter( gameEngine );
 			lightRenderer	=	new Graphics.LightRenderer( gameEngine );
@@ -147,7 +148,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="stereoEye"></param>
 		internal void Draw ( GameTime gameTime, StereoEye stereoEye )
 		{
-			//GIS.Update(gameTime);
+			Gis.Update(gameTime);
 			//GIS.Draw(gameTime, StereoEye.Mono);
 
 			var layersToDraw = ViewLayers

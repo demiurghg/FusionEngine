@@ -9,7 +9,7 @@ using Fusion.Engine.Graphics.GIS.DataSystem.MapSources;
 
 namespace Fusion.Engine.Graphics.GIS
 {
-	public partial class TilesGisBatch : GIS.GisBatch
+	public partial class TilesGisLayer : Gis.GisLayer
 	{
 		Ubershader		shader;
 		StateFactory	factory;
@@ -25,7 +25,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public TilesGisBatch(GameEngine engine) : base(engine)
+		public TilesGisLayer(GameEngine engine) : base(engine)
 		{
 			RegisterMapSources();
 
@@ -33,7 +33,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			frame	= GameEngine.Content.Load<Texture2D>("redframe.tga");
 			shader	= GameEngine.Content.Load<Ubershader>("globe.Tile.hlsl");
-			factory = new StateFactory(shader, typeof(TileFlags), Primitive.TriangleList, VertexInputElement.FromStructure<GIS.GeoPoint>(), BlendState.Opaque, RasterizerState.CullCW, DepthStencilState.Default);
+			factory = new StateFactory(shader, typeof(TileFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.Opaque, RasterizerState.CullCW, DepthStencilState.Default);
 		}
 
 

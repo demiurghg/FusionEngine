@@ -8,7 +8,7 @@ using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Graphics.GIS
 {
-	public class LinesGisBatch : GIS.GisBatch
+	public class LinesGisLayer : Gis.GisLayer
 	{
 		Ubershader		shader;
 		StateFactory	factory;
@@ -34,21 +34,21 @@ namespace Fusion.Engine.Graphics.GIS
 		VertexBuffer secondBuffer;
 		VertexBuffer currentBuffer;
 
-		public GIS.GeoPoint[] PointsCpu { get; protected set; }
+		public Gis.GeoPoint[] PointsCpu { get; protected set; }
 
 
-		public LinesGisBatch(GameEngine engine, int linesPointsCount, bool isDynamic = false) : base(engine)
+		public LinesGisLayer(GameEngine engine, int linesPointsCount, bool isDynamic = false) : base(engine)
 		{
 			shader = GameEngine.Content.Load<Ubershader>("globe.Line.hlsl");
-			factory = new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<GIS.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
+			factory = new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
 
 
 			var vbOptions = isDynamic ? VertexBufferOptions.Dynamic : VertexBufferOptions.Default;
 
-			firstBuffer		= new VertexBuffer(engine.GraphicsDevice, typeof(GIS.GeoPoint), linesPointsCount, vbOptions);
+			firstBuffer		= new VertexBuffer(engine.GraphicsDevice, typeof(Gis.GeoPoint), linesPointsCount, vbOptions);
 			currentBuffer	= firstBuffer;
 
-			PointsCpu = new GIS.GeoPoint[linesPointsCount];
+			PointsCpu = new Gis.GeoPoint[linesPointsCount];
 
 			Flags = (int)(LineFlags.ARC_LINE);
 		}

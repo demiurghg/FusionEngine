@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 using Fusion;
 using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
@@ -15,7 +12,7 @@ using Lidgren.Network;
 
 namespace Fusion.Engine.Graphics.GIS
 {
-    public class GIS : GameModule
+    public class Gis : GameModule
     {
 	    public GlobeCamera Camera;
 
@@ -58,7 +55,7 @@ namespace Fusion.Engine.Graphics.GIS
 			Cartesian
 		}
 
-	    public class GisBatch
+	    public class GisLayer
 	    {
 		    protected GameEngine GameEngine;
 
@@ -72,36 +69,15 @@ namespace Fusion.Engine.Graphics.GIS
 			public virtual void Dispose	() {}
 
 
-		    public GisBatch(GameEngine engine)
+		    public GisLayer(GameEngine engine)
 		    {
 			    GameEngine = engine;
 		    }
 	    }
 
-
-	    List<GisBatch> currentBatches	= new List<GisBatch>();
-
-
-	    Context currentContext;
-
 		Vector2 previousMousePosition;
 
-
-	    // Context stuff
-		public class Context
-		{
-			public List<GisBatch> Batches;
-
-			//public Settings Config;
-
-		}
-
-		TilesGisBatch  Globe;
-	    //PointsGisBatch Points;
-	    LinesGisBatch lines;
-	    PolyGisBatch heatMap;
-
-	    public GIS(GameEngine gameEngine) : base(gameEngine)
+	    public Gis(GameEngine gameEngine) : base(gameEngine)
 	    {
 			
 	    }
@@ -110,7 +86,6 @@ namespace Fusion.Engine.Graphics.GIS
 	    public override void Initialize()
 	    {
 			constBuffer = new ConstantBuffer(GameEngine.GraphicsDevice, typeof(ConstData));
-			Globe		= new TilesGisBatch(GameEngine);
 			Camera		= new GlobeCamera(GameEngine);
 
 			Camera.Viewport = new Viewport(0, 0, GameEngine.GraphicsDevice.DisplayBounds.Width, GameEngine.GraphicsDevice.DisplayBounds.Height);
@@ -201,8 +176,6 @@ namespace Fusion.Engine.Graphics.GIS
 	    protected override void Dispose(bool disposing)
 	    {
 		    if (disposing) {
-			    if (Globe != null) Globe.Dispose();
-
 				constBuffer.Dispose();
 		    }
 		    base.Dispose(disposing);
@@ -212,14 +185,13 @@ namespace Fusion.Engine.Graphics.GIS
 	    public void Update(GameTime gameTime)
 	    {
 		    Camera.Update(gameTime);
-
-			Globe.Update(gameTime);
-			//Points.Update(gameTime);
 	    }
 
 
-	    public  void Draw(GameTime gameTime, StereoEye stereoEye)
+	    public  void Draw(GameTime gameTime, StereoEye stereoEye, ICollection<GisLayer> layers)
 	    {
+		    if (!layers.Any()) return;
+
 			constantData.ViewProj		= Camera.ViewMatrixFloat * Camera.ProjMatrixFloat;
 			constantData.ViewPositionX	= Camera.FreeCamPosition.X;
 			constantData.ViewPositionY	= Camera.FreeCamPosition.Y;
@@ -227,30 +199,54 @@ namespace Fusion.Engine.Graphics.GIS
 
 			constBuffer.SetData(constantData);
 
-
-			var batches = currentBatches.OrderByDescending(x => x.ZOrder);
-
-
-			Globe.Draw(gameTime, constBuffer);
+			var batches = layers.OrderByDescending(x => x.ZOrder);
+			
 		    foreach (var batch in batches) {
 				batch.Draw(gameTime, constBuffer);
 		    }
-
-			//Points.Draw(gameTime, constBuffer);
-			//lines.Draw(gameTime, constBuffer);
-			//heatMap.Draw(gameTime, constBuffer);
 	    }
 
 
-	    public void AddBatch(GisBatch gisBatch)
-	    {
-			if (!currentBatches.Contains(gisBatch))	currentBatches.Add(gisBatch);
-	    }
 
+		public static void ToLatLon(double utmX, double utmY, string utmZone, out double latitude, out double longitude)
+		{
+			bool isNorthHemisphere = utmZone.Last() >= 'N';
 
-	    public void		LoadContext		(Context context)	{ }
-		public Context	SaveContext		()					{ return new Context(); }
-		public void		ClearContext	()					{ }
+			var diflat = -0.00066286966871111111111111111111111111;
+			var diflon = -0.0003868060578;
 
+			var zone = int.Parse(utmZone.Remove(utmZone.Length - 1));
+			var c_sa = 6378137.000000;
+			var c_sb = 6356752.314245;
+			var e2 = Math.Pow((Math.Pow(c_sa, 2) - Math.Pow(c_sb, 2)), 0.5) / c_sb;
+			var e2cuadrada = Math.Pow(e2, 2);
+			var c = Math.Pow(c_sa, 2) / c_sb;
+			var x = utmX - 500000;
+			var y = isNorthHemisphere ? utmY : utmY - 10000000;
+
+			var s = ((zone * 6.0) - 183.0);
+			var lat = y / (c_sa * 0.9996);
+			var v = (c / Math.Pow(1 + (e2cuadrada * Math.Pow(Math.Cos(lat), 2)), 0.5)) * 0.9996;
+			var a = x / v;
+			var a1 = Math.Sin(2 * lat);
+			var a2 = a1 * Math.Pow((Math.Cos(lat)), 2);
+			var j2 = lat + (a1 / 2.0);
+			var j4 = ((3 * j2) + a2) / 4.0;
+			var j6 = ((5 * j4) + Math.Pow(a2 * (Math.Cos(lat)), 2)) / 3.0;
+			var alfa = (3.0 / 4.0) * e2cuadrada;
+			var beta = (5.0 / 3.0) * Math.Pow(alfa, 2);
+			var gama = (35.0 / 27.0) * Math.Pow(alfa, 3);
+			var bm = 0.9996 * c * (lat - alfa * j2 + beta * j4 - gama * j6);
+			var b = (y - bm) / v;
+			var epsi = ((e2cuadrada * Math.Pow(a, 2)) / 2.0) * Math.Pow((Math.Cos(lat)), 2);
+			var eps = a * (1 - (epsi / 3.0));
+			var nab = (b * (1 - epsi)) + lat;
+			var senoheps = (Math.Exp(eps) - Math.Exp(-eps)) / 2.0;
+			var delt = Math.Atan(senoheps / (Math.Cos(nab)));
+			var tao = Math.Atan(Math.Cos(delt) * Math.Tan(nab));
+
+			longitude = ((delt * (180.0 / Math.PI)) + s) + diflon;
+			latitude = ((lat + (1 + e2cuadrada * Math.Pow(Math.Cos(lat), 2) - (3.0 / 2.0) * e2cuadrada * Math.Sin(lat) * Math.Cos(lat) * (tao - lat)) * (tao - lat)) * (180.0 / Math.PI)) + diflat;
+		}
     }
 }
