@@ -23,10 +23,8 @@ namespace Fusion.Core.Configuration {
 	internal static class ConfigSerializer {
 
 
-		public static void SaveToFile ( IEnumerable<GameModule.ModuleBinding> bindings, string path )
+		public static void SaveToStream ( IEnumerable<GameModule.ModuleBinding> bindings, Stream stream )
 		{
-			Log.Message("Saving : {0}", path );
-
 			try {
 		
 				//	prepare ini data :			
@@ -61,11 +59,9 @@ namespace Fusion.Core.Configuration {
 
 
 				//	write file :
-				Directory.CreateDirectory( Path.GetDirectoryName(path) );
-
 				var parser = new StreamIniDataParser();
 
-				using ( var sw = new StreamWriter(path) ) {
+				using ( var sw = new StreamWriter(stream) ) {
 					parser.WriteData( sw, iniData );
 				}
 
@@ -81,10 +77,8 @@ namespace Fusion.Core.Configuration {
 		/// </summary>
 		/// <param name="bindings"></param>
 		/// <param name="path"></param>
-		public static void LoadFromFile	( IEnumerable<GameModule.ModuleBinding> bindings, string path )
+		public static void LoadFromStream	( IEnumerable<GameModule.ModuleBinding> bindings, Stream stream )
 		{
-			Log.Message("Loading : {0}", path );
-
 			try {
 		
 				var iniData = new IniData();
@@ -92,7 +86,7 @@ namespace Fusion.Core.Configuration {
 
 				parser.Parser.Configuration.CommentString	=	"# ";
 
-				using ( var sw = new StreamReader(path) ) {
+				using ( var sw = new StreamReader(stream) ) {
 					iniData	= parser.ReadData( sw );
 				}
 			

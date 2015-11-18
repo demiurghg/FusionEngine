@@ -390,6 +390,7 @@
     <Compile Include="Engine\Network\NetChanHeader.cs" />
     <Compile Include="Engine\Network\NetworkConfig.cs" />
     <Compile Include="Engine\Network\NetworkEngine.cs" />
+    <Compile Include="Engine\Storage\UserStorage.cs" />
     <Compile Include="Framework\ClearCmd.cs" />
     <Compile Include="Framework\GameConsoleConfig.cs" />
     <Compile Include="Framework\EditBox.cs" />

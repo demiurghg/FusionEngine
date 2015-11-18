@@ -28,6 +28,7 @@ using Fusion.Engine.Client;
 using Fusion.Engine.Graphics.GIS;
 using Fusion.Engine.Server;
 using Lidgren.Network;
+using Fusion.Engine.Storage;
 
 
 namespace Fusion.Engine.Common {
@@ -93,6 +94,11 @@ namespace Fusion.Engine.Common {
 		/// Gets current content manager
 		/// </summary>
 		public	Invoker Invoker { get { return invoker; } }
+
+		/// <summary>
+		/// Gets user storage.
+		/// </summary>
+		public UserStorage UserStorage { get { return userStorage; } }
 
 		/// <summary>
 		/// Sets and gets game window icon.
@@ -192,6 +198,7 @@ namespace Fusion.Engine.Common {
 		Keyboard			keyboard		;
 		Mouse				mouse			;
 		GamepadCollection	gamepads		;
+		UserStorage			userStorage		;
 
 
 		GameTime	gameTimeInternal;
@@ -296,6 +303,8 @@ namespace Fusion.Engine.Common {
 			keyboard			=	new Keyboard(this);
 			mouse				=	new Mouse(this);
 			gamepads			=	new GamepadCollection(this);
+
+			userStorage			=	new UserStorage(this);
 
 		}
 
@@ -407,6 +416,9 @@ namespace Fusion.Engine.Common {
 
 				Log.Message("Disposing : Graphics Device");
 				SafeDispose( ref graphicsDevice );
+
+				Log.Message("Disposing : User Storage");
+				SafeDispose( ref userStorage );
 			}
 
 			base.Dispose(disposing);
@@ -580,7 +592,11 @@ namespace Fusion.Engine.Common {
 
 			Invoker.FeedConfigs( ConfigSerializer.GetConfigVariables( GameModule.Enumerate(this) ) );
 
-			ConfigSerializer.LoadFromFile( GameModule.Enumerate(this), ConfigSerializer.GetConfigPath(filename) );
+			if (userStorage.FileExists(filename)) {
+				ConfigSerializer.LoadFromStream( GameModule.Enumerate(this), UserStorage.OpenFile(filename, FileMode.Open, FileAccess.Read) );
+			} else {
+				Log.Warning("Can not load configuration from {0}", filename);
+			}
 		}
 
 
@@ -592,7 +608,8 @@ namespace Fusion.Engine.Common {
 		{	
 			Log.Message("Saving configuration...");
 
-			ConfigSerializer.SaveToFile( GameModule.Enumerate(this), ConfigSerializer.GetConfigPath(filename) );
+			UserStorage.DeleteFile(filename);
+			ConfigSerializer.SaveToStream( GameModule.Enumerate(this), UserStorage.OpenFile(filename, FileMode.Create, FileAccess.Write) );
 		}
 
 
