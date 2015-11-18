@@ -99,6 +99,7 @@ namespace Fusion.Engine.Graphics.GIS
 		TilesGisBatch  Globe;
 	    //PointsGisBatch Points;
 	    LinesGisBatch lines;
+	    PolyGisBatch heatMap;
 
 	    public GIS(GameEngine gameEngine) : base(gameEngine)
 	    {
@@ -183,6 +184,17 @@ namespace Fusion.Engine.Graphics.GIS
 			//	Tex0	= new Vector4(1, 1, 1, 1)
 			//};
 			//lines.UpdatePointsBuffer();
+
+			//heatMap = PolyGisBatch.GenerateRegularGrid(30.165024, 30.332521, 59.965494, 59.911272, 10, 64, 64, Globe.CurrentMapSource.Projection);
+		    //heatMap.MaxHeatMapLevel = 1.0f;
+		    //heatMap.InterpFactor	= 1.0f;
+			//
+			//heatMap.ClearData();
+		    //for (int i = 0; i < 100; i++) {
+			//	heatMap.AddValue(r.NextDouble(heatMap.Left, heatMap.Right), r.NextDouble(heatMap.Bottom, heatMap.Top), 10.0f);			    
+		    //}
+			//
+			//heatMap.UpdateHeatMap();
 	    }
 
 
@@ -226,6 +238,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			//Points.Draw(gameTime, constBuffer);
 			//lines.Draw(gameTime, constBuffer);
+			//heatMap.Draw(gameTime, constBuffer);
 	    }
 
 
