@@ -7,6 +7,8 @@ using Fusion.Core.Mathematics;
 using Fusion.Core;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
+using Fusion.Engine.Graphics.GIS;
+using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
 
 namespace Fusion.Engine.Graphics {
 	public class ViewLayer {
@@ -88,6 +90,9 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		public ICollection<Gis.GisLayer> GisLayers;
+
+
 		/// <summary>
 		/// Creates view's instance.
 		/// </summary>
@@ -106,6 +111,7 @@ namespace Fusion.Engine.Graphics {
 			SpriteLayers	=	new List<SpriteLayer>();
 			Instances		=	new List<Instance>();
 			LightSet		=	new LightSet( gameEngine.GraphicsEngine );
+			GisLayers		=	new List<Gis.GisLayer>();
 		}
 
 
@@ -140,6 +146,14 @@ namespace Fusion.Engine.Graphics {
 
 			//	apply tonemapping and bloom :
 			ge.HdrFilter.Render( gameTime, ge.Device.BackbufferColor.Surface, ge.LightRenderer.HdrBuffer );
+
+			GameEngine.GraphicsDevice.RestoreBackbuffer();
+			if (GisLayers.Any()) {
+				var tiles = GisLayers.First() as TilesGisLayer;
+				if(tiles != null)
+					tiles.Update(gameTime);
+			}
+			ge.Gis.Draw(gameTime, stereoEye, GisLayers);
 
 			//	draw sprites :
 			ge.SpriteEngine.DrawSprites( gameTime, stereoEye, SpriteLayers );

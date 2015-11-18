@@ -11,7 +11,7 @@ using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
 
 namespace Fusion.Engine.Graphics.GIS
 {
-	public class PolyGisBatch : GIS.GisBatch
+	public class PolyGisLayer : Gis.GisLayer
 	{
 		Ubershader		shader;
 		StateFactory	factory;
@@ -44,7 +44,7 @@ namespace Fusion.Engine.Graphics.GIS
 		VertexBuffer currentBuffer;
 		IndexBuffer	 indexBuffer;
 
-		public GIS.GeoPoint[] PointsCpu { get; protected set; }
+		public Gis.GeoPoint[] PointsCpu { get; protected set; }
 
 
 #region Heat map stuff
@@ -85,15 +85,15 @@ namespace Fusion.Engine.Graphics.GIS
 #endregion
 
 
-		void Initialize(GIS.GeoPoint[] points, int[] indeces, bool isDynamic)
+		void Initialize(Gis.GeoPoint[] points, int[] indeces, bool isDynamic)
 		{
 			shader	= GameEngine.Content.Load<Ubershader>("globe.Poly.hlsl");
-			factory = new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<GIS.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
+			factory = new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
 
 
 			var vbOptions = isDynamic ? VertexBufferOptions.Dynamic : VertexBufferOptions.Default;
 
-			firstBuffer = new VertexBuffer(GameEngine.GraphicsDevice, typeof(GIS.GeoPoint), points.Length, vbOptions);
+			firstBuffer = new VertexBuffer(GameEngine.GraphicsDevice, typeof(Gis.GeoPoint), points.Length, vbOptions);
 			firstBuffer.SetData(points);
 			currentBuffer = firstBuffer;
 
@@ -103,7 +103,7 @@ namespace Fusion.Engine.Graphics.GIS
 			PointsCpu = points;
 		}
 
-		public PolyGisBatch(GameEngine engine, GIS.GeoPoint[] points, int[] indeces, int mapDimX, int mapDimY, bool isDynamic = false) : base(engine)
+		public PolyGisLayer(GameEngine engine, Gis.GeoPoint[] points, int[] indeces, int mapDimX, int mapDimY, bool isDynamic = false) : base(engine)
 		{
 			Initialize(points, indeces, isDynamic);
 
@@ -228,7 +228,7 @@ namespace Fusion.Engine.Graphics.GIS
 			ClearData();
 
 			int[]			indeces;
-			GIS.GeoPoint[]	points;
+			Gis.GeoPoint[]	points;
 			CalculateVertices(out points, out indeces, GridDensity, left, right, top, bottom, Projection);
 
 			PointsCpu = points;
@@ -273,19 +273,19 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public static PolyGisBatch GenerateRegularGrid(double left, double right, double top, double bottom, int density, int dimX, int dimY, MapProjection projection)
+		public static PolyGisLayer GenerateRegularGrid(double left, double right, double top, double bottom, int density, int dimX, int dimY, MapProjection projection)
 		{
 			int[] indexes;
-			GIS.GeoPoint[] vertices;
+			Gis.GeoPoint[] vertices;
 
 			CalculateVertices(out vertices, out indexes, density, left, right, top, bottom, projection);
 
-			var vb = new VertexBuffer(GameEngine.Instance.GraphicsDevice, typeof(GIS.GeoPoint), vertices.Length);
+			var vb = new VertexBuffer(GameEngine.Instance.GraphicsDevice, typeof(Gis.GeoPoint), vertices.Length);
 			var ib = new IndexBuffer(GameEngine.Instance.GraphicsDevice, indexes.Length);
 			ib.SetData(indexes);
 			vb.SetData(vertices, 0, vertices.Length);
 
-			return new PolyGisBatch(GameEngine.Instance, vertices, indexes, dimX, dimY, false) {
+			return new PolyGisLayer(GameEngine.Instance, vertices, indexes, dimX, dimY, false) {
 				Left		= left,
 				Right		= right,
 				Top			= top, 
@@ -295,7 +295,7 @@ namespace Fusion.Engine.Graphics.GIS
 			};
 		}
 
-		public static PolyGisBatch CreateFromContour()
+		public static PolyGisLayer CreateFromContour()
 		{
 			return null;
 		}
@@ -306,13 +306,13 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		static void CalculateVertices(out GIS.GeoPoint[] vertices, out int[] indeces, int density, double leftLon, double rightLon, double topLat, double bottomLat, MapProjection projection)
+		static void CalculateVertices(out Gis.GeoPoint[] vertices, out int[] indeces, int density, double leftLon, double rightLon, double topLat, double bottomLat, MapProjection projection)
 		{
 			int RowsCount		= density + 2;
 			int ColumnsCount	= RowsCount;
 
 			var ms		= projection;
-			var verts	= new List<GIS.GeoPoint>();
+			var verts	= new List<Gis.GeoPoint>();
 
 			var leftTop		= ms.WorldToTilePos(leftLon, topLat, 0);
 			var rightBottom = ms.WorldToTilePos(rightLon, bottomLat, 0);
@@ -335,7 +335,7 @@ namespace Fusion.Engine.Graphics.GIS
 					var lon = sc.X * Math.PI / 180.0;
 					var lat = sc.Y * Math.PI / 180.0;
 
-					verts.Add(new GIS.GeoPoint {
+					verts.Add(new Gis.GeoPoint {
 						Tex0	= new Vector4(step * col, step * row, 0, 0),
 						Lon		= lon,
 						Lat		= lat
