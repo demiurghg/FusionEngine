@@ -12,6 +12,7 @@ using Fusion.Core;
 using Fusion.Core.Configuration;
 using Fusion.Framework;
 using Fusion.Build;
+using Fusion.Engine.UserInterface;
 
 namespace TestGame2 {
 
@@ -22,6 +23,9 @@ namespace TestGame2 {
 		public GameConsole Console { get { return console; } }
 		public GameConsole console;
 
+		[GameModule("UserInterface2", "ui2", InitOrder.Before)]
+		public UserInterface UserInterface { get; private set; }
+
 		/*[GameModule("BarBefore", "bar", InitOrder.Before)]
 		public SomeModule2 Bar { get; set; }
 
@@ -29,6 +33,7 @@ namespace TestGame2 {
 		public SomeModule2 Bar2 { get; set; }*/
 
 		SpriteLayer testLayer;
+		SpriteLayer	uiLayer;
 		DiscTexture	texture;
 
 
@@ -47,6 +52,8 @@ namespace TestGame2 {
 		public CustomGameInterface ( GameEngine gameEngine ) : base(gameEngine)
 		{
 			console		=	new GameConsole( gameEngine, "conchars", "conback");
+
+			UserInterface	=	new UserInterface( gameEngine, @"Fonts\textFont" ); 
 
 			/*Bar = new SomeModule2(gameEngine);
 			Bar2 = new SomeModule2(gameEngine);*/
@@ -67,6 +74,7 @@ namespace TestGame2 {
 			GameEngine.GraphicsEngine.ViewLayers.Add( master );
 
 			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
+			uiLayer		=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
 			scene		=	GameEngine.Content.Load<Scene>( "testScene" );
 
@@ -104,8 +112,52 @@ namespace TestGame2 {
 
 			master.SpriteLayers.Add( testLayer );
 			master.SpriteLayers.Add( console.ConsoleSpriteLayer );
+			master.SpriteLayers.Add( uiLayer );
 
 			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
+
+
+			UserInterface.RootFrame = Frame.Create( UserInterface, 50,50, 320, 40, "PUSH!", Color.Black );
+			UserInterface.RootFrame.TextAlignment = Alignment.MiddleLeft;
+			UserInterface.RootFrame.StatusChanged += RootFrame_StatusChanged;
+			UserInterface.RootFrame.Click +=RootFrame_Click;
+		}
+
+
+		Random tr = new Random();
+
+		void RootFrame_Click(object sender, Frame.MouseEventArgs e)
+		{
+			var bt = (Frame)sender;
+			bt.Text = text[ rand.Next(0, text.Length-1) ];
+		}
+
+
+		string[] text = new string[]{
+			"DONT PUSH ME!",
+			"STOP!!!",
+			"DAMN...",
+			"STP FCKNG PSHNG M!!!",
+			"STOP!!!!!!",
+			"ARE YOU MAD BRO???",
+			"...",
+			"PUSH",
+			"PUSH!!!",
+			"PUSH ME AGAIN!",
+			"ITS JOKE, PUNK",
+			"DO *NOT* PUSH ME!!!",
+			".",
+		};
+
+
+		void RootFrame_StatusChanged ( object sender, Frame.StatusEventArgs e )
+		{
+			var bt = (Frame)sender;
+			switch (e.Status) {
+				case FrameStatus.None    : bt.BackColor = Color.Black;    bt.TextOffsetX = 0; bt.ForeColor = Color.White; break;
+				case FrameStatus.Hovered : bt.BackColor = Color.DarkGray; bt.TextOffsetX = 0; bt.ForeColor = Color.White; break;
+				case FrameStatus.Pushed  : bt.BackColor = Color.White;    bt.TextOffsetX = 2; bt.ForeColor = Color.Black; break;
+			}
 		}
 
 
@@ -126,6 +178,7 @@ namespace TestGame2 {
 		{
 			if (disposing) {
 				SafeDispose( ref testLayer );
+				SafeDispose( ref uiLayer );
 			}
 			base.Dispose( disposing );
 		}
@@ -141,6 +194,9 @@ namespace TestGame2 {
 		public override void Update ( GameTime gameTime )
 		{
 			console.Update( gameTime );
+
+			UserInterface.Update( gameTime );
+			UserInterface.Draw( gameTime, uiLayer );
 
 			testLayer.Color	=	Color.White;
 

@@ -10,13 +10,15 @@ using Fusion.Core.Mathematics;
 using Fusion.Drivers.Input;
 using Fusion.Drivers.Graphics;
 using System.Diagnostics;
+using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
+using Fusion.Engine.Graphics;
 
 
-namespace Fusion.UserInterface {
+namespace Fusion.Engine.UserInterface {
 
 
-	public class UserInterface : GameService {
+	public class UserInterface : GameModule {
 
 		[Config]
 		public Config	Config	{ get; set; }
@@ -36,11 +38,11 @@ namespace Fusion.UserInterface {
 		/// </summary>
 		/// <param name="width"></param>
 		/// <param name="height"></param>
-		public UserInterface ( Game game, string defaultFont ) : base(game)
+		public UserInterface ( GameEngine game, string defaultFont ) : base(game)
 		{
-			Config				=	new Fusion.UserInterface.Config();
+			Config				=	new Fusion.Engine.UserInterface.Config();
 			defaultFontPath		=	defaultFont;
-			mouseProcessor		=	new MouseProcessor( Game, this );
+			mouseProcessor		=	new MouseProcessor( GameEngine, this );
 		}
 
 
@@ -50,9 +52,7 @@ namespace Fusion.UserInterface {
 		/// </summary>
 		public override void Initialize()
 		{
- 			 base.Initialize();
-
-			 DefaultFont	=	Game.Content.Load<SpriteFont>(defaultFontPath);
+			 DefaultFont	=	GameEngine.Content.Load<SpriteFont>(defaultFontPath);
 
 			 mouseProcessor.Initialize();
 		}
@@ -96,13 +96,10 @@ namespace Fusion.UserInterface {
 		/// Updates stuff
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public override void Update( GameTime gameTime )
+		public void Update( GameTime gameTime )
 		{
 			var viewCtxt	=	new ViewContext();
 
-			var sb	=	Game.GetService<SpriteBatch>();
-			var ds	=	Game.GetService<DebugStrings>();
-		
 			//
 			//	Update and profile UI stuff :
 			//
@@ -124,47 +121,19 @@ namespace Fusion.UserInterface {
 		/// Draws entire interface
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public override void Draw ( GameTime gameTime, StereoEye stereoEye )
+		public void Draw ( GameTime gameTime, SpriteLayer spriteLayer )
 		{
 			if (Config.SkipUserInterface) {
 				return;
 			}
 
-			var sb	=	Game.GetService<SpriteBatch>();
-			var ds	=	Game.GetService<DebugStrings>();
-			var vp  =	Game.GraphicsDevice.DisplayBounds;
+			var sb	=	spriteLayer;
+			var vp  =	GameEngine.GraphicsEngine.DisplayBounds;
 
-			int load = 0;
-
-
-			Game.GraphicsDevice.ResetStates();
-			Game.GraphicsDevice.RestoreBackbuffer();
-
+			sb.Clear();
+		
 			if (RootFrame!=null) {
-				var list = Frame.BFSList( RootFrame );
-				foreach ( var f in list ) {
-					if (f.OnGameDraw( gameTime, stereoEye )) {
-						Game.GraphicsDevice.ResetStates();
-						Game.GraphicsDevice.RestoreBackbuffer();
-					}
-				}
-			}
-
-
-			sb.Begin();
-		
-				if (RootFrame!=null) {
-					RootFrame.DrawInternal( gameTime, stereoEye, sb, Color.White );
-				}
-
-				sb.ColorMultiplier = Color.White;
-		
-			sb.End();
-
-			if (Config.ShowProfilingInfo) {
-				ds.Add("Viewport         : {0} {1}", vp.Width, vp.Height );
-				ds.Add("UI update time   : {0}", uiUpdateProfiling );
-				ds.Add("SpriteBatch load : {0}", load );
+				RootFrame.DrawInternal( gameTime, sb );
 			}
 		}
 

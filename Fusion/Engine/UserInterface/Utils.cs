@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Fusion.Drivers.Input;
+using Fusion.Engine.Input;
 using SharpDX;
 using Fusion;
 using Fusion.Core.Mathematics;
+using Fusion.Engine.Common;
 
-namespace Fusion.UserInterface {
+namespace Fusion.Engine.UserInterface {
 
 
 	public enum AutoImageSize {

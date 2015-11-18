@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 using SharpDX;
 using Fusion;
 using Fusion.Core.Mathematics;
+using Fusion.Engine.Input;
+using Fusion.Engine.Common;
 
-using Fusion.Drivers.Input;
 
-
-namespace Fusion.UserInterface {
+namespace Fusion.Engine.UserInterface {
 
 	class MouseProcessor {
 
-		public readonly Game Game;
+		public readonly GameEngine Game;
 		public UserInterface ui;
 
 		Point	oldMousePoint;
@@ -30,7 +30,7 @@ namespace Fusion.UserInterface {
 		/// 
 		/// </summary>
 		/// <param name="game"></param>
-		public MouseProcessor ( Game game, UserInterface ui )
+		public MouseProcessor ( GameEngine game, UserInterface ui )
 		{
 			this.Game	=	game;
 			this.ui		=	ui;
@@ -43,9 +43,9 @@ namespace Fusion.UserInterface {
 		/// </summary>
 		public void Initialize ()
 		{
-			Game.InputDevice.KeyDown += InputDevice_KeyDown;
-			Game.InputDevice.KeyUp += InputDevice_KeyUp;
-			Game.InputDevice.MouseScroll += InputDevice_MouseScroll;
+			Game.Keyboard.KeyDown += InputDevice_KeyDown;
+			Game.Keyboard.KeyUp += InputDevice_KeyUp;
+			Game.Mouse.Scroll += InputDevice_MouseScroll;
 
 			oldMousePoint	=	Game.InputDevice.MousePosition;
 		}
@@ -193,7 +193,7 @@ namespace Fusion.UserInterface {
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
-		void InputDevice_KeyDown ( object sender, Drivers.Input.InputDevice.KeyEventArgs e )
+		void InputDevice_KeyDown ( object sender, KeyEventArgs e )
 		{
 			if (e.Key==Keys.LeftButton || e.Key==Keys.RightButton) {
 				PushFrame( GetHoveredFrame(), e.Key );
@@ -206,7 +206,7 @@ namespace Fusion.UserInterface {
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
-		void InputDevice_KeyUp ( object sender, Drivers.Input.InputDevice.KeyEventArgs e )
+		void InputDevice_KeyUp ( object sender, KeyEventArgs e )
 		{
 			if (e.Key==Keys.LeftButton || e.Key==Keys.RightButton) {
 				ReleaseFrame( GetHoveredFrame(), e.Key );
@@ -215,7 +215,7 @@ namespace Fusion.UserInterface {
 
 
 
-		void InputDevice_MouseScroll ( object sender, InputDevice.MouseScrollEventArgs e )
+		void InputDevice_MouseScroll ( object sender, MouseScrollEventArgs e )
 		{
 			var hovered = GetHoveredFrame();
 			if ( hovered!=null ) {
