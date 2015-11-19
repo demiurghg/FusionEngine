@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using Fusion.Core.Mathematics;
 
 namespace Fusion.Engine.Graphics.GIS.GlobeMath
 {
@@ -1771,6 +1772,13 @@ namespace Fusion.Engine.Graphics.GIS.GlobeMath
             var strongValue = (DVector3)value;
             return Equals(ref strongValue);
         }
+
+
+	    public Vector3 ToVector3()
+	    {
+		    return new Vector3((float)X, (float)Y, (float)Z);
+	    }
+
 #if WPFInterop
         /// <summary>
         /// Performs an implicit conversion from <see cref="SharpDX.DVector3"/> to <see cref="System.Windows.Media.Media3D.DVector3D"/>.

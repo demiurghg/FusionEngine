@@ -147,6 +147,11 @@ namespace Fusion.Engine.Graphics.GIS.GlobeMath
             return degree * (Pi / 180.0);
         }
 
+		public static DVector2 DegreesToRadians(DVector2 degree)
+		{
+			return new DVector2(degree.X * (Pi / 180.0), degree.Y * (Pi / 180.0));
+		}
+
         /// <summary>
         /// Converts radians to revolutions.
         /// </summary>

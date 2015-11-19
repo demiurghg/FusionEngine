@@ -12,8 +12,8 @@ using Fusion.Core;
 using Fusion.Core.Configuration;
 using Fusion.Framework;
 using Fusion.Build;
-using Fusion.Engine.UserInterface;
 using Fusion.Engine.Graphics.GIS;
+using Fusion.Engine.Graphics.GIS.GlobeMath;
 
 namespace TestGame2 {
 
@@ -23,9 +23,6 @@ namespace TestGame2 {
 		[GameModule("Console", "con", InitOrder.Before)]
 		public GameConsole Console { get { return console; } }
 		public GameConsole console;
-
-		[GameModule("UserInterface2", "ui2", InitOrder.Before)]
-		public UserInterface UserInterface { get; private set; }
 
 		/*[GameModule("BarBefore", "bar", InitOrder.Before)]
 		public SomeModule2 Bar { get; set; }
@@ -55,8 +52,6 @@ namespace TestGame2 {
 		public CustomGameInterface ( GameEngine gameEngine ) : base(gameEngine)
 		{
 			console		=	new GameConsole( gameEngine, "conchars", "conback");
-
-			UserInterface	=	new UserInterface( gameEngine, @"Fonts\textFont" ); 
 
 			/*Bar = new SomeModule2(gameEngine);
 			Bar2 = new SomeModule2(gameEngine);*/
@@ -125,50 +120,9 @@ namespace TestGame2 {
 
 			//master.GisLayers.Add(new TilesGisLayer(GameEngine));
 
+			//master.GisLayers.Add(new ModelLayer(GameEngine, new DVector2(30.246735, 59.944007), "teapot"));
+
 			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
-
-
-			UserInterface.RootFrame = Frame.Create( UserInterface, 50,50, 320, 40, "PUSH!", Color.Black );
-			UserInterface.RootFrame.TextAlignment = Alignment.MiddleLeft;
-			UserInterface.RootFrame.StatusChanged += RootFrame_StatusChanged;
-			UserInterface.RootFrame.Click +=RootFrame_Click;
-		}
-
-
-		Random tr = new Random();
-
-		void RootFrame_Click(object sender, Frame.MouseEventArgs e)
-		{
-			var bt = (Frame)sender;
-			bt.Text = text[ rand.Next(0, text.Length-1) ];
-		}
-
-
-		string[] text = new string[]{
-			"DONT PUSH ME!",
-			"STOP!!!",
-			"DAMN...",
-			"STP FCKNG PSHNG M!!!",
-			"STOP!!!!!!",
-			"ARE YOU MAD BRO???",
-			"...",
-			"PUSH",
-			"PUSH!!!",
-			"PUSH ME AGAIN!",
-			"ITS JOKE, PUNK",
-			"DO *NOT* PUSH ME!!!",
-			".",
-		};
-
-
-		void RootFrame_StatusChanged ( object sender, Frame.StatusEventArgs e )
-		{
-			var bt = (Frame)sender;
-			switch (e.Status) {
-				case FrameStatus.None    : bt.BackColor = Color.Black;    bt.TextOffsetX = 0; bt.ForeColor = Color.White; break;
-				case FrameStatus.Hovered : bt.BackColor = Color.DarkGray; bt.TextOffsetX = 0; bt.ForeColor = Color.White; break;
-				case FrameStatus.Pushed  : bt.BackColor = Color.White;    bt.TextOffsetX = 2; bt.ForeColor = Color.Black; break;
-			}
 		}
 
 
@@ -207,9 +161,6 @@ namespace TestGame2 {
 		{
 			console.Update( gameTime );
 
-			UserInterface.Update( gameTime );
-			UserInterface.Draw( gameTime, uiLayer );
-
 			testLayer.Color	=	Color.White;
 
 			master.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 0,0, 1 );
@@ -229,8 +180,8 @@ namespace TestGame2 {
 			testLayer.SetTransform( new Vector2(100,0), new Vector2(128+5,128+5), angle );
 
 			var m = UpdateCam( gameTime );
-			
-			master.Camera.SetupCameraFov( m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 0,0, 1 );
+
+			master.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(45), 0.1f, 1000, 0, 0, (float)GameEngine.GraphicsEngine.DisplayBounds.Width / (float)GameEngine.GraphicsEngine.DisplayBounds.Height);
 		}
 
 
