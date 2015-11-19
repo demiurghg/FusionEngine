@@ -13,6 +13,7 @@ using Fusion.Core.Configuration;
 using Fusion.Framework;
 using Fusion.Build;
 using Fusion.Engine.Graphics.GIS;
+using Fusion.Engine.Graphics.GIS.GlobeMath;
 
 namespace TestGame2 {
 
@@ -69,7 +70,7 @@ namespace TestGame2 {
 
 			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
-			scene		=	GameEngine.Content.Load<Scene>( "testScene" );
+			scene		=	GameEngine.Content.Load<Scene>( "teapot" );
 
 			master.LightSet.SpotAtlas	=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
 			master.LightSet.DirectLight.Position	=	new Vector3(1,2,3);
@@ -106,7 +107,9 @@ namespace TestGame2 {
 			master.SpriteLayers.Add( testLayer );
 			master.SpriteLayers.Add( console.ConsoleSpriteLayer );
 			
-			//master.GisLayers.Add(new TilesGisLayer(GameEngine));
+			master.GisLayers.Add(new TilesGisLayer(GameEngine));
+
+			master.GisLayers.Add(new ModelLayer(GameEngine, new DVector2(30.246735, 59.944007), "teapot"));
 
 			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
 		}
@@ -164,8 +167,8 @@ namespace TestGame2 {
 			testLayer.SetTransform( new Vector2(100,0), new Vector2(128+5,128+5), angle );
 
 			var m = UpdateCam( gameTime );
-			
-			master.Camera.SetupCameraFov( m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 0,0, 1 );
+
+			master.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(45), 0.1f, 1000, 0, 0, (float)GameEngine.GraphicsEngine.DisplayBounds.Width / (float)GameEngine.GraphicsEngine.DisplayBounds.Height);
 		}
 
 

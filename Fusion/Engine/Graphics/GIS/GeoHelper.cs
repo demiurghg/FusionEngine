@@ -91,9 +91,9 @@ namespace Fusion.Engine.Graphics.GIS
 			double x, y, z;
 			SphericalToCartesian(lon, lat, radius, out x, out y, out z);
 
-			cart.X = (float)x;
-			cart.Y = (float)y;
-			cart.Z = (float)z;
+			cart.X = x;
+			cart.Y = y;
+			cart.Z = z;
 		}
 
 
