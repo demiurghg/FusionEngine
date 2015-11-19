@@ -11,7 +11,7 @@ using Fusion.Drivers.Input;
 using Fusion.Drivers.Graphics;
 
 
-namespace Fusion.UserInterface {
+namespace Fusion.Engine.UserInterface {
 	
 	public abstract class LayoutEngine {
 

@@ -6,16 +6,17 @@ using System.Threading.Tasks;
 using SharpDX;
 using Fusion;
 using Fusion.Core.Mathematics;
-using Fusion.Drivers.Input;
-using Fusion.Drivers.Graphics;
+using Fusion.Engine.Input;
+using Fusion.Engine.Graphics;
+using Fusion.Engine.Common;
 using Forms = System.Windows.Forms;
 
 
-namespace Fusion.UserInterface {
+namespace Fusion.Engine.UserInterface {
 
 	public partial class Frame {
 
-		public readonly	Game	Game;
+		public readonly	GameEngine	Game;
 		readonly UserInterface	ui;
 
 		/// <summary>
@@ -215,7 +216,7 @@ namespace Fusion.UserInterface {
 		public int				ImageOffsetY	{ get; set; }
 		public FrameImageMode	ImageMode		{ get; set; }
 		public Color			ImageColor		{ get; set; }
-		public ShaderResource	Image			{ get; set; }
+		public Texture			Image			{ get; set; }
 
 		/// <summary>
 		/// 
@@ -256,12 +257,6 @@ namespace Fusion.UserInterface {
 			public int	Height;
 		}
 
-		public class DrawEventArgs : EventArgs {
-			public GameTime GameTime;
-			public StereoEye StereoEye;
-			public SpriteBatch SpriteBatch = null;
-		}
-
 		public event EventHandler	Tick;
 		public event EventHandler	LayoutChanged;
 		public event EventHandler<MouseEventArgs>	MouseIn;
@@ -274,27 +269,25 @@ namespace Fusion.UserInterface {
 		public event EventHandler<StatusEventArgs>	StatusChanged;
 		public event EventHandler<MoveEventArgs>	Move;
 		public event EventHandler<ResizeEventArgs>	Resize;
-		public event EventHandler<DrawEventArgs>	GameDraw;
-		public event EventHandler<DrawEventArgs>	UserDraw;
 		#endregion
 
 
 		/// <summary>
 		/// Gets list of frame children
 		/// </summary>
-		public	IEnumerable<Frame>	Children	{ get { return children; } }
+		public IEnumerable<Frame> Children { get { return children; } }
 
 
 		/// <summary>
 		/// Gets frame
 		/// </summary>
-		public	Frame				Parent		{ get { return parent; } }
+		public Frame Parent { get { return parent; } }
 
 		/// <summary>
 		/// Global frame rectangle made 
 		/// after all layouting and transitioning operation
 		/// </summary>
-		public	Rectangle	GlobalRectangle		{ get; private set; }
+		public Rectangle GlobalRectangle { get; private set; }
 
 
 
@@ -302,11 +295,11 @@ namespace Fusion.UserInterface {
 		/// Constructor
 		/// </summary>
 		/// <param name="id"></param>
-		public Frame ( Game game )
+		public Frame ( UserInterface ui )
 		{
-			Game	=	game;
-			ui		=	Game.GetService<UserInterface>();
-			Init( game );
+			Game	=	ui.GameEngine;
+			this.ui	=	ui;
+			Init();
 		}
 
 
@@ -322,9 +315,9 @@ namespace Fusion.UserInterface {
 		/// <param name="text"></param>
 		/// <param name="backColor"></param>
 		/// <returns></returns>
-		public static Frame Create ( Game game, int x, int y, int w, int h, string text, Color backColor )
+		public static Frame Create ( UserInterface ui, int x, int y, int w, int h, string text, Color backColor )
 		{
-			return new Frame( game ) {
+			return new Frame( ui ) {
 				X = x,
 				Y = y,
 				Width = w,
@@ -346,11 +339,11 @@ namespace Fusion.UserInterface {
 		/// <param name="h"></param>
 		/// <param name="text"></param>
 		/// <param name="backColor"></param>
-		public Frame ( Game game, int x, int y, int w, int h, string text, Color backColor )
+		public Frame ( UserInterface ui, int x, int y, int w, int h, string text, Color backColor )
 		{
-			Game	=	game;
-			ui		=	Game.GetService<UserInterface>();
-			Init( game );
+			Game	=	ui.GameEngine;
+			this.ui	=	ui;
+			Init();
 
 			X				=	x;
 			Y				=	y;
@@ -366,10 +359,8 @@ namespace Fusion.UserInterface {
 		/// Common init 
 		/// </summary>
 		/// <param name="game"></param>
-		void Init ( Game game )
+		void Init ()
 		{
-			var ui		=	Game.GetService<UserInterface>();
-
 			Padding			=	0;
 			Visible			=	true;
 			Enabled			=	true;
@@ -599,16 +590,6 @@ namespace Fusion.UserInterface {
 		}
 
 
-		internal bool OnGameDraw ( GameTime gameTime, StereoEye stereoEye )
-		{
-			if (GameDraw!=null) {
-				GameDraw( this, new DrawEventArgs(){ GameTime = gameTime, StereoEye = stereoEye } );
-				return true;
-			}	
-			return false;
-		}
-
-
 		/*-----------------------------------------------------------------------------------------
 		 * 
 		 *	Update and draw stuff :
@@ -701,11 +682,9 @@ namespace Fusion.UserInterface {
 		/// </summary>
 		/// <param name="gameTime"></param>
 		/// <param name="frame"></param>
-		internal void DrawInternal ( GameTime gameTime, StereoEye stereoEye, SpriteBatch sb, Color colorMul )
+		internal void DrawInternal ( GameTime gameTime, SpriteLayer sb )
 		{
 			var vp = Game.GraphicsDevice.DisplayBounds;
-
-			sb.ColorMultiplier	=	colorMul * this.OverallColor;
 
 			if ( IsDrawable && MathUtil.IsRectInsideRect( vp, GlobalRectangle ) ) {
 
@@ -713,41 +692,13 @@ namespace Fusion.UserInterface {
 
 					DrawFrameBorders( sb );
 
-					Draw( gameTime, stereoEye, sb );
+					Draw( gameTime, sb );
 
 					foreach ( var child in Children ) {
-						child.DrawInternal( gameTime, stereoEye, sb, sb.ColorMultiplier );
+						child.DrawInternal( gameTime, sb );
 					}
-
-				} else {
-
-					Rectangle clipRect = new Rectangle(0,0,0,0);
-					
-					if (ClippingMode==ClippingMode.ClipByFrame) {
-						clipRect	=	GlobalRectangle;
-					}
-					if (ClippingMode==ClippingMode.ClipByBorder) {
-						clipRect	=	GetBorderedRectangle();
-					}
-					if (ClippingMode==ClippingMode.ClipByPadding) {
-						clipRect	=	GetPaddedRectangle();
-					}
-
-					DrawFrameBorders( sb );
-
-					sb.Restart( SpriteBlend.AlphaBlend,null,null,null, clipRect );
-
-						Draw( gameTime, stereoEye, sb );
-
-						foreach ( var child in Children ) {
-							child.DrawInternal( gameTime, stereoEye, sb, sb.ColorMultiplier );
-						}
-
-					sb.Restart();
 				}
 			}
-
-			sb.ColorMultiplier	=	colorMul;
 		}
 
 
@@ -764,7 +715,7 @@ namespace Fusion.UserInterface {
 		/// <summary>
 		/// Draws frame stuff
 		/// </summary>
-		void DrawFrameBorders ( SpriteBatch sb )
+		void DrawFrameBorders ( SpriteLayer sb )
 		{
 			int gx	=	GlobalRectangle.X;
 			int gy	=	GlobalRectangle.Y;
@@ -775,12 +726,14 @@ namespace Fusion.UserInterface {
 			int br	=	BorderRight;
 			int bl	=	BorderLeft;
 
-			sb.Draw( sb.TextureWhite,	gx,				gy,				w,		bt,				BorderColor ); 
-			sb.Draw( sb.TextureWhite,	gx,				gy + h - bb,	w,		bb,				BorderColor ); 
-			sb.Draw( sb.TextureWhite,	gx,				gy + bt,		bl,		h - bt - bb,	BorderColor ); 
-			sb.Draw( sb.TextureWhite,	gx + w - br,	gy + bt,		br,		h - bt - bb,	BorderColor ); 
+			var whiteTex = Game.GraphicsEngine.WhiteTexture;
 
-			sb.Draw( sb.TextureWhite,	GetBorderedRectangle(), BackColor );
+			sb.Draw( whiteTex,	gx,				gy,				w,		bt,				BorderColor ); 
+			sb.Draw( whiteTex,	gx,				gy + h - bb,	w,		bb,				BorderColor ); 
+			sb.Draw( whiteTex,	gx,				gy + bt,		bl,		h - bt - bb,	BorderColor ); 
+			sb.Draw( whiteTex,	gx + w - br,	gy + bt,		br,		h - bt - bb,	BorderColor ); 
+
+			sb.Draw( whiteTex,	GetBorderedRectangle(), BackColor );
 		}
 
 
@@ -789,14 +742,10 @@ namespace Fusion.UserInterface {
 		/// Draws frame stuff.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		protected virtual void Draw ( GameTime gameTime, StereoEye stereoEye, SpriteBatch sb )
+		protected virtual void Draw ( GameTime gameTime, SpriteLayer sb )
 		{
 			DrawFrameImage( sb );
 			DrawFrameText( sb );
-
-			if (UserDraw!=null) {
-				UserDraw( this, new DrawEventArgs(){ GameTime = gameTime, StereoEye = stereoEye, SpriteBatch = sb } );
-			}
 		}
 
 
@@ -931,7 +880,7 @@ namespace Fusion.UserInterface {
 		/// <summary>
 		/// 
 		/// </summary>
-		protected void DrawFrameImage (SpriteBatch sb)
+		protected void DrawFrameImage (SpriteLayer sb)
 		{
 			if (Image==null) {
 				return;
@@ -971,7 +920,7 @@ namespace Fusion.UserInterface {
 		/// Draws string
 		/// </summary>
 		/// <param name="text"></param>
-		protected void DrawFrameText ( SpriteBatch sb )
+		protected void DrawFrameText ( SpriteLayer sb )
 		{											
 			if (string.IsNullOrEmpty(Text)) {
 				return;

@@ -70,7 +70,7 @@ namespace TestGame2 {
 
 			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
-			scene		=	GameEngine.Content.Load<Scene>( "teapot" );
+			scene		=	GameEngine.Content.Load<Scene>( "testScene" );
 
 			master.LightSet.SpotAtlas	=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
 			master.LightSet.DirectLight.Position	=	new Vector3(1,2,3);
@@ -107,9 +107,9 @@ namespace TestGame2 {
 			master.SpriteLayers.Add( testLayer );
 			master.SpriteLayers.Add( console.ConsoleSpriteLayer );
 			
-			master.GisLayers.Add(new TilesGisLayer(GameEngine));
+			//master.GisLayers.Add(new TilesGisLayer(GameEngine));
 
-			master.GisLayers.Add(new ModelLayer(GameEngine, new DVector2(30.246735, 59.944007), "teapot"));
+			//master.GisLayers.Add(new ModelLayer(GameEngine, new DVector2(30.246735, 59.944007), "teapot"));
 
 			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
 		}

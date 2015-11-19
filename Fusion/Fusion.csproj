@@ -392,6 +392,15 @@
     <Compile Include="Engine\Network\NetworkConfig.cs" />
     <Compile Include="Engine\Network\NetworkEngine.cs" />
     <Compile Include="Engine\Storage\UserStorage.cs" />
+    <Compile Include="Engine\UserInterface\Config.cs" />
+    <Compile Include="Engine\UserInterface\Context.cs" />
+    <Compile Include="Engine\UserInterface\Enums.cs" />
+    <Compile Include="Engine\UserInterface\Frame.cs" />
+    <Compile Include="Engine\UserInterface\LayoutEngine.cs" />
+    <Compile Include="Engine\UserInterface\MouseProcessor.cs" />
+    <Compile Include="Engine\UserInterface\Transition.cs" />
+    <Compile Include="Engine\UserInterface\UserInterface.cs" />
+    <Compile Include="Engine\UserInterface\Utils.cs" />
     <Compile Include="Framework\ClearCmd.cs" />
     <Compile Include="Framework\GameConsoleConfig.cs" />
     <Compile Include="Framework\EditBox.cs" />
@@ -482,7 +491,6 @@
     <Folder Include="Engine\Audio\" />
     <Folder Include="Engine\Physics\" />
     <Folder Include="Engine\Triggers\" />
-    <Folder Include="Engine\UserInterface\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

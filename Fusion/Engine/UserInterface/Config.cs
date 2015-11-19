@@ -10,7 +10,7 @@ using Fusion.Core.Mathematics;
 using System.Xml.Serialization;
 
 
-namespace Fusion.UserInterface {
+namespace Fusion.Engine.UserInterface {
 	public class Config {
 		public bool		ShowFrames			{ get; set; }
 		public bool		SkipUserInterface	{ get; set; }
