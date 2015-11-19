@@ -18,6 +18,8 @@ namespace Fusion.Engine.Graphics {
 		const int	MaxOmniLights	=	1024;
 		const int	MaxSpotLights	=	16;
 
+		GraphicsEngine ge { get { return GameEngine.GraphicsEngine; } }
+
 
 		[Config]
 		public LightRendererConfig	Config { get; set; }
@@ -81,7 +83,7 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		[StructLayout(LayoutKind.Explicit)]
+		[StructLayout(LayoutKind.Explicit, Size=560)]
 		struct LightingParams {
 			[FieldOffset(  0)] public Matrix	View;
 			[FieldOffset( 64)] public Matrix	Projection;
@@ -96,6 +98,8 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(496)] public Vector4	ViewportSize;
 			[FieldOffset(512)] public Vector4	CSMFilterRadius;
 			[FieldOffset(528)] public Color4	AmbientColor;
+			[FieldOffset(544)] public Vector4	Viewport;
+
 
 		}
 
@@ -251,11 +255,19 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public void ClearGBuffer ()
 		{
-			GameEngine.GraphicsDevice.Clear( depthBuffer.Surface,		1, 0 );
-			GameEngine.GraphicsDevice.Clear( hdrBuffer.Surface,			Color4.Black );
 			GameEngine.GraphicsDevice.Clear( diffuseBuffer.Surface,		Color4.Black );
 			GameEngine.GraphicsDevice.Clear( specularBuffer.Surface,	Color4.Black );
 			GameEngine.GraphicsDevice.Clear( normalMapBuffer.Surface,	Color4.Black );
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public void ClearHdrBuffer ()
+		{
+			GameEngine.GraphicsDevice.Clear( depthBuffer.Surface,		1, 0 );
+			GameEngine.GraphicsDevice.Clear( hdrBuffer.Surface,			Color4.Black );
 		}
 
 
@@ -267,7 +279,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="view"></param>
 		/// <param name="projection"></param>
-		public void RenderLighting ( Camera camera, StereoEye stereoEye, LightSet lightSet, Texture occlusionMap )
+		public void RenderLighting ( Camera camera, StereoEye stereoEye, LightSet lightSet, Texture occlusionMap, Viewport viewport )
 		{
 			var view		=	camera.GetViewMatrix( stereoEye );
 			var projection	=	camera.GetProjectionMatrix( stereoEye );
@@ -333,6 +345,7 @@ namespace Fusion.Engine.Graphics {
 				cbData.CSMFilterRadius			=	new Vector4( Config.CSMFilterSize );
 
 				cbData.AmbientColor				=	new Color4(0.0f, 0.0f, 0.0f, 1);
+				cbData.Viewport					=	new Vector4( viewport.X, viewport.Y, viewport.Width, viewport.Height );
 
 				PrepareOmniLights( view, projection, lightSet );
 				PrepareSpotLights( view, projection, lightSet );
@@ -354,7 +367,7 @@ namespace Fusion.Engine.Graphics {
 				device.ComputeShaderResources[3]	=	depthBuffer;
 				device.ComputeShaderResources[4]	=	csmColor;
 				device.ComputeShaderResources[5]	=	spotColor;
-				device.ComputeShaderResources[6]	=	lightSet.SpotAtlas.Texture.Srv;
+				device.ComputeShaderResources[6]	=	lightSet.SpotAtlas==null ? ge.WhiteTexture.Srv : lightSet.SpotAtlas.Texture.Srv;
 				device.ComputeShaderResources[7]	=	omniLightBuffer;
 				device.ComputeShaderResources[8]	=	spotLightBuffer;
 				device.ComputeShaderResources[9]	=	occlusionMap.Srv;
@@ -366,7 +379,7 @@ namespace Fusion.Engine.Graphics {
 				//
 				//	Dispatch :
 				//
-				device.Dispatch( MathUtil.IntDivUp( HdrBuffer.Width, BlockSizeX ), MathUtil.IntDivUp( HdrBuffer.Height, BlockSizeY ), 1 );
+				device.Dispatch( MathUtil.IntDivUp( viewport.Width, BlockSizeX ), MathUtil.IntDivUp( viewport.Height, BlockSizeY ), 1 );
 
 			} catch ( UbershaderException e ) {
 				e.Report();
@@ -378,9 +391,7 @@ namespace Fusion.Engine.Graphics {
 			//
 			//	Add accumulated light  :
 			//
-			var	ge	=	GameEngine.GraphicsEngine;
-
-			ge.Filter.OverlayAdditive( HdrBuffer.Surface, lightAccumBuffer );
+			ge.Filter.OverlayAdditive( HdrBuffer.Surface, lightAccumBuffer, viewport );
 
 			device.ResetStates();
 

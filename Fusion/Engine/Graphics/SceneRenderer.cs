@@ -132,7 +132,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="diffuse"></param>
 		/// <param name="specular"></param>
 		/// <param name="normals"></param>
-		internal void RenderGBuffer ( Camera camera, StereoEye stereoEye, IEnumerable<Instance> instances )
+		internal void RenderGBuffer ( Camera camera, StereoEye stereoEye, IEnumerable<Instance> instances, Viewport viewport )
 		{		
 			if (surfaceShader==null) {	
 				return;
@@ -155,6 +155,8 @@ namespace Fusion.Engine.Graphics {
 			device.ResetStates();
 
 			device.SetTargets( depth, hdr, diffuse, specular, normals );
+
+			device.SetViewport(viewport); 
 
 			device.PipelineState	=	factory[ (int)SurfaceFlags.GBUFFER ];
 

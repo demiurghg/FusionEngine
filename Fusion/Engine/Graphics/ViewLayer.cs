@@ -49,13 +49,6 @@ namespace Fusion.Engine.Graphics {
 		}
 
 		/// <summary>
-		/// Gets and sets view bounds.
-		/// </summary>
-		public Rectangle ViewBounds {
-			get; set;
-		}
-
-		/// <summary>
 		/// Indicated whether target buffer should be cleared before rendering.
 		/// </summary>
 		public bool Clear {	
@@ -129,23 +122,30 @@ namespace Fusion.Engine.Graphics {
 			}
 
 
-			//	clear g-buffer :
-			ge.LightRenderer.ClearGBuffer();
+			var viewport	=	new Viewport( 0,0, targetRT.Width, targetRT.Height );
 
-			//	render shadows :
-			ge.LightRenderer.RenderShadows( Camera, Instances );
+
+			ge.LightRenderer.ClearHdrBuffer();
+
+			if (Instances.Any()) {
+				//	clear g-buffer :
+				ge.LightRenderer.ClearGBuffer();
+
+				//	render shadows :
+				ge.LightRenderer.RenderShadows( Camera, Instances );
 			
-			//	render g-buffer :
-			ge.SceneRenderer.RenderGBuffer( Camera, stereoEye, Instances );
+				//	render g-buffer :
+				ge.SceneRenderer.RenderGBuffer( Camera, stereoEye, Instances, viewport );
 
-			//	render sky :
-			ge.Sky.Render( Camera, stereoEye, gameTime, ge.LightRenderer.DepthBuffer.Surface, ge.LightRenderer.HdrBuffer.Surface );
+				//	render sky :
+				//ge.Sky.Render( Camera, stereoEye, gameTime, ge.LightRenderer.DepthBuffer.Surface, ge.LightRenderer.HdrBuffer.Surface );
 
-			//	render lights :
-			ge.LightRenderer.RenderLighting( Camera, stereoEye, LightSet, GameEngine.GraphicsEngine.WhiteTexture );
+				//	render lights :
+				ge.LightRenderer.RenderLighting( Camera, stereoEye, LightSet, GameEngine.GraphicsEngine.WhiteTexture, viewport );
+			}
 
 			//	apply tonemapping and bloom :
-			ge.HdrFilter.Render( gameTime, ge.Device.BackbufferColor.Surface, ge.LightRenderer.HdrBuffer );
+			ge.HdrFilter.Render( gameTime, targetRT.Surface, ge.LightRenderer.HdrBuffer, viewport );
 
 			GameEngine.GraphicsDevice.RestoreBackbuffer();
 			if (GisLayers.Any()) {

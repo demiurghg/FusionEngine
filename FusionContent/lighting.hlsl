@@ -111,6 +111,8 @@ struct LightingParams {
 	
 	float4		CSMFilterRadius;	//	for each cascade
 	float4		AmbientColor;
+	
+	float4		Viewport;			//	x,y,w,h,
 };
 
 
@@ -184,8 +186,8 @@ void CSMain(
 	uint3 dispatchThreadId : SV_DispatchThreadID) 
 {
 	//-----------------------------------------------------
-	int width, height;
-	GBufferDiffuse.GetDimensions( width, height );
+	float width			=	Params.Viewport.z;
+	float height		=	Params.Viewport.w;
 
 	int3 location		=	int3( dispatchThreadId.x, dispatchThreadId.y, 0 );
 
@@ -206,6 +208,7 @@ void CSMain(
 	
 	float4	totalLight	=	0;//hdrTexture[dispatchThreadId.xy];
 	//GroupMemoryBarrierWithGroupSync(); 
+	
 	
 	//-----------------------------------------------------
 	//	Direct light :

@@ -142,7 +142,7 @@ namespace DeferredDemo {
 		/// </summary>
 		/// <param name="target">LDR target.</param>
 		/// <param name="hdrImage">HDR source image.</param>
-		public void Render ( GameTime gameTime, RenderTargetSurface target, ShaderResource hdrImage )
+		public void Render ( GameTime gameTime, RenderTargetSurface target, ShaderResource hdrImage, Viewport viewport )
 		{
 			var device	=	GameEngine.GraphicsDevice;
 			var filter	=	GameEngine.GraphicsEngine.Filter;

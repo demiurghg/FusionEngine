@@ -37,8 +37,10 @@ namespace TestGame2 {
 		SpriteLayer	uiLayer;
 		DiscTexture	texture;
 
+		TargetTexture	target;
 
 		ViewLayer	master;
+		ViewLayer	uiView;
 
 		Scene		scene;
 
@@ -71,18 +73,24 @@ namespace TestGame2 {
 		public override void Initialize ()
 		{
 			master		=	new ViewLayer(GameEngine);
+			uiView		=	new ViewLayer(GameEngine);
 
 			GameEngine.GraphicsEngine.ViewLayers.Add( master );
+			GameEngine.GraphicsEngine.ViewLayers.Add( uiView );
 
 			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			uiLayer		=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
 			scene		=	GameEngine.Content.Load<Scene>( "testScene" );
 
+			target		=	new TargetTexture( GameEngine.GraphicsEngine, 512, 512, TargetFormat.LowDynamicRange );
+
 			master.LightSet.SpotAtlas	=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
 			master.LightSet.DirectLight.Position	=	new Vector3(1,2,3);
 			master.LightSet.DirectLight.Intensity	=	Color4.White;
 			master.LightSet.DirectLight.Enabled		=	true;
+
+			master.Target	=	target;
 			
 			var transforms = new Matrix[ scene.Nodes.Count ];
 			scene.ComputeAbsoluteTransforms( transforms );
@@ -102,18 +110,18 @@ namespace TestGame2 {
 			}
 
 			testLayer.Clear();
-			testLayer.Draw( texture, 10,10 + 384,256,256, Color.White );
+			testLayer.Draw( target, 10,10 + 384,256,256, Color.White );
 
 			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.DiffuseTexture,     0,  0, 200,150, Color.White );
 			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.SpecularTexturer, 200,  0, 200,150, Color.White );
 			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.NormalMapTexture, 400,  0, 200,150, Color.White );
-			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.HdrTexture,		  600,  0, 400,300, Color.White );
+			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.HdrTexture,		  600,  0, 400,300, Color.White );//*/
 
 			//testLayer.DrawDebugString( debugFont, 10,276, "Lenna Soderberg", Color.White );
 
-			master.SpriteLayers.Add( testLayer );
-			master.SpriteLayers.Add( console.ConsoleSpriteLayer );
-			master.SpriteLayers.Add( uiLayer );
+			uiView.SpriteLayers.Add( console.ConsoleSpriteLayer );
+			uiView.SpriteLayers.Add( uiLayer );
+			uiView.SpriteLayers.Add( testLayer );
 
 			//master.GisLayers.Add(new TilesGisLayer(GameEngine));
 
@@ -182,6 +190,7 @@ namespace TestGame2 {
 			if (disposing) {
 				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
+				SafeDispose( ref target );
 			}
 			base.Dispose( disposing );
 		}

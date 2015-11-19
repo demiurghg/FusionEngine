@@ -281,7 +281,7 @@ namespace DeferredDemo
 		/// </summary>
 		/// <param name="dst">target to copy to</param>
 		/// <param name="src">target to copy from</param>
-		public void OverlayAdditive( RenderTargetSurface dst, ShaderResource src )
+		public void OverlayAdditive( RenderTargetSurface dst, ShaderResource src, Viewport viewport )
 		{
 			SetDefaultRenderStates();
 
@@ -290,12 +290,12 @@ namespace DeferredDemo
 				if(dst == null) {
 					rs.RestoreBackbuffer();
 				} else {
-					SetViewport(dst);
+					rs.SetViewport(viewport);
 					rs.SetTargets( null, dst );
 				}
 
 				rs.PipelineState			=	factory[ (int)ShaderFlags.OVERLAY_ADDITIVE ];
-				rs.PixelShaderResources[0]	= src;
+				rs.PixelShaderResources[0]	=	src;
 
 				rs.Draw( 3, 0 );
 			}
