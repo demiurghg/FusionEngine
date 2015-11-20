@@ -16,14 +16,8 @@ namespace Fusion.Engine.Graphics {
 	}
 
 
-	public enum FrameFormat {
-		Ldr,
-		Hdr,
-	}
 
-
-
-	/// <summary>
+		/// <summary>
 	/// Defines set of applied to instance surface effects.
 	/// </summary>
 	public enum InstanceFX {

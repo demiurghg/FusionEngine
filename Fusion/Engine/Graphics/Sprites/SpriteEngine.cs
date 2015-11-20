@@ -103,12 +103,13 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="gameTime"></param>
 		/// <param name="stereoEye"></param>
-		public void DrawSprites ( GameTime gameTime, StereoEye stereoEye, IEnumerable<SpriteLayer> layers )
+		public void DrawSprites ( GameTime gameTime, StereoEye stereoEye, RenderTargetSurface surface, IEnumerable<SpriteLayer> layers )
 		{
 			device.ResetStates();
-			device.RestoreBackbuffer();
+			//device.RestoreBackbuffer();
+			device.SetTargets( null, surface );
 
-			DrawSpritesRecursive( gameTime, stereoEye, layers, Matrix.Identity, new Color4(1f,1f,1f,1f) );
+			DrawSpritesRecursive( gameTime, stereoEye, surface, layers, Matrix.Identity, new Color4(1f,1f,1f,1f) );
 		}
 
 
@@ -118,10 +119,10 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="gameTime"></param>
 		/// <param name="stereoEye"></param>
 		/// <param name="layers"></param>
-		void DrawSpritesRecursive ( GameTime gameTime, StereoEye stereoEye, IEnumerable<SpriteLayer> layers, Matrix parentTransform, Color4 parentColor )
+		void DrawSpritesRecursive ( GameTime gameTime, StereoEye stereoEye, RenderTargetSurface surface, IEnumerable<SpriteLayer> layers, Matrix parentTransform, Color4 parentColor )
 		{
-			int	w	=	device.DisplayBounds.Width;
-			int h	=	device.DisplayBounds.Height;
+			int	w	=	surface.Width;
+			int h	=	surface.Height;
 			var ofs	=	0f;
 
 			var projection = Matrix.OrthoOffCenterRH(ofs, w + ofs, h + ofs, ofs, -9999, 9999);
@@ -173,7 +174,7 @@ namespace Fusion.Engine.Graphics {
 
 				layer.Draw( gameTime, stereoEye );
 
-				DrawSpritesRecursive( gameTime, stereoEye, layer.Layers, absTransform, absColor );
+				DrawSpritesRecursive( gameTime, stereoEye, surface, layer.Layers, absTransform, absColor );
 			}
 		}
 	}

@@ -9,6 +9,7 @@ using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
+using Fusion.Engine.Graphics;
 
 namespace DeferredDemo {
 	public class HdrFilter : GameModule {
@@ -20,11 +21,6 @@ namespace DeferredDemo {
 		Ubershader	shader;
 		ConstantBuffer	paramsCB;
 		RenderTarget2D	averageLum;
-		RenderTarget2D	measuredOld;
-		RenderTarget2D	measuredNew;
-
-		RenderTarget2D	bloom0;
-		RenderTarget2D	bloom1;
 		StateFactory	factory;
 
 
@@ -70,33 +66,11 @@ namespace DeferredDemo {
 		public override void Initialize ()
 		{
 			averageLum	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, 256,256, true, false );
-			measuredOld	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
-			measuredNew	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
 			paramsCB	=	new ConstantBuffer( GameEngine.GraphicsDevice, typeof(Params) );
 
-			CreateTargets();
 			LoadContent();
 
-			GameEngine.GraphicsDevice.DisplayBoundsChanged += (s,e) => CreateTargets();
 			GameEngine.Reloading += (s,e) => LoadContent();
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		void CreateTargets ()
-		{
-			var disp	=	GameEngine.GraphicsDevice.DisplayBounds;
-
-			SafeDispose( ref bloom0 );
-			SafeDispose( ref bloom1 );
-
-			int width	=	( disp.Width/2  ) & 0xFFF0;
-			int height	=	( disp.Height/2 ) & 0xFFF0;
-			bloom0		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, width, height, true, false );
-			bloom1		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, width, height, true, false );
 		}
 
 
@@ -124,11 +98,7 @@ namespace DeferredDemo {
 		{
 			if (disposing) {
 				SafeDispose( ref factory );
-				SafeDispose( ref bloom0 );
-				SafeDispose( ref bloom1 );
 				SafeDispose( ref averageLum	 );
-				SafeDispose( ref measuredOld );
-				SafeDispose( ref measuredNew );
 				SafeDispose( ref paramsCB	 );
 			}
 
@@ -142,28 +112,29 @@ namespace DeferredDemo {
 		/// </summary>
 		/// <param name="target">LDR target.</param>
 		/// <param name="hdrImage">HDR source image.</param>
-		public void Render ( GameTime gameTime, RenderTargetSurface target, ShaderResource hdrImage, Viewport viewport )
+		public void Render ( GameTime gameTime, RenderTargetSurface target, ShaderResource hdrImage, ViewLayer viewLayer )
 		{
 			var device	=	GameEngine.GraphicsDevice;
 			var filter	=	GameEngine.GraphicsEngine.Filter;
 
+			var rect	=	new Rectangle( 0,0, viewLayer.Width, viewLayer.Height );
 
 			//
 			//	Rough downsampling of source HDR-image :
 			//
-			filter.StretchRect( averageLum.Surface, hdrImage );
+			filter.StretchRect( averageLum.Surface, hdrImage, SamplerState.PointClamp, rect );
 			averageLum.BuildMipmaps();
 
 			//
 			//	Make bloom :
 			//
-			filter.StretchRect( bloom0.Surface, hdrImage );
-			bloom0.BuildMipmaps();
+			filter.StretchRect( viewLayer.bloom0.Surface, hdrImage, SamplerState.LinearClamp, rect );
+			viewLayer.bloom0.BuildMipmaps();
 
-			filter.GaussBlur( bloom0, bloom1, Config.GaussBlurSigma, 0 );
-			filter.GaussBlur( bloom0, bloom1, Config.GaussBlurSigma, 1 );
-			filter.GaussBlur( bloom0, bloom1, Config.GaussBlurSigma, 2 );
-			filter.GaussBlur( bloom0, bloom1, Config.GaussBlurSigma, 3 );
+			filter.GaussBlur( viewLayer.bloom0, viewLayer.bloom1, Config.GaussBlurSigma, 0 );
+			filter.GaussBlur( viewLayer.bloom0, viewLayer.bloom1, Config.GaussBlurSigma, 1 );
+			filter.GaussBlur( viewLayer.bloom0, viewLayer.bloom1, Config.GaussBlurSigma, 2 );
+			filter.GaussBlur( viewLayer.bloom0, viewLayer.bloom1, Config.GaussBlurSigma, 3 );
 
 
 			//
@@ -183,10 +154,10 @@ namespace DeferredDemo {
 			//
 			//	Measure and adapt :
 			//
-			device.SetTargets( null, measuredNew );
+			device.SetTargets( null, viewLayer.measuredNew );
 
 			device.PixelShaderResources[0]	=	averageLum;
-			device.PixelShaderResources[1]	=	measuredOld;
+			device.PixelShaderResources[1]	=	viewLayer.measuredOld;
 
 			device.PipelineState		=	factory[ (int)(Flags.MEASURE_ADAPT) ];
 				
@@ -199,8 +170,8 @@ namespace DeferredDemo {
 			device.SetTargets( null, target );
 
 			device.PixelShaderResources[0]	=	hdrImage;// averageLum;
-			device.PixelShaderResources[1]	=	measuredNew;// averageLum;
-			device.PixelShaderResources[2]	=	bloom0;// averageLum;
+			device.PixelShaderResources[1]	=	viewLayer.measuredNew;// averageLum;
+			device.PixelShaderResources[2]	=	viewLayer.bloom0;// averageLum;
 			device.PixelShaderSamplers[0]	=	SamplerState.LinearClamp;
 
 			Flags op = Flags.LINEAR;
@@ -216,7 +187,7 @@ namespace DeferredDemo {
 
 
 			//	swap luminanice buffers :
-			Misc.Swap( ref measuredNew, ref measuredOld );
+			Misc.Swap( ref viewLayer.measuredNew, ref viewLayer.measuredOld );
 		}
 
 

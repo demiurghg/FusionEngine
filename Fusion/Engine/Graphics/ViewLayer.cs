@@ -11,7 +11,11 @@ using Fusion.Engine.Graphics.GIS;
 using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
 
 namespace Fusion.Engine.Graphics {
-	public class ViewLayer {
+
+	/// <summary>
+	/// Represents entire visible world.
+	/// </summary>
+	public class ViewLayer : DisposableBase {
 		
 		readonly GameEngine		GameEngine;
 		readonly GraphicsEngine	ge;
@@ -25,7 +29,7 @@ namespace Fusion.Engine.Graphics {
 		}
 
 		/// <summary>
-		/// Indicates whether view should be drawn.
+		/// Indicates in which order view should be drawn.
 		/// </summary>
 		public int Order {
 			get; set;
@@ -40,12 +44,14 @@ namespace Fusion.Engine.Graphics {
 		}
 
 		/// <summary>
-		/// Gets and sets view target.
+		/// Gets view target.
 		/// Null value indicates that view will be rendered to backbuffer.
 		/// Default value is null.
 		/// </summary>
 		public TargetTexture Target {
-			get; set;
+			get {
+				return new TargetTexture( ldrTarget );
+			}
 		}
 
 		/// <summary>
@@ -63,7 +69,7 @@ namespace Fusion.Engine.Graphics {
 		}
 
 		/// <summary>
-		/// Gets and sets view light set.
+		/// Gets view light set.
 		/// This value is already initialized when View object is created.
 		/// </summary>
 		public LightSet LightSet {
@@ -78,51 +84,234 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		/// <summary>
+		/// Gets collection of mesh instances.
+		/// </summary>
 		public ICollection<Instance> Instances {
 			get; private set;
 		}
 
 
+		/// <summary>
+		/// Gets collection of GIS layers.
+		/// </summary>
 		public ICollection<Gis.GisLayer> GisLayers;
 
 
 		/// <summary>
-		/// Creates view's instance.
+		/// Gets view layer width.
 		/// </summary>
-		/// <param name="ge"></param>
-		public ViewLayer ( GameEngine gameEngine )
+		public int Width { 
+			get {
+				return ldrTarget == null ? ge.DisplayBounds.Width : ldrTarget.Width;
+			}
+		}
+
+
+		/// <summary>
+		/// Gets view layer height
+		/// </summary>
+		public int Height {
+			get {
+				return ldrTarget == null ? ge.DisplayBounds.Height : ldrTarget.Height;
+			}
+		}
+
+		
+
+
+		readonly bool useBackbuffer;
+		readonly bool useHDR;
+
+		internal RenderTarget2D ldrTarget;
+		internal RenderTarget2D	measuredOld;
+		internal RenderTarget2D	measuredNew;
+		internal RenderTarget2D	bloom0;
+		internal RenderTarget2D	bloom1;
+
+
+		/// <summary>
+		/// Creates ViewLayer instance
+		/// </summary>
+		/// <param name="gameEngine">Game engine</param>
+		/// <param name="width">Target width. Specify zero value for backbuffer.</param>
+		/// <param name="height">Target height. Specify zero value for backbuffer.</param>
+		/// <param name="enableHdr">Indicates that ViewLayer has HDR capabilities.</param>
+		public ViewLayer ( GameEngine gameEngine, int width, int height, bool enableHdr )
 		{
-			GameEngine	=	gameEngine;
-			this.ge		=	gameEngine.GraphicsEngine;
+			GameEngine		=	gameEngine;
+			this.ge			=	gameEngine.GraphicsEngine;
+			useBackbuffer	=	width == 0 || height == 0;
+			useHDR			=	enableHdr;
 
-			Visible		=	true;
-			Order		=	0;
+			Visible			=	true;
+			Order			=	0;
 
-			Camera		=	new Camera();
-			Target		=	null;
+			Camera			=	new Camera();
 
 			SpriteLayers	=	new List<SpriteLayer>();
 			Instances		=	new List<Instance>();
 			LightSet		=	new LightSet( gameEngine.GraphicsEngine );
 			GisLayers		=	new List<Gis.GisLayer>();
+
+			if (useHDR) {
+				measuredOld	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
+				measuredNew	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
+			}
+
+			if (useBackbuffer) {
+				Resize( 1, 1 );
+			} else {
+				Resize( width, height );
+			}
+
+			ge.DisplayBoundsChanged += ge_DisplayBoundsChanged;
 		}
 
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void Dispose ( bool disposing )
+		{
+			if (disposing) {
+				ge.DisplayBoundsChanged -= ge_DisplayBoundsChanged;
+
+				SafeDispose( ref measuredNew );
+				SafeDispose( ref measuredOld );
+				SafeDispose( ref bloom0 );
+				SafeDispose( ref bloom1 );
+				SafeDispose( ref ldrTarget );
+			}
+			base.Dispose( disposing );
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		void ge_DisplayBoundsChanged ( object sender, EventArgs e )
+		{
+			if (useBackbuffer) {
+				Resize( ge.DisplayBounds.Width, ge.DisplayBounds.Height );
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		public void Resize ( int newWidth, int newHeight )
+		{
+			var bounds = ge.DisplayBounds;
+			
+			if ( newWidth <= 0 || newWidth > bounds.Width ) {
+				throw new ArgumentOutOfRangeException("newWidth", "argument must be within range [1..DisplayWidth]");
+			}
+			if ( newHeight <= 0 || newHeight > bounds.Height ) {
+				throw new ArgumentOutOfRangeException("newHeight", "argument must be within range [1..DisplayHeight]");
+			}
+
+
+			if (useHDR) {
+
+				int targetWidth		=	newWidth;
+				int targetHeight	=	newHeight;
+
+				if (useBackbuffer) {
+					targetWidth		=	bounds.Width;
+					targetHeight	=	bounds.Height;
+				}
+
+				int width	=	( targetWidth/2  ) & 0xFFF0;
+				int height	=	( targetHeight/2 ) & 0xFFF0;
+			
+
+				if (bloom0==null || bloom1==null || width!=bloom0.Width || height!=bloom1.Height) {
+
+					SafeDispose( ref bloom0 );
+					SafeDispose( ref bloom1 );
+
+					bloom0		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, width, height, true, false );
+					bloom1		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, width, height, true, false );
+				}
+			}
+
+			if (!useBackbuffer) {
+
+				SafeDispose( ref ldrTarget );
+				ldrTarget	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8, newWidth, newHeight, false, false );
+
+			} else {
+				ldrTarget	=	null;
+			}
+		}
+
+
+
+		/*-----------------------------------------------------------------------------------------
+		 * 
+		 *	Rendering :
+		 * 
+		-----------------------------------------------------------------------------------------*/
 
 		/// <summary>
 		/// Renders view
 		/// </summary>
 		internal void RenderView ( GameTime gameTime, StereoEye stereoEye )
 		{
-			var targetRT = (Target!=null) ? Target.RenderTarget : ge.Device.BackbufferColor;
+			var targetSurface = useBackbuffer ? ge.Device.BackbufferColor.Surface : Target.RenderTarget.Surface;
 
 			//	clear target buffer if necassary :
 			if (Clear) {
-				ge.Device.Clear( targetRT.Surface, ClearColor );
+				ge.Device.Clear( targetSurface, ClearColor );
 			}
 
 
-			var viewport	=	new Viewport( 0,0, targetRT.Width, targetRT.Height );
+			var viewport	=	new Viewport( 0,0, targetSurface.Width, targetSurface.Height );
+
+
+			//	Render HDR stuff: mesh instances, 
+			//	special effects, sky, water, light etc. 
+			RenderHdrScene( gameTime, stereoEye, viewport, targetSurface );
+
+
+			GameEngine.GraphicsDevice.RestoreBackbuffer();
+			if (GisLayers.Any()) {
+				var tiles = GisLayers.First() as TilesGisLayer;
+				if(tiles != null)
+					tiles.Update(gameTime);
+			}
+			ge.Gis.Draw(gameTime, stereoEye, GisLayers);
+
+			//	draw sprites :
+
+			ge.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="gameTime"></param>
+		/// <param name="stereoEye"></param>
+		void RenderHdrScene ( GameTime gameTime, StereoEye stereoEye, Viewport viewport, RenderTargetSurface targetSurface )
+		{
+			if (!useHDR) {
+				if (Instances.Any()) {
+					Log.Warning("HDR must be enabled on ViewLayer to render mesh instances");
+				}
+				return;
+			}
 
 
 			ge.LightRenderer.ClearHdrBuffer();
@@ -138,25 +327,16 @@ namespace Fusion.Engine.Graphics {
 				ge.SceneRenderer.RenderGBuffer( Camera, stereoEye, Instances, viewport );
 
 				//	render sky :
-				//ge.Sky.Render( Camera, stereoEye, gameTime, ge.LightRenderer.DepthBuffer.Surface, ge.LightRenderer.HdrBuffer.Surface );
+				ge.Sky.Render( Camera, stereoEye, gameTime, ge.LightRenderer.DepthBuffer.Surface, ge.LightRenderer.HdrBuffer.Surface, viewport );
 
 				//	render lights :
 				ge.LightRenderer.RenderLighting( Camera, stereoEye, LightSet, GameEngine.GraphicsEngine.WhiteTexture, viewport );
 			}
 
 			//	apply tonemapping and bloom :
-			ge.HdrFilter.Render( gameTime, targetRT.Surface, ge.LightRenderer.HdrBuffer, viewport );
+			ge.HdrFilter.Render( gameTime, targetSurface, ge.LightRenderer.HdrBuffer, this );
 
-			GameEngine.GraphicsDevice.RestoreBackbuffer();
-			if (GisLayers.Any()) {
-				var tiles = GisLayers.First() as TilesGisLayer;
-				if(tiles != null)
-					tiles.Update(gameTime);
-			}
-			ge.Gis.Draw(gameTime, stereoEye, GisLayers);
 
-			//	draw sprites :
-			ge.SpriteEngine.DrawSprites( gameTime, stereoEye, SpriteLayers );
 		}
 	}
 }

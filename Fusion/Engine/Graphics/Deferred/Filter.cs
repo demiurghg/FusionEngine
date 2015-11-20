@@ -27,7 +27,7 @@ namespace DeferredDemo
 			PASS2								= 1 << 1,
 			FXAA								= 1 << 2,
 			COPY								= 1 << 3,
-			DOWNSAMPLE_2_2x2					= 1 << 4,
+			STRETCH_RECT						= 1 << 4,
 			DOWNSAMPLE_2_4x4					= 1 << 5,
 			DOWNSAMPLE_4						= 1 << 6,
 			GAUSS_BLUR_3x3						= 1 << 7,
@@ -48,6 +48,7 @@ namespace DeferredDemo
 		Ubershader		shaders;
 		StateFactory	factory;
 		ConstantBuffer	gaussWeightsCB;
+		ConstantBuffer	sourceRectCB;
 		ConstantBuffer	bufLinearizeDepth;
 		
 		public Filter( GameEngine gameEngine ) : base( gameEngine )
@@ -64,6 +65,7 @@ namespace DeferredDemo
 		{
 			bufLinearizeDepth	= new ConstantBuffer( rs, 128 );
 			gaussWeightsCB		= new ConstantBuffer( rs, typeof(Vector4), MaxBlurTaps );
+			sourceRectCB		= new ConstantBuffer( rs, typeof(Vector4) );
 
 			LoadContent();
 			GameEngine.Reloading += (s,e) => LoadContent();
@@ -111,6 +113,7 @@ namespace DeferredDemo
 			if (disposing) {
 				SafeDispose( ref factory );
 				SafeDispose( ref gaussWeightsCB );
+				SafeDispose( ref sourceRectCB );
 				SafeDispose( ref bufLinearizeDepth );
 			}
 
@@ -138,8 +141,9 @@ namespace DeferredDemo
 		/// </summary>
 		/// <param name="dst"></param>
 		/// <param name="src"></param>
-		/// <param name="blendState"></param>
-		public void StretchRect( RenderTargetSurface dst, ShaderResource src, SamplerState filter = null )
+		/// <param name="filter"></param>
+		/// <param name="rect"></param>
+		public void StretchRect( RenderTargetSurface dst, ShaderResource src, SamplerState filter = null, Rectangle? sourceRectangle = null )
 		{
 			SetDefaultRenderStates();
 
@@ -148,10 +152,21 @@ namespace DeferredDemo
 				SetViewport(dst);
 				rs.SetTargets( null, dst );
 
-				rs.PipelineState			=	factory[ (int)ShaderFlags.DOWNSAMPLE_2_2x2 ];
+				float srcW = src.Width;
+				float srcH = src.Height;
+
+				if (sourceRectangle.HasValue) {
+					var rect = sourceRectangle.Value;
+					sourceRectCB.SetData( new Vector4( 0, 0, rect.Width/srcW, rect.Height/srcH ) );
+				} else {
+					sourceRectCB.SetData( new Vector4( 0,0, 1, 1 ) );
+				}
+
+				rs.PipelineState			=	factory[ (int)ShaderFlags.STRETCH_RECT ];
 				rs.VertexShaderResources[0] =	src;
 				rs.PixelShaderResources[0]	=	src;
-				rs.PixelShaderSamplers[0]	=  filter ?? SamplerState.LinearPointClamp;
+				rs.PixelShaderSamplers[0]	=	filter ?? SamplerState.LinearPointClamp;
+				rs.VertexShaderConstants[0]	=	sourceRectCB;
 
 				rs.Draw( 3, 0 );
 			}

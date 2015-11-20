@@ -1,6 +1,6 @@
 #if 0
 $ubershader FXAA|COPY|DOWNSAMPLE_4|OVERLAY_ADDITIVE
-$ubershader (DOWNSAMPLE_2_2x2..TO_CUBE_FACE)|(DOWNSAMPLE_2_4x4..TO_CUBE_FACE)
+$ubershader (STRETCH_RECT..TO_CUBE_FACE)|(DOWNSAMPLE_2_4x4..TO_CUBE_FACE)
 $ubershader GAUSS_BLUR_3x3 PASS1|PASS2
 $ubershader GAUSS_BLUR PASS1|PASS2
 $ubershader LINEARIZE_DEPTH|RESOLVE_AND_LINEARIZE_DEPTH_MSAA
@@ -25,7 +25,11 @@ float4 PSMain(float4 position : SV_POSITION) : SV_Target
 #endif
 
 //-------------------------------------------------------------------------------
-#ifdef DOWNSAMPLE_2_2x2
+#ifdef STRETCH_RECT
+
+cbuffer CBuffer : register(b0) {
+	float4 sourceRect : register(c0);  // x,y,w,h
+};
 
 SamplerState	SamplerLinearClamp : register(s0);
 Texture2D Source : register(t0);
@@ -35,6 +39,7 @@ struct PS_IN {
   	float2 uv : TEXCOORD0;
 };
 
+
 PS_IN VSMain(uint VertexID : SV_VertexID)
 {
 	PS_IN output;
@@ -42,14 +47,16 @@ PS_IN VSMain(uint VertexID : SV_VertexID)
 	output.position.y = (VertexID == 2) ? 3.0f : -1.0f;
 	output.position.zw = 1.0f;
 
-	output.uv = output.position.xy * float2(0.5f, -0.5f) + 0.5f;
+	output.uv 	=	output.position.xy * float2(0.5f, -0.5f) + 0.5f;
+	output.uv 	*=	sourceRect.zw;
 
-#ifdef TO_CUBE_FACE
-	output.uv = output.position.xy * float2(-0.5f, -0.5f) + 0.5f;
-#endif  
+	#ifdef TO_CUBE_FACE
+		output.uv 	= 	output.position.xy * float2(-0.5f, -0.5f) + 0.5f;
+	#endif  
 
 	return output;
 }
+
 
 float4 PSMain(PS_IN input) : SV_Target
 {

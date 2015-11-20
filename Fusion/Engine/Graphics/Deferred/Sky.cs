@@ -328,7 +328,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="rendCtxt"></param>
 		/// <param name="techName"></param>
-		internal void Render( Camera camera, StereoEye stereoEye,GameTime gameTime, DepthStencilSurface depthBuffer, RenderTargetSurface hdrTarget )
+		internal void Render( Camera camera, StereoEye stereoEye, GameTime gameTime, DepthStencilSurface depthBuffer, RenderTargetSurface hdrTarget, Viewport viewport )
 		{
 			var scale		=	Matrix.Scaling( Params.SkySphereSize );
 			var rotation	=	Matrix.Identity;
@@ -340,9 +340,9 @@ namespace Fusion.Engine.Graphics {
 
 			//rs.DepthStencilState = depthBuffer==null? DepthStencilState.None : DepthStencilState.Default ;
 
-			rs.SetViewport( 0, 0, hdrTarget.Width, hdrTarget.Height );
-
 			rs.SetTargets( depthBuffer, hdrTarget );
+
+			rs.SetViewport( viewport );
 
 			var viewMatrix = camera.GetViewMatrix( stereoEye );
 			var projMatrix = camera.GetProjectionMatrix( stereoEye );
