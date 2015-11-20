@@ -44,6 +44,9 @@ namespace Fusion.Engine.Graphics.GIS
 		public DVector3 CartesianPos { get; protected set; }
 		public DVector2 LonLatPosition;
 
+		public float ScaleFactor = 1.0f;
+		public float Yaw, Pitch, Roll;
+
 		Scene model;
 		Matrix[] transforms;
 
@@ -87,13 +90,13 @@ namespace Fusion.Engine.Graphics.GIS
 			Matrix rotationMat	= Matrix.Identity;
 			rotationMat.Forward = xAxis.ToVector3();
 			rotationMat.Up		= normal.ToVector3();
-			rotationMat.Right	= zAxis.ToVector3();
+			rotationMat.Right	= -zAxis.ToVector3();
 			rotationMat.TranslationVector = Vector3.Zero;
 
 			var viewPositionFloat = new Vector3((float)viewPosition.X, (float)viewPosition.Y, (float)viewPosition.Z);
 
 
-			constData.ModelWorld				= rotationMat;
+			constData.ModelWorld				= Matrix.RotationYawPitchRoll(Yaw, Pitch, Roll) * Matrix.Scaling(ScaleFactor) * rotationMat;
 			constData.ViewPositionTransparency	= new Vector4(viewPositionFloat, Transparency);
 			modelBuf.SetData(constData);
 

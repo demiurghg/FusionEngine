@@ -60,7 +60,7 @@ namespace Fusion.Engine.Graphics.GIS
 		    protected GameEngine GameEngine;
 
 			public bool IsActive;
-			public bool IsVisible;
+			public bool IsVisible = true;
 
 		    public uint ZOrder;
 
@@ -202,13 +202,15 @@ namespace Fusion.Engine.Graphics.GIS
 			var batches = layers.OrderByDescending(x => x.ZOrder);
 			
 		    foreach (var batch in batches) {
+			    //if (!batch.IsVisible) continue;
+
 				batch.Draw(gameTime, constBuffer);
 		    }
 	    }
 
 
 
-		public static void ToLatLon(double utmX, double utmY, string utmZone, out double latitude, out double longitude)
+		public static void UtmToLatLon(double utmX, double utmY, string utmZone, out double longitude, out double latitude)
 		{
 			bool isNorthHemisphere = utmZone.Last() >= 'N';
 

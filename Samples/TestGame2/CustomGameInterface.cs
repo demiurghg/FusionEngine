@@ -119,8 +119,14 @@ namespace TestGame2 {
 			uiView.SpriteLayers.Add( testLayer );
 
 			//master.GisLayers.Add(new TilesGisLayer(GameEngine));
+			//master.GisLayers.Add(PolyGisLayer.CreateFromUtmFbxModel(GameEngine, "water_342631_6664090_36N"));
 
-			//master.GisLayers.Add(new ModelLayer(GameEngine, new DVector2(30.246735, 59.944007), "teapot"));
+			//master.GisLayers.Add(new ModelLayer(GameEngine, new DVector2(30.30913, 59.95684), "itmo_building")
+			//{
+			//	ScaleFactor = 0.000142f,
+			//	Yaw = MathUtil.Rad(57)
+			//});
+
 
 			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
 		}

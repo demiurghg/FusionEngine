@@ -191,6 +191,7 @@
     </Compile>
     <Compile Include="Engine\Graphics\Deferred\Sky.cs" />
     <Compile Include="Engine\Graphics\Deferred\SkyConfig.cs" />
+    <Compile Include="Engine\Graphics\GIS\HeatMapLayer.cs" />
     <Compile Include="Engine\Graphics\GIS\ModelLayer.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRendererConfig.cs" />

@@ -49,11 +49,11 @@ VS_OUTPUT VSMain ( VS_INPUT v )
 {
 	VS_OUTPUT output;
 	
-	float4 tempPos 	= mul( float4(v.Position.xzy, 1), 	ModelStage.World ) + float4(ModelStage.ViewPositionTransparency.xyz, 0);
-	float4 normal	= mul( float4(v.Normal,0), 		ModelStage.World );
+	float4 tempPos 	= mul( float4(v.Position.xzy, 	1), ModelStage.World ) + float4(ModelStage.ViewPositionTransparency.xyz, 0);
+	float4 normal	= mul( float4(v.Normal,			0), ModelStage.World );
 	
 	output.Position	= mul(float4(tempPos.xyz, 1), Stage.ViewProj);
-	output.Normal 	= normal.xyz;
+	output.Normal 	= normalize(normal.xyz);
 	output.Color 	= v.Color;
 	output.Tangent 	= v.Tangent;
 	output.Binormal = v.Binormal;

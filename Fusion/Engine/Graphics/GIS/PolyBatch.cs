@@ -8,13 +8,14 @@ using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
 using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
+using Fusion.Engine.Graphics.GIS.GlobeMath;
 
 namespace Fusion.Engine.Graphics.GIS
 {
 	public class PolyGisLayer : Gis.GisLayer
 	{
-		Ubershader		shader;
-		StateFactory	factory;
+		protected Ubershader	shader;
+		protected StateFactory	factory;
 
 		[Flags]
 		public enum PolyFlags : int
@@ -27,6 +28,7 @@ namespace Fusion.Engine.Graphics.GIS
 			COMPUTE_SHADER	= 1 << 5,
 			BLUR_HORIZONTAL = 1 << 6,
 			BLUR_VERTICAL	= 1 << 7,
+			DRAW_COLORED	= 1 << 8,
 		}
 
 		public int Flags;
@@ -39,53 +41,25 @@ namespace Fusion.Engine.Graphics.GIS
 		public Vector2	PatternSize;
 		public float	ArrowsScale;
 
-		VertexBuffer firstBuffer;
-		VertexBuffer secondBuffer;
-		VertexBuffer currentBuffer;
-		IndexBuffer	 indexBuffer;
+		protected VertexBuffer	firstBuffer;
+		protected VertexBuffer	secondBuffer;
+		protected VertexBuffer	currentBuffer;
+		protected IndexBuffer	indexBuffer;
 
 		public Gis.GeoPoint[] PointsCpu { get; protected set; }
 
+		protected PolyGisLayer(GameEngine engine) : base(engine) { }
 
-#region Heat map stuff
-		public float[] Data;
 
-		public float InterpFactor = 0;
+		PolyGisLayer(GameEngine engine, Gis.GeoPoint[] points, int[] indeces, bool isDynamic) : base(engine)
+		{
+			Initialize(points, indeces, isDynamic);
 
-		public Texture2D HeatTexture { get; protected set; }
-		private RenderTarget2D Temp;
-		private RenderTarget2D Final;
-		private RenderTarget2D Prev;
-		private RenderTarget2D FirstFinal;
-		private RenderTarget2D SecondFinal;
-
-		public int MapDimX { get; protected set; }
-		public int MapDimY { get; protected set; }
-
-		public double Left		{ get; protected set; }
-		public double Right		{ get; protected set; }
-		public double Top		{ get; protected set; }
-		public double Bottom	{ get; protected set; }
-
-		public int				GridDensity;
-		public MapProjection	Projection;
-
-		public float MaxHeatMapLevel;
-		public float HeatMapTransparency;
-
-		struct HeatMapConstData {
-			public Vector4 Data;
+			Flags = (int)(PolyFlags.VERTEX_SHADER | PolyFlags.PIXEL_SHADER | PolyFlags.DRAW_COLORED);
 		}
-		HeatMapConstData	heatConstData;
-		ConstantBuffer		cb;
-
-		StateFactory blurFactory;
-
-		protected static Texture2D[] HeatMapPalettes;
-#endregion
 
 
-		void Initialize(Gis.GeoPoint[] points, int[] indeces, bool isDynamic)
+		protected void Initialize(Gis.GeoPoint[] points, int[] indeces, bool isDynamic)
 		{
 			shader	= GameEngine.Content.Load<Ubershader>("globe.Poly.hlsl");
 			factory = new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
@@ -102,168 +76,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			PointsCpu = points;
 		}
-
-		public PolyGisLayer(GameEngine engine, Gis.GeoPoint[] points, int[] indeces, int mapDimX, int mapDimY, bool isDynamic = false) : base(engine)
-		{
-			Initialize(points, indeces, isDynamic);
-
-			MapDimX = mapDimX;
-			MapDimY = mapDimY;
-
-			HeatTexture = new Texture2D(GameEngine.GraphicsDevice, MapDimX, MapDimY, ColorFormat.R32F, false);
-			Temp		= new RenderTarget2D(GameEngine.GraphicsDevice, ColorFormat.R32F, MapDimX, MapDimY, true);
-			FirstFinal	= new RenderTarget2D(GameEngine.GraphicsDevice, ColorFormat.R32F, MapDimX, MapDimY, true);
-			SecondFinal = new RenderTarget2D(GameEngine.GraphicsDevice, ColorFormat.R32F, MapDimX, MapDimY, true);
-
-			Final	= SecondFinal;
-			Prev	= FirstFinal;
-
-			Data = new float[MapDimX * MapDimY];
-
-			HeatMapPalettes		= new Texture2D[1];
-			HeatMapPalettes[0]	= GameEngine.Content.Load<Texture2D>("palette");
-
-			cb				= new ConstantBuffer(GameEngine.GraphicsDevice, typeof(HeatMapConstData));
-			heatConstData	= new HeatMapConstData();
-
-			Flags = (int)(PolyFlags.PIXEL_SHADER | PolyFlags.VERTEX_SHADER | PolyFlags.DRAW_HEAT);
-
-			blurFactory = new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList,
-					null,
-					BlendState.AlphaBlend,
-					RasterizerState.CullNone,
-					DepthStencilState.None);
-		}
-
-
-		public virtual void UpdateHeatMap()
-		{
-			HeatTexture.SetData(Data);
-
-			var game = GameEngine;
-
-			if (Final == FirstFinal) {
-				Final = SecondFinal;
-				Prev = FirstFinal;
-			} else {
-				Final = FirstFinal;
-				Prev = SecondFinal;
-			}
-
-			game.GraphicsDevice.PipelineState = blurFactory[(int)(PolyFlags.COMPUTE_SHADER | PolyFlags.BLUR_VERTICAL)];
-
-			game.GraphicsDevice.ComputeShaderResources[0] = HeatTexture;
-			game.GraphicsDevice.SetCSRWTexture(0, Temp.Surface);
-
-			game.GraphicsDevice.Dispatch(1, MapDimY, 1);
-
-			game.GraphicsDevice.SetCSRWTexture(0, null);
-
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			game.GraphicsDevice.PipelineState = blurFactory[(int)(PolyFlags.COMPUTE_SHADER | PolyFlags.BLUR_HORIZONTAL)];
-
-			game.GraphicsDevice.ComputeShaderResources[0] = Temp;
-			game.GraphicsDevice.SetCSRWTexture(0, Final.Surface);
-
-			game.GraphicsDevice.Dispatch(1, MapDimY, 1);
-
-			game.GraphicsDevice.SetCSRWTexture(0, null);
-		}
-
-
-		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
-		{
-
-			heatConstData.Data = new Vector4(MaxHeatMapLevel, HeatMapTransparency, MapDimX, InterpFactor);
-			cb.SetData(heatConstData);
-
-			GameEngine.GraphicsDevice.PipelineState = factory[
-			(int)(
-				PolyFlags.PIXEL_SHADER |
-				PolyFlags.VERTEX_SHADER |
-				PolyFlags.DRAW_HEAT)
-			];
-
-			//if(((PolyFlags)Flags).HasFlag(PolyFlags.DRAW_HEAT))
-
-			GameEngine.GraphicsDevice.VertexShaderConstants[0]	= constBuffer;
-			GameEngine.GraphicsDevice.PixelShaderConstants[0]	= constBuffer;
-			GameEngine.GraphicsDevice.PixelShaderConstants[1]	= cb;
-			
-			GameEngine.GraphicsDevice.PixelShaderSamplers[0] = SamplerState.LinearClamp;
-			GameEngine.GraphicsDevice.PixelShaderSamplers[1] = SamplerState.AnisotropicClamp;
-			
-			GameEngine.GraphicsDevice.PixelShaderResources[0] = HeatMapPalettes[0];
-			GameEngine.GraphicsDevice.PixelShaderResources[1] = Final;
-			GameEngine.GraphicsDevice.PixelShaderResources[2] = Prev;
-			
-			GameEngine.GraphicsDevice.SetupVertexInput(currentBuffer, indexBuffer);
-			GameEngine.GraphicsDevice.DrawIndexed(indexBuffer.Capacity, 0, 0);
-
-			//game.GraphicsDevice.ResetStates();
-		}
-
-
-		public void SetHeatMapCoordinates(double left, double right, double top, double bottom)
-		{
-			var hLen = right - left;
-			bottom = top - hLen * 0.5;
 		
-		
-			if (Left == left && Right == right && Top == top && Bottom == bottom) return;
-		
-			Left	= left;
-			Right	= right;
-			Top		= top;
-			Bottom	= bottom;
-		
-			if (currentBuffer != null) {
-				currentBuffer.Dispose();
-			}
-			if (indexBuffer != null) {
-				indexBuffer.Dispose();
-			}
-		
-			ClearData();
-
-			int[]			indeces;
-			Gis.GeoPoint[]	points;
-			CalculateVertices(out points, out indeces, GridDensity, left, right, top, bottom, Projection);
-
-			PointsCpu = points;
-			UpdatePointsBuffer();
-
-			if(indexBuffer != null)
-				indexBuffer.SetData(indeces);
-
-		}
-
-
-		public void AddValue(double lon, double lat, float val)
-		{
-			var lonFactor = (lon - Left) / (Right - Left);
-			var latFactor = (lat - Bottom) / (Top - Bottom);
-
-			int x = (int)(lonFactor * MapDimX);
-			int y = (int)(latFactor * MapDimY);
-
-			if (x < 0 || x >= MapDimX) return;
-			if (y < 0 || y >= MapDimY) return;
-
-			var ind = x + y * MapDimX;
-
-			if (ind < Data.Length && ind >= 0) {
-				Data[ind] += val;
-			}
-		}
-
-
-		public virtual void ClearData()
-		{
-			Array.Clear(Data, 0, Data.Length);
-		}
-
 
 		public void UpdatePointsBuffer()
 		{
@@ -273,32 +86,106 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public static PolyGisLayer GenerateRegularGrid(double left, double right, double top, double bottom, int density, int dimX, int dimY, MapProjection projection)
+		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
+		{
+			GameEngine.GraphicsDevice.PipelineState = factory[Flags];
+
+			//if(((PolyFlags)Flags).HasFlag(PolyFlags.DRAW_HEAT))
+
+			GameEngine.GraphicsDevice.VertexShaderConstants[0] = constBuffer;
+
+			GameEngine.GraphicsDevice.PixelShaderSamplers[0] = SamplerState.LinearClamp;
+			GameEngine.GraphicsDevice.PixelShaderSamplers[1] = SamplerState.AnisotropicClamp;
+
+			GameEngine.GraphicsDevice.SetupVertexInput(currentBuffer, indexBuffer);
+			GameEngine.GraphicsDevice.DrawIndexed(indexBuffer.Capacity, 0, 0);
+
+			//game.GraphicsDevice.ResetStates();
+		}
+
+
+		public static PolyGisLayer GenerateRegularGrid(GameEngine engine, double left, double right, double top, double bottom, int density, int dimX, int dimY, MapProjection projection)
 		{
 			int[] indexes;
 			Gis.GeoPoint[] vertices;
 
 			CalculateVertices(out vertices, out indexes, density, left, right, top, bottom, projection);
 
-			var vb = new VertexBuffer(GameEngine.Instance.GraphicsDevice, typeof(Gis.GeoPoint), vertices.Length);
-			var ib = new IndexBuffer(GameEngine.Instance.GraphicsDevice, indexes.Length);
-			ib.SetData(indexes);
-			vb.SetData(vertices, 0, vertices.Length);
+			//var vb = new VertexBuffer(GameEngine.Instance.GraphicsDevice, typeof(Gis.GeoPoint), vertices.Length);
+			//var ib = new IndexBuffer(GameEngine.Instance.GraphicsDevice, indexes.Length);
+			//ib.SetData(indexes);
+			//vb.SetData(vertices, 0, vertices.Length);
 
-			return new PolyGisLayer(GameEngine.Instance, vertices, indexes, dimX, dimY, false) {
-				Left		= left,
-				Right		= right,
-				Top			= top, 
-				Bottom		= bottom,
-				GridDensity = density,
-				Projection	= projection
-			};
+			return new PolyGisLayer(engine, vertices, indexes, false);
 		}
+
 
 		public static PolyGisLayer CreateFromContour()
 		{
 			return null;
 		}
+
+
+
+		public static PolyGisLayer CreateFromUtmFbxModel(GameEngine engine, string fileName)
+		{
+			var scene = engine.Content.Load<Scene>(fileName);
+
+			var s = fileName.Split('_');
+			double easting	= double.Parse(s[1]);
+			double northing = double.Parse(s[2]);
+			string region	= s[3];
+			
+			var transforms = new Matrix[scene.Nodes.Count];
+			scene.ComputeAbsoluteTransforms(transforms);
+
+			List<Gis.GeoPoint>	points = new List<Gis.GeoPoint>();
+			List<int>			indeces = new List<int>();
+
+			for (int i = 0; i < scene.Nodes.Count; i++) {
+
+				var meshIndex = scene.Nodes[i].MeshIndex;
+
+				if (meshIndex < 0) {
+					continue;
+				}
+
+				int vertexOffset = points.Count;
+
+				var world = transforms[i];
+				
+
+				foreach (var vert in scene.Meshes[meshIndex].Vertices) {
+					var pos = vert.Position;
+
+					var worldPos = Vector3.TransformCoordinate(pos, world);
+
+
+					double lon, lat;
+					Gis.UtmToLatLon(easting + worldPos.X, northing - worldPos.Z, region, out lon, out lat);
+					
+					var point = new Gis.GeoPoint {
+						Lon = DMathUtil.DegreesToRadians(lon) + 0.0000068,
+						Lat = DMathUtil.DegreesToRadians(lat) + 0.0000113,
+						Color = meshIndex%2 == 1 ? vert.Color0 : new Color(28, 89, 177, 255),
+						Tex1 = new Vector4(0,0,0, worldPos.Y/1000.0f)
+					};
+					point.Color.Alpha = 0.5f;
+					points.Add(point);
+				}
+
+				var inds = scene.Meshes[meshIndex].GetIndices();
+
+				foreach (var ind in inds) {
+					indeces.Add(vertexOffset + ind);
+				}
+
+			}
+
+			return new PolyGisLayer(engine, points.ToArray(), indeces.ToArray(), false);
+		}
+
+
 
 		void SwapBuffers()
 		{
@@ -306,7 +193,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		static void CalculateVertices(out Gis.GeoPoint[] vertices, out int[] indeces, int density, double leftLon, double rightLon, double topLat, double bottomLat, MapProjection projection)
+		static protected void CalculateVertices(out Gis.GeoPoint[] vertices, out int[] indeces, int density, double leftLon, double rightLon, double topLat, double bottomLat, MapProjection projection)
 		{
 			int RowsCount		= density + 2;
 			int ColumnsCount	= RowsCount;

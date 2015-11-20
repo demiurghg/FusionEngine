@@ -114,6 +114,7 @@ double3 SphericalToDecart(double2 pos, double r)
 
 #if 0
 $ubershader PIXEL_SHADER VERTEX_SHADER DRAW_HEAT
+$ubershader PIXEL_SHADER VERTEX_SHADER DRAW_COLORED
 $ubershader COMPUTE_SHADER BLUR_HORIZONTAL
 $ubershader COMPUTE_SHADER BLUR_VERTICAL
 #endif
@@ -131,7 +132,7 @@ VS_OUTPUT VSMain ( VS_INPUT v )
 
 	double lon		= asdouble(v.lon.x, v.lon.y);
 	double lat		= asdouble(v.lat.x, v.lat.y);
-	double3 cPos	= SphericalToDecart(double2(lon, lat), 6378.137);
+	double3 cPos	= SphericalToDecart(double2(lon, lat), 6378.137 + v.Tex1.w);
 
 	angle = float(lon);
 	
@@ -196,6 +197,9 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 		#endif
 		
 		return float4(ret, color.a);
+	#endif
+	#ifdef DRAW_COLORED
+		return input.Color;
 	#endif
 }
 #endif

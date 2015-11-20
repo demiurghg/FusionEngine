@@ -43,7 +43,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			CurrentMapSource.Update(gameTime);
 
-			CurrentMapSource = MapSources[(int)0];
+			CurrentMapSource = MapSources[(int)5];
 
 
 			if (!oldProj.Equals(CurrentMapSource.Projection)) {
