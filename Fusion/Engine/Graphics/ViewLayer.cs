@@ -301,13 +301,13 @@ namespace Fusion.Engine.Graphics {
 			RenderHdrScene( gameTime, stereoEye, viewport, targetSurface );
 
 
-			GameEngine.GraphicsDevice.RestoreBackbuffer();
+			/*GameEngine.GraphicsDevice.RestoreBackbuffer();
 			if (GisLayers.Any()) {
 				var tiles = GisLayers.First() as TilesGisLayer;
 				if(tiles != null)
 					tiles.Update(gameTime);
 			}
-			ge.Gis.Draw(gameTime, stereoEye, GisLayers);
+			ge.Gis.Draw(gameTime, stereoEye, GisLayers);*/
 
 			//	draw sprites :
 

@@ -176,7 +176,7 @@ namespace TestGame2 {
 
 			testLayer.Color	=	Color.White;
 
-			sceneView.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 0,0, 1 );
+			sceneView.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1,0, 1 );
 
 			/*if ( gameEngine.Keyboard.IsKeyDown(Keys.R) ) {
 				testLayer.Clear();
@@ -194,10 +194,10 @@ namespace TestGame2 {
 
 			var m = UpdateCam( gameTime );
 
-			masterView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 0, 0, 1);
+			masterView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1, 0, 1);
 
 			var origin = Vector3.TransformCoordinate(Vector3.One * 25, Matrix.RotationY( (float)gameTime.Total.TotalSeconds ));
-			sceneView1.Camera.SetupCameraFov( origin, Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 0,0, 1);
+			sceneView1.Camera.SetupCameraFov( origin, Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1,0, 1);
 		}
 
 

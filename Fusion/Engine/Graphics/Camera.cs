@@ -27,7 +27,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public Camera ()
 		{
-			SetupCameraFov(Matrix.Identity, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.125f, 1024f, 0, 0, 1 );
+			SetupCameraFov(Matrix.Identity, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.125f, 1024f, 1, 0, 1 );
 		}
 
 
@@ -44,6 +44,10 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="separation">Stereo separation or distance between eyes.</param>
 		public void SetupCamera ( Matrix viewMatrix, Vector3 velocity, float height, float width, float near, float far, float convergence, float separation )
 		{
+			if (convergence<=0) {	
+				throw new ArgumentOutOfRangeException("convergence must be > 0");
+			}
+
 			float offset		=	separation / convergence * near / 2;
 			float nearHeight	=	height;
 			float nearWidth		=	width;
