@@ -50,9 +50,6 @@ namespace Fusion.Engine.Graphics {
 
 		public Vector3	SkyAmbientLevel { get; protected set; }
 
-		[Config]
-		public SkyConfig Params { get; set; }
-
 		Vector3[]		randVectors;
 
 		public RenderTargetCube	SkyCube { get { return skyCube; } }
@@ -185,7 +182,6 @@ namespace Fusion.Engine.Graphics {
 		public Sky ( GameEngine game ) : base( game )
 		{
 			rs	=	GameEngine.GraphicsDevice;
-			Params = new SkyConfig();
 		}
 
 
@@ -261,9 +257,9 @@ namespace Fusion.Engine.Graphics {
 
 
 
-		void ApplyColorSpace ( ref SkyFlags flags )
+		void ApplyColorSpace ( ref SkyFlags flags, SkySettings settings )
 		{	
-			switch (Params.RgbSpace) {
+			switch (settings.RgbSpace) {
 				case RgbSpace.CIE_RGB	: flags |= SkyFlags.CIERGB;	break;
 				case RgbSpace.sRGB		: flags |= SkyFlags.SRGB;	break;
 			}
@@ -274,10 +270,10 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Renders fog look-up table
 		/// </summary>
-		internal void RenderFogTable()
+		internal void RenderFogTable( SkySettings settings )
 		{
-			var	sunPos		= GetSunDirection();
-			var sunColor	= GetSunLightColor();
+			var	sunPos		= GetSunDirection(settings);
+			var sunColor	= GetSunLightColor(settings);
 
 			var rotation	=	Matrix.Identity;
 			var projection	=	MathUtil.ComputeCubemapProjectionMatrixLH( 0.125f, 10.0f );
@@ -285,16 +281,16 @@ namespace Fusion.Engine.Graphics {
 
 			var flags		=	SkyFlags.FOG;
 
-			ApplyColorSpace( ref flags );
+			ApplyColorSpace( ref flags, settings );
 				
 			rs.PipelineState	=	factory[(int)flags];
 //			rs.DepthStencilState = DepthStencilState.None ;
 
 			skyConstsData.SunPosition	= sunPos;
 			skyConstsData.SunColor		= sunColor;
-			skyConstsData.Turbidity		= Params.SkyTurbidity;
-			skyConstsData.Temperature	= Temperature.Get( Params.SunTemperature ); 
-			skyConstsData.SkyIntensity	= Params.SkyIntensity;
+			skyConstsData.Turbidity		= settings.SkyTurbidity;
+			skyConstsData.Temperature	= Temperature.Get( settings.SunTemperature ); 
+			skyConstsData.SkyIntensity	= settings.SkyIntensity;
 
 			for( int i = 0; i < 6; ++i ) {
 				rs.SetTargets( null, SkyCube.GetSurface(0, (CubeFace)i ) );
@@ -328,13 +324,13 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="rendCtxt"></param>
 		/// <param name="techName"></param>
-		internal void Render( Camera camera, StereoEye stereoEye, GameTime gameTime, DepthStencilSurface depthBuffer, RenderTargetSurface hdrTarget, Viewport viewport )
+		internal void Render( Camera camera, StereoEye stereoEye, GameTime gameTime, DepthStencilSurface depthBuffer, RenderTargetSurface hdrTarget, Viewport viewport, SkySettings settings )
 		{
-			var scale		=	Matrix.Scaling( Params.SkySphereSize );
+			var scale		=	Matrix.Scaling( settings.SkySphereSize );
 			var rotation	=	Matrix.Identity;
 
-			var	sunPos		=	GetSunDirection();
-			var sunColor	=	GetSunGlowColor();
+			var	sunPos		=	GetSunDirection(settings);
+			var sunColor	=	GetSunGlowColor(settings);
 
 			rs.ResetStates();
 
@@ -350,9 +346,9 @@ namespace Fusion.Engine.Graphics {
 			skyConstsData.MatrixWVP		= scale * rotation * MathUtil.Transformation( viewMatrix.Right, viewMatrix.Up, viewMatrix.Backward ) * projMatrix;
 			skyConstsData.SunPosition	= sunPos;
 			skyConstsData.SunColor		= sunColor;
-			skyConstsData.Turbidity		= Params.SkyTurbidity;
-			skyConstsData.Temperature	= Temperature.Get( Params.SunTemperature ); 
-			skyConstsData.SkyIntensity	= Params.SkyIntensity;
+			skyConstsData.Turbidity		= settings.SkyTurbidity;
+			skyConstsData.Temperature	= Temperature.Get( settings.SunTemperature ); 
+			skyConstsData.SkyIntensity	= settings.SkyIntensity;
 	
 			skyConstsCB.SetData( skyConstsData );
 			
@@ -365,7 +361,7 @@ namespace Fusion.Engine.Graphics {
 			//
 			SkyFlags flags = SkyFlags.SKY;
 
-			ApplyColorSpace( ref flags );
+			ApplyColorSpace( ref flags, settings );
 				
 			rs.PipelineState	=	factory[(int)flags];
 						
@@ -385,17 +381,17 @@ namespace Fusion.Engine.Graphics {
 		/// Gets current Sun direction.
 		/// </summary>
 		/// <returns></returns>
-		public Vector3 GetSunDirection()
+		public Vector3 GetSunDirection( SkySettings settings )
 		{
-			return Params.SunDirection.Normalized();
+			return settings.SunDirection.Normalized();
 		}
 
 
 
-		Color4 SunColor ( Vector3 dir )
+		Color4 SunColor ( Vector3 dir, SkySettings settings )
 		{
 			Color4 dusk		=	new Color4(Temperature.Get(2000), 1);
-			Color4 zenith	=	new Color4(Temperature.Get(Params.SunTemperature), 1);
+			Color4 zenith	=	new Color4(Temperature.Get(settings.SunTemperature), 1);
 
 			Vector3 ndir	=	dir.Normalized();
 
@@ -407,16 +403,11 @@ namespace Fusion.Engine.Graphics {
 		/// Gets Sun color.
 		/// </summary>
 		/// <returns></returns>
-		public Color4 GetSunLightColor()
+		public Color4 GetSunLightColor(SkySettings settings)
 		{
-			var sunPos = GetSunDirection();
+			var sunPos = GetSunDirection(settings);
 
-			return SunColor( sunPos ) * Params.SunLightIntensity;
-
-			/*var zenithColorYxy = perezZenith( Params.SkyTurbidity, sunPos.Y );
-			var sunColorYxy = perezSun( Params.SkyTurbidity, sunPos.Y, 10 );
-			
-			return new Color4( YxyToRGB( sunColorYxy * new Vector3( Params.SunLightIntensity, 1, 1 ) ) * Temperature.Get( Params.SunTemperature ), 1 );*/
+			return SunColor( sunPos, settings ) * settings.SunLightIntensity;
 		}
 
 
@@ -425,11 +416,11 @@ namespace Fusion.Engine.Graphics {
 		/// Gets Sun color.
 		/// </summary>
 		/// <returns></returns>
-		public Color4 GetSunGlowColor()
+		public Color4 GetSunGlowColor(SkySettings settings)
 		{
-			var sunPos = GetSunDirection();
+			var sunPos = GetSunDirection(settings);
 
-			return SunColor( sunPos ) * Params.SunGlowIntensity;
+			return SunColor( sunPos, settings ) * settings.SunGlowIntensity;
 
 			/*var zenithColorYxy = perezZenith( Params.SkyTurbidity, sunPos.Y );
 			var sunColorYxy = perezSun( Params.SkyTurbidity, sunPos.Y, 10 );
@@ -443,16 +434,16 @@ namespace Fusion.Engine.Graphics {
 		/// Gets average sky color.
 		/// </summary>
 		/// <returns></returns>
-		public Color4 GetAmbientLevel()
+		public Color4 GetAmbientLevel(SkySettings settings)
 		{
-			var sunPos = GetSunDirection();
+			var sunPos = GetSunDirection(settings);
 			var ambientLight = Vector3.Zero;
 
 			var norm = randVectors.Length;// * 2 * MathUtil.Pi;
 
 			for (int i = 0; i < randVectors.Length; i++) {
-				var yxy = perezSky( Params.SkyTurbidity, randVectors[i], sunPos );
-				var rgb = YxyToRGB( yxy ) * Temperature.Get( Params.SunTemperature );
+				var yxy = perezSky( settings.SkyTurbidity, randVectors[i], sunPos );
+				var rgb = YxyToRGB( yxy ) * Temperature.Get( settings.SunTemperature );
 				ambientLight += rgb / norm;
 			}
 

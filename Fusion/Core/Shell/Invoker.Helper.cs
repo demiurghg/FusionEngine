@@ -27,10 +27,12 @@ namespace Fusion.Core.Shell {
 
 			var cmd  =	input.Trim().ToLower();
 
-			var list =	CommandList
-						.ToList();
+			var cmdList =	CommandList
+							.ToList();
 
-			list.AddRange( variables.Select(var => var.Key) );
+			var varList	=	variables.Select( a => a.Value )
+							.OrderBy( b => b.FullName )
+							.ToList();
 
 
 			//list = list.OrderBy( n=>n ).ToList();
@@ -38,7 +40,7 @@ namespace Fusion.Core.Shell {
 			string longestCommon = null;
 			int count = 0;
 
-			foreach ( var name in list ) {
+			foreach ( var name in cmdList ) {
 				if (cmd.ToLower()==name.ToLower()) {
 					return name + " ";
 				}
@@ -46,7 +48,19 @@ namespace Fusion.Core.Shell {
 					longestCommon = LongestCommon( longestCommon, name );
 					output = longestCommon;
 					count++;
-					Log.Message(" {0}", name);
+					Log.Message(" {0}", name );
+				}
+			}
+
+			foreach ( var variable in varList ) {
+				if (cmd.ToLower()==variable.FullName.ToLower()) {
+					return variable.FullName + " ";
+				}
+				if (variable.FullName.StartsWith(cmd, StringComparison.OrdinalIgnoreCase)) {
+					longestCommon = LongestCommon( longestCommon, variable.FullName );
+					output = longestCommon;
+					count++;
+					Log.Message(" {0,-30} = {1}", variable.FullName, variable.Get() );
 				}
 			}
 

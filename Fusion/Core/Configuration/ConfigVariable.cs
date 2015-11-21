@@ -10,12 +10,24 @@ namespace Fusion.Core.Configuration {
 
 	public class ConfigVariable {
 
+		static string Separator = ".";
+
 		public readonly string Prefix;
 		public readonly string Name;
 		public readonly PropertyInfo Property;
 		public readonly object Object;
 
 		readonly TypeConverter converter;
+
+
+		/// <summary>
+		/// Variable full name.
+		/// </summary>
+		public string FullName {
+			get {
+				return Prefix + Separator + Name;
+			}
+		}
 		
 
 		/// <summary>

@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace Fusion.Core.Shell.Commands {
 	
-	[Command("listCmds", CommandAffinity.Default)]
-	public class ListCommands : Command {
+	[Command("listVars", CommandAffinity.Default)]
+	public class ListVariables : Command {
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="game"></param>
-		public ListCommands ( Invoker invoker ) : base(invoker)
+		public ListVariables ( Invoker invoker ) : base(invoker)
 		{
 		}
 
@@ -24,14 +24,17 @@ namespace Fusion.Core.Shell.Commands {
 		public override void Execute ()
 		{
 			Log.Message("");
-			Log.Message("Commands:");
+			Log.Message("Variables:");
 
-			var list = Invoker.CommandList;
+			var list = Invoker.Variables.ToList()
+					.Select( e1 => e1.Value )
+					.OrderBy( e => e.Prefix + e.Name )
+					.ToList();
 			
-			foreach ( var name in list ) {
-				Log.Message("  {0}", name );
+			foreach ( var variable in list ) {
+				Log.Message("  {0,-35} = {1}", variable.Prefix + "." + variable.Name, variable.Get() );
 			}
-			Log.Message("{0} cmds", list.Length );
+			Log.Message("{0} vars", list.Count );
 		}
 
 

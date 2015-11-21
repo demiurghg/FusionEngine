@@ -76,6 +76,12 @@ namespace Fusion.Engine.Graphics {
 			get; private set;
 		}
 
+		/// <summary>
+		/// Gets sky settings.
+		/// </summary>
+		public SkySettings SkySettings {
+			get; private set;
+		}
 
 		/// <summary>
 		/// Gets view light set.
@@ -158,6 +164,7 @@ namespace Fusion.Engine.Graphics {
 
 			Camera			=	new Camera();
 			HdrSettings		=	new HdrSettings();
+			SkySettings		=	new SkySettings();
 
 			SpriteLayers	=	new List<SpriteLayer>();
 			Instances		=	new List<Instance>();
@@ -337,7 +344,7 @@ namespace Fusion.Engine.Graphics {
 				ge.SceneRenderer.RenderGBuffer( Camera, stereoEye, Instances, viewport );
 
 				//	render sky :
-				ge.Sky.Render( Camera, stereoEye, gameTime, ge.LightRenderer.DepthBuffer.Surface, ge.LightRenderer.HdrBuffer.Surface, viewport );
+				ge.Sky.Render( Camera, stereoEye, gameTime, ge.LightRenderer.DepthBuffer.Surface, ge.LightRenderer.HdrBuffer.Surface, viewport, SkySettings );
 
 				//	render lights :
 				ge.LightRenderer.RenderLighting( Camera, stereoEye, LightSet, GameEngine.GraphicsEngine.WhiteTexture, viewport );

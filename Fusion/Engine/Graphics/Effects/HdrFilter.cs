@@ -115,7 +115,7 @@ namespace Fusion.Engine.Graphics {
 
 			var rect	=	new Rectangle( 0,0, viewLayer.Width, viewLayer.Height );
 
-			var Config	=	viewLayer.HdrSettings;
+			var settings	=	viewLayer.HdrSettings;
 
 			//
 			//	Rough downsampling of source HDR-image :
@@ -129,21 +129,21 @@ namespace Fusion.Engine.Graphics {
 			filter.StretchRect( viewLayer.bloom0.Surface, hdrImage, SamplerState.LinearClamp, rect );
 			viewLayer.bloom0.BuildMipmaps();
 
-			filter.GaussBlur( viewLayer.bloom0, viewLayer.bloom1, Config.GaussBlurSigma, 0 );
-			filter.GaussBlur( viewLayer.bloom0, viewLayer.bloom1, Config.GaussBlurSigma, 1 );
-			filter.GaussBlur( viewLayer.bloom0, viewLayer.bloom1, Config.GaussBlurSigma, 2 );
-			filter.GaussBlur( viewLayer.bloom0, viewLayer.bloom1, Config.GaussBlurSigma, 3 );
+			filter.GaussBlur( viewLayer.bloom0, viewLayer.bloom1, settings.GaussBlurSigma, 0 );
+			filter.GaussBlur( viewLayer.bloom0, viewLayer.bloom1, settings.GaussBlurSigma, 1 );
+			filter.GaussBlur( viewLayer.bloom0, viewLayer.bloom1, settings.GaussBlurSigma, 2 );
+			filter.GaussBlur( viewLayer.bloom0, viewLayer.bloom1, settings.GaussBlurSigma, 3 );
 
 
 			//
 			//	Setup parameters :
 			//
 			var paramsData	=	new Params();
-			paramsData.AdaptationRate		=	1 - (float)Math.Pow( 0.5f, gameTime.ElapsedSec / Config.AdaptationHalfLife );
-			paramsData.LuminanceLowBound	=	Config.LuminanceLowBound;
-			paramsData.LuminanceHighBound	=	Config.LuminanceHighBound;
-			paramsData.KeyValue				=	Config.KeyValue;
-			paramsData.BloomAmount			=	Config.BloomAmount;
+			paramsData.AdaptationRate		=	1 - (float)Math.Pow( 0.5f, gameTime.ElapsedSec / settings.AdaptationHalfLife );
+			paramsData.LuminanceLowBound	=	settings.LuminanceLowBound;
+			paramsData.LuminanceHighBound	=	settings.LuminanceHighBound;
+			paramsData.KeyValue				=	settings.KeyValue;
+			paramsData.BloomAmount			=	settings.BloomAmount;
 
 			paramsCB.SetData( paramsData );
 			device.PixelShaderConstants[0]	=	paramsCB;
@@ -173,9 +173,9 @@ namespace Fusion.Engine.Graphics {
 			device.PixelShaderSamplers[0]	=	SamplerState.LinearClamp;
 
 			Flags op = Flags.LINEAR;
-			if (Config.TonemappingOperator==TonemappingOperator.Filmic)   { op = Flags.FILMIC;   }
-			if (Config.TonemappingOperator==TonemappingOperator.Linear)   { op = Flags.LINEAR;	 }
-			if (Config.TonemappingOperator==TonemappingOperator.Reinhard) { op = Flags.REINHARD; }
+			if (settings.TonemappingOperator==TonemappingOperator.Filmic)   { op = Flags.FILMIC;   }
+			if (settings.TonemappingOperator==TonemappingOperator.Linear)   { op = Flags.LINEAR;	 }
+			if (settings.TonemappingOperator==TonemappingOperator.Reinhard) { op = Flags.REINHARD; }
 
 			device.PipelineState		=	factory[ (int)(Flags.TONEMAPPING|op) ];
 				
