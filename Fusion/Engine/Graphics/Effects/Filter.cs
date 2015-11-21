@@ -10,7 +10,7 @@ using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
 
-namespace DeferredDemo
+namespace Fusion.Engine.Graphics
 {
 	/// <summary>
 	/// Class for base image processing such as copying, blurring, enhancement, anti-aliasing etc.

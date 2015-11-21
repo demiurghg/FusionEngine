@@ -25,12 +25,12 @@ namespace Fusion.Engine.Graphics {
 		Gis gis;
 
 		[GameModule("Filter", "filter", InitOrder.After)]
-		public DeferredDemo.Filter Filter { get{ return filter; } }
-		public DeferredDemo.Filter filter;
+		public Filter Filter { get{ return filter; } }
+		public Filter filter;
 
 		[GameModule("HdrFilter", "hdr", InitOrder.After)]
-		public DeferredDemo.HdrFilter HdrFilter { get{ return hdrFilter; } }
-		public DeferredDemo.HdrFilter hdrFilter;
+		public HdrFilter HdrFilter { get{ return hdrFilter; } }
+		public HdrFilter hdrFilter;
 		
 		[GameModule("LightRenderer", "light", InitOrder.After)]
 		public LightRenderer	LightRenderer { get { return lightRenderer; } }
@@ -74,11 +74,11 @@ namespace Fusion.Engine.Graphics {
 			ViewLayers	=	new List<ViewLayer>();
 			spriteEngine	=	new SpriteEngine( this );
 			gis				=	new Gis(gameEngine);
-			filter			=	new DeferredDemo.Filter( gameEngine );
-			hdrFilter		=	new DeferredDemo.HdrFilter( gameEngine );
-			lightRenderer	=	new Graphics.LightRenderer( gameEngine );
-			sceneRenderer	=	new Graphics.SceneRenderer( gameEngine );
-			sky				=	new Graphics.Sky( gameEngine );
+			filter			=	new Filter( gameEngine );
+			hdrFilter		=	new HdrFilter( gameEngine );
+			lightRenderer	=	new LightRenderer( gameEngine );
+			sceneRenderer	=	new SceneRenderer( gameEngine );
+			sky				=	new Sky( gameEngine );
 
 			Device.DisplayBoundsChanged += (s,e) => {
 				var handler = DisplayBoundsChanged;

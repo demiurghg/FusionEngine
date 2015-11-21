@@ -182,15 +182,13 @@
     <Compile Include="Drivers\Graphics\Resources\FormattedBuffer.cs" />
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
     <Compile Include="Drivers\Graphics\Resources\UnorderedAccess.cs" />
-    <Compile Include="Engine\Graphics\Deferred\Filter.cs" />
-    <Compile Include="Engine\Graphics\Deferred\HdrFilter.cs">
+    <Compile Include="Engine\Graphics\Effects\HdrSettings.cs" />
+    <Compile Include="Engine\Graphics\Effects\Filter.cs" />
+    <Compile Include="Engine\Graphics\Effects\HdrFilter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Engine\Graphics\Deferred\HdrFilterConfig.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Engine\Graphics\Deferred\Sky.cs" />
-    <Compile Include="Engine\Graphics\Deferred\SkyConfig.cs" />
+    <Compile Include="Engine\Graphics\Effects\Sky.cs" />
+    <Compile Include="Engine\Graphics\Effects\SkyConfig.cs" />
     <Compile Include="Engine\Graphics\GIS\HeatMapLayer.cs" />
     <Compile Include="Engine\Graphics\GIS\ModelLayer.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.cs" />

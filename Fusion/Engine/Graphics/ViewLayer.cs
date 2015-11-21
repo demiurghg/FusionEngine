@@ -68,6 +68,15 @@ namespace Fusion.Engine.Graphics {
 			get; set;
 		}
 
+
+		/// <summary>
+		/// Gets HDR settings.
+		/// </summary>
+		public HdrSettings HdrSettings {
+			get; private set;
+		}
+
+
 		/// <summary>
 		/// Gets view light set.
 		/// This value is already initialized when View object is created.
@@ -148,6 +157,7 @@ namespace Fusion.Engine.Graphics {
 			Order			=	0;
 
 			Camera			=	new Camera();
+			HdrSettings		=	new HdrSettings();
 
 			SpriteLayers	=	new List<SpriteLayer>();
 			Instances		=	new List<Instance>();

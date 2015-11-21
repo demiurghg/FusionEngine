@@ -11,11 +11,8 @@ using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
 using Fusion.Engine.Graphics;
 
-namespace DeferredDemo {
+namespace Fusion.Engine.Graphics {
 	public class HdrFilter : GameModule {
-
-		[Config]
-		public HdrFilterConfig	Config { get; set; }
 
 
 		Ubershader	shader;
@@ -55,7 +52,6 @@ namespace DeferredDemo {
 		/// <param name="game"></param>
 		public HdrFilter ( GameEngine game ) : base(game)
 		{
-			Config	=	new HdrFilterConfig();
 		}
 
 
@@ -118,6 +114,8 @@ namespace DeferredDemo {
 			var filter	=	GameEngine.GraphicsEngine.Filter;
 
 			var rect	=	new Rectangle( 0,0, viewLayer.Width, viewLayer.Height );
+
+			var Config	=	viewLayer.HdrSettings;
 
 			//
 			//	Rough downsampling of source HDR-image :
