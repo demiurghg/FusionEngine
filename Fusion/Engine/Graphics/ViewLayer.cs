@@ -68,6 +68,21 @@ namespace Fusion.Engine.Graphics {
 			get; set;
 		}
 
+
+		/// <summary>
+		/// Gets HDR settings.
+		/// </summary>
+		public HdrSettings HdrSettings {
+			get; private set;
+		}
+
+		/// <summary>
+		/// Gets sky settings.
+		/// </summary>
+		public SkySettings SkySettings {
+			get; private set;
+		}
+
 		/// <summary>
 		/// Gets view light set.
 		/// This value is already initialized when View object is created.
@@ -157,6 +172,8 @@ namespace Fusion.Engine.Graphics {
 			Order			=	0;
 
 			Camera			=	new Camera();
+			HdrSettings		=	new HdrSettings();
+			SkySettings		=	new SkySettings();
 
 			SpriteLayers	=	new List<SpriteLayer>();
 			Instances		=	new List<Instance>();
@@ -298,8 +315,6 @@ namespace Fusion.Engine.Graphics {
 			//	special effects, sky, water, light etc. 
 			RenderHdrScene( gameTime, stereoEye, viewport, targetSurface );
 
-
-			//GameEngine.GraphicsDevice.RestoreBackbuffer();
 			if (GisLayers.Any()) {
 				ge.Device.Clear(GlobeDepthStencil.Surface);
 
@@ -316,7 +331,7 @@ namespace Fusion.Engine.Graphics {
 				ge.Gis.Camera = GlobeCamera;
 				ge.Gis.Draw(gameTime, stereoEye, GisLayers);
 			}
-			
+
 
 			//	draw sprites :
 			ge.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );
@@ -352,7 +367,7 @@ namespace Fusion.Engine.Graphics {
 				ge.SceneRenderer.RenderGBuffer( Camera, stereoEye, Instances, viewport );
 
 				//	render sky :
-				ge.Sky.Render( Camera, stereoEye, gameTime, ge.LightRenderer.DepthBuffer.Surface, ge.LightRenderer.HdrBuffer.Surface, viewport );
+				ge.Sky.Render( Camera, stereoEye, gameTime, ge.LightRenderer.DepthBuffer.Surface, ge.LightRenderer.HdrBuffer.Surface, viewport, SkySettings );
 
 				//	render lights :
 				ge.LightRenderer.RenderLighting( Camera, stereoEye, LightSet, GameEngine.GraphicsEngine.WhiteTexture, viewport );

@@ -65,7 +65,7 @@ namespace TestGame2 {
 		/// </summary>
 		public override void Initialize ()
 		{
-			masterView		=	new ViewLayer(GameEngine, 0,0, false);
+			masterView		=	new ViewLayer(GameEngine, 0,0, true);
 			sceneView		=	new ViewLayer(GameEngine, 256,256, true);
 			sceneView1		=	new ViewLayer(GameEngine, 768,768, true);
 
@@ -79,10 +79,10 @@ namespace TestGame2 {
 			scene		=	GameEngine.Content.Load<Scene>( "testScene" );
 
 
-			sceneView.LightSet.SpotAtlas	=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
-			sceneView.LightSet.DirectLight.Position	=	new Vector3(1,2,3);
-			sceneView.LightSet.DirectLight.Intensity	=	Color4.White;
-			sceneView.LightSet.DirectLight.Enabled		=	true;
+			masterView.LightSet.SpotAtlas	=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
+			masterView.LightSet.DirectLight.Position	=	new Vector3(1,2,3);
+			masterView.LightSet.DirectLight.Intensity	=	Color4.White;
+			masterView.LightSet.DirectLight.Enabled		=	true;
 
 			sceneView1.LightSet.SpotAtlas	=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
 			sceneView1.LightSet.DirectLight.Position	=	new Vector3(1,2,3);
@@ -103,7 +103,7 @@ namespace TestGame2 {
 				var inst = new Instance( GameEngine.GraphicsEngine, scene.Meshes[meshIndex] );
 				inst.World = transforms[ i ];
 			
-				sceneView.Instances.Add( inst );
+				masterView.Instances.Add( inst );
 				sceneView1.Instances.Add( inst );
 			}
 
@@ -176,7 +176,7 @@ namespace TestGame2 {
 
 			testLayer.Color	=	Color.White;
 
-			sceneView.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 0,0, 1 );
+			sceneView.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1,0, 1 );
 
 			/*if ( gameEngine.Keyboard.IsKeyDown(Keys.R) ) {
 				testLayer.Clear();
@@ -194,10 +194,10 @@ namespace TestGame2 {
 
 			var m = UpdateCam( gameTime );
 
-			sceneView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 0, 0, 1);
+			masterView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1, 0, 1);
 
 			var origin = Vector3.TransformCoordinate(Vector3.One * 25, Matrix.RotationY( (float)gameTime.Total.TotalSeconds ));
-			sceneView1.Camera.SetupCameraFov( origin, Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 0,0, 1);
+			sceneView1.Camera.SetupCameraFov( origin, Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1,0, 1);
 		}
 
 

@@ -134,6 +134,7 @@
     <Compile Include="Core\IniParser\StringIniParser.cs" />
     <Compile Include="Core\Shell\CommandLineParserConfiguration.cs" />
     <Compile Include="Core\Shell\CommandAffinity.cs" />
+    <Compile Include="Core\Shell\Commands\ListVariables.cs" />
     <Compile Include="Core\Shell\NoRollbackCommand.cs" />
     <Compile Include="Core\Shell\Invoker.Helper.cs" />
     <Compile Include="Drivers\Audio\AudioChannels.cs" />
@@ -182,15 +183,13 @@
     <Compile Include="Drivers\Graphics\Resources\FormattedBuffer.cs" />
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
     <Compile Include="Drivers\Graphics\Resources\UnorderedAccess.cs" />
-    <Compile Include="Engine\Graphics\Deferred\Filter.cs" />
-    <Compile Include="Engine\Graphics\Deferred\HdrFilter.cs">
+    <Compile Include="Engine\Graphics\Effects\HdrSettings.cs" />
+    <Compile Include="Engine\Graphics\Effects\Filter.cs" />
+    <Compile Include="Engine\Graphics\Effects\HdrFilter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Engine\Graphics\Deferred\HdrFilterConfig.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Engine\Graphics\Deferred\Sky.cs" />
-    <Compile Include="Engine\Graphics\Deferred\SkyConfig.cs" />
+    <Compile Include="Engine\Graphics\Effects\Sky.cs" />
+    <Compile Include="Engine\Graphics\Effects\SkySettings.cs" />
     <Compile Include="Engine\Graphics\GIS\HeatMapLayer.cs" />
     <Compile Include="Engine\Graphics\GIS\ModelLayer.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.cs" />
