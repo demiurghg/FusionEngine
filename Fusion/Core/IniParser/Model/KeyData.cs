@@ -25,6 +25,19 @@ namespace Fusion.Core.IniParser.Model
         }
 
         /// <summary>
+        ///     Initializes a new instance of the <see cref="KeyData"/> class.
+        /// </summary>
+        public KeyData(string keyName, string keyValue)
+        {
+            if(string.IsNullOrEmpty(keyName))
+                throw new ArgumentException("key name can not be empty");
+
+            _comments = new List<string>();
+            _value = keyValue;
+            _keyName = keyName;
+        }
+
+        /// <summary>
         ///     Initializes a new instance of the <see cref="KeyData"/> class
         ///     from a previous instance of <see cref="KeyData"/>.
         /// </summary>

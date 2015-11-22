@@ -34,26 +34,14 @@ namespace Fusion.Core.Configuration {
 				foreach ( var bind in bindings ) {
 
 					var sectionName		=	bind.NiceName;
-					var configObject	=	GetConfigObject( bind.Module );
+					var config			=	bind.Module.GetConfiguration();
 
 					iniData.Sections.AddSection( sectionName );
 
 					var sectionData	=	iniData.Sections.GetSectionData( sectionName );
 
-					if (configObject==null) {
-						continue;
-					}
-				
-					foreach ( var prop in configObject.GetType().GetProperties() ) {
-
-						var name	=	prop.Name;
-						var value	=	prop.GetValue( configObject );
-						var conv	=	TypeDescriptor.GetConverter( prop.PropertyType );
-						var keyData	=	new KeyData(name);
-
-						keyData.Value	=	conv.ConvertToInvariantString( value );
-
-						sectionData.Keys.AddKey( keyData );
+					foreach ( var key in config ) { 
+						sectionData.Keys.AddKey( key );
 					}
 				}
 
@@ -104,20 +92,7 @@ namespace Fusion.Core.Configuration {
 
 					var configObject	=	GetConfigObject( bind.Module );
 
-					foreach ( var keyData in section.Keys ) {
-						
-						var prop =	configObject.GetType().GetProperty( keyData.KeyName );
-
-						if (prop==null) {
-							Log.Warning("Config property {0}.{1} does not exist. Key ignored.", section.SectionName, keyData.KeyName );
-							continue;
-						}
-
-						var conv	=	TypeDescriptor.GetConverter( prop.PropertyType );
-						
-						prop.SetValue( configObject, conv.ConvertFromInvariantString( keyData.Value ));
-					}
-
+					bind.Module.SetConfiguration( section.Keys );
 				}
 
 			} catch (Exception e) {
@@ -133,7 +108,7 @@ namespace Fusion.Core.Configuration {
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
-		static object GetConfigObject ( object obj )
+		static internal object GetConfigObject ( object obj )
 		{
 			var cfgobj = obj.GetType().GetProperties()
 							.Where( prop1 => prop1.GetCustomAttribute<ConfigAttribute>() != null )
