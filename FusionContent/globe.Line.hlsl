@@ -120,7 +120,8 @@ cbuffer CBStage			: register(b0) 	{	ConstData	Stage		: 	packoffset( c0 );	}
 
 #if 0
 $ubershader DRAW_LINES +ADD_CAPS +FADING_LINE
-$ubershader ARC_LINE +ADD_CAPS +FADING_LINE
+$ubershader ARC_LINE +FADING_LINE
+$ubershader DRAW_SEGMENTED_LINES +TEXTURED_LINE
 #endif
 
 
@@ -315,5 +316,9 @@ void GSMain ( line VS_OUTPUT inputArray[2], inout TriangleStream<GS_OUTPUT> stre
 
 float4 PSMain ( GS_OUTPUT input ) : SV_Target
 {
+#ifdef TEXTURED_LINE
+	float4 color = DiffuseMap.Sample(Sampler, input.Tex.xy);
+	return color;
+#endif
 	return input.Color;
 }

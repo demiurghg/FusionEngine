@@ -133,6 +133,7 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			if (TextureAtlas == null) return;
 
+			Update(gameTime);
 
 			var dev = GameEngine.GraphicsDevice;
 

@@ -214,6 +214,10 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref bloom0 );
 				SafeDispose( ref bloom1 );
 				SafeDispose( ref ldrTarget );
+
+				foreach (var gisLayer in GisLayers) {
+					gisLayer.Dispose();
+				}
 			}
 			base.Dispose( disposing );
 		}
@@ -284,7 +288,13 @@ namespace Fusion.Engine.Graphics {
 				ldrTarget	=	null;
 			}
 
-			GlobeDepthStencil = new DepthStencil2D(GameEngine.GraphicsDevice, DepthFormat.D24S8, newWidth, newHeight);
+			SafeDispose(ref GlobeDepthStencil);
+			if (!useBackbuffer) {
+				GlobeDepthStencil = new DepthStencil2D(GameEngine.GraphicsDevice, DepthFormat.D24S8, newWidth, newHeight);
+			}
+			else {
+				GlobeDepthStencil = new DepthStencil2D(GameEngine.GraphicsDevice, DepthFormat.D24S8, GameEngine.GraphicsEngine.DisplayBounds.Width, GameEngine.GraphicsEngine.DisplayBounds.Height);
+			}
 		}
 
 

@@ -37,9 +37,19 @@ namespace Fusion.Engine.Graphics.GIS
 		public Gis.GeoPoint[] PointsCpu { get; protected set; }
 
 
+		public override void Dispose()
+		{
+			if (firstBuffer != null)	firstBuffer.Dispose();
+			if (secondBuffer != null)	secondBuffer.Dispose();
+
+			if(shader != null) shader.Dispose();
+			if(factory!= null) factory.Dispose();
+		}
+
+
 		public LinesGisLayer(GameEngine engine, int linesPointsCount, bool isDynamic = false) : base(engine)
 		{
-			shader = GameEngine.Content.Load<Ubershader>("globe.Line.hlsl");
+			shader	= GameEngine.Content.Load<Ubershader>("globe.Line.hlsl");
 			factory = new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
 
 
@@ -72,6 +82,9 @@ namespace Fusion.Engine.Graphics.GIS
 			dev.GeometryShaderConstants[0]	= constBuffer;
 			dev.VertexShaderConstants[0]	= constBuffer;
 			dev.PixelShaderConstants[0]		= constBuffer;
+
+			dev.PixelShaderResources[0] = Texture;
+			dev.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap;
 
 
 			dev.SetupVertexInput(currentBuffer, null);

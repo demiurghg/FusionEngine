@@ -50,6 +50,17 @@ namespace Fusion.Engine.Graphics.GIS
 		protected static Texture2D[] HeatMapPalettes;
 		#endregion
 
+		public override void Dispose()
+		{
+			if(HeatTexture	!= null) HeatTexture.Dispose();
+			if(Temp			!= null) Temp.Dispose();		
+			if(FirstFinal	!= null) FirstFinal.Dispose();	
+			if(SecondFinal	!= null) SecondFinal.Dispose();
+			if(cb			!= null) cb.Dispose();
+			if(blurFactory	!= null) blurFactory.Dispose();
+			
+			base.Dispose();
+		}
 
 
 		public HeatMapLayer(GameEngine engine, Gis.GeoPoint[] points, int[] indeces, int mapDimX, int mapDimY, bool isDynamic = false) : base(engine)
