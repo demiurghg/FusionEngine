@@ -46,17 +46,17 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Gets the current audio device
 		/// </summary>
-		internal	AudioDevice	AudioDevice { get { return audioDevice; } }
+		internal AudioDevice	AudioDevice { get { return audioDevice; } }
 
 		/// <summary>
 		/// Gets the current input device
 		/// </summary>
-		internal	InputDevice	InputDevice { get { return inputDevice; } }
+		internal InputDevice	InputDevice { get { return inputDevice; } }
 
 		/// <summary>
 		/// Gets the current graphics device
 		/// </summary>
-		internal	GraphicsDevice GraphicsDevice { get { return graphicsDevice; } }
+		internal GraphicsDevice GraphicsDevice { get { return graphicsDevice; } }
 
 		/// <summary>
 		/// Gets the current graphics engine
@@ -71,7 +71,7 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Gets current content manager
 		/// </summary>
-		public	ContentManager Content { get { return content; } }
+		public ContentManager Content { get { return content; } }
 
 		/// <summary>
 		/// Gets keyboard.

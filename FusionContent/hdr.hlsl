@@ -105,12 +105,16 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 	float3	bloom1		=	BloomTexture.SampleLevel( LinearSampler, uv, 1 ).rgb;
 	float3	bloom2		=	BloomTexture.SampleLevel( LinearSampler, uv, 2 ).rgb;
 	float3	bloom3		=	BloomTexture.SampleLevel( LinearSampler, uv, 3 ).rgb;
-	//float4	bloomMask	=	BloomMask.SampleLevel( LinearSampler, uv, 0 );
-	//float 	sum			=	dot( bloomMask, float4(1,1,1,1) );
-	float3	bloom		=	( bloom0 * 1  
-							+ bloom1 * 1  
-							+ bloom2 * 1  
-							+ bloom3 * 1 )/4;//*/
+
+	/*float3	bloom		=	( bloom0 * 1.000f  
+							+ bloom1 * 1.000f  
+							+ bloom2 * 1.000f  
+							+ bloom3 * 1.000f )/4.000f;//*/
+							
+	float3	bloom		=	( bloom0 * 1.000f  
+							+ bloom1 * 0.500f  
+							+ bloom2 * 0.250f  
+							+ bloom3 * 0.125f )/1.875f;//*/
 							
 	//bloom	=	bloom * bloomMask.rgb;
 	

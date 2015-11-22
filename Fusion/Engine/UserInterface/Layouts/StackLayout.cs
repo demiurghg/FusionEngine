@@ -8,9 +8,10 @@ using Fusion;
 using Fusion.Core.Mathematics;
 using Fusion.Drivers.Input;
 using Fusion.Drivers.Graphics;
+using Fusion.Engine.UserInterface;
 
 
-namespace Fusion.UserInterface.Layouts {
+namespace Fusion.Engine.UserInterface.Layouts {
 
 	public class StackLayout : LayoutEngine {
 

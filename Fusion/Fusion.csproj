@@ -401,6 +401,9 @@
     <Compile Include="Engine\UserInterface\Enums.cs" />
     <Compile Include="Engine\UserInterface\Frame.cs" />
     <Compile Include="Engine\UserInterface\LayoutEngine.cs" />
+    <Compile Include="Engine\UserInterface\Layouts\QuadLayout.cs" />
+    <Compile Include="Engine\UserInterface\Layouts\QuadLayoutStyle.cs" />
+    <Compile Include="Engine\UserInterface\Layouts\StackLayout.cs" />
     <Compile Include="Engine\UserInterface\MouseProcessor.cs" />
     <Compile Include="Engine\UserInterface\Transition.cs" />
     <Compile Include="Engine\UserInterface\UserInterface.cs" />

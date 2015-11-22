@@ -29,3 +29,6 @@ HKEY_CURRENT_USER\Software\FusionEngine@ContentDir
 
 [Scenes]
 *.fbx /geom
+
+[Copy]
+myDir/*.*

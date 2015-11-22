@@ -14,6 +14,7 @@ using Fusion.Framework;
 using Fusion.Build;
 using Fusion.Engine.Graphics.GIS;
 using Fusion.Engine.Graphics.GIS.GlobeMath;
+using Fusion.Engine.UserInterface;
 
 namespace TestGame2 {
 
@@ -24,11 +25,10 @@ namespace TestGame2 {
 		public GameConsole Console { get { return console; } }
 		public GameConsole console;
 
-		/*[GameModule("BarBefore", "bar", InitOrder.Before)]
-		public SomeModule2 Bar { get; set; }
 
-		[GameModule("BarAfter", "bar", InitOrder.After)]
-		public SomeModule2 Bar2 { get; set; }*/
+		[GameModule("GUI", "gui", InitOrder.Before)]
+		public UserInterface UserInterface { get { return userInterface; } }
+		UserInterface userInterface;
 
 		SpriteLayer testLayer;
 		SpriteLayer	uiLayer;
@@ -49,10 +49,8 @@ namespace TestGame2 {
 		/// <param name="engine"></param>
 		public CustomGameInterface ( GameEngine gameEngine ) : base(gameEngine)
 		{
-			console		=	new GameConsole( gameEngine, "conchars", "conback");
-
-			/*Bar = new SomeModule2(gameEngine);
-			Bar2 = new SomeModule2(gameEngine);*/
+			console			=	new GameConsole( gameEngine, "conchars", "conback");
+			userInterface	=	new UserInterface( gameEngine, @"Fonts\textFont" );
 		}
 
 
