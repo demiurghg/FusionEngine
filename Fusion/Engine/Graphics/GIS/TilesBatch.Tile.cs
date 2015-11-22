@@ -65,19 +65,19 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			var ms = CurrentMapSource;
 
-			var d = Math.Log((GameEngine.GraphicsEngine.Gis.Camera.CameraDistance - GameEngine.GraphicsEngine.Gis.Camera.EarthRadius) * 1000.0, 2.0);
+			var d = Math.Log((camera.CameraDistance - camera.EarthRadius) * 1000.0, 2.0);
 			double lod = 29.3 - d;
 
 
-			if (GameEngine.GraphicsEngine.Gis.Camera.Viewport.Width != 0) {
+			if (camera.Viewport.Width != 0) {
 				int closestZoom = 3;
 				double closestRadius = 100;
 
 				for (int zoom = 3; zoom < ms.MaxZoom; zoom++) {
 					double eps	= 256.0 / (1 << zoom);
-					double xx	= GameEngine.GraphicsEngine.Gis.Camera.Viewport.Height;
-					double dd	= GameEngine.GraphicsEngine.Gis.Camera.CameraDistance - GameEngine.GraphicsEngine.Gis.Camera.EarthRadius;
-					double eta	= DMathUtil.DegreesToRadians(GameEngine.GraphicsEngine.Gis.Camera.camFov);
+					double xx	= camera.Viewport.Height;
+					double dd	= camera.CameraDistance - camera.EarthRadius;
+					double eta	= DMathUtil.DegreesToRadians(camera.camFov);
 
 					double p = (eps * xx) / (2 * dd * Math.Tan(eta));
 
@@ -104,7 +104,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 			// Get camera mercator position 
-			var lonLat = GameEngine.GraphicsEngine.Gis.Camera.GetCameraLonLat();
+			var lonLat = camera.GetCameraLonLat();
 			lonLat.X = DMathUtil.RadiansToDegrees(lonLat.X);
 			lonLat.Y = DMathUtil.RadiansToDegrees(lonLat.Y);
 

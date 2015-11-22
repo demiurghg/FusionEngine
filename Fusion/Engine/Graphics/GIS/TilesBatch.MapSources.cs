@@ -32,15 +32,21 @@ namespace Fusion.Engine.Graphics.GIS
 
 		protected void RegisterMapSources()
 		{
-			MapSources.Add(new OpenStreetMap(GameEngine));
-			MapSources.Add(new GoogleMap(GameEngine));
-			MapSources.Add(new GoogleSatelliteMap(GameEngine));
-			MapSources.Add(new YandexMap(GameEngine));
-			MapSources.Add(new YandexSatelliteMap(GameEngine));
-			MapSources.Add(new PencilMap(GameEngine));
-			MapSources.Add(new SpaceStationMap(GameEngine));
-			MapSources.Add(new PirateMap(GameEngine));
+			MapSources.Add(new OpenStreetMap(GameEngine)		);
+			MapSources.Add(new GoogleMap(GameEngine)			);
+			MapSources.Add(new GoogleSatelliteMap(GameEngine)	);
+			MapSources.Add(new YandexMap(GameEngine)			);
+			MapSources.Add(new YandexSatelliteMap(GameEngine)	);
+			MapSources.Add(new PencilMap(GameEngine)			);
+			MapSources.Add(new SpaceStationMap(GameEngine)		);
+			MapSources.Add(new PirateMap(GameEngine)			);
 		}
+
+
+	    public void SetMapSource(MapSource map)
+	    {
+		    CurrentMapSource = MapSources[(int)map];
+	    }
 
 	}
 }

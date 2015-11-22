@@ -43,8 +43,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public DMatrix ViewMatrixWithTranslation;
 
-		Viewport viewport;
-		public Viewport Viewport { set { viewport = value; UpdateProjectionMatrix(); } get { return viewport; } }
+		public Viewport Viewport { set; get; }
 
 		public bool PerspSwitcher = false;
 
@@ -118,6 +117,8 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public void Update(GameTime gameTime)
 		{
+			UpdateProjectionMatrix();
+
 			CameraPosition = DVector3.Transform(new DVector3(0, 0, CameraDistance), Rotation);
 
 			UpdateFreeCamera();

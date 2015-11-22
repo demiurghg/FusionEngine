@@ -17,6 +17,8 @@ namespace Fusion.Engine.Graphics.GIS
 
 		Texture2D frame;
 
+		GlobeCamera camera;
+
 
 		[Flags]
 		public enum TileFlags : int
@@ -25,11 +27,13 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public TilesGisLayer(GameEngine engine) : base(engine)
+		public TilesGisLayer(GameEngine engine, GlobeCamera camera) : base(engine)
 		{
 			RegisterMapSources();
 
 			CurrentMapSource = MapSources[0];
+
+			this.camera = camera;
 
 			frame	= GameEngine.Content.Load<Texture2D>("redframe.tga");
 			shader	= GameEngine.Content.Load<Ubershader>("globe.Tile.hlsl");

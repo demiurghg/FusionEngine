@@ -165,10 +165,10 @@ namespace Fusion.Engine.Graphics.GIS
 					Gis.UtmToLatLon(easting + worldPos.X, northing - worldPos.Z, region, out lon, out lat);
 					
 					var point = new Gis.GeoPoint {
-						Lon = DMathUtil.DegreesToRadians(lon) + 0.0000068,
-						Lat = DMathUtil.DegreesToRadians(lat) + 0.0000113,
-						Color = meshIndex%2 == 1 ? vert.Color0 : new Color(28, 89, 177, 255),
-						Tex1 = new Vector4(0,0,0, worldPos.Y/1000.0f)
+						Lon		= DMathUtil.DegreesToRadians(lon) + 0.0000068,
+						Lat		= DMathUtil.DegreesToRadians(lat) + 0.0000113,
+						Color	= vert.Color0,
+						Tex1	= new Vector4(0,0,0, worldPos.Y/1000.0f)
 					};
 					point.Color.Alpha = 0.5f;
 					points.Add(point);

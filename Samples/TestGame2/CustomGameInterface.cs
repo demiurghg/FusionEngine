@@ -67,7 +67,7 @@ namespace TestGame2 {
 		{
 			masterView		=	new ViewLayer(GameEngine, 0,0, false);
 			sceneView		=	new ViewLayer(GameEngine, 256,256, true);
-			sceneView1		=	new ViewLayer(GameEngine, 1024,768, true);
+			sceneView1		=	new ViewLayer(GameEngine, 768,768, true);
 
 			GameEngine.GraphicsEngine.ViewLayers.Add( sceneView );
 			GameEngine.GraphicsEngine.ViewLayers.Add( sceneView1 );
@@ -113,8 +113,8 @@ namespace TestGame2 {
 			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.DiffuseTexture,     0,  0, 200,150, Color.White );
 			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.SpecularTexturer, 200,  0, 200,150, Color.White );
 			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.NormalMapTexture, 400,  0, 200,150, Color.White );
-			testLayer.Draw( sceneView.Target,		  600,  0, 256,256, Color.White );//*/
-			testLayer.Draw( sceneView1.Target,		  600,384, 256,256, Color.White );//*/
+			testLayer.Draw( sceneView.Target,		600, 0, 256, 256, Color.White);//*/
+			testLayer.Draw( sceneView1.Target,		 600,384, 256,256, Color.White );//*/
 
 			//testLayer.DrawDebugString( debugFont, 10,276, "Lenna Soderberg", Color.White );
 			sceneView1.SpriteLayers.Add( console.ConsoleSpriteLayer );
@@ -123,8 +123,8 @@ namespace TestGame2 {
 			masterView.SpriteLayers.Add( uiLayer );
 			masterView.SpriteLayers.Add( testLayer );
 
-			//master.GisLayers.Add(new TilesGisLayer(GameEngine));
-			//master.GisLayers.Add(PolyGisLayer.CreateFromUtmFbxModel(GameEngine, "water_342631_6664090_36N"));
+			//sceneView1.GisLayers.Add(new TilesGisLayer(GameEngine, sceneView1.GlobeCamera));
+			//sceneView.GisLayers.Add(PolyGisLayer.CreateFromUtmFbxModel(GameEngine, "mapspb_342631_6664090_36N"));
 
 			//master.GisLayers.Add(new ModelLayer(GameEngine, new DVector2(30.30913, 59.95684), "itmo_building")
 			//{

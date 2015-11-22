@@ -95,7 +95,14 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Gets collection of GIS layers.
 		/// </summary>
-		public ICollection<Gis.GisLayer> GisLayers;
+		public ICollection<Gis.GisLayer> GisLayers {
+			get; private set;
+		}
+
+		public GlobeCamera GlobeCamera {
+			get;
+			set;
+		}
 
 
 		/// <summary>
@@ -129,6 +136,8 @@ namespace Fusion.Engine.Graphics {
 		internal RenderTarget2D	bloom0;
 		internal RenderTarget2D	bloom1;
 
+		internal DepthStencil2D GlobeDepthStencil;
+
 
 		/// <summary>
 		/// Creates ViewLayer instance
@@ -153,6 +162,10 @@ namespace Fusion.Engine.Graphics {
 			Instances		=	new List<Instance>();
 			LightSet		=	new LightSet( gameEngine.GraphicsEngine );
 			GisLayers		=	new List<Gis.GisLayer>();
+			GlobeCamera		=	new GlobeCamera(gameEngine);
+
+			GlobeCamera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
+
 
 			if (useHDR) {
 				measuredOld	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
@@ -253,6 +266,8 @@ namespace Fusion.Engine.Graphics {
 			} else {
 				ldrTarget	=	null;
 			}
+
+			GlobeDepthStencil = new DepthStencil2D(GameEngine.GraphicsDevice, DepthFormat.D24S8, newWidth, newHeight);
 		}
 
 
@@ -284,16 +299,26 @@ namespace Fusion.Engine.Graphics {
 			RenderHdrScene( gameTime, stereoEye, viewport, targetSurface );
 
 
-			GameEngine.GraphicsDevice.RestoreBackbuffer();
+			//GameEngine.GraphicsDevice.RestoreBackbuffer();
 			if (GisLayers.Any()) {
+				ge.Device.Clear(GlobeDepthStencil.Surface);
+
+				GameEngine.GraphicsDevice.SetTargets(GlobeDepthStencil.Surface, targetSurface);
+				
+				GlobeCamera.Viewport = viewport;
+				GlobeCamera.Update(gameTime);
+
 				var tiles = GisLayers.First() as TilesGisLayer;
-				if(tiles != null)
+				if (tiles != null) {
 					tiles.Update(gameTime);
+				}
+
+				ge.Gis.Camera = GlobeCamera;
+				ge.Gis.Draw(gameTime, stereoEye, GisLayers);
 			}
-			ge.Gis.Draw(gameTime, stereoEye, GisLayers);
+			
 
 			//	draw sprites :
-
 			ge.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );
 		}
 
