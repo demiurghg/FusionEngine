@@ -63,6 +63,16 @@ namespace Fusion.Build {
 
 
 		/// <summary>
+		/// Gets filename hash.
+		/// </summary>
+		public string Hash {
+			get {
+				return ContentUtils.GetHashedFileName( KeyPath, "" );
+			}
+		}
+
+
+		/// <summary>
 		/// Full target file path
 		/// </summary>
 		public string FullTargetPath {

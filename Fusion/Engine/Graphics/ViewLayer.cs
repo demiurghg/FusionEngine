@@ -215,6 +215,8 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref bloom1 );
 				SafeDispose( ref ldrTarget );
 
+				SafeDispose( ref GlobeDepthStencil );
+
 				foreach (var gisLayer in GisLayers) {
 					gisLayer.Dispose();
 				}

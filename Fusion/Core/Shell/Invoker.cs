@@ -118,7 +118,7 @@ namespace Fusion.Core.Shell {
 
 				if (Variables.TryGetValue( cmdName, out variable )) {
 					if (argList.Count()==0) {
-						Log.Message("{0}{1} = {2}", variable.Prefix, variable.Name, variable.Get() );
+						Log.Message("{0} = {1}", variable.FullName, variable.Get() );
 						return null;
 					} else {
 						return Push( string.Format("set {0} {1}", cmdName, string.Join(" ", argList) ) );

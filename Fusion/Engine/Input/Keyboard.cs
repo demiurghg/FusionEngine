@@ -116,7 +116,7 @@ namespace Fusion.Engine.Input {
 
 				var key = (Keys)Enum.Parse(typeof(Keys), keyData.KeyName, true );
 
-				var cmds	=	keyData.Value.Split('|');
+				var cmds	=	keyData.Value.Split('|').Select( s => s.Trim() ).ToArray();
 
 				string cmdDown	=	null;
 				string cmdUp	=	null;

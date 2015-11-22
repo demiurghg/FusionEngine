@@ -344,7 +344,7 @@ namespace Fusion.Build {
 					keyPath = "..." + keyPath.Substring( keyPath.Length - 40 + 3 );
 				}
 
-				Log.Message("{0,-40} {1,-5} {2}  {3}", keyPath, Path.GetExtension(keyPath), status, string.Join(" ", args) );
+				Log.Message("{0,-40} {1,-5} {2}  {3}", keyPath, Path.GetExtension(keyPath), status, string.Join(" ", args), assetFile.Hash );
 
 				// Apply attribute :
 				var parser =	new CommandLineParser( processor );
