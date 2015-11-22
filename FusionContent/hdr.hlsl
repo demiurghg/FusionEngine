@@ -84,6 +84,14 @@ float4 VSMain(uint VertexID : SV_VertexID, out float2 uv : TEXCOORD) : SV_POSITI
 static const float dither[4][4] = {{1,9,3,11},{13,5,15,7},{4,12,2,10},{16,8,14,16}};
 
 
+float3 Dither ( int xpos, int ypos, float3 color )
+{
+	color += dither[(xpos+ypos/7)%4][(ypos+xpos/7)%4]/256.0f/5;
+	color -= dither[(ypos+xpos/7)%4][(xpos+ypos/7)%4]/256.0f/5;//*/
+	return color;
+}
+
+
 float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 {
 	uint width;
@@ -125,12 +133,10 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 	#endif
 	
 	
-	
+	tonemapped	=	Dither( xpos, ypos, tonemapped );
 	
 	
 	// dithering :
-	tonemapped += dither[(xpos+ypos/7)%4][(ypos+xpos/7)%4]/256.0f/5;
-	tonemapped -= dither[(ypos+xpos/7)%4][(xpos+ypos/7)%4]/256.0f/5;//*/
 	
 	return  float4( tonemapped, dot( tonemapped, float3(0.3f,0.6f,0.2f)) );
 }

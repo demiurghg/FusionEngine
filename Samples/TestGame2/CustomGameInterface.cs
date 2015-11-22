@@ -81,7 +81,7 @@ namespace TestGame2 {
 
 			masterView.LightSet.SpotAtlas	=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
 			masterView.LightSet.DirectLight.Position	=	new Vector3(1,2,3);
-			masterView.LightSet.DirectLight.Intensity	=	Color4.White;
+			masterView.LightSet.DirectLight.Intensity	=	GameEngine.GraphicsEngine.Sky.GetSunLightColor( masterView.SkySettings );
 			masterView.LightSet.DirectLight.Enabled		=	true;
 
 			sceneView1.LightSet.SpotAtlas	=	GameEngine.Content.Load<TextureAtlas>("spots/spots");

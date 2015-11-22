@@ -10,6 +10,8 @@ using Fusion.Core.Configuration;
 using Fusion.Drivers.Graphics;
 using Fusion.Core;
 using Fusion.Framework;
+using Fusion.Core.IniParser.Model;
+using System.ComponentModel;
 
 
 namespace Fusion.Engine.Common {
@@ -36,6 +38,70 @@ namespace Fusion.Engine.Common {
 
 
 
+		/// <summary>
+		/// Gets configuration as collection of KeyData.
+		/// Derived classes can replace this to customize what to save into configuration. 
+		/// </summary>
+		/// <returns>Collection of KeyData</returns>
+		public virtual IEnumerable<KeyData> GetConfiguration ()
+		{
+			var sectionData		=	new List<KeyData>();
+			var configObject	=	ConfigSerializer.GetConfigObject( this );
+
+			if (configObject==null) {
+				return sectionData;
+			}
+
+			foreach ( var prop in configObject.GetType().GetProperties() ) {
+
+				var name	=	prop.Name;
+				var value	=	prop.GetValue( configObject );
+				var conv	=	TypeDescriptor.GetConverter( prop.PropertyType );
+				var keyData	=	new KeyData(name);
+
+				keyData.Value	=	conv.ConvertToInvariantString( value );
+
+				sectionData.Add( keyData );
+			}
+
+			return sectionData;
+		}
+
+
+
+		/// <summary>
+		/// Sets module configuration from collection of KeyData.
+		/// Derived classes can replace this to customize how to load configuration. 
+		/// </summary>
+		/// <param name="configuration"></param>
+		public virtual void SetConfiguration ( IEnumerable<KeyData> configuration )
+		{
+			var configObject	=	ConfigSerializer.GetConfigObject( this );
+
+			if (configObject==null) {
+				return;
+			}
+
+			foreach ( var keyData in configuration ) {
+						
+				var prop =	configObject.GetType().GetProperty( keyData.KeyName );
+
+				if (prop==null) {
+					Log.Warning("Config property {0} does not exist. Key ignored.", keyData.KeyName );
+					continue;
+				}
+
+				var conv	=	TypeDescriptor.GetConverter( prop.PropertyType );
+						
+				prop.SetValue( configObject, conv.ConvertFromInvariantString( keyData.Value ));
+			}
+		}
+
+
+
+		/// <summary>
+		/// Represents game module binding.
+		/// </summary>
 		internal class ModuleBinding {
 			public readonly string NiceName;
 			public readonly string ShortName;

@@ -277,6 +277,10 @@
     <Compile Include="Engine\Graphics\GIS\TilesBatch.Tile.cs" />
     <Compile Include="Engine\Graphics\Lights\LightSet.cs" />
     <Compile Include="Engine\Graphics\Textures\TargetFormat.cs" />
+    <Compile Include="Engine\Input\Bind.cs" />
+    <Compile Include="Engine\Input\BindList.cs" />
+    <Compile Include="Engine\Input\KeyBind.cs" />
+    <Compile Include="Engine\Input\Unbind.cs" />
     <Compile Include="Engine\Network\NetChan.State.cs" />
     <Compile Include="Engine\Server\GameClientState.cs" />
     <Compile Include="Engine\Client\GameClient.STActive.cs" />
