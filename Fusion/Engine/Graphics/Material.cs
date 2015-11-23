@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core.IniParser;
 using System.IO;
+using Fusion.Core;
+using Fusion.Core.IniParser.Model;
+using Fusion.Core.IniParser.Model.Formatting;
 
 namespace Fusion.Engine.Graphics {
 
@@ -26,7 +29,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Indicates that material uses displacement mapping.
 		/// </summary>
-		public bool UseDisplacement;
+		public bool Displacement;
 
 		/// <summary>
 		/// Material options for mapping and layer blending.
@@ -74,11 +77,58 @@ namespace Fusion.Engine.Graphics {
 			mtrl.Layer2	=	null;
 			mtrl.Layer3	=	null;
 
-			mtrl.UseDisplacement	=	false;
-			mtrl.Transparent		=	false;
-			mtrl.CastShadow			=	true;
+			mtrl.Displacement	=	false;
+			mtrl.Transparent	=	false;
+			mtrl.CastShadow		=	true;
 
 			return mtrl;
+		}
+
+
+
+		static void SectionToObject<T>( ref T obj, KeyDataCollection keyDataCollection )
+		{
+			if (keyDataCollection==null) {
+				obj = default(T);
+				return;
+			}
+
+			var type = typeof(T);
+
+			foreach ( var field in type.GetFields() ) {
+
+				if (field.FieldType==typeof(MaterialLayer)) {
+					continue;
+				}
+
+				var keyValue = keyDataCollection[ field.Name ];
+
+				if (keyValue!=null) {
+					field.SetValue( obj, StringConverter.FromString( field.FieldType, keyValue ) );
+				}
+			}
+		}
+
+
+		static SectionData ObjectToSection<T>( T obj, string sectionName )
+		{
+			var sectionData = new SectionData(sectionName);
+			
+			var type = typeof(T);
+
+			foreach ( var field in type.GetFields() ) {
+				
+				if (field.FieldType==typeof(MaterialLayer)) {
+					continue;
+				}
+
+				var name	= field.Name;
+				var value	= StringConverter.ToString( field.GetValue(obj) );
+
+				sectionData.Keys.AddKey( new KeyData( name, value ) );
+			}
+
+			return sectionData;
 		}
 
 
@@ -88,7 +138,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="iniData"></param>
 		public static Material FromIniFile ( string iniDataString )
 		{
-			/*var parser = new StreamIniDataParser();
+			var parser = new StreamIniDataParser();
 
 			parser.Parser.Configuration.AllowDuplicateSections	=	true;
 			parser.Parser.Configuration.AllowDuplicateKeys		=	true;
@@ -97,12 +147,62 @@ namespace Fusion.Engine.Graphics {
 			parser.Parser.Configuration.KeyValueAssigmentChar	=	'=';
 			parser.Parser.Configuration.AllowKeysWithoutValues	=	false;
 
-			var iniData = parser.ReadData( new StringReader(iniDataString) );
+			var iniData = parser.ReadData( new StreamReader( new MemoryStream( Encoding.UTF8.GetBytes(iniDataString) ) ) );
 
 			var mtrlSection = iniData.Sections["Material"];//*/
-			//mtrlSection[""
+			
+			var material	=	new Material();
+			material.Layer0	=	new MaterialLayer();
+			material.Layer1	=	new MaterialLayer();
+			material.Layer2	=	new MaterialLayer();
+			material.Layer3	=	new MaterialLayer();
+			
+			SectionToObject( ref material, iniData.Sections["Material"] );
+			SectionToObject( ref material.Layer0, iniData.Sections["Layer0"] );
+			SectionToObject( ref material.Layer1, iniData.Sections["Layer1"] );
+			SectionToObject( ref material.Layer2, iniData.Sections["Layer2"] );
+			SectionToObject( ref material.Layer3, iniData.Sections["Layer3"] );
 
-			return null;
+			return material;
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="material"></param>
+		/// <returns></returns>
+		public string ToIniFile ()
+		{
+			var parser = new StreamIniDataParser();
+
+			parser.Parser.Configuration.AllowDuplicateSections	=	true;
+			parser.Parser.Configuration.AllowDuplicateKeys		=	true;
+			parser.Parser.Configuration.CommentString			=	"#";
+			parser.Parser.Configuration.OverrideDuplicateKeys	=	true;
+			parser.Parser.Configuration.KeyValueAssigmentChar	=	'=';
+			parser.Parser.Configuration.AllowKeysWithoutValues	=	false;
+
+			var iniData = new IniData();
+
+			var mtrlSection = ObjectToSection( this, "Material" );
+			iniData.Sections.Add( mtrlSection );
+
+			if (Layer0!=null) {
+				iniData.Sections.Add( ObjectToSection( Layer0, "Layer0" ) );
+			}
+			if (Layer1!=null) {
+				iniData.Sections.Add( ObjectToSection( Layer1, "Layer1" ) );
+			}
+			if (Layer2!=null) {
+				iniData.Sections.Add( ObjectToSection( Layer2, "Layer2" ) );
+			}
+			if (Layer3!=null) {
+				iniData.Sections.Add( ObjectToSection( Layer3, "Layer3" ) );
+			}
+
+			iniData.Configuration.AssigmentSpacer = "   ";
+			return iniData.ToString( new AlignedIniDataFormatter() );
 		}
 	}
 }

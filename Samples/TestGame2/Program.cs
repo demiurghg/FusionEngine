@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.IO;
 using Fusion;
 using Fusion.Build;
 using Fusion.Engine.Common;
@@ -11,6 +12,7 @@ using Fusion.Core.Shell;
 using Fusion.Core.Utils;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
+using Fusion.Engine.Graphics;
 
 namespace TestGame2 {
 
@@ -36,6 +38,7 @@ namespace TestGame2 {
 
 
 
+
 			//
 			//	Parse command line :
 			//
@@ -54,6 +57,15 @@ namespace TestGame2 {
 
 				//	apply command-line options here:
 				//	...
+
+				var mtrl = Material.CreateFromTexture("walls/wall01.tga");
+
+				File.WriteAllText(@"C:\GitHub\Material.ini", mtrl.ToIniFile());
+
+				var mtrl2 = Material.FromIniFile( File.ReadAllText(@"C:\GitHub\Material.ini") );
+				mtrl2.Options = MaterialOptions.Terrain;
+				File.WriteAllText(@"C:\GitHub\Material2.ini", mtrl2.ToIniFile());
+
 
 				engine.Run();
 				

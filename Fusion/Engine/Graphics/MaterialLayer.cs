@@ -130,6 +130,11 @@ namespace Fusion.Engine.Graphics {
 			OffsetU	=	0;
 			OffsetV	=	0;
 			OffsetW	=	0;
+
+			ColorTexture		=	"*grey";
+			SurfaceTexture		=	"*metal";
+			NormalMapTexture	=	"*flat";
+			EmissionTexture		=	"*black";
 		}	
 	}
 }

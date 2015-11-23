@@ -17,6 +17,9 @@ namespace Fusion.Core {
 			var type = value.GetType();
 
 			if (type.IsEnum)			return ToString( (Enum)   value );
+			//if (type==typeof( Bool		) )	return ToString( ( Bool		)value );
+			if (type==typeof( String	) )	return ToString( ( String	)value );
+			if (type==typeof( Boolean	) )	return ToString( ( Boolean	)value );
 			if (type==typeof( Int16		) )	return ToString( ( Int16	)value );
 			if (type==typeof( Int32		) )	return ToString( ( Int32	)value );
 			if (type==typeof( Int64		) )	return ToString( ( Int64	)value );
@@ -33,6 +36,7 @@ namespace Fusion.Core {
 			if (type==typeof( Half3		) )	return ToString( ( Half3	)value );
 			if (type==typeof( Half4		) )	return ToString( ( Half4	)value );
 
+			//	fallback to TypeConverter?
 			throw new ArgumentException(string.Format("Can not convert {0} to string", type));
 		}
 
@@ -40,6 +44,9 @@ namespace Fusion.Core {
 		public static object FromString ( Type type, string value )
 		{
 			if (type.IsEnum)			return Enum.Parse( type, value, true );
+			//if (type==typeof(Bool)  )	return ToBool	( value );
+			if (type==typeof(String))	return ToString ( value );
+			if (type==typeof(Boolean))	return ToBoolean( value );
 			if (type==typeof(Int16)  )	return ToInt16	( value );
 			if (type==typeof(Int32)  )	return ToInt32	( value );
 			if (type==typeof(Int64)  )	return ToInt64	( value );
@@ -56,6 +63,7 @@ namespace Fusion.Core {
 			if (type==typeof(Half3)  )	return ToHalf3	( value );
 			if (type==typeof(Half4)  )	return ToHalf4	( value );
 
+			//	fallback to TypeConverter?
 			throw new ArgumentException(string.Format("{0} is not valid value for {1}", value, type));
 		}
 
@@ -65,6 +73,21 @@ namespace Fusion.Core {
 			return (T)FromString( typeof(T), value );
 		}
 
+
+		/*public static string ToString( Bool value )
+		{
+			return value.ToString();
+		} */
+
+		public static string ToString( String value )
+		{
+			return value;
+		}
+
+		public static string ToString( Boolean value )
+		{
+			return value.ToString(CultureInfo.InvariantCulture);
+		}
 
 		public static string ToString( Byte value )
 		{
@@ -147,6 +170,21 @@ namespace Fusion.Core {
 		}
 
 		
+		//public static Bool ToBool ( string value )
+		//{
+		//	value = value.ToLowerInvariant();
+		//	if (value=="0" || value=="false") return false;
+		//	if (value=="1" || value=="true")  return true;
+		//	throw new ArgumentException(value + " is not valid value for Bool");
+		//}
+
+		public static Boolean ToBoolean ( string value )
+		{
+			value = value.ToLowerInvariant();
+			if (value=="0" || value=="false") return false;
+			if (value=="1" || value=="true")  return true;
+			throw new ArgumentException(value + " is not valid value for Bool");
+		}
 
 		public static Byte ToByte ( string value )
 		{

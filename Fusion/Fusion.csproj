@@ -120,6 +120,7 @@
     <Compile Include="Core\IniParser\Helpers\Assert.cs" />
     <Compile Include="Core\IniParser\Model\Configuration\ConcatenateDuplicatedKeysIniParserConfiguration.cs" />
     <Compile Include="Core\IniParser\Model\Configuration\IniParserConfiguration.cs" />
+    <Compile Include="Core\IniParser\Model\Formatting\AlignedIniDataFormatter.cs" />
     <Compile Include="Core\IniParser\Model\Formatting\DefaultIniDataFormatter.cs" />
     <Compile Include="Core\IniParser\Model\Formatting\IIniDataFormatter.cs" />
     <Compile Include="Core\IniParser\Model\IniData.cs" />
