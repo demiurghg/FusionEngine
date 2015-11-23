@@ -34,12 +34,10 @@ namespace TestGame2 {
 		SpriteLayer	uiLayer;
 		DiscTexture	texture;
 		ViewLayer	masterView;
-		ViewLayer	sceneView;
-		ViewLayer	sceneView1;
 
 		Scene		scene;
 
-		Vector3		position = new Vector3(0,5,0);
+		Vector3		position = new Vector3(0,10,0);
 		float		yaw = 0, pitch = 0;
 
 
@@ -64,11 +62,7 @@ namespace TestGame2 {
 		public override void Initialize ()
 		{
 			masterView		=	new ViewLayer(GameEngine, 0,0, true);
-			sceneView		=	new ViewLayer(GameEngine, 256,256, true);
-			sceneView1		=	new ViewLayer(GameEngine, 768,768, true);
 
-			GameEngine.GraphicsEngine.ViewLayers.Add( sceneView );
-			GameEngine.GraphicsEngine.ViewLayers.Add( sceneView1 );
 			GameEngine.GraphicsEngine.ViewLayers.Add( masterView );
 
 			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
@@ -76,16 +70,10 @@ namespace TestGame2 {
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
 			scene		=	GameEngine.Content.Load<Scene>( "testScene" );
 
-
 			masterView.LightSet.SpotAtlas	=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
 			masterView.LightSet.DirectLight.Position	=	new Vector3(1,2,3);
 			masterView.LightSet.DirectLight.Intensity	=	GameEngine.GraphicsEngine.Sky.GetSunLightColor( masterView.SkySettings );
 			masterView.LightSet.DirectLight.Enabled		=	true;
-
-			sceneView1.LightSet.SpotAtlas	=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
-			sceneView1.LightSet.DirectLight.Position	=	new Vector3(1,2,3);
-			sceneView1.LightSet.DirectLight.Intensity	=	Color4.White;
-			sceneView1.LightSet.DirectLight.Enabled		=	true;
 
 			var transforms = new Matrix[ scene.Nodes.Count ];
 			scene.ComputeAbsoluteTransforms( transforms );
@@ -102,7 +90,6 @@ namespace TestGame2 {
 				inst.World = transforms[ i ];
 			
 				masterView.Instances.Add( inst );
-				sceneView1.Instances.Add( inst );
 			}
 
 			testLayer.Clear();
@@ -111,24 +98,12 @@ namespace TestGame2 {
 			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.DiffuseTexture,     0,  0, 200,150, Color.White );
 			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.SpecularTexturer, 200,  0, 200,150, Color.White );
 			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.NormalMapTexture, 400,  0, 200,150, Color.White );
-			testLayer.Draw( sceneView.Target,		600, 0, 256, 256, Color.White);//*/
-			testLayer.Draw( sceneView1.Target,		 600,384, 256,256, Color.White );//*/
-
-			//testLayer.DrawDebugString( debugFont, 10,276, "Lenna Soderberg", Color.White );
-			sceneView1.SpriteLayers.Add( console.ConsoleSpriteLayer );
+			/*testLayer.Draw( sceneView.Target,		600, 0, 256, 256, Color.White);//*/
+			/*testLayer.Draw( sceneView1.Target,		 600,384, 256,256, Color.White );//*/
 
 			masterView.SpriteLayers.Add( console.ConsoleSpriteLayer );
 			masterView.SpriteLayers.Add( uiLayer );
 			masterView.SpriteLayers.Add( testLayer );
-
-			//sceneView1.GisLayers.Add(new TilesGisLayer(GameEngine, sceneView1.GlobeCamera));
-			//sceneView.GisLayers.Add(PolyGisLayer.CreateFromUtmFbxModel(GameEngine, "mapspb_342631_6664090_36N"));
-
-			//master.GisLayers.Add(new ModelLayer(GameEngine, new DVector2(30.30913, 59.95684), "itmo_building")
-			//{
-			//	ScaleFactor = 0.000142f,
-			//	Yaw = MathUtil.Rad(57)
-			//});
 
 
 			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
@@ -154,8 +129,8 @@ namespace TestGame2 {
 				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
 				SafeDispose( ref masterView );
-				SafeDispose( ref sceneView );
-				SafeDispose( ref sceneView1 );
+				/*SafeDispose( ref sceneView );
+				SafeDispose( ref sceneView1 );**/
 			}
 			base.Dispose( disposing );
 		}
@@ -174,7 +149,7 @@ namespace TestGame2 {
 
 			testLayer.Color	=	Color.White;
 
-			sceneView.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1,0, 1 );
+			//sceneView.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1,0, 1 );
 
 			/*if ( gameEngine.Keyboard.IsKeyDown(Keys.R) ) {
 				testLayer.Clear();
@@ -193,9 +168,6 @@ namespace TestGame2 {
 			var m = UpdateCam( gameTime );
 
 			masterView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1, 0, 1);
-
-			var origin = Vector3.TransformCoordinate(Vector3.One * 25, Matrix.RotationY( (float)gameTime.Total.TotalSeconds ));
-			sceneView1.Camera.SetupCameraFov( origin, Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1,0, 1);
 		}
 
 

@@ -9,8 +9,15 @@ using Fusion.Build;
 using Fusion.Engine.Common;
 using Fusion.Core.Shell;
 using Fusion.Core.Utils;
+using Fusion.Core;
+using Fusion.Core.Mathematics;
 
 namespace TestGame2 {
+
+	enum Blah {
+		BlahA,
+		BlahB,
+	}
 
 	class Program {
 		[STAThread]
@@ -23,6 +30,10 @@ namespace TestGame2 {
 			//	Build content on startup :
 			//
 			Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", false );
+	
+			Log.Warning( StringConverter.ToString( Color.Red ) );
+
+
 
 
 			//

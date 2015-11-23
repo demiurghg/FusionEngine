@@ -60,6 +60,29 @@ namespace Fusion.Engine.Input {
 
 
 		/// <summary>
+		/// Indicates whether keyboard should be scanned.
+		/// If ScanKeyboard equals false methods IsKeyDown and IsKeyUp indicate that all keys are unpressed.
+		/// All events like FormKeyPress, FormKeyDown, FormKeyUp will work.
+		/// </summary>
+		public bool ScanKeyboard {
+			get {
+				return scanKeyboard;
+			}
+			set {
+				if (value) {
+					scanKeyboard = true;
+				} else {
+					scanKeyboard = false;
+					device.RemoveAllPressedKeys();
+				}
+			}
+		}
+
+		bool scanKeyboard = true;
+
+
+
+		/// <summary>
 		/// Binds command to key.
 		/// </summary>
 		/// <param name="key"></param>

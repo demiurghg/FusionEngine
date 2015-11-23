@@ -230,8 +230,8 @@ namespace Fusion.Drivers.Graphics.Display {
 			form.KeyDown += form_KeyDown;
 			form.KeyUp += form_KeyUp;
 			form.KeyPress += form_KeyPress;
-			form.Resize += (s,e) => GameEngine.InputDevice.RemoveAllPressedKey();
-			form.Move += (s,e) => GameEngine.InputDevice.RemoveAllPressedKey();
+			form.Resize += (s,e) => GameEngine.InputDevice.RemoveAllPressedKeys();
+			form.Move += (s,e) => GameEngine.InputDevice.RemoveAllPressedKeys();
 
 			return form;
 		}

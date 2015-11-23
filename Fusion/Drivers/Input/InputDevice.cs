@@ -180,7 +180,7 @@ namespace Fusion.Drivers.Input {
 		/// <summary>
 		/// 
 		/// </summary>
-		internal void RemoveAllPressedKey()
+		internal void RemoveAllPressedKeys()
 		{
 			foreach ( var key in pressed ) {
 				if ( KeyUp!=null ) {
@@ -349,7 +349,7 @@ namespace Fusion.Drivers.Input {
 					RelativeMouseOffset		=	Vector2.Zero;
 					SetCursorVisibility( true );
 
-					RemoveAllPressedKey();
+					RemoveAllPressedKeys();
 			    }
 			}
 

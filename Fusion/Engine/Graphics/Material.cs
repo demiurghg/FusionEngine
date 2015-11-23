@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Fusion.Core.IniParser;
+using System.IO;
 
 namespace Fusion.Engine.Graphics {
 
@@ -34,25 +36,21 @@ namespace Fusion.Engine.Graphics {
 
 		/// <summary>
 		/// Material layer #0.
-		/// Null value means no layer.
 		/// </summary>
 		public MaterialLayer	Layer0;
 
 		/// <summary>
 		/// Material layer #1
-		/// Null value means no layer.
 		/// </summary>
 		public MaterialLayer	Layer1;
 
 		/// <summary>
 		/// Material layer #2
-		/// Null value means no layer.
 		/// </summary>
 		public MaterialLayer	Layer2;
 
 		/// <summary>
 		/// Material layer #2
-		/// Null value means no layer.
 		/// </summary>
 		public MaterialLayer	Layer3;
 
@@ -81,6 +79,30 @@ namespace Fusion.Engine.Graphics {
 			mtrl.CastShadow			=	true;
 
 			return mtrl;
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="iniData"></param>
+		public static Material FromIniFile ( string iniDataString )
+		{
+			/*var parser = new StreamIniDataParser();
+
+			parser.Parser.Configuration.AllowDuplicateSections	=	true;
+			parser.Parser.Configuration.AllowDuplicateKeys		=	true;
+			parser.Parser.Configuration.CommentString			=	"#";
+			parser.Parser.Configuration.OverrideDuplicateKeys	=	true;
+			parser.Parser.Configuration.KeyValueAssigmentChar	=	'=';
+			parser.Parser.Configuration.AllowKeysWithoutValues	=	false;
+
+			var iniData = parser.ReadData( new StringReader(iniDataString) );
+
+			var mtrlSection = iniData.Sections["Material"];//*/
+			//mtrlSection[""
+
+			return null;
 		}
 	}
 }
