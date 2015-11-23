@@ -122,10 +122,19 @@ namespace Fusion.Engine.Graphics {
 					continue;
 				}
 
-				var name	= field.Name;
-				var value	= StringConverter.ToString( field.GetValue(obj) );
+				var name	=	field.Name;
+				var value	=	StringConverter.ToString( field.GetValue(obj) );
 
-				sectionData.Keys.AddKey( new KeyData( name, value ) );
+				var key		=	new KeyData( name, value );
+				
+				if (field.FieldType.IsEnum) {
+					key.Comments.Add("Possible values:");
+					foreach ( var enumName in Enum.GetNames( field.FieldType )) {
+						key.Comments.Add("  " + enumName);
+					}
+				}
+
+				sectionData.Keys.AddKey( key );
 			}
 
 			return sectionData;
@@ -136,7 +145,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="iniData"></param>
-		public static Material FromIniFile ( string iniDataString )
+		public static Material FromIni ( string iniDataString )
 		{
 			var parser = new StreamIniDataParser();
 
@@ -172,7 +181,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="material"></param>
 		/// <returns></returns>
-		public string ToIniFile ()
+		public string ToIni ()
 		{
 			var parser = new StreamIniDataParser();
 
@@ -201,8 +210,9 @@ namespace Fusion.Engine.Graphics {
 				iniData.Sections.Add( ObjectToSection( Layer3, "Layer3" ) );
 			}
 
-			iniData.Configuration.AssigmentSpacer = "   ";
-			return iniData.ToString( new AlignedIniDataFormatter() );
+			iniData.Configuration.AssigmentSpacer = " ";
+			iniData.Configuration.CommentString   = "# ";
+			return iniData.ToString( new AlignedIniDataFormatter(iniData.Configuration) );
 		}
 	}
 }

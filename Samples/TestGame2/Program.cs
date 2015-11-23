@@ -33,12 +33,6 @@ namespace TestGame2 {
 			//
 			Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", false );
 	
-			Log.Warning( StringConverter.ToString( Color.Red ) );
-
-
-
-
-
 			//
 			//	Parse command line :
 			//
@@ -58,13 +52,13 @@ namespace TestGame2 {
 				//	apply command-line options here:
 				//	...
 
-				var mtrl = Material.CreateFromTexture("walls/wall01.tga");
+				/*var mtrl = Material.CreateFromTexture("walls/wall01.tga");
 
-				File.WriteAllText(@"C:\GitHub\Material.ini", mtrl.ToIniFile());
+				File.WriteAllText(@"C:\GitHub\Material.ini", mtrl.ToIni());
 
-				var mtrl2 = Material.FromIniFile( File.ReadAllText(@"C:\GitHub\Material.ini") );
+				var mtrl2 = Material.FromIni( File.ReadAllText(@"C:\GitHub\Material.ini") );
 				mtrl2.Options = MaterialOptions.Terrain;
-				File.WriteAllText(@"C:\GitHub\Material2.ini", mtrl2.ToIniFile());
+				File.WriteAllText(@"C:\GitHub\Material2.ini", mtrl2.ToIni());*/
 
 
 				engine.Run();
