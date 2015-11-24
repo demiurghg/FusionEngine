@@ -233,6 +233,18 @@ namespace Fusion.Engine.Graphics.GIS
 			int[]			indexes;
 			Gis.GeoPoint[]	vertices;
 
+
+			var leftTop		= projection.WorldToTilePos(left, top, 0);
+			var rightBottom = projection.WorldToTilePos(right, bottom, 0);
+
+			double newleft		= leftTop.X;
+			double newright		= rightBottom.X;
+			double newtop		= leftTop.Y;
+			double newbottom	= newtop + (newright - newleft);
+
+			var newRightBottom = projection.TileToWorldPos(newright, newbottom, 0);
+			bottom = newRightBottom.Y;
+
 			CalculateVertices(out vertices, out indexes, density, left, right, top, bottom, projection);
 
 			return new HeatMapLayer(engine, vertices, indexes, dimX, dimY, false)

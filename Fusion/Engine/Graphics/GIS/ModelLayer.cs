@@ -36,6 +36,8 @@ namespace Fusion.Engine.Graphics.GIS
 			DRAW_TEXTURED	= 1 << 3,
 			DRAW_COLORED	= 1 << 4,
 			COMPUTE_NORMALS = 1 << 5,
+			XRAY			= 1 << 6,
+			INSTANCED		= 1 << 7,
 		}
 
 
@@ -44,15 +46,29 @@ namespace Fusion.Engine.Graphics.GIS
 		public DVector3 CartesianPos { get; protected set; }
 		public DVector2 LonLatPosition;
 
+
+		public struct InstancedDataStruct
+		{
+			public Matrix World;
+		}
+
+		public InstancedDataStruct[] InstancedDataCPU { get; private set; }
+
+		StructuredBuffer instDataGpu;
+
+		public int InstancedCountToDraw;
+
+
 		public float ScaleFactor = 1.0f;
 		public float Yaw, Pitch, Roll;
 
-		Scene model;
-		Matrix[] transforms;
+		Scene		model;
+		Matrix[]	transforms;
 
-		public float			Transparency;
+		public float	Transparency;
+		public bool		XRay = false;
 
-		public ModelLayer(GameEngine engine, DVector2 lonLatPosition, string fileName) : base(engine)
+		public ModelLayer(GameEngine engine, DVector2 lonLatPosition, string fileName, int maxInstancedCount = 0) : base(engine)
 		{
 			model = engine.Content.Load<Scene>(fileName);
 
@@ -66,7 +82,14 @@ namespace Fusion.Engine.Graphics.GIS
 			constData	= new ConstDataStruct();
 			modelBuf	= new ConstantBuffer(GameEngine.GraphicsDevice, typeof(ConstDataStruct));
 			shader		= GameEngine.Content.Load<Ubershader>("globe.Model.hlsl");
-			factory		= new StateFactory(shader, typeof(ModelFlags), Primitive.TriangleList, VertexInputElement.FromStructure<VertexColorTextureTBNRigid>(), BlendState.Opaque, RasterizerState.CullNone, DepthStencilState.Default);
+			factory		= new StateFactory(shader, typeof(ModelFlags), Primitive.TriangleList, VertexInputElement.FromStructure<VertexColorTextureTBNRigid>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
+
+			if (maxInstancedCount > 0) {
+				InstancedCountToDraw	= maxInstancedCount;
+				InstancedDataCPU		= new InstancedDataStruct[maxInstancedCount];
+
+				instDataGpu = new StructuredBuffer(engine.GraphicsDevice, typeof(InstancedDataStruct), maxInstancedCount, StructuredBufferFlags.None);
+			}
 		}
 
 
@@ -104,8 +127,23 @@ namespace Fusion.Engine.Graphics.GIS
 			dev.VertexShaderConstants[1]	= modelBuf;
 			dev.PixelShaderConstants[1]		= modelBuf;
 
-			dev.PipelineState = factory[(int) (ModelFlags.VERTEX_SHADER | ModelFlags.PIXEL_SHADER | ModelFlags.DRAW_COLORED)];
+			int flags = (int) (ModelFlags.VERTEX_SHADER | ModelFlags.PIXEL_SHADER | (XRay ? ModelFlags.XRAY : ModelFlags.DRAW_COLORED));
+
+
+			if (InstancedDataCPU != null) {
+				flags |= (int)(ModelFlags.INSTANCED);
+
+				instDataGpu.SetData(InstancedDataCPU);
+				dev.VertexShaderResources[1] = instDataGpu;
+
+				InstancedCountToDraw = InstancedCountToDraw > InstancedDataCPU.Length
+					? InstancedDataCPU.Length
+					: InstancedCountToDraw;
+			}
 			
+			dev.PipelineState = factory[flags];
+			
+
 			for (int i = 0; i < model.Nodes.Count; i++) {
 				var meshIndex = model.Nodes[i].MeshIndex;
 
@@ -116,7 +154,13 @@ namespace Fusion.Engine.Graphics.GIS
 				var mesh = model.Meshes[meshIndex];
 
 				dev.SetupVertexInput(mesh.VertexBuffer, mesh.IndexBuffer);
-				dev.DrawIndexed(mesh.IndexBuffer.Capacity, 0, 0);
+
+				if (InstancedDataCPU != null) {
+					dev.DrawInstancedIndexed(mesh.IndexBuffer.Capacity, InstancedCountToDraw, 0, 0, 0);
+				}
+				else {
+					dev.DrawIndexed(mesh.IndexBuffer.Capacity, 0, 0);
+				}
 			}
 		}
 	}

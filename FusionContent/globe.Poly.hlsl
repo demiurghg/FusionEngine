@@ -1,43 +1,3 @@
-struct ConstData {
-	float4x4	ViewProj;
-	uint2		CameraX	;
-	uint2		CameraY	;
-	uint4		CameraZ	;
-	float4		Dummy	;
-};
-
-struct HeatConstData {
-	float4 Data;
-};
-
-
-struct VS_INPUT {	
-	uint2 lon				: TEXCOORD0	;
-	uint2 lat				: TEXCOORD1	;
-	float4	Tex0			: TEXCOORD2	;	// Texture Coordinates
-	float4	Tex1			: TEXCOORD3	;
-	float4	Color			: COLOR		;
-};
-
-struct VS_OUTPUT {
-    float4 Position		: SV_POSITION	;
-	float4 Color		: COLOR			;
-	float4 Tex			: TEXCOORD0		;
-	float3 Normal		: TEXCOORD1		;
-	float3 XAxis		: TEXCOORD2		;
-};
-
-
-cbuffer CBStage		: register(b0) 	{ ConstData Stage : packoffset( c0 ); }
-cbuffer PolyStage	: register(b1) 	{ HeatConstData HeatStage; }
-
-Texture2D		DiffuseMap		: register(t0);
-Texture2D		FloatMap		: register(t1);
-Texture2D		FrameMap		: register(t2);
-SamplerState	Sampler			: register(s0);
-SamplerState	PointSampler	: register(s1);
-
-
 
 double dDiv(double a, double b) // 
 {
@@ -112,9 +72,52 @@ double3 SphericalToDecart(double2 pos, double r)
 }
 
 
+
+
+struct ConstData {
+	float4x4	ViewProj;
+	uint2		CameraX	;
+	uint2		CameraY	;
+	uint4		CameraZ	;
+	float4		Dummy	;
+};
+
+struct HeatConstData {
+	float4 Data;
+};
+
+
+struct VS_INPUT {	
+	uint2 lon				: TEXCOORD0	;
+	uint2 lat				: TEXCOORD1	;
+	float4	Tex0			: TEXCOORD2	;	// Texture Coordinates
+	float4	Tex1			: TEXCOORD3	;
+	float4	Color			: COLOR		;
+};
+
+struct VS_OUTPUT {
+    float4 Position	: SV_POSITION	;
+	float4 Color	: COLOR			;
+	float4 Tex		: TEXCOORD0		;
+	float3 Normal	: TEXCOORD1		;
+	float3 WPos		: TEXCOORD2		;
+};
+
+
+cbuffer CBStage		: register(b0) 	{ ConstData Stage : packoffset( c0 ); }
+cbuffer PolyStage	: register(b1) 	{ HeatConstData HeatStage; }
+
+Texture2D		DiffuseMap		: register(t0);
+Texture2D		FloatMap		: register(t1);
+Texture2D		FrameMap		: register(t2);
+SamplerState	Sampler			: register(s0);
+SamplerState	PointSampler	: register(s1);
+
+
 #if 0
 $ubershader PIXEL_SHADER VERTEX_SHADER DRAW_HEAT
 $ubershader PIXEL_SHADER VERTEX_SHADER DRAW_COLORED
+$ubershader PIXEL_SHADER VERTEX_SHADER XRAY
 $ubershader COMPUTE_SHADER BLUR_HORIZONTAL
 $ubershader COMPUTE_SHADER BLUR_VERTICAL
 #endif
@@ -143,12 +146,16 @@ VS_OUTPUT VSMain ( VS_INPUT v )
 	double posY = cPos.y - cameraPos.y;
 	double posZ = cPos.z - cameraPos.z;
 
-
-	output.Position	=	mul(float4(posX, posY, posZ, 1), Stage.ViewProj);
+	float4 wPos = float4(posX, posY, posZ, 1.0f);
+	
+	output.Position	=	mul(wPos, Stage.ViewProj);
 	output.Normal	=	normal;
 	output.Color	=	v.Color;
 	output.Tex		=	v.Tex0;
 	
+	#ifdef XRAY
+		output.WPos = wPos.xyz;
+	#endif
 
 	return output;
 }
@@ -158,6 +165,15 @@ VS_OUTPUT VSMain ( VS_INPUT v )
 #ifdef PIXEL_SHADER
 float4 PSMain ( VS_OUTPUT input ) : SV_Target
 {
+	#ifdef XRAY
+		float3 norm = normalize(input.Tex.xyz);
+		float3 ndir	= normalize(-input.WPos);
+		
+		float  ndot = abs(dot( ndir, norm ));
+		float  frsn	= pow(saturate(1.1f-ndot), 0.5);
+		
+		return frsn*float4(input.Color.xyz, 1);
+	#endif
 	#ifdef DRAW_HEAT
 		//return float4(1.0f, 0.0f, 0.0f, 1.0f);
 

@@ -67,7 +67,7 @@ namespace Fusion.Engine.Graphics.GIS
 			dev.PixelShaderSamplers[0]		= SamplerState.LinearClamp;
 			dev.PixelShaderResources[1]		= frame;
 
-			dev.PipelineState = factory[(int)(TileFlags.SHOW_FRAMES)];
+			dev.PipelineState = factory[(int)(0)];
 
 
 			foreach (var globeTile in tilesToRender) {

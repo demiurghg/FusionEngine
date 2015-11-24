@@ -16,6 +16,7 @@ namespace Fusion.Engine.Graphics.GIS
 	{
 		protected Ubershader	shader;
 		protected StateFactory	factory;
+		protected StateFactory	factoryXray;
 
 		[Flags]
 		public enum PolyFlags : int
@@ -29,6 +30,7 @@ namespace Fusion.Engine.Graphics.GIS
 			BLUR_HORIZONTAL = 1 << 6,
 			BLUR_VERTICAL	= 1 << 7,
 			DRAW_COLORED	= 1 << 8,
+			XRAY			= 1 << 9,
 		}
 
 		public int Flags;
@@ -61,9 +63,9 @@ namespace Fusion.Engine.Graphics.GIS
 
 		protected void Initialize(Gis.GeoPoint[] points, int[] indeces, bool isDynamic)
 		{
-			shader	= GameEngine.Content.Load<Ubershader>("globe.Poly.hlsl");
-			factory = new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
-
+			shader		= GameEngine.Content.Load<Ubershader>("globe.Poly.hlsl");
+			factory		= new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
+			factoryXray = new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.Additive, RasterizerState.CullCW, DepthStencilState.None);
 
 			var vbOptions = isDynamic ? VertexBufferOptions.Dynamic : VertexBufferOptions.Default;
 
@@ -88,9 +90,12 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
-			GameEngine.GraphicsDevice.PipelineState = factory[Flags];
-
-			//if(((PolyFlags)Flags).HasFlag(PolyFlags.DRAW_HEAT))
+			if (((PolyFlags) Flags).HasFlag(PolyFlags.XRAY)) {
+				GameEngine.GraphicsDevice.PipelineState = factoryXray[Flags];
+			}
+			else {
+				GameEngine.GraphicsDevice.PipelineState = factory[Flags];
+			}
 
 			GameEngine.GraphicsDevice.VertexShaderConstants[0] = constBuffer;
 
@@ -155,19 +160,43 @@ namespace Fusion.Engine.Graphics.GIS
 				var world = transforms[i];
 				
 
+
 				foreach (var vert in scene.Meshes[meshIndex].Vertices) {
 					var pos = vert.Position;
 
-					var worldPos = Vector3.TransformCoordinate(pos, world);
+					var worldPos	= Vector3.TransformCoordinate(pos, world);
+					var worldNorm	= Vector3.TransformNormal(vert.Normal, world);
 
 
 					double lon, lat;
 					Gis.UtmToLatLon(easting + worldPos.X, northing - worldPos.Z, region, out lon, out lat);
-					
+
+					DVector3 norm = new DVector3(worldNorm.X, worldNorm.Z, worldNorm.Y);
+					norm.Normalize();
+					//norm = DVector3.TransformNormal(norm, DQuaternion.RotationAxis(DVector3.Normalize(DVector3.Cross(norm, DVector3.UnitY)), DMathUtil.DegreesToRadians(lat)));
+					//norm.Normalize();
+					//norm = DVector3.TransformNormal(norm, DQuaternion.RotationAxis(DVector3.UnitY, DMathUtil.DegreesToRadians(lon)));
+					//norm.Normalize();
+
+					norm = DVector3.TransformNormal(norm, DMatrix.RotationYawPitchRoll(DMathUtil.DegreesToRadians(lon), DMathUtil.DegreesToRadians(lat), 0));
+					norm.Normalize();
+
+					norm.Y = -norm.Y;
+
+					//var LonLatPosition = new DVector2(lon, lat);
+					//var cart = GeoHelper.SphericalToCartesian(DMathUtil.DegreesToRadians(LonLatPosition), 6378.137);
+					//
+					//cart.Normalize();
+					//
+					//Console.WriteLine(norm);
+					//Console.WriteLine(cart);
+					//Console.WriteLine();
+
 					var point = new Gis.GeoPoint {
 						Lon		= DMathUtil.DegreesToRadians(lon) + 0.0000068,
 						Lat		= DMathUtil.DegreesToRadians(lat) + 0.0000113,
 						Color	= vert.Color0,
+						Tex0	= new Vector4(norm.ToVector3(), 0),
 						Tex1	= new Vector4(0,0,0, worldPos.Y/1000.0f)
 					};
 					point.Color.Alpha = 0.5f;
