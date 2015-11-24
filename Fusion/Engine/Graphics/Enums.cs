@@ -17,14 +17,14 @@ namespace Fusion.Engine.Graphics {
 
 
 
-		/// <summary>
+	/// <summary>
 	/// Defines set of applied to instance surface effects.
+	/// No XRay - replace material with narrowed glow.
 	/// </summary>
 	public enum InstanceFX {
 		None,
 		Wet,
 		Frozen,
-		XRay,
 		Selection,
 	}
 

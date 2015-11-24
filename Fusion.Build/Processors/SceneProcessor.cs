@@ -30,6 +30,12 @@ namespace Fusion.Build.Processors {
 		[CommandLineParser.Name("geom", "import geometry")]
 		public bool ImportGeometry { get; set; }
 
+		/// <summary>
+		/// Evaluates transform
+		/// </summary>
+		[CommandLineParser.Name("report", "output html report")]
+		public bool OutputReport { get; set; }
+
 
 		
 		/// <summary>
@@ -49,11 +55,12 @@ namespace Fusion.Build.Processors {
 		{
 			var resolvedPath	=	assetFile.FullSourcePath;
 			var destPath		=	context.GetTempFileName( assetFile.KeyPath, ".scene" );
-			var cmdLine			=	string.Format("\"{0}\" /out:\"{1}\" /merge:{2} {3} {4}", 
+			var cmdLine			=	string.Format("\"{0}\" /out:\"{1}\" /merge:{2} {3} {4} {5}", 
 				resolvedPath, destPath, 
 				MergeTolerance, 
 				ImportAnimation ? "/anim":"", 
-				ImportGeometry ? "/geom":"" 
+				ImportGeometry ? "/geom":"", 
+				OutputReport ? "/report":"" 
 			);
 
 			context.RunTool( "FScene.exe", cmdLine );

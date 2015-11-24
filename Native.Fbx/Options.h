@@ -19,6 +19,7 @@ public ref class Options {
 	bool	wait;
 	bool	anim;
 	bool	geom;
+	bool	report;
 
 	public:
 
@@ -73,6 +74,12 @@ public ref class Options {
 	property bool Wait {
 		void set(bool value) { wait = value; } 
 		bool get() { return wait; } 
+	}
+
+	[CommandLineParser::Name("report", "export html build report")]
+	property bool Report {
+		void set(bool value) { report = value; } 
+		bool get() { return report; } 
 	}
 };
 

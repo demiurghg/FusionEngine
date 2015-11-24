@@ -43,14 +43,14 @@ namespace Fusion.Engine.Graphics {
 		public float Displacement;
 
 		/// <summary>
-		/// Minimal rougheness.
+		/// Rougheness mapping range (min, max).
 		/// </summary>
-		public float MinRoughness;
+		public Vector2 RoughnessRange;
 
 		/// <summary>
-		/// Maximal rougheness.
+		/// Emission glow narrowness range (min, max, bias(?)).
 		/// </summary>
-		public float MaxRoughness;
+		public Vector2 GlowNarrowness;
 
 		/// <summary>
 		/// Blend factor. 
@@ -60,34 +60,16 @@ namespace Fusion.Engine.Graphics {
 		public float BlendFactor;
 
 		/// <summary>
-		/// Tiling. Default value is (1, 1).
+		/// Tiling. Default value is (1, 1, 1).
+		/// Z-coordinate is used for triplanar mapping.
 		/// </summary>
-		public float TilingU;
+		public Vector3 Tiling;
 
 		/// <summary>
-		/// Tiling. Default value is (1, 1).
+		/// Offset. Default value is (0, 0, 0).
+		/// Z-coordinate is used for triplanar mapping.
 		/// </summary>
-		public float TilingV;
-
-		/// <summary>
-		/// Tiling. Default value is (1, 1).
-		/// </summary>
-		public float TilingW;
-
-		/// <summary>
-		/// Offset. Default value is (0, 0).
-		/// </summary>
-		public float OffsetU;
-
-		/// <summary>
-		/// Offset. Default value is (0, 0).
-		/// </summary>
-		public float OffsetV;
-
-		/// <summary>
-		/// Offset. Default value is (0, 0).
-		/// </summary>
-		public float OffsetW;
+		public Vector3 Offset;
 
 		/// <summary>
 		/// Path to color texture.
@@ -121,15 +103,12 @@ namespace Fusion.Engine.Graphics {
 			EmissionLevel	=	1;
 			Displacement	=	1;
 
-			MinRoughness	=	0;
-			MaxRoughness	=	1;
+			GlowNarrowness	=	new Vector2(0,0);
 
-			TilingU	=	1;
-			TilingV	=	1;
-			TilingW	=	1;
-			OffsetU	=	0;
-			OffsetV	=	0;
-			OffsetW	=	0;
+			RoughnessRange	=	new Vector2(0,1);
+
+			Tiling	=	Vector3.One;
+			Offset	=	Vector3.Zero;
 
 			ColorTexture		=	"*grey";
 			SurfaceTexture		=	"*metal";

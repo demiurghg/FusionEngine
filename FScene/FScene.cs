@@ -56,6 +56,9 @@ namespace FScene {
 						scene.Save( stream );
 					}
 
+					if (options.Report) {
+						File.WriteAllText( options.Input + ".html", scene.ExportHtmlReport());
+					}
 				}
 
 				Log.Message("Done!");
