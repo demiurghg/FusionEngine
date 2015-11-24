@@ -39,17 +39,16 @@ namespace Fusion.Engine.Client {
 		/// <summary>
 		/// Runs one step of client-side simulation and render world state.
 		/// </summary>
-		/// <param name="gameTime">Game time.</param>
-		/// <param name="commandStream">Stream to write user's command. 
-		/// Should not exceed 1024 bytes. Good size for user commands is about 8-12 bytes.</param>
-		public abstract void Update ( GameTime gameTime, Stream commandStream );
+		/// <param name="gameTime"></param>
+		/// <returns>User command bytes</returns>
+		public abstract byte[] Update ( GameTime gameTime );
 
 		/// <summary>
 		/// Feed server snapshot to client.
 		/// Called when fresh snapshot arrived.
 		/// </summary>
 		/// <param name="snapshotStream">Snapshot data stream.</param>
-		public abstract void FeedSnapshot ( Stream snapshotStream );
+		public abstract void FeedSnapshot ( byte[] snapshot );
 
 		/// <summary>
 		/// Gets user information.

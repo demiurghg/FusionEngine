@@ -107,22 +107,26 @@ namespace Fusion.Engine.Client {
 			/// <param name="gameTime"></param>
 			public override void Update ( GameTime gameTime )
 			{
-				var buffer = new byte[1024 + 16];
-				int length = 0;
+				var userCmd	=	client.Update( gameTime );
+
+				if (userCmd.Length>1024) {
+					Log.Warning("User command > 1024 bytes. Ignored.");
+					return;
+				}
+
+				var buffer = new byte[userCmd.Length + 8];
 
 				using ( var stream = new MemoryStream(buffer) ) {
 					using ( var writer = new BinaryWriter(stream) ) {
 
 						writer.Write( commandCounter );
-
-						client.Update( gameTime, stream );
-
-						length = (int)stream.Position;
+						writer.Write( userCmd.Length );
+						writer.Write( userCmd );
 					}
 
 				}
 
-				netChan.Transmit( client.serverEP, NetCommand.UserCommand, buffer, length );
+				netChan.Transmit( client.serverEP, NetCommand.UserCommand, buffer, buffer.Length );
 			}
 
 
@@ -154,13 +158,7 @@ namespace Fusion.Engine.Client {
 			/// <param name="message"></param>
 			void AssembleSnapshot ( NetMessage message )
 			{	
-				using ( var stream = new MemoryStream(message.Data) ) {	
-					using ( var reader = new BinaryReader(stream) ) {
-
-						client.FeedSnapshot( stream );
-
-					}
-				}
+				client.FeedSnapshot( message.Data );
 			}
 		}
 	}

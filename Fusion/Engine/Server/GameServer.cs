@@ -41,14 +41,15 @@ namespace Fusion.Engine.Server {
 		/// Runs one step of server-side world simulation.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public abstract void Update ( GameTime gameTime, Stream outputSnapshotStream );
+		/// <returns>Snapshot bytes</returns>
+		public abstract byte[] Update ( GameTime gameTime );
 
 		/// <summary>
 		/// Feed server with commands from particular client.
 		/// </summary>
 		/// <param name="id">Client's ID</param>
 		/// <param name="command">Client's user command stream</param>
-		public abstract void FeedCommand ( string id, Stream inputCommandStream );
+		public abstract void FeedCommand ( string id, byte[] userCommand );
 
 		/// <summary>
 		/// Gets server information that required for client to load the game.

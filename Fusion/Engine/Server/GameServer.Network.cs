@@ -66,15 +66,10 @@ namespace Fusion.Engine.Server {
 			//
 			//	update and feed clients back :
 			//	
-			using ( var stream = new MemoryStream() ) {
-				
-				Update( gameTime, stream );
+			var snapshot = Update( gameTime );
 
-				int length = (int)stream.Length;
-			
-				foreach ( var cl in clients ) {
-					cl.SendSnapshot( stream.GetBuffer(), length );
-				}
+			foreach ( var cl in clients ) {
+				cl.SendSnapshot( snapshot, snapshot.Length );
 			}
 		}
 
@@ -145,9 +140,12 @@ namespace Fusion.Engine.Server {
 			using ( var stream = new MemoryStream(msg.Data) ) {
 				using ( var reader = new BinaryReader(stream) ) {
 				
-					int commandCounter = reader.ReadInt32();
+					int commandCounter	=	reader.ReadInt32();
+					int length			=	reader.ReadInt32();
 
-					FeedCommand( cl.ID, stream );
+					var userCmd			=	reader.ReadBytes( length );
+
+					FeedCommand( cl.ID, userCmd );
 				}
 			}
 		}

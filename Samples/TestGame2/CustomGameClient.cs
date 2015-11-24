@@ -54,13 +54,11 @@ namespace TestGame2 {
 		/// Do not close the stream.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public override void Update ( GameTime gameTime, Stream outputCommand )
+		public override byte[] Update ( GameTime gameTime )
 		{
 			var mouse = GameEngine.Mouse;
 			
-			using ( var writer = new BinaryWriter(outputCommand, Encoding.UTF8, true) ) {
-				writer.Write(string.Format("[{0} {1}]", mouse.Position.X, mouse.Position.Y ));
-			}
+			return Encoding.UTF8.GetBytes( string.Format("[{0} {1}]", mouse.Position.X, mouse.Position.Y ) );
 		}
 
 
@@ -69,34 +67,10 @@ namespace TestGame2 {
 		/// Called when fresh snapshot arrived.
 		/// </summary>
 		/// <param name="snapshot"></param>
-		public override void FeedSnapshot ( Stream inputSnapshot ) 
+		public override void FeedSnapshot ( byte[] snapshot ) 
 		{
-			var bb = new byte[1500];
-			
-			/*using ( var reader = new BinaryReader(inputSnapshot, Encoding.UTF8, true) ) {
-				reader.Read(bb, 0, 1500);	
-			} */
-
-
-			using ( var reader = new BinaryReader(inputSnapshot, Encoding.UTF8, true) ) {
-
-				int last = -1;
-				for (int i=0; i<3000; i++) {
-					var curr = reader.ReadInt32();
-					if (curr!=last+1) {
-						Log.Warning("{0} {1}", curr, last);
-						break;
-					}
-					last = curr;
-				}
-
-				/*for (int i=0; i<250; i++) {
-					reader.ReadString();
-				}
-
-				string s = reader.ReadString();
-				Log.Message("SNAPSHOT: {1} : {0}", s, inputSnapshot.Length );*/
-			}
+			var str = Encoding.UTF8.GetString( snapshot );
+			Log.Message("CL : {0}", str);
 		}
 
 

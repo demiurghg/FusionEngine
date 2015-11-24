@@ -102,21 +102,9 @@ namespace TestGame2 {
 		/// Do not close the stream.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public override void Update ( GameTime gameTime, Stream outputSnapshot )
+		public override byte[] Update ( GameTime gameTime )
 		{
-			//Thread.Sleep(20);
-
-			using (var writer = new BinaryWriter(outputSnapshot, Encoding.UTF8, true)) {
-
-				for (int i=0; i<3000; i++) {
-					writer.Write(i);
-				}
-				/*var str = string.Join( " | ", state.Select(s1=>s1.Value) );
-
-				for (int i = 0; i<2050; i++) {
-					writer.Write(string.Format("SV: {1}", gameTime.ElapsedSec, str ));
-				} */
-			}
+			return Encoding.UTF8.GetBytes( string.Join( " | ", state.Select(s1=>s1.Value) ) );
 		}
 
 
@@ -127,13 +115,9 @@ namespace TestGame2 {
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="clientId"></param>
-		public override void FeedCommand ( string clientIP, Stream inputCommand )
+		public override void FeedCommand ( string clientIP, byte[] userCommand )
 		{
-			using ( var reader = new BinaryReader(inputCommand) ) {
-				var s = reader.ReadString();
-				state[clientIP] = s;
-				//Log.Message("FeedCommand: {0} -> {1}", clientIP, s );
-			}
+			state[clientIP] = Encoding.UTF8.GetString( userCommand );
 		}
 
 
