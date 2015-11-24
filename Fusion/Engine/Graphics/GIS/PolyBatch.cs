@@ -55,6 +55,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		PolyGisLayer(GameEngine engine, Gis.GeoPoint[] points, int[] indeces, bool isDynamic) : base(engine)
 		{
+			Console.WriteLine(points.Length + " _ " + indeces.Length);
 			Initialize(points, indeces, isDynamic);
 
 			Flags = (int)(PolyFlags.VERTEX_SHADER | PolyFlags.PIXEL_SHADER | PolyFlags.DRAW_COLORED);
@@ -159,8 +160,6 @@ namespace Fusion.Engine.Graphics.GIS
 
 				var world = transforms[i];
 				
-
-
 				foreach (var vert in scene.Meshes[meshIndex].Vertices) {
 					var pos = vert.Position;
 
@@ -173,24 +172,11 @@ namespace Fusion.Engine.Graphics.GIS
 
 					DVector3 norm = new DVector3(worldNorm.X, worldNorm.Z, worldNorm.Y);
 					norm.Normalize();
-					//norm = DVector3.TransformNormal(norm, DQuaternion.RotationAxis(DVector3.Normalize(DVector3.Cross(norm, DVector3.UnitY)), DMathUtil.DegreesToRadians(lat)));
-					//norm.Normalize();
-					//norm = DVector3.TransformNormal(norm, DQuaternion.RotationAxis(DVector3.UnitY, DMathUtil.DegreesToRadians(lon)));
-					//norm.Normalize();
 
 					norm = DVector3.TransformNormal(norm, DMatrix.RotationYawPitchRoll(DMathUtil.DegreesToRadians(lon), DMathUtil.DegreesToRadians(lat), 0));
 					norm.Normalize();
 
 					norm.Y = -norm.Y;
-
-					//var LonLatPosition = new DVector2(lon, lat);
-					//var cart = GeoHelper.SphericalToCartesian(DMathUtil.DegreesToRadians(LonLatPosition), 6378.137);
-					//
-					//cart.Normalize();
-					//
-					//Console.WriteLine(norm);
-					//Console.WriteLine(cart);
-					//Console.WriteLine();
 
 					var point = new Gis.GeoPoint {
 						Lon		= DMathUtil.DegreesToRadians(lon) + 0.0000068,

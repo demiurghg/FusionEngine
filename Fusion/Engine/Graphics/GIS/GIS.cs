@@ -202,7 +202,7 @@ namespace Fusion.Engine.Graphics.GIS
 			var batches = layers.OrderByDescending(x => x.ZOrder);
 			
 		    foreach (var batch in batches) {
-			    //if (!batch.IsVisible) continue;
+			    if (!batch.IsVisible) continue;
 
 				batch.Draw(gameTime, constBuffer);
 		    }

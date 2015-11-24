@@ -16,6 +16,7 @@ namespace Fusion.Engine.Graphics.GIS
 	{
 		Ubershader		shader;
 		StateFactory	factory;
+		StateFactory	factoryXray;
 		ConstantBuffer	modelBuf;
 
 		[StructLayout(LayoutKind.Explicit)]
@@ -83,6 +84,7 @@ namespace Fusion.Engine.Graphics.GIS
 			modelBuf	= new ConstantBuffer(GameEngine.GraphicsDevice, typeof(ConstDataStruct));
 			shader		= GameEngine.Content.Load<Ubershader>("globe.Model.hlsl");
 			factory		= new StateFactory(shader, typeof(ModelFlags), Primitive.TriangleList, VertexInputElement.FromStructure<VertexColorTextureTBNRigid>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
+			factoryXray = new StateFactory(shader, typeof(ModelFlags), Primitive.TriangleList, VertexInputElement.FromStructure<VertexColorTextureTBNRigid>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
 
 			if (maxInstancedCount > 0) {
 				InstancedCountToDraw	= maxInstancedCount;
@@ -140,8 +142,13 @@ namespace Fusion.Engine.Graphics.GIS
 					? InstancedDataCPU.Length
 					: InstancedCountToDraw;
 			}
-			
-			dev.PipelineState = factory[flags];
+
+			if (XRay) {
+				dev.PipelineState = factoryXray[flags];
+			}
+			else {
+				dev.PipelineState = factory[flags];
+			}
 			
 
 			for (int i = 0; i < model.Nodes.Count; i++) {

@@ -93,7 +93,7 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 		float3 ndir	= normalize(-input.WPos);
 		
 		float  ndot = abs(dot( ndir, input.Normal ));
-		float  frsn	= pow(saturate(1-ndot), 0.5);
+		float  frsn	= pow(saturate(1.2f-ndot), 0.5);
 		
 		return frsn*float4(input.Color.xyz, 1);
 	#endif
