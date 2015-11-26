@@ -63,7 +63,7 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		public override void Initialize ()
 		{
-			Log.Message("  local IP : {0}", GetLocalIPAddress());
+			/*Log.Message("  local IP : {0}", GetLocalIPAddress());
 
 			Log.Message("  network  : {0}", System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable() );
 
@@ -98,7 +98,7 @@ namespace Fusion.Engine.Network {
 			serverSocket.DontFragment	= true;
 
 			clientSocket.Bind( new IPEndPoint(IPAddress.Any, 0) );
-			Log.Message("  client   : {0}", clientSocket.LocalEndPoint );
+			Log.Message("  client   : {0}", clientSocket.LocalEndPoint );*/
 		}
 
 
@@ -109,11 +109,11 @@ namespace Fusion.Engine.Network {
 		/// <param name="disposing"></param>
 		protected override void Dispose ( bool disposing )
 		{
-			if (disposing) {
-				SafeDispose( ref clientSocket );
-				SafeDispose( ref serverSocket );
-			}
-			base.Dispose( disposing );
+			//if (disposing) {
+			//	SafeDispose( ref clientSocket );
+			//	SafeDispose( ref serverSocket );
+			//}
+			//base.Dispose( disposing );
 		}
 
 	
@@ -123,13 +123,13 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		public string GetLocalIPAddress()
 		{
-			var host = Dns.GetHostEntry(Dns.GetHostName());
+			//var host = Dns.GetHostEntry(Dns.GetHostName());
 
-			foreach (var ip in host.AddressList) {
-				if (ip.AddressFamily == AddressFamily.InterNetwork) {
-					return ip.ToString();
-				}
-			}
+			//foreach (var ip in host.AddressList) {
+			//	if (ip.AddressFamily == AddressFamily.InterNetwork) {
+			//		return ip.ToString();
+			//	}
+			//}
 
 			throw new Exception("Local IP Address Not Found!");
 		}

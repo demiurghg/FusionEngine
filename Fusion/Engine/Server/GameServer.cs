@@ -55,6 +55,7 @@ namespace Fusion.Engine.Server {
 		/// Gets server information that required for client to load the game.
 		/// This information usually contains map name and game type.
 		/// This information is also used for discovery response.
+		/// This information shoud not be changed within session.
 		/// </summary>
 		/// <returns></returns>
 		public abstract string ServerInfo ();
@@ -73,12 +74,23 @@ namespace Fusion.Engine.Server {
 		public abstract void ClientDisconnected ( string id, string userInfo );
 
 		/// <summary>
+		/// Approves client by id and user information.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="userInfo"></param>
+		/// <returns></returns>
+		public virtual bool ApproveClient ( string id, string userInfo )
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
 		/// Sends text message to all clients.
 		/// </summary>
 		/// <param name="message"></param>
 		public void NotifyClients ( string format, params object[] args )
 		{
-			NotifyClientsInternal( string.Format(format, args) );
+			//NotifyClientsInternal( string.Format(format, args) );
 		}
 	}
 }

@@ -8,27 +8,14 @@ using Fusion.Engine.Network;
 using System.Net;
 using Fusion.Core.Shell;
 using Fusion.Engine.Common;
+using Lidgren.Network;
+using Fusion.Engine.Server;
 
 
 namespace Fusion.Engine.Client {
 	public abstract partial class GameClient : GameModule {
 
-		NetChan	netChan		=	null;
-		STState	state;
-
-		IPEndPoint	serverEP	=	null;
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="newState"></param>
-		void SetState ( STState newState )
-		{
-			state	=	newState;
-		}
-
-
+		NetClient client;
 
 		/// <summary>
 		/// 
@@ -37,11 +24,14 @@ namespace Fusion.Engine.Client {
 		/// <param name="port"></param>
 		internal void ConnectInternal ( string host, int port )
 		{
-			//	recreate NetChan to reset counters and internal state.
-			SafeDispose( ref netChan );
-			netChan	=	new NetChan( GameEngine, GameEngine.Network.ClientSocket, "CL" );
+			var netConfig	=	new NetPeerConfiguration(GameEngine.GameTitle);
+			netConfig.AutoFlushSendQueue	=	true;
 
-			state.Connect( host, port );
+			client	=	new NetClient( netConfig );
+
+			client.Start();
+
+			client.Connect( new IPEndPoint( IPAddress.Parse(host), port ) );
 		}
 
 
@@ -53,7 +43,9 @@ namespace Fusion.Engine.Client {
 		/// <param name="port"></param>
 		internal void DisconnectInternal ()
 		{
-			state.Disconnect(); 
+			client.Disconnect("Client disconnected");
+			client.Shutdown("Client shutdown");
+			client = null;
 		}
 
 
@@ -64,31 +56,71 @@ namespace Fusion.Engine.Client {
 		/// <param name="gameTime"></param>
 		internal void UpdateInternal ( GameTime gameTime )
 		{
-			NetMessage msg;
-
-			try {
-				
-				while ( netChan!=null && netChan.Dispatch(out msg) ) {
-
-					if (msg==null) continue;
-
-					//	dispatch messages only from server :
-					if (NetUtils.IsIPsEqual( msg.SenderEP, serverEP ) ) {
-						state.DispatchIM( msg );
-					} else {
-						Log.Warning("{0} sends commands. Expected from: {1}", msg.SenderEP, serverEP );
-					}
-				}
-
-			} catch ( NetChanException ne ) {
-				Log.Error(ne.Message);
-				GameEngine.GameInterface.ShowError(ne.Message);
-				SetState( new STStandBy(this) );
-				return;
+			if (client!=null) {
+				DispatchIM( client );
+				Update( gameTime );
 			}
-
-			state.Update( gameTime );
 		}
 
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="message"></param>
+		void DispatchIM ( NetClient server )
+		{
+			NetIncomingMessage msg;
+			while ((msg = server.ReadMessage()) != null)
+			{
+				switch (msg.MessageType)
+				{
+					case NetIncomingMessageType.VerboseDebugMessage:Log.Verbose	("CL: " + msg.ReadString()); break;
+					case NetIncomingMessageType.DebugMessage:		Log.Debug	("CL: " + msg.ReadString()); break;
+					case NetIncomingMessageType.WarningMessage:		Log.Warning	("CL: " + msg.ReadString()); break;
+					case NetIncomingMessageType.ErrorMessage:		Log.Error	("CL: " + msg.ReadString()); break;
+					case NetIncomingMessageType.StatusChanged:		Log.Message	("CL: Status changed: {0}", (NetConnectionStatus)msg.ReadByte());	break;
+					
+					case NetIncomingMessageType.ConnectionLatencyUpdated:
+						Log.Message("CL: Connection latencty - {0}", msg.ReadSingle() );
+						break;
+
+					case NetIncomingMessageType.Data:
+						DispatchDataIM( msg );
+						break;
+					
+					default:
+						Log.Warning("CL: Unhandled type: " + msg.MessageType);
+						break;
+				}
+				server.Recycle(msg);
+			}			
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="msg"></param>
+		void DispatchDataIM ( NetIncomingMessage msg )
+		{
+			var netCmd = (NetCommand)msg.ReadByte();
+
+			switch (netCmd) {
+				case NetCommand.Snapshot : 
+					Log.Warning("Snapshot is received"); 
+					break;
+				case NetCommand.UserCommand : 
+					Log.Warning("User command is received by client");
+					break;
+				case NetCommand.Notification :
+					Log.Message("CL: Notification: {0}", msg.ReadString() );
+					break;
+				case NetCommand.ChatMessage :
+					//CharM
+					break;
+			}
+		}
 	}
 }

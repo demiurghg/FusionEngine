@@ -570,7 +570,7 @@ namespace Fusion.Engine.Graphics {
 				index++;
 			}
 
-			#warning Debug omni-lights.
+			//#warning Debug omni-lights.
 			#if false
 			if (Config.ShowOmniLights) {
 				var dr	=	GameEngine.GetService<DebugRender>();
@@ -620,7 +620,7 @@ namespace Fusion.Engine.Graphics {
 				var bf = new BoundingFrustum( spot.SpotView * spot.Projection );
 				var pos = Matrix.Invert(spot.SpotView).TranslationVector;
 
-				#warning Debug spot-lights.
+				//#warning Debug spot-lights.
 				#if false
 				if (Config.ShowSpotLights) {
 					dr.DrawPoint( pos, 0.5f, Color.LightYellow );

@@ -100,6 +100,7 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		public UserStorage UserStorage { get { return userStorage; } }
 
+
 		/// <summary>
 		/// Sets and gets game window icon.
 		/// </summary>
@@ -116,6 +117,7 @@ namespace Fusion.Engine.Common {
 		}
 		System.Drawing.Icon windowIcon = null;
 
+
 		/// <summary>
 		/// Gets and sets game window title.
 		/// </summary>
@@ -126,6 +128,9 @@ namespace Fusion.Engine.Common {
 			set {
 				if (value==null) {
 					throw new ArgumentNullException();
+				}
+				if (string.IsNullOrWhiteSpace(value)) {
+					throw new ArgumentException("GameTitle must be readable string", "value");
 				}
 				if (IsInitialized) {
 					throw new InvalidOperationException("Can not set GameTitle after game engine initialization");

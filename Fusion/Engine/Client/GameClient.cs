@@ -19,7 +19,6 @@ namespace Fusion.Engine.Client {
 		/// <param name="gameEngine"></param>
 		public GameClient ( GameEngine gameEngine ) : base(gameEngine) 
 		{
-			state	=	new STStandBy(this);
 		}
 
 		/// <summary>
