@@ -59,7 +59,7 @@ namespace Fusion.Engine.Graphics.GIS
 	    {
 		    protected GameEngine GameEngine;
 
-			public bool IsActive;
+			public bool IsActive = true;
 			public bool IsVisible = true;
 
 		    public uint ZOrder;

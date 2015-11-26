@@ -45,7 +45,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public Viewport Viewport { set; get; }
 
-		public bool PerspSwitcher = false;
+		public bool ViewToPointSwitcher = false;
 
 
 		public DVector3 CameraPosition { get; private set; }
@@ -70,14 +70,16 @@ namespace Fusion.Engine.Graphics.GIS
 		double frustumZFar	= 100000.0;
 		public readonly double camFov = 20;
 
-		double FreeCamYaw	=  Math.PI / 2.0;
-		double FreeCamPitch = -Math.PI / 10.0;
+		double FreeCamYaw	=  Math.PI;
+		double FreeCamPitch = -Math.PI/2.01;
 
 
 
 		public readonly double EarthRadius = 6378.137;
 		double maxCameraDistance	= 100000.0;
 		double cameraDistance		= 6500.0;
+
+
 
 
 		public enum Places
@@ -134,10 +136,10 @@ namespace Fusion.Engine.Graphics.GIS
 
 			var input = gameEngine.InputDevice;
 
-			if (input.IsKeyDown(Keys.LeftShift))	{ PerspSwitcher = true; }
-			if (input.IsKeyDown(Keys.RightShift))	{ PerspSwitcher = false; }
+			if (input.IsKeyDown(Keys.LeftShift))	{ ViewToPointSwitcher = true; }
+			if (input.IsKeyDown(Keys.RightShift))	{ ViewToPointSwitcher = false; }
 
-			if (PerspSwitcher) {
+			if (ViewToPointSwitcher) {
 				DVector3 cameraUp		= CameraPosition / CameraPosition.Length();
 				DVector3 lookAtPoint	= cameraUp * EarthRadius;
 
@@ -180,7 +182,7 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			var input = gameEngine.InputDevice;
 
-			if (PerspSwitcher && input.IsKeyDown(Keys.MiddleButton)) {
+			if (ViewToPointSwitcher && input.IsKeyDown(Keys.MiddleButton)) {
 				FreeCamYaw		+= input.RelativeMouseOffset.X * 0.003;
 				FreeCamPitch	-= input.RelativeMouseOffset.Y * 0.003;
 

@@ -335,10 +335,15 @@ namespace Fusion.Engine.Graphics {
 				GlobeCamera.Viewport = viewport;
 				GlobeCamera.Update(gameTime);
 
-				var tiles = GisLayers.First() as TilesGisLayer;
-				if (tiles != null) {
-					tiles.Update(gameTime);
+				var tiles = GisLayers.Where(x => x is TilesGisLayer).Select(x => x);
+				foreach (var tile in tiles) {
+					if(tile.IsActive)
+						tile.Update(gameTime);
 				}
+				//var tiles = GisLayers.First() as TilesGisLayer;
+				//if (tiles != null) {
+				//	tiles.Update(gameTime);
+				//}
 
 				ge.Gis.Camera = GlobeCamera;
 				ge.Gis.Draw(gameTime, stereoEye, GisLayers);
