@@ -9,6 +9,7 @@ using Fusion.Core;
 using Fusion.Engine.Common;
 using Fusion.Engine.Client;
 using Fusion.Engine.Server;
+using System.Diagnostics;
 
 
 namespace TestGame2 {
@@ -58,7 +59,7 @@ namespace TestGame2 {
 		{
 			var mouse = GameEngine.Mouse;
 			
-			return Encoding.UTF8.GetBytes( string.Format("[{0} {1}]", mouse.Position.X, mouse.Position.Y ) );
+			return Encoding.UTF8.GetBytes( string.Format("[{0} {1} {2}]", mouse.Position.X, mouse.Position.Y, UserInfo() ) );
 		}
 
 
@@ -81,7 +82,7 @@ namespace TestGame2 {
 		/// <returns></returns>
 		public override string UserInfo ()
 		{
-			return "Bob";
+			return "Bob" + Process.GetCurrentProcess().Id.ToString();
 		}
 	}
 }

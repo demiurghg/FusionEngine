@@ -68,6 +68,16 @@ namespace Fusion.Engine.Server {
 			//	
 			var snapshot = Update( gameTime );
 
+			int usize	=	snapshot.Length;
+
+			snapshot = NetworkEngine.Compress( snapshot );
+
+			int csize	=	snapshot.Length;
+
+			if (GameEngine.Network.Config.ShowCompression) {
+				Log.Message("Snapshot compression: {0}/{1} {2,3}% ", csize, usize, (csize*100)/usize );
+			}
+
 			foreach ( var cl in clients ) {
 				cl.SendSnapshot( snapshot, snapshot.Length );
 			}

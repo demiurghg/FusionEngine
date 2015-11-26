@@ -18,6 +18,8 @@ namespace Fusion.Engine.Network {
 
 		public bool ShowPackets { get; set; }
 
+		public bool ShowCompression { get; set; }
+
 		public float SimulatePacketsLoss { get; set; }
 
 
@@ -38,6 +40,7 @@ namespace Fusion.Engine.Network {
 			MaxClients			=	8;
 			SimulatePacketsLoss	=	0;
 			ShowPackets			=	false;
+			ShowCompression		=	false;
 
 			ResendTimeout		=	1000;
 			ResendMaxCount		=	10;

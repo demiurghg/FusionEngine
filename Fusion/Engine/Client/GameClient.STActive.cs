@@ -158,7 +158,7 @@ namespace Fusion.Engine.Client {
 			/// <param name="message"></param>
 			void AssembleSnapshot ( NetMessage message )
 			{	
-				client.FeedSnapshot( message.Data );
+				client.FeedSnapshot( NetworkEngine.Decompress(message.Data) );
 			}
 		}
 	}

@@ -104,6 +104,7 @@ namespace TestGame2 {
 		/// <param name="gameTime"></param>
 		public override byte[] Update ( GameTime gameTime )
 		{
+			Thread.Sleep(10);
 			return Encoding.UTF8.GetBytes( string.Join( " | ", state.Select(s1=>s1.Value) ) );
 		}
 
