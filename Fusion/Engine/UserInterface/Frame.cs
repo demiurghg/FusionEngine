@@ -682,7 +682,7 @@ namespace Fusion.Engine.UserInterface {
 		/// </summary>
 		/// <param name="gameTime"></param>
 		/// <param name="frame"></param>
-		internal void DrawInternal ( GameTime gameTime, SpriteLayer sb )
+		internal void DrawInternal ( GameTime gameTime, SpriteLayer sb, Color colorMultiplier )
 		{
 			var vp = Game.GraphicsDevice.DisplayBounds;
 
@@ -690,12 +690,14 @@ namespace Fusion.Engine.UserInterface {
 
 				if (ClippingMode==ClippingMode.None) {
 
-					DrawFrameBorders( sb );
+					colorMultiplier	=	colorMultiplier * OverallColor;
 
-					Draw( gameTime, sb );
+					DrawFrameBorders( sb, colorMultiplier );
+
+					Draw( gameTime, sb, colorMultiplier );
 
 					foreach ( var child in Children ) {
-						child.DrawInternal( gameTime, sb );
+						child.DrawInternal( gameTime, sb, colorMultiplier );
 					}
 				}
 			}
@@ -715,7 +717,7 @@ namespace Fusion.Engine.UserInterface {
 		/// <summary>
 		/// Draws frame stuff
 		/// </summary>
-		void DrawFrameBorders ( SpriteLayer sb )
+		void DrawFrameBorders ( SpriteLayer sb, Color colorMultiplier )
 		{
 			int gx	=	GlobalRectangle.X;
 			int gy	=	GlobalRectangle.Y;
@@ -728,12 +730,14 @@ namespace Fusion.Engine.UserInterface {
 
 			var whiteTex = Game.GraphicsEngine.WhiteTexture;
 
-			sb.Draw( whiteTex,	gx,				gy,				w,		bt,				BorderColor ); 
-			sb.Draw( whiteTex,	gx,				gy + h - bb,	w,		bb,				BorderColor ); 
-			sb.Draw( whiteTex,	gx,				gy + bt,		bl,		h - bt - bb,	BorderColor ); 
-			sb.Draw( whiteTex,	gx + w - br,	gy + bt,		br,		h - bt - bb,	BorderColor ); 
+			var clr	=	BorderColor * colorMultiplier;
 
-			sb.Draw( whiteTex,	GetBorderedRectangle(), BackColor );
+			sb.Draw( whiteTex,	gx,				gy,				w,		bt,				clr ); 
+			sb.Draw( whiteTex,	gx,				gy + h - bb,	w,		bb,				clr ); 
+			sb.Draw( whiteTex,	gx,				gy + bt,		bl,		h - bt - bb,	clr ); 
+			sb.Draw( whiteTex,	gx + w - br,	gy + bt,		br,		h - bt - bb,	clr ); 
+
+			sb.Draw( whiteTex,	GetBorderedRectangle(), BackColor * colorMultiplier );
 		}
 
 
@@ -742,10 +746,10 @@ namespace Fusion.Engine.UserInterface {
 		/// Draws frame stuff.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		protected virtual void Draw ( GameTime gameTime, SpriteLayer sb )
+		protected virtual void Draw ( GameTime gameTime, SpriteLayer sb, Color colorMultiplier )
 		{
-			DrawFrameImage( sb );
-			DrawFrameText( sb );
+			DrawFrameImage( sb, colorMultiplier );
+			DrawFrameText( sb, colorMultiplier );
 		}
 
 
@@ -814,22 +818,6 @@ namespace Fusion.Engine.UserInterface {
 		}
 
 
-		/*protected void UpdateAnchorsAndStoreOldXYWH ()
-		{
-			if ( oldW != Width || oldH != Height ) {	
-				
-				if (!firstResize) {
-					ForEachChildren( f => f.UpdateAnchors( oldW, oldH, Width, Height ) );
-				}
-				
-				firstResize = false;
-
-				oldW = Width;
-				oldH = Height;
-			}
-		} */
-
-
 
 		/// <summary>
 		/// 
@@ -880,7 +868,7 @@ namespace Fusion.Engine.UserInterface {
 		/// <summary>
 		/// 
 		/// </summary>
-		protected void DrawFrameImage (SpriteLayer sb)
+		protected void DrawFrameImage (SpriteLayer sb, Color colorMultiplier )
 		{
 			if (Image==null) {
 				return;
@@ -890,24 +878,24 @@ namespace Fusion.Engine.UserInterface {
 			var bp = GetBorderedRectangle();
 
 			if (ImageMode==FrameImageMode.Stretched) {
-				sb.Draw( Image, gp, ImageColor );
+				sb.Draw( Image, gp, ImageColor * colorMultiplier );
 				return;
 			}
 
 			if (ImageMode==FrameImageMode.Centered) {
 				int x = gp.X + gp.Width/2  - Image.Width/2;
 				int y = gp.Y + gp.Height/2 - Image.Height/2;
-				sb.Draw( Image, x, y, Image.Width, Image.Height, ImageColor );
+				sb.Draw( Image, x, y, Image.Width, Image.Height, ImageColor * colorMultiplier );
 				return;
 			}
 
 			if (ImageMode==FrameImageMode.Tiled) {
-				sb.Draw( Image, bp, new Rectangle(0,0,bp.Width,bp.Height), ImageColor );
+				sb.Draw( Image, bp, new Rectangle(0,0,bp.Width,bp.Height), ImageColor * colorMultiplier );
 				return;
 			}
 
 			if (ImageMode == FrameImageMode.DirectMapped) {
-				sb.Draw(Image, gp, gp, ImageColor);
+				sb.Draw(Image, gp, gp, ImageColor * colorMultiplier);
 				return;
 			}
 
@@ -920,7 +908,7 @@ namespace Fusion.Engine.UserInterface {
 		/// Draws string
 		/// </summary>
 		/// <param name="text"></param>
-		protected void DrawFrameText ( SpriteLayer sb )
+		protected void DrawFrameText ( SpriteLayer sb, Color colorMultiplier )
 		{											
 			if (string.IsNullOrEmpty(Text)) {
 				return;
@@ -979,10 +967,10 @@ namespace Fusion.Engine.UserInterface {
 			} */
 
 			if (ShadowColor.A!=0) {
-				Font.DrawString( sb, Text, x + TextOffsetX+ShadowOffset.X, y + TextOffsetY+ShadowOffset.Y, ShadowColor, 0, false );
+				Font.DrawString( sb, Text, x + TextOffsetX+ShadowOffset.X, y + TextOffsetY+ShadowOffset.Y, ShadowColor * colorMultiplier, 0, false );
 			}
 
-			Font.DrawString( sb, Text, x + TextOffsetX, y + TextOffsetY, ForeColor, 0, false );
+			Font.DrawString( sb, Text, x + TextOffsetX, y + TextOffsetY, ForeColor * colorMultiplier, 0, false );
 		}
 
 

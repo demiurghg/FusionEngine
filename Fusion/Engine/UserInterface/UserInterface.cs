@@ -133,7 +133,7 @@ namespace Fusion.Engine.UserInterface {
 			sb.Clear();
 		
 			if (RootFrame!=null) {
-				RootFrame.DrawInternal( gameTime, sb );
+				RootFrame.DrawInternal( gameTime, sb, Color.White );
 			}
 		}
 
