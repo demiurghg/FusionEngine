@@ -266,7 +266,7 @@ void GSMain ( line VS_OUTPUT inputArray[2], inout TriangleStream<GS_OUTPUT> stre
 	
 #ifdef ADD_CAPS
 	// Add caps
-	float f = 0.525f;
+	float f = 0.55f;
 	
 	stream.RestartStrip();
 	{
@@ -281,11 +281,11 @@ void GSMain ( line VS_OUTPUT inputArray[2], inout TriangleStream<GS_OUTPUT> stre
 		output.Tex		= float2(1.0f, 0.5f);
 		stream.Append( output );
 
-		output.Position	= mul(float4(p0.Position.xyz + sideOffset0*f  + dir*f, 1), Stage.ViewProj);
+		output.Position	= mul(float4(p0.Position.xyz + sideOffset0*f  + dir*f*halfWidth0, 1), Stage.ViewProj);
 		output.Tex		= float2(0.0f, 0.0f);
 		stream.Append( output );
 		
-		output.Position	= mul(float4(p0.Position.xyz - sideOffset0*f  + dir*f, 1), Stage.ViewProj);
+		output.Position	= mul(float4(p0.Position.xyz - sideOffset0*f  + dir*f*halfWidth0, 1), Stage.ViewProj);
 		output.Tex		= float2(1.0f, 0.0f);
 		stream.Append( output );
 	}
@@ -302,11 +302,11 @@ void GSMain ( line VS_OUTPUT inputArray[2], inout TriangleStream<GS_OUTPUT> stre
 		output.Tex		= float2(1.0f, 0.5f);
 		stream.Append( output );
 
-		output.Position	= mul(float4(p1.Position.xyz + sideOffset1  - dir*f, 1), Stage.ViewProj);
+		output.Position	= mul(float4(p1.Position.xyz + sideOffset1*f  - dir*f*halfWidth1, 1), Stage.ViewProj);
 		output.Tex		= float2(0.0f, 0.0f);
 		stream.Append( output );
 		
-		output.Position	= mul(float4(p1.Position.xyz - sideOffset1  - dir*f, 1), Stage.ViewProj);
+		output.Position	= mul(float4(p1.Position.xyz - sideOffset1*f  - dir*f*halfWidth1, 1), Stage.ViewProj);
 		output.Tex		= float2(1.0f, 0.0f);
 		stream.Append( output );
 	}

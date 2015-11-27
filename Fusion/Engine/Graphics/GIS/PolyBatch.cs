@@ -55,7 +55,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		PolyGisLayer(GameEngine engine, Gis.GeoPoint[] points, int[] indeces, bool isDynamic) : base(engine)
 		{
-			Console.WriteLine(points.Length + " _ " + indeces.Length);
+			//Console.WriteLine(points.Length + " _ " + indeces.Length);
 			Initialize(points, indeces, isDynamic);
 
 			Flags = (int)(PolyFlags.VERTEX_SHADER | PolyFlags.PIXEL_SHADER | PolyFlags.DRAW_COLORED);

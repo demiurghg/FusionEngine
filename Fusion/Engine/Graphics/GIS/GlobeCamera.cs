@@ -69,7 +69,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		DVector3	FreeSurfacePosition;
 		DVector3	FreeSurfaceVelocityDirection;
-		double		FreeSurfaceVelocityMagnitude = 0.001;
+		double		FreeSurfaceVelocityMagnitude = 0.1;
 
 		double FreeSurfaceYaw	= Math.PI;
 		double FreeSurfacePitch = -Math.PI / 2.01;
@@ -139,6 +139,15 @@ namespace Fusion.Engine.Graphics.GIS
 
 			if (input.IsKeyDown(Keys.LeftShift))	{ ViewToPointSwitcher = true; }
 			if (input.IsKeyDown(Keys.RightShift))	{ ViewToPointSwitcher = false; }
+			if (input.IsKeyDown(Keys.LeftControl)) {
+				FreeSurfaceSwitcher = true;
+				FreeSurfacePosition = CameraPosition;
+			}
+			if (input.IsKeyDown(Keys.RightControl)) {
+				FreeSurfaceSwitcher = false;
+				CameraPosition = FreeSurfacePosition;
+				CameraDistance = CameraPosition.Length();
+			}
 
 			if (ViewToPointSwitcher) {
 				var mat = CalculateBasisOnSurface();
@@ -160,15 +169,18 @@ namespace Fusion.Engine.Graphics.GIS
 
 				ViewMatrix.TranslationVector = DVector3.Zero;
 			} else if (FreeSurfaceSwitcher) {
+
+				var mat = CalculateBasisOnSurface();
+
 				// Update surface camera yaw and pitch
 				if (input.IsKeyDown(Keys.RightButton)) {
-					FreeSurfaceYaw += input.RelativeMouseOffset.X*0.0003f;
-					FreeSurfacePitch -= input.RelativeMouseOffset.Y*0.0003f;
-
+					FreeSurfaceYaw		+= input.RelativeMouseOffset.X*0.0003;
+					FreeSurfacePitch	-= input.RelativeMouseOffset.Y*0.0003;
+					
 					FreeSurfaceVelocityMagnitude += (input.TotalMouseScroll - prevMouseScroll)*0.0001;
 					//Console.WriteLine(FreeSurfaceVelocityMagnitude);
 
-					input.IsMouseCentered	= true;
+					input.IsMouseCentered	= false;
 					input.IsMouseHidden		= true;
 				}
 				else {
@@ -176,8 +188,19 @@ namespace Fusion.Engine.Graphics.GIS
 					input.IsMouseHidden		= false;
 				}
 				prevMouseScroll = input.TotalMouseScroll;
+
+
+				if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Left))		FreeSurfaceYaw		-= gameTime.ElapsedSec * 0.5;
+				if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Right))	FreeSurfaceYaw		+= gameTime.ElapsedSec * 0.5;
+				if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Up))		FreeSurfacePitch	-= gameTime.ElapsedSec * 0.1;
+				if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Down))		FreeSurfacePitch	+= gameTime.ElapsedSec * 0.1;
+
+
+				//FreeSurfaceYaw = DMathUtil.Clamp(FreeSurfaceYaw, -DMathUtil.PiOverTwo, DMathUtil.PiOverTwo);
+				if (FreeSurfaceYaw > DMathUtil.TwoPi) FreeSurfaceYaw -= DMathUtil.TwoPi;
+				if (FreeSurfaceYaw < -DMathUtil.TwoPi) FreeSurfaceYaw += DMathUtil.TwoPi;
+
 				// Calculate free cam rotation matrix
-				var mat = CalculateBasisOnSurface();
 
 				var quat = DQuaternion.RotationAxis(DVector3.UnitY, FreeSurfaceYaw) * DQuaternion.RotationAxis(DVector3.UnitX, FreeSurfacePitch);
 				var qRot = DMatrix.RotationQuaternion(quat);
@@ -218,14 +241,13 @@ namespace Fusion.Engine.Graphics.GIS
 				#endregion
 
 				// Update camera position
-				FinalCamPosition	= CameraPosition + velDir*velocityMag;
+				FinalCamPosition	= FreeSurfacePosition = FreeSurfacePosition + velDir * velocityMag;
 				CameraPosition		= FinalCamPosition;
 
 				//Calculate view matrix
 				ViewMatrix = DMatrix.LookAtRH(FinalCamPosition, FinalCamPosition + matrix.Forward, matrix.Up);
-				ViewMatrixWithTranslation = ViewMatrix;
-
-				ViewMatrix.TranslationVector = DVector3.Zero;
+				ViewMatrixWithTranslation		= ViewMatrix;
+				ViewMatrix.TranslationVector	= DVector3.Zero;
 
 				// Calculate new yaw and pitch
 				CameraDistance = CameraPosition.Length();
@@ -345,5 +367,16 @@ namespace Fusion.Engine.Graphics.GIS
 
 			return ret;
 		}
+
+
+		#region Free Surface Camera Animation Stuff
+
+		public void SaveCurrentStateToFile(string fileName = "d")
+		{
+			
+		}
+
+		#endregion
+
 	}
 }
