@@ -671,7 +671,7 @@ namespace Fusion.Engine.Common {
 
 		internal void Disconnect ()
 		{
-			GameClient.DisconnectInternal();
+			GameClient.DisconnectInternal(true);
 			//	Kill server!
 		}
 	}

@@ -135,12 +135,14 @@ namespace TestGame2 {
 		public override void ClientConnected ( string clientIP, string userInfo )
 		{
 			NotifyClients("CONNECTED: {0} - {1}", clientIP, userInfo);
+			Log.Message("CONNECTED: {0} - {1}", clientIP, userInfo);
 			state.Add( clientIP, " --- " );
 		}
 
 		public override void ClientDisconnected ( string clientIP, string userInfo )
 		{
 			NotifyClients("DISCONNECTED: {0} - {1}", clientIP, userInfo );
+			Log.Message("DISCONNECTED: {0} - {1}", clientIP, userInfo );
 			state.Remove( clientIP );
 		}
 	}

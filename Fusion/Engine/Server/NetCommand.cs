@@ -11,6 +11,7 @@ namespace Fusion.Engine.Server {
 		Snapshot,
 		Notification,
 		ChatMessage,
+		UserInfoUpdate,
 
 	}
 }
