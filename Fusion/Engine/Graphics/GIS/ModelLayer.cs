@@ -102,7 +102,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			CartesianPos = GeoHelper.SphericalToCartesian(DMathUtil.DegreesToRadians(LonLatPosition), gis.Camera.EarthRadius);
 
-			var viewPosition		= CartesianPos - gis.Camera.FreeCamPosition;
+			var viewPosition		= CartesianPos - gis.Camera.FinalCamPosition;
 
 			var normal = DVector3.Normalize(CartesianPos);
 
