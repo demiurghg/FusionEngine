@@ -93,6 +93,7 @@ namespace Fusion.Engine.Server {
 		}
 
 
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -104,8 +105,8 @@ namespace Fusion.Engine.Server {
 			netConfig.MaximumConnections	=	32;
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
 
-			var server	=	new NetServer( netConfig );
-			notifications		=	new Queue<string>();
+			var server		=	new NetServer( netConfig );
+			notifications	=	new Queue<string>();
 
 			Log.Message("SV: Start: {0} {1}", map, postCommand);
 			snapshotCounter	=	0;
@@ -206,8 +207,8 @@ namespace Fusion.Engine.Server {
 			{
 				switch (msg.MessageType)
 				{
-					case NetIncomingMessageType.VerboseDebugMessage:Log.Verbose	("SV Net: " + msg.ReadString()); break;
-					case NetIncomingMessageType.DebugMessage:		Log.Debug	("SV Net: " + msg.ReadString()); break;
+					case NetIncomingMessageType.VerboseDebugMessage:Log.Debug	("SV Net: " + msg.ReadString()); break;
+					case NetIncomingMessageType.DebugMessage:		Log.Verbose	("SV Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.WarningMessage:		Log.Warning	("SV Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.ErrorMessage:		Log.Error	("SV Net: " + msg.ReadString()); break;
 
@@ -216,7 +217,7 @@ namespace Fusion.Engine.Server {
 						var clientID	=	msg.SenderEndPoint.ToString();
 						var userInfo	=	msg.SenderConnection.RemoteHailMessage.PeekString();
 						var reason		=	"";
-						var approve = ApproveClient( clientID, userInfo, out reason );
+						var approve		=	ApproveClient( clientID, userInfo, out reason );
 
 						if (approve) {	
 							msg.SenderConnection.Approve( server.CreateMessage( ServerInfo() ) );
@@ -304,6 +305,10 @@ namespace Fusion.Engine.Server {
 
 
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="server"></param>
 		void SendNotifications ( NetServer server )
 		{
 			List<string> messages;

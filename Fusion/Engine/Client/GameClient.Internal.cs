@@ -47,17 +47,18 @@ namespace Fusion.Engine.Client {
 
 
 
+		/// <summary>
+		/// Wait for client completion.
+		/// </summary>
 		internal void Wait ()
 		{	
 			if ( !(state is StandBy) && !(state is Disconnected) ) {
-				Log.Message("-----quit");
 				DisconnectInternal("quit");
 			}
 
 
 			while ( !(state is StandBy) ) {
 				Thread.Sleep(50);
-				Log.Message("--");
 				UpdateInternal( new GameTime() );
 			}
 		}
@@ -118,8 +119,8 @@ namespace Fusion.Engine.Client {
 			{
 				switch (msg.MessageType)
 				{
-					case NetIncomingMessageType.VerboseDebugMessage:Log.Verbose	("CL Net: " + msg.ReadString()); break;
-					case NetIncomingMessageType.DebugMessage:		Log.Debug	("CL Net: " + msg.ReadString()); break;
+					case NetIncomingMessageType.VerboseDebugMessage:Log.Debug	("CL Net: " + msg.ReadString()); break;
+					case NetIncomingMessageType.DebugMessage:		Log.Verbose	("CL Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.WarningMessage:		Log.Warning	("CL Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.ErrorMessage:		Log.Error	("CL Net: " + msg.ReadString()); break;
 

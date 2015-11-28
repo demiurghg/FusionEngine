@@ -8,6 +8,8 @@ using Fusion.Core.Shell;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
+using Lidgren.Network;
+
 
 namespace Fusion.Engine.Network {
 
@@ -23,27 +25,16 @@ namespace Fusion.Engine.Network {
 		public float SimulatePacketsLoss { get; set; }
 
 
-		/// <summary>
-		/// Client connection resend timeout.
-		/// </summary>
-		public int ResendTimeout { get; set; }
-
-		/// <summary>
-		/// Client connection max resend count.
-		/// </summary>
-		public int ResendMaxCount { get; set; }
-
-
 		public NetworkConfig ()
 		{
+			/*var cfg = new NetPeerConfiguration("");
+			cfg.*/
+
 			Port				=	28100;
 			MaxClients			=	8;
 			SimulatePacketsLoss	=	0;
 			ShowPackets			=	false;
 			ShowCompression		=	false;
-
-			ResendTimeout		=	1000;
-			ResendMaxCount		=	10;
 		}
 
 	}
