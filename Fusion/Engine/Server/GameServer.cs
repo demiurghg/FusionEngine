@@ -52,9 +52,17 @@ namespace Fusion.Engine.Server {
 		public abstract void FeedCommand ( string id, byte[] userCommand );
 
 		/// <summary>
+		/// Feed server with commands from particular client.
+		/// </summary>
+		/// <param name="id">Client's ID</param>
+		/// <param name="command">Client's user command stream</param>
+		public abstract void FeedNotification ( string id, string message );
+
+		/// <summary>
 		/// Gets server information that required for client to load the game.
 		/// This information usually contains map name and game type.
 		/// This information is also used for discovery response.
+		/// This information shoud not be changed within session.
 		/// </summary>
 		/// <returns></returns>
 		public abstract string ServerInfo ();
@@ -71,6 +79,14 @@ namespace Fusion.Engine.Server {
 		/// </summary>
 		/// <param name="clientIP">Client IP in format 123.45.67.89:PORT. Could be used as client identifier.</param>
 		public abstract void ClientDisconnected ( string id, string userInfo );
+
+		/// <summary>
+		/// Approves client by id and user information.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="userInfo"></param>
+		/// <returns></returns>
+		public abstract bool ApproveClient ( string id, string userInfo, out string reason );
 
 		/// <summary>
 		/// Sends text message to all clients.

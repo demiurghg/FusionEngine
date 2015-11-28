@@ -100,6 +100,7 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		public UserStorage UserStorage { get { return userStorage; } }
 
+
 		/// <summary>
 		/// Sets and gets game window icon.
 		/// </summary>
@@ -116,6 +117,7 @@ namespace Fusion.Engine.Common {
 		}
 		System.Drawing.Icon windowIcon = null;
 
+
 		/// <summary>
 		/// Gets and sets game window title.
 		/// </summary>
@@ -126,6 +128,9 @@ namespace Fusion.Engine.Common {
 			set {
 				if (value==null) {
 					throw new ArgumentNullException();
+				}
+				if (string.IsNullOrWhiteSpace(value)) {
+					throw new ArgumentException("GameTitle must be readable string", "value");
 				}
 				if (IsInitialized) {
 					throw new InvalidOperationException("Can not set GameTitle after game engine initialization");
@@ -263,11 +268,21 @@ namespace Fusion.Engine.Common {
 
 
 		/// <summary>
+		/// Game ID is used for networking as application identifier.
+		/// </summary>
+		public string GameID {
+			get { return gameId; }
+		}
+		readonly string gameId;
+
+
+		/// <summary>
 		/// Initializes a new instance of this class, which provides 
 		/// basic graphics device initialization, game logic, rendering code, and a game loop.
 		/// </summary>
-		public GameEngine ()
+		public GameEngine (string gameId)
 		{
+			this.gameId	=	gameId;
 			Enabled	=	true;
 
 			AppDomain currentDomain = AppDomain.CurrentDomain;
@@ -395,7 +410,9 @@ namespace Fusion.Engine.Common {
 
 			//	wait for server 
 			//	if it is still running :
+			cl.Wait();
 			sv.Wait();
+
 			
 			//	call exit event :
 			if (Exiting!=null) {
@@ -664,9 +681,9 @@ namespace Fusion.Engine.Common {
 		}
 
 
-		internal void Disconnect ()
+		internal void Disconnect ( string message )
 		{
-			GameClient.DisconnectInternal();
+			GameClient.DisconnectInternal(message);
 			//	Kill server!
 		}
 	}

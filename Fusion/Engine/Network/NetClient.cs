@@ -20,29 +20,18 @@ namespace Fusion.Engine.Network {
 		/// <summary>
 		/// 
 		/// </summary>
-		public NetClient ( string host, int port )
+		public NetClient ( string host, int port, int timeout )
 		{
-			this.host	=	host;
-			this.port	=	port;
+			//this.host	=	host;
+			//this.port	=	port;
 
-			var ipAddr	=	IPAddress.Parse( host );
+			//var ipAddr	=	IPAddress.Parse( host );
 
-			endPoint	=	new IPEndPoint( ipAddr, port );
+			//endPoint	=	new IPEndPoint( ipAddr, port );
 
-			socket			=	new Socket( SocketType.Dgram, ProtocolType.Udp );
-			//socket.Bind( localEP );
-			socket.Blocking	=	false;
-		}
-
-
-
-		public void SendMessage ( string message )
-		{
-			var bytes = Encoding.ASCII.GetBytes(message);
-
-			socket.SendTo( bytes, endPoint );
-
-			Log.Message("...sent: {0}", message );
+			//socket			=	new Socket( SocketType.Dgram, ProtocolType.Udp );
+			////socket.Bind( localEP );
+			//socket.Blocking	=	false;
 		}
 
 
@@ -59,5 +48,36 @@ namespace Fusion.Engine.Network {
 
 			base.Dispose( disposing );
 		}	
+
+
+
+		/// <summary>
+		/// Gets snapshot.
+		/// </summary>
+		/// <returns>Null if new snapshot is not available</returns>
+		public byte[] GetSnapshot ()
+		{
+		}
+
+
+
+		/// <summary>
+		/// Pushes reliable message.
+		/// </summary>
+		/// <param name="message"></param>
+		public void PushMessage ( string message )
+		{
+		}
+
+
+
+		/// <summary>
+		/// Pop message.
+		/// Returns null, if no new messages is available.
+		/// </summary>
+		/// <returns></returns>
+		public string PopMessage ()
+		{
+		}
 	}
 }

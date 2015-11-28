@@ -28,7 +28,7 @@ namespace Fusion.Engine.Common.Commands {
 		{
 			if (Invoker.GameEngine.GameServer.IsAlive) {
 				
-				Invoker.GameEngine.GameServer.PrintServerInfo();
+				//Invoker.GameEngine.GameServer.PrintServerInfo();
 
 			} else {
 				Log.Warning("Server is not running");

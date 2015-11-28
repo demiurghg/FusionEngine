@@ -36,7 +36,7 @@ namespace TestGame2 {
 			//
 			//	Parse command line :
 			//
-			using ( var engine = new GameEngine() ) {
+			using ( var engine = new GameEngine("TestGame") ) {
 
 				engine.GameServer		=	new CustomGameServer(engine);
 				engine.GameClient		=	new CustomGameClient(engine);

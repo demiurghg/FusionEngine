@@ -19,6 +19,7 @@ namespace Fusion.Engine.Common {
 	public abstract class GameModule : DisposableBase {
 
 		public GameEngine GameEngine { get; protected set; }
+		Queue<Action> actionQueue = new Queue<Action>();
 
 		
 		/// <summary>
@@ -35,6 +36,38 @@ namespace Fusion.Engine.Common {
 		/// Intializes module.
 		/// </summary>
 		public abstract void Initialize ();
+
+
+
+		/// <summary>
+		/// Pushes action to the invoke queue.
+		/// </summary>
+		/// <param name="action"></param>
+		public virtual void Invoke ( Action action )
+		{
+			lock ( actionQueue ) {
+				actionQueue.Enqueue( action );
+			}
+		}
+
+
+
+		/// <summary>
+		/// Calls all actions pushed to invoke queue.
+		/// </summary>
+		protected virtual void Dispatch ()
+		{
+			List<Action> actions;
+
+			lock ( actionQueue ) {
+				actions = actionQueue.ToList();
+				actionQueue.Clear();
+			}
+
+			foreach ( var action in actions ) {
+				action();
+			}
+		}
 
 
 
@@ -98,6 +131,11 @@ namespace Fusion.Engine.Common {
 		}
 
 
+		/*-----------------------------------------------------------------------------------------
+		 * 
+		 *	Internal stuff
+		 * 
+		-----------------------------------------------------------------------------------------*/
 
 		/// <summary>
 		/// Represents game module binding.
