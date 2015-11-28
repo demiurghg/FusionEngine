@@ -122,6 +122,13 @@ namespace TestGame2 {
 		}
 
 
+		public override void FeedNotification ( string id, string message )
+		{
+			Log.Message("NOTIFICATION {0}: {1}", id, message );
+			NotifyClients("{0} says: {1}", id, message );
+		}
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -144,6 +151,14 @@ namespace TestGame2 {
 			NotifyClients("DISCONNECTED: {0} - {1}", clientIP, userInfo );
 			Log.Message("DISCONNECTED: {0} - {1}", clientIP, userInfo );
 			state.Remove( clientIP );
+		}
+
+
+		public override bool ApproveClient(string id, string userInfo, out string reason)
+		{
+			Log.Message("APPROVE: {0} {1}", id, userInfo );
+			reason = ".";
+			return true;
 		}
 	}
 }

@@ -52,6 +52,13 @@ namespace Fusion.Engine.Server {
 		public abstract void FeedCommand ( string id, byte[] userCommand );
 
 		/// <summary>
+		/// Feed server with commands from particular client.
+		/// </summary>
+		/// <param name="id">Client's ID</param>
+		/// <param name="command">Client's user command stream</param>
+		public abstract void FeedNotification ( string id, string message );
+
+		/// <summary>
 		/// Gets server information that required for client to load the game.
 		/// This information usually contains map name and game type.
 		/// This information is also used for discovery response.
@@ -79,10 +86,7 @@ namespace Fusion.Engine.Server {
 		/// <param name="id"></param>
 		/// <param name="userInfo"></param>
 		/// <returns></returns>
-		public virtual bool ApproveClient ( string id, string userInfo )
-		{
-			throw new NotImplementedException();
-		}
+		public abstract bool ApproveClient ( string id, string userInfo, out string reason );
 
 		/// <summary>
 		/// Sends text message to all clients.
@@ -90,7 +94,7 @@ namespace Fusion.Engine.Server {
 		/// <param name="message"></param>
 		public void NotifyClients ( string format, params object[] args )
 		{
-			//NotifyClientsInternal( string.Format(format, args) );
+			NotifyClientsInternal( string.Format(format, args) );
 		}
 	}
 }

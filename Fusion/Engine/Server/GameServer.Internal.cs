@@ -19,8 +19,9 @@ namespace Fusion.Engine.Server {
 		Task serverTask;
 		CancellationTokenSource killToken;
 
-
 		object lockObj = new object();
+
+		Queue<string> notifications = null;
 
 
 		/// <summary>
@@ -92,18 +93,19 @@ namespace Fusion.Engine.Server {
 		}
 
 
-
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="map"></param>
 		void ServerTaskFunc ( string map, string postCommand )
 		{
-			var netConfig		=	new NetPeerConfiguration( GameEngine.GameTitle );
+			var netConfig		=	new NetPeerConfiguration(GameEngine.GameID);
 			netConfig.Port		=	GameEngine.Network.Config.Port;
-			netConfig.MaximumConnections	=	8;
+			netConfig.MaximumConnections	=	32;
+			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
 
-			NetServer server	=	new NetServer( netConfig );
+			var server	=	new NetServer( netConfig );
+			notifications		=	new Queue<string>();
 
 			Log.Message("SV: Start: {0} {1}", map, postCommand);
 			snapshotCounter	=	0;
@@ -145,6 +147,8 @@ namespace Fusion.Engine.Server {
 
 					SendSnapshot( server, snapshot );
 
+					SendNotifications( server );
+
 					GameEngine.Invoker.ExecuteQueue( svTime, CommandAffinity.Server );
 
 					CrashServer.CrashTest();
@@ -175,8 +179,11 @@ namespace Fusion.Engine.Server {
 				server.Shutdown("Server shutdown");
 				Log.Message("SV: Shutdown");
 
+				notifications	=	null;
+
 				killToken	=	null;
 				serverTask	=	null;
+				server		=	null;
 			}
 		}
 
@@ -199,19 +206,30 @@ namespace Fusion.Engine.Server {
 			{
 				switch (msg.MessageType)
 				{
-					case NetIncomingMessageType.VerboseDebugMessage:Log.Verbose	("SV: " + msg.ReadString()); break;
-					case NetIncomingMessageType.DebugMessage:		Log.Debug	("SV: " + msg.ReadString()); break;
-					case NetIncomingMessageType.WarningMessage:		Log.Warning	("SV: " + msg.ReadString()); break;
-					case NetIncomingMessageType.ErrorMessage:		Log.Error	("SV: " + msg.ReadString()); break;
+					case NetIncomingMessageType.VerboseDebugMessage:Log.Verbose	("SV Net: " + msg.ReadString()); break;
+					case NetIncomingMessageType.DebugMessage:		Log.Debug	("SV Net: " + msg.ReadString()); break;
+					case NetIncomingMessageType.WarningMessage:		Log.Warning	("SV Net: " + msg.ReadString()); break;
+					case NetIncomingMessageType.ErrorMessage:		Log.Error	("SV Net: " + msg.ReadString()); break;
+
+					case NetIncomingMessageType.ConnectionApproval:
+
+						var clientID	=	msg.SenderEndPoint.ToString();
+						var userInfo	=	msg.SenderConnection.RemoteHailMessage.PeekString();
+						var reason		=	"";
+						var approve = ApproveClient( clientID, userInfo, out reason );
+
+						if (approve) {	
+							msg.SenderConnection.Approve( server.CreateMessage( ServerInfo() ) );
+						} else {
+							msg.SenderConnection.Deny( reason );
+						}
+
+						break;
 
 					case NetIncomingMessageType.StatusChanged:		
 						DispatchStatusChange( msg );
 						break;
 					
-					case NetIncomingMessageType.ConnectionLatencyUpdated:
-						Log.Message("SV: Connection latencty - {0}", msg.ReadSingle() );
-						break;
-
 					case NetIncomingMessageType.Data:
 						DispatchDataIM( msg );
 						break;
@@ -265,6 +283,9 @@ namespace Fusion.Engine.Server {
 		void SendSnapshot ( NetServer server, byte[] snapshot )
 		{
 			if (snapshotRequests.Any()) {
+
+				snapshot	=	NetworkEngine.Compress(snapshot);
+
 				var msg = server.CreateMessage( snapshot.Length + 4 + 4 + 1 );
 			
 				msg.Write( (byte)NetCommand.Snapshot );
@@ -278,6 +299,30 @@ namespace Fusion.Engine.Server {
 				} */
 
 				snapshotRequests.Clear();
+			}
+		}
+
+
+
+		void SendNotifications ( NetServer server )
+		{
+			List<string> messages;
+			lock (notifications) {
+				messages = notifications.ToList();
+				notifications.Clear();
+			}
+
+			var conns = server.Connections;
+
+			if (!conns.Any()) {
+				return;
+			}
+
+			foreach ( var message in messages ) {
+				var msg = server.CreateMessage( message.Length + 1 );
+				msg.Write( (byte)NetCommand.Notification );
+				msg.Write( message );
+				server.SendMessage( msg, conns, NetDeliveryMethod.ReliableSequenced, 0 );
 			}
 		}
 
@@ -310,21 +355,28 @@ namespace Fusion.Engine.Server {
 			var netCmd = (NetCommand)msg.ReadByte();
 
 			switch (netCmd) {
-				case NetCommand.Snapshot : 
-					Log.Warning("Snapshot is received by server"); 
-					break;
-
 				case NetCommand.UserCommand : 
 					DispatchUserCommand( msg );
 					break;
 
 				case NetCommand.Notification :
-					Log.Warning("Notification is received by server");
+					FeedNotification( msg.SenderEndPoint.ToString(), msg.ReadString() );
 					break;
+			}
+		}
 
-				case NetCommand.ChatMessage :
-					//CharM
-					break;
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="message"></param>
+		void NotifyClientsInternal ( string message )
+		{
+			if (notifications!=null) {
+				lock (notifications) {
+					notifications.Enqueue(message);
+				}
 			}
 		}
 	}

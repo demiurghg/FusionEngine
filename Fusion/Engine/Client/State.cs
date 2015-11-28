@@ -9,33 +9,6 @@ using System.Net;
 
 namespace Fusion.Engine.Client {
 
-	abstract class State {
-
-		protected readonly GameClient	gameClient;
-
-		public State ( GameClient gameClient )
-		{
-			this.gameClient	=	gameClient;
-		}
-
-		public abstract void Connect ( string host, int port );
-		public abstract void Disconnect ();
-		public abstract void Update ( GameTime gameTime );
-
-
-		public bool DispatchInternalMessages( NetIncomingMessage msg )
-		{
-			switch (msg.MessageType) {
-				case NetIncomingMessageType.VerboseDebugMessage:Log.Verbose	("CL: " + msg.ReadString()); return true;
-				case NetIncomingMessageType.DebugMessage:		Log.Debug	("CL: " + msg.ReadString()); return true;
-				case NetIncomingMessageType.WarningMessage:		Log.Warning	("CL: " + msg.ReadString()); return true;
-				case NetIncomingMessageType.ErrorMessage:		Log.Error	("CL: " + msg.ReadString()); return true;
-				default: return false;
-			}
-		}
-	}
-
-
 
 	/// <summary>
 	/// StansBy state.

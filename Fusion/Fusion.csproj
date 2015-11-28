@@ -188,6 +188,13 @@
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
     <Compile Include="Drivers\Graphics\Resources\UnorderedAccess.cs" />
     <Compile Include="Engine\Client\ClientState.cs" />
+    <Compile Include="Engine\Client\GameClient.Disconnected.cs" />
+    <Compile Include="Engine\Client\GameClient.Active.cs" />
+    <Compile Include="Engine\Client\GameClient.StandBy.cs" />
+    <Compile Include="Engine\Client\GameClient.Awaiting.cs" />
+    <Compile Include="Engine\Client\GameClient.Loading.cs" />
+    <Compile Include="Engine\Client\GameClient.Connecting.cs" />
+    <Compile Include="Engine\Client\GameClient.State.cs" />
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
     <Compile Include="Engine\Graphics\Effects\HdrSettings.cs" />
     <Compile Include="Engine\Graphics\Effects\Filter.cs" />

@@ -268,11 +268,21 @@ namespace Fusion.Engine.Common {
 
 
 		/// <summary>
+		/// Game ID is used for networking as application identifier.
+		/// </summary>
+		public string GameID {
+			get { return gameId; }
+		}
+		readonly string gameId;
+
+
+		/// <summary>
 		/// Initializes a new instance of this class, which provides 
 		/// basic graphics device initialization, game logic, rendering code, and a game loop.
 		/// </summary>
-		public GameEngine ()
+		public GameEngine (string gameId)
 		{
+			this.gameId	=	gameId;
 			Enabled	=	true;
 
 			AppDomain currentDomain = AppDomain.CurrentDomain;
@@ -400,7 +410,9 @@ namespace Fusion.Engine.Common {
 
 			//	wait for server 
 			//	if it is still running :
+			cl.Wait();
 			sv.Wait();
+
 			
 			//	call exit event :
 			if (Exiting!=null) {
@@ -669,9 +681,9 @@ namespace Fusion.Engine.Common {
 		}
 
 
-		internal void Disconnect ()
+		internal void Disconnect ( string message )
 		{
-			GameClient.DisconnectInternal(true);
+			GameClient.DisconnectInternal(message);
 			//	Kill server!
 		}
 	}

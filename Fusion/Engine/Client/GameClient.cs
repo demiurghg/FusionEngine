@@ -19,7 +19,15 @@ namespace Fusion.Engine.Client {
 		/// <param name="gameEngine"></param>
 		public GameClient ( GameEngine gameEngine ) : base(gameEngine) 
 		{
+			InitInternal();
 		}
+
+
+		protected override void Dispose ( bool disposing )
+		{
+			base.Dispose( disposing );
+		}
+
 
 		/// <summary>
 		/// Called when connection request accepted by server.
@@ -50,9 +58,26 @@ namespace Fusion.Engine.Client {
 		public abstract void FeedSnapshot ( byte[] snapshot );
 
 		/// <summary>
+		/// Feed notification from server.
+		/// </summary>
+		/// <param name="message"></param>
+		public abstract void FeedNotification ( string message );
+
+		/// <summary>
 		/// Gets user information.
 		/// </summary>
 		/// <returns>User information</returns>
 		public abstract string UserInfo ();
+
+
+		/// <summary>
+		/// Sends server string message.
+		/// This method may be used for chat.
+		/// </summary>
+		/// <param name="message"></param>
+		public void NotifyServer ( string message )
+		{
+			NotifyInternal(message);
+		}
 	}
 }
