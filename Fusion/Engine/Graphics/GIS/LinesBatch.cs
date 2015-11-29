@@ -21,6 +21,7 @@ namespace Fusion.Engine.Graphics.GIS
 			ARC_LINE				= 1 << 2,
 			ADD_CAPS				= 1 << 3,
 			FADING_LINE				= 1 << 4,
+			THIN_LINE				= 1 << 5,
 		}
 
 		public int Flags;

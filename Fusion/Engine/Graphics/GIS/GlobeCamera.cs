@@ -59,9 +59,9 @@ namespace Fusion.Engine.Graphics.GIS
 		
 		double frustumWidth;
 		double frustumHeight;
-		double frustumZNear = 0.1;
+		double frustumZNear = 0.0001;
 		double frustumZFar	= 100000.0;
-		public readonly double camFov = 20;
+		public readonly double camFov = 45;
 
 		double ViewToPointYaw	=  Math.PI;
 		double ViewToPointPitch = -Math.PI/2.01;
@@ -146,6 +146,7 @@ namespace Fusion.Engine.Graphics.GIS
 			if (input.IsKeyDown(Keys.LeftControl)) {
 				FreeSurfaceSwitcher = true;
 				FreeSurfacePosition = CameraPosition;
+				prevMouseScroll = input.TotalMouseScroll;
 			}
 			if (input.IsKeyDown(Keys.RightControl)) {
 				FreeSurfaceSwitcher = false;
@@ -181,9 +182,11 @@ namespace Fusion.Engine.Graphics.GIS
 					if (input.IsKeyDown(Keys.RightButton)) {
 						FreeSurfaceYaw		+= input.RelativeMouseOffset.X*0.0003;
 						FreeSurfacePitch	-= input.RelativeMouseOffset.Y*0.0003;
-						
-						FreeSurfaceVelocityMagnitude += (input.TotalMouseScroll - prevMouseScroll)*0.0001;
-						//Console.WriteLine(FreeSurfaceVelocityMagnitude);
+
+						if (prevMouseScroll > input.TotalMouseScroll)
+							FreeSurfaceVelocityMagnitude -= 0.001;
+						if (prevMouseScroll < input.TotalMouseScroll)
+							FreeSurfaceVelocityMagnitude += 0.001;
 
 						input.IsMouseCentered	= false;
 						input.IsMouseHidden		= true;

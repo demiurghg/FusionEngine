@@ -172,7 +172,7 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 		float  ndot = abs(dot( ndir, norm ));
 		float  frsn	= pow(saturate(1.1f-ndot), 0.5);
 		
-		return frsn*float4(input.Color.xyz, 1);
+		return frsn*float4(input.Color.xyz, input.Color.a);
 	#endif
 	#ifdef DRAW_HEAT
 		//return float4(1.0f, 0.0f, 0.0f, 1.0f);

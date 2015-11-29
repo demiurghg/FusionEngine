@@ -122,6 +122,7 @@ cbuffer CBStage			: register(b0) 	{	ConstData	Stage		: 	packoffset( c0 );	}
 $ubershader DRAW_LINES +ADD_CAPS +FADING_LINE
 $ubershader ARC_LINE +FADING_LINE
 $ubershader DRAW_SEGMENTED_LINES +TEXTURED_LINE
+$ubershader THIN_LINE
 #endif
 
 
@@ -184,12 +185,35 @@ VS_OUTPUT VSMain ( VS_INPUT v )
 	#endif
 #endif
 
+#ifdef THIN_LINE
+	#define TotalVertex 2
+#endif
+
 [maxvertexcount(TotalVertex)]
-void GSMain ( line VS_OUTPUT inputArray[2], inout TriangleStream<GS_OUTPUT> stream )
+void GSMain ( line VS_OUTPUT inputArray[2], 
+#ifdef THIN_LINE
+inout LineStream<GS_OUTPUT> stream 
+#else
+inout TriangleStream<GS_OUTPUT> stream 
+#endif
+)
 {
 	GS_OUTPUT	output;// = (GS_OUTPUT)0;
 	VS_OUTPUT	p0	=	inputArray[0];
 	VS_OUTPUT	p1	=	inputArray[1];
+	
+#ifdef THIN_LINE
+	output.Normal 	= float3(0,0,0);
+	output.Tex		= float2(0,0);
+	output.Color	= p0.Color;
+	output.Position	= mul(float4(p0.Position.xyz, 1), Stage.ViewProj);	
+	stream.Append( output );
+	
+	output.Color	= p1.Color;
+	output.Position	= mul(float4(p1.Position.xyz, 1), Stage.ViewProj);	
+	stream.Append( output );
+	
+#else
 
 	float halfWidth0 = p0.Tex.x;
 	float halfWidth1 = p1.Tex.x;
@@ -262,7 +286,7 @@ void GSMain ( line VS_OUTPUT inputArray[2], inout TriangleStream<GS_OUTPUT> stre
 
 	}
 	
-	
+#endif
 	
 #ifdef ADD_CAPS
 	// Add caps

@@ -63,8 +63,8 @@ namespace Fusion.Engine.Graphics.GIS
 		public float ScaleFactor = 1.0f;
 		public float Yaw, Pitch, Roll;
 
-		Scene		model;
-		Matrix[]	transforms;
+		protected Scene		model;
+		protected Matrix[]	transforms;
 
 		public float	Transparency;
 		public bool		XRay = false;
@@ -85,7 +85,7 @@ namespace Fusion.Engine.Graphics.GIS
 			shader		= GameEngine.Content.Load<Ubershader>("globe.Model.hlsl");
 			factory		= new StateFactory(shader, typeof(ModelFlags), Primitive.TriangleList, VertexInputElement.FromStructure<VertexColorTextureTBNRigid>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
 			factoryXray = new StateFactory(shader, typeof(ModelFlags), Primitive.TriangleList, VertexInputElement.FromStructure<VertexColorTextureTBNRigid>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
-
+			
 			if (maxInstancedCount > 0) {
 				InstancedCountToDraw	= maxInstancedCount;
 				InstancedDataCPU		= new InstancedDataStruct[maxInstancedCount];
@@ -115,15 +115,15 @@ namespace Fusion.Engine.Graphics.GIS
 			Matrix rotationMat	= Matrix.Identity;
 			rotationMat.Forward = xAxis.ToVector3();
 			rotationMat.Up		= normal.ToVector3();
-			rotationMat.Right	= -zAxis.ToVector3();
+			rotationMat.Right	= zAxis.ToVector3();
 			rotationMat.TranslationVector = Vector3.Zero;
 
 			var viewPositionFloat = new Vector3((float)viewPosition.X, (float)viewPosition.Y, (float)viewPosition.Z);
 
 
-			constData.ModelWorld				= Matrix.RotationYawPitchRoll(Yaw, Pitch, Roll) * Matrix.Scaling(ScaleFactor) * rotationMat;
-			constData.ViewPositionTransparency	= new Vector4(viewPositionFloat, Transparency);
-			modelBuf.SetData(constData);
+			var modelRotationMatrix = Matrix.RotationYawPitchRoll(Yaw, Pitch, Roll) * Matrix.Scaling(ScaleFactor) * rotationMat;
+			constData.ViewPositionTransparency = new Vector4(viewPositionFloat, Transparency);
+
 
 			dev.VertexShaderConstants[0]	= constBuffer;
 			dev.VertexShaderConstants[1]	= modelBuf;
@@ -159,6 +159,11 @@ namespace Fusion.Engine.Graphics.GIS
 				}
 
 				var mesh = model.Meshes[meshIndex];
+
+				var translation = transforms[i] * Matrix.Scaling(0.001f);
+
+				constData.ModelWorld = translation * modelRotationMatrix;
+				modelBuf.SetData(constData);
 
 				dev.SetupVertexInput(mesh.VertexBuffer, mesh.IndexBuffer);
 

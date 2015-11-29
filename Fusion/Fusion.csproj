@@ -203,6 +203,7 @@
     </Compile>
     <Compile Include="Engine\Graphics\Effects\Sky.cs" />
     <Compile Include="Engine\Graphics\Effects\SkySettings.cs" />
+    <Compile Include="Engine\Graphics\GIS\AnimatedModelLayer.cs" />
     <Compile Include="Engine\Graphics\GIS\HeatMapLayer.cs" />
     <Compile Include="Engine\Graphics\GIS\ModelLayer.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.cs" />

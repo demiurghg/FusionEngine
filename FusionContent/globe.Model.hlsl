@@ -69,8 +69,8 @@ VS_OUTPUT VSMain ( VS_INPUT v
 		worldMatrix = mul(InstData[id].World, worldMatrix);
 	#endif
 	
-	float4 tempPos 	= mul( float4(v.Position.xzy, 	1), worldMatrix ) + float4(ModelStage.ViewPositionTransparency.xyz, 0);
-	float4 normal	= mul( float4(v.Normal.xzy,		0), worldMatrix );
+	float4 tempPos 	= mul( float4(v.Position.xyz, 	1), worldMatrix ) + float4(ModelStage.ViewPositionTransparency.xyz, 0);
+	float4 normal	= mul( float4(v.Normal.xyz,		0), worldMatrix );
 	
 	output.Position	= mul(float4(tempPos.xyz, 1), Stage.ViewProj);
 	output.Normal 	= normalize(normal.xyz);
@@ -95,7 +95,7 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 		float  ndot = abs(dot( ndir, input.Normal ));
 		float  frsn	= pow(saturate(1.2f-ndot), 0.5);
 		
-		return frsn*float4(input.Color.xyz, 1);
+		return frsn*float4(input.Color.xyz, input.Color.a);
 	#endif
 
 	float4 color = float4(0,0,0,0);
