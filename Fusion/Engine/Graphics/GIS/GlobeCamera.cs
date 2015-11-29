@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -73,6 +74,9 @@ namespace Fusion.Engine.Graphics.GIS
 
 		double FreeSurfaceYaw	= Math.PI;
 		double FreeSurfacePitch = -Math.PI / 2.01;
+
+		bool		freezeFreeCamRotation = false;
+		DQuaternion freeSurfaceRotation;
 
 		#endregion
 
@@ -171,42 +175,45 @@ namespace Fusion.Engine.Graphics.GIS
 			} else if (FreeSurfaceSwitcher) {
 
 				var mat = CalculateBasisOnSurface();
+				
+				#region Input
+					// Update surface camera yaw and pitch
+					if (input.IsKeyDown(Keys.RightButton)) {
+						FreeSurfaceYaw		+= input.RelativeMouseOffset.X*0.0003;
+						FreeSurfacePitch	-= input.RelativeMouseOffset.Y*0.0003;
+						
+						FreeSurfaceVelocityMagnitude += (input.TotalMouseScroll - prevMouseScroll)*0.0001;
+						//Console.WriteLine(FreeSurfaceVelocityMagnitude);
 
-				// Update surface camera yaw and pitch
-				if (input.IsKeyDown(Keys.RightButton)) {
-					FreeSurfaceYaw		+= input.RelativeMouseOffset.X*0.0003;
-					FreeSurfacePitch	-= input.RelativeMouseOffset.Y*0.0003;
-					
-					FreeSurfaceVelocityMagnitude += (input.TotalMouseScroll - prevMouseScroll)*0.0001;
-					//Console.WriteLine(FreeSurfaceVelocityMagnitude);
-
-					input.IsMouseCentered	= false;
-					input.IsMouseHidden		= true;
-				}
-				else {
-					input.IsMouseCentered	= false;
-					input.IsMouseHidden		= false;
-				}
-				prevMouseScroll = input.TotalMouseScroll;
-
-
-				if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Left))		FreeSurfaceYaw		-= gameTime.ElapsedSec * 0.5;
-				if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Right))	FreeSurfaceYaw		+= gameTime.ElapsedSec * 0.5;
-				if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Up))		FreeSurfacePitch	-= gameTime.ElapsedSec * 0.1;
-				if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Down))		FreeSurfacePitch	+= gameTime.ElapsedSec * 0.1;
+						input.IsMouseCentered	= false;
+						input.IsMouseHidden		= true;
+					}
+					else {
+						input.IsMouseCentered	= false;
+						input.IsMouseHidden		= false;
+					}
+					prevMouseScroll = input.TotalMouseScroll;
 
 
-				//FreeSurfaceYaw = DMathUtil.Clamp(FreeSurfaceYaw, -DMathUtil.PiOverTwo, DMathUtil.PiOverTwo);
-				if (FreeSurfaceYaw > DMathUtil.TwoPi) FreeSurfaceYaw -= DMathUtil.TwoPi;
-				if (FreeSurfaceYaw < -DMathUtil.TwoPi) FreeSurfaceYaw += DMathUtil.TwoPi;
+					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Left))		FreeSurfaceYaw		-= gameTime.ElapsedSec * 0.5;
+					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Right))	FreeSurfaceYaw		+= gameTime.ElapsedSec * 0.5;
+					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Up))		FreeSurfacePitch	-= gameTime.ElapsedSec * 0.1;
+					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Down))		FreeSurfacePitch	+= gameTime.ElapsedSec * 0.1;
 
-				// Calculate free cam rotation matrix
 
-				var quat = DQuaternion.RotationAxis(DVector3.UnitY, FreeSurfaceYaw) * DQuaternion.RotationAxis(DVector3.UnitX, FreeSurfacePitch);
-				var qRot = DMatrix.RotationQuaternion(quat);
-				var matrix = qRot * mat;
+					//FreeSurfaceYaw = DMathUtil.Clamp(FreeSurfaceYaw, -DMathUtil.PiOverTwo, DMathUtil.PiOverTwo);
+					if (FreeSurfaceYaw > DMathUtil.TwoPi)	FreeSurfaceYaw -= DMathUtil.TwoPi;
+					if (FreeSurfaceYaw < -DMathUtil.TwoPi)	FreeSurfaceYaw += DMathUtil.TwoPi;
 
-				#region Mouse direction and velocity
+					// Calculate free cam rotation matrix
+
+					if (!freezeFreeCamRotation)
+						freeSurfaceRotation = DQuaternion.RotationAxis(DVector3.UnitY, FreeSurfaceYaw) * DQuaternion.RotationAxis(DVector3.UnitX, FreeSurfacePitch);
+
+					var quat = freeSurfaceRotation;
+					var qRot = DMatrix.RotationQuaternion(quat);
+					var matrix = qRot * mat;
+
 					double velocityMag = 0;
 					var velDir = DVector3.Zero;
 
@@ -371,9 +378,184 @@ namespace Fusion.Engine.Graphics.GIS
 
 		#region Free Surface Camera Animation Stuff
 
-		public void SaveCurrentStateToFile(string fileName = "d")
+		struct SurfaceCameraState
 		{
+			public DVector3	FreeSurfacePosition;
+			public double	FreeSurfaceYaw;
+			public double	FreeSurfacePitch;
+			public float	WaitTime;
+			public float	TransitionTime;
+
+			public DQuaternion FreeRotation;
+		}
+
+		List<SurfaceCameraState> cameraStates;
+		int		curStateInd = 0;
+		float	curTime		= 0;
+
+		public void SaveCurrentStateToFile(string fileName = "cameraAnimation.txt")
+		{
+			File.AppendAllText(fileName,
+				"Free camera position\n"	+
+				FreeSurfacePosition.X + " " + FreeSurfacePosition.Y + " " + FreeSurfacePosition.Z +
+				"\nFreeSurfaceYaw\n"		+
+				FreeSurfaceYaw				+
+				"\nFreeSurfacePitch\n"		+
+				FreeSurfacePitch +
+				"\nWaitTime\n" +
+				3 +
+				"\nTransitionTime\n" +
+				3 +
+				"\n\n"
+			);
+		}
+
+		public void LoadAnimation(string fileName = "cameraAnimation.txt")
+		{
+			cameraStates = new List<SurfaceCameraState>();
+
+			var lines = File.ReadAllLines(fileName);
+
+			SurfaceCameraState curState = new SurfaceCameraState();
+
+			for (int i = 0; i < lines.Length; i++) {
+				var line = lines[i];
+
+				if (line == "") {
+					curState.FreeRotation = DQuaternion.RotationAxis(DVector3.UnitY, curState.FreeSurfaceYaw) * DQuaternion.RotationAxis(DVector3.UnitX, curState.FreeSurfacePitch);
+
+					cameraStates.Add(curState);
+
+					curState = new SurfaceCameraState();
+					continue;
+				}
+
+				switch (line) {
+					case "Free camera position" :
+						var vals = lines[++i].Split(' ');
+						curState.FreeSurfacePosition = new DVector3(double.Parse(vals[0]), double.Parse(vals[1]), double.Parse(vals[2]));
+						break;
+					case "FreeSurfaceYaw" :
+						curState.FreeSurfaceYaw = double.Parse(lines[++i]);
+						break;
+					case "FreeSurfacePitch" :
+						curState.FreeSurfacePitch = double.Parse(lines[++i]);
+						break;
+					case "WaitTime" :
+						curState.WaitTime = float.Parse(lines[++i]);
+						break;
+					case "TransitionTime" :
+						curState.TransitionTime = float.Parse(lines[++i]);
+						break;
+				}
+			}
+		}
+
+
+		public void PlayAnimation(GameTime gameTime)
+		{
+			if(cameraStates == null) return;
+
+			freezeFreeCamRotation = true;
+
+			var state = cameraStates[curStateInd];
+
+
+			curTime += 0.016f; //gameTime.ElapsedSec;
 			
+			if (curTime < state.WaitTime || curStateInd >= cameraStates.Count - 1) {
+				SetState(state);
+				return;
+			}
+
+			float time		= curTime - state.WaitTime;
+			float amount	= time/state.TransitionTime;
+
+			float	factor = MathUtil.SmoothStep(amount);
+					factor = MathUtil.Clamp(factor, 0.0f, 1.0f);
+
+			var nextState = cameraStates[curStateInd+1];
+
+			var curPos		= DVector3.Lerp(state.FreeSurfacePosition, nextState.FreeSurfacePosition, factor);
+			var curFreeRot	= DQuaternion.Slerp(state.FreeRotation, nextState.FreeRotation, factor);
+
+			freeSurfaceRotation = curFreeRot;
+
+			CameraPosition = FreeSurfacePosition = curPos;
+
+			var newLonLat = GetCameraLonLat();
+			Yaw		= newLonLat.X;
+			Pitch	= -newLonLat.Y;
+			
+			if (curTime > state.WaitTime + state.TransitionTime) {
+				curStateInd++;
+				curTime = 0;
+			}
+		}
+
+		public void ResetAnimation()
+		{
+			curStateInd = 0;
+			curTime		= 0;
+		}
+
+		public void StopAnimation()
+		{
+			freezeFreeCamRotation	= false;
+			cameraStates			= null;
+		}
+
+		void SetState(SurfaceCameraState state)
+		{
+			CameraPosition = FreeSurfacePosition = state.FreeSurfacePosition;
+			CameraDistance = CameraPosition.Length();
+
+			FreeSurfaceYaw		= state.FreeSurfaceYaw;
+			FreeSurfacePitch	= state.FreeSurfacePitch;
+
+			freeSurfaceRotation = state.FreeRotation;
+
+			var newLonLat = GetCameraLonLat();
+			Yaw		= newLonLat.X;
+			Pitch	= -newLonLat.Y;
+		}
+		
+
+		void GetEulerAngles(DMatrix q, out double yaw, out double pitch, out double roll)
+		{
+			yaw		= Math.Atan2(q.M32, q.M33);
+			pitch	= Math.Atan2(-q.M31, Math.Sqrt(q.M32*q.M32 + q.M33*q.M33));
+			roll	= Math.Atan2(q.M21, q.M11);
+		}
+
+		void GetEulerAngles(DQuaternion q, out double yaw, out double pitch, out double roll)
+		{
+		    double w2 = q.W*q.W;
+		    double x2 = q.X*q.X;
+		    double y2 = q.Y*q.Y;
+		    double z2 = q.Z*q.Z;
+		    double unitLength = w2 + x2 + y2 + z2;    // Normalised == 1, otherwise correction divisor.
+		    double abcd = q.W*q.X + q.Y*q.Z;
+		    double eps = 1e-7;    // TODO: pick from your math lib instead of hardcoding.
+		    double pi = 3.14159265358979323846;   // TODO: pick from your math lib instead of hardcoding.
+		    
+			if (abcd > (0.5-eps)*unitLength) {
+		        yaw		= 2 * Math.Atan2(q.Y, q.W);
+		        pitch	= pi;
+		        roll	= 0;
+		    }
+		    else if (abcd < (-0.5+eps)*unitLength) {
+		        yaw		= -2 * Math.Atan2(q.Y, q.W);
+		        pitch	= -pi;
+		        roll	= 0;
+		    }
+		    else {
+		        double adbc = q.W*q.Z - q.X*q.Y;
+		        double acbd = q.W*q.Y - q.X*q.Z;
+		        yaw		= Math.Atan2(2*adbc, 1 - 2*(z2+x2));
+		        pitch	= Math.Asin(2*abcd/unitLength);
+				roll	= Math.Atan2(2 * acbd, 1 - 2 * (y2 + x2));
+		    }
 		}
 
 		#endregion
