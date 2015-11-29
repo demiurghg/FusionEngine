@@ -143,6 +143,10 @@ namespace Fusion.Engine.Server {
 
 					svTime.Update();
 
+					#if DEBUG
+					server.Configuration.SimulatedLoss	=	GameEngine.Network.Config.SimulatePacketsLoss;
+					#endif
+
 					//	read input messages :
 					DispatchIM( server );
 
