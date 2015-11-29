@@ -10,6 +10,7 @@ using Fusion.Core.Shell;
 using Fusion.Engine.Network;
 using Fusion.Engine.Common;
 using Fusion.Engine.Common.Commands;
+using System.Diagnostics;
 
 
 namespace Fusion.Engine.Server {
@@ -287,10 +288,15 @@ namespace Fusion.Engine.Server {
 		void SendSnapshot ( NetServer server, SnapshotQueue queue )
 		{
 			//	snapshot request is stored in connection's tag.s
+			var debug	=	GameEngine.Network.Config.ShowSnapshots;
 			var conns	=	server.Connections.Where ( c => c.Tag is uint );
+
+			var sw		=	new Stopwatch();
 
 			foreach ( var conn in conns ) {
 
+				sw.Reset();
+				sw.Start();
 					
 				var frame		=	queue.LastFrame;
 				var prevFrame	=	(uint)conn.Tag;
@@ -312,10 +318,12 @@ namespace Fusion.Engine.Server {
 				//	and command shoud reach the server.
 				var delivery	=	prevFrame == 0 ? NetDeliveryMethod.ReliableOrdered : NetDeliveryMethod.UnreliableSequenced;
 
+				sw.Stop();
+
 				server.SendMessage( msg, conn, delivery, 0 );
 
-				if (GameEngine.Network.Config.ShowSnapshots) {
-					Log.Message("Snapshot: #{0} - #{1} : {2} / {3} to {4}", frame, prevFrame, snapshot.Length, size, conn.RemoteEndPoint.ToString() );
+				if (debug) {
+					Log.Message("Snapshot: #{0} - #{1} : {2} / {3} to {4} at {5} msec", frame, prevFrame, snapshot.Length, size, conn.RemoteEndPoint.ToString(), sw.Elapsed.TotalMilliseconds );
 				}
 			}
 		}
