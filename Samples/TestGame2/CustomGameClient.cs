@@ -10,10 +10,29 @@ using Fusion.Engine.Common;
 using Fusion.Engine.Client;
 using Fusion.Engine.Server;
 using System.Diagnostics;
+using System.Threading;
+using Fusion.Core.Shell;
 
 
 namespace TestGame2 {
 	class CustomGameClient : GameClient {
+
+		[Command("chat", CommandAffinity.Client)]
+		public class Chat : NoRollbackCommand {
+
+			[CommandLineParser.Required]
+			public List<string> Messages { get; set; }
+
+			public Chat ( Invoker invoker ) : base(invoker)
+			{
+				Messages = new List<string>();
+			}
+
+			public override void Execute ()
+			{
+				Invoker.GameEngine.GameClient.NotifyServer("chat:" + string.Join(" ", Messages));
+			}
+		}
 
 		/// <summary>
 		/// Ctor
@@ -39,6 +58,9 @@ namespace TestGame2 {
 		/// <param name="map"></param>
 		public override void LoadLevel ( string serverInfo )
 		{
+			Log.Message("LOAD LEVEL: {0}", serverInfo);
+			Thread.Sleep(2000);
+			Log.Message("LOAD LEVEL COMPLETED!");
 		}
 
 		/// <summary>
@@ -74,6 +96,11 @@ namespace TestGame2 {
 			Log.Message("CL : {0}", str);
 		}
 
+
+		public override void FeedNotification ( string message )
+		{
+			Log.Message("NOTIFICATION : {0}", message );
+		}
 
 
 		/// <summary>

@@ -10,13 +10,21 @@ namespace Fusion.Engine.Common.Commands {
 	[Command("disconnect", CommandAffinity.Default)]
 	public class DisconnectCommand : NoRollbackCommand {
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		[CommandLineParser.Name("msg")]
+		public string Message { get; set; }
+
 		public DisconnectCommand ( Invoker invoker ) : base(invoker) 
 		{
+			Message = "";
 		}
 
 		public override void Execute ()
 		{
-			Invoker.GameEngine.Disconnect();
+			Invoker.GameEngine.Disconnect(Message);
 		}
 	}
 }

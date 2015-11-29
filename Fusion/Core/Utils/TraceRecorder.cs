@@ -41,13 +41,6 @@ namespace Fusion.Core.Utils {
 
 
 
-		/// <summary>
-		/// Recorded lines.
-		/// </summary>
-		public static IEnumerable<Line> Lines { get { return lines; } }
-		
-
-
 		void NotifyTraceRecord ()
 		{
 		}
@@ -71,6 +64,19 @@ namespace Fusion.Core.Utils {
 				if (TraceRecorded!=null) {
 					TraceRecorded(null, EventArgs.Empty);
 				}
+			}
+		}
+
+
+
+		/// <summary>
+		/// Gets lines.
+		/// </summary>
+		/// <returns></returns>
+		public static IEnumerable<Line> GetLines ()
+		{
+			lock (lockObj) {
+				return lines.ToArray();
 			}
 		}
 

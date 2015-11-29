@@ -15,53 +15,8 @@ using Fusion.Engine.Server;
 namespace Fusion.Engine.Client {
 	public abstract partial class GameClient : GameModule {
 
+		ClientState state;
 		NetClient	client;
-		State		state;
-
-
-		/// <summary>
-		/// Sets state
-		/// </summary>
-		/// <param name="newState"></param>
-		void SetState ( State newState )
-		{						
-			this.state = newState;
-			Log.Message("CL: State: {0}", newState.GetType().Name );
-		}
-							
-
-
-		/// <summary>
-		/// Inits internal stuff
-		/// </summary>
-		void InitInternal ()
-		{
-			SetState( new StandBy(this) );
-
-			var netConfig	=	new NetPeerConfiguration(GameEngine.GameID);
-			netConfig.AutoFlushSendQueue	=	true;
-			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
-
-			client	=	new NetClient( netConfig );
-		}
-
-
-
-		internal void Wait ()
-		{	
-			if ( !(state is StandBy) && !(state is Disconnected) ) {
-				Log.Message("-----quit");
-				DisconnectInternal("quit");
-			}
-
-
-			while ( !(state is StandBy) ) {
-				Thread.Sleep(50);
-				Log.Message("--");
-				UpdateInternal( new GameTime() );
-			}
-		}
-
 
 
 		/// <summary>
@@ -71,7 +26,19 @@ namespace Fusion.Engine.Client {
 		/// <param name="port"></param>
 		internal void ConnectInternal ( string host, int port )
 		{
-			state.Connect( host, port );
+			switch (state) {
+				case ClientState.StandBy :
+					DoConnect( host, port );
+					break;
+				case ClientState.Connecting :
+				case ClientState.Loading :
+				case ClientState.Awaiting :
+					Log.Warning("{0} in progress.", state);
+					break;
+				case ClientState.Active :
+					Log.Warning("Already connected");
+					break;
+			}
 		}
 
 
@@ -81,9 +48,21 @@ namespace Fusion.Engine.Client {
 		/// </summary>
 		/// <param name="host"></param>
 		/// <param name="port"></param>
-		internal void DisconnectInternal (string message)
+		internal void DisconnectInternal (bool disconnect)
 		{
-			state.Disconnect(message);
+			switch (state) {
+				case ClientState.Active :
+					DoDisconnect();
+					break;
+				case ClientState.StandBy :
+					Log.Warning("Not connected.");
+					break;
+				case ClientState.Loading:
+				case ClientState.Awaiting:
+				case ClientState.Connecting:
+					Log.Warning("{0} can not be interrupted.", state);
+					break;
+			}
 		}
 
 
@@ -94,18 +73,56 @@ namespace Fusion.Engine.Client {
 		/// <param name="gameTime"></param>
 		internal void UpdateInternal ( GameTime gameTime )
 		{
-			//
-			//	Read messages :
-			//	
-			DispatchIM( client );
-
-			//
-			//	Update client-side game :
-			//
-			state.Update( gameTime );
+			if (client!=null) {
+				DispatchIM(client);
+			}
+			
+			Dispatch();
 		}
 
 
+
+
+
+		
+		void DoConnect ( string host, int port )
+		{
+			var netConfig	=	new NetPeerConfiguration(GameEngine.GameTitle);
+			netConfig.AutoFlushSendQueue	=	true;
+
+			client	=	new NetClient( netConfig );
+
+			client.Start();
+
+			var userInfo	=	UserInfo();
+			var hail		=	client.CreateMessage( userInfo );
+
+			var serverEP	=	new IPEndPoint( IPAddress.Parse(host), port );
+
+			var conn		=	client.Connect( serverEP, hail );
+
+			state		=	ClientState.Connecting;
+		}
+
+
+
+		void DoDisconnect ()
+		{
+			if (client!=null) {
+				client.Shutdown("Client disconnected");
+				client = null;
+			}
+
+			//client.SendUnconnectedToSelf
+		}
+
+
+
+		/*-----------------------------------------------------------------------------------------
+		 * 
+		 *	Client-server stuff :
+		 * 
+		-----------------------------------------------------------------------------------------*/
 
 		/// <summary>
 		/// 
@@ -118,26 +135,17 @@ namespace Fusion.Engine.Client {
 			{
 				switch (msg.MessageType)
 				{
-					case NetIncomingMessageType.VerboseDebugMessage:Log.Verbose	("CL Net: " + msg.ReadString()); break;
-					case NetIncomingMessageType.DebugMessage:		Log.Debug	("CL Net: " + msg.ReadString()); break;
-					case NetIncomingMessageType.WarningMessage:		Log.Warning	("CL Net: " + msg.ReadString()); break;
-					case NetIncomingMessageType.ErrorMessage:		Log.Error	("CL Net: " + msg.ReadString()); break;
+					case NetIncomingMessageType.VerboseDebugMessage:Log.Verbose	("CL: " + msg.ReadString()); break;
+					case NetIncomingMessageType.DebugMessage:		Log.Debug	("CL: " + msg.ReadString()); break;
+					case NetIncomingMessageType.WarningMessage:		Log.Warning	("CL: " + msg.ReadString()); break;
+					case NetIncomingMessageType.ErrorMessage:		Log.Error	("CL: " + msg.ReadString()); break;
 
 					case NetIncomingMessageType.StatusChanged:		
-
-						var status	=	(NetConnectionStatus)msg.ReadByte();
-						var message	=	msg.ReadString();
-						Log.Message("CL: {0} - {1}", status, message );
-
-						state.StatusChanged( status, message, msg.SenderConnection );
-
+						DispatchStatusChange( msg );
 						break;
 					
 					case NetIncomingMessageType.Data:
-						
-						var netCmd	=	(NetCommand)msg.ReadByte();
-						state.DataReceived( netCmd, msg );
-
+						DispatchDataIM( msg );
 						break;
 					
 					default:
@@ -153,26 +161,14 @@ namespace Fusion.Engine.Client {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="message"></param>
-		void NotifyInternal ( string message )
-		{
-			var msg = client.CreateMessage( message.Length + 1 );
-
-			msg.Write( (byte)NetCommand.Notification );
-			msg.Write( message );
-
-			client.SendMessage( msg, NetDeliveryMethod.ReliableSequenced );
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
 		/// <param name="client"></param>
 		/// <param name="userCmd"></param>
 		void SendUserCommand ( NetClient client, byte[] userCmd )
 		{
+			if (client==null) {
+				return;
+			}
+
 			var msg = client.CreateMessage( userCmd.Length + 4 + 4 + 1 );
 
 			msg.Write( (byte)NetCommand.UserCommand );
@@ -184,7 +180,7 @@ namespace Fusion.Engine.Client {
 		}
 
 
-		#if false
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -267,6 +263,5 @@ namespace Fusion.Engine.Client {
 					break;
 			}
 		}
-		#endif
 	}
 }

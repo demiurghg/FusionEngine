@@ -36,7 +36,7 @@ namespace Fusion.Engine.Common.Commands {
 		public override void Execute ()
 		{
 			if (Invoker.GameEngine.GameServer.IsAlive) {
-				Invoker.GameEngine.GameServer.Drop( Client, Reason );
+				//Invoker.GameEngine.GameServer.Drop( Client, Reason );
 			} else {
 				Log.Warning("Server is not running");
 			}

@@ -46,6 +46,29 @@ namespace Fusion {
 
 
 		/// <summary>
+		/// Trace.TraceInformation
+		/// </summary>
+		/// <param name="message"></param>
+		public static void Verbose ( string message )
+		{
+			Trace.TraceInformation( "..." + message );
+		}
+
+
+
+		/// <summary>
+		/// Trace.TraceInformation
+		/// </summary>
+		/// <param name="format"></param>
+		/// <param name="args"></param>
+		public static void Verbose ( string format, params object[] args )
+		{
+			Trace.TraceInformation( "..." + format, args );
+		}
+
+
+
+		/// <summary>
 		///	Trace.TraceWarning
 		/// </summary>
 		/// <param name="message"></param>

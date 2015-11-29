@@ -222,13 +222,15 @@ namespace Fusion.Framework {
 			//	add small gap below command line...
 			consoleLayer.Draw( consoleBackground, 0,0, vp.Width, vp.Height/2+1, Color.White );
 
-			scroll	=	MathUtil.Clamp( scroll, 0, TraceRecorder.Lines.Count() );
+			var lines	=	TraceRecorder.GetLines();
+
+			scroll	=	MathUtil.Clamp( scroll, 0, lines.Count() );
 
 			/*var info = gameEngine.GetReleaseInfo();
 			consoleFont.DrawString( consoleLayer, info, vp.Width - consoleFont.MeasureString(info).Width, vp.Height/2 - 1 * charHeight, ErrorColor );*/
 
 
-			foreach ( var line in TraceRecorder.Lines.Reverse().Skip(scroll) ) {
+			foreach ( var line in lines.Reverse().Skip(scroll) ) {
 
 				Color color = Color.Gray;
 
