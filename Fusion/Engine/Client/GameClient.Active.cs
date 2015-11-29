@@ -51,7 +51,13 @@ namespace Fusion.Engine.Client {
 			{
 				var userCmd  = gameClient.Update(gameTime);
 
-				gameClient.SendUserCommand( client, 0, userCmd );
+				bool showSnapshot = gameClient.GameEngine.Network.Config.ShowSnapshots;
+
+				if (showSnapshot) {
+					Log.Message("User cmd: #{0} : {1}", lastSnapshotFrame, userCmd.Length );
+				}
+
+				gameClient.SendUserCommand( client, lastSnapshotFrame, userCmd );
 			}
 
 
@@ -66,18 +72,24 @@ namespace Fusion.Engine.Client {
 
 			public override void DataReceived ( NetCommand command, NetIncomingMessage msg )
 			{
+				bool showSnapshot = gameClient.GameEngine.Network.Config.ShowSnapshots;
+
 				if (command==NetCommand.Snapshot) {
 					var index		=	msg.ReadUInt32();
 					var prevFrame	=	msg.ReadUInt32();
 					var size		=	msg.ReadInt32();
 
-					lastSnapshotFrame	=	prevFrame;
+					lastSnapshotFrame	=	index;
 
-					var snapshot	=	queue.Decompress( prevFrame, msg.ReadBytes(size) );
+					var snapshot		=	queue.Decompress( prevFrame, msg.ReadBytes(size) );
 					
 					if (snapshot!=null) {
+
 						gameClient.FeedSnapshot( snapshot );
 						queue.Push( new Snapshot(index, snapshot) );
+
+					} else {
+						lastSnapshotFrame = 0;
 					}
 				}
 

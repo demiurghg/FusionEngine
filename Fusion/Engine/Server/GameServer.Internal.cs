@@ -290,10 +290,12 @@ namespace Fusion.Engine.Server {
 			var conns	=	server.Connections.Where ( c => c.Tag is uint );
 
 			foreach ( var conn in conns ) {
+
 					
 				var frame		=	queue.LastFrame;
 				var prevFrame	=	(uint)conn.Tag;
-				var snapshot	=	queue.Compress( ref prevFrame );
+				int size		=	0;
+				var snapshot	=	queue.Compress( ref prevFrame, out size);
 
 				//	reset snapshot request :
 				conn.Tag = null;
@@ -311,6 +313,10 @@ namespace Fusion.Engine.Server {
 				var delivery	=	prevFrame == 0 ? NetDeliveryMethod.ReliableOrdered : NetDeliveryMethod.UnreliableSequenced;
 
 				server.SendMessage( msg, conn, delivery, 0 );
+
+				if (GameEngine.Network.Config.ShowSnapshots) {
+					Log.Message("Snapshot: #{0} - #{1} : {2} / {3} to {4}", frame, prevFrame, snapshot.Length, size, conn.RemoteEndPoint.ToString() );
+				}
 			}
 		}
 

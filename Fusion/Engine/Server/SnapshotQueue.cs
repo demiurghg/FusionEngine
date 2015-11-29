@@ -15,7 +15,7 @@ namespace Fusion.Engine.Server {
 		readonly int capacity;
 				
 		
-		Queue<Snapshot> queue;
+		List<Snapshot> queue;
 
 		/// <summary>
 		/// 
@@ -24,7 +24,7 @@ namespace Fusion.Engine.Server {
 		public SnapshotQueue ( int capacity )
 		{
 			this.capacity	=	capacity;
-			queue			=	new Queue<Snapshot>( capacity );
+			queue			=	new List<Snapshot>( capacity + 4 );
 		}
 
 
@@ -47,10 +47,10 @@ namespace Fusion.Engine.Server {
 		/// <param name="snapshot"></param>
 		public void Push ( Snapshot snapshot )
 		{
-			queue.Enqueue ( snapshot );
+			queue.Add ( snapshot );
 
 			while (queue.Count>capacity) {
-				queue.Dequeue();
+				queue.RemoveAt(0);
 			}
 		}
 
@@ -71,9 +71,10 @@ namespace Fusion.Engine.Server {
 		/// </summary>
 		/// <param name="prevFrame"></param>
 		/// <returns></returns>
-		public byte[] Compress ( ref uint prevFrame )
+		public byte[] Compress ( ref uint prevFrame, out int size )
 		{
-			var lastSnapshot	=	queue.Peek();
+			var lastSnapshot	=	queue.Last();
+				size			=	lastSnapshot.Data.Length;
 
 			var prevFrameLocal	=	prevFrame;
 
@@ -83,7 +84,9 @@ namespace Fusion.Engine.Server {
 				prevFrame = 0;
 				return NetworkEngine.Compress( lastSnapshot.Data );
 			}
+
 			
+
 
 			var delta	=	new byte[lastSnapshot.Data.Length];
 			var minSize	=	Math.Min( delta.Length, prevSnapshot.Data.Length );
@@ -116,7 +119,7 @@ namespace Fusion.Engine.Server {
 				return NetworkEngine.Decompress( snapshot );
 			}
 
-			var prevSnapshot	=	queue.LastOrDefault( s => s.Frame == prevFrameId );
+			var prevSnapshot	=	queue.SingleOrDefault( s => s.Frame == prevFrameId );
 
 			if (prevSnapshot==null) {
 				Log.Warning("Missing snapshot #{0}. Waiting for full snapshot.", prevFrameId );

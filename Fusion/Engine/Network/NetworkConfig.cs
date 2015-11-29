@@ -24,6 +24,8 @@ namespace Fusion.Engine.Network {
 
 		public float SimulatePacketsLoss { get; set; }
 
+		public bool ShowSnapshots { get; set; }
+
 
 		public NetworkConfig ()
 		{

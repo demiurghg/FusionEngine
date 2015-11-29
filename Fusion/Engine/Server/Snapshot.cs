@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Fusion.Engine.Server {
 
 	/// <summary>
 	/// Represents byte array of server state.
 	/// </summary>
+	//[DebuggerDisplay("Frame={Frame} Data={Data.Length} bytes")]
 	public class Snapshot {
 
 		/// <summary>
@@ -35,6 +37,12 @@ namespace Fusion.Engine.Server {
 
 			this.Frame	=	frame;
 			this.Data	=	data.ToArray();
+		}
+
+
+		public override string ToString ()
+		{
+			return string.Format("#{0}: [{1}]", Frame, string.Join(" ", Data.Select(b=>b.ToString("X2"))));
 		}
 	}
 }
