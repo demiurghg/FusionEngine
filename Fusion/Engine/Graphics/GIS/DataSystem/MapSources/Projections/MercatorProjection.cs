@@ -1,6 +1,5 @@
 ﻿using System;
 using Fusion.Core.Mathematics;
-using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
 using Fusion.Engine.Graphics.GIS.GlobeMath;
 
 namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections

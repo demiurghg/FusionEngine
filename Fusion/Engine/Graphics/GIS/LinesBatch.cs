@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
+using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
+using Fusion.Engine.Graphics.GIS.GlobeMath;
 
 namespace Fusion.Engine.Graphics.GIS
 {
@@ -93,9 +96,63 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		void SwapBuffers()
+		static public LinesGisLayer GenerateGrid(GameEngine gameEngine, DVector2 leftTop, DVector2 rightBottom, int dimX, int dimY, Color color, MapProjection projection, bool keepQuad = false)
 		{
+			var lt = projection.WorldToTilePos(leftTop.X,		leftTop.Y, 0);
+			var rb = projection.WorldToTilePos(rightBottom.X,	rightBottom.Y, 0);
 
+			if (keepQuad) {
+				rb.Y = lt.Y + (rb.X - lt.X);
+			}
+
+			double stepX = Math.Abs(rb.X - lt.X) / (dimX - 1);
+			double stepY = Math.Abs(rb.Y - lt.Y) / (dimY - 1);
+
+
+			List<Gis.GeoPoint> points = new List<Gis.GeoPoint>();
+			
+			// Too lazy
+			for (int row = 1; row < dimY-1; row++) {
+				for (int col = 0; col < dimX-1; col++) {
+					var coords0 = projection.TileToWorldPos(lt.X + stepX * col,		lt.Y + stepY * row, 0);
+					var coords1 = projection.TileToWorldPos(lt.X + stepX * (col+1), lt.Y + stepY * row, 0);
+
+					points.Add(new Gis.GeoPoint {
+						Lon		= DMathUtil.DegreesToRadians(coords0.X),
+						Lat		= DMathUtil.DegreesToRadians(coords0.Y),
+						Color	= color
+					});
+					points.Add(new Gis.GeoPoint {
+						Lon		= DMathUtil.DegreesToRadians(coords1.X),
+						Lat		= DMathUtil.DegreesToRadians(coords1.Y),
+						Color	= color
+					});
+				} 
+			}
+			for (int col = 1; col < dimX-1; col++) {
+				for (int row = 0; row < dimY-1; row++) {
+					var coords0 = projection.TileToWorldPos(lt.X + stepX * col,	lt.Y + stepY * row, 0);
+					var coords1 = projection.TileToWorldPos(lt.X + stepX * col, lt.Y + stepY * (row+1), 0);
+
+					points.Add(new Gis.GeoPoint {
+						Lon		= DMathUtil.DegreesToRadians(coords0.X),
+						Lat		= DMathUtil.DegreesToRadians(coords0.Y),
+						Color	= color
+					});
+					points.Add(new Gis.GeoPoint {
+						Lon		= DMathUtil.DegreesToRadians(coords1.X),
+						Lat		= DMathUtil.DegreesToRadians(coords1.Y),
+						Color	= color
+					});
+				} 
+			}
+
+			var linesLayer = new LinesGisLayer(gameEngine, points.Count);
+			Array.Copy(points.ToArray(), linesLayer.PointsCpu, points.Count);
+			linesLayer.UpdatePointsBuffer();
+			linesLayer.Flags = (int)(LineFlags.THIN_LINE);
+
+			return linesLayer;
 		}
 	}
 }
