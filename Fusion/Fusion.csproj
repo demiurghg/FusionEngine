@@ -140,6 +140,7 @@
     <Compile Include="Core\Shell\NoRollbackCommand.cs" />
     <Compile Include="Core\Shell\Invoker.Helper.cs" />
     <Compile Include="Core\StringConverter.cs" />
+    <Compile Include="Core\Utils\Crc32.cs" />
     <Compile Include="Core\Utils\TimeProbe.cs" />
     <Compile Include="Drivers\Audio\AudioChannels.cs" />
     <Compile Include="Drivers\Audio\AudioDevice.cs" />
@@ -396,6 +397,8 @@
     <Compile Include="Engine\Network\NetworkConfig.cs" />
     <Compile Include="Engine\Network\NetworkEngine.cs" />
     <Compile Include="Engine\Server\NetCommand.cs" />
+    <Compile Include="Engine\Server\Snapshot.cs" />
+    <Compile Include="Engine\Server\SnapshotQueue.cs" />
     <Compile Include="Engine\Storage\UserStorage.cs" />
     <Compile Include="Engine\UserInterface\Config.cs" />
     <Compile Include="Engine\UserInterface\Context.cs" />

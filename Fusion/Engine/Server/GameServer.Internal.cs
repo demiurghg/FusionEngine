@@ -109,8 +109,8 @@ namespace Fusion.Engine.Server {
 			notifications	=	new Queue<string>();
 
 			Log.Message("SV: Start: {0} {1}", map, postCommand);
-			snapshotCounter	=	0;
-			snapshotRequests	=	new HashSet<NetConnection>();
+
+			var snapshotQueue	=	new SnapshotQueue(32);
 
 
 			//
@@ -142,16 +142,25 @@ namespace Fusion.Engine.Server {
 
 					svTime.Update();
 
+					//	read input messages :
 					DispatchIM( server );
 
+					//	update frame and get snapshot :
 					var snapshot = Update( svTime );
 
-					SendSnapshot( server, snapshot );
+					//	push snapshot to queue :
+					snapshotQueue.Push( snapshot );
 
+					//	send snapshot to clients :
+					SendSnapshot( server, snapshotQueue );
+
+					//	send notifications to clients :
 					SendNotifications( server );
 
+					//	execute server's command queue :
 					GameEngine.Invoker.ExecuteQueue( svTime, CommandAffinity.Server );
 
+					//	crash test for server :
 					CrashServer.CrashTest();
 				}
 
@@ -240,14 +249,8 @@ namespace Fusion.Engine.Server {
 						break;
 				}
 				server.Recycle(msg);
-			}			
+			}		
 		}
-
-
-		uint snapshotCounter	=	0;
-
-		HashSet<NetConnection>	snapshotRequests = new HashSet<NetConnection>();
-
 
 
 		/// <summary>
@@ -281,25 +284,33 @@ namespace Fusion.Engine.Server {
 		/// 
 		/// </summary>
 		/// <param name="server"></param>
-		void SendSnapshot ( NetServer server, byte[] snapshot )
+		void SendSnapshot ( NetServer server, SnapshotQueue queue )
 		{
-			if (snapshotRequests.Any()) {
+			//	snapshot request is stored in connection's tag.s
+			var conns	=	server.Connections.Where ( c => c.Tag is uint );
 
-				snapshot	=	NetworkEngine.Compress(snapshot);
+			foreach ( var conn in conns ) {
+					
+				var frame		=	queue.LastFrame;
+				var prevFrame	=	(uint)conn.Tag;
+				var snapshot	=	queue.Compress( ref prevFrame );
 
-				var msg = server.CreateMessage( snapshot.Length + 4 + 4 + 1 );
+				//	reset snapshot request :
+				conn.Tag = null;
+
+				var msg = server.CreateMessage( snapshot.Length + 4 * 3 + 1 );
 			
 				msg.Write( (byte)NetCommand.Snapshot );
-				msg.Write( snapshotCounter );
+				msg.Write( frame );
+				msg.Write( prevFrame );
 				msg.Write( snapshot.Length );
 				msg.Write( snapshot );
 
-				server.SendMessage( msg, snapshotRequests.Select(n=>n).ToList(), NetDeliveryMethod.UnreliableSequenced, 0 );
-				/*foreach ( var conn in snapshotRequests ) {
-					server.SendMessage( msg, conn, NetDeliveryMethod.UnreliableSequenced );
-				} */
+				//	Zero snapshot frame index means that we are waiting for first snapshot.
+				//	and command shoud reach the server.
+				var delivery	=	prevFrame == 0 ? NetDeliveryMethod.ReliableOrdered : NetDeliveryMethod.UnreliableSequenced;
 
-				snapshotRequests.Clear();
+				server.SendMessage( msg, conn, delivery, 0 );
 			}
 		}
 
@@ -337,24 +348,6 @@ namespace Fusion.Engine.Server {
 		/// 
 		/// </summary>
 		/// <param name="msg"></param>
-		void DispatchUserCommand ( NetIncomingMessage msg )
-		{	
-			var snapshotID	=	msg.ReadUInt32();
-			var size		=	msg.ReadInt32();
-
-			var data		=	msg.ReadBytes( size );
-
-			FeedCommand( msg.SenderEndPoint.ToString(), data );
-
-			snapshotRequests.Add( msg.SenderConnection );
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="msg"></param>
 		void DispatchDataIM ( NetIncomingMessage msg )
 		{
 			var netCmd = (NetCommand)msg.ReadByte();
@@ -368,6 +361,24 @@ namespace Fusion.Engine.Server {
 					FeedNotification( msg.SenderEndPoint.ToString(), msg.ReadString() );
 					break;
 			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="msg"></param>
+		void DispatchUserCommand ( NetIncomingMessage msg )
+		{	
+			var snapshotID	=	msg.ReadUInt32();
+			var size		=	msg.ReadInt32();
+
+			var data		=	msg.ReadBytes( size );
+
+			FeedCommand( msg.SenderEndPoint.ToString(), data );
+
+			msg.SenderConnection.Tag = snapshotID;
 		}
 
 

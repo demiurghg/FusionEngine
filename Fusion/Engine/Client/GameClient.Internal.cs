@@ -172,16 +172,20 @@ namespace Fusion.Engine.Client {
 		/// </summary>
 		/// <param name="client"></param>
 		/// <param name="userCmd"></param>
-		void SendUserCommand ( NetClient client, byte[] userCmd )
+		void SendUserCommand ( NetClient client, uint recvSnapshotFrame, byte[] userCmd )
 		{
-			var msg = client.CreateMessage( userCmd.Length + 4 + 4 + 1 );
+			var msg = client.CreateMessage( userCmd.Length + 4 * 3 + 1 );
 
 			msg.Write( (byte)NetCommand.UserCommand );
-			msg.Write( (uint)0 );
+			msg.Write( recvSnapshotFrame );
 			msg.Write( userCmd.Length );
 			msg.Write( userCmd );
 
-			client.SendMessage( msg, NetDeliveryMethod.UnreliableSequenced );
+			//	Zero snapshot frame index means that we are waiting for first snapshot.
+			//	and command shoud reach the server.
+			var delivery	=	recvSnapshotFrame == 0 ? NetDeliveryMethod.ReliableOrdered : NetDeliveryMethod.UnreliableSequenced;
+
+			client.SendMessage( msg, delivery );
 		}
 
 

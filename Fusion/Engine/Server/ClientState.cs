@@ -14,7 +14,7 @@ using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Server {
 
-	class GameClientState {
+	class ClientState {
 			
 		/// <summary>
 		/// Client's end point.
@@ -42,7 +42,6 @@ namespace Fusion.Engine.Server {
 
 
 		readonly GameServer	server;
-		readonly NetChan	netChan;
 
 
 		/// <summary>
@@ -57,9 +56,8 @@ namespace Fusion.Engine.Server {
 		/// </summary>
 		/// <param name="ep"></param>
 		/// <param name="userInfo"></param>
-		public GameClientState ( NetChan netChan, GameServer server, IPEndPoint ep, string userInfo )
+		public ClientState ( GameServer server, IPEndPoint ep, string userInfo )
 		{
-			this.netChan	=	netChan;
 			this.server		=	server;
 			EndPoint		=	ep;
 			UserInfo		=	userInfo;
