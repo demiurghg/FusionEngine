@@ -41,6 +41,7 @@ namespace Fusion.Engine.Client {
 			var netConfig	=	new NetPeerConfiguration(GameEngine.GameID);
 			netConfig.AutoFlushSendQueue	=	true;
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
+			netConfig.UnreliableSizeBehaviour = NetUnreliableSizeBehaviour.NormalFragmentation;
 
 			client	=	new NetClient( netConfig );
 		}

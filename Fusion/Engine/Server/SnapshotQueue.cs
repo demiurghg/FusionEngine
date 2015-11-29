@@ -1,10 +1,13 @@
-﻿using System;
+﻿//#define DONT_USE_DELTA
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Fusion.Engine.Network;
 using Fusion.Engine.Common;
+
+
 
 namespace Fusion.Engine.Server {
 	
@@ -73,6 +76,11 @@ namespace Fusion.Engine.Server {
 		/// <returns></returns>
 		public byte[] Compress ( ref uint prevFrame, out int size )
 		{
+			#if DONT_USE_DELTA
+				size = queue.Last().Data.Length;
+				return NetworkEngine.Compress( queue.Last().Data );
+			#endif
+
 			var lastSnapshot	=	queue.Last();
 				size			=	lastSnapshot.Data.Length;
 
@@ -84,8 +92,6 @@ namespace Fusion.Engine.Server {
 				prevFrame = 0;
 				return NetworkEngine.Compress( lastSnapshot.Data );
 			}
-
-			
 
 
 			var delta	=	new byte[lastSnapshot.Data.Length];
@@ -115,6 +121,11 @@ namespace Fusion.Engine.Server {
 		/// <returns></returns>
 		public byte[] Decompress ( uint prevFrameId, byte[] snapshot )
 		{
+			#if DONT_USE_DELTA
+				return NetworkEngine.Decompress( snapshot );
+			#endif
+			
+
 			if (prevFrameId==0) {
 				return NetworkEngine.Decompress( snapshot );
 			}

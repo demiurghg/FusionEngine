@@ -61,7 +61,7 @@ namespace Fusion.Engine.Network {
 		{
 			using (var compressedStream = new MemoryStream()) {
 
-				using (var zipStream = new DeflateStream(compressedStream, CompressionLevel.Optimal)) {
+				using (var zipStream = new DeflateStream(compressedStream, CompressionLevel.Fastest)) {
 
 					zipStream.Write(data, 0, data.Length);
 					zipStream.Close();

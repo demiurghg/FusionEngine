@@ -104,6 +104,7 @@ namespace Fusion.Engine.Server {
 			var netConfig		=	new NetPeerConfiguration(GameEngine.GameID);
 			netConfig.Port		=	GameEngine.Network.Config.Port;
 			netConfig.MaximumConnections	=	32;
+			netConfig.UnreliableSizeBehaviour = NetUnreliableSizeBehaviour.NormalFragmentation;
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
 
 			var server		=	new NetServer( netConfig );
@@ -316,7 +317,7 @@ namespace Fusion.Engine.Server {
 				msg.Write( frame );
 				msg.Write( prevFrame );
 				msg.Write( snapshot.Length );
-				msg.Write( snapshot );
+				msg.Write( snapshot ); 
 
 				//	Zero snapshot frame index means that we are waiting for first snapshot.
 				//	and command shoud reach the server.
@@ -327,7 +328,7 @@ namespace Fusion.Engine.Server {
 				server.SendMessage( msg, conn, delivery, 0 );
 
 				if (debug) {
-					Log.Message("Snapshot: #{0} - #{1} : {2} / {3} to {4} at {5} msec", frame, prevFrame, snapshot.Length, size, conn.RemoteEndPoint.ToString(), sw.Elapsed.TotalMilliseconds );
+					Log.Message("Snapshot: #{0} - #{1} : {2}:{6} / {3} to {4} at {5} msec", frame, prevFrame, snapshot.Length, size, conn.RemoteEndPoint.ToString(), sw.Elapsed.TotalMilliseconds, msg.Data.Length );
 				}
 			}
 		}
