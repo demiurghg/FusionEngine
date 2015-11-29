@@ -23,31 +23,6 @@ namespace Fusion.Engine.Network {
 
 
 		/// <summary>
-		/// Server socket
-		/// </summary>
-		public Socket ServerSocket { 
-			get {
-				return serverSocket;
-			}
-		}
-
-
-		/// <summary>
-		/// Client socket
-		/// </summary>
-		public Socket ClientSocket { 
-			get { 
-				return clientSocket;
-			}
-		}
-
-
-		Socket serverSocket;
-		Socket clientSocket;
-
-
-
-		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="gameEngine"></param>
@@ -63,42 +38,6 @@ namespace Fusion.Engine.Network {
 		/// </summary>
 		public override void Initialize ()
 		{
-			/*Log.Message("  local IP : {0}", GetLocalIPAddress());
-
-			Log.Message("  network  : {0}", System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable() );
-
-			//	create server socket :
-			serverSocket				=	new Socket( AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp );
-			serverSocket.Blocking		=	false;
-			serverSocket.DontFragment	=	true;
-			Log.Message("  recv buf : {0}", serverSocket.ReceiveBufferSize );
-
-			int port = Config.Port;
-
-			for (int i=0; i<10; i++) {
-				try {			   
-					Log.Message("  try port : {0}", port );
-					serverSocket.Bind( new IPEndPoint( IPAddress.Any, port ) );
-					Log.Message("  server   : {0}", serverSocket.LocalEndPoint );
-					break;
-
-				} catch ( SocketException ne ) {
-					if (ne.SocketErrorCode==SocketError.AddressAlreadyInUse) {
-						port++;
-					}
-					if (i>=9) {
-						throw;
-					}
-				}
-			}
-
-			//	create client socket :
-			clientSocket			=	new Socket( AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp );
-			clientSocket.Blocking	=	false;
-			serverSocket.DontFragment	= true;
-
-			clientSocket.Bind( new IPEndPoint(IPAddress.Any, 0) );
-			Log.Message("  client   : {0}", clientSocket.LocalEndPoint );*/
 		}
 
 
@@ -109,34 +48,10 @@ namespace Fusion.Engine.Network {
 		/// <param name="disposing"></param>
 		protected override void Dispose ( bool disposing )
 		{
-			//if (disposing) {
-			//	SafeDispose( ref clientSocket );
-			//	SafeDispose( ref serverSocket );
-			//}
-			//base.Dispose( disposing );
 		}
 
 	
 		
-		/// <summary>
-		/// http://stackoverflow.com/questions/6803073/get-local-ip-address
-		/// </summary>
-		public string GetLocalIPAddress()
-		{
-			//var host = Dns.GetHostEntry(Dns.GetHostName());
-
-			//foreach (var ip in host.AddressList) {
-			//	if (ip.AddressFamily == AddressFamily.InterNetwork) {
-			//		return ip.ToString();
-			//	}
-			//}
-
-			throw new Exception("Local IP Address Not Found!");
-		}
-
-
-
-
 		/// <summary>
 		/// Compresses byte array.
 		/// </summary>
