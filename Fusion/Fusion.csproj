@@ -197,6 +197,7 @@
     <Compile Include="Engine\Client\GameClient.Connecting.cs" />
     <Compile Include="Engine\Client\GameClient.State.cs" />
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
+    <Compile Include="Engine\Common\GameInterface.Internal.cs" />
     <Compile Include="Engine\Graphics\Effects\HdrSettings.cs" />
     <Compile Include="Engine\Graphics\Effects\Filter.cs" />
     <Compile Include="Engine\Graphics\Effects\HdrFilter.cs">

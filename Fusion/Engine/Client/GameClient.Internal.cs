@@ -39,9 +39,13 @@ namespace Fusion.Engine.Client {
 			SetState( new StandBy(this) );
 
 			var netConfig	=	new NetPeerConfiguration(GameEngine.GameID);
+
 			netConfig.AutoFlushSendQueue	=	true;
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
+			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryRequest );
+			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryResponse );
 			netConfig.UnreliableSizeBehaviour = NetUnreliableSizeBehaviour.NormalFragmentation;
+
 
 			client	=	new NetClient( netConfig );
 		}
@@ -125,6 +129,10 @@ namespace Fusion.Engine.Client {
 					case NetIncomingMessageType.WarningMessage:		Log.Warning	("CL Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.ErrorMessage:		Log.Error	("CL Net: " + msg.ReadString()); break;
 
+					case NetIncomingMessageType.DiscoveryResponse:
+						GameEngine.GameInterface.DiscoveryResponse( msg.SenderEndPoint, msg.ReadString() );
+						break;
+
 					case NetIncomingMessageType.StatusChanged:		
 
 						var status	=	(NetConnectionStatus)msg.ReadByte();
@@ -148,6 +156,16 @@ namespace Fusion.Engine.Client {
 				}
 				client.Recycle(msg);
 			}			
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		internal void SendDiscoveryRequest ()
+		{
+			client.DiscoverLocalPeers( GameEngine.Network.Config.Port );
 		}
 
 

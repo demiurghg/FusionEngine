@@ -15,8 +15,39 @@ using Fusion.Build;
 using Fusion.Engine.Graphics.GIS;
 using Fusion.Engine.Graphics.GIS.GlobeMath;
 using Fusion.Engine.UserInterface;
+using Fusion;
+using Fusion.Core.Shell;
 
 namespace TestGame2 {
+
+	
+	[Command("refreshServers", CommandAffinity.Default)]
+	public class RefreshServerList : NoRollbackCommand {
+		
+		public RefreshServerList( Invoker invoker ) : base(invoker)
+		{
+		}
+
+		public override void Execute ()
+		{
+			Invoker.GameEngine.GameInterface.StartDiscovery(4, new TimeSpan(0,0,10));
+		}
+
+	}
+	
+	[Command("stopRefresh", CommandAffinity.Default)]
+	public class StopRefreshServerList : NoRollbackCommand {
+		
+		public StopRefreshServerList( Invoker invoker ) : base(invoker)
+		{
+		}
+
+		public override void Execute ()
+		{
+			Invoker.GameEngine.GameInterface.StopDiscovery();
+		}
+
+	}
 
 
 	class CustomGameInterface : Fusion.Engine.Common.GameInterface {
@@ -199,6 +230,16 @@ namespace TestGame2 {
 			return m;
 		}
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="endPoint"></param>
+		/// <param name="serverInfo"></param>
+		public override void DiscoveryResponse ( System.Net.IPEndPoint endPoint, string serverInfo )
+		{
+			Log.Message("DISCOVERY : {0} - {1}", endPoint.ToString(), serverInfo );
+		}
 
 
 		/// <summary>

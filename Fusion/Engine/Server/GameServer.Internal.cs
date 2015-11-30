@@ -106,6 +106,8 @@ namespace Fusion.Engine.Server {
 			netConfig.MaximumConnections	=	32;
 			netConfig.UnreliableSizeBehaviour = NetUnreliableSizeBehaviour.NormalFragmentation;
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
+			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryRequest );
+			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryResponse );
 
 			var server		=	new NetServer( netConfig );
 			notifications	=	new Queue<string>();
@@ -227,6 +229,13 @@ namespace Fusion.Engine.Server {
 					case NetIncomingMessageType.WarningMessage:		Log.Warning	("SV Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.ErrorMessage:		Log.Error	("SV Net: " + msg.ReadString()); break;
 
+					case NetIncomingMessageType.DiscoveryRequest:
+						Log.Message("Discovery request from {0}", msg.SenderEndPoint.ToString() );
+						var response = server.CreateMessage( ServerInfo() );
+						server.SendDiscoveryResponse( response, msg.SenderEndPoint );
+
+						break;
+
 					case NetIncomingMessageType.ConnectionApproval:
 
 						var clientID	=	msg.SenderEndPoint.ToString();
@@ -328,7 +337,8 @@ namespace Fusion.Engine.Server {
 				server.SendMessage( msg, conn, delivery, 0 );
 
 				if (debug) {
-					Log.Message("Snapshot: #{0} - #{1} : {2}:{6} / {3} to {4} at {5} msec", frame, prevFrame, snapshot.Length, size, conn.RemoteEndPoint.ToString(), sw.Elapsed.TotalMilliseconds, msg.Data.Length );
+					Log.Message("Snapshot: #{0} - #{1} : {2} / {3} to {4} at {5} msec", 
+						frame, prevFrame, snapshot.Length, size, conn.RemoteEndPoint.ToString(), sw.Elapsed.TotalMilliseconds );
 				}
 			}
 		}
