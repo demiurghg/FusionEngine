@@ -94,7 +94,7 @@ namespace TestGame2 {
 		{
 			masterView		=	new ViewLayer(GameEngine, 0,0, true);
 
-			GameEngine.GraphicsEngine.ViewLayers.Add( masterView );
+			GameEngine.GraphicsEngine.AddLayer( masterView );
 
 			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			uiLayer		=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
