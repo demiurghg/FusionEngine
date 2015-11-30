@@ -61,10 +61,10 @@ namespace TestGame2 {
 		public UserInterface UserInterface { get { return userInterface; } }
 		UserInterface userInterface;
 
-		SpriteLayer testLayer;
-		SpriteLayer	uiLayer;
-		DiscTexture	texture;
-		ViewLayer	masterView;
+		SpriteLayer		testLayer;
+		SpriteLayer		uiLayer;
+		DiscTexture		texture;
+		ViewLayerHdr	masterView;
 
 		Scene		scene;
 
@@ -92,7 +92,8 @@ namespace TestGame2 {
 		/// </summary>
 		public override void Initialize ()
 		{
-			masterView		=	new ViewLayer(GameEngine, 0,0, true);
+			var bounds		=	GameEngine.GraphicsEngine.DisplayBounds;
+			masterView		=	new ViewLayerHdr(GameEngine, bounds.Width, bounds.Height);
 
 			GameEngine.GraphicsEngine.AddLayer( masterView );
 
@@ -122,15 +123,6 @@ namespace TestGame2 {
 			
 				masterView.Instances.Add( inst );
 			}
-
-			testLayer.Clear();
-			//testLayer.Draw( target, 10,10 + 384,256,256, Color.White );
-
-			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.DiffuseTexture,     0,  0, 200,150, Color.White );
-			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.SpecularTexturer, 200,  0, 200,150, Color.White );
-			testLayer.Draw( GameEngine.GraphicsEngine.LightRenderer.NormalMapTexture, 400,  0, 200,150, Color.White );
-			/*testLayer.Draw( sceneView.Target,		600, 0, 256, 256, Color.White);//*/
-			/*testLayer.Draw( sceneView1.Target,		 600,384, 256,256, Color.White );//*/
 
 			masterView.SpriteLayers.Add( console.ConsoleSpriteLayer );
 			masterView.SpriteLayers.Add( uiLayer );
@@ -185,7 +177,16 @@ namespace TestGame2 {
 			/*if ( gameEngine.Keyboard.IsKeyDown(Keys.R) ) {
 				testLayer.Clear();
 				testLayer.DrawDebugString( debugFont, 10, 276, rand.Next().ToString(), Color.White );
+
 			} */
+
+			testLayer.Clear();
+			testLayer.BlendMode = SpriteBlendMode.Opaque;
+			testLayer.Draw( masterView.HdrTexture,	 -200,  0, 200,150, Color.White );
+			testLayer.Draw( masterView.DiffuseTexture,	    0,  0, 200,150, Color.White );
+			testLayer.Draw( masterView.SpecularTexture, 200,  0, 200,150, Color.White );
+			testLayer.Draw( masterView.NormalMapTexture, 400,  0, 200,150, Color.White );
+
 
 			if ( GameEngine.Keyboard.IsKeyDown(Keys.PageDown) ) {
 				angle -= 0.01f;
@@ -194,7 +195,7 @@ namespace TestGame2 {
 				angle += 0.01f;
 			}
 
-			testLayer.SetTransform( new Vector2(100,0), new Vector2(128+5,128+5), angle );
+			testLayer.SetTransform( new Vector2(200,0), new Vector2(128+5,128+5), angle );
 
 			var m = UpdateCam( gameTime );
 

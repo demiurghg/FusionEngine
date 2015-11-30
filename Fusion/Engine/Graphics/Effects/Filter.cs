@@ -296,7 +296,7 @@ namespace Fusion.Engine.Graphics
 		/// </summary>
 		/// <param name="dst">target to copy to</param>
 		/// <param name="src">target to copy from</param>
-		public void OverlayAdditive( RenderTargetSurface dst, ShaderResource src, Viewport viewport )
+		public void OverlayAdditive( RenderTargetSurface dst, ShaderResource src )
 		{
 			SetDefaultRenderStates();
 
@@ -305,7 +305,6 @@ namespace Fusion.Engine.Graphics
 				if(dst == null) {
 					rs.RestoreBackbuffer();
 				} else {
-					rs.SetViewport(viewport);
 					rs.SetTargets( null, dst );
 				}
 
