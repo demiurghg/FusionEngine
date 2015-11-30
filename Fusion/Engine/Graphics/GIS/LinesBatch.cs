@@ -15,6 +15,7 @@ namespace Fusion.Engine.Graphics.GIS
 	{
 		Ubershader		shader;
 		StateFactory	factory;
+		StateFactory	thinFactory;
 
 		[Flags]
 		public enum LineFlags : int
@@ -54,7 +55,8 @@ namespace Fusion.Engine.Graphics.GIS
 		public LinesGisLayer(GameEngine engine, int linesPointsCount, bool isDynamic = false) : base(engine)
 		{
 			shader	= GameEngine.Content.Load<Ubershader>("globe.Line.hlsl");
-			factory = new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
+			factory		= new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
+			thinFactory = new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.Readonly);
 
 
 			var vbOptions = isDynamic ? VertexBufferOptions.Dynamic : VertexBufferOptions.Default;
@@ -80,8 +82,12 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			var dev = GameEngine.GraphicsDevice;
 
-
-			dev.PipelineState = factory[Flags];
+			if (((LineFlags) Flags).HasFlag(LineFlags.THIN_LINE)) {
+				dev.PipelineState = thinFactory[Flags];
+			}
+			else {
+				dev.PipelineState = factory[Flags];
+			}
 
 			dev.GeometryShaderConstants[0]	= constBuffer;
 			dev.VertexShaderConstants[0]	= constBuffer;
@@ -96,7 +102,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		static public LinesGisLayer GenerateGrid(GameEngine gameEngine, DVector2 leftTop, DVector2 rightBottom, int dimX, int dimY, Color color, MapProjection projection, bool keepQuad = false)
+		public static LinesGisLayer GenerateGrid(GameEngine gameEngine, DVector2 leftTop, DVector2 rightBottom, int dimX, int dimY, Color color, MapProjection projection, bool keepQuad = false)
 		{
 			var lt = projection.WorldToTilePos(leftTop.X,		leftTop.Y, 0);
 			var rb = projection.WorldToTilePos(rightBottom.X,	rightBottom.Y, 0);

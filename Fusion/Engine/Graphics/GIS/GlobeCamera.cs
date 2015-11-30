@@ -70,7 +70,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		DVector3	FreeSurfacePosition;
 		DVector3	FreeSurfaceVelocityDirection;
-		double		FreeSurfaceVelocityMagnitude = 0.1;
+		double		FreeSurfaceVelocityMagnitude = 0.001;
 
 		double FreeSurfaceYaw	= Math.PI;
 		double FreeSurfacePitch = -Math.PI / 2.01;
@@ -184,9 +184,9 @@ namespace Fusion.Engine.Graphics.GIS
 						FreeSurfacePitch	-= input.RelativeMouseOffset.Y*0.0003;
 
 						if (prevMouseScroll > input.TotalMouseScroll)
-							FreeSurfaceVelocityMagnitude -= 0.001;
+							FreeSurfaceVelocityMagnitude -= 0.0001;
 						if (prevMouseScroll < input.TotalMouseScroll)
-							FreeSurfaceVelocityMagnitude += 0.001;
+							FreeSurfaceVelocityMagnitude += 0.0001;
 
 						input.IsMouseCentered	= false;
 						input.IsMouseHidden		= true;
@@ -468,6 +468,10 @@ namespace Fusion.Engine.Graphics.GIS
 			
 			if (curTime < state.WaitTime || curStateInd >= cameraStates.Count - 1) {
 				SetState(state);
+
+				if (curStateInd >= cameraStates.Count - 1)
+					StopAnimation();
+
 				return;
 			}
 

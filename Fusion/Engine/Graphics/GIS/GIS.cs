@@ -184,7 +184,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 	    public void Update(GameTime gameTime)
 	    {
-		    Camera.Update(gameTime);
+		    //Camera.Update(gameTime);
 	    }
 
 
