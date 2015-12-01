@@ -18,6 +18,7 @@ namespace Fusion {
 		/// <summary>
 		/// Defines Log verbosity level.
 		///	Value means lowest level, that will be printed.
+		///	
 		/// </summary>
 		public static LogMessageType VerbosityLevel { get; set; }
 
