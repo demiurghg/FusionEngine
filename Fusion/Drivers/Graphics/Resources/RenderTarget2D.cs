@@ -62,6 +62,8 @@ namespace Fusion.Drivers.Graphics {
 		/// <param name="backbufColor"></param>
 		internal RenderTarget2D ( GraphicsDevice device, D3D.Texture2D backbufColor ) : base( device )
 		{
+			Log.Debug("RenderTarget2D: from backbuffer.");
+
 			if (backbufColor.Description.Format!=DXGI.Format.R8G8B8A8_UNorm) {
 				Log.Warning("R8G8B8A8_UNorm");
 			}
@@ -120,6 +122,8 @@ namespace Fusion.Drivers.Graphics {
 		/// <param name="debugName"></param>
 		void Create ( ColorFormat format, int width, int height, int samples, bool mips, bool enableRWBuffer )
 		{
+			Log.Debug("RenderTarget2D: f:{0} w:{1} h:{2} s:{3}{4}{5}", format, width, height, samples, mips?" mips":"", enableRWBuffer?" uav":"" );
+
 			bool msaa	=	samples > 1;
 
 			CheckSamplesCount( samples );
@@ -246,6 +250,7 @@ namespace Fusion.Drivers.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
+				Log.Debug("RenderTarget2D: disposing");
 				if (surfaces!=null) {
 					for (int i=0; i<surfaces.Length; i++) {
 						var surf = surfaces[i];

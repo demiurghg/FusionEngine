@@ -25,8 +25,9 @@ namespace TestGame2 {
 		[STAThread]
 		static int Main ( string[] args )
 		{
-			Trace.Listeners.Add( new ColoredTraceListener() );
-			Trace.Listeners.Add( new TraceRecorder() );
+			Log.AddListener( new ColoredLogListener() );
+			Log.AddListener( new LogRecorder() );
+			Log.VerbosityLevel	=	LogMessageType.Verbose;
 
 			//
 			//	Build content on startup :

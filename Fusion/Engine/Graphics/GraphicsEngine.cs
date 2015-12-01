@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -71,7 +72,7 @@ namespace Fusion.Engine.Graphics {
 			Config		=	new GraphicsEngineConfig();
 			this.Device	=	gameEngine.GraphicsDevice;
 
-			ViewLayers	=	new List<ViewLayer>();
+			viewLayers	=	new List<ViewLayer>();
 			spriteEngine	=	new SpriteEngine( this );
 			gis				=	new Gis(gameEngine);
 			filter			=	new Filter( gameEngine );
@@ -151,9 +152,14 @@ namespace Fusion.Engine.Graphics {
 			Gis.Update(gameTime);
 			//GIS.Draw(gameTime, StereoEye.Mono);
 
-			var layersToDraw = ViewLayers
-				.OrderBy( c1 => c1.Order )
-				.Where( c2 => c2.Visible );
+			ViewLayer[] layersToDraw;
+
+			lock (viewLayers) {
+				layersToDraw = viewLayers
+					.OrderBy( c1 => c1.Order )
+					.Where( c2 => c2.Visible )
+					.ToArray();
+			}
 
 			foreach ( var viewLayer in layersToDraw ) {
 				viewLayer.RenderView( gameTime, stereoEye );
@@ -163,11 +169,41 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// Adds view layer.
+		/// </summary>
+		/// <param name="viewLayer"></param>
+		public void AddLayer ( ViewLayer viewLayer )
+		{
+			lock (viewLayers) {
+				viewLayers.Add( viewLayer );
+			}
+		}
+
+
+
+		/// <summary>
+		/// Removes layer.
+		/// </summary>
+		/// <param name="viewLayer"></param>
+		/// <returns>True if element was removed. False if layer does not exist.</returns>
+		public bool RemoveLayer ( ViewLayer viewLayer )
+		{
+			lock (viewLayers) {
+				if (viewLayers.Contains(viewLayer)) {
+					viewLayers.Remove( viewLayer );
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+
+
+		/// <summary>
 		/// Gets collection of Composition.
 		/// </summary>
-		public ICollection<ViewLayer> ViewLayers {
-			get; private set;
-		}
+		readonly ICollection<ViewLayer> viewLayers = new List<ViewLayer>();
 
 
 

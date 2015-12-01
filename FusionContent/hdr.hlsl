@@ -100,11 +100,12 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 	uint ypos = position.y;
 	SourceHdrImage.GetDimensions( width, height );
 	
-	float3	hdrImage	=	SourceHdrImage.Load(int3(position.xy, 0)).rgb;
-	float3	bloom0		=	BloomTexture.SampleLevel( LinearSampler, uv, 0 ).rgb;
-	float3	bloom1		=	BloomTexture.SampleLevel( LinearSampler, uv, 1 ).rgb;
-	float3	bloom2		=	BloomTexture.SampleLevel( LinearSampler, uv, 2 ).rgb;
-	float3	bloom3		=	BloomTexture.SampleLevel( LinearSampler, uv, 3 ).rgb;
+	//float3	hdrImage	=	SourceHdrImage.Load(int3(position.xy, 0)).rgb;
+	float3	hdrImage	=	SourceHdrImage.SampleLevel( LinearSampler, uv, 0 ).rgb;
+	float3	bloom0		=	BloomTexture  .SampleLevel( LinearSampler, uv, 0 ).rgb;
+	float3	bloom1		=	BloomTexture  .SampleLevel( LinearSampler, uv, 1 ).rgb;
+	float3	bloom2		=	BloomTexture  .SampleLevel( LinearSampler, uv, 2 ).rgb;
+	float3	bloom3		=	BloomTexture  .SampleLevel( LinearSampler, uv, 3 ).rgb;
 
 	/*float3	bloom		=	( bloom0 * 1.000f  
 							+ bloom1 * 1.000f  

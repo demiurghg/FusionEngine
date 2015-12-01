@@ -151,6 +151,7 @@ namespace Fusion.Drivers.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
+				Log.Debug("PipelineState: disposing");
 				DisposeStates();
 			}
 
@@ -228,6 +229,8 @@ namespace Fusion.Drivers.Graphics {
 		{
 			lock (device.DeviceContext) {
 				
+				Log.Debug("PipelineState: applying changes");
+
 				DisposeStates();
 
 				SetupDepthStencilState();

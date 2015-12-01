@@ -20,7 +20,7 @@ namespace FScene {
 		static int Main ( string[] args )
 		{
 			Thread.CurrentThread.CurrentCulture	=	System.Globalization.CultureInfo.InvariantCulture;
-			Trace.Listeners.Add( new StdTraceListener() );
+			Log.AddListener( new StdLogListener() );
 
 			var options = new Options();
 			var parser = new CommandLineParser( options );

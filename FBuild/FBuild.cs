@@ -28,7 +28,7 @@ namespace FBuild {
 		static int Main ( string[] args )
 		{
 			Thread.CurrentThread.CurrentCulture	=	System.Globalization.CultureInfo.InvariantCulture;
-			Trace.Listeners.Add( new StdTraceListener() );
+			Log.AddListener( new StdLogListener() );
 
 			var options = new BuildOptions();
 			var parser = new CommandLineParser( options );

@@ -140,6 +140,9 @@
     <Compile Include="Core\Shell\NoRollbackCommand.cs" />
     <Compile Include="Core\Shell\Invoker.Helper.cs" />
     <Compile Include="Core\StringConverter.cs" />
+    <Compile Include="Core\Utils\LogListener.cs" />
+    <Compile Include="Core\Utils\LogMessage.cs" />
+    <Compile Include="Core\Utils\LogMessageType.cs" />
     <Compile Include="Core\Utils\Crc32.cs" />
     <Compile Include="Core\Utils\TimeProbe.cs" />
     <Compile Include="Drivers\Audio\AudioChannels.cs" />
@@ -293,6 +296,9 @@
     <Compile Include="Engine\Graphics\GIS\TilesBatch.Tile.cs" />
     <Compile Include="Engine\Graphics\Lights\LightSet.cs" />
     <Compile Include="Engine\Graphics\Textures\TargetFormat.cs" />
+    <Compile Include="Engine\Graphics\ViewLayerHdr.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Engine\Input\Bind.cs" />
     <Compile Include="Engine\Input\BindList.cs" />
     <Compile Include="Engine\Input\KeyBind.cs" />

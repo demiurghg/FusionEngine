@@ -95,7 +95,7 @@ namespace Fusion.Framework {
 			GameEngine.Reloading += (s,e) => LoadContent();
 
 			GameEngine.GraphicsDevice.DisplayBoundsChanged += GraphicsDevice_DisplayBoundsChanged;
-			TraceRecorder.TraceRecorded += TraceRecorder_TraceRecorded;
+			LogRecorder.TraceRecorded += TraceRecorder_TraceRecorded;
 			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
 			GameEngine.Keyboard.FormKeyPress += Keyboard_FormKeyPress;
 			GameEngine.Keyboard.FormKeyDown += Keyboard_FormKeyDown;
@@ -141,7 +141,7 @@ namespace Fusion.Framework {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				TraceRecorder.TraceRecorded -= TraceRecorder_TraceRecorded;
+				LogRecorder.TraceRecorded -= TraceRecorder_TraceRecorded;
 				SafeDispose( ref consoleLayer );
 				SafeDispose( ref editLayer );
 			}
@@ -222,7 +222,7 @@ namespace Fusion.Framework {
 			//	add small gap below command line...
 			consoleLayer.Draw( consoleBackground, 0,0, vp.Width, vp.Height/2+1, Color.White );
 
-			var lines	=	TraceRecorder.GetLines();
+			var lines	=	LogRecorder.GetLines();
 
 			scroll	=	MathUtil.Clamp( scroll, 0, lines.Count() );
 
@@ -234,14 +234,14 @@ namespace Fusion.Framework {
 
 				Color color = Color.Gray;
 
-				switch (line.EventType) {
-					case TraceEventType.Information : color = Config.MessageColor; break;
-					case TraceEventType.Error		: color = Config.ErrorColor;   break;
-					case TraceEventType.Warning		: color = Config.WarningColor; break;
+				switch (line.MessageType) {
+					case LogMessageType.Information : color = Config.MessageColor; break;
+					case LogMessageType.Error		: color = Config.ErrorColor;   break;
+					case LogMessageType.Warning		: color = Config.WarningColor; break;
 				}
 				
 
-				consoleLayer.DrawDebugString( consoleFont, 0, vp.Height/2 - (count+2) * charHeight, line.Message, color );
+				consoleLayer.DrawDebugString( consoleFont, 0, vp.Height/2 - (count+2) * charHeight, line.MessageText, color );
 				//consoleFont.DrawString( consoleLayer, line.Message, , color );
 
 				if (count>rows) {
