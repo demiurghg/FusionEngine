@@ -140,6 +140,9 @@
     <Compile Include="Core\Shell\NoRollbackCommand.cs" />
     <Compile Include="Core\Shell\Invoker.Helper.cs" />
     <Compile Include="Core\StringConverter.cs" />
+    <Compile Include="Core\Utils\LogListener.cs" />
+    <Compile Include="Core\Utils\LogMessage.cs" />
+    <Compile Include="Core\Utils\LogMessageType.cs" />
     <Compile Include="Core\Utils\Crc32.cs" />
     <Compile Include="Core\Utils\TimeProbe.cs" />
     <Compile Include="Drivers\Audio\AudioChannels.cs" />

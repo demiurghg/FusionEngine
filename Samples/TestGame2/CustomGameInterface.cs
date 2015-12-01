@@ -65,6 +65,8 @@ namespace TestGame2 {
 		SpriteLayer		uiLayer;
 		DiscTexture		texture;
 		ViewLayerHdr	masterView;
+		ViewLayer		masterView2;
+		TargetTexture	targetTexture;
 
 		Scene		scene;
 
@@ -94,8 +96,13 @@ namespace TestGame2 {
 		{
 			var bounds		=	GameEngine.GraphicsEngine.DisplayBounds;
 			masterView		=	new ViewLayerHdr(GameEngine, bounds.Width, bounds.Height);
+			masterView2		=	new ViewLayer(GameEngine);
+
+			targetTexture		=	new TargetTexture(GameEngine.GraphicsEngine, bounds.Width, bounds.Height, TargetFormat.LowDynamicRange );
+			masterView.Target	=	targetTexture;
 
 			GameEngine.GraphicsEngine.AddLayer( masterView );
+			GameEngine.GraphicsEngine.AddLayer( masterView2 );
 
 			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			uiLayer		=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
@@ -124,9 +131,9 @@ namespace TestGame2 {
 				masterView.Instances.Add( inst );
 			}
 
-			masterView.SpriteLayers.Add( console.ConsoleSpriteLayer );
-			masterView.SpriteLayers.Add( uiLayer );
-			masterView.SpriteLayers.Add( testLayer );
+			masterView2.SpriteLayers.Add( console.ConsoleSpriteLayer );
+			masterView2.SpriteLayers.Add( uiLayer );
+			masterView2.SpriteLayers.Add( testLayer );
 
 
 			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
@@ -152,6 +159,8 @@ namespace TestGame2 {
 				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
 				SafeDispose( ref masterView );
+				SafeDispose( ref masterView2 );
+				SafeDispose( ref targetTexture );
 				/*SafeDispose( ref sceneView );
 				SafeDispose( ref sceneView1 );**/
 			}
@@ -186,6 +195,7 @@ namespace TestGame2 {
 			testLayer.Draw( masterView.DiffuseTexture,	    0,  0, 200,150, Color.White );
 			testLayer.Draw( masterView.SpecularTexture, 200,  0, 200,150, Color.White );
 			testLayer.Draw( masterView.NormalMapTexture, 400,  0, 200,150, Color.White );
+			testLayer.Draw( masterView.Target, 200,200,300,200, Color.White);
 
 
 			if ( GameEngine.Keyboard.IsKeyDown(Keys.PageDown) ) {

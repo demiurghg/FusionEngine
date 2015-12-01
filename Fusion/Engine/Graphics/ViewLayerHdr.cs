@@ -16,7 +16,6 @@ namespace Fusion.Engine.Graphics {
 	/// Represents entire visible world.
 	/// </summary>
 	public class ViewLayerHdr : ViewLayer {
-		
 
 		/// <summary>
 		/// Gets HDR settings.
@@ -54,6 +53,9 @@ namespace Fusion.Engine.Graphics {
 		internal RenderTarget2D	DiffuseBuffer	;
 		internal RenderTarget2D	SpecularBuffer	;
 		internal RenderTarget2D	NormalMapBuffer	;
+
+		//	reuse diffuse buffer as temporal buffer for effects.
+		internal RenderTarget2D TempFXBuffer { get { return DiffuseBuffer; } }
 
 		internal RenderTarget2D	MeasuredOld;
 		internal RenderTarget2D	MeasuredNew;
@@ -232,7 +234,10 @@ namespace Fusion.Engine.Graphics {
 			ge.LightRenderer.RenderLighting( stereoEye, this, GameEngine.GraphicsEngine.WhiteTexture );
 
 			//	apply tonemapping and bloom :
-			ge.HdrFilter.Render( gameTime, targetSurface, HdrBuffer, this );
+			ge.HdrFilter.Render( gameTime, TempFXBuffer.Surface, HdrBuffer, this );
+
+			//	apply FXAA
+			ge.Filter.Fxaa( targetSurface, TempFXBuffer );
 		}
 	}
 }

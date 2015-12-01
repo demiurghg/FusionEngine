@@ -10,19 +10,7 @@ namespace Fusion.Core.Utils {
 	/// <summary>
 	/// Trace recorder
 	/// </summary>
-	public class TraceRecorder : TraceListener {
-
-		public class Line {
-			public readonly TraceEventType EventType;
-			public readonly string Message;
-
-			public Line ( TraceEventType eventType, string message ) 
-			{
-				EventType	=	eventType;
-				Message		=	message;
-			}
-		}
-
+	public class LogRecorder : LogListener {
 
 		public static event EventHandler	TraceRecorded;
 
@@ -37,23 +25,25 @@ namespace Fusion.Core.Utils {
 			set;
 		}
 		
-		static List<Line> lines = new List<Line>();
+		static List<LogMessage> lines = new List<LogMessage>();
 
 
 
-		void NotifyTraceRecord ()
-		{
-		}
-			   
-
-		static TraceRecorder ()
+		/// <summary>
+		/// 
+		/// </summary>
+		static LogRecorder ()
 		{
 			MaxLineCount	=	1024;
 		}
 
 
 
-		void AddMessage ( Line line )
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="line"></param>
+		void RecordMessage ( LogMessage line )
 		{
 			lock (lockObj) {
 				lines.Add( line );
@@ -73,7 +63,7 @@ namespace Fusion.Core.Utils {
 		/// Gets lines.
 		/// </summary>
 		/// <returns></returns>
-		public static IEnumerable<Line> GetLines ()
+		public static IEnumerable<LogMessage> GetLines ()
 		{
 			lock (lockObj) {
 				return lines.ToArray();
@@ -82,6 +72,9 @@ namespace Fusion.Core.Utils {
 
 
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public static void Clear ()
 		{
 			lock (lockObj) {
@@ -95,47 +88,13 @@ namespace Fusion.Core.Utils {
 
 
 
-		public override void Fail ( string message )
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="message"></param>
+		public override void Log ( LogMessage message )
 		{
-			base.Fail( message );
-			NotifyTraceRecord();
-		}
-
-
-		public override void Fail ( string message, string detailMessage )
-		{
-			base.Fail( message, detailMessage );
-			NotifyTraceRecord();
-		}
-
-
-		public override void TraceEvent ( TraceEventCache eventCache, string source, TraceEventType eventType, int id )
-		{
-			AddMessage( new Line( eventType, "" ) );
-		}
-
-
-		public override void TraceEvent ( TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args )
-		{
-			AddMessage( new Line( eventType, string.Format( format, args ) ) );
-		}
-
-
-		public override void TraceEvent ( TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message )
-		{
-			AddMessage( new Line( eventType, message ) );
-		}
-
-
-
-		public override void Write ( string message )
-		{
-			AddMessage( new Line( TraceEventType.Information, message ) );
-		}
-
-		public override void WriteLine ( string message )
-		{
-			AddMessage( new Line( TraceEventType.Information, message ) );
+			RecordMessage( message );
 		}
 	}
 }

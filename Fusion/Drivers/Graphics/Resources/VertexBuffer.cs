@@ -59,6 +59,8 @@ namespace Fusion.Drivers.Graphics {
 
 			Stride		=	Marshal.SizeOf( vertexType );
 
+			Log.Debug("VertexBuffer: count:{0} stride:{1} options:{2}", capacity, Stride, options);
+
 			BufferDescription	desc = new BufferDescription();
 
 			if (options==VertexBufferOptions.Default) {
@@ -125,6 +127,7 @@ namespace Fusion.Drivers.Graphics {
 		protected override void Dispose( bool disposing )
 		{
 			if (disposing) {
+				Log.Debug("VertexBuffer: disposing");
 				vertexBuffer.Dispose();
 			}
 		 	base.Dispose(disposing);
