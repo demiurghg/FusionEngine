@@ -29,7 +29,7 @@ namespace Fusion.Framework {
 		/// </summary>
 		public override void Execute ()
 		{
-			TraceRecorder.Clear();
+			LogRecorder.Clear();
 		}
 	}
 }

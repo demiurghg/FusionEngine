@@ -132,7 +132,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="diffuse"></param>
 		/// <param name="specular"></param>
 		/// <param name="normals"></param>
-		internal void RenderGBuffer ( Camera camera, StereoEye stereoEye, IEnumerable<Instance> instances, Viewport viewport )
+		internal void RenderGBuffer ( StereoEye stereoEye, ViewLayerHdr viewLayer )
 		{		
 			if (surfaceShader==null) {	
 				return;
@@ -140,23 +140,23 @@ namespace Fusion.Engine.Graphics {
 
 			var device		=	GameEngine.GraphicsDevice;
 
-			var view			=	camera.GetViewMatrix( stereoEye );
-			var projection		=	camera.GetProjectionMatrix( stereoEye );
-			var viewPosition	=	camera.GetCameraPosition4( stereoEye );
+			var view			=	viewLayer.Camera.GetViewMatrix( stereoEye );
+			var projection		=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
+			var viewPosition	=	viewLayer.Camera.GetCameraPosition4( stereoEye );
 
 			var cbData		=	new CBSurfaceData();
 
-			var hdr			=	GameEngine.GraphicsEngine.LightRenderer.HdrBuffer.Surface;
-			var depth		=	GameEngine.GraphicsEngine.LightRenderer.DepthBuffer.Surface;
-			var diffuse		=	GameEngine.GraphicsEngine.LightRenderer.DiffuseBuffer.Surface;
-			var specular	=	GameEngine.GraphicsEngine.LightRenderer.SpecularBuffer.Surface;
-			var normals		=	GameEngine.GraphicsEngine.LightRenderer.NormalMapBuffer.Surface;
+			var hdr			=	viewLayer.HdrBuffer.Surface;
+			var depth		=	viewLayer.DepthBuffer.Surface;
+			var diffuse		=	viewLayer.DiffuseBuffer.Surface;
+			var specular	=	viewLayer.SpecularBuffer.Surface;
+			var normals		=	viewLayer.NormalMapBuffer.Surface;
 
 			device.ResetStates();
 
 			device.SetTargets( depth, hdr, diffuse, specular, normals );
 
-			device.SetViewport(viewport); 
+			//device.SetViewport(viewport); 
 
 			device.PipelineState	=	factory[ (int)SurfaceFlags.GBUFFER ];
 
@@ -166,6 +166,8 @@ namespace Fusion.Engine.Graphics {
 			device.PixelShaderResources[1]	=	defaultSpecular	;
 			device.PixelShaderResources[2]	=	defaultNormalMap;
 			device.PixelShaderResources[3]	=	defaultEmission	;
+
+			var instances	=	viewLayer.Instances;
 
 			foreach ( var instance in instances ) {
 				

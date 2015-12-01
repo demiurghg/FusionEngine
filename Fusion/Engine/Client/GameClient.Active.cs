@@ -16,8 +16,18 @@ namespace Fusion.Engine.Client {
 
 		class Active : State {
 
+			SnapshotQueue queue;
+			
+			uint lastSnapshotFrame;
+
+
 			public Active ( GameClient gameClient, uint snapshotId, byte[] initialSnapshot ) : base(gameClient)
 			{
+				queue	=	new SnapshotQueue(32);
+				queue.Push( new Snapshot(snapshotId, initialSnapshot) );
+
+				lastSnapshotFrame	=	snapshotId;
+
 				gameClient.FeedSnapshot( initialSnapshot );
 			}
 
@@ -41,7 +51,13 @@ namespace Fusion.Engine.Client {
 			{
 				var userCmd  = gameClient.Update(gameTime);
 
-				gameClient.SendUserCommand( client, userCmd );
+				bool showSnapshot = gameClient.GameEngine.Network.Config.ShowSnapshots;
+
+				if (showSnapshot) {
+					Log.Message("User cmd: #{0} : {1}", lastSnapshotFrame, userCmd.Length );
+				}
+
+				gameClient.SendUserCommand( client, lastSnapshotFrame, userCmd );
 			}
 
 
@@ -56,12 +72,25 @@ namespace Fusion.Engine.Client {
 
 			public override void DataReceived ( NetCommand command, NetIncomingMessage msg )
 			{
+				bool showSnapshot = gameClient.GameEngine.Network.Config.ShowSnapshots;
+
 				if (command==NetCommand.Snapshot) {
 					var index		=	msg.ReadUInt32();
+					var prevFrame	=	msg.ReadUInt32();
 					var size		=	msg.ReadInt32();
-					var snapshot	=	NetworkEngine.Decompress( msg.ReadBytes(size) );
 
-					gameClient.FeedSnapshot( snapshot );
+					lastSnapshotFrame	=	index;
+
+					var snapshot		=	queue.Decompress( prevFrame, msg.ReadBytes(size) );
+					
+					if (snapshot!=null) {
+
+						gameClient.FeedSnapshot( snapshot );
+						queue.Push( new Snapshot(index, snapshot) );
+
+					} else {
+						lastSnapshotFrame = 0;
+					}
 				}
 
 				if (command==NetCommand.Notification) {

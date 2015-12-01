@@ -59,7 +59,7 @@ namespace Fusion.Engine.Graphics.GIS
 	    {
 		    protected GameEngine GameEngine;
 
-			public bool IsActive;
+			public bool IsActive = true;
 			public bool IsVisible = true;
 
 		    public uint ZOrder;
@@ -193,9 +193,9 @@ namespace Fusion.Engine.Graphics.GIS
 		    if (!layers.Any()) return;
 
 			constantData.ViewProj		= Camera.ViewMatrixFloat * Camera.ProjMatrixFloat;
-			constantData.ViewPositionX	= Camera.FreeCamPosition.X;
-			constantData.ViewPositionY	= Camera.FreeCamPosition.Y;
-			constantData.ViewPositionZ	= Camera.FreeCamPosition.Z;
+			constantData.ViewPositionX	= Camera.FinalCamPosition.X;
+			constantData.ViewPositionY	= Camera.FinalCamPosition.Y;
+			constantData.ViewPositionZ	= Camera.FinalCamPosition.Z;
 
 			constBuffer.SetData(constantData);
 

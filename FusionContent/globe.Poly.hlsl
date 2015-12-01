@@ -172,7 +172,7 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 		float  ndot = abs(dot( ndir, norm ));
 		float  frsn	= pow(saturate(1.1f-ndot), 0.5);
 		
-		return frsn*float4(input.Color.xyz, 1);
+		return frsn*float4(input.Color.xyz, input.Color.a);
 	#endif
 	#ifdef DRAW_HEAT
 		//return float4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -182,7 +182,8 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 		float valX = FloatMap.Sample(PointSampler, float2(input.Tex.x, 1.0f - input.Tex.y)).x;
 		float valY = FrameMap.Sample(PointSampler, float2(input.Tex.x, 1.0f - input.Tex.y)).x;
 		val	= lerp(valY, valX, HeatStage.Data.w);
-		// Corners
+		
+		//float step = 0.5f/512.0f;
 		//float val0 = FloatMap.Sample(PointSampler, float2(input.Tex.x - step, 1.0f - input.Tex.y - step)).x; // left top;
 		//float val1 = FloatMap.Sample(PointSampler, float2(input.Tex.x + step, 1.0f - input.Tex.y - step)).x; // left top;
 		//float val2 = FloatMap.Sample(PointSampler, float2(input.Tex.x - step, 1.0f - input.Tex.y + step)).x; // left top;
@@ -191,7 +192,7 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 		//val += val1; // right top
 		//val += val2; // left bottom
 		//val += val3; // right bottom
-        
+        //
 		//val = val / 5.0f;
 
 		val = val / HeatStage.Data.x;
@@ -223,7 +224,7 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 
 #ifdef COMPUTE_SHADER
 
-#define WIDTH 256
+#define WIDTH 1024
 #define GS2 7
 
 groupshared float Line[WIDTH];	// TLS

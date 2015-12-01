@@ -12,10 +12,21 @@ using Fusion.Engine.Server;
 using System.Diagnostics;
 using System.Threading;
 using Fusion.Core.Shell;
+using Fusion.Core.Configuration;
 
 
 namespace TestGame2 {
+
+	public class Config {
+		public bool Show { get; set; }
+	}
+
+
 	class CustomGameClient : GameClient {
+
+		[Config]
+		public Config Config { get; set; }
+		
 
 		[Command("chat", CommandAffinity.Client)]
 		public class Chat : NoRollbackCommand {
@@ -40,6 +51,7 @@ namespace TestGame2 {
 		/// <param name="engine"></param>
 		public CustomGameClient ( GameEngine gameEngine )	: base(gameEngine)
 		{
+			Config	= new Config();
 		}
 
 
@@ -59,7 +71,7 @@ namespace TestGame2 {
 		public override void LoadLevel ( string serverInfo )
 		{
 			Log.Message("LOAD LEVEL: {0}", serverInfo);
-			Thread.Sleep(2000);
+			Thread.Sleep(100);
 			Log.Message("LOAD LEVEL COMPLETED!");
 		}
 
@@ -93,7 +105,9 @@ namespace TestGame2 {
 		public override void FeedSnapshot ( byte[] snapshot ) 
 		{
 			var str = Encoding.UTF8.GetString( snapshot );
-			Log.Message("CL : {0}", str);
+			if (Config.Show) {
+				Log.Message("FOOD : {0}", str);
+			}
 		}
 
 

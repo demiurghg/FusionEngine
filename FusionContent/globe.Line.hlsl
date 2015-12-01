@@ -122,6 +122,7 @@ cbuffer CBStage			: register(b0) 	{	ConstData	Stage		: 	packoffset( c0 );	}
 $ubershader DRAW_LINES +ADD_CAPS +FADING_LINE
 $ubershader ARC_LINE +FADING_LINE
 $ubershader DRAW_SEGMENTED_LINES +TEXTURED_LINE
+$ubershader THIN_LINE
 #endif
 
 
@@ -184,12 +185,35 @@ VS_OUTPUT VSMain ( VS_INPUT v )
 	#endif
 #endif
 
+#ifdef THIN_LINE
+	#define TotalVertex 2
+#endif
+
 [maxvertexcount(TotalVertex)]
-void GSMain ( line VS_OUTPUT inputArray[2], inout TriangleStream<GS_OUTPUT> stream )
+void GSMain ( line VS_OUTPUT inputArray[2], 
+#ifdef THIN_LINE
+inout LineStream<GS_OUTPUT> stream 
+#else
+inout TriangleStream<GS_OUTPUT> stream 
+#endif
+)
 {
 	GS_OUTPUT	output;// = (GS_OUTPUT)0;
 	VS_OUTPUT	p0	=	inputArray[0];
 	VS_OUTPUT	p1	=	inputArray[1];
+	
+#ifdef THIN_LINE
+	output.Normal 	= float3(0,0,0);
+	output.Tex		= float2(0,0);
+	output.Color	= p0.Color;
+	output.Position	= mul(float4(p0.Position.xyz, 1), Stage.ViewProj);	
+	stream.Append( output );
+	
+	output.Color	= p1.Color;
+	output.Position	= mul(float4(p1.Position.xyz, 1), Stage.ViewProj);	
+	stream.Append( output );
+	
+#else
 
 	float halfWidth0 = p0.Tex.x;
 	float halfWidth1 = p1.Tex.x;
@@ -262,11 +286,11 @@ void GSMain ( line VS_OUTPUT inputArray[2], inout TriangleStream<GS_OUTPUT> stre
 
 	}
 	
-	
+#endif
 	
 #ifdef ADD_CAPS
 	// Add caps
-	float f = 0.525f;
+	float f = 0.55f;
 	
 	stream.RestartStrip();
 	{
@@ -281,11 +305,11 @@ void GSMain ( line VS_OUTPUT inputArray[2], inout TriangleStream<GS_OUTPUT> stre
 		output.Tex		= float2(1.0f, 0.5f);
 		stream.Append( output );
 
-		output.Position	= mul(float4(p0.Position.xyz + sideOffset0*f  + dir*f, 1), Stage.ViewProj);
+		output.Position	= mul(float4(p0.Position.xyz + sideOffset0*f  + dir*f*halfWidth0, 1), Stage.ViewProj);
 		output.Tex		= float2(0.0f, 0.0f);
 		stream.Append( output );
 		
-		output.Position	= mul(float4(p0.Position.xyz - sideOffset0*f  + dir*f, 1), Stage.ViewProj);
+		output.Position	= mul(float4(p0.Position.xyz - sideOffset0*f  + dir*f*halfWidth0, 1), Stage.ViewProj);
 		output.Tex		= float2(1.0f, 0.0f);
 		stream.Append( output );
 	}
@@ -302,11 +326,11 @@ void GSMain ( line VS_OUTPUT inputArray[2], inout TriangleStream<GS_OUTPUT> stre
 		output.Tex		= float2(1.0f, 0.5f);
 		stream.Append( output );
 
-		output.Position	= mul(float4(p1.Position.xyz + sideOffset1  - dir*f, 1), Stage.ViewProj);
+		output.Position	= mul(float4(p1.Position.xyz + sideOffset1*f  - dir*f*halfWidth1, 1), Stage.ViewProj);
 		output.Tex		= float2(0.0f, 0.0f);
 		stream.Append( output );
 		
-		output.Position	= mul(float4(p1.Position.xyz - sideOffset1  - dir*f, 1), Stage.ViewProj);
+		output.Position	= mul(float4(p1.Position.xyz - sideOffset1*f  - dir*f*halfWidth1, 1), Stage.ViewProj);
 		output.Tex		= float2(1.0f, 0.0f);
 		stream.Append( output );
 	}

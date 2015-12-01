@@ -118,6 +118,8 @@ namespace Fusion.Drivers.Graphics {
 					database.Add( defines, new UsdbEntry( defines, ps, vs, gs, hs, ds, cs ) );
 				}
 			}
+
+			Log.Debug("Ubershader: {0} shaders", database.Count );
 		}
 
 

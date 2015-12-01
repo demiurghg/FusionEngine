@@ -97,6 +97,10 @@ namespace TestGame2 {
 		}
 
 
+		static Random rand = new Random();
+
+		int[] buffer	=	Enumerable.Range(0,10000).Select( i => rand.Next(0,5000) ).ToArray();
+
 		/// <summary>
 		/// Runs one step of server-side world simulation.
 		/// Do not close the stream.
@@ -105,7 +109,13 @@ namespace TestGame2 {
 		public override byte[] Update ( GameTime gameTime )
 		{
 			Thread.Sleep(10);
-			return Encoding.UTF8.GetBytes( string.Join( " | ", state.Select(s1=>s1.Value) ) );
+
+			for (int i=0; i<5000; i++) {
+				buffer[ rand.Next(0, buffer.Length-1) ] = rand.Next(0,5000);
+			}
+
+			var extrs = string.Join(" ", buffer.Select( i => i.ToString("x5") ) );
+			return Encoding.UTF8.GetBytes( "World: [" + string.Join( " | ", state.Select(s1=>s1.Value) ) + "]" + extrs);
 		}
 
 

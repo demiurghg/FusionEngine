@@ -31,7 +31,7 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			RegisterMapSources();
 
-			CurrentMapSource = MapSources[0];
+			CurrentMapSource = MapSources[2];
 
 			this.camera = camera;
 
@@ -46,9 +46,6 @@ namespace Fusion.Engine.Graphics.GIS
 			var oldProj = CurrentMapSource.Projection;
 
 			CurrentMapSource.Update(gameTime);
-
-			CurrentMapSource = MapSources[(int)5];
-
 
 			if (!oldProj.Equals(CurrentMapSource.Projection)) {
 				updateTiles = true;

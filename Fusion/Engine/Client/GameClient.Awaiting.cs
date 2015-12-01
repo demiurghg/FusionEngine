@@ -19,7 +19,7 @@ namespace Fusion.Engine.Client {
 			public Awaiting ( GameClient gameClient ) : base(gameClient)
 			{
 				//	send user command to draw server attention:
-				gameClient.SendUserCommand( client, new byte[0] );
+				gameClient.SendUserCommand( client, 0, new byte[0] );
 			}
 
 
@@ -55,11 +55,18 @@ namespace Fusion.Engine.Client {
 			public override void DataReceived ( NetCommand command, NetIncomingMessage msg )
 			{
 				if (command==NetCommand.Snapshot) {
-					var index		=	msg.ReadUInt32();
+					var frame		=	msg.ReadUInt32();
+					var prevFrame	=	msg.ReadUInt32();
 					var size		=	msg.ReadInt32();
+
+					if (prevFrame!=0) {
+						Log.Warning("Bad initial snapshot. Previous frame does not equal zero.");
+						return;
+					}
+
 					var snapshot	=	NetworkEngine.Decompress( msg.ReadBytes(size) );
 
-					gameClient.SetState( new Active( gameClient, index, snapshot ) );
+					gameClient.SetState( new Active( gameClient, frame, snapshot ) );
 				}
 
 				if (command==NetCommand.Notification) {

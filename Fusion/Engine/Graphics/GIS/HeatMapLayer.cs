@@ -67,6 +67,8 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			Initialize(points, indeces, isDynamic);
 
+			factory = new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
+
 			MapDimX = mapDimX;
 			MapDimY = mapDimY;
 
@@ -110,25 +112,31 @@ namespace Fusion.Engine.Graphics.GIS
 				Prev = SecondFinal;
 			}
 
-			game.GraphicsDevice.PipelineState = blurFactory[(int)(PolyFlags.COMPUTE_SHADER | PolyFlags.BLUR_VERTICAL)];
+			GameEngine.GraphicsDevice.DeviceContext.CopyResource(HeatTexture.SRV.Resource, Final.Surface.Resource);
 
-			game.GraphicsDevice.ComputeShaderResources[0] = HeatTexture;
-			game.GraphicsDevice.SetCSRWTexture(0, Temp.Surface);
+			GameEngine.GraphicsEngine.Filter.GaussBlur(Final, Temp, 1.5f, 0);
 
-			game.GraphicsDevice.Dispatch(1, MapDimY, 1);
+			//game.GraphicsDevice.PipelineState = blurFactory[(int)(PolyFlags.COMPUTE_SHADER | PolyFlags.BLUR_VERTICAL)];
+			//
+			//game.GraphicsDevice.ComputeShaderResources[0] = HeatTexture;
+			//game.GraphicsDevice.SetCSRWTexture(0, Temp.Surface);
+			//
+			//game.GraphicsDevice.Dispatch(1, MapDimY, 1);
+			//
+			//game.GraphicsDevice.SetCSRWTexture(0, null);
+			//
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//
+			//game.GraphicsDevice.PipelineState = blurFactory[(int)(PolyFlags.COMPUTE_SHADER | PolyFlags.BLUR_HORIZONTAL)];
+			//
+			//game.GraphicsDevice.ComputeShaderResources[0] = Temp;
+			//game.GraphicsDevice.SetCSRWTexture(0, Final.Surface);
+			//
+			//game.GraphicsDevice.Dispatch(1, MapDimY, 1);
+			//
+			//game.GraphicsDevice.SetCSRWTexture(0, null);
 
-			game.GraphicsDevice.SetCSRWTexture(0, null);
-
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			game.GraphicsDevice.PipelineState = blurFactory[(int)(PolyFlags.COMPUTE_SHADER | PolyFlags.BLUR_HORIZONTAL)];
-
-			game.GraphicsDevice.ComputeShaderResources[0] = Temp;
-			game.GraphicsDevice.SetCSRWTexture(0, Final.Surface);
-
-			game.GraphicsDevice.Dispatch(1, MapDimY, 1);
-
-			game.GraphicsDevice.SetCSRWTexture(0, null);
+			Array.Clear(Data, 0, Data.Length);
 		}
 
 
@@ -166,8 +174,8 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public void SetHeatMapCoordinates(double left, double right, double top, double bottom)
 		{
-			var hLen = right - left;
-			bottom = top - hLen * 0.5;
+			//var hLen = right - left;
+			//bottom = top - hLen * 0.5;
 
 
 			if (Left == left && Right == right && Top == top && Bottom == bottom) return;
@@ -203,9 +211,11 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public void AddValue(double lon, double lat, float val)
 		{
-			var lonFactor = (lon - Left) / (Right - Left);
-			var latFactor = (lat - Bottom) / (Top - Bottom);
+			var lonLat = Projection.WorldToTilePos(lon, lat, 0);
 
+			var lonFactor = (lonLat.X - Left)	/ (Right - Left);
+			var latFactor = (lonLat.Y - Bottom) / (Top - Bottom);
+			
 			int x = (int)(lonFactor * MapDimX);
 			int y = (int)(latFactor * MapDimY);
 
@@ -249,10 +259,10 @@ namespace Fusion.Engine.Graphics.GIS
 
 			return new HeatMapLayer(engine, vertices, indexes, dimX, dimY, false)
 			{
-				Left		= left,
-				Right		= right,
-				Top			= top,
-				Bottom		= bottom,
+				Left		= newleft,
+				Right		= newright,
+				Top			= newtop,
+				Bottom		= newbottom,
 				GridDensity = density,
 				Projection	= projection
 			};

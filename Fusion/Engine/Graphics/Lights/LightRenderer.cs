@@ -37,13 +37,6 @@ namespace Fusion.Engine.Graphics {
 		DepthStencil2D		spotDepth		;
 		RenderTarget2D		spotColor		;
 
-		DepthStencil2D		depthBuffer		;
-		RenderTarget2D		hdrBuffer		;
-		RenderTarget2D		diffuseBuffer	;
-		RenderTarget2D		specularBuffer	;
-		RenderTarget2D		normalMapBuffer	;
-		RenderTarget2D		lightAccumBuffer;
-
 
 		OmniLightGPU[]		omniLightData;
 		SpotLightGPU[]		spotLightData;
@@ -55,19 +48,6 @@ namespace Fusion.Engine.Graphics {
 
 		public RenderTarget2D	SpotColor { get { return spotColor; } }
 		public DepthStencil2D	SpotDepth { get { return spotDepth; } }
-
-		public RenderTarget2D	HdrBuffer		{ get { return hdrBuffer; } }
-		public DepthStencil2D	DepthBuffer		{ get { return depthBuffer; } }
-		public RenderTarget2D	DiffuseBuffer	{ get { return diffuseBuffer; } }
-		public RenderTarget2D	SpecularBuffer	{ get { return specularBuffer; } }
-		public RenderTarget2D	NormalMapBuffer	{ get { return normalMapBuffer; } }
-
-
-		public TargetTexture	HdrTexture			{ get; private set; }
-		public TargetTexture	DiffuseTexture		{ get; private set; }
-		public TargetTexture	SpecularTexturer	{ get; private set; }
-		public TargetTexture	NormalMapTexture	{ get; private set; }
-
 
 
 
@@ -150,9 +130,6 @@ namespace Fusion.Engine.Graphics {
 
 			CreateShadowMaps();
 
-			CreateGBuffer();
-			GameEngine.GraphicsDevice.DisplayBoundsChanged += (s,e) => CreateGBuffer();
-
 			LoadContent();
 			GameEngine.Reloading += (s,e) => LoadContent();
 		}
@@ -167,35 +144,6 @@ namespace Fusion.Engine.Graphics {
 			SafeDispose( ref factory );
 			lightingShader	=	GameEngine.Content.Load<Ubershader>("lighting");
 			factory			=	new StateFactory( lightingShader, typeof(LightingFlags), Primitive.TriangleList, VertexInputElement.Empty );
-		}
-
-
-
-		/// <summary>
-		/// Creates GBuffer
-		/// </summary>
-		void CreateGBuffer ()
-		{
-			SafeDispose( ref hdrBuffer		);
-			SafeDispose( ref depthBuffer	 );
-			SafeDispose( ref diffuseBuffer	 );
-			SafeDispose( ref specularBuffer	 );
-			SafeDispose( ref normalMapBuffer );
-			SafeDispose( ref lightAccumBuffer );
-
-			var vp		=	GameEngine.GraphicsDevice.DisplayBounds;
-
-			hdrBuffer			=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, vp.Width, vp.Height );
-			depthBuffer			=	new DepthStencil2D( GameEngine.GraphicsDevice, DepthFormat.D24S8,	vp.Width, vp.Height );
-			diffuseBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8,	vp.Width, vp.Height );
-			specularBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8,	vp.Width, vp.Height );
-			normalMapBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgb10A2,	vp.Width, vp.Height );
-			lightAccumBuffer	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F,	vp.Width, vp.Height, true );
-
-			HdrTexture			=	new TargetTexture( hdrBuffer );
-			DiffuseTexture		=	new TargetTexture( diffuseBuffer );
-			SpecularTexturer	=	new TargetTexture( specularBuffer );
-			NormalMapTexture	=	new TargetTexture( normalMapBuffer );
 		}
 
 
@@ -233,13 +181,6 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref spotDepth );
 				SafeDispose( ref spotColor );
 
-				SafeDispose( ref hdrBuffer	 );
-				SafeDispose( ref depthBuffer	 );
-				SafeDispose( ref diffuseBuffer	 );
-				SafeDispose( ref specularBuffer	 );
-				SafeDispose( ref normalMapBuffer );
-				SafeDispose( ref lightAccumBuffer );
-
 				SafeDispose( ref lightingCB );
 				SafeDispose( ref omniLightBuffer );
 				SafeDispose( ref spotLightBuffer );
@@ -247,29 +188,6 @@ namespace Fusion.Engine.Graphics {
 
 			base.Dispose( disposing );
 		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public void ClearGBuffer ()
-		{
-			GameEngine.GraphicsDevice.Clear( diffuseBuffer.Surface,		Color4.Black );
-			GameEngine.GraphicsDevice.Clear( specularBuffer.Surface,	Color4.Black );
-			GameEngine.GraphicsDevice.Clear( normalMapBuffer.Surface,	Color4.Black );
-		}
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public void ClearHdrBuffer ()
-		{
-			GameEngine.GraphicsDevice.Clear( depthBuffer.Surface,		1, 0 );
-			GameEngine.GraphicsDevice.Clear( hdrBuffer.Surface,			Color4.Black );
-		}
-
 
 		Matrix[] csmViewProjections = new Matrix[4];
 
@@ -279,10 +197,10 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="view"></param>
 		/// <param name="projection"></param>
-		public void RenderLighting ( Camera camera, StereoEye stereoEye, LightSet lightSet, Texture occlusionMap, Viewport viewport )
+		public void RenderLighting ( StereoEye stereoEye, ViewLayerHdr viewLayer, Texture occlusionMap )
 		{
-			var view		=	camera.GetViewMatrix( stereoEye );
-			var projection	=	camera.GetProjectionMatrix( stereoEye );
+			var view		=	viewLayer.Camera.GetViewMatrix( stereoEye );
+			var projection	=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
 
 			var device = GameEngine.GraphicsDevice;
 			device.ResetStates();
@@ -315,6 +233,9 @@ namespace Fusion.Engine.Graphics {
 			}
 
 
+			var width	=	viewLayer.HdrBuffer.Width;
+			var height	=	viewLayer.HdrBuffer.Height;
+
 
 			//
 			//	Setup compute shader parameters and states :
@@ -345,15 +266,15 @@ namespace Fusion.Engine.Graphics {
 				cbData.CSMFilterRadius			=	new Vector4( Config.CSMFilterSize );
 
 				cbData.AmbientColor				=	new Color4(0.0f, 0.0f, 0.0f, 1);
-				cbData.Viewport					=	new Vector4( viewport.X, viewport.Y, viewport.Width, viewport.Height );
+				cbData.Viewport					=	new Vector4( 0, 0, width, height );
 
-				PrepareOmniLights( view, projection, lightSet );
-				PrepareSpotLights( view, projection, lightSet );
+				PrepareOmniLights( view, projection, viewLayer.LightSet );
+				PrepareSpotLights( view, projection, viewLayer.LightSet );
 
 				//
 				//	set states :
 				//
-				device.SetTargets( null, HdrBuffer.Surface );
+				device.SetTargets( null, viewLayer.HdrBuffer.Surface );
 
 				lightingCB.SetData( cbData );
 
@@ -361,60 +282,39 @@ namespace Fusion.Engine.Graphics {
 				device.ComputeShaderSamplers[1]	=	SamplerState.LinearClamp;
 				device.ComputeShaderSamplers[2]	=	SamplerState.ShadowSampler;
 
-				device.ComputeShaderResources[0]	=	diffuseBuffer;
-				device.ComputeShaderResources[1]	=	specularBuffer;
-				device.ComputeShaderResources[2]	=	normalMapBuffer;
-				device.ComputeShaderResources[3]	=	depthBuffer;
+				device.ComputeShaderResources[0]	=	viewLayer.DiffuseBuffer;
+				device.ComputeShaderResources[1]	=	viewLayer.SpecularBuffer;
+				device.ComputeShaderResources[2]	=	viewLayer.NormalMapBuffer;
+				device.ComputeShaderResources[3]	=	viewLayer.DepthBuffer;
 				device.ComputeShaderResources[4]	=	csmColor;
 				device.ComputeShaderResources[5]	=	spotColor;
-				device.ComputeShaderResources[6]	=	lightSet.SpotAtlas==null ? ge.WhiteTexture.Srv : lightSet.SpotAtlas.Texture.Srv;
+				device.ComputeShaderResources[6]	=	viewLayer.LightSet.SpotAtlas==null ? ge.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
 				device.ComputeShaderResources[7]	=	omniLightBuffer;
 				device.ComputeShaderResources[8]	=	spotLightBuffer;
 				device.ComputeShaderResources[9]	=	occlusionMap.Srv;
 
 				device.ComputeShaderConstants[0]	=	lightingCB;
 
-				device.SetCSRWTexture( 0, lightAccumBuffer.Surface );
+				device.SetCSRWTexture( 0, viewLayer.LightAccumulator.Surface );
 
 				//
 				//	Dispatch :
 				//
-				device.Dispatch( MathUtil.IntDivUp( viewport.Width, BlockSizeX ), MathUtil.IntDivUp( viewport.Height, BlockSizeY ), 1 );
+				device.Dispatch( MathUtil.IntDivUp( width, BlockSizeX ), MathUtil.IntDivUp( height, BlockSizeY ), 1 );
 
 			} catch ( UbershaderException e ) {
 				e.Report();
 			}
 
 
-			//device.DisplayBounds
-
 			//
 			//	Add accumulated light  :
 			//
-			ge.Filter.OverlayAdditive( HdrBuffer.Surface, lightAccumBuffer, viewport );
+			ge.Filter.OverlayAdditive( viewLayer.HdrBuffer.Surface, viewLayer.LightAccumulator );
 
 			device.ResetStates();
-
-			
-			/*if ( Config.ShowSpotLightExtents ) {			
-				device.ResetStates();
-				device.SetTargets( null, hdrTarget );
-
-				var sb = GameEngine.GetService<SpriteBatch>();
-				sb.Begin( BlendState.Additive );
-					foreach ( var spot in spotLightData ) {
-
-						sb.Draw( sb.TextureWhite, 
-							spot.ExtentMin.X, 
-							spot.ExtentMin.Y, 
-							spot.ExtentMax.X-spot.ExtentMin.X, 
-							spot.ExtentMax.Y-spot.ExtentMin.Y, 
-							new Color(32,0,32,255) );
-					
-					}
-				sb.End();
-			} */
 		}
+
 
 
 		/// <summary>

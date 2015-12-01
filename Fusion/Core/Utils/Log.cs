@@ -8,140 +8,228 @@ using System.IO;
 using System.IO.Pipes;
 using CC = System.ConsoleColor;
 using Fusion.Core.Mathematics;
+using System.Threading;
+using System.Collections.Concurrent;
 
 
 namespace Fusion {
 	public static class Log {
 
 		/// <summary>
-		/// Verbocoty level
-		/// false - Only Initializing, Loading, Disposing and Processing.
-		/// true - Additional info, tools output etc.
+		/// Defines Log verbosity level.
+		///	Value means lowest level, that will be printed.
+		///	
 		/// </summary>
-		static public bool Verbocity	=	false;
+		public static LogMessageType VerbosityLevel { get; set; }
 
+		static object lockObj = new object();
+		static List<LogListener> listeners = new List<LogListener>();
+
+
+		///// <summary>
+		///// Indicates that debug messages are allowed.
+		///// </summary>
+		//public static bool IsDebugMessageEnabled { get { return VerbosityLevel == LogMessageType.Debug; } }
 
 
 		/// <summary>
-		/// Trace.TraceInformation
+		/// 
 		/// </summary>
+		/// <param name="type"></param>
 		/// <param name="message"></param>
-		public static void Message ( string message )
+		static void AddMessage ( LogMessageType type, string text )
 		{
-			Trace.TraceInformation( message );
+			if (type>=VerbosityLevel) {
+				lock (lockObj) {
+					var threadId	=	Thread.CurrentThread.ManagedThreadId;
+					var message		=	new LogMessage( threadId, type, text );
+					
+					foreach (var listener in listeners) {
+						listener.Log( message );
+					}
+				}
+			}
 		}
 
 
 
 		/// <summary>
-		/// Trace.TraceInformation
+		/// Adds Log listener.
+		/// </summary>
+		/// <param name="listener"></param>
+		public static void AddListener ( LogListener listener )
+		{
+			lock (lockObj) {
+				listeners.Add( listener );
+			}
+		}
+
+
+
+		/// <summary>
+		/// Removes Log listener.
+		/// </summary>
+		/// <param name="listener"></param>
+		public static void RemoveListener ( LogListener listener )
+		{
+			lock (lockObj) {
+				listeners.Remove( listener );
+				listener.Flush();
+			}
+		}
+
+
+
+		/// <summary>
+		/// Logs information message
+		/// </summary>
+		/// <param name="message"></param>
+		public static void Message ( string message )
+		{
+			AddMessage( LogMessageType.Information, message );
+		}
+
+
+
+		/// <summary>
+		/// Logs information message
 		/// </summary>
 		/// <param name="format"></param>
 		/// <param name="args"></param>
 		public static void Message ( string format, params object[] args )
 		{
-			Trace.TraceInformation( format, args );
+			AddMessage( LogMessageType.Information, string.Format(format, args) );
 		}
 
 
 
 		/// <summary>
-		/// Trace.TraceInformation
+		/// Logs verbose message
 		/// </summary>
 		/// <param name="message"></param>
 		public static void Verbose ( string message )
 		{
-			Trace.TraceInformation( "..." + message );
+			AddMessage( LogMessageType.Verbose, message );
 		}
 
 
 
 		/// <summary>
-		/// Trace.TraceInformation
+		/// Logs verbose message.
 		/// </summary>
 		/// <param name="format"></param>
 		/// <param name="args"></param>
 		public static void Verbose ( string format, params object[] args )
 		{
-			Trace.TraceInformation( "..." + format, args );
+			AddMessage( LogMessageType.Verbose, string.Format(format, args) );
 		}
 
 
 
 		/// <summary>
-		///	Trace.TraceWarning
+		/// Logs warning message.
 		/// </summary>
 		/// <param name="message"></param>
 		public static void Warning ( string message )
 		{
-			Trace.TraceWarning( message );
+			AddMessage( LogMessageType.Warning, message );
 		}
 
 
 
 		/// <summary>
-		/// Trace.TraceWarning
+		/// Logs warning message.
 		/// </summary>
 		/// <param name="format"></param>
 		/// <param name="args"></param>
 		public static void Warning ( string format, params object[] args )
 		{
-			Trace.TraceWarning( format, args );
+			AddMessage( LogMessageType.Warning, string.Format(format, args) );
 		}
 
 
 
 		/// <summary>
-		/// Trace.TraceError
+		/// Logs error message.
 		/// </summary>
 		/// <param name="message"></param>
 		public static void Error ( string message )
 		{
-			Trace.TraceError( message );
+			AddMessage( LogMessageType.Error, message );
 		}
 
 
 
 		/// <summary>
-		/// Trace.TraceError
+		/// Logs error message.
 		/// </summary>
 		/// <param name="format"></param>
 		/// <param name="args"></param>
 		public static void Error ( string format, params object[] args )
 		{
-			Trace.TraceError( format, args );
+			AddMessage( LogMessageType.Error, string.Format(format, args) );
 		}
 
 
 
 		/// <summary>
-		/// Debug.Print
+		/// Logs fatal error message.
+		/// </summary>
+		/// <param name="message"></param>
+		public static void Fatal ( string message )
+		{
+			AddMessage( LogMessageType.Fatal, message );
+		}
+
+
+
+		/// <summary>
+		/// Logs fatal error message.
+		/// </summary>
+		/// <param name="format"></param>
+		/// <param name="args"></param>
+		public static void Fatal ( string format, params object[] args )
+		{
+			AddMessage( LogMessageType.Fatal, string.Format(format, args) );
+		}
+
+
+
+		/// <summary>
+		/// Logs debug message.
 		/// </summary>
 		/// <param name="message"></param>
 		public static void Debug ( string message )
 		{	
-			System.Diagnostics.Debug.Print( message );
+			if (VerbosityLevel>LogMessageType.Debug) {
+				return;
+			}
+			AddMessage( LogMessageType.Debug, message );
 		}
 
 
 
 		/// <summary>
-		/// Debug.Print
+		/// Logs debug message.
 		/// </summary>
 		/// <param name="format"></param>
 		/// <param name="args"></param>
 		public static void Debug ( string format, params object[] args )
 		{	
-			System.Diagnostics.Debug.Print( format, args );
+			if (VerbosityLevel>LogMessageType.Debug) {
+				return;
+			}
+			AddMessage( LogMessageType.Debug, string.Format(format, args) );
 		}
 
 
 
-		[Obsolete("Use Log.Message()", true)]
-		public static void Information ( string format, params object[] args ) {}
-
-
-
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="e"></param>
+		/// <param name="format"></param>
+		/// <param name="args"></param>
 		public static void PrintException ( Exception e, string format, params object[] args )
 		{
 			Log.Error( format, args );
