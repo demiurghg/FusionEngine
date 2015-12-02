@@ -33,15 +33,16 @@ namespace Fusion.Engine.Client {
 		/// Called when connection request accepted by server.
 		/// Client could start loading models, textures, models etc.
 		/// The method can be invoked in parallel task.
+		/// Thus this method should not setup scene.
 		/// </summary>
 		/// <param name="host"></param>
-		public abstract void LoadLevel ( string serverInfo );
+		public abstract void LoadContent ( string serverInfo );
 
 		/// <summary>
 		///	Called when client disconnected, dropped, kicked or timeouted.
 		///	Client must purge all level-associated content.
 		/// </summary>
-		public abstract void UnloadLevel ();
+		public abstract void UnloadContent ();
 
 		/// <summary>
 		/// Runs one step of client-side simulation and render world state.
@@ -55,7 +56,10 @@ namespace Fusion.Engine.Client {
 		/// Called when fresh snapshot arrived.
 		/// </summary>
 		/// <param name="snapshotStream">Snapshot data stream.</param>
-		public abstract void FeedSnapshot ( byte[] snapshot );
+		/// <param name="initial">Indicates that this is first snapshot.
+		/// Client module may setup graphic scene here. 
+		/// </param>
+		public abstract void FeedSnapshot ( byte[] snapshot, bool initial );
 
 		/// <summary>
 		/// Feed notification from server.

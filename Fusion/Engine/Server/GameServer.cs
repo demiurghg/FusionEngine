@@ -28,14 +28,14 @@ namespace Fusion.Engine.Server {
 		/// Method is invoked when server started.
 		/// </summary>
 		/// <param name="map"></param>
-		public abstract void LoadLevel ( string map );
+		public abstract void LoadContent ( string map );
 
 		/// <summary>
 		/// Method is invoked when server shuts down.
 		/// This method will be also called when server crashes to clean-up.
 		/// </summary>
 		/// <param name="map"></param>
-		public abstract void UnloadLevel ();
+		public abstract void UnloadContent ();
 
 		/// <summary>
 		/// Runs one step of server-side world simulation.

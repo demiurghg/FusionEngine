@@ -28,7 +28,7 @@ namespace Fusion.Engine.Client {
 
 				lastSnapshotFrame	=	snapshotId;
 
-				gameClient.FeedSnapshot( initialSnapshot );
+				gameClient.FeedSnapshot( initialSnapshot, true );
 			}
 
 
@@ -85,7 +85,7 @@ namespace Fusion.Engine.Client {
 					
 					if (snapshot!=null) {
 
-						gameClient.FeedSnapshot( snapshot );
+						gameClient.FeedSnapshot( snapshot, false );
 						queue.Push( new Snapshot(index, snapshot) );
 
 					} else {

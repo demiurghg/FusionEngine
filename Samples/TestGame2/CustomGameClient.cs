@@ -68,7 +68,7 @@ namespace TestGame2 {
 		/// Client could start loading models, textures, models etc.
 		/// </summary>
 		/// <param name="map"></param>
-		public override void LoadLevel ( string serverInfo )
+		public override void LoadContent ( string serverInfo )
 		{
 			Log.Message("LOAD LEVEL: {0}", serverInfo);
 			Thread.Sleep(100);
@@ -80,7 +80,7 @@ namespace TestGame2 {
 		///	Client must purge all level-associated content.
 		///	Reason???
 		/// </summary>
-		public override void UnloadLevel ()
+		public override void UnloadContent ()
 		{
 		}
 
@@ -102,7 +102,7 @@ namespace TestGame2 {
 		/// Called when fresh snapshot arrived.
 		/// </summary>
 		/// <param name="snapshot"></param>
-		public override void FeedSnapshot ( byte[] snapshot ) 
+		public override void FeedSnapshot ( byte[] snapshot, bool initial ) 
 		{
 			var str = Encoding.UTF8.GetString( snapshot );
 			if (Config.Show) {

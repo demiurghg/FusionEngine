@@ -444,8 +444,8 @@
     <Compile Include="Core\Test\Tester.cs" />
     <Compile Include="Core\Test\TestException.cs" />
     <Compile Include="Core\Utils\CharStream.cs" />
-    <Compile Include="Core\Utils\ColoredTraceListener.cs" />
-    <Compile Include="Core\Utils\StdTraceListener.cs" />
+    <Compile Include="Core\Utils\ColoredLogListener.cs" />
+    <Compile Include="Core\Utils\StdLogListener.cs" />
     <Compile Include="Core\Utils\KdTree3.cs" />
     <Compile Include="Core\Utils\KdTree2.cs" />
     <Compile Include="Drivers\Graphics\GraphicsDevice.cs" />
@@ -467,7 +467,7 @@
     <Compile Include="Core\Utils\Serializer.cs" />
     <Compile Include="Core\Mathematics\Temperature.cs" />
     <Compile Include="Core\Utils\Wildcard.cs" />
-    <Compile Include="Core\Utils\TraceRecorder.cs" />
+    <Compile Include="Core\Utils\LogRecorder.cs" />
     <Compile Include="Framework\GameConsole.cs" />
   </ItemGroup>
   <ItemGroup>

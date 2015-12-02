@@ -19,7 +19,7 @@ namespace Fusion.Engine.Client {
 
 			public Disconnected ( GameClient gameClient, string reason ) : base(gameClient)
 			{
-				gameClient.UnloadLevel();
+				gameClient.UnloadContent();
 				client.Shutdown( reason );
 			}
 

@@ -257,7 +257,7 @@ namespace Fusion.Engine.Client {
 		{
 			var task = new Task( 
 				()=> {
-					LoadLevel( serverInfo );
+					LoadContent( serverInfo );
 					//clientState = ClientState.Awaiting;
 				}
 			);

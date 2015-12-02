@@ -127,7 +127,7 @@ namespace Fusion.Engine.Server {
 				//
 				//	start game specific stuff :
 				//
-				LoadLevel( map );
+				LoadContent( map );
 
 				//
 				//	invoke post-start command :
@@ -189,7 +189,7 @@ namespace Fusion.Engine.Server {
 				//	kill game specific stuff :
 				//	try...catch???
 				//
-				UnloadLevel();
+				UnloadContent();
 
 				//
 				//	shutdown connection :

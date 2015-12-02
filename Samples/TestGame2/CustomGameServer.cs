@@ -64,7 +64,7 @@ namespace TestGame2 {
 		/// Starts server with given map/level.
 		/// </summary>
 		/// <param name="map"></param>
-		public override void LoadLevel ( string map )
+		public override void LoadContent ( string map )
 		{
 			var rand = new Random();
 
@@ -81,7 +81,7 @@ namespace TestGame2 {
 		/// <summary>
 		/// Kills server
 		/// </summary>
-		public override void UnloadLevel ()
+		public override void UnloadContent ()
 		{
 			var rand = new Random();
 

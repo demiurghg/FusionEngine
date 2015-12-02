@@ -25,7 +25,7 @@ namespace Fusion.Engine.Client {
 
 			public Loading ( GameClient gameClient, string serverInfo ) : base(gameClient)
 			{
-				loadingTask = new Task( () => gameClient.LoadLevel(serverInfo) );
+				loadingTask = new Task( () => gameClient.LoadContent(serverInfo) );
 				loadingTask.Start();
 			}
 
