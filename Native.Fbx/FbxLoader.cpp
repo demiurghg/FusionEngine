@@ -829,8 +829,6 @@ void Native::Fbx::FbxLoader::HandleLight( Fusion::Engine::Graphics::Scene ^scene
 */
 int main(array<System::String ^> ^args)
 {
-	Trace::Listeners->Add( gcnew StdTraceListener() );
-
 	auto options	=	gcnew Options();
 	auto parser		=	gcnew CommandLineParser( options, nullptr );
 
