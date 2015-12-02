@@ -94,6 +94,8 @@ namespace TestGame2 {
 		/// </summary>
 		public override void Initialize ()
 		{
+			var mtrl		=	GameEngine.Content.Load<Material>("testMtrl");
+
 			var bounds		=	GameEngine.GraphicsEngine.DisplayBounds;
 			masterView		=	new ViewLayerHdr(GameEngine, bounds.Width, bounds.Height);
 			masterView2		=	new ViewLayer(GameEngine);

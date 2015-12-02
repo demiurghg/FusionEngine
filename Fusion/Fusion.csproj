@@ -215,6 +215,7 @@
     <Compile Include="Engine\Graphics\Lights\LightRendererConfig.cs" />
     <Compile Include="Engine\Graphics\Lights\DirectLight.cs" />
     <Compile Include="Engine\Graphics\Lights\ShadowContext.cs" />
+    <Compile Include="Engine\Graphics\MaterialLoader.cs" />
     <Compile Include="Engine\Graphics\MaterialOptions.cs" />
     <Compile Include="Engine\Graphics\MaterialLayer.cs" />
     <Compile Include="Engine\Graphics\SceneRenderer.cs" />

@@ -116,6 +116,10 @@ namespace Fusion.Engine.Graphics {
 			
 			vertexCount	=	mesh.VertexCount;
 			indexCount	=	mesh.IndexCount;
+
+			//	TODO : Get materials here
+			//	TODO : Get textures here
+			//	Keep in mind hot reloading!
 		}
 
 

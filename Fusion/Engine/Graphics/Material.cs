@@ -15,7 +15,7 @@ namespace Fusion.Engine.Graphics {
 	/// Reprsents material.
 	/// </summary>
 	public class Material {
-		
+
 		/// <summary>
 		/// Indicates that material is tranparent.
 		/// </summary>
@@ -145,7 +145,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="iniData"></param>
-		public static Material FromIni ( string iniDataString )
+		public static Material FromINI ( string iniDataString )
 		{
 			var parser = new StreamIniDataParser();
 
@@ -181,7 +181,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="material"></param>
 		/// <returns></returns>
-		public string ToIni ()
+		public string ToINI ()
 		{
 			var parser = new StreamIniDataParser();
 

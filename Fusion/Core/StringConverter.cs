@@ -223,7 +223,7 @@ namespace Fusion.Core {
 
 		public static Color ToColor ( string value )
 		{
-			var args = value.Split(new[]{' ','\t',';',','});
+			var args = value.Split(new[]{' ','\t',';',','}, StringSplitOptions.RemoveEmptyEntries);
 			if (args.Length!=4) {
 				throw new ArgumentException(value + " is not valid value for Color");
 			}
@@ -233,7 +233,7 @@ namespace Fusion.Core {
 
 		public static Color4 ToColor4 ( string value )
 		{
-			var args = value.Split(new[]{' ','\t',';',','});
+			var args = value.Split(new[]{' ','\t',';',','}, StringSplitOptions.RemoveEmptyEntries);
 			if (args.Length!=4) {
 				throw new ArgumentException(value + " is not valid value for Color4");
 			}
@@ -243,7 +243,7 @@ namespace Fusion.Core {
 
 		public static Vector4 ToVector4 ( string value )
 		{
-			var args = value.Split(new[]{' ','\t',';',','});
+			var args = value.Split(new[]{' ','\t',';',','}, StringSplitOptions.RemoveEmptyEntries);
 			if (args.Length!=4) {
 				throw new ArgumentException(value + " is not valid value for Vector4");
 			}
@@ -253,8 +253,8 @@ namespace Fusion.Core {
 
 		public static Vector3 ToVector3 ( string value )
 		{
-			var args = value.Split(new[]{' ','\t',';',','});
-			if (args.Length!=4) {
+			var args = value.Split(new[]{' ','\t',';',','}, StringSplitOptions.RemoveEmptyEntries);
+			if (args.Length!=3) {
 				throw new ArgumentException(value + " is not valid value for Vector3");
 			}
 			var cult = CultureInfo.InvariantCulture;
@@ -263,7 +263,7 @@ namespace Fusion.Core {
 
 		public static Vector2 ToVector2 ( string value )
 		{
-			var args = value.Split(new[]{' ','\t',';',','});
+			var args = value.Split(new[]{' ','\t',';',','}, StringSplitOptions.RemoveEmptyEntries);
 			if (args.Length!=2) {
 				throw new ArgumentException(value + " is not valid value for Vector2");
 			}
@@ -274,7 +274,7 @@ namespace Fusion.Core {
 
 		public static Half4 ToHalf4 ( string value )
 		{
-			var args = value.Split(new[]{' ','\t',';',','});
+			var args = value.Split(new[]{' ','\t',';',','}, StringSplitOptions.RemoveEmptyEntries);
 			if (args.Length!=4) {
 				throw new ArgumentException(value + " is not valid value for Half4");
 			}
@@ -284,8 +284,8 @@ namespace Fusion.Core {
 
 		public static Half3 ToHalf3 ( string value )
 		{
-			var args = value.Split(new[]{' ','\t',';',','});
-			if (args.Length!=4) {
+			var args = value.Split(new[]{' ','\t',';',','}, StringSplitOptions.RemoveEmptyEntries);
+			if (args.Length!=3) {
 				throw new ArgumentException(value + " is not valid value for Half3");
 			}
 			var cult = CultureInfo.InvariantCulture;
@@ -294,7 +294,7 @@ namespace Fusion.Core {
 
 		public static Half2 ToHalf2 ( string value )
 		{
-			var args = value.Split(new[]{' ','\t',';',','});
+			var args = value.Split(new[]{' ','\t',';',','}, StringSplitOptions.RemoveEmptyEntries);
 			if (args.Length!=2) {
 				throw new ArgumentException(value + " is not valid value for Half2");
 			}

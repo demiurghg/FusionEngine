@@ -69,6 +69,7 @@
     <Compile Include="Processors\AssetProcessor.cs" />
     <Compile Include="Processors\AssetProcessorAttribute.cs" />
     <Compile Include="Processors\AssetProcessorBinding.cs" />
+    <Compile Include="Processors\MaterialProcessor.cs" />
     <Compile Include="Processors\TextureAtlasProcessor.cs" />
     <Compile Include="Processors\CopyProcessor.cs" />
     <Compile Include="Processors\FontProcessor.cs" />
