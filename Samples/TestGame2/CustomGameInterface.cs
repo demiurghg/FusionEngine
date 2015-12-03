@@ -17,6 +17,7 @@ using Fusion.Engine.Graphics.GIS.GlobeMath;
 using Fusion.Engine.UserInterface;
 using Fusion;
 using Fusion.Core.Shell;
+using Fusion.Engine.Media;
 
 namespace TestGame2 {
 
@@ -61,6 +62,10 @@ namespace TestGame2 {
 		public UserInterface UserInterface { get { return userInterface; } }
 		UserInterface userInterface;
 
+
+		VideoPlayer		videoPlayer;
+		Video			video;
+
 		SpriteLayer		testLayer;
 		SpriteLayer		uiLayer;
 		DiscTexture		texture;
@@ -95,6 +100,10 @@ namespace TestGame2 {
 		public override void Initialize ()
 		{
 			var mtrl		=	GameEngine.Content.Load<Material>("testMtrl");
+
+			//videoPlayer		=	new VideoPlayer();
+			//video			=	new Video( GameEngine, @"C:\Watchmen.mkv");
+
 
 			var bounds		=	GameEngine.GraphicsEngine.DisplayBounds;
 			masterView		=	new ViewLayerHdr(GameEngine, bounds.Width, bounds.Height);

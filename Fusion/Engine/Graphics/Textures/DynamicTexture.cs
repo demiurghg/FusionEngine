@@ -12,7 +12,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	///	Represents texture that could be updated by CPU (video frame of dynamic texture)
 	/// </summary>
-	class DynamicTexture : Texture{
+	public class DynamicTexture : Texture{
 
 		/// <summary>
 		/// Gets texture's element type
