@@ -19,8 +19,6 @@ using Fusion.Core.Shell;
 
 namespace Fusion.Build.Processors {
 
-	using Core.Mathematics;
-
 	[AssetProcessor("Shaders","")]
 	public partial class UbershaderProcessor : AssetProcessor {
 			

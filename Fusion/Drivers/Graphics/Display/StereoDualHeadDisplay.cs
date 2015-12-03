@@ -188,7 +188,7 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// <param name="rightOut"></param>
 		void GetDualHeadAdapter ( FeatureLevel fl, out Adapter adapter, out Output leftOut, out Output rightOut )
 		{
-			using ( var factory2 = new Factory(new IntPtr(0)) ) {
+			using ( var factory2 = new Factory() ) {
 
 				adapter	=	factory2.Adapters.FirstOrDefault( a => a.Outputs.Length>=2 && D3D.Device.IsSupportedFeatureLevel( a, fl ) );
 
