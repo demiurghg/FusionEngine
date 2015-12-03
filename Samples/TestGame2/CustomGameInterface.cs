@@ -17,6 +17,7 @@ using Fusion.Engine.Graphics.GIS.GlobeMath;
 using Fusion.Engine.UserInterface;
 using Fusion;
 using Fusion.Core.Shell;
+using Fusion.Video;
 
 namespace TestGame2 {
 
@@ -61,6 +62,9 @@ namespace TestGame2 {
 		public UserInterface UserInterface { get { return userInterface; } }
 		UserInterface userInterface;
 
+		//VideoPlayer	videoPlayer;
+		//Video		video;
+
 		SpriteLayer		testLayer;
 		SpriteLayer		uiLayer;
 		DiscTexture		texture;
@@ -94,6 +98,9 @@ namespace TestGame2 {
 		/// </summary>
 		public override void Initialize ()
 		{
+			/*videoPlayer	=	new VideoPlayer();
+			video		=	new Video(@"C:\infection_demo.wmv");*/
+
 			var mtrl		=	GameEngine.Content.Load<Material>("testMtrl");
 
 			var bounds		=	GameEngine.GraphicsEngine.DisplayBounds;
@@ -151,6 +158,13 @@ namespace TestGame2 {
 
 				GameEngine.Reload();
 			}
+
+			/*if (e.Key==Keys.P ) {
+				videoPlayer.Play(video);
+			}
+			if (e.Key==Keys.O ) {
+				videoPlayer.Stop();
+			} */
 		}
 
 
@@ -158,6 +172,10 @@ namespace TestGame2 {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
+
+				/*SafeDispose( ref video );
+				SafeDispose( ref videoPlayer );*/
+
 				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
 				SafeDispose( ref masterView );
@@ -198,6 +216,12 @@ namespace TestGame2 {
 			testLayer.Draw( masterView.SpecularTexture, 200,  0, 200,150, Color.White );
 			testLayer.Draw( masterView.NormalMapTexture, 400,  0, 200,150, Color.White );
 			testLayer.Draw( masterView.Target, 200,200,300,200, Color.White);
+
+			/*if (videoPlayer.State==MediaState.Playing) {
+				testLayer.Draw( videoPlayer.GetTexture(), 20,0,300,200, Color.White);
+			}*/
+
+			//Log.Message("{0}", videoPlayer.State);
 
 
 			if ( GameEngine.Keyboard.IsKeyDown(Keys.PageDown) ) {

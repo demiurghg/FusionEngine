@@ -12,7 +12,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	///	Represents texture that could be updated by CPU (video frame of dynamic texture)
 	/// </summary>
-	class DynamicTexture : Texture{
+	public class DynamicTexture : Texture{
 
 		/// <summary>
 		/// Gets texture's element type
@@ -27,6 +27,7 @@ namespace Fusion.Engine.Graphics {
 
 		static Tuple<Type,ColorFormat>[] formats = 
 			new[] {
+				new Tuple<Type,ColorFormat>( typeof(ColorBGRA),	ColorFormat.Bgra8 ),
 				new Tuple<Type,ColorFormat>( typeof(Color),		ColorFormat.Rgba8 ),
 				new Tuple<Type,ColorFormat>( typeof(Color4),	ColorFormat.Rgba32F ),
 				new Tuple<Type,ColorFormat>( typeof(Vector4),	ColorFormat.Rgba32F ),
@@ -44,6 +45,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="format"></param>
 		public DynamicTexture ( GraphicsEngine ge, int width, int height, Type elementType, bool mips = false, bool srgb = false )
 		{
+			Log.Message("DynamicTexture: {0}x{1}@{2} {3} {4}", width, height, elementType.Name, mips, srgb );
 			this.ElementType	=	elementType;
 			this.Width			=	width;
 			this.Height			=	height;
