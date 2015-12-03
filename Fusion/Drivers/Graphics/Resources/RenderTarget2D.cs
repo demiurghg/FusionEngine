@@ -402,7 +402,8 @@ namespace Fusion.Drivers.Graphics {
 		/// <param name="path"></param>
 		public void SaveToFile ( string path )
 		{
-			lock ( device.DeviceContext ) {
+			throw new NotImplementedException();
+			/*lock ( device.DeviceContext ) {
 				if (SampleCount>1) {
 												
 					using( var temp = new RenderTarget2D( this.device, this.Format, this.Width, this.Height, false, false ) ) {
@@ -426,7 +427,7 @@ namespace Fusion.Drivers.Graphics {
 					//
 					D3D.Texture2D.ToFile( device.DeviceContext, tex2D, iff, path );
 				}
-			}
+			} */
 		}
 	}
 }

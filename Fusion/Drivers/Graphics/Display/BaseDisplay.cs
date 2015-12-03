@@ -276,7 +276,7 @@ namespace Fusion.Drivers.Graphics.Display {
 				parameters.UseDebugDevice ? "(Debug)" : "",
 				parameters.StereoMode );
 
-			using ( var factory2 = new Factory() ) {
+			using ( var factory2 = new Factory(new IntPtr(0)) ) {
 
 				Log.Message("Adapters:");
 
