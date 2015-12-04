@@ -33,6 +33,7 @@ testScene.fbx /geom
 
 [Copy]
 myDir/*.*
+*.wmv
 
 [Materials]
 *.mtrl

@@ -17,7 +17,8 @@ using Fusion.Engine.Graphics.GIS.GlobeMath;
 using Fusion.Engine.UserInterface;
 using Fusion;
 using Fusion.Core.Shell;
-using Fusion.Video;
+using System.IO;
+using Fusion.Engine.Media;
 
 namespace TestGame2 {
 
@@ -100,6 +101,8 @@ namespace TestGame2 {
 		{
 			videoPlayer	=	new VideoPlayer();
 			video		=	new Video(@"C:\infection_demo.wmv");//*/
+			////video		=	GameEngine.Content.Load<Video>("infection_demo");
+			//video		=	new Video(File.ReadAllBytes(@"C:\infection_demo.wmv"));//*/
 
 			var mtrl		=	GameEngine.Content.Load<Material>("testMtrl");
 

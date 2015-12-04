@@ -10,8 +10,22 @@ using Fusion.Engine.Graphics;
 using SharpDX;
 using SharpDX.Mathematics.Interop;
 using SharpDX.MediaFoundation;
+using System.IO;
+using Fusion.Core.Content;
 
-namespace Fusion.Video {
+namespace Fusion.Engine.Media {
+
+	
+	[ContentLoader(typeof(Video))]
+	public class VideoLoader : ContentLoader {
+
+		public override object Load ( GameEngine game, Stream stream, Type requestedType, string assetPath )
+		{
+			return new Video( stream );
+		}
+	}
+
+
 	public enum VideoSoundtrackType {
 		/// <summary>
 		/// This video contains only music.
@@ -38,7 +52,7 @@ namespace Fusion.Video {
 		/// <summary>
 		/// File name
 		/// </summary>
-		public string FileName { get; private set; }
+		//public string FileName { get; private set; }
 
 		/// <summary>
 		/// Gets the duration of the Video.
@@ -73,9 +87,27 @@ namespace Fusion.Video {
 		/// <param name="fileName"></param>
 		public Video(string fileName)
 		{
-			FileName = fileName;
+			PlatformInitialize( null, null, fileName );
+		}
 
-			PlatformInitialize();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="fileName"></param>
+		public Video(Stream stream)
+		{
+			PlatformInitialize( null, stream, null );
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="fileName"></param>
+		public Video(byte[] bytes)
+		{
+			PlatformInitialize( bytes, null, null );
 		}
 
 
@@ -113,7 +145,7 @@ namespace Fusion.Video {
 		/// <summary>
 		/// 
 		/// </summary>
-		private void PlatformInitialize()
+		private void PlatformInitialize( byte[] bytes, Stream stream, string url )
 		{
 			if (Topology != null) {
 				return;
@@ -126,7 +158,26 @@ namespace Fusion.Video {
 				SourceResolver resolver = new SourceResolver();
 				
 				ObjectType otype;
-				ComObject source = resolver.CreateObjectFromURL(FileName, SourceResolverFlags.MediaSource, null, out otype);
+				ComObject source = null;
+
+				if (url!=null) {
+					source = resolver.CreateObjectFromURL(url, SourceResolverFlags.MediaSource, null, out otype);
+				}
+
+				if (stream!=null) {
+					var bs = new ByteStream( stream );
+					source = resolver.CreateObjectFromStream(bs, null, SourceResolverFlags.MediaSource, null, out otype);
+				}
+
+				if (bytes!=null) {
+					var bs = new ByteStream( bytes );
+					source = resolver.CreateObjectFromStream(bs, null, SourceResolverFlags.MediaSource|SourceResolverFlags.ContentDoesNotHaveToMatchExtensionOrMimeType, null, out otype);
+				}
+
+				if (source==null) {
+					throw new ArgumentException("'stream' and 'url' are null!");
+				}
+
 				mediaSource = source.QueryInterface<SharpDX.MediaFoundation.MediaSource>();
 
 				

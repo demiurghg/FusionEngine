@@ -8,8 +8,8 @@ using Fusion.Core.Shell;
 
 namespace Fusion.Build.Processors {
 
-	[AssetProcessor("Copy", "Copies file to target directory without processing")]
-	public class CopyProcessor : AssetProcessor {
+	[AssetProcessor("Stream", "Copies file to target directory without processing")]
+	public class StreamProcessor : AssetProcessor {
 		
 		/// <summary>
 		/// 

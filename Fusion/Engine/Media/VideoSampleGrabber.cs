@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SharpDX.MediaFoundation;
 
-namespace Fusion.Video
+namespace Fusion.Engine.Media
 {
 	internal class VideoSampleGrabber : SharpDX.CallbackBase, SampleGrabberSinkCallback
 	{

@@ -15,7 +15,7 @@ using SharpDX.Mathematics.Interop;
 using System.Runtime.InteropServices;
 using SharpDX.MediaFoundation;
 
-namespace Fusion.Video
+namespace Fusion.Engine.Media
 {
 	public sealed partial class VideoPlayer : DisposableBase {
 
@@ -228,7 +228,7 @@ namespace Fusion.Video
 					break;
 				}
 				var sleepTime = i * sleepTimeFactor;
-				Debug.WriteLine("State != MediaState.Playing ({0}) sleeping for {1} ms", i + 1, sleepTime);
+				Log.Verbose("State != MediaState.Playing ({0}) sleeping for {1} ms", i + 1, sleepTime);
 #if WINRT
                 Task.Delay(sleepTime).Wait();
 #else
