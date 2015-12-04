@@ -62,8 +62,8 @@ namespace TestGame2 {
 		public UserInterface UserInterface { get { return userInterface; } }
 		UserInterface userInterface;
 
-		//VideoPlayer	videoPlayer;
-		//Video		video;
+		VideoPlayer	videoPlayer;
+		Video		video;
 
 		SpriteLayer		testLayer;
 		SpriteLayer		uiLayer;
@@ -98,8 +98,8 @@ namespace TestGame2 {
 		/// </summary>
 		public override void Initialize ()
 		{
-			/*videoPlayer	=	new VideoPlayer();
-			video		=	new Video(@"C:\infection_demo.wmv");*/
+			videoPlayer	=	new VideoPlayer();
+			video		=	new Video(@"C:\infection_demo.wmv");//*/
 
 			var mtrl		=	GameEngine.Content.Load<Material>("testMtrl");
 
@@ -159,12 +159,12 @@ namespace TestGame2 {
 				GameEngine.Reload();
 			}
 
-			/*if (e.Key==Keys.P ) {
+			if (e.Key==Keys.P ) {
 				videoPlayer.Play(video);
 			}
 			if (e.Key==Keys.O ) {
 				videoPlayer.Stop();
-			} */
+			} //*/
 		}
 
 
@@ -173,8 +173,8 @@ namespace TestGame2 {
 		{
 			if (disposing) {
 
-				/*SafeDispose( ref video );
-				SafeDispose( ref videoPlayer );*/
+				SafeDispose( ref video );
+				SafeDispose( ref videoPlayer );//*/
 
 				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
@@ -217,9 +217,9 @@ namespace TestGame2 {
 			testLayer.Draw( masterView.NormalMapTexture, 400,  0, 200,150, Color.White );
 			testLayer.Draw( masterView.Target, 200,200,300,200, Color.White);
 
-			/*if (videoPlayer.State==MediaState.Playing) {
+			if (videoPlayer.State==MediaState.Playing) {
 				testLayer.Draw( videoPlayer.GetTexture(), 20,0,300,200, Color.White);
-			}*/
+			}//*/
 
 			//Log.Message("{0}", videoPlayer.State);
 

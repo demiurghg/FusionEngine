@@ -305,10 +305,9 @@
     <Compile Include="Engine\Input\KeyBind.cs" />
     <Compile Include="Engine\Input\Unbind.cs" />
     <Compile Include="Engine\Client\GameClient.Internal.cs" />
+    <Compile Include="Engine\Media\MediaState.cs" />
     <Compile Include="Engine\Media\Video.cs" />
-    <Compile Include="Engine\Media\Video.WMS.cs" />
     <Compile Include="Engine\Media\VideoPlayer.cs" />
-    <Compile Include="Engine\Media\VideoPlayer.WMS.cs" />
     <Compile Include="Engine\Media\VideoSampleGrabber.cs" />
     <Compile Include="Engine\Server\GameServer.Internal.cs" />
     <Compile Include="Engine\Common\GameModuleAttribute.cs" />
