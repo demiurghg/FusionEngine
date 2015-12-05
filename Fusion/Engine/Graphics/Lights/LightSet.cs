@@ -51,6 +51,14 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		/// <summary>
+		/// Average ambient level.
+		/// </summary>
+		public Color4 AmbientLevel {
+			get; set; 
+		}
+
+
 		DirectLight		directLight = new DirectLight();
 		List<OmniLight> omniLights = new List<OmniLight>();
 		List<SpotLight> spotLights = new List<SpotLight>();
@@ -62,6 +70,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="ge"></param>
 		public LightSet ( GraphicsEngine ge )
 		{
+			AmbientLevel	=	Color4.Zero;
 		}
 	}
 }

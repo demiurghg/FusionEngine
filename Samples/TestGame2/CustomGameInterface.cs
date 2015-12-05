@@ -63,8 +63,8 @@ namespace TestGame2 {
 		public UserInterface UserInterface { get { return userInterface; } }
 		UserInterface userInterface;
 
-		VideoPlayer	videoPlayer;
-		Video		video;
+		//VideoPlayer	videoPlayer;
+		//Video		video;
 
 		SpriteLayer		testLayer;
 		SpriteLayer		uiLayer;
@@ -99,8 +99,8 @@ namespace TestGame2 {
 		/// </summary>
 		public override void Initialize ()
 		{
-			videoPlayer	=	new VideoPlayer();
-			video		=	new Video(@"C:\infection_demo.wmv");//*/
+			//videoPlayer	=	new VideoPlayer();
+			//video		=	new Video(@"C:\infection_demo.wmv");//*/
 			////video		=	GameEngine.Content.Load<Video>("infection_demo");
 			//video		=	new Video(File.ReadAllBytes(@"C:\infection_demo.wmv"));//*/
 
@@ -111,7 +111,7 @@ namespace TestGame2 {
 			masterView2		=	new ViewLayer(GameEngine);
 
 			targetTexture		=	new TargetTexture(GameEngine.GraphicsEngine, bounds.Width, bounds.Height, TargetFormat.LowDynamicRange );
-			masterView.Target	=	targetTexture;
+			//masterView.Target	=	targetTexture;
 
 			GameEngine.GraphicsEngine.AddLayer( masterView );
 			GameEngine.GraphicsEngine.AddLayer( masterView2 );
@@ -121,10 +121,13 @@ namespace TestGame2 {
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
 			scene		=	GameEngine.Content.Load<Scene>( "testScene" );
 
-			masterView.LightSet.SpotAtlas	=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
-			masterView.LightSet.DirectLight.Position	=	new Vector3(1,2,3);
-			masterView.LightSet.DirectLight.Intensity	=	GameEngine.GraphicsEngine.Sky.GetSunLightColor( masterView.SkySettings );
+			masterView.SkySettings.SunPosition			=	new Vector3(10,40,30);
+
+			masterView.LightSet.SpotAtlas				=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
+			masterView.LightSet.DirectLight.Direction	=	masterView.SkySettings.SunLightDirection;
+			masterView.LightSet.DirectLight.Intensity	=	masterView.SkySettings.SunLightColor;
 			masterView.LightSet.DirectLight.Enabled		=	true;
+			masterView.LightSet.AmbientLevel			=	masterView.SkySettings.AmbientLevel;
 
 			var transforms = new Matrix[ scene.Nodes.Count ];
 			scene.ComputeAbsoluteTransforms( transforms );
@@ -162,12 +165,12 @@ namespace TestGame2 {
 				GameEngine.Reload();
 			}
 
-			if (e.Key==Keys.P ) {
-				videoPlayer.Play(video);
-			}
-			if (e.Key==Keys.O ) {
-				videoPlayer.Stop();
-			} //*/
+			//if (e.Key==Keys.P ) {
+			//	videoPlayer.Play(video);
+			//}
+			//if (e.Key==Keys.O ) {
+			//	videoPlayer.Stop();
+			//} //*/
 		}
 
 
@@ -176,8 +179,8 @@ namespace TestGame2 {
 		{
 			if (disposing) {
 
-				SafeDispose( ref video );
-				SafeDispose( ref videoPlayer );//*/
+				//SafeDispose( ref video );
+				//SafeDispose( ref videoPlayer );//*/
 
 				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
@@ -218,11 +221,11 @@ namespace TestGame2 {
 			testLayer.Draw( masterView.DiffuseTexture,	    0,  0, 200,150, Color.White );
 			testLayer.Draw( masterView.SpecularTexture, 200,  0, 200,150, Color.White );
 			testLayer.Draw( masterView.NormalMapTexture, 400,  0, 200,150, Color.White );
-			testLayer.Draw( masterView.Target, 200,200,300,200, Color.White);
+			//testLayer.Draw( masterView.Target, 200,200,300,200, Color.White);
 
-			if (videoPlayer.State==MediaState.Playing) {
-				testLayer.Draw( videoPlayer.GetTexture(), 20,0,300,200, Color.White);
-			}//*/
+			//if (videoPlayer.State==MediaState.Playing) {
+			//	testLayer.Draw( videoPlayer.GetTexture(), 20,0,300,200, Color.White);
+			//}//*/
 
 			//Log.Message("{0}", videoPlayer.State);
 

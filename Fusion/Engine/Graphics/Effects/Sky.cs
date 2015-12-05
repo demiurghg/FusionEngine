@@ -56,6 +56,7 @@ namespace Fusion.Engine.Graphics {
 		RenderTargetCube	skyCube;
 		Texture2D			clouds;
 
+		#if false
 		#region Sky model
 		float dot ( Vector3 a, Vector3 b ) { return Vector3.Dot(a, b); }
 		float dot ( Vector4 a, Vector4 b ) { return Vector4.Dot(a, b); }
@@ -171,6 +172,7 @@ namespace Fusion.Engine.Graphics {
 			return new Vector3 ( dot ( rCoeffs, XYZ ), dot ( gCoeffs, XYZ ), dot ( bCoeffs, XYZ ) ) * tm;
 		}
 		#endregion
+		#endif
 
 		Random	rand = new Random();
 
@@ -272,8 +274,8 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		internal void RenderFogTable( SkySettings settings )
 		{
-			var	sunPos		= GetSunDirection(settings);
-			var sunColor	= GetSunLightColor(settings);
+			var	sunPos		= settings.SunPosition;
+			var sunColor	= settings.SunLightColor;
 
 			var rotation	=	Matrix.Identity;
 			var projection	=	MathUtil.ComputeCubemapProjectionMatrixLH( 0.125f, 10.0f );
@@ -329,8 +331,8 @@ namespace Fusion.Engine.Graphics {
 			var scale		=	Matrix.Scaling( settings.SkySphereSize );
 			var rotation	=	Matrix.Identity;
 
-			var	sunPos		=	GetSunDirection(settings);
-			var sunColor	=	GetSunGlowColor(settings);
+			var	sunPos		=	settings.SunPosition;
+			var sunColor	=	settings.SunGlowColor;
 
 			rs.ResetStates();
 
@@ -376,14 +378,14 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-
+#if false
 		/// <summary>
 		/// Gets current Sun direction.
 		/// </summary>
 		/// <returns></returns>
 		public Vector3 GetSunDirection( SkySettings settings )
 		{
-			return settings.SunDirection.Normalized();
+			return settings.SunPosition.Normalized();
 		}
 
 
@@ -442,12 +444,13 @@ namespace Fusion.Engine.Graphics {
 			var norm = randVectors.Length;// * 2 * MathUtil.Pi;
 
 			for (int i = 0; i < randVectors.Length; i++) {
-				var yxy = perezSky( settings.SkyTurbidity, randVectors[i], sunPos );
-				var rgb = YxyToRGB( yxy ) * Temperature.Get( settings.SunTemperature );
+				var yxy = SkyModel.perezSky( settings.SkyTurbidity, randVectors[i], sunPos );
+				var rgb = SkyModel.YxyToRGB( yxy );// * Temperature.Get( settings.SunTemperature );
 				ambientLight += rgb / norm;
 			}
 
 			return new Color4(ambientLight,1);
 		}
+#endif
 	}
 }

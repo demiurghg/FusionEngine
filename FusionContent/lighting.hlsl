@@ -215,8 +215,9 @@ void CSMain(
 	//-----------------------------------------------------
 	#ifdef DIRECT
 		float3 csmFactor	=	ComputeCSM( worldPos );
-		totalLight.xyz		+=	csmFactor.rgb * Lambert	( normal.xyz,  Params.DirectLightDirection.xyz, Params.DirectLightIntensity.rgb, diffuse.rgb );
-		totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, normalize(Params.DirectLightDirection.xyz), Params.DirectLightIntensity.rgb, specular.rgb, specular.a );
+		float3 lightDir		=	-normalize(Params.DirectLightDirection.xyz);
+		totalLight.xyz		+=	csmFactor.rgb * Lambert	( normal.xyz,  lightDir, Params.DirectLightIntensity.rgb, diffuse.rgb );
+		totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, Params.DirectLightIntensity.rgb, specular.rgb, specular.a );
 	#endif
 	
 	//-----------------------------------------------------
@@ -394,6 +395,26 @@ float3	ComputeSpotShadow ( float4 worldPos, SPOTLIGHT spot )
 }
 
 
+static float2 poisonDisk[16] = {
+	float2( 0.6471434f,  0.5442180f),
+	float2( 0.6627925f, -0.0145980f),
+	float2( 0.2094653f,  0.6861125f),
+	float2( 0.01836824f, 0.1938052f),
+	float2(-0.5083427f, -0.0543112f),
+	float2(-0.1876637f, -0.4905864f),
+	float2( 0.2701841f, -0.1667389f),
+	float2(-0.5884321f,  0.5500614f),
+	
+	float2( 0.5244192f, -0.7732284f),
+	float2( 0.1206752f, -0.9527515f),
+	float2(-0.2352096f,  0.9127740f),
+	float2(-0.9525819f,  0.2960428f),
+	float2( 0.8872142f, -0.4135098f),
+	float2(-0.9452454f, -0.1600218f),
+	float2(-0.6495278f, -0.4626486f),
+	float2(-0.4085272f, -0.8579809f)
+};
+
 float3	ComputeCSM ( float4 worldPos )
 {
 	float3	colorizer		= float3(1,1,1);
@@ -432,13 +453,11 @@ float3	ComputeCSM ( float4 worldPos )
 	
 	float radius = Params.CSMFilterRadius.x;
 	
-	for (int i=-1; i<2; i++) {
-		for (int j=-1; j<2; j++) {
-			float  x   = i/1.0f;
-			float  y   = j/1.0f;
-			float  sh  = CSMTexture.SampleCmpLevelZero( ShadowSampler, smUV + offset * radius * float2(x,y), z );
-			shadow += sh / 9;
-		}
+	for (int i=0; i<16; i++) {
+		float  x   = poisonDisk[i].x;
+		float  y   = poisonDisk[i].y;
+		float  sh  = CSMTexture.SampleCmpLevelZero( ShadowSampler, smUV + offset * radius * float2(x,y), z );
+		shadow += sh / 16;
 	}
 	
 	if ( shadowId==-1 ) {

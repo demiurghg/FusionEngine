@@ -44,19 +44,5 @@ namespace Fusion.Engine.Graphics {
 				direction = value;
 			}
 		}
-
-
-		/// <summary>
-		/// The direction TO distant light source (Sun, Moon, thunder etc).
-		/// </summary>
-		public Vector3 Position {
-			get {
-				return -direction;
-			}
-			set {
-				direction = -value;
-			}
-		}
-
 	}
 }

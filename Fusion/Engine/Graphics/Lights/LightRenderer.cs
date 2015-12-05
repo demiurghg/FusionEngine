@@ -24,9 +24,9 @@ namespace Fusion.Engine.Graphics {
 		[Config]
 		public LightRendererConfig	Config { get; set; }
 		
-		public Vector3	DirectLightDirection	=	new Vector3(1,1,1);
-		public Color4	DirectLightIntensity	=	new Color4(10,10,10,1);
-		public Color4	AmbientLevel			=	new Color4(0,0,0,0);
+		//public Vector3	DirectLightDirection	=	new Vector3(1,1,1);
+		//public Color4	DirectLightIntensity	=	new Color4(10,10,10,1);
+		//public Color4	AmbientLevel			=	new Color4(0,0,0,0);
 
 		List<OmniLight>	omniLights = new List<OmniLight>();
 		List<SpotLight>	spotLights = new List<SpotLight>();
@@ -251,8 +251,8 @@ namespace Fusion.Engine.Graphics {
 				var viewPos	=	invView.TranslationVector;
 
 
-				cbData.DirectLightDirection		=	new Vector4( DirectLightDirection, 0 );
-				cbData.DirectLightIntensity		=	DirectLightIntensity.ToVector4();
+				cbData.DirectLightDirection		=	new Vector4( viewLayer.LightSet.DirectLight.Direction, 0 );
+				cbData.DirectLightIntensity		=	viewLayer.LightSet.DirectLight.Intensity.ToVector4();
 				cbData.Projection				=	projection;
 
 				cbData.CSMViewProjection0		=	csmViewProjections[0];
@@ -265,7 +265,7 @@ namespace Fusion.Engine.Graphics {
 				cbData.InverseViewProjection	=	invVP;
 				cbData.CSMFilterRadius			=	new Vector4( Config.CSMFilterSize );
 
-				cbData.AmbientColor				=	new Color4(0.0f, 0.0f, 0.0f, 1);
+				cbData.AmbientColor				=	viewLayer.LightSet.AmbientLevel;
 				cbData.Viewport					=	new Vector4( 0, 0, width, height );
 
 				PrepareOmniLights( view, projection, viewLayer.LightSet );
@@ -321,8 +321,11 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="?"></param>
-		internal void RenderShadows ( Camera camera, IEnumerable<Instance> instances )
+		internal void RenderShadows ( ViewLayerHdr viewLayer )
 		{
+			var camera		=	viewLayer.Camera;
+			var instances	=	viewLayer.Instances;
+
 			if (Config.SkipShadows) {
 				return;
 			}
@@ -343,7 +346,7 @@ namespace Fusion.Engine.Graphics {
 			//	shadow is computed for both eyes :
 			var view = camera.GetViewMatrix( StereoEye.Mono );
 
-			ComputeCSMMatricies( view, out shadowViews, out shadowProjections, out csmViewProjections );
+			ComputeCSMMatricies( view, viewLayer.LightSet.DirectLight.Direction, out shadowViews, out shadowProjections, out csmViewProjections );
 
 			for (int i=0; i<4; i++) {
 
@@ -398,7 +401,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="view"></param>
 		/// <returns></returns>
-		void ComputeCSMMatricies ( Matrix view, out Matrix[] shadowViews, out Matrix[] shadowProjections, out Matrix[] shadowViewProjections )
+		void ComputeCSMMatricies ( Matrix view, Vector3 lightDir2, out Matrix[] shadowViews, out Matrix[] shadowProjections, out Matrix[] shadowViewProjections )
 		{
 			shadowViews				=	new Matrix[4];
 			shadowProjections		=	new Matrix[4];
@@ -415,7 +418,7 @@ namespace Fusion.Engine.Graphics {
 				float	radius		=	Config.SplitSize   * (float)Math.Pow( Config.SplitFactor, i );
 
 				Vector3 viewDir		=	camMatrix.Forward.Normalized();
-				Vector3	lightDir	=	- DirectLightDirection;
+				Vector3	lightDir	=	lightDir2.Normalized();
 				Vector3	origin		=	viewPos + viewDir * offset;
 
 				Matrix	lightRot	=	Matrix.LookAtRH( Vector3.Zero, Vector3.Zero + lightDir, Vector3.UnitY );

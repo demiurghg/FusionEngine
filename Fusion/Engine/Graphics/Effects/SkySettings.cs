@@ -35,14 +35,12 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public float SkySphereSize { get; set; }
 
-
 		public float AerialFogDensity { get; set; }
 
-
 		/// <summary>
-		/// Sun direction
+		/// Vector that points toward the sun.
 		/// </summary>
-		public Vector3 SunDirection { get; set; }
+		public Vector3 SunPosition { get; set; }
 
 		/// <summary>
 		/// Sun glow intensity
@@ -55,15 +53,76 @@ namespace Fusion.Engine.Graphics {
 		public float SunLightIntensity { get; set; }
 
 		/// <summary>
-		/// Sun temperature.
+		/// Maximal sun temperature.
 		/// </summary>
 		public int SunTemperature { get; set; }
-
 
 		/// <summary>
 		/// RGB space.
 		/// </summary>
 		public RgbSpace	RgbSpace { get; set; }
+
+		/// <summary>
+		/// Gets normalized sun-light direction.
+		/// </summary>
+		public Vector3 SunLightDirection {
+			get {
+				return -SunPosition.Normalized();
+			}
+		}
+
+		/// <summary>
+		/// Lerps sun color temperature from 2000K to 5500K and multiplies result by SunLightIntensity.
+		/// </summary>
+		public Color4 SunLightColor {
+			get {
+				Color4 dusk		=	new Color4(Temperature.Get(2000), 1);
+				Color4 zenith	=	new Color4(Temperature.Get(SunTemperature), 1);
+
+				Vector3 ndir	=	SunPosition.Normalized();
+
+				return Color4.Lerp( dusk, zenith, (float)Math.Pow(ndir.Y, 0.5f) ) * SunLightIntensity;
+			}
+		}
+
+		/// <summary>
+		/// Lerps sun color temperature from 2000K to 5500K and multiplies result by SunGlowIntensity.
+		/// </summary>
+		public Color4 SunGlowColor {
+			get {
+				Color4 dusk		=	new Color4(Temperature.Get(2000), 1);
+				Color4 zenith	=	new Color4(Temperature.Get(SunTemperature), 1);
+
+				Vector3 ndir	=	SunPosition.Normalized();
+
+				return Color4.Lerp( dusk, zenith, (float)Math.Pow(ndir.Y, 0.5f) ) * SunGlowIntensity;
+			}
+		}
+
+
+		/// <summary>
+		/// Gets average ambient level.
+		/// </summary>
+		public Color4 AmbientLevel {
+			get {
+				var sunPos = SunPosition.Normalized();
+				var ambientLight = Vector3.Zero;
+
+				var norm = randVectors.Length;// * 2 * MathUtil.Pi;
+
+				for (int i = 0; i < randVectors.Length; i++) {
+					var yxy = SkyModel.perezSky( SkyTurbidity, randVectors[i], sunPos );
+					var rgb = SkyModel.YxyToRGB( yxy );// * Temperature.Get( settings.SunTemperature );
+					ambientLight += rgb / norm;
+				}
+
+				return new Color4(ambientLight,1) * SkyIntensity;
+			}
+		}
+
+
+		Vector3[] randVectors;
+
 
 
 		public SkySettings()
@@ -72,11 +131,24 @@ namespace Fusion.Engine.Graphics {
 			AerialFogDensity	= 0.001f;
 			SkySphereSize		= 1000.0f;
 			SkyTurbidity		= 4.0f;
-			SunDirection		= new Vector3( 1.0f, 1.0f, 1.0f );
+			SunPosition		= new Vector3( 1.0f, 1.0f, 1.0f );
 			SunGlowIntensity	= Half.MaxValue;
-			SunLightIntensity	= 1f;
-			SunTemperature		= 5700;
+			SunLightIntensity	= 1000.0f;
+			SunTemperature		= 5500;
 			SkyIntensity		= 1.0f;
+
+
+			randVectors	=	new Vector3[64];
+			var rand	=	new Random(465464);
+
+			for (int i=0; i<randVectors.Length; i++) {
+				Vector3 randV;
+				do {
+					randV = rand.NextVector3( -Vector3.One, Vector3.One );
+				} while ( randV.Length()>1 && randV.Y < 0 );
+
+				randVectors[i] = randV.Normalized();
+			}
 		}
 	}
 }

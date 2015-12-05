@@ -222,7 +222,7 @@ namespace Fusion.Engine.Graphics {
 			ClearBuffers();
 
 			//	render shadows :
-			ge.LightRenderer.RenderShadows( Camera, Instances );
+			ge.LightRenderer.RenderShadows( this );
 			
 			//	render g-buffer :
 			ge.SceneRenderer.RenderGBuffer( stereoEye, this );
