@@ -19,7 +19,7 @@ namespace Fusion.Engine.Graphics {
 	public sealed class MeshMaterial : IEquatable<MeshMaterial> {
 
 		/// <summary>
-		/// Base texture path.
+		/// Material name.
 		/// </summary>
 		public	string	Name { get; set; }
 

@@ -36,6 +36,12 @@ namespace Fusion.Build.Processors {
 		[CommandLineParser.Name("report", "output html report")]
 		public bool OutputReport { get; set; }
 
+		/// <summary>
+		/// Evaluates transform
+		/// </summary>
+		[CommandLineParser.Name("genmtrl", "generate missing materials")]
+		public bool GenerateMissingMaterials { get; set; }
+
 
 		
 		/// <summary>
@@ -55,12 +61,16 @@ namespace Fusion.Build.Processors {
 		{
 			var resolvedPath	=	assetFile.FullSourcePath;
 			var destPath		=	context.GetTempFileName( assetFile.KeyPath, ".scene" );
-			var cmdLine			=	string.Format("\"{0}\" /out:\"{1}\" /merge:{2} {3} {4} {5}", 
-				resolvedPath, destPath, 
+
+			var cmdLine			=	string.Format("\"{0}\" /out:\"{1}\" /base:\"{2}\" /merge:{3} {4} {5} {6} {7}", 
+				resolvedPath, 
+				destPath, 
+				assetFile.BasePath,
 				MergeTolerance, 
 				ImportAnimation ? "/anim":"", 
 				ImportGeometry ? "/geom":"", 
-				OutputReport ? "/report":"" 
+				OutputReport ? "/report":"" ,
+				GenerateMissingMaterials ? "/genmtrl":""
 			);
 
 			context.RunTool( "FScene.exe", cmdLine );

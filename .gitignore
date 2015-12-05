@@ -8,6 +8,8 @@ sharpdxsdk.exe
 fbxsdk.exe
 *.asset
 *.tar
+*.swatches
+*.swatch
 [Tt]emp/
 
 # installer result

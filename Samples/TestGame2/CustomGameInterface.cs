@@ -119,7 +119,7 @@ namespace TestGame2 {
 			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			uiLayer		=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
-			scene		=	GameEngine.Content.Load<Scene>( "testScene" );
+			scene		=	GameEngine.Content.Load<Scene>( @"scenes\testScene" );
 
 			masterView.SkySettings.SunPosition			=	new Vector3(10,40,30);
 

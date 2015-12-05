@@ -15,6 +15,7 @@ namespace Fusion.Build {
 		string fullPath;
 		string keyPath;
 		string outputDir;
+		string basePath;
 		bool processed;
 
 		/// <summary>
@@ -32,6 +33,15 @@ namespace Fusion.Build {
 		public string FullSourcePath { 
 			get { 
 				return fullPath; 
+			} 
+		}
+
+		/// <summary>
+		/// Base directory for this file
+		/// </summary>
+		public string BasePath { 
+			get { 
+				return basePath; 
 			} 
 		}
 
@@ -143,6 +153,7 @@ namespace Fusion.Build {
 		{
 			this.outputDir		=	context.Options.FullOutputDirectory;
 			this.fullPath		=	fullPath;
+			this.basePath		=	contentDir;
 			this.keyPath		=	ContentUtils.BackslashesToSlashes( ContentUtils.MakeRelativePath( contentDir + "\\", fullPath ) );
 
 			this.processed		=	false;

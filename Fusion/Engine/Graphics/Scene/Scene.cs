@@ -412,6 +412,48 @@ namespace Fusion.Engine.Graphics {
 			}
 		}
 
+		/*-----------------------------------------------------------------------------------------
+		 * 
+		 *	Optimization stuff :
+		 * 
+		-----------------------------------------------------------------------------------------*/
+
+		class Comparer : IEqualityComparer<Mesh> {
+			public bool Equals ( Mesh a, Mesh b ) 
+			{
+				return a.Equals(b);
+			}
+			
+			public int GetHashCode ( Mesh a ) {
+				return a.GetHashCode();
+			}	
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public void DetectAndMergeInstances ()
+		{
+			//	creates groups of each mesh :
+			var instanceGroups	=	Enumerable.Range( 0, Meshes.Count )
+									.Select( i => new { Index = i, Mesh = Meshes[i] } )
+									.GroupBy( ig => ig.Mesh, ig => ig.Index )
+									.ToArray();
+
+			foreach ( var ig in instanceGroups ) {
+				Log.Message("{0}", ig.Key.ToString());
+				foreach ( var i in ig ) {
+					Log.Message("  {0}", i );
+				}
+			}
+
+			foreach ( var node in Nodes ) {
+				if (node.MeshIndex<0) {
+					continue;
+				}
+				///	TODO!
+			}
+		}
 
 		/*-----------------------------------------------------------------------------------------
 		 * 
@@ -612,7 +654,7 @@ namespace Fusion.Engine.Graphics {
 
 
 
-		int CalculateNodeDepth ( Node node )
+		public int CalculateNodeDepth ( Node node )
 		{
 			int depth = 0;
 			while (node.ParentIndex>=0) {
@@ -621,73 +663,5 @@ namespace Fusion.Engine.Graphics {
 			}
 			return depth;
 		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public string ExportHtmlReport ()
-		{
-			var sb = new StringBuilder();
-
-			sb.AppendLine("<pre>");
-
-
-			sb.AppendFormat("<b>Nodes count</b>     : {0}\r\n", this.Nodes.Count );
-			sb.AppendFormat("<b>Mesh count</b>      : {0}\r\n", this.Meshes.Count );
-			sb.AppendFormat("<b>Materials count</b> : {0}\r\n", this.Materials.Count );
-
-
-
-			sb.AppendLine();
-			sb.AppendLine("<b>Materials:</b>");
-
-			foreach ( var mtrl in Materials ) {
-
-				var index = Materials.IndexOf(mtrl);
-				
-				sb.AppendFormat("{0,4}:  {1,-30} <i>{2}</i>\r\n", index, "\"" + mtrl.Name + "\"", mtrl.TexturePath );
-			}
-
-
-
-			sb.AppendLine();
-			sb.AppendLine("<b>Meshes:</b>");
-
-			foreach ( var mesh in Meshes ) {
-				
-				var index	=	Meshes.IndexOf(mesh);
-				var verts	=	mesh.VertexCount;
-				var tris	=	mesh.TriangleCount;
-				var subsets	=	mesh.Subsets.Count;
-				var refs	=	string.Join(" ", Nodes.Where( n => n.MeshIndex==index ).Select( n1 => n1.Name ) );
-				
-				sb.AppendFormat("{0,4}:  v:{1,4}  t:{2,4}  s:{3,2}  ref:[<i>{4}</i>]\r\n", index, verts, tris, subsets, refs );
-			}
-
-
-
-			sb.AppendLine();
-			sb.AppendLine("<b>Nodes:</b>");
-
-			foreach ( var node in Nodes ) {
-				
-				var index	= Nodes.IndexOf(node);
-				var parent	= node.ParentIndex;
-				var name	= node.Name;
-
-				int depth	=	CalculateNodeDepth(node);
-				var padding	=	new string(' ', depth*2);
-				var hasMesh =	node.MeshIndex >= 0 ? "mesh" : "";
-				
-				sb.AppendFormat("{0,4}:  {1,-30}{2,4} {3}\r\n", index, padding + name, parent, hasMesh );
-			}
-
-			sb.AppendLine("</pre>");
-
-			return sb.ToString();
-		}
-
 	}
 }

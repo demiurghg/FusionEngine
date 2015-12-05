@@ -56,6 +56,12 @@ namespace Fusion.Engine.Graphics {
 
 
 
+		public override string ToString ()
+		{
+			return string.Format("Mesh: [{0} vertices, {1} indices, {2} subsets]", VertexCount, IndexCount, Subsets.Count );
+		}
+
+
 		/// <summary>
 		/// Gets indices ready for hardware use
 		/// </summary>

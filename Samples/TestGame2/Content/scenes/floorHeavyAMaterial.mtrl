@@ -1,0 +1,32 @@
+[Material]
+Transparent  = False
+CastShadow   = True
+Displacement = False
+
+# Possible values:
+#   SingleLayer
+#   DoubleLayer
+#   TripleLayer
+#   QuadLayer
+#   Terrain
+#   TriplanarWorldSingle
+#   TriplanarWorldDouble
+#   TriplanarWorldTriple
+Options      = SingleLayer
+
+[Layer0]
+ColorLevel       = 1
+AlphaLevel       = 0
+EmissionLevel    = 1
+SpecularLevel    = 1
+BumpLevel        = 1
+Displacement     = 1
+RoughnessRange   = 0, 1
+GlowNarrowness   = 0, 0
+BlendFactor      = 0
+Tiling           = 1, 1, 1
+Offset           = 0, 0, 0
+ColorTexture     = textures\q2Floor\floorHeavyA.tga|srgb
+SurfaceTexture   = textures\q2Floor\floorHeavyA.tga_s
+NormalMapTexture = textures\q2Floor\floorHeavyA.tga_n
+EmissionTexture  = textures\q2Floor\floorHeavyA.tga_e|srgb

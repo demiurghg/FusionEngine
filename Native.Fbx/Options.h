@@ -20,6 +20,7 @@ public ref class Options {
 	bool	anim;
 	bool	geom;
 	bool	report;
+	bool	genmtrl;
 
 	public:
 
@@ -52,7 +53,7 @@ public ref class Options {
 		float get() { return mergeTolerance; } 
 	}
 
-	[CommandLineParser::Name("base")]
+	[CommandLineParser::Name("base", "root directory")]
 	property string ^BaseDirectory { 
 		void set(string ^value) { base = value; } 
 		string ^get() { return base; } 
@@ -80,6 +81,12 @@ public ref class Options {
 	property bool Report {
 		void set(bool value) { report = value; } 
 		bool get() { return report; } 
+	}
+
+	[CommandLineParser::Name("genmtrl", "generate missing materials")]
+	property bool GenerateMissingMaterials {
+		void set(bool value) { genmtrl = value; } 
+		bool get() { return genmtrl; } 
 	}
 };
 

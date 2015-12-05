@@ -137,7 +137,7 @@ Fusion::Engine::Graphics::Scene ^ FbxLoader::LoadScene( string ^filename, Option
 
 	if (options->ImportGeometry) {
 		for each ( Node ^node in scene->Nodes ) {
-			Console::WriteLine( "  {0}",node->Name);
+			//Console::WriteLine( "  {0}",node->Name);
 
 			FbxNode *fbxNode	=	(FbxNode*)(((IntPtr)node->Tag).ToPointer());
 			HandleMesh( scene, node, fbxNode );
@@ -171,7 +171,7 @@ void Native::Fbx::FbxLoader::IterateChildren( FbxNode *fbxNode, FbxScene *fbxSce
 	node->TrackIndex	=	trackId;
 
 
-	Console::WriteLine("{0}{1}", gcnew String(' ', depth*2), node->Name);
+	//Console::WriteLine("{0}{1}", gcnew String(' ', depth*2), node->Name);
 
 	//	Animate :
 	if (options->ImportAnimation) {

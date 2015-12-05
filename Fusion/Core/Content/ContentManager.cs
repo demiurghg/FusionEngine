@@ -264,6 +264,20 @@ namespace Fusion.Core.Content {
 
 
 		/// <summary>
+		/// This function resolves asset path using baseAssetPath and localAssetPath.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="baseAssetPath"></param>
+		/// <param name="assetPath"></param>
+		/// <returns></returns>
+		public T Load<T>( string baseAssetPath, string localAssetPath )
+		{
+			var assetPath	=	Path.Combine( Path.GetDirectoryName( baseAssetPath ), localAssetPath );
+			return Load<T>( assetPath );
+		}
+
+
+		/// <summary>
 		/// Safe version of ContentManager.Load. If any exception occurs default object will be returned.
 		/// ContentManager.Unload will not dispose default object.
 		/// </summary>
@@ -288,13 +302,27 @@ namespace Fusion.Core.Content {
 
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="baseAssetPath"></param>
+		/// <param name="assetPath"></param>
+		/// <returns></returns>
+		public T Load<T>( string baseAssetPath, string localAssetPath, T defaultObject )
+		{
+			var assetPath	=	Path.Combine( Path.GetDirectoryName( baseAssetPath ), localAssetPath );
+			return Load<T>( assetPath, defaultObject );
+		}
+
+
+		/// <summary>
 		/// Safe version of ContentManager.Load. If any exception occurs it will try to load fallback object.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="path"></param>
 		/// <param name="fallbackObject"></param>
 		/// <returns></returns>
-		public T Load<T>( string path, string fallbackPath )
+		/*public T Load<T>( string path, string fallbackPath )
 		{
 			if ( string.IsNullOrWhiteSpace(path) ) {
 				throw new ArgumentException("Asset path can not be null, empty or whitespace.");
@@ -307,7 +335,7 @@ namespace Fusion.Core.Content {
 				
 				return Load<T>( fallbackPath );
 			}
-		}
+		}*/
 
 
 

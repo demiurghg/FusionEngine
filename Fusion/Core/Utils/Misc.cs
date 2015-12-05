@@ -224,21 +224,17 @@ namespace Fusion.Core {
 
 			int num = 42;
 
-			unchecked
-			{
-				foreach(var item in args)
-				{
-					if (ReferenceEquals(item, null))
-					{ }
-					else if (item.GetType().IsArray)
-					{
-						foreach (var subItem in (IEnumerable)item)
-						{
+			unchecked {
+				foreach(var item in args) {
+
+					if (ReferenceEquals(item, null)) { 
+						//	...
+					} else if (item is IEnumerable) {
+						foreach (var subItem in (IEnumerable)item) {
 							num = num * 37 + Hash(subItem);
 						}
 					}
-					else
-					{
+					else {
 						num = num * 37 + item.GetHashCode();
 					}
 				}
