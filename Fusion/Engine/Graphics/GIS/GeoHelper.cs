@@ -130,5 +130,30 @@ namespace Fusion.Engine.Graphics.GIS
 
 			return d;
 		}
+
+
+		public static DVector2 RhumbDestinationPoint(DVector2 startPoint, double bearing, double distance, double radius = 6378.137)
+		{
+			var δ	= distance / radius; // angular distance in radians
+			var φ1	= DMathUtil.DegreesToRadians(startPoint.Y);
+			var λ1	= DMathUtil.DegreesToRadians(startPoint.X);
+			var θ	= DMathUtil.DegreesToRadians(bearing);
+
+			var Δφ = δ * Math.Cos(θ);
+			var φ2 = φ1 + Δφ;
+
+			// check for some daft bugger going past the pole, normalise latitude if so
+			if (Math.Abs(φ2) > Math.PI / 2) φ2 = φ2 > 0 ? Math.PI - φ2 : -Math.PI - φ2;
+
+			var Δψ = Math.Log(Math.Tan(φ2 / 2 + Math.PI / 4) / Math.Tan(φ1 / 2 + Math.PI / 4));
+			var q = Math.Abs(Δψ) > 10e-12 ? Δφ / Δψ : Math.Cos(φ1); // E-W course becomes ill-conditioned with 0/0
+
+			var Δλ = δ * Math.Sin(θ) / q;
+			var λ2 = λ1 + Δλ;
+
+
+
+			return new DVector2((DMathUtil.RadiansToDegrees(λ2) + 540) % 360 - 180, DMathUtil.RadiansToDegrees(φ2)); // normalise to −180…+180°
+		}
 	}
 }

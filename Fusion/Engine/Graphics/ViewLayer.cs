@@ -122,6 +122,7 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
+				if(GlobeDepthStencil != null) GlobeDepthStencil.Dispose();
 			}
 			base.Dispose( disposing );
 		}
@@ -165,6 +166,16 @@ namespace Fusion.Engine.Graphics {
 		protected void RenderGIS ( GameTime gameTime, StereoEye stereoEye, Viewport viewport, RenderTargetSurface targetSurface ) 
 		{
 			if (GisLayers.Any()) {
+
+				if (GlobeDepthStencil == null) {
+					GlobeDepthStencil = new DepthStencil2D(GameEngine.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height);
+				}
+				else if (GlobeDepthStencil.Width != targetSurface.Width || GlobeDepthStencil.Height != targetSurface.Height) {
+					
+					GlobeDepthStencil.Dispose();
+					GlobeDepthStencil = new DepthStencil2D(GameEngine.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height);
+				}
+
 				ge.Device.Clear(GlobeDepthStencil.Surface);
 
 				GameEngine.GraphicsDevice.SetTargets(GlobeDepthStencil.Surface, targetSurface);

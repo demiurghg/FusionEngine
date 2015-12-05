@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core.Mathematics;
@@ -160,5 +161,94 @@ namespace Fusion.Engine.Graphics.GIS
 
 			return linesLayer;
 		}
+
+
+
+		public static LinesGisLayer GenerateDistanceGrid(GameEngine gameEngine, DVector2 lonLatLeftBottomCorner, double step, int xStepsCount, int yStepsCount, Color color)
+		{
+
+			List<Gis.GeoPoint> points = new List<Gis.GeoPoint>();
+
+			// Too lazy
+			var yPoint = lonLatLeftBottomCorner;
+			
+			//for (int row = 0; row < yStepsCount; row++) {
+			//
+			//	yPoint = GeoHelper.RhumbDestinationPoint(yPoint, 0, step);
+			//
+			//	for (int col = 0; col < xStepsCount; col++)
+			//	{
+			//		var coords0 = GeoHelper.RhumbDestinationPoint(yPoint, 90, step * col);
+			//		//var coords1 = GeoHelper.RhumbDestinationPoint(coords0, 90, step);
+			//
+			//		points.Add(new Gis.GeoPoint {
+			//			Lon = DMathUtil.DegreesToRadians(coords0.X),
+			//			Lat = DMathUtil.DegreesToRadians(coords0.Y),
+			//			Color = color
+			//		});
+			//		//points.Add(new Gis.GeoPoint {
+			//		//	Lon = DMathUtil.DegreesToRadians(coords1.X),
+			//		//	Lat = DMathUtil.DegreesToRadians(coords1.Y),
+			//		//	Color = color
+			//		//});
+			//	}
+			//}
+
+			for (int col = 0; col < xStepsCount; col++)
+			{
+				var xPoint = GeoHelper.RhumbDestinationPoint(lonLatLeftBottomCorner, 90, step * col);
+				
+				for (int row = 0; row < yStepsCount; row++)
+				{
+					var coords0 = GeoHelper.RhumbDestinationPoint(xPoint, 0, step * row);
+					//var coords1 = GeoHelper.RhumbDestinationPoint(xPoint, 0, step * (row + 1));
+			
+					points.Add(new Gis.GeoPoint
+					{
+						Lon = DMathUtil.DegreesToRadians(coords0.X),
+						Lat = DMathUtil.DegreesToRadians(coords0.Y),
+						Color = color
+					});
+					//points.Add(new Gis.GeoPoint
+					//{
+					//	Lon = DMathUtil.DegreesToRadians(coords1.X),
+					//	Lat = DMathUtil.DegreesToRadians(coords1.Y),
+					//	Color = color
+					//});
+				}
+			}
+
+
+			var indeces = new List<int>();
+
+			for (int col = 0; col < xStepsCount-1; col++) {
+				for (int row = 0; row < yStepsCount; row++) {
+					indeces.Add(row + (col+1) * yStepsCount);
+					indeces.Add(row + col*yStepsCount);
+				}
+			}
+
+			for (int row = 0; row < yStepsCount-1; row++)
+			{
+				for (int col = 0; col < xStepsCount; col++)
+				{
+					indeces.Add(col * yStepsCount + row);
+					indeces.Add((col) * yStepsCount + row + 1);
+				}
+			}
+
+			var newPoints = new List<Gis.GeoPoint>();
+			foreach (var ind in indeces) {
+				newPoints.Add(points[ind]);
+			}
+
+			var linesLayer = new LinesGisLayer(gameEngine, newPoints.Count);
+			Array.Copy(newPoints.ToArray(), linesLayer.PointsCpu, newPoints.Count);
+			linesLayer.UpdatePointsBuffer();
+			linesLayer.Flags = (int)(LineFlags.THIN_LINE);
+
+			return linesLayer;
+		}
+
 	}
 }
