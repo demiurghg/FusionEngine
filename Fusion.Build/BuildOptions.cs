@@ -41,6 +41,12 @@ namespace Fusion.Build {
 		/// <summary>
 		/// Force rebuild
 		/// </summary>
+		[CommandLineParser.Name("clean", "clean pattern")]
+		public string CleanPattern { get; set; }
+			
+		/// <summary>
+		/// Force rebuild
+		/// </summary>
 		[CommandLineParser.Name("help", "print detailed help")]
 		public bool Help { get; set; }
 			

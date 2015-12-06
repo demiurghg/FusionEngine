@@ -51,13 +51,17 @@ namespace FScene {
 					//
 					//	Save scene :
 					//					
-					Log.Message("Preparation:");
+					Log.Message("Preparation...");
 					foreach ( var mesh in scene.Meshes ) {
 						if (mesh!=null) {
-							mesh.Prepare( scene, options.MergeTolerance );
+							mesh.MergeVertices( options.MergeTolerance );
+							mesh.DefragmentSubsets(scene, true);
+							mesh.ComputeTangentFrame();
+							mesh.ComputeBoundingBox();
 						}
 					}
 
+					Log.Message("Merging instances...");
 					scene.DetectAndMergeInstances();
 					
 					//
@@ -89,7 +93,7 @@ namespace FScene {
 					/*if (options.GenerateMissingMaterials) {
 						Log.Message("Generating missing materials...");
 						Log.Message("...Base dir: {0}", options.BaseDirectory);
-						scene.GenerateMissingMaterials(options.BaseDirectory, options.Input, ".mtrl");
+						scene.GenerateMissingMaterials(options.BaseDirectory, options.Input, ".material");
 					} */
 
 					if (options.Report) {
@@ -102,7 +106,7 @@ namespace FScene {
 				Log.Message("Done.");
 
 			} catch ( Exception e ) {
-				parser.ShowError( "{0}", e.Message );
+				parser.ShowError( "{0}", e.ToString() );
 
 				if (options.Wait) {
 					Log.Message("Press any key to continue...");
@@ -125,11 +129,11 @@ namespace FScene {
 		static void ResolveMaterial ( MeshMaterial material, string relativeSceneDir, string fullSceneDir )
 		{
 			var mtrlName			=	material.Name;
-			var texPath				=	material.TexturePath;
+			var texPath				=	material.TexturePath ?? "";
 
 			material.Name			=	Path.Combine( relativeSceneDir, mtrlName );
 			material.TexturePath	=	Path.Combine( relativeSceneDir, texPath );
-			var mtrlFileName		=	Path.Combine( fullSceneDir, mtrlName + ".mtrl" );
+			var mtrlFileName		=	Path.Combine( fullSceneDir, mtrlName + ".material" );
 
 
 			if (!File.Exists(mtrlFileName)) {
@@ -153,6 +157,10 @@ namespace FScene {
 
 		static string ResolveTexture ( string relativeSceneDir, string fullSceneDir, string textureName, string postfix )
 		{	
+			if (string.IsNullOrWhiteSpace(textureName)) {
+				return "";
+			}
+
 			var ext		=	Path.GetExtension( textureName );
 			var noExt	=	Path.Combine( Path.GetDirectoryName(textureName), Path.GetFileNameWithoutExtension( textureName ) );
 

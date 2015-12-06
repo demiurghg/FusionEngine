@@ -104,7 +104,7 @@ namespace TestGame2 {
 			////video		=	GameEngine.Content.Load<Video>("infection_demo");
 			//video		=	new Video(File.ReadAllBytes(@"C:\infection_demo.wmv"));//*/
 
-			var mtrl		=	GameEngine.Content.Load<Material>("testMtrl");
+			//var mtrl		=	GameEngine.Content.Load<Material>("testMtrl");
 
 			var bounds		=	GameEngine.GraphicsEngine.DisplayBounds;
 			masterView		=	new ViewLayerHdr(GameEngine, bounds.Width, bounds.Height);
@@ -160,7 +160,7 @@ namespace TestGame2 {
 		{
 			if (e.Key==Keys.F5) {
 
-				Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", false );
+				Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", null, false );
 
 				GameEngine.Reload();
 			}

@@ -435,23 +435,27 @@ namespace Fusion.Engine.Graphics {
 		public void DetectAndMergeInstances ()
 		{
 			//	creates groups of each mesh :
-			var instanceGroups	=	Enumerable.Range( 0, Meshes.Count )
-									.Select( i => new { Index = i, Mesh = Meshes[i] } )
-									.GroupBy( ig => ig.Mesh, ig => ig.Index )
+			var nodeMeshGroups	=	Nodes
+									.Where( n1 => n1.MeshIndex >= 0 )
+									.Select( n2 => new { Node = n2, Mesh = Meshes[n2.MeshIndex] } )
+									.GroupBy( nm => nm.Mesh, nm => nm.Node )
 									.ToArray();
 
-			foreach ( var ig in instanceGroups ) {
-				Log.Message("{0}", ig.Key.ToString());
-				foreach ( var i in ig ) {
-					Log.Message("  {0}", i );
-				}
-			}
+			//foreach ( var ig in nodeMeshGroups ) {
+			//	Log.Message("{0}", ig.Key.ToString());
+			//	foreach ( var n in ig ) {
+			//		Log.Message("  {0}", n.Name );
+			//	}
+			//}
 
-			foreach ( var node in Nodes ) {
-				if (node.MeshIndex<0) {
-					continue;
+			meshes	=	nodeMeshGroups
+						.Select( nmg => nmg.Key )
+						.ToList();
+
+			for	( int i=0; i<nodeMeshGroups.Length; i++) {
+				foreach ( var n in nodeMeshGroups[i] ) {
+					n.MeshIndex = i;
 				}
-				///	TODO!
 			}
 		}
 

@@ -50,13 +50,14 @@ namespace Fusion.Build {
 		/// <param name="outputDirectory"></param>
 		/// <param name="temporaryDirectory"></param>
 		/// <param name="force"></param>
-		public static void Build ( string inputDirectory, string outputDirectory, string temporaryDirectory, bool force )
+		public static void Build ( string inputDirectory, string outputDirectory, string temporaryDirectory, string cleanPattern, bool force )
 		{
 			var options = new BuildOptions();
 			options.InputDirectory	=	inputDirectory;
 			options.OutputDirectory	=	outputDirectory;
 			options.TempDirectory	=	temporaryDirectory;
 			options.ForceRebuild	=	force;
+			options.CleanPattern	=	cleanPattern;
 
 			Build( options );
 		}
@@ -70,14 +71,14 @@ namespace Fusion.Build {
 		/// <param name="temporaryDirectory"></param>
 		/// <param name="force"></param>
 		/// <returns></returns>
-		public static bool SafeBuild ( string inputDirectory, string outputDirectory, string temporaryDirectory, bool force )
+		public static bool SafeBuild ( string inputDirectory, string outputDirectory, string temporaryDirectory, string cleanPattern, bool force )
 		{
 			try {
 				
 				var contentFile = Path.Combine(inputDirectory, ".content");
 
 				if (File.Exists(contentFile)) {
-					Build( inputDirectory, outputDirectory, temporaryDirectory, force );
+					Build( inputDirectory, outputDirectory, temporaryDirectory, cleanPattern, force );
 					return true;
 				} else {
 					Log.Message("{0} does not exist. Build skipped.", contentFile );
@@ -178,7 +179,8 @@ namespace Fusion.Build {
 
 
 			//
-			//	gather files on source folder 
+			//	gather files on source folder ignoring 
+			//	files that match ignore patter :
 			//
 			Log.Message("Gathering files...");
 			var files		=	GatherAssetFiles( ignorePatterns, ref result );
@@ -191,24 +193,28 @@ namespace Fusion.Build {
 			var collisions	=	files
 								.GroupBy( file0 => file0.TargetName )
 								.Where( fileGroup1 => fileGroup1.Count() > 1 )
-								.Select( fileGroup2 => fileGroup2.ToArray() )
 								.Distinct()
 								.ToArray();
 
-
-			//
-			//	ignore some of them :
-			//	
-
-
 			if (collisions.Any()) {
 				Log.Error("Hash collisions detected:");
+				int collisionCount = 0;
 				foreach ( var collision in collisions ) {
-					Log.Error( "  {0} - {1}", collision[0].KeyPath, collision[1].KeyPath );
+					Log.Error("  [{0}] {1}", collisionCount++, collision.Key);
+					foreach ( var collisionEntry in collision ) {
+						Log.Error( "    {0}",  collisionEntry.FullSourcePath );
+					}
 				}
 				throw new BuildException("Hash collisions detected");
 			}
 
+
+			//
+			//	remove stale built content :
+			//
+			Log.Message("Cleaning stale content up...");
+			CleanStaleContent( options.FullOutputDirectory, files );			
+			Log.Message("");
 
 			result.Total	=	files.Count;
 
@@ -275,6 +281,30 @@ namespace Fusion.Build {
 
 
 		/// <summary>
+		/// Removes all content thar do not match given files.
+		/// </summary>
+		/// <param name="outputFolder"></param>
+		/// <param name="files"></param>
+		void CleanStaleContent ( string outputFolder, IEnumerable<AssetFile> inputFiles )
+		{
+			var dictinary	=	inputFiles.ToDictionary( file => file.Hash );
+			var outputFiles =	Directory.EnumerateFiles( outputFolder );
+
+			int totalOutput	=	outputFiles.Count();
+			
+			var staleFiles	=	outputFiles.Where( file => !dictinary.ContainsKey(Path.GetFileNameWithoutExtension(file)) );
+
+			int totalStale	=	staleFiles.Count();
+
+			foreach ( var name in staleFiles ) {
+				File.Delete( name );
+			}
+
+			Log.Message("{0} stale files from {1} are removed", totalStale, totalOutput );
+		}
+
+
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="section"></param>
@@ -326,7 +356,7 @@ namespace Fusion.Build {
 				//	Write time and 
 				string status	=	"...";
 
-				if ( assetFile.IsUpToDate && !context.Options.ForceRebuild ) {
+				if ( assetFile.IsUpToDate && !context.Options.ForceRebuild && !Wildcard.Match(assetFile.KeyPath, context.Options.CleanPattern, true) ) {
 					if ( assetFile.IsParametersEqual() ) {
 						status = "UTD";
 						buildResult.UpToDate ++;

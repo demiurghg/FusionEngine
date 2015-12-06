@@ -32,6 +32,9 @@ namespace Fusion {
 		/// <returns></returns>
 		public static bool Match ( string value, string pattern, bool ignoreCase = false )
 		{
+			if (pattern==null) {
+				return false;
+			}
 			Regex regex = new Regex( WildcardToRegex( pattern ), ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None ); 
 
 			return regex.IsMatch( value );

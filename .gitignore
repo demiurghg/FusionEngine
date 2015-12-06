@@ -10,6 +10,7 @@ fbxsdk.exe
 *.tar
 *.swatches
 *.swatch
+*.fbx.html
 [Tt]emp/
 
 # installer result

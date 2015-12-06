@@ -28,8 +28,8 @@ HKEY_CURRENT_USER\Software\FusionEngine@ContentDir
 *.hlsl
 
 [Scenes]
-*.fbx /geom
-scenes/testScene.fbx /geom /genmtrl
+*.fbx /geom /report
+scenes/testScene.fbx /geom /genmtrl /report
 
 [Copy]
 myDir/*.*

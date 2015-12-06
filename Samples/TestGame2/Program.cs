@@ -32,7 +32,7 @@ namespace TestGame2 {
 			//
 			//	Build content on startup :
 			//
-			Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", false );
+			Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", null, false );
 	
 			//
 			//	Parse command line :
