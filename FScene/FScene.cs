@@ -126,9 +126,12 @@ namespace FScene {
 
 
 
+
+
+
 		static void ResolveMaterial ( MeshMaterial material, string relativeSceneDir, string fullSceneDir )
 		{
-			var mtrlName			=	material.Name;
+			var mtrlName			=	ContentUtils.CreateSafeName( material.Name );
 			var texPath				=	material.TexturePath ?? "";
 
 			material.Name			=	Path.Combine( relativeSceneDir, mtrlName );

@@ -52,6 +52,23 @@ namespace Fusion.Core.Content {
 		/// <summary>
 		/// 
 		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		static public string CreateSafeName ( string name )
+		{
+			name = new string( name.Select( ch => IsCharSafe(ch) ? ch : '_' ).ToArray() );
+			return string.Join("_", name.Split( new[]{'_'}, StringSplitOptions.RemoveEmptyEntries ) );
+		}
+
+		static bool IsCharSafe( char ch )
+		{
+			return char.IsDigit(ch) || (ch>='a' && ch<='z') || (ch>='A' && ch<='Z') || ch=='_';
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
 		/// <param name="input"></param>
 		/// <returns></returns>
 		public static byte[] CalclulateMD5HashBytes( string input )
