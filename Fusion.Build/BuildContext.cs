@@ -269,7 +269,6 @@ namespace Fusion.Build {
 
 
 
-
 		/// <summary>
 		/// 
 		/// </summary>
@@ -277,6 +276,7 @@ namespace Fusion.Build {
 		/// <param name="commandLine"></param>
 		public void RunTool ( string exePath, string commandLine )
 		{
+			//commandLine = FixEncoding(commandLine);
 			Log.Debug("...exec: {0} {1}", exePath, commandLine );
 
 			ProcessStartInfo psi = new ProcessStartInfo();
@@ -290,8 +290,8 @@ namespace Fusion.Build {
 
 			int exitCode = 0;
 
-			string stdout;
-			string stderr;
+			string stdout = "";
+			string stderr = "";
 
 
 			using ( Process proc = Process.Start( psi ) ) {
@@ -301,14 +301,15 @@ namespace Fusion.Build {
 				exitCode = proc.ExitCode;
 			}
 
-			Log.Debug( "{0}", stdout );
+			Log.Verbose( "{0}", stdout ); //*/
 				
 			if ( exitCode != 0 ) {
+				File.WriteAllText( @"C:\GITHUB\stderr.txt", commandLine);
 				throw new ToolException( string.Format("Failed to launch tool:\r\n{0} {1}\r\n{2}", exePath, commandLine, stderr ) );
 			} else {
 				if (!string.IsNullOrWhiteSpace(stderr)) {				
 					Log.Warning( "{0}", stderr.Trim(new[]{'\r', '\n'}) );
-				}
+				} 
 			}
 		}
 	}

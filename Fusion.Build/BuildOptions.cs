@@ -99,6 +99,14 @@ namespace Fusion.Build {
 
 
 
+		bool CheckASCIString( string input )
+		{
+			var ascii = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(input));
+			return input == ascii;
+		}
+
+
+
 		/// <summary>
 		/// Checks options
 		/// </summary>
@@ -131,6 +139,13 @@ namespace Fusion.Build {
 				throw new BuildException("File '.content' not found");
 			}
 				
+
+			if (!CheckASCIString(FullInputDirectory)) {
+				throw new BuildException("Full path to input directory contains non-ASCII characters");
+			}
+			if (!CheckASCIString(FullOutputDirectory)) {
+				throw new BuildException("Full path to output directory contains non-ASCII characters");
+			}
 
 		}
 	}
