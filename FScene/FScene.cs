@@ -148,9 +148,6 @@ namespace FScene {
 				newMtrl.Layer0.NormalMapTexture	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_local" ); 
 				newMtrl.Layer0.EmissionTexture	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_glow" ); 
 
-
-
-
 				File.WriteAllText( mtrlFileName, newMtrl.ToINI() );
 			}
 
@@ -172,7 +169,7 @@ namespace FScene {
 			if ( File.Exists(fileName) ) {
 				return Path.Combine( relativeSceneDir, noExt + postfix + ext );
 			} else {
-				Log.Warning("{0}", fileName); 
+				//Log.Warning("{0}", fileName); 
 				return "";
 			}
 		}

@@ -98,6 +98,7 @@ namespace Fusion.Engine.Graphics {
 		public MaterialLayer ()
 		{
 			ColorLevel		=	1;
+			AlphaLevel		=	1;
 			SpecularLevel	=	1;
 			BumpLevel		=	1;
 			EmissionLevel	=	1;

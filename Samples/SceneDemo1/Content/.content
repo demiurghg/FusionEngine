@@ -1,0 +1,23 @@
+[Ignore]
+*.ma
+*.psd
+
+[BinaryDirectories]
+HKEY_CURRENT_USER\Software\FusionEngine@ToolsDir
+
+[ContentDirectories]
+HKEY_CURRENT_USER\Software\FusionEngine@ContentDir
+
+[Textures]
+*.tga
+*.png
+*.jpg
+
+[Fonts]
+*.bmfc
+
+[Shaders]
+*.hlsl
+
+[Scenes]
+*.fbx /geom /report
