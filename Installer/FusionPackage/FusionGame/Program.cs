@@ -17,26 +17,25 @@ namespace $safeprojectname$ {
 		static int Main ( string[] args )
 		{
 			// 	colored console output :
-			Trace.Listeners.Add( new ColoredTraceListener() );
+			Log.AddListener( new ColoredLogListener() );
 			
 			//	output for in-game console :
-			Trace.Listeners.Add( new TraceRecorder() );
+			Log.AddListener( new LogRecorder() );
+
+			//	set verbosity :
+			Log.VerbosityLevel	=	LogMessageType.Verbose;
+
 
 			//
 			//	Build content on startup :
 			//
-			try {
-				Builder.Build( @"..\..\..\Content", @"Content", @"..\..\..\Temp", false );
-			} catch ( Exception e ) {
-				Log.Error( e.Message );
-				return 1;
-			}
+			Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", null, false );
 
 
 			//
 			//	Run game :
 			//
-			using ( var engine = new GameEngine() ) {
+			using ( var engine = new GameEngine("$safeprojectname$") ) {
 
 				//	create SV, CL and UI instances :
 				engine.GameServer		=	new $safeprojectname$GameServer(engine);
@@ -47,6 +46,15 @@ namespace $safeprojectname$ {
 				//	first run will cause warning, 
 				//	because configuration file still does not exist.
 				engine.LoadConfiguration("Config.ini");
+
+				//	enable and disable debug direct3d device :
+				engine.GraphicsEngine.Config.UseDebugDevice =	false;
+
+				//	enable and disable object tracking :
+				engine.TrackObjects	= true;
+
+				//	set game title :
+				engine.GameTitle = "$safeprojectname$";
 
 				//	apply command-line options here:
 				//	...

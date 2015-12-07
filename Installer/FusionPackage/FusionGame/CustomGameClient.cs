@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Fusion;
 using Fusion.Core;
+using Fusion.Core.Mathematics;
 using Fusion.Engine.Common;
 using Fusion.Engine.Client;
 using Fusion.Engine.Server;
@@ -23,6 +24,7 @@ namespace $safeprojectname$ {
 		}
 
 
+
 		/// <summary>
 		/// Initializes game
 		/// </summary>
@@ -31,37 +33,42 @@ namespace $safeprojectname$ {
 		}
 
 
+
 		/// <summary>
 		/// Called when connection request accepted by server.
 		/// Client could start loading models, textures, models etc.
 		/// </summary>
 		/// <param name="map"></param>
-		public override void LoadLevel ( string serverInfo )
+		public override void LoadContent ( string serverInfo )
 		{
+			Log.Message("SERVER INFO : {0}", serverInfo );
 		}
+
+
 
 		/// <summary>
 		///	Called when client disconnected, dropped, kicked or timeouted.
 		///	Client must purge all level-associated content.
 		///	Reason???
 		/// </summary>
-		public override void UnloadLevel ()
+		public override void UnloadContent ()
 		{
 		}
+
+
 
 		/// <summary>
 		/// Runs one step of client-side simulation and render world state.
 		/// Do not close the stream.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public override void Update ( GameTime gameTime, Stream outputCommand )
+		public override byte[] Update ( GameTime gameTime )
 		{
 			var mouse = GameEngine.Mouse;
 			
-			using ( var writer = new BinaryWriter(outputCommand, Encoding.UTF8, true) ) {
-				writer.Write(string.Format("[{0} {1}]", mouse.Position.X, mouse.Position.Y ));
-			}
+			return Encoding.UTF8.GetBytes( string.Format("[{0} {1} {2}]", mouse.Position.X, mouse.Position.Y, UserInfo() ) );
 		}
+
 
 
 		/// <summary>
@@ -69,22 +76,22 @@ namespace $safeprojectname$ {
 		/// Called when fresh snapshot arrived.
 		/// </summary>
 		/// <param name="snapshot"></param>
-		public override void FeedSnapshot ( Stream inputSnapshot ) 
+		public override void FeedSnapshot ( byte[] snapshot, bool initial ) 
 		{
-			var bb = new byte[1500];
+			var str = Encoding.UTF8.GetString( snapshot );
+			Log.Message("SNAPSHOT : {0}", str);
+		}
 
-			using ( var reader = new BinaryReader(inputSnapshot, Encoding.UTF8, true) ) {
 
-				int last = -1;
-				for (int i=0; i<3000; i++) {
-					var curr = reader.ReadInt32();
-					if (curr!=last+1) {
-						Log.Warning("{0} {1}", curr, last);
-						break;
-					}
-					last = curr;
-				}
-			}
+
+		/// <summary>
+		/// Feed server notification to client.
+		/// Called when fresh snapshot arrived.
+		/// </summary>
+		/// <param name="snapshot"></param>
+		public override void FeedNotification ( string message )
+		{
+			Log.Message("NOTIFICATION : {0}", message );
 		}
 
 
@@ -95,7 +102,7 @@ namespace $safeprojectname$ {
 		/// <returns></returns>
 		public override string UserInfo ()
 		{
-			return "Bob";
+			return "Bob" + System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
 		}
 	}
 }

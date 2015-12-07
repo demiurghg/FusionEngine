@@ -1,9 +1,8 @@
 
 
 #if 0
-//$compute	+DIRECT..SHOW_SPLITS +OMNI..SHOW_OMNI_LOAD +SPOT..SHOW_SPOT_LOAD
-$ubershader	+DIRECT..SHOW_SPLITS +OMNI..SHOW_OMNI_LOAD +SPOT..SHOW_SPOT_LOAD +USE_UE4
-//$compute	+DIRECT +USE_UE4
+//$ubershader	+DIRECT..SHOW_SPLITS +OMNI..SHOW_OMNI_LOAD +SPOT..SHOW_SPOT_LOAD
+$ubershader	+DIRECT +OMNI +SPOT
 #endif
 
 /*-----------------------------------------------------------------------------
@@ -467,7 +466,7 @@ float3	ComputeCSM ( float4 worldPos )
 	#ifdef SHOW_SPLITS
 		return shadow * shadow * colorizer;
 	#else
-		return shadow * shadow;
+		return shadow;
 	#endif
 }
 

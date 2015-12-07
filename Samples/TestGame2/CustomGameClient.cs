@@ -123,7 +123,7 @@ namespace TestGame2 {
 		/// <returns></returns>
 		public override string UserInfo ()
 		{
-			return "Bob" + Process.GetCurrentProcess().Id.ToString();
+			return "Bob" + System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
 		}
 	}
 }

@@ -164,7 +164,7 @@ namespace TestGame2 {
 		}
 
 
-		public override bool ApproveClient(string id, string userInfo, out string reason)
+		public override bool ApproveClient( string id, string userInfo, out string reason )
 		{
 			Log.Message("APPROVE: {0} {1}", id, userInfo );
 			reason = ".";

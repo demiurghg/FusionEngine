@@ -5,14 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
-using Fusion.Engine.Common;
 using Fusion.Engine.Input;
 using Fusion.Engine.Graphics;
 using Fusion.Core;
 using Fusion.Core.Configuration;
 using Fusion.Framework;
-using Fusion.Engine.Scene;
-using Fusion.Build;
+using Fusion;
+using Fusion.Engine.Client;
+using Fusion.Engine.Common;
+using Fusion.Engine.Server;
 
 namespace $safeprojectname$ {
 
@@ -22,15 +23,6 @@ namespace $safeprojectname$ {
 		[GameModule("Console", "con", InitOrder.Before)]
 		public GameConsole Console { get { return console; } }
 		public GameConsole console;
-
-		/*[GameModule("BarBefore", "bar", InitOrder.Before)]
-		public SomeModule2 Bar { get; set; }
-
-		[GameModule("BarAfter", "bar", InitOrder.After)]
-		public SomeModule2 Bar2 { get; set; }*/
-
-		SpriteLayer testLayer;
-
 
 		ViewLayer	master;
 
@@ -42,14 +34,8 @@ namespace $safeprojectname$ {
 		public $safeprojectname$GameInterface ( GameEngine gameEngine ) : base(gameEngine)
 		{
 			console		=	new GameConsole( gameEngine, "conchars", "conback");
-
-			/*Bar = new SomeModule2(gameEngine);
-			Bar2 = new SomeModule2(gameEngine);*/
 		}
 
-
-
-		float angle = 0;
 
 
 		/// <summary>
@@ -57,47 +43,29 @@ namespace $safeprojectname$ {
 		/// </summary>
 		public override void Initialize ()
 		{
+			//	create view layer :
 			master		=	new ViewLayer(GameEngine);
 
-			GameEngine.GraphicsEngine.ViewLayers.Add( master );
+			//	add view to layer to scene :
+			GameEngine.GraphicsEngine.AddLayer( master );
 
-			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
-			//debugFont	=	GameEngine.Content.Load<DiscTexture>( "debugFont" );
-
-			testLayer.Clear();
-
-			//testLayer.DrawDebugString( debugFont, 10,276, "Lenna Soderberg", Color.White );
-
-			master.SpriteLayers.Add( testLayer );
+			//	add console sprite layer to master view layer :
 			master.SpriteLayers.Add( console.ConsoleSpriteLayer );
-
-			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
 		}
 
 
 
-		void Keyboard_KeyDown ( object sender, KeyEventArgs e )
-		{
-			if (e.Key==Keys.F5) {
-
-				Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", false );
-
-				GameEngine.Reload();
-			}
-		}
-
-
-
+		/// <summary>
+		/// 
+		/// </summary>
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				SafeDispose( ref testLayer );
+				SafeDispose( ref master );
 			}
 			base.Dispose( disposing );
 		}
 
-
-		Random rand = new Random();
 
 
 		/// <summary>
@@ -106,24 +74,22 @@ namespace $safeprojectname$ {
 		/// <param name="gameTime"></param>
 		public override void Update ( GameTime gameTime )
 		{
+			//	update console :
 			console.Update( gameTime );
-
-			testLayer.Color	=	Color.White;
-
-			/*if ( gameEngine.Keyboard.IsKeyDown(Keys.R) ) {
-				testLayer.Clear();
-				testLayer.DrawDebugString( debugFont, 10, 276, rand.Next().ToString(), Color.White );
-			} */
-
-			if ( GameEngine.Keyboard.IsKeyDown(Keys.Left) ) {
-				angle -= 0.01f;
-			}
-			if ( GameEngine.Keyboard.IsKeyDown(Keys.Right) ) {
-				angle += 0.01f;
-			}
-
-			testLayer.SetTransform( new Vector2(100,0), new Vector2(128+5,128+5), angle );
 		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="endPoint"></param>
+		/// <param name="serverInfo"></param>
+		public override void DiscoveryResponse ( System.Net.IPEndPoint endPoint, string serverInfo )
+		{
+			Log.Message("DISCOVERY : {0} - {1}", endPoint.ToString(), serverInfo );
+		}
+
 
 
 		/// <summary>
@@ -134,6 +100,8 @@ namespace $safeprojectname$ {
 		{
 		}
 
+
+
 		/// <summary>
 		/// Shows message to user.
 		/// </summary>
@@ -142,6 +110,8 @@ namespace $safeprojectname$ {
 		{
 		}
 
+
+
 		/// <summary>
 		/// Shows message to user.
 		/// </summary>
@@ -149,6 +119,8 @@ namespace $safeprojectname$ {
 		public override void ShowError ( string message )
 		{
 		}
+
+
 
 		/// <summary>
 		/// Shows message to user.

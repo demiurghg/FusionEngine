@@ -21,8 +21,6 @@ namespace Fusion.Engine.Graphics {
 		StateFactory	factory;
 
 
-		Texture2D		bloomMask;
-
 		//	float AdaptationRate;          // Offset:    0
 		//	float LuminanceLowBound;       // Offset:    4
 		//	float LuminanceHighBound;      // Offset:    8
@@ -80,8 +78,6 @@ namespace Fusion.Engine.Graphics {
 
 			shader	=	GameEngine.Content.Load<Ubershader>("hdr");
 			factory	=	new StateFactory( shader, typeof(Flags), Primitive.TriangleList, VertexInputElement.Empty, BlendState.Opaque, RasterizerState.CullNone, DepthStencilState.None );
-
-			bloomMask	=	GameEngine.Content.Load<Texture2D>("bloomMask");
 		}
 
 
