@@ -31,6 +31,26 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public int Flags;
 
+		[StructLayout(LayoutKind.Explicit)]
+		struct LinesConstDataStruct {
+			[FieldOffset(0)]
+			public float TransparencyMultiplayer;
+			[FieldOffset(4)]
+			public Vector3 Dummy; 
+		}
+
+		private LinesConstDataStruct	linesConstData = new LinesConstDataStruct();
+		private ConstantBuffer			linesConstantBuffer;
+
+		bool isDirty = false;
+		public float TransparencyMultiplayer {
+			set {
+				linesConstData.TransparencyMultiplayer = value;
+				isDirty = true;
+			} 
+			get {
+				return linesConstData.TransparencyMultiplayer;
+		}}
 
 		public bool IsDoubleBuffer { get; protected set; }
 
@@ -55,19 +75,21 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public LinesGisLayer(GameEngine engine, int linesPointsCount, bool isDynamic = false) : base(engine)
 		{
-			shader	= GameEngine.Content.Load<Ubershader>("globe.Line.hlsl");
+			shader		= GameEngine.Content.Load<Ubershader>("globe.Line.hlsl");
 			factory		= new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
 			thinFactory = new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.Readonly);
-
+			
+			TransparencyMultiplayer = 1.0f;
+			linesConstantBuffer		= new ConstantBuffer(engine.GraphicsDevice, typeof(LinesConstDataStruct));
+			//linesConstantBuffer.SetData(linesConstData);
 
 			var vbOptions = isDynamic ? VertexBufferOptions.Dynamic : VertexBufferOptions.Default;
 
 			firstBuffer		= new VertexBuffer(engine.GraphicsDevice, typeof(Gis.GeoPoint), linesPointsCount, vbOptions);
 			currentBuffer	= firstBuffer;
 
-			PointsCpu = new Gis.GeoPoint[linesPointsCount];
-
-			Flags = (int)(LineFlags.ARC_LINE);
+			PointsCpu	= new Gis.GeoPoint[linesPointsCount];
+			Flags		= (int)(LineFlags.ARC_LINE);
 		}
 
 
@@ -90,9 +112,15 @@ namespace Fusion.Engine.Graphics.GIS
 				dev.PipelineState = factory[Flags];
 			}
 
+			if (isDirty) {
+				linesConstantBuffer.SetData(linesConstData);
+				isDirty = false;
+			}
+
 			dev.GeometryShaderConstants[0]	= constBuffer;
 			dev.VertexShaderConstants[0]	= constBuffer;
 			dev.PixelShaderConstants[0]		= constBuffer;
+			dev.PixelShaderConstants[1]		= linesConstantBuffer;
 
 			dev.PixelShaderResources[0] = Texture;
 			dev.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap;
@@ -170,7 +198,7 @@ namespace Fusion.Engine.Graphics.GIS
 			List<Gis.GeoPoint> points = new List<Gis.GeoPoint>();
 
 			// Too lazy
-			var yPoint = lonLatLeftBottomCorner;
+			//var yPoint = lonLatLeftBottomCorner;
 			
 			//for (int row = 0; row < yStepsCount; row++) {
 			//
@@ -194,17 +222,14 @@ namespace Fusion.Engine.Graphics.GIS
 			//	}
 			//}
 
-			for (int col = 0; col < xStepsCount; col++)
-			{
+			for (int col = 0; col < xStepsCount; col++) {
 				var xPoint = GeoHelper.RhumbDestinationPoint(lonLatLeftBottomCorner, 90, step * col);
 				
-				for (int row = 0; row < yStepsCount; row++)
-				{
+				for (int row = 0; row < yStepsCount; row++) {
 					var coords0 = GeoHelper.RhumbDestinationPoint(xPoint, 0, step * row);
 					//var coords1 = GeoHelper.RhumbDestinationPoint(xPoint, 0, step * (row + 1));
 			
-					points.Add(new Gis.GeoPoint
-					{
+					points.Add(new Gis.GeoPoint {
 						Lon = DMathUtil.DegreesToRadians(coords0.X),
 						Lat = DMathUtil.DegreesToRadians(coords0.Y),
 						Color = color

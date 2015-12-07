@@ -111,11 +111,16 @@ struct ConstData {
 	float4		Dummy	; // Factor, Radius
 };
 
+struct LinesConstData {
+	float	TransparencyMult	;
+	float3	Dummy				;
+};
 
 Texture2D		DiffuseMap		: register(t0);
 SamplerState	Sampler			: register(s0);
 
-cbuffer CBStage			: register(b0) 	{	ConstData	Stage		: 	packoffset( c0 );	}
+cbuffer CBStage			: register(b0) 	{	ConstData		Stage		: 	packoffset( c0 );	}
+cbuffer LinesCBStage	: register(b1) 	{	LinesConstData	LinesStage;	}
 
 
 #if 0
@@ -340,9 +345,14 @@ inout TriangleStream<GS_OUTPUT> stream
 
 float4 PSMain ( GS_OUTPUT input ) : SV_Target
 {
+	float4 color;
 #ifdef TEXTURED_LINE
-	float4 color = DiffuseMap.Sample(Sampler, input.Tex.xy);
+	color = DiffuseMap.Sample(Sampler, input.Tex.xy);
+	color.a = color.a * LinesStage.TransparencyMult;
+	return color;
+#else
+	color = input.Color;
+	color.a = color.a * LinesStage.TransparencyMult;
 	return color;
 #endif
-	return input.Color;
 }
