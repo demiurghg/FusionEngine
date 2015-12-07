@@ -16,6 +16,28 @@ namespace Fusion.Engine.Graphics {
 	}
 
 
+	/// <summary>
+	/// Defines stereo mode
+	/// </summary>
+	public enum StereoMode {
+		Disabled,	///	No stereo
+		NV3DVision,	///	NVidia 3DVision stereo
+		DualHead,	///	Dual-head projector stereo
+		OculusRift,	///	Oculus Rift
+		Interlaced,	///	Interlaced mode for TVs
+	}
+
+
+	/// <summary>
+	/// Defines interlacing mode for interlaced stereo
+	/// </summary>
+	public enum InterlacingMode {
+		VerticalLR,
+		VerticalRL,
+		HorizontalLR,
+		HorizontalRL,
+	}
+
 
 	/// <summary>
 	/// Defines set of applied to instance surface effects.

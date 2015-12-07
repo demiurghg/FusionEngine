@@ -76,7 +76,7 @@ namespace Fusion.Drivers.Graphics.Display {
 			bool driverConcurrentCreates;
 			bool driverCommandLists;
 			d3dDevice.CheckThreadingSupport( out driverConcurrentCreates, out driverCommandLists );
-			d3dDevice.GetCounterCapabilities();
+			//d3dDevice.GetCounterCapabilities();
 			Log.Message("   Concurrent Creates : {0}", driverConcurrentCreates );
 			Log.Message("   Command Lists      : {0}", driverCommandLists );
 
@@ -160,7 +160,6 @@ namespace Fusion.Drivers.Graphics.Display {
 
 
 
-		bool fullscr = false;
 
 
 		/// <summary>
@@ -173,20 +172,12 @@ namespace Fusion.Drivers.Graphics.Display {
 			set {
 				if (value!=fullscr) {
 					fullscr = value;
-
-					if (fullscr) {
-						window.FormBorderStyle	=	FormBorderStyle.None;
-						window.WindowState		=	FormWindowState.Maximized;
-						window.TopMost			=	true;
-					} else {
-						window.FormBorderStyle	=	FormBorderStyle.Sizable;
-						window.WindowState		=	FormWindowState.Normal;
-						window.TopMost			=	false;
-					}
+					window.Invoke( changeFullscreen, window, fullscr );
 				}
 			}
 		}
 
+		bool fullscr = false;
 
 
 		/// <summary>

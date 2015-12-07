@@ -100,8 +100,8 @@ namespace Fusion.Engine.Graphics {
 			p.Width				=	Config.Width;
 			p.Height			=	Config.Height;
 			p.FullScreen		=	Config.Fullscreen;
-			p.StereoMode		=	Config.StereoMode;
-			p.InterlacingMode	=	Config.InterlacingMode;
+			p.StereoMode		=	(Fusion.Drivers.Graphics.StereoMode)Config.StereoMode;
+			p.InterlacingMode	=	(Fusion.Drivers.Graphics.InterlacingMode)Config.InterlacingMode;
 			p.UseDebugDevice	=	Config.UseDebugDevice;
 		}
 

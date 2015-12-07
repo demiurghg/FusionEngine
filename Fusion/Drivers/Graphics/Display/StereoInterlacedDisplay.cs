@@ -221,16 +221,7 @@ namespace Fusion.Drivers.Graphics.Display {
 			set {
 				if (value!=fullscr) {
 					fullscr = value;
-
-					if (fullscr) {
-						window.FormBorderStyle	=	FormBorderStyle.None;
-						window.WindowState		=	FormWindowState.Maximized;
-						window.TopMost			=	true;
-					} else {
-						window.FormBorderStyle	=	FormBorderStyle.Sizable;
-						window.WindowState		=	FormWindowState.Normal;
-						window.TopMost			=	false;
-					}
+					window.Invoke( changeFullscreen, window, fullscr );
 				}
 			}
 		}

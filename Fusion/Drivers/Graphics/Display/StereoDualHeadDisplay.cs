@@ -303,21 +303,8 @@ namespace Fusion.Drivers.Graphics.Display {
 				if (value!=fullscr) {
 					fullscr = value;
 
-					if (fullscr) {
-						window1.FormBorderStyle	=	FormBorderStyle.None;
-						window1.WindowState		=	FormWindowState.Maximized;
-						window1.TopMost			=	true;
-						window2.FormBorderStyle	=	FormBorderStyle.None;
-						window2.WindowState		=	FormWindowState.Maximized;
-						window2.TopMost			=	true;
-					} else {
-						window1.FormBorderStyle	=	FormBorderStyle.Sizable;
-						window1.WindowState		=	FormWindowState.Normal;
-						window1.TopMost			=	false;
-						window2.FormBorderStyle	=	FormBorderStyle.Sizable;
-						window2.WindowState		=	FormWindowState.Normal;
-						window2.TopMost			=	false;
-					}
+					window1.Invoke( changeFullscreen, window1, fullscr );
+					window2.Invoke( changeFullscreen, window2, fullscr );
 				}
 			}
 		}

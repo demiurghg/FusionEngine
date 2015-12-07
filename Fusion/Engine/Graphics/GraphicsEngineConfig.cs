@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core;
 using Fusion.Engine.Common;
-using Fusion.Drivers.Graphics;
 
 namespace Fusion.Engine.Graphics {
 

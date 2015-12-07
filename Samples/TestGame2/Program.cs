@@ -16,10 +16,56 @@ using Fusion.Engine.Graphics;
 
 namespace TestGame2 {
 
-	enum Blah {
-		BlahA,
-		BlahB,
+	/// <summary>
+	/// Program parameters.
+	/// </summary>
+	class Options {
+		
+		[CommandLineParser.Name("width")]
+		public int Width { get; set; }
+
+		[CommandLineParser.Name("height")]
+		public int Height { get; set; }
+
+		[CommandLineParser.Name("fullscr")]
+		public bool Fullscreen { get; set; }
+
+		[CommandLineParser.Name("stereo")]
+		public StereoMode StereoMode { get; set; }
+
+		[CommandLineParser.Name("debug")]
+		public bool DebugDevice { get; set; }
+
+		[CommandLineParser.Name("dedicated")]
+		public bool Dedicated { get; set; }
+
+		[CommandLineParser.Name("command")]
+		public string Command { get; set; }
+
+		public void Apply ( GameEngine gameEngine )
+		{
+			if (Width>0) {
+				gameEngine.GraphicsEngine.Config.Width	=	Width;
+			}
+			if (Height>0) {
+				gameEngine.GraphicsEngine.Config.Height	=	Height;
+			}
+			if (Fullscreen) {
+				gameEngine.GraphicsEngine.Config.Fullscreen	=	Fullscreen;
+			}
+			if (DebugDevice) {
+				gameEngine.GraphicsEngine.Config.UseDebugDevice =	DebugDevice;
+			}
+			if (StereoMode!=StereoMode.Disabled) {
+				gameEngine.GraphicsEngine.Config.StereoMode	=	StereoMode;
+			}
+			if (!string.IsNullOrWhiteSpace(Command)) {
+				gameEngine.Invoker.Push( Command );
+			}
+		}
 	}
+
+
 
 	class Program {
 		[STAThread]
@@ -30,40 +76,48 @@ namespace TestGame2 {
 			Log.VerbosityLevel	=	LogMessageType.Verbose;
 
 			//
-			//	Build content on startup :
+			//	Parse command line arguments.
+			//
+			var options	=	new Options();
+			var parser	=	new CommandLineParser(options);
+			parser.ParseCommandLine(args);
+
+			//
+			//	Build content on startup.
+			//	Remove this line in release code.
 			//
 			Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", null, false );
 	
 			//
-			//	Parse command line :
+			//	Run engine.
 			//
 			using ( var engine = new GameEngine("TestGame") ) {
 
-				engine.GameServer		=	new CustomGameServer(engine);
-				engine.GameClient		=	new CustomGameClient(engine);
-				engine.GameInterface	=	new CustomGameInterface(engine);
+				if (options.Dedicated) {
+					engine.GameServer		=	new CustomGameServer(engine);
+					engine.GameClient		=	null;
+					engine.GameInterface	=	null;
+				} else {
+					engine.GameServer		=	new CustomGameServer(engine);
+					engine.GameClient		=	new CustomGameClient(engine);
+					engine.GameInterface	=	new CustomGameInterface(engine);
+				}
 
+				//	load configuration:
 				engine.LoadConfiguration("Config.ini");
 
-				engine.GraphicsEngine.Config.UseDebugDevice = false;
+				//	apply configuration here:
+				engine.GraphicsEngine.Config.UseDebugDevice =	false;
 				engine.TrackObjects		=	true;
 				engine.GameTitle		=	"Test Game 2";
 
-
 				//	apply command-line options here:
-				//	...
+				options.Apply( engine );
 
-				/*var mtrl = Material.CreateFromTexture("walls/wall01.tga");
-
-				File.WriteAllText(@"C:\GitHub\Material.ini", mtrl.ToIni());
-
-				var mtrl2 = Material.FromIni( File.ReadAllText(@"C:\GitHub\Material.ini") );
-				mtrl2.Options = MaterialOptions.Terrain;
-				File.WriteAllText(@"C:\GitHub\Material2.ini", mtrl2.ToIni());*/
-
-
+				//	run:
 				engine.Run();
 				
+				//	save configuration:
 				engine.SaveConfiguration("Config.ini"); 				
 			}
 

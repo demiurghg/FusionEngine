@@ -225,6 +225,7 @@ namespace Fusion.Drivers.Graphics {
 		}
 
 
+		bool fullscreenRequest = false;
 
 
 		/// <summary>
@@ -241,6 +242,7 @@ namespace Fusion.Drivers.Graphics {
 				if (parameters.StereoMode==StereoMode.Interlaced)	display	=	new StereoInterlacedDisplay( GameEngine, this, parameters ); else 
 				//if (parameters.StereoMode==StereoMode.OculusRift)	display	=	new OculusRiftDisplay( GameEngine, this, parameters ); else 
 					throw new ArgumentException("parameters.StereoMode");
+
 			} catch ( GraphicsException e ) {
 				Log.Warning("Failed to intialize graphics device.");
 				Log.Warning("{0}", e.Message );
@@ -284,6 +286,8 @@ namespace Fusion.Drivers.Graphics {
 			HullShaderConstants		=	new ConstantBufferCollection( this, DeviceContext.HullShader		);
 
 			ResetStates();
+
+			FullScreen	=	parameters.FullScreen;
 		}
 
 

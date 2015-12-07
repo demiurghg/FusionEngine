@@ -110,6 +110,8 @@ namespace TestGame2 {
 			masterView		=	new ViewLayerHdr(GameEngine, bounds.Width, bounds.Height);
 			masterView2		=	new ViewLayer(GameEngine);
 
+			GameEngine.GraphicsEngine.DisplayBoundsChanged += (s,e) => masterView.Resize( GameEngine.GraphicsEngine.DisplayBounds.Width, GameEngine.GraphicsEngine.DisplayBounds.Height );
+
 			targetTexture		=	new TargetTexture(GameEngine.GraphicsEngine, bounds.Width, bounds.Height, TargetFormat.LowDynamicRange );
 			//masterView.Target	=	targetTexture;
 

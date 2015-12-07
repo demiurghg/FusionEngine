@@ -176,6 +176,9 @@ namespace Fusion.Drivers.Graphics.Display {
 
 
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public abstract Form Window {
 			get;
 		}
@@ -197,7 +200,38 @@ namespace Fusion.Drivers.Graphics.Display {
 
 
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public abstract void Update ();
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="window"></param>
+		/// <param name="fullscr"></param>
+		protected delegate void ChangeFullscreenDelegate(Form window, bool fullscr);
+		protected ChangeFullscreenDelegate changeFullscreen = new ChangeFullscreenDelegate( ChangeFullscreen );
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="window"></param>
+		/// <param name="fullscr"></param>
+		static void ChangeFullscreen ( Form window, bool fullscr ) 
+		{
+			if (fullscr) {
+				window.FormBorderStyle	=	FormBorderStyle.None;
+				window.WindowState		=	FormWindowState.Maximized;
+				window.TopMost			=	true;
+			} else {
+				window.FormBorderStyle	=	FormBorderStyle.Sizable;
+				window.WindowState		=	FormWindowState.Normal;
+				window.TopMost			=	false;
+			}
+		}
+
 
 
 		/// <summary>
@@ -232,6 +266,8 @@ namespace Fusion.Drivers.Graphics.Display {
 			form.KeyPress += form_KeyPress;
 			form.Resize += (s,e) => GameEngine.InputDevice.RemoveAllPressedKeys();
 			form.Move += (s,e) => GameEngine.InputDevice.RemoveAllPressedKeys();
+
+			ChangeFullscreen( form, parameters.FullScreen );
 
 			return form;
 		}

@@ -604,7 +604,7 @@ namespace Fusion.Engine.Media
 
 				SetChannelVolumes();
 			}
-			catch (Exception e) {
+			catch (Exception /*e*/) {
 				_volumeController = null;
 			}
 		}

@@ -376,8 +376,6 @@ namespace Fusion.Engine.Common {
 			InputDevice.Initialize();
 			AudioDevice.Initialize();
 
-			GraphicsDevice.FullScreen = false;
-
 			//	init game :
 			Log.Message("");
 
