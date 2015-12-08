@@ -47,6 +47,10 @@ namespace SceneDemo1 {
 			//	create view layer :
 			master = new ViewLayer( GameEngine );
 
+			var data = GameEngine.Content.Load<byte[]>("workspace");
+
+			Log.Dump(data);
+
 			//	add view to layer to scene :
 			GameEngine.GraphicsEngine.AddLayer( master );
 

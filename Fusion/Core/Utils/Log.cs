@@ -247,8 +247,8 @@ namespace Fusion {
 		/// <param name="array"></param>
 		public static void Dump ( byte[] array )
 		{
-			Trace.WriteLine( "---------------------------------------------------------------------");
-			Trace.WriteLine( string.Format("Dump: {0} bytes ({0:X8})", array.Length) );
+			Log.Verbose( "---------------------------------------------------------------------");
+			Log.Verbose( string.Format("Dump: {0} bytes ({0:X8})", array.Length) );
 
 			for (int i=0; i<MathUtil.IntDivRoundUp( array.Length, 16 ); i++) {
 
@@ -276,10 +276,10 @@ namespace Fusion {
 					}
 				}
 
-				Trace.WriteLine( string.Format("{0,-51}| {1}", hex, txt) );
+				Log.Verbose( string.Format("{0,-51}| {1}", hex, txt) );
 			}
 
-			Trace.WriteLine( "---------------------------------------------------------------------");
+			Log.Verbose( "---------------------------------------------------------------------");
 		}
 	}
 }

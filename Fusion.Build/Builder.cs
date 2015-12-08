@@ -313,21 +313,30 @@ namespace Fusion.Build {
 			Log.Message("Downloading...");
 
 			foreach ( var keyValue in section ) {
+
+				if (Path.IsPathRooted(keyValue.KeyName)) {
+					throw new BuildException(string.Format("Rooted paths are not allowed: {0}", keyValue.KeyName));
+				}
 				
 				var fileName	=	keyValue.KeyName;
+				var fullPath	=	Path.Combine( context.Options.FullInputDirectory, keyValue.KeyName );
 				var urlName		=	keyValue.Value;
 
-				if (context.ContentFileExists( fileName ) && !context.Options.ForceRebuild ) {
+				var dirName		=	Path.Combine( context.Options.FullInputDirectory, Path.GetDirectoryName(fileName) );
+
+				if (!Directory.Exists(dirName)) {
+					Directory.CreateDirectory(dirName);
+				}
+
+				if (context.ContentFileExists( fullPath ) && !context.Options.ForceRebuild ) {
 					Log.Message("  {0} already exists", fileName);
 					continue;
 				}
 
-				var fullPath	=	Path.Combine( context.Options.FullInputDirectory, fileName );
-
 				try {
 					WebClient webClient = new WebClient();
 					Log.Message("  {0} -> {1}", urlName, fileName );
-					webClient.DownloadFile( urlName, fileName );
+					webClient.DownloadFile( urlName, fullPath );
 				} catch ( WebException wex ) {
 					Log.Error("{0} : {1}", fileName, wex.Message );
 					result.Failed++;

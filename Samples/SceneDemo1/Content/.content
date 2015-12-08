@@ -8,6 +8,9 @@ HKEY_CURRENT_USER\Software\FusionEngine@ToolsDir
 [ContentDirectories]
 HKEY_CURRENT_USER\Software\FusionEngine@ContentDir
 
+[Download]
+download\ololo\trololo\lenaWeb.tiff = http://www.ece.rice.edu/~wakin/images/lena512color.tiff
+
 [Textures]
 *.tga
 *.png
@@ -21,3 +24,7 @@ HKEY_CURRENT_USER\Software\FusionEngine@ContentDir
 
 [Scenes]
 *.fbx /geom /report
+
+[Copy]
+*.tiff
+*.mel

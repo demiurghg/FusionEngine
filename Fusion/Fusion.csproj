@@ -115,6 +115,8 @@
   <ItemGroup>
     <Compile Include="Core\Configuration\ConfigSerializer.cs" />
     <Compile Include="Core\Configuration\ConfigVariable.cs" />
+    <Compile Include="Core\Content\BytesLoader.cs" />
+    <Compile Include="Core\Content\StringLoader.cs" />
     <Compile Include="Core\IniParser\Exceptions\ParsingException.cs" />
     <Compile Include="Core\IniParser\FileIniParser.cs" />
     <Compile Include="Core\IniParser\Helpers\Assert.cs" />
