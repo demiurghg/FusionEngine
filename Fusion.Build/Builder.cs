@@ -305,6 +305,57 @@ namespace Fusion.Build {
 
 
 		/// <summary>
+		/// http://stackoverflow.com/questions/6239485/httpwebrequest-vs-webclient-special-scenario
+		/// </summary>
+		/// <param name="url"></param>
+		/// <param name="dateTime"></param>
+		/// <returns></returns>
+		bool DownloadIfModified(string url, string fullFilePath) 
+		{            
+			try {
+				var request = (HttpWebRequest)HttpWebRequest.Create(new Uri(url));
+
+				if (File.Exists(fullFilePath)) {
+					request.IfModifiedSince = File.GetLastWriteTimeUtc(fullFilePath);
+					request.Method = "GET";
+				} else {
+					var dirName = Path.GetDirectoryName(fullFilePath);
+					if (!Directory.Exists(dirName)) {
+						Directory.CreateDirectory(dirName);
+					}
+				}
+
+				Log.Message("  Request...");
+				var response = (HttpWebResponse)request.GetResponse();
+
+				Log.Message("  Writing...");
+				using ( var fs = File.OpenWrite(fullFilePath) ) {
+					 response.GetResponseStream().CopyTo( fs );
+				}
+
+				Log.Message("  Done.");
+
+				return true;
+			}
+			catch(WebException ex) {
+				if (ex.Status != WebExceptionStatus.ProtocolError) {
+					throw;
+				}
+
+				var response = (HttpWebResponse)ex.Response;
+				if (response.StatusCode != HttpStatusCode.NotModified) {
+					throw;
+				} else {
+					Log.Message("  File is up-to-date.");
+				}
+
+				return false;    
+			}
+		}
+
+
+
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="section"></param>
@@ -318,27 +369,17 @@ namespace Fusion.Build {
 					throw new BuildException(string.Format("Rooted paths are not allowed: {0}", keyValue.KeyName));
 				}
 				
-				var fileName	=	keyValue.KeyName;
 				var fullPath	=	Path.Combine( context.Options.FullInputDirectory, keyValue.KeyName );
 				var urlName		=	keyValue.Value;
 
-				var dirName		=	Path.Combine( context.Options.FullInputDirectory, Path.GetDirectoryName(fileName) );
-
-				if (!Directory.Exists(dirName)) {
-					Directory.CreateDirectory(dirName);
-				}
-
-				if (context.ContentFileExists( fullPath ) && !context.Options.ForceRebuild ) {
-					Log.Message("  {0} already exists", fileName);
-					continue;
-				}
+				Log.Message("  {0} -> {1}", urlName, keyValue.KeyName);
 
 				try {
-					WebClient webClient = new WebClient();
-					Log.Message("  {0} -> {1}", urlName, fileName );
-					webClient.DownloadFile( urlName, fullPath );
+					
+					DownloadIfModified( urlName, fullPath);
+					 
 				} catch ( WebException wex ) {
-					Log.Error("{0} : {1}", fileName, wex.Message );
+					Log.Error("{0} : {1}", keyValue.KeyName, wex.Message );
 					result.Failed++;
 				}
 			}

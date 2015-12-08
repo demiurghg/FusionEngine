@@ -49,7 +49,7 @@ namespace SceneDemo1 {
 
 			var data = GameEngine.Content.Load<byte[]>("workspace");
 
-			Log.Dump(data);
+			//Log.Dump(data);
 
 			//	add view to layer to scene :
 			GameEngine.GraphicsEngine.AddLayer( master );

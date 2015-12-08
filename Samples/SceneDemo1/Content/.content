@@ -24,7 +24,3 @@ download\ololo\trololo\lenaWeb.tiff = http://www.ece.rice.edu/~wakin/images/lena
 
 [Scenes]
 *.fbx /geom /report
-
-[Copy]
-*.tiff
-*.mel
