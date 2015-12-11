@@ -27,16 +27,21 @@ namespace Fusion.Engine.Graphics.GIS
 			ADD_CAPS				= 1 << 3,
 			FADING_LINE				= 1 << 4,
 			THIN_LINE				= 1 << 5,
+			OVERALL_COLOR = 1 << 6,
+			TEXTURED_LINE = 1 << 7,
+			PALETTE_COLOR = 1 << 8,
 		}
 
 		public int Flags;
-
+		 
 		[StructLayout(LayoutKind.Explicit)]
 		struct LinesConstDataStruct {
 			[FieldOffset(0)]
 			public float TransparencyMultiplayer;
 			[FieldOffset(4)]
-			public Vector3 Dummy; 
+			Vector3 Dummy;
+			[FieldOffset(16)]
+			public Color4 OverallColor; 
 		}
 
 		private LinesConstDataStruct	linesConstData = new LinesConstDataStruct();
@@ -51,6 +56,15 @@ namespace Fusion.Engine.Graphics.GIS
 			get {
 				return linesConstData.TransparencyMultiplayer;
 		}}
+		public Color4 OverallColor {
+			set {
+				linesConstData.OverallColor = value;
+				isDirty = true;
+			} 
+			get {
+				return linesConstData.OverallColor;
+			}
+		}
 
 		public bool IsDoubleBuffer { get; protected set; }
 
@@ -80,6 +94,7 @@ namespace Fusion.Engine.Graphics.GIS
 			thinFactory = new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.Readonly);
 			
 			TransparencyMultiplayer = 1.0f;
+			OverallColor			= Color4.White;
 			linesConstantBuffer		= new ConstantBuffer(engine.GraphicsDevice, typeof(LinesConstDataStruct));
 			//linesConstantBuffer.SetData(linesConstData);
 

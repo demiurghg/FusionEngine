@@ -381,95 +381,115 @@ namespace Fusion.Engine.Graphics.GIS
 
 		#region Free Surface Camera Animation Stuff
 
-		struct SurfaceCameraState
+		class SurfaceCameraState
 		{
+			public string	Id;
+
 			public DVector3	FreeSurfacePosition;
 			public double	FreeSurfaceYaw;
 			public double	FreeSurfacePitch;
+			
 			public float	WaitTime;
 			public float	TransitionTime;
 
 			public DQuaternion FreeRotation;
 		}
 
+		private string GenerateId() {
+			Guid g = Guid.NewGuid();
+			string GuidString = Convert.ToBase64String(g.ToByteArray());
+			GuidString = GuidString.Replace("=", "");
+			GuidString = GuidString.Replace("+", "");
+
+			return GuidString;
+		}
+
+		List<SurfaceCameraState> cameraAnimTrackStates;
 		List<SurfaceCameraState> cameraStates;
 		int		curStateInd = 0;
 		float	curTime		= 0;
 
-		public void SaveCurrentStateToFile(string fileName = "cameraAnimation.txt")
+
+		public void SaveCurrentStateToFile(string fileName = "cameraAnimation.txt", string stateName = "")
 		{
+			// Id FreeCameraPosition FreeSurfaceYaw FreeSurfacePitch WaitTime TransitionTime
 			File.AppendAllText(fileName,
-				"Free camera position\n"	+
-				FreeSurfacePosition.X + " " + FreeSurfacePosition.Y + " " + FreeSurfacePosition.Z +
-				"\nFreeSurfaceYaw\n"		+
-				FreeSurfaceYaw				+
-				"\nFreeSurfacePitch\n"		+
-				FreeSurfacePitch +
-				"\nWaitTime\n" +
-				3 +
-				"\nTransitionTime\n" +
-				3 +
-				"\n\n"
-			);
+				stateName == "" ? GenerateId() : stateName + '\t'
+					+ FreeSurfacePosition.X + '\t' + FreeSurfacePosition.Y + '\t' + FreeSurfacePosition.Z + '\t'
+					+ FreeSurfaceYaw + '\t' + FreeSurfacePitch + "\t1\t1"
+				);
 		}
 
 		public void LoadAnimation(string fileName = "cameraAnimation.txt")
 		{
-			cameraStates = new List<SurfaceCameraState>();
+			var states = LoadCameraStatesFromFile(fileName);
 
+			if (states == null) {
+				Log.Error("File: " + fileName + " not found");
+				return;
+			}
+
+			cameraAnimTrackStates = states;
+		}
+
+		public void LoadCameraStates(string fileName = "cameraStates.txt")
+		{
+			var states = LoadCameraStatesFromFile(fileName);
+
+			if (states == null) {
+				Log.Error("File: " + fileName + " not found");
+				return;
+			}
+
+			cameraStates = states;
+		}
+
+
+		List<SurfaceCameraState> LoadCameraStatesFromFile(string fileName)
+		{
+			if (!File.Exists(fileName)) return null;
+
+			var states = new List<SurfaceCameraState>();
 			var lines = File.ReadAllLines(fileName);
-
-			SurfaceCameraState curState = new SurfaceCameraState();
 
 			for (int i = 0; i < lines.Length; i++) {
 				var line = lines[i];
+				
+				var s = line.Split(new char[] {'\t'}, StringSplitOptions.RemoveEmptyEntries);
 
-				if (line == "") {
-					curState.FreeRotation = DQuaternion.RotationAxis(DVector3.UnitY, curState.FreeSurfaceYaw) * DQuaternion.RotationAxis(DVector3.UnitX, curState.FreeSurfacePitch);
+				var curState = new SurfaceCameraState();
 
-					cameraStates.Add(curState);
+				curState.Id						= s[0];
+				curState.FreeSurfacePosition	= new DVector3(double.Parse(s[1]), double.Parse(s[2]), double.Parse(s[3]));
+				curState.FreeSurfaceYaw			= double.Parse(s[4]);
+				curState.FreeSurfacePitch		= double.Parse(s[5]);
+				curState.WaitTime				= float.Parse(s[6]);
+				curState.TransitionTime			= float.Parse(s[7]);
 
-					curState = new SurfaceCameraState();
-					continue;
-				}
+				curState.FreeRotation = DQuaternion.RotationAxis(DVector3.UnitY, curState.FreeSurfaceYaw) * DQuaternion.RotationAxis(DVector3.UnitX, curState.FreeSurfacePitch);
 
-				switch (line) {
-					case "Free camera position" :
-						var vals = lines[++i].Split(' ');
-						curState.FreeSurfacePosition = new DVector3(double.Parse(vals[0]), double.Parse(vals[1]), double.Parse(vals[2]));
-						break;
-					case "FreeSurfaceYaw" :
-						curState.FreeSurfaceYaw = double.Parse(lines[++i]);
-						break;
-					case "FreeSurfacePitch" :
-						curState.FreeSurfacePitch = double.Parse(lines[++i]);
-						break;
-					case "WaitTime" :
-						curState.WaitTime = float.Parse(lines[++i]);
-						break;
-					case "TransitionTime" :
-						curState.TransitionTime = float.Parse(lines[++i]);
-						break;
-				}
+				states.Add(curState);
 			}
+
+			return states;
 		}
 
 
 		public void PlayAnimation(GameTime gameTime)
 		{
-			if(cameraStates == null) return;
+			if(cameraAnimTrackStates == null) return;
 
 			freezeFreeCamRotation = true;
 
-			var state = cameraStates[curStateInd];
+			var state = cameraAnimTrackStates[curStateInd];
 
 
 			curTime += 0.016f; //gameTime.ElapsedSec;
 			
-			if (curTime < state.WaitTime || curStateInd >= cameraStates.Count - 1) {
+			if (curTime < state.WaitTime || curStateInd >= cameraAnimTrackStates.Count - 1) {
 				SetState(state);
 
-				if (curStateInd >= cameraStates.Count - 1)
+				if (curStateInd >= cameraAnimTrackStates.Count - 1)
 					StopAnimation();
 
 				return;
@@ -481,7 +501,7 @@ namespace Fusion.Engine.Graphics.GIS
 			float	factor = MathUtil.SmoothStep(amount);
 					factor = MathUtil.Clamp(factor, 0.0f, 1.0f);
 
-			var nextState = cameraStates[curStateInd+1];
+			var nextState = cameraAnimTrackStates[curStateInd+1];
 
 			var curPos		= DVector3.Lerp(state.FreeSurfacePosition, nextState.FreeSurfacePosition, factor);
 			var curFreeRot	= DQuaternion.Slerp(state.FreeRotation, nextState.FreeRotation, factor);
@@ -509,7 +529,7 @@ namespace Fusion.Engine.Graphics.GIS
 		public void StopAnimation()
 		{
 			freezeFreeCamRotation	= false;
-			cameraStates			= null;
+			cameraAnimTrackStates			= null;
 		}
 
 		void SetState(SurfaceCameraState state)
@@ -525,6 +545,15 @@ namespace Fusion.Engine.Graphics.GIS
 			var newLonLat = GetCameraLonLat();
 			Yaw		= newLonLat.X;
 			Pitch	= -newLonLat.Y;
+		}
+
+		public void SetState(string name)
+		{
+			if (cameraStates == null) return;
+
+			var state = cameraStates.FirstOrDefault(x => x.Id == name);
+			if(state != null) SetState(state);
+			else Log.Warning("No such camera state found: " + name);
 		}
 		
 

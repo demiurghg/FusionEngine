@@ -113,10 +113,12 @@ struct ConstData {
 
 struct LinesConstData {
 	float	TransparencyMult	;
-	float3	Dummy				;
+	float3 	Dummy				;
+	float4	OverallColor		;
 };
 
 Texture2D		DiffuseMap		: register(t0);
+Texture2D		PaletteMap		: register(t1);
 SamplerState	Sampler			: register(s0);
 
 cbuffer CBStage			: register(b0) 	{	ConstData		Stage		: 	packoffset( c0 );	}
@@ -124,10 +126,11 @@ cbuffer LinesCBStage	: register(b1) 	{	LinesConstData	LinesStage;	}
 
 
 #if 0
-$ubershader DRAW_LINES +ADD_CAPS +FADING_LINE
-$ubershader ARC_LINE +FADING_LINE
+$ubershader DRAW_LINES +ADD_CAPS +PALETTE_COLOR
+$ubershader ARC_LINE
 $ubershader DRAW_SEGMENTED_LINES +TEXTURED_LINE
-$ubershader THIN_LINE
+$ubershader THIN_LINE +OVERALL_COLOR
+$ubershader THIN_LINE PALETTE_COLOR
 #endif
 
 
@@ -207,6 +210,12 @@ inout TriangleStream<GS_OUTPUT> stream
 	VS_OUTPUT	p0	=	inputArray[0];
 	VS_OUTPUT	p1	=	inputArray[1];
 	
+#ifdef PALETTE_COLOR
+	// For roads graph load
+	p0.Color = PaletteMap.SampleLevel(Sampler, float2(p0.Tex.w, 0.5f), 0);
+	p1.Color = p0.Color;
+#endif
+	
 #ifdef THIN_LINE
 	output.Normal 	= float3(0,0,0);
 	output.Tex		= float2(0,0);
@@ -232,9 +241,6 @@ inout TriangleStream<GS_OUTPUT> stream
 	float3 sideOffset0 = sideVec0*halfWidth0;
 	float3 sideOffset1 = sideVec1*halfWidth1;
 
-	//// For roads graph load
-	//p0.Color = FrameMap.SampleLevel(Sampler, float2(p0.Tex.w, 0.5f), 0);
-	//p1.Color = p0.Color;
 	
 #ifdef DRAW_LINES
 	float slicesCount = 2;
@@ -300,7 +306,7 @@ inout TriangleStream<GS_OUTPUT> stream
 	stream.RestartStrip();
 	{
 		output.Normal	= p0.Normal;
-		output.Color	= float4(1.0f, 0.0f, 0.0f, 1.0f);
+		output.Color	= p0.Color;
 
 		output.Position	= mul(float4(p0.Position.xyz + sideOffset0, 1), Stage.ViewProj);
 		output.Tex		= float2(0.0f, 0.5f);
@@ -321,9 +327,9 @@ inout TriangleStream<GS_OUTPUT> stream
 	stream.RestartStrip();
 	{
 		output.Normal	= p1.Normal;
-
+		output.Color	= p1.Color;
+		
 		output.Position	= mul(float4(p1.Position.xyz + sideOffset1, 1), Stage.ViewProj);
-		//output.Color	= p1.Color;
 		output.Tex		= float2(0.0f, 0.5f);
 		stream.Append( output );
 		
@@ -348,11 +354,12 @@ float4 PSMain ( GS_OUTPUT input ) : SV_Target
 	float4 color;
 #ifdef TEXTURED_LINE
 	color = DiffuseMap.Sample(Sampler, input.Tex.xy);
-	color.a = color.a * LinesStage.TransparencyMult;
-	return color;
+#elif OVERALL_COLOR
+	color = LinesStage.OverallColor;
 #else
 	color = input.Color;
+#endif
+
 	color.a = color.a * LinesStage.TransparencyMult;
 	return color;
-#endif
 }
