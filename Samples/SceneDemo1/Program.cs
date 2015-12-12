@@ -29,9 +29,7 @@ namespace SceneDemo1 {
 			//
 			//	Build content on startup :
 			//
-			if (args.Contains("-build")) {
-				Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", null, false );
-			}
+			Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", null, false );
 
 
 			//

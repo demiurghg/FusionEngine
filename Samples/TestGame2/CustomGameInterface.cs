@@ -145,7 +145,7 @@ namespace TestGame2 {
 					continue;
 				}
 				
-				var inst = new Instance( GameEngine.GraphicsEngine, scene.Meshes[meshIndex] );
+				var inst = new InstancedMesh( GameEngine.GraphicsEngine, scene.Meshes[meshIndex] );
 				inst.World = transforms[ i ];
 			
 				masterView.Instances.Add( inst );

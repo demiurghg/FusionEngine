@@ -24,7 +24,8 @@ namespace SceneDemo1 {
 		public GameConsole Console { get { return console; } }
 		public GameConsole console;
 
-		ViewLayer	master;
+		ViewLayerHdr	master;
+		Scene			scene;
 
 
 		/// <summary>
@@ -45,17 +46,29 @@ namespace SceneDemo1 {
 		public override void Initialize ()
 		{
 			//	create view layer :
-			master = new ViewLayer( GameEngine );
-
-			var data = GameEngine.Content.Load<byte[]>("workspace");
-
-			//Log.Dump(data);
+			master = new ViewLayerHdr( GameEngine, 0, 0 );
 
 			//	add view to layer to scene :
 			GameEngine.GraphicsEngine.AddLayer( master );
 
 			//	add console sprite layer to master view layer :
 			master.SpriteLayers.Add( console.ConsoleSpriteLayer );
+
+			//	load content and scubscribe on content reload.
+			LoadContent();
+			GameEngine.Reloading += (s,e) => LoadContent();
+		}
+
+
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		void LoadContent ()
+		{
+			scene	=	GameEngine.Content.Load<Scene>(@"Scenes\testScene");
+
+			//master.Instances.Add( new InstancedMesh(
 		}
 
 
@@ -79,6 +92,8 @@ namespace SceneDemo1 {
 		/// <param name="gameTime"></param>
 		public override void Update ( GameTime gameTime )
 		{
+			master.Camera.SetupCameraFov( Vector3.One * 10, Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.Rad(120), 0.1f, 1000.0f, 1, 0, 1 );
+
 			//	update console :
 			console.Update( gameTime );
 		}

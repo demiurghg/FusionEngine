@@ -192,7 +192,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="context"></param>
-		internal void RenderShadowMapCascade ( ShadowContext shadowRenderCtxt, IEnumerable<Instance> instances )
+		internal void RenderShadowMapCascade ( ShadowContext shadowRenderCtxt, IEnumerable<InstancedMesh> instances )
 		{
 			if (surfaceShader==null) {
 				return;

@@ -15,28 +15,6 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	public class InstancedMesh {
 
-		
-		public void SetInstance ( int instanceIndex, Matrix world, Color4 color, Vector4 blending )
-		{
-		}
-
-
-		public void SetInstanceBones ( int instanceIndex, Matrix[] bonesTransforms, Color4[] boneColors, Vector4 boneBlending )
-		{
-		}
-		
-
-
-		public void ReplaceMaterial ( int materialIndex, Material material )
-		{
-		}
-
-
-		public void RestoreMaterial ( int materialIndex, Material material )
-		{
-		}
-
-
 		/// <summary>
 		/// Indicates whether mesh instance visible.
 		/// Default value is True.
@@ -146,6 +124,57 @@ namespace Fusion.Engine.Graphics {
 
 
 
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="instanceIndex"></param>
+		/// <param name="world"></param>
+		/// <param name="color"></param>
+		/// <param name="blending"></param>
+		public void SetInstance ( int instanceIndex, Matrix world, Color4 color, Vector4 blending )
+		{
+			throw new NotImplementedException();
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="instanceIndex"></param>
+		/// <param name="bonesTransforms"></param>
+		/// <param name="boneColors"></param>
+		/// <param name="boneBlending"></param>
+		public void SetInstanceBones ( int instanceIndex, Matrix[] bonesTransforms, Color4[] boneColors, Vector4[] boneBlending )
+		{
+			throw new NotImplementedException();
+		}
+		
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="materialIndex"></param>
+		/// <param name="material"></param>
+		public void ReplaceMaterial ( int materialIndex, Material material )
+		{
+			throw new NotImplementedException();
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="materialIndex"></param>
+		/// <param name="material"></param>
+		public void RestoreMaterial ( int materialIndex, Material material )
+		{
+			throw new NotImplementedException();
+		}
 
 
 

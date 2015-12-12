@@ -42,7 +42,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Gets collection of mesh instances.
 		/// </summary>
-		public ICollection<Instance> Instances {
+		public ICollection<InstancedMesh> Instances {
 			get; private set;
 		}
 
@@ -78,10 +78,19 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="enableHdr">Indicates that ViewLayer has HDR capabilities.</param>
 		public ViewLayerHdr ( GameEngine gameEngine, int width, int height ) : base( gameEngine )
 		{
+			var vp	=	gameEngine.GraphicsDevice.DisplayBounds;
+
+			if (width<=0) {
+				width	=	vp.Width;
+			}
+			if (height<=0) {
+				height	=	vp.Height;
+			}
+
 			HdrSettings		=	new HdrSettings();
 			SkySettings		=	new SkySettings();
 
-			Instances		=	new List<Instance>();
+			Instances		=	new List<InstancedMesh>();
 			LightSet		=	new LightSet( gameEngine.GraphicsEngine );
 
 			MeasuredOld		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );

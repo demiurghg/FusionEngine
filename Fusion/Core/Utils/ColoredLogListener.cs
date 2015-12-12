@@ -15,6 +15,7 @@ namespace Fusion.Core.Utils {
 			Colorize( message.MessageType );
 			
 			GetWriter( message.MessageType ).WriteLine("[{0:HH:mm:ss}] {1}> : {2}", message.DateTime, message.ThreadId, message.MessageText );
+			//GetWriter( message.MessageType ).WriteLine("{1,2}| {2}", message.DateTime, message.ThreadId, message.MessageText );
 
 			Console.ResetColor();
 		}
