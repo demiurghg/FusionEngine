@@ -10,12 +10,14 @@ struct PARAMS {
 	float	LuminanceHighBound;
 	float	KeyValue;
 	float	BloomAmount;
+	float	DirtMaskLerpFactor;
 };
 
 Texture2D		SourceHdrImage 		: register(t0);
 Texture2D		MasuredLuminance	: register(t1);
 Texture2D		BloomTexture		: register(t2);
-Texture2D		BloomMask			: register(t3);	// currently not used.
+Texture2D		BloomMask1			: register(t3);
+Texture2D		BloomMask2			: register(t4);
 SamplerState	LinearSampler		: register(s0);
 	
 cbuffer PARAMS 		: register(b0) { 
@@ -99,31 +101,43 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 	uint xpos = position.x;
 	uint ypos = position.y;
 	SourceHdrImage.GetDimensions( width, height );
-	
-	//float3	hdrImage	=	SourceHdrImage.Load(int3(position.xy, 0)).rgb;
+
+	//
+	//	Read images :
+	//
 	float3	hdrImage	=	SourceHdrImage.SampleLevel( LinearSampler, uv, 0 ).rgb;
 	float3	bloom0		=	BloomTexture  .SampleLevel( LinearSampler, uv, 0 ).rgb;
 	float3	bloom1		=	BloomTexture  .SampleLevel( LinearSampler, uv, 1 ).rgb;
 	float3	bloom2		=	BloomTexture  .SampleLevel( LinearSampler, uv, 2 ).rgb;
 	float3	bloom3		=	BloomTexture  .SampleLevel( LinearSampler, uv, 3 ).rgb;
+	float4	bloomMask1	=	BloomMask1.SampleLevel( LinearSampler, uv, 0 );
+	float4	bloomMask2	=	BloomMask2.SampleLevel( LinearSampler, uv, 0 );
+	float4	bloomMask	=	lerp( bloomMask1, bloomMask2, Params.DirtMaskLerpFactor );
+	float	luminance	=	MasuredLuminance.Load(int3(0,0,0)).r;
 
-	/*float3	bloom		=	( bloom0 * 1.000f  
+	float3	bloom		=	( bloom0 * 1.000f  
 							+ bloom1 * 1.000f  
 							+ bloom2 * 1.000f  
 							+ bloom3 * 1.000f )/4.000f;//*/
-							
-	float3	bloom		=	( bloom0 * 1.000f  
+					
+	//
+	//	Make bloom :
+	//	
+	/*float3	bloom		=	( bloom0 * 1.000f  
 							+ bloom1 * 0.500f  
 							+ bloom2 * 0.250f  
 							+ bloom3 * 0.125f )/1.875f;//*/
-							
-	//bloom	=	bloom * bloomMask.rgb;
 	
-	hdrImage			=	lerp( hdrImage, bloom, Params.BloomAmount);
+	bloom	*=	bloomMask.rgb;
 	
-	float	luminance	=	MasuredLuminance.Load(int3(0,0,0)).r;
+	hdrImage			=	lerp( hdrImage, bloom, bloomMask.rgb * Params.BloomAmount);
+	
+
+	//
+	//	Tonemapping :
+	//	
 	float3	exposured	=	Params.KeyValue * hdrImage / luminance;
-	
+
 	#ifdef LINEAR
 		float3 	tonemapped	=	pow( exposured, 1/2.2f );
 	#endif

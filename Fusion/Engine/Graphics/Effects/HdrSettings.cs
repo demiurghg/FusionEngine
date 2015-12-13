@@ -69,6 +69,22 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public float BloomAmount { get; set; }
 
+		/// <summary>
+		/// Dirt mask lerp factor.
+		/// Default value is zero.
+		/// </summary>
+		public float DirtMaskLerpFactor { get; set; }
+
+		/// <summary>
+		/// Dirt mask #1. This value could be null.
+		/// </summary>
+		public Texture DirtMask1 { get; set; }
+
+		/// <summary>
+		/// Dirt mask #2. This value could be null.
+		/// </summary>
+		public Texture DirtMask2 { get; set; }
+
 
 		/// <summary>
 		/// Ctor.

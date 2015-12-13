@@ -10,12 +10,14 @@ struct PARAMS {
 	float	LuminanceHighBound;
 	float	KeyValue;
 	float	BloomAmount;
+	float	DirtMaskLerpFactor;
 };
 
 Texture2D		SourceHdrImage 		: register(t0);
 Texture2D		MasuredLuminance	: register(t1);
 Texture2D		BloomTexture		: register(t2);
-Texture2D		BloomMask			: register(t3);
+Texture2D		BloomMask1			: register(t3);
+Texture2D		BloomMask2			: register(t4);
 SamplerState	LinearSampler		: register(s0);
 	
 cbuffer PARAMS 		: register(b0) { 
@@ -97,26 +99,18 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 	float3	bloom1		=	BloomTexture.SampleLevel( LinearSampler, uv, 1 ).rgb;
 	float3	bloom2		=	BloomTexture.SampleLevel( LinearSampler, uv, 2 ).rgb;
 	float3	bloom3		=	BloomTexture.SampleLevel( LinearSampler, uv, 3 ).rgb;
-	float4	bloomMask	=	BloomMask.SampleLevel( LinearSampler, uv, 0 );
+	float4	bloomMask1	=	BloomMask1.SampleLevel( LinearSampler, uv, 0 );
+	float4	bloomMask2	=	BloomMask2.SampleLevel( LinearSampler, uv, 0 );
+	float4	bloomMask	=	lerp( bloomMask1, bloomMask2, Params.DirtMaskLerpFactor );
 	float 	sum			=	dot( bloomMask, float4(1,1,1,1) );
 	float3	bloom		=	( bloom0 * 1  
 							+ bloom1 * 1  
 							+ bloom2 * 1  
 							+ bloom3 * 1 )/4;//*/
-							
-	bloom	=	bloom * bloomMask.rgb;
-                                       
-	/*float3	bloom		=	( bloom0 * bloomMask.x  
-							+ bloom1 * bloomMask.y  
-							+ bloom2 * bloomMask.z  
-							+ bloom3 * bloomMask.w )/4;//*/
-
-	/*float3	bloom		=	( bloom0 * 1 * float3(1.0,1.0,1.0) 
-							+ bloom1 * 1 * float3(1.0,0.6,0.3) 
-							+ bloom2 * 1 * float3(0.5,1.0,0.5) 
-							+ bloom3 * 1 * float3(0.3,0.6,1.0))/4;//*/
 	
-	hdrImage			=	lerp( hdrImage, bloom, Params.BloomAmount);
+	bloom		=	bloom * bloomMask.rgb;
+    
+	hdrImage	=	lerp( hdrImage, bloom, Params.BloomAmount);
 	
 	float	luminance	=	MasuredLuminance.Load(int3(0,0,0)).r;
 	float3	exposured	=	Params.KeyValue * hdrImage / luminance;
@@ -130,13 +124,9 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 	#endif
 	
 	#ifdef FILMIC
-		float3 x = max(0,exposured-0.004);
+		float3 x = max(0, exposured-0.004);
 		float3 tonemapped = (x*(6.2*x+.5))/(x*(6.2*x+1.7)+0.06);
 	#endif
-	
-	
-	
-	
 	
 	// dithering :
 	tonemapped += dither[(xpos+ypos/7)%4][(ypos+xpos/7)%4]/256.0f/5;

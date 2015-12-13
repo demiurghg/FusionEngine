@@ -108,6 +108,7 @@ namespace TestGame2 {
 
 			var bounds		=	GameEngine.GraphicsEngine.DisplayBounds;
 			masterView		=	new ViewLayerHdr(GameEngine, bounds.Width, bounds.Height);
+
 			masterView2		=	new ViewLayer(GameEngine);
 
 			GameEngine.GraphicsEngine.DisplayBoundsChanged += (s,e) => {
@@ -157,8 +158,20 @@ namespace TestGame2 {
 
 
 			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
+
+			LoadContent();
+
+			GameEngine.Reloading += (s,e) => LoadContent();
 		}
 
+
+
+		void LoadContent ()
+		{
+			masterView.HdrSettings.BloomAmount	=	0.1f;
+			masterView.HdrSettings.DirtMask1	=	null;//GameEngine.Content.Load<DiscTexture>("bloomMask");
+			masterView.HdrSettings.DirtMask2	=	null;//GameEngine.Content.Load<DiscTexture>("bloomMask2");
+		}
 
 
 		void Keyboard_KeyDown ( object sender, KeyEventArgs e )
