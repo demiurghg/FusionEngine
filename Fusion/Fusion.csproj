@@ -146,6 +146,7 @@
     <Compile Include="Core\Utils\LogMessage.cs" />
     <Compile Include="Core\Utils\LogMessageType.cs" />
     <Compile Include="Core\Utils\Crc32.cs" />
+    <Compile Include="Core\Utils\DebugStrings.cs" />
     <Compile Include="Core\Utils\TimeProbe.cs" />
     <Compile Include="Drivers\Audio\AudioChannels.cs" />
     <Compile Include="Drivers\Audio\AudioDevice.cs" />

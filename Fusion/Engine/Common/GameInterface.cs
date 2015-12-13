@@ -18,6 +18,11 @@ namespace Fusion.Engine.Common {
 		{
 		}
 
+
+		/// <summary>
+		/// Disposes GameInterface
+		/// </summary>
+		/// <param name="disposing"></param>
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
@@ -37,28 +42,9 @@ namespace Fusion.Engine.Common {
 		public abstract void Update ( GameTime gameTime );
 
 		/// <summary>
-		/// Shows message to user.
+		/// Called when user tries to close program using Alt-F4 or from windows menu.
 		/// </summary>
-		/// <param name="message"></param>
-		public abstract void ShowMessage ( string message );
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public abstract void ShowWarning ( string message );
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public abstract void ShowError ( string message );
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public abstract void ChatMessage ( string message );
+		public abstract void RequestToExit ();
 
 		/// <summary>
 		/// This method called each time when discovery responce arrived.

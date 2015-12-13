@@ -266,10 +266,23 @@ namespace Fusion.Drivers.Graphics.Display {
 			form.KeyPress += form_KeyPress;
 			form.Resize += (s,e) => GameEngine.InputDevice.RemoveAllPressedKeys();
 			form.Move += (s,e) => GameEngine.InputDevice.RemoveAllPressedKeys();
+			form.FormClosing += form_FormClosing;
 
 			ChangeFullscreen( form, parameters.FullScreen );
 
 			return form;
+		}
+
+
+
+		void form_FormClosing ( object sender, FormClosingEventArgs e )
+		{
+			if (GameEngine.ExitRequested) {
+				e.Cancel	=	false;
+			} else {
+				GameEngine.GameInterface.RequestToExit();
+				e.Cancel	=	true;
+			}
 		}
 
 

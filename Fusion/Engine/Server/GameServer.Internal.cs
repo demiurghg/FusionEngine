@@ -173,7 +173,7 @@ namespace Fusion.Engine.Server {
 				}
 
 				foreach ( var conn in server.Connections ) {
-					conn.Disconnect("Server is killed");
+					conn.Disconnect("Server disconnected");
 				}
 
 			} catch ( Exception e ) {

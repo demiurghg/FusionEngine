@@ -20,19 +20,20 @@ namespace Fusion.Engine.Client {
 			public Disconnected ( GameClient gameClient, string reason ) : base(gameClient)
 			{
 				gameClient.UnloadContent();
+				gameClient.GameEnd( reason );
 				client.Shutdown( reason );
 			}
 
 
 
-			public override void Connect ( string host, int port )
+			public override void UserConnect ( string host, int port )
 			{
 				Log.Warning("Wait stand by.");
 			}
 
 
 
-			public override void Disconnect ( string reason )
+			public override void UserDisconnect ( string reason )
 			{
 				Log.Warning("Already disconnected.");
 			}

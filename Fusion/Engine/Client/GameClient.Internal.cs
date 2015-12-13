@@ -77,7 +77,7 @@ namespace Fusion.Engine.Client {
 		/// <param name="port"></param>
 		internal void ConnectInternal ( string host, int port )
 		{
-			state.Connect( host, port );
+			state.UserConnect( host, port );
 		}
 
 
@@ -89,7 +89,7 @@ namespace Fusion.Engine.Client {
 		/// <param name="port"></param>
 		internal void DisconnectInternal (string message)
 		{
-			state.Disconnect(message);
+			state.UserDisconnect(message);
 		}
 
 

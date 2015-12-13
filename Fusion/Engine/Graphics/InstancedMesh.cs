@@ -13,7 +13,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// Represnets mesh instance
 	/// </summary>
-	public class InstancedMesh {
+	public class MeshInstance {
 
 		/// <summary>
 		/// Indicates whether mesh instance visible.
@@ -104,7 +104,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="ge"></param>
 		/// <param name="mesh"></param>
-		public InstancedMesh ( GraphicsEngine ge, Mesh mesh )
+		public MeshInstance ( GraphicsEngine ge, Mesh mesh )
 		{
 			Visible		=	true;
 			World		=	Matrix.Identity;
