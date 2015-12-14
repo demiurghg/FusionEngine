@@ -111,6 +111,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Triangle">
+      <HintPath>..\SDKs\Triangle\Triangle.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Configuration\ConfigSerializer.cs" />

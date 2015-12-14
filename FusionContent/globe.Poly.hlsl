@@ -118,6 +118,7 @@ SamplerState	PointSampler	: register(s1);
 $ubershader PIXEL_SHADER VERTEX_SHADER DRAW_HEAT
 $ubershader PIXEL_SHADER VERTEX_SHADER DRAW_COLORED
 $ubershader PIXEL_SHADER VERTEX_SHADER XRAY
+$ubershader PIXEL_SHADER VERTEX_SHADER DRAW_TEXTURED NO_DEPTH CULL_NONE USE_PALETTE_COLOR
 $ubershader COMPUTE_SHADER BLUR_HORIZONTAL
 $ubershader COMPUTE_SHADER BLUR_VERTICAL
 #endif
@@ -205,15 +206,21 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 		return float4(color.rgba);
 	#endif
 	#ifdef DRAW_TEXTURED
-		float4 color	= DiffuseMap.Sample(Sampler, input.Tex.xy);
-		float3 ret		= color.rgb;
 		
-		#ifdef SHOW_FRAMES
-			float4	frame	= FrameMap.Sample(Sampler, input.Tex.xy);
-					ret		= color.rgb * (1.0 - frame.a) + frame.rgb*frame.a;
+		#ifdef USE_PALETTE_COLOR
+			float3 color = DiffuseMap.Sample(Sampler, float2(HeatStage.Data.x, 0.5f)).xyz;
+			return float4(color, HeatStage.Data.y);
+		#else
+			float4 color	= DiffuseMap.Sample(Sampler, input.Tex.xy);
+			float3 ret		= color.rgb;
+			
+			#ifdef SHOW_FRAMES
+				float4	frame	= FrameMap.Sample(Sampler, input.Tex.xy);
+						ret		= color.rgb * (1.0 - frame.a) + frame.rgb*frame.a;
+			#endif
+			
+			return float4(ret, color.a);
 		#endif
-		
-		return float4(ret, color.a);
 	#endif
 	#ifdef DRAW_COLORED
 		return input.Color;
