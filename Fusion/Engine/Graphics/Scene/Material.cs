@@ -8,13 +8,15 @@ using System.IO;
 using Fusion.Core;
 using Fusion.Core.IniParser.Model;
 using Fusion.Core.IniParser.Model.Formatting;
+using Fusion.Core.Content;
+using Fusion.Drivers.Graphics;
 
 namespace Fusion.Engine.Graphics {
 
 	/// <summary>
 	/// Reprsents material.
 	/// </summary>
-	public class Material {
+	public partial class Material : DisposableBase {
 
 		/// <summary>
 		/// Indicates that material is tranparent.
@@ -58,6 +60,44 @@ namespace Fusion.Engine.Graphics {
 		public MaterialLayer	Layer3;
 
 
+
+		/// <summary>
+		/// Creates instance of material.
+		/// </summary>
+		public Material ()
+		{
+			this.Layer0	=	new MaterialLayer();
+			this.Layer0.ColorTexture		=	"";
+			this.Layer0.SurfaceTexture		=	"";
+			this.Layer0.NormalMapTexture	=	"";
+			this.Layer0.EmissionTexture		=	"";
+
+			this.Layer1	=	null;
+			this.Layer2	=	null;
+			this.Layer3	=	null;
+
+			this.Displacement	=	false;
+			this.Transparent	=	false;
+			this.CastShadow		=	true;
+		}
+
+
+
+		/// <summary>
+		/// Disposes material.
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void Dispose ( bool disposing )
+		{
+			if (disposing) {
+				DisposeGpuResources();
+			}
+			base.Dispose( disposing );
+		}
+
+
+
+
 		/// <summary>
 		/// Creates non-transparent material that casts shadow from color texture.
 		/// Method search for existing textures with postfixes like "_s", "_n", "_e" 
@@ -85,35 +125,18 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		/*-----------------------------------------------------------------------------------------
+		 * 
+		 *	Serialization :
+		 * 
+		-----------------------------------------------------------------------------------------*/
 
 		/// <summary>
-		/// Creates non-transparent material that casts shadow from color texture.
-		/// Method search for existing textures with postfixes like "_s", "_n", "_e" 
-		/// and substitutes them into material.
+		/// Converts section to object
 		/// </summary>
-		/// <param name="path"></param>
-		public static Material CreateDefault ()
-		{
-			var mtrl = new Material();
-			mtrl.Layer0	=	new MaterialLayer();
-			mtrl.Layer0.ColorTexture		=	"";
-			mtrl.Layer0.SurfaceTexture		=	"";
-			mtrl.Layer0.NormalMapTexture	=	"";
-			mtrl.Layer0.EmissionTexture		=	"";
-
-			mtrl.Layer1	=	null;
-			mtrl.Layer2	=	null;
-			mtrl.Layer3	=	null;
-
-			mtrl.Displacement	=	false;
-			mtrl.Transparent	=	false;
-			mtrl.CastShadow		=	true;
-
-			return mtrl;
-		}
-
-
-
+		/// <typeparam name="T"></typeparam>
+		/// <param name="obj"></param>
+		/// <param name="keyDataCollection"></param>
 		static void SectionToObject<T>( ref T obj, KeyDataCollection keyDataCollection )
 		{
 			if (keyDataCollection==null) {
@@ -138,6 +161,13 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		/// <summary>
+		/// Converts object to section
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="obj"></param>
+		/// <param name="sectionName"></param>
+		/// <returns></returns>
 		static SectionData ObjectToSection<T>( T obj, string sectionName )
 		{
 			var sectionData = new SectionData(sectionName);
@@ -170,7 +200,7 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
-		/// 
+		/// Creates material from INI data.
 		/// </summary>
 		/// <param name="iniData"></param>
 		public static Material FromINI ( string iniDataString )
@@ -204,8 +234,9 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+
 		/// <summary>
-		/// 
+		/// Create INI-description for material.
 		/// </summary>
 		/// <param name="material"></param>
 		/// <returns></returns>

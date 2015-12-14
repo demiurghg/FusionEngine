@@ -127,7 +127,7 @@ namespace TestGame2 {
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
 			scene		=	GameEngine.Content.Load<Scene>( @"scenes\testScene" );
 
-			masterView.SkySettings.SunPosition			=	new Vector3(10,40,30);
+			masterView.SkySettings.SunPosition			=	new Vector3(10,20,30);
 
 			masterView.LightSet.SpotAtlas				=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
 			masterView.LightSet.DirectLight.Direction	=	masterView.SkySettings.SunLightDirection;
@@ -146,7 +146,7 @@ namespace TestGame2 {
 					continue;
 				}
 				
-				var inst = new MeshInstance( GameEngine.GraphicsEngine, scene.Meshes[meshIndex] );
+				var inst = new MeshInstance( GameEngine.GraphicsEngine, scene, scene.Meshes[meshIndex] );
 				inst.World = transforms[ i ];
 			
 				masterView.Instances.Add( inst );

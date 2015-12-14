@@ -64,15 +64,6 @@ namespace FScene {
 					Log.Message("Merging instances...");
 					scene.DetectAndMergeInstances();
 					
-					//
-					//	Save scene :
-					//					
-					Log.Message("Writing binary file: {0}", options.Output);
-					using ( var stream = File.OpenWrite( options.Output ) ) {
-						scene.Save( stream );
-					}
-
-
 					if (options.BaseDirectory!=null) {
 
 						Log.Message("Resolving assets path...");
@@ -90,11 +81,14 @@ namespace FScene {
 						}
 					}
 
-					/*if (options.GenerateMissingMaterials) {
-						Log.Message("Generating missing materials...");
-						Log.Message("...Base dir: {0}", options.BaseDirectory);
-						scene.GenerateMissingMaterials(options.BaseDirectory, options.Input, ".material");
-					} */
+					//
+					//	Save scene :
+					//					
+					Log.Message("Writing binary file: {0}", options.Output);
+					using ( var stream = File.OpenWrite( options.Output ) ) {
+						scene.Save( stream );
+					}
+
 
 					if (options.Report) {
 						var reportPath = options.Input + ".html";
@@ -129,19 +123,19 @@ namespace FScene {
 
 
 
-		static void ResolveMaterial ( MeshMaterial material, string relativeSceneDir, string fullSceneDir )
+		static void ResolveMaterial ( MaterialRef material, string relativeSceneDir, string fullSceneDir )
 		{
 			var mtrlName			=	ContentUtils.CreateSafeName( material.Name );
-			var texPath				=	material.TexturePath ?? "";
+			var texPath				=	material.Texture ?? "";
 
 			material.Name			=	Path.Combine( relativeSceneDir, mtrlName );
-			material.TexturePath	=	Path.Combine( relativeSceneDir, texPath );
+			material.Texture	=	Path.Combine( relativeSceneDir, texPath );
 			var mtrlFileName		=	Path.Combine( fullSceneDir, mtrlName + ".material" );
 
 
 			if (!File.Exists(mtrlFileName)) {
 
-				var newMtrl =	Material.CreateDefault();
+				var newMtrl =	new Material();
 
 				newMtrl.Layer0.ColorTexture		=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "" ); 
 				newMtrl.Layer0.SurfaceTexture	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_surf" ); 

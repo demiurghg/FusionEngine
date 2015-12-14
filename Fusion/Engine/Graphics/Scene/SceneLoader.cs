@@ -30,12 +30,17 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="stream"></param>
 		/// <param name="requestedType"></param>
 		/// <returns></returns>
-		public override object Load ( GameEngine game, Stream stream, Type requestedType, string assetPath )
+		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 		{																			
 			var scene = Scene.Load( stream );
 
 			foreach ( var mesh in scene.Meshes ) {	
-				mesh.CreateVertexAndIndexBuffers( game.GraphicsDevice );
+				mesh.CreateVertexAndIndexBuffers( content.GameEngine.GraphicsDevice );
+			}
+
+			foreach ( var mtrlRef in scene.Materials ) {
+				mtrlRef.Material	=	content.Load<Material>( mtrlRef.Name );
+				mtrlRef.Material.LoadGpuResources( content );
 			}
 
 			return scene;

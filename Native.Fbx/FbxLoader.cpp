@@ -320,7 +320,7 @@ void Native::Fbx::FbxLoader::HandleMesh( Fusion::Engine::Graphics::Scene ^scene,
 
 	for (int i=0; i<mtrlCount; i++) {
 
-		Fusion::Engine::Graphics::MeshMaterial	^mtrl		=	gcnew Fusion::Engine::Graphics::MeshMaterial();
+		Fusion::Engine::Graphics::MaterialRef	^mtrl		=	gcnew Fusion::Engine::Graphics::MaterialRef();
 		FbxSurfaceMaterial		*fbxMtrl	=	fbxNode->GetMaterial(i);
 
 		if (fbxMtrl) {
@@ -337,7 +337,7 @@ void Native::Fbx::FbxLoader::HandleMesh( Fusion::Engine::Graphics::Scene ^scene,
 				_property = fbxMtrl->FindProperty( FbxLayerElement::sTextureChannelNames[textureIndex] );
 
 				TryGetDiffuseTexture( texturePath, _property, i ); 
-				mtrl->TexturePath = texturePath;
+				mtrl->Texture = texturePath;
 			}
 		}
 

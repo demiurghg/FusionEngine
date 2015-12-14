@@ -19,10 +19,7 @@ namespace Fusion.Engine.Graphics {
 
 		List<Node>			nodes		= new List<Node>();
 		List<Mesh>			meshes		= new List<Mesh>();
-		List<MeshMaterial>	materials	= new List<MeshMaterial>();
-
-		VertexBuffer[]	vertexBuffers	=	null;
-		IndexBuffer[]	indexBuffers	=	null;
+		List<MaterialRef>	materials	= new List<MaterialRef>();
 
 		int firstFrame = 0;
 		int lastFrame = 0;
@@ -53,7 +50,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// List of scene materials.
 		/// </summary>
-		public IList<MeshMaterial> Materials { 
+		public IList<MaterialRef> Materials { 
 			get {
 				return materials;
 			}
@@ -511,13 +508,13 @@ namespace Fusion.Engine.Graphics {
 				scene.materials.Clear();
 				
 				for ( int i=0; i<mtrlCount; i++) {
-					var mtrl	=	new MeshMaterial();
+					var mtrl	=	new MaterialRef();
 					mtrl.Name	=	reader.ReadString();
 
 					if (reader.ReadBoolean()==true) {
-						mtrl.TexturePath = reader.ReadString();
+						mtrl.Texture = reader.ReadString();
 					} else {
-						mtrl.TexturePath = null;
+						mtrl.Texture = null;
 					}
 					scene.Materials.Add( mtrl );
 				}
@@ -592,9 +589,9 @@ namespace Fusion.Engine.Graphics {
 
 				foreach ( var mtrl in Materials ) {
 					writer.Write( mtrl.Name );
-					if ( mtrl.TexturePath!=null ) {
+					if ( mtrl.Texture!=null ) {
 						writer.Write( true );
-						writer.Write( mtrl.TexturePath );
+						writer.Write( mtrl.Texture );
 					} else {
 						writer.Write( false );
 					}
@@ -642,17 +639,17 @@ namespace Fusion.Engine.Graphics {
 
 			foreach ( var mtrl in Materials ) {
 					
-				if (mtrl.TexturePath==null) {
+				if (mtrl.Texture==null) {
 					continue;
 				}
-				Log.Message( "-" + mtrl.TexturePath );
+				Log.Message( "-" + mtrl.Texture );
 
-				var absTexPath		=	Path.Combine( sceneDirFullPath, mtrl.TexturePath );
+				var absTexPath		=	Path.Combine( sceneDirFullPath, mtrl.Texture );
 				var texUri			=	new Uri( absTexPath );
-				mtrl.TexturePath	=	baseDirUri.MakeRelativeUri( texUri ).ToString();
+				mtrl.Texture	=	baseDirUri.MakeRelativeUri( texUri ).ToString();
 
 				Log.Message( "-" + texUri );
-				Log.Message( "+" + mtrl.TexturePath );
+				Log.Message( "+" + mtrl.Texture );
 			}
 		}
 

@@ -18,10 +18,10 @@ namespace Fusion.Engine.Graphics {
 	[ContentLoader(typeof(TextureAtlas))]
 	public class TextureAtlasLoader : ContentLoader {
 
-		public override object Load ( GameEngine game, Stream stream, Type requestedType, string assetPath )
+		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 		{
 			bool srgb = assetPath.ToLowerInvariant().Contains("|srgb");
-			return new TextureAtlas( game.GraphicsEngine, stream, srgb );
+			return new TextureAtlas( content.GameEngine.GraphicsEngine, stream, srgb );
 		}
 	}
 		

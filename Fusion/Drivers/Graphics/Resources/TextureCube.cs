@@ -32,10 +32,10 @@ namespace Fusion.Drivers.Graphics {
 		[ContentLoader(typeof(TextureCube))]
 		public class Loader : ContentLoader {
 
-			public override object Load ( GameEngine game, Stream stream, Type requestedType, string assetPath )
+			public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 			{
 				bool srgb = assetPath.ToLowerInvariant().Contains("|srgb");
-				return new TextureCube( game.GraphicsDevice, stream, srgb );
+				return new TextureCube( content.GameEngine.GraphicsDevice, stream, srgb );
 			}
 		}
 		

@@ -11,7 +11,7 @@ namespace Fusion.Core.Content {
 	[ContentLoader(typeof(string))]
 	public class StringLoader : ContentLoader {
 		
-		public override object Load ( GameEngine game, Stream stream, Type requestedType, string assetPath )
+		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 		{
 			return Encoding.UTF8.GetString( stream.ReadAllBytes() );
 		}
