@@ -361,6 +361,14 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
+		public Vector2 CartesianToScreen(DVector3 cartPos)
+		{
+			var p = DVector3.Project(cartPos, Viewport.X, Viewport.Y, Viewport.Width, Viewport.Height, frustumZNear, frustumZFar, ViewMatrixWithTranslation * ProjMatrix);
+
+			return new Vector2((float)p.X, (float)p.Y);
+		}
+
+
 		public DVector2 GetCameraLonLat()
 		{
 			var nearPoint	= new DVector3((CameraPosition.X / CameraDistance), (CameraPosition.Y / CameraDistance), (CameraPosition.Z / CameraDistance));
