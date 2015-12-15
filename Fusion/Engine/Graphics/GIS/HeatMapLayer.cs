@@ -36,10 +36,9 @@ namespace Fusion.Engine.Graphics.GIS
 		public MapProjection Projection;
 
 		public float MaxHeatMapLevel;
+		public float MinHeatMapLevel;
 		public float HeatMapTransparency;
-
 		
-
 		StateFactory blurFactory;
 
 		//protected static Texture2D[] HeatMapPalettes;
@@ -91,6 +90,10 @@ namespace Fusion.Engine.Graphics.GIS
 					BlendState.AlphaBlend,
 					RasterizerState.CullNone,
 					DepthStencilState.None);
+
+			MaxHeatMapLevel = 100;
+			MinHeatMapLevel = 0;
+			HeatMapTransparency = 1.0f;
 		}
 
 
@@ -138,7 +141,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
-			constData.Data = new Vector4(MaxHeatMapLevel, HeatMapTransparency, MapDimX, InterpFactor);
+			constData.Data = new Vector4(MaxHeatMapLevel, MinHeatMapLevel, HeatMapTransparency, InterpFactor);
 			cb.SetData(constData);
 
 			GameEngine.GraphicsDevice.PipelineState = factory[

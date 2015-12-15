@@ -196,14 +196,13 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
         //
 		//val = val / 5.0f;
 
-		val = val / HeatStage.Data.x;
-
+		val = (val - HeatStage.Data.y) / (HeatStage.Data.x - HeatStage.Data.y);
 		val = clamp(val, 0.0f, 1.0f);
 		
 		float4	color	= DiffuseMap.Sample(Sampler, float2(val, 0.0f));
 		
 		//return float4(val, val, val, 1.0f);
-		return float4(color.rgba);
+		return float4(color.rgb, color.a * HeatStage.Data.z);
 	#endif
 	#ifdef DRAW_TEXTURED
 		
