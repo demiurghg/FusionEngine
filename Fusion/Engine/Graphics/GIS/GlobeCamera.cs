@@ -200,8 +200,8 @@ namespace Fusion.Engine.Graphics.GIS
 
 					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Left))		FreeSurfaceYaw		-= gameTime.ElapsedSec * 0.5;
 					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Right))	FreeSurfaceYaw		+= gameTime.ElapsedSec * 0.5;
-					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Up))		FreeSurfacePitch	-= gameTime.ElapsedSec * 0.1;
-					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Down))		FreeSurfacePitch	+= gameTime.ElapsedSec * 0.1;
+					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Up))		FreeSurfacePitch	-= gameTime.ElapsedSec * 0.4;
+					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Down))		FreeSurfacePitch	+= gameTime.ElapsedSec * 0.4;
 
 
 					//FreeSurfaceYaw = DMathUtil.Clamp(FreeSurfaceYaw, -DMathUtil.PiOverTwo, DMathUtil.PiOverTwo);
@@ -251,9 +251,9 @@ namespace Fusion.Engine.Graphics.GIS
 
 				FreeSurfaceVelocityMagnitude = DMathUtil.Lerp(0.005, 100.0, fac);
 
-				Console.WriteLine("Vel " + FreeSurfaceVelocityMagnitude);
-				Console.WriteLine("fac " + fac);
-				Console.WriteLine();
+				//Console.WriteLine("Vel " + FreeSurfaceVelocityMagnitude);
+				//Console.WriteLine("fac " + fac);
+				//Console.WriteLine();
 
 				// Update camera position
 				FinalCamPosition = FreeSurfacePosition = FreeSurfacePosition + velDir * FreeSurfaceVelocityMagnitude;
