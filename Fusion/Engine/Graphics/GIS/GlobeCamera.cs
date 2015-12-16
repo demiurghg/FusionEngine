@@ -217,41 +217,46 @@ namespace Fusion.Engine.Graphics.GIS
 					var qRot = DMatrix.RotationQuaternion(quat);
 					var matrix = qRot * mat;
 
-					double velocityMag = 0;
 					var velDir = DVector3.Zero;
 
 					if (input.IsKeyDown(Keys.W)) {
 						velDir += matrix.Forward;
-						velocityMag = FreeSurfaceVelocityMagnitude;
 					}
 					if (input.IsKeyDown(Keys.S)) {
 						velDir -= matrix.Forward;
-						velocityMag = FreeSurfaceVelocityMagnitude;
 					}
 					if (input.IsKeyDown(Keys.A)) {
 						velDir += matrix.Right;
-						velocityMag = FreeSurfaceVelocityMagnitude;
 					}
 					if (input.IsKeyDown(Keys.D)) {
 						velDir += matrix.Left;
-						velocityMag = FreeSurfaceVelocityMagnitude;
 					}
 					if (input.IsKeyDown(Keys.Space)) {
 						velDir += mat.Up;
-						velocityMag = FreeSurfaceVelocityMagnitude;
 					}
 					if (input.IsKeyDown(Keys.C)) {
 						velDir += mat.Down;
-						velocityMag = FreeSurfaceVelocityMagnitude;
 					}
 
-					if (velocityMag != 0) {
+					if (velDir.Length() != 0) {
 						velDir.Normalize();
 					}
 				#endregion
 
+				double maxDist = 10000;
+				double minDist = 1;
+				double fac = ((CameraDistance - EarthRadius) - minDist) / (maxDist - minDist);
+				fac = DMathUtil.Clamp(fac, 0.0, 1.0);
+
+
+				FreeSurfaceVelocityMagnitude = DMathUtil.Lerp(0.005, 100.0, fac);
+
+				Console.WriteLine("Vel " + FreeSurfaceVelocityMagnitude);
+				Console.WriteLine("fac " + fac);
+				Console.WriteLine();
+
 				// Update camera position
-				FinalCamPosition	= FreeSurfacePosition = FreeSurfacePosition + velDir * velocityMag;
+				FinalCamPosition = FreeSurfacePosition = FreeSurfacePosition + velDir * FreeSurfaceVelocityMagnitude;
 				CameraPosition		= FinalCamPosition;
 
 				//Calculate view matrix
