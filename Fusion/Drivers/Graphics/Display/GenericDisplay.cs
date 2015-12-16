@@ -67,8 +67,6 @@ namespace Fusion.Drivers.Graphics.Display {
 				Flags				=	SwapChainFlags.None,
 			};
 
-			var adapter	=	GetPereferredAdapter();
-
 			D3D.Device.CreateWithSwapChain( driverType, deviceFlags, new[]{ featureLevel }, swapChainDesc, out d3dDevice, out swapChain );
 
 			//Log.Message("   compute shaders : {0}", d3dDevice.CheckFeatureSupport(Feature.ComputeShaders) );

@@ -302,40 +302,6 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <returns></returns>
-		protected Adapter GetPereferredAdapter ()
-		{
-			using ( var factory2 = new Factory() ) {
-
-				Log.Message("Choosing adapter:");
-
-				try {
-					foreach (var adapter in factory2.Adapters) {
-						var aDesc = adapter.Description;
-						Log.Message("   {0} - {1}", aDesc.Description, D3D.Device.GetSupportedFeatureLevel(adapter));
-					
-						foreach ( var output in adapter.Outputs ) {
-							var desc = output.Description;
-							var bnds = output.Description.DesktopBounds;
-							var bndsString = string.Format("x:{0} y:{1} w:{2} h:{3}", bnds.Left, bnds.Top, bnds.Right-bnds.Left, bnds.Bottom-bnds.Top );
-
-							Log.Message("   {0} [{1}] {2}", desc.DeviceName, bndsString, desc.Rotation );
-						}
-					}
-				} catch ( Exception e ) {
-					Log.Warning( e.Message );
-					return null;
-				}
-			}
-
-			return null;
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
 		protected void ShowAdapterInfo ( GraphicsParameters parameters )
 		{
 			Log.Message("Mode : {0}x{1} {3} MS:{2} Stereo:{5} {4}", 
