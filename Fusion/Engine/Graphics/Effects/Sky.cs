@@ -67,6 +67,7 @@ namespace Fusion.Engine.Graphics {
 		Random	rand = new Random();
 
 
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
@@ -76,10 +77,6 @@ namespace Fusion.Engine.Graphics {
 			rs	=	GameEngine.GraphicsDevice;
 		}
 
-
-
-		const int NumSegments	=	32;
-		const int NumStacks		=	16;
 
 
 		/// <summary>
@@ -114,9 +111,6 @@ namespace Fusion.Engine.Graphics {
 
 
 
-
-
-
 		/// <summary>
 		/// 
 		/// </summary>
@@ -124,7 +118,6 @@ namespace Fusion.Engine.Graphics {
 		{
 			SafeDispose( ref factory );
 
-			//skySphere	=	GameEngine.Content.Load<Scene>("skySphere");
 			sky			=	GameEngine.Content.Load<Ubershader>("sky");
 			factory		=	new StateFactory( sky, typeof(SkyFlags), (ps,i) => EnumFunc(ps, (SkyFlags)i) );
 		}
@@ -162,6 +155,11 @@ namespace Fusion.Engine.Graphics {
 
 
 
+		/// <summary>
+		/// Selects colorspace in ubershader.
+		/// </summary>
+		/// <param name="flags"></param>
+		/// <param name="settings"></param>
 		void ApplyColorSpace ( ref SkyFlags flags, SkySettings settings )
 		{	
 			switch (settings.RgbSpace) {
@@ -211,12 +209,6 @@ namespace Fusion.Engine.Graphics {
 
 				rs.SetupVertexInput( skyVB, null );
 				rs.Draw( skyVB.Capacity, 0 );
-				/*for ( int j=0; j<skySphere.Meshes.Count; j++) {
-					var mesh = skySphere.Meshes[j];
-
-					rs.SetupVertexInput( mesh.VertexBuffer, mesh.IndexBuffer );
-					rs.DrawIndexed( mesh.IndexCount, 0, 0 );
-				} */
 			}
 
 			rs.ResetStates();
@@ -275,90 +267,7 @@ namespace Fusion.Engine.Graphics {
 			rs.SetupVertexInput( skyVB, null );
 			rs.Draw( skyVB.Capacity, 0 );
 
-			/*for ( int j=0; j<skySphere.Meshes.Count; j++) {
-				var mesh = skySphere.Meshes[j];
-
-				rs.SetupVertexInput( mesh.VertexBuffer, mesh.IndexBuffer );
-				rs.DrawIndexed( mesh.IndexCount, 0, 0 );
-			}*/
-
 			rs.ResetStates();
 		}
-
-
-#if false
-		/// <summary>
-		/// Gets current Sun direction.
-		/// </summary>
-		/// <returns></returns>
-		public Vector3 GetSunDirection( SkySettings settings )
-		{
-			return settings.SunPosition.Normalized();
-		}
-
-
-
-		Color4 SunColor ( Vector3 dir, SkySettings settings )
-		{
-			Color4 dusk		=	new Color4(Temperature.Get(2000), 1);
-			Color4 zenith	=	new Color4(Temperature.Get(settings.SunTemperature), 1);
-
-			Vector3 ndir	=	dir.Normalized();
-
-			return Color4.Lerp( dusk, zenith, (float)Math.Pow(ndir.Y, 0.5f) );
-		}
-
-
-		/// <summary>
-		/// Gets Sun color.
-		/// </summary>
-		/// <returns></returns>
-		public Color4 GetSunLightColor(SkySettings settings)
-		{
-			var sunPos = GetSunDirection(settings);
-
-			return SunColor( sunPos, settings ) * settings.SunLightIntensity;
-		}
-
-
-
-		/// <summary>
-		/// Gets Sun color.
-		/// </summary>
-		/// <returns></returns>
-		public Color4 GetSunGlowColor(SkySettings settings)
-		{
-			var sunPos = GetSunDirection(settings);
-
-			return SunColor( sunPos, settings ) * settings.SunGlowIntensity;
-
-			/*var zenithColorYxy = perezZenith( Params.SkyTurbidity, sunPos.Y );
-			var sunColorYxy = perezSun( Params.SkyTurbidity, sunPos.Y, 10 );
-			
-			return new Color4( YxyToRGB( sunColorYxy * new Vector3( Params.SunGlowIntensity, 1, 1 ) ) * Temperature.Get( Params.SunTemperature ), 1 );*/
-		}
-
-
-
-		/// <summary>
-		/// Gets average sky color.
-		/// </summary>
-		/// <returns></returns>
-		public Color4 GetAmbientLevel(SkySettings settings)
-		{
-			var sunPos = GetSunDirection(settings);
-			var ambientLight = Vector3.Zero;
-
-			var norm = randVectors.Length;// * 2 * MathUtil.Pi;
-
-			for (int i = 0; i < randVectors.Length; i++) {
-				var yxy = SkyModel.perezSky( settings.SkyTurbidity, randVectors[i], sunPos );
-				var rgb = SkyModel.YxyToRGB( yxy );// * Temperature.Get( settings.SunTemperature );
-				ambientLight += rgb / norm;
-			}
-
-			return new Color4(ambientLight,1);
-		}
-#endif
 	}
 }
