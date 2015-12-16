@@ -168,7 +168,7 @@ namespace TestGame2 {
 
 		void LoadContent ()
 		{
-			masterView.HdrSettings.BloomAmount	=	0.1f;
+			masterView.HdrSettings.BloomAmount	=	0.05f;
 			masterView.HdrSettings.DirtMask1	=	null;//GameEngine.Content.Load<DiscTexture>("bloomMask");
 			masterView.HdrSettings.DirtMask2	=	null;//GameEngine.Content.Load<DiscTexture>("bloomMask2");
 		}
