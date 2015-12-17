@@ -103,6 +103,7 @@ namespace Fusion.Engine.Graphics {
 			p.StereoMode		=	(Fusion.Drivers.Graphics.StereoMode)Config.StereoMode;
 			p.InterlacingMode	=	(Fusion.Drivers.Graphics.InterlacingMode)Config.InterlacingMode;
 			p.UseDebugDevice	=	Config.UseDebugDevice;
+			p.MsaaLevel			=	Config.MsaaEnabled ? 4 : 1;
 		}
 
 

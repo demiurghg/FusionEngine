@@ -45,6 +45,11 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public bool UseDebugDevice { get; set; }
 
+		/// <summary>
+		/// 
+		/// </summary>
+		public bool MsaaEnabled { get; set; }
+
 
 		/// <summary>
 		/// 
@@ -65,6 +70,7 @@ namespace Fusion.Engine.Graphics {
 			UseDebugDevice	=	false;
 			TrackObjects	=	true;
 			VSyncInterval	=	1;
+			MsaaEnabled		=	false;
 		}
 
 	}

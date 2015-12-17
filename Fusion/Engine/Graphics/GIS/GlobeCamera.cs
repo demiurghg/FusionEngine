@@ -59,8 +59,8 @@ namespace Fusion.Engine.Graphics.GIS
 		
 		double frustumWidth;
 		double frustumHeight;
-		double frustumZNear = 0.0001;
-		double frustumZFar	= 100000.0;
+		double frustumZNear = 0.0009765625f;
+		double frustumZFar	= 131072;
 		public readonly double camFov = 45;
 
 		double ViewToPointYaw	=  Math.PI;
