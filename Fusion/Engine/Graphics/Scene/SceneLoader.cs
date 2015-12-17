@@ -38,11 +38,6 @@ namespace Fusion.Engine.Graphics {
 				mesh.CreateVertexAndIndexBuffers( content.GameEngine.GraphicsDevice );
 			}
 
-			foreach ( var mtrlRef in scene.Materials ) {
-				mtrlRef.Material	=	content.Load<Material>( mtrlRef.Name );
-				mtrlRef.Material.LoadGpuResources( content );
-			}
-
 			return scene;
 		}
 	}

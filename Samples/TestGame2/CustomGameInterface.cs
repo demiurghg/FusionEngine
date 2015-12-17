@@ -137,6 +137,8 @@ namespace TestGame2 {
 
 			var transforms = new Matrix[ scene.Nodes.Count ];
 			scene.ComputeAbsoluteTransforms( transforms );
+
+			var materials	=	scene.Materials.Select( m => GameEngine.Content.Load<Material>( m.Name ) ).ToArray();
 			
 			for ( int i=0; i<scene.Nodes.Count; i++ ) {
 			
@@ -146,7 +148,7 @@ namespace TestGame2 {
 					continue;
 				}
 				
-				var inst = new MeshInstance( GameEngine.GraphicsEngine, scene, scene.Meshes[meshIndex] );
+				var inst   = new MeshInstance( GameEngine.GraphicsEngine, scene, scene.Meshes[meshIndex], materials );
 				inst.World = transforms[ i ];
 			
 				masterView.Instances.Add( inst );
@@ -168,8 +170,8 @@ namespace TestGame2 {
 
 		void LoadContent ()
 		{
-			masterView.HdrSettings.BloomAmount	=	0.05f;
-			masterView.HdrSettings.DirtMask1	=	null;//GameEngine.Content.Load<DiscTexture>("bloomMask");
+			masterView.HdrSettings.BloomAmount	=	0.5f;
+			masterView.HdrSettings.DirtMask1	=	GameEngine.Content.Load<DiscTexture>("bloomMask");
 			masterView.HdrSettings.DirtMask2	=	null;//GameEngine.Content.Load<DiscTexture>("bloomMask2");
 		}
 

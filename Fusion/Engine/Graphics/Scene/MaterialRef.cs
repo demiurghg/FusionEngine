@@ -29,11 +29,6 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public	string	Texture { get; set; }
 
-		/// <summary>
-		/// Gets or sets an object identifying this model.
-		/// </summary>
-		public	Material  Material { get; set; }
-
 
 
 		/// <summary>
@@ -86,7 +81,6 @@ namespace Fusion.Engine.Graphics {
 
 			return ( Name		== other.Name		)
 				&& ( Texture	== other.Texture	)
-				&& ( Material	== other.Material	)
 				;
 		}
 

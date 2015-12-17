@@ -109,7 +109,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="ge"></param>
 		/// <param name="mesh"></param>
-		public MeshInstance ( GraphicsEngine ge, Scene scene, Mesh mesh )
+		public MeshInstance ( GraphicsEngine ge, Scene scene, Mesh mesh, Material[] materials )
 		{
 			Visible		=	true;
 			World		=	Matrix.Identity;

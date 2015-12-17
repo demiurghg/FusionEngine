@@ -26,11 +26,17 @@ namespace Fusion.Engine.Graphics {
 		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 		{
 			using ( var sr = new BinaryReader(stream) ) {
-				var iniText = sr.ReadString();
-				return Material.FromINI( iniText );
+				var iniText		=	sr.ReadString();
+				var material	=	Material.FromINI( iniText );
+
+				material.LoadGpuResources( content );
+
+				return material;
 			}
 
 		}
+
+
 
 	}
 }
