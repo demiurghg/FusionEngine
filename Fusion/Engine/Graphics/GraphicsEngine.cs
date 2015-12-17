@@ -49,6 +49,15 @@ namespace Fusion.Engine.Graphics {
 		public  GraphicsEngineConfig Config { get; private set; }
 
 
+		/// <summary>
+		/// Fullscreen
+		/// </summary>
+		public bool Fullscreen { 
+			get { return Device.FullScreen; }
+			set { Device.FullScreen = value; }
+		}
+
+
 
 		RenderTarget2D	hdrTarget;
 
@@ -213,7 +222,17 @@ namespace Fusion.Engine.Graphics {
 		 *	Display stuff :
 		 * 
 		-----------------------------------------------------------------------------------------*/
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="path"></param>
+		public void Screenshot ( string path = null )
+		{
+			Device.Screenshot(path);
+		}
 		
+
 		/// <summary>
 		/// Gets display bounds.
 		/// </summary>

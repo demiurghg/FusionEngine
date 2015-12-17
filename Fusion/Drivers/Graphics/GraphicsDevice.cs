@@ -365,6 +365,7 @@ namespace Fusion.Drivers.Graphics {
 					requestScreenShotPath = null;
 
 					BackbufferColor.SaveToFile( path );
+					Log.Message("screenshot saved: {0}", path );
 				}
 
 				display.SwapBuffers( syncInterval );
