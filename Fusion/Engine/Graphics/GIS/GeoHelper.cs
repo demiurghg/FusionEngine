@@ -9,6 +9,8 @@ namespace Fusion.Engine.Graphics.GIS
 {
 	public static class GeoHelper
 	{
+		public static readonly double EarthRadius = 6378.137;
+
 		public static bool LineIntersection(DVector3 lineOrigin, DVector3 lineEnd, double radius, out DVector3[] intersectionPoints)
 		{
 			intersectionPoints = new DVector3[0];
