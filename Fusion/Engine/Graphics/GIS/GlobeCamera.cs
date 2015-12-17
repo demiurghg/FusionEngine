@@ -17,6 +17,15 @@ namespace Fusion.Engine.Graphics.GIS
 		GameEngine gameEngine;
 
 
+		public enum CameraStates
+		{
+			TopDown,
+			ViewToPoint,
+			FreeSurface
+		}
+
+		public CameraStates CameraState = CameraStates.TopDown;
+
 		double pitch = 0.0f;
 		readonly double maxPitch = 0;
 		readonly double minPitch = 0;
@@ -43,9 +52,6 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public Viewport Viewport { set; get; }
 
-		public bool ViewToPointSwitcher = false;
-		public bool FreeSurfaceSwitcher	= false;
-
 		public DVector3 CameraPosition { get; private set; }
 		public double CameraDistance {
 			get { return cameraDistance; }
@@ -60,7 +66,7 @@ namespace Fusion.Engine.Graphics.GIS
 		double frustumWidth;
 		double frustumHeight;
 		double frustumZNear = 0.0001;
-		double frustumZFar	= 100000.0;
+		double frustumZFar	= 10000.0;
 		public readonly double camFov = 45;
 
 		double ViewToPointYaw	=  Math.PI;
@@ -69,7 +75,6 @@ namespace Fusion.Engine.Graphics.GIS
 		#region Free Surface Camera
 
 		DVector3	FreeSurfacePosition;
-		DVector3	FreeSurfaceVelocityDirection;
 		double		FreeSurfaceVelocityMagnitude = 0.001;
 
 		double FreeSurfaceYaw	= Math.PI;
@@ -77,6 +82,8 @@ namespace Fusion.Engine.Graphics.GIS
 
 		bool		freezeFreeCamRotation = false;
 		DQuaternion freeSurfaceRotation;
+
+		private DVector3 velocityDirection;
 
 		#endregion
 
@@ -121,40 +128,140 @@ namespace Fusion.Engine.Graphics.GIS
 			}
 		}
 
-		int prevMouseScroll = 0;
+
+
+		public void ToggleViewToPointCamera()
+		{
+			if (CameraState == CameraStates.ViewToPoint) {
+
+			} else {
+				CameraState = CameraStates.ViewToPoint;
+			} 
+		}
+
+		public void ToggleFreeSurfaceCamera()
+		{
+			if (CameraState == CameraStates.FreeSurface) {
+				//CameraState = CameraStates.TopDown;
+			} else {
+				CameraState			= CameraStates.FreeSurface;
+				FreeSurfacePosition = CameraPosition;
+			}
+		}
+
+		public void ToggleTopDownCamera()
+		{
+			CameraState = CameraStates.TopDown;
+		}
+
+
+		/// <summary>
+		/// Move TopDown and ViewToPoint cameras
+		/// </summary>
+		/// <param name="prevMousePos"></param>
+		/// <param name="currentMousePos"></param>
+		public void MoveCamera(Vector2 prevMousePos, Vector2 currentMousePos)
+		{
+				DVector2 before, after;
+				var beforeHit	= ScreenToSpherical(prevMousePos.X, prevMousePos.Y, out before, true);
+				var afterHit	= ScreenToSpherical(currentMousePos.X, currentMousePos.Y, out after, true);
+
+				if (beforeHit && afterHit) {
+					Yaw		-= after.X - before.X;
+					Pitch	+= after.Y - before.Y;
+				}
+		}
+
+		public void RotateViewToPointCamera(Vector2 relativeMouseOffset)
+		{
+			var yawDelta = relativeMouseOffset.X * 0.003;
+			var pitDelta = relativeMouseOffset.Y * 0.003;
+
+			RotateViewToPointCamera(yawDelta, pitDelta);
+		}
+		
+		public void RotateViewToPointCamera(double yawDelta, double pitchDelta)
+		{
+			ViewToPointYaw		+= yawDelta;
+			ViewToPointPitch	-= pitchDelta;
+
+			ViewToPointPitch = DMathUtil.Clamp(ViewToPointPitch, -Math.PI / 2.01, 0.0);
+		}
+
+
+		public void RotateFreeSurfaceCamera(Vector2 relativeMouseOffset)
+		{
+			var yawDelta = relativeMouseOffset.X * 0.003;
+			var pitDelta = relativeMouseOffset.Y * 0.003;
+
+			RotateFreeSurfaceCamera(yawDelta, pitDelta);
+		}
+
+		public void RotateFreeSurfaceCamera(double yawDelta, double pitchDelta)
+		{
+			FreeSurfaceYaw		+= yawDelta;
+			FreeSurfacePitch	-= pitchDelta;
+
+			ViewToPointPitch = DMathUtil.Clamp(ViewToPointPitch, -Math.PI / 2.01, 0.0);
+		}
+
+
+		public void MoveFreeSurfaceCamera(DVector3 direction)
+		{
+			velocityDirection = direction;
+		}
+
+
+
 		public void Update(GameTime gameTime)
 		{
+			var input = gameEngine.InputDevice;
+			
+			
+			#region test
+
+			var dir = DVector3.Zero;
+
+
+			if (input.IsKeyDown(Keys.W)) { dir.X += 1.0; }
+			if (input.IsKeyDown(Keys.S)) { dir.X -= 1.0; }
+			if (input.IsKeyDown(Keys.A)) { dir.Z += 1.0; }
+			if (input.IsKeyDown(Keys.D)) { dir.Z -= 1.0; }
+			if (input.IsKeyDown(Keys.Space)) { dir.Y += 1.0; }
+			if (input.IsKeyDown(Keys.C)) { dir.Y -= 1.0; }
+			if (dir.Length() != 0.0)
+				dir.Normalize();
+			MoveFreeSurfaceCamera(dir);
+
+			double fy = 0;
+			double fp = 0;
+
+			if (input.IsKeyDown(Keys.Left))		fy -= gameTime.ElapsedSec * 0.7;
+			if (input.IsKeyDown(Keys.Right))	fy += gameTime.ElapsedSec * 0.7;
+			if (input.IsKeyDown(Keys.Up))		fp -= gameTime.ElapsedSec * 0.7;
+			if (input.IsKeyDown(Keys.Down))		fp += gameTime.ElapsedSec * 0.7;
+
+			RotateFreeSurfaceCamera(fy, fp);
+			#endregion
+
 			UpdateProjectionMatrix();
 
-			CameraPosition = DVector3.Transform(new DVector3(0, 0, CameraDistance), Rotation);
+			CameraPosition	= DVector3.Transform(new DVector3(0, 0, CameraDistance), Rotation);
+			ViewMatrix		= DMatrix.LookAtRH(CameraPosition, DVector3.Zero, DVector3.UnitY);
 
-			UpdateViewToPointCamera();
+			ViewMatrixWithTranslation		= ViewMatrix;
+			ViewMatrix.TranslationVector	= DVector3.Zero;
+			FinalCamPosition				= CameraPosition;
 
-			ViewMatrix = DMatrix.LookAtRH(CameraPosition, DVector3.Zero, DVector3.UnitY);
-
-			ViewMatrixWithTranslation = ViewMatrix;
-
-			ViewMatrix.TranslationVector = DVector3.Zero;
-
-			FinalCamPosition = CameraPosition;
-
-
-			var input = gameEngine.InputDevice;
-
-			if (input.IsKeyDown(Keys.LeftShift))	{ ViewToPointSwitcher = true; }
-			if (input.IsKeyDown(Keys.RightShift))	{ ViewToPointSwitcher = false; }
-			if (input.IsKeyDown(Keys.LeftControl)) {
-				FreeSurfaceSwitcher = true;
-				FreeSurfacePosition = CameraPosition;
-				prevMouseScroll = input.TotalMouseScroll;
-			}
-			if (input.IsKeyDown(Keys.RightControl)) {
-				FreeSurfaceSwitcher = false;
-				CameraPosition = FreeSurfacePosition;
-				CameraDistance = CameraPosition.Length();
+			
+			if (input.IsKeyDown(Keys.LeftShift))	{ CameraState = CameraStates.ViewToPoint; }
+			if (input.IsKeyDown(Keys.RightShift))	{ CameraState = CameraStates.TopDown; }
+			if (input.IsKeyDown(Keys.LeftControl))	{
+				ToggleFreeSurfaceCamera();
 			}
 
-			if (ViewToPointSwitcher) {
+
+			if (CameraState == CameraStates.ViewToPoint) {
 				var mat = CalculateBasisOnSurface();
 
 				DVector3	lookAtPoint = mat.Up * EarthRadius;
@@ -173,35 +280,28 @@ namespace Fusion.Engine.Graphics.GIS
 				ViewMatrixWithTranslation	= ViewMatrix;
 
 				ViewMatrix.TranslationVector = DVector3.Zero;
-			} else if (FreeSurfaceSwitcher) {
-
+			} else if (CameraState == CameraStates.FreeSurface) {
 				var mat = CalculateBasisOnSurface();
 				
 				#region Input
 					// Update surface camera yaw and pitch
-					if (input.IsKeyDown(Keys.RightButton)) {
-						FreeSurfaceYaw		+= input.RelativeMouseOffset.X*0.0003;
-						FreeSurfacePitch	-= input.RelativeMouseOffset.Y*0.0003;
-
-						if (prevMouseScroll > input.TotalMouseScroll)
-							FreeSurfaceVelocityMagnitude -= 0.0001;
-						if (prevMouseScroll < input.TotalMouseScroll)
-							FreeSurfaceVelocityMagnitude += 0.0001;
-
-						input.IsMouseCentered	= false;
-						input.IsMouseHidden		= true;
-					}
-					else {
-						input.IsMouseCentered	= false;
-						input.IsMouseHidden		= false;
-					}
-					prevMouseScroll = input.TotalMouseScroll;
+					//if (input.IsKeyDown(Keys.RightButton)) {
+					//	FreeSurfaceYaw		+= input.RelativeMouseOffset.X*0.0003;
+					//	FreeSurfacePitch	-= input.RelativeMouseOffset.Y*0.0003;
+					//
+					//	input.IsMouseCentered	= false;
+					//	input.IsMouseHidden		= true;
+					//}
+					//else {
+					//	input.IsMouseCentered	= false;
+					//	input.IsMouseHidden		= false;
+					//}
 
 
-					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Left))		FreeSurfaceYaw		-= gameTime.ElapsedSec * 0.5;
-					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Right))	FreeSurfaceYaw		+= gameTime.ElapsedSec * 0.5;
-					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Up))		FreeSurfacePitch	-= gameTime.ElapsedSec * 0.4;
-					if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Down))		FreeSurfacePitch	+= gameTime.ElapsedSec * 0.4;
+					//if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Left))		FreeSurfaceYaw		-= gameTime.ElapsedSec * 0.7;
+					//if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Right))	FreeSurfaceYaw		+= gameTime.ElapsedSec * 0.7;
+					//if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Up))		FreeSurfacePitch	-= gameTime.ElapsedSec * 0.7;
+					//if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Down))		FreeSurfacePitch	+= gameTime.ElapsedSec * 0.7;
 
 
 					//FreeSurfaceYaw = DMathUtil.Clamp(FreeSurfaceYaw, -DMathUtil.PiOverTwo, DMathUtil.PiOverTwo);
@@ -213,34 +313,16 @@ namespace Fusion.Engine.Graphics.GIS
 					if (!freezeFreeCamRotation)
 						freeSurfaceRotation = DQuaternion.RotationAxis(DVector3.UnitY, FreeSurfaceYaw) * DQuaternion.RotationAxis(DVector3.UnitX, FreeSurfacePitch);
 
-					var quat = freeSurfaceRotation;
-					var qRot = DMatrix.RotationQuaternion(quat);
-					var matrix = qRot * mat;
+					var quat	= freeSurfaceRotation;
+					var qRot	= DMatrix.RotationQuaternion(quat);
+					var matrix	= qRot * mat;
 
-					var velDir = DVector3.Zero;
-
-					if (input.IsKeyDown(Keys.W)) {
-						velDir += matrix.Forward;
-					}
-					if (input.IsKeyDown(Keys.S)) {
-						velDir -= matrix.Forward;
-					}
-					if (input.IsKeyDown(Keys.A)) {
-						velDir += matrix.Right;
-					}
-					if (input.IsKeyDown(Keys.D)) {
-						velDir += matrix.Left;
-					}
-					if (input.IsKeyDown(Keys.Space)) {
-						velDir += mat.Up;
-					}
-					if (input.IsKeyDown(Keys.C)) {
-						velDir += mat.Down;
-					}
+					var velDir = matrix.Forward * velocityDirection.X + mat.Up * velocityDirection.Y + matrix.Right * velocityDirection.Z;
 
 					if (velDir.Length() != 0) {
 						velDir.Normalize();
 					}
+				
 				#endregion
 
 				double maxDist = 10000;
@@ -248,16 +330,14 @@ namespace Fusion.Engine.Graphics.GIS
 				double fac = ((CameraDistance - EarthRadius) - minDist) / (maxDist - minDist);
 				fac = DMathUtil.Clamp(fac, 0.0, 1.0);
 
-
-				FreeSurfaceVelocityMagnitude = DMathUtil.Lerp(0.005, 100.0, fac);
-
-				//Console.WriteLine("Vel " + FreeSurfaceVelocityMagnitude);
-				//Console.WriteLine("fac " + fac);
-				//Console.WriteLine();
+				FreeSurfaceVelocityMagnitude = DMathUtil.Lerp(0.04, 800.0, fac);
 
 				// Update camera position
-				FinalCamPosition = FreeSurfacePosition = FreeSurfacePosition + velDir * FreeSurfaceVelocityMagnitude;
+				FinalCamPosition	= FreeSurfacePosition = FreeSurfacePosition + velDir * FreeSurfaceVelocityMagnitude * gameTime.ElapsedSec;
 				CameraPosition		= FinalCamPosition;
+
+				velocityDirection = DVector3.Zero;
+
 
 				//Calculate view matrix
 				ViewMatrix = DMatrix.LookAtRH(FinalCamPosition, FinalCamPosition + matrix.Forward, matrix.Up);
@@ -293,28 +373,6 @@ namespace Fusion.Engine.Graphics.GIS
 			mat.Forward.Normalize();
 
 			return mat;
-		}
-
-
-		void UpdateViewToPointCamera()
-		{
-			var input = gameEngine.InputDevice;
-
-			if (ViewToPointSwitcher && input.IsKeyDown(Keys.MiddleButton)) {
-				var yawDelta = input.RelativeMouseOffset.X * 0.003;
-				var pitDelta = input.RelativeMouseOffset.Y * 0.003;
-
-				RotateViewToPointCamera(yawDelta, pitDelta);
-			}
-		}
-
-
-		public void RotateViewToPointCamera(double yawDelta, double pitchDelta)
-		{
-			ViewToPointYaw		+= yawDelta;
-			ViewToPointPitch	-= pitchDelta;
-
-			ViewToPointPitch = DMathUtil.Clamp(ViewToPointPitch, -Math.PI / 2.01, 0.0);
 		}
 
 
