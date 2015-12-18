@@ -35,6 +35,7 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(12)]	public	float	KeyValue;
 			[FieldOffset(16)]	public	float	BloomAmount;
 			[FieldOffset(20)]	public	float	DirtMaskLerpFactor;
+			[FieldOffset(24)]	public	float	DirtAmount;
 		}
 
 
@@ -143,6 +144,7 @@ namespace Fusion.Engine.Graphics {
 			paramsData.KeyValue				=	settings.KeyValue;
 			paramsData.BloomAmount			=	settings.BloomAmount;
 			paramsData.DirtMaskLerpFactor	=	settings.DirtMaskLerpFactor;
+			paramsData.DirtAmount			=	settings.DirtAmount;
 
 			paramsCB.SetData( paramsData );
 			device.PixelShaderConstants[0]	=	paramsCB;
