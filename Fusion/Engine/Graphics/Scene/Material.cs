@@ -42,22 +42,37 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Material layer #0.
 		/// </summary>
-		public MaterialLayer	Layer0;
+		public MaterialLayer	Layer0 { 
+			get { return layers[0]; } 
+			set { layers[0] = value; }
+		}
 
 		/// <summary>
 		/// Material layer #1
 		/// </summary>
-		public MaterialLayer	Layer1;
+		public MaterialLayer Layer1 {
+			get { return layers[1]; } 
+			set { layers[1] = value; }
+		}
 
 		/// <summary>
 		/// Material layer #2
 		/// </summary>
-		public MaterialLayer	Layer2;
+		public MaterialLayer Layer2 {
+			get { return layers[2]; } 
+			set { layers[2] = value; }
+		}
 
 		/// <summary>
 		/// Material layer #2
 		/// </summary>
-		public MaterialLayer	Layer3;
+		public MaterialLayer Layer3 {
+			get { return layers[3]; } 
+			set { layers[3] = value; }
+		}
+
+
+		MaterialLayer[] layers = new MaterialLayer[4];
 
 
 
@@ -225,10 +240,10 @@ namespace Fusion.Engine.Graphics {
 			material.Layer3	=	new MaterialLayer();
 			
 			SectionToObject( ref material, iniData.Sections["Material"] );
-			SectionToObject( ref material.Layer0, iniData.Sections["Layer0"] );
-			SectionToObject( ref material.Layer1, iniData.Sections["Layer1"] );
-			SectionToObject( ref material.Layer2, iniData.Sections["Layer2"] );
-			SectionToObject( ref material.Layer3, iniData.Sections["Layer3"] );
+			SectionToObject( ref material.layers[0], iniData.Sections["Layer0"] );
+			SectionToObject( ref material.layers[1], iniData.Sections["Layer1"] );
+			SectionToObject( ref material.layers[2], iniData.Sections["Layer2"] );
+			SectionToObject( ref material.layers[3], iniData.Sections["Layer3"] );
 
 			return material;
 		}

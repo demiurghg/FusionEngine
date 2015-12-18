@@ -405,7 +405,7 @@
     <Compile Include="Engine\Graphics\Textures\DynamicTexture.cs" />
     <Compile Include="Engine\Graphics\Textures\LightProbe.cs" />
     <Compile Include="Engine\Graphics\Scene\Material.cs" />
-    <Compile Include="Engine\Graphics\InstancedMesh.cs" />
+    <Compile Include="Engine\Graphics\MeshInstance.cs" />
     <Compile Include="Engine\Graphics\Lights\OmniLight.cs" />
     <Compile Include="Engine\Graphics\Lights\SpotLight.cs" />
     <Compile Include="Engine\Graphics\Textures\TargetTexture.cs" />

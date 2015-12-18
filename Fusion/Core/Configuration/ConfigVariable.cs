@@ -8,7 +8,7 @@ using System.ComponentModel;
 
 namespace Fusion.Core.Configuration {
 
-	public class ConfigVariable {
+	internal class ConfigVariable {
 
 		static string Separator = ".";
 
