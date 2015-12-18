@@ -36,18 +36,12 @@ namespace Fusion.Engine.Graphics.GIS
 		public MapProjection Projection;
 
 		public float MaxHeatMapLevel;
+		public float MinHeatMapLevel;
 		public float HeatMapTransparency;
-
-		struct HeatMapConstData
-		{
-			public Vector4 Data;
-		}
-		HeatMapConstData heatConstData;
-		ConstantBuffer cb;
-
+		
 		StateFactory blurFactory;
 
-		protected static Texture2D[] HeatMapPalettes;
+		//protected static Texture2D[] HeatMapPalettes;
 		#endregion
 
 		public override void Dispose()
@@ -82,11 +76,12 @@ namespace Fusion.Engine.Graphics.GIS
 
 			Data = new float[MapDimX * MapDimY];
 
-			HeatMapPalettes		= new Texture2D[1];
-			HeatMapPalettes[0]	= GameEngine.Content.Load<Texture2D>("palette");
+			//HeatMapPalettes		= new Texture2D[1];
+			//HeatMapPalettes[0]	= GameEngine.Content.Load<Texture2D>("palette");
+			Palette = GameEngine.Content.Load<Texture2D>("palette");
 
-			cb				= new ConstantBuffer(GameEngine.GraphicsDevice, typeof(HeatMapConstData));
-			heatConstData	= new HeatMapConstData();
+			//cb			= new ConstantBuffer(GameEngine.GraphicsDevice, typeof(ConstData));
+			//constData	= new ConstData();
 
 			Flags = (int)(PolyFlags.PIXEL_SHADER | PolyFlags.VERTEX_SHADER | PolyFlags.DRAW_HEAT);
 
@@ -95,6 +90,10 @@ namespace Fusion.Engine.Graphics.GIS
 					BlendState.AlphaBlend,
 					RasterizerState.CullNone,
 					DepthStencilState.None);
+
+			MaxHeatMapLevel = 100;
+			MinHeatMapLevel = 0;
+			HeatMapTransparency = 1.0f;
 		}
 
 
@@ -142,8 +141,8 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
-			heatConstData.Data = new Vector4(MaxHeatMapLevel, HeatMapTransparency, MapDimX, InterpFactor);
-			cb.SetData(heatConstData);
+			constData.Data = new Vector4(MaxHeatMapLevel, MinHeatMapLevel, HeatMapTransparency, InterpFactor);
+			cb.SetData(constData);
 
 			GameEngine.GraphicsDevice.PipelineState = factory[
 			(int)(
@@ -161,7 +160,7 @@ namespace Fusion.Engine.Graphics.GIS
 			GameEngine.GraphicsDevice.PixelShaderSamplers[0] = SamplerState.LinearClamp;
 			GameEngine.GraphicsDevice.PixelShaderSamplers[1] = SamplerState.AnisotropicClamp;
 
-			GameEngine.GraphicsDevice.PixelShaderResources[0] = HeatMapPalettes[0];
+			GameEngine.GraphicsDevice.PixelShaderResources[0] = Palette;
 			GameEngine.GraphicsDevice.PixelShaderResources[1] = Final;
 			GameEngine.GraphicsDevice.PixelShaderResources[2] = Prev;
 

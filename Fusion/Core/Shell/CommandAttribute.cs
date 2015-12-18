@@ -29,7 +29,8 @@ namespace Fusion.Core.Shell {
 		/// <param name="name"></param>
 		public CommandAttribute ( string name, CommandAffinity affinity )
 		{
-			this.Name = name;
+			this.Name		=	name;
+			this.Affinity	=	affinity;
 		}
 	}
 }

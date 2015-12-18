@@ -24,6 +24,7 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			[FieldOffset(0)]	public Matrix	ModelWorld;
 			[FieldOffset(64)]	public Vector4	ViewPositionTransparency;
+			[FieldOffset(80)]	public Color4	OverallColor;
 		}
 
 		ConstDataStruct constData;
@@ -31,14 +32,15 @@ namespace Fusion.Engine.Graphics.GIS
 		[Flags]
 		public enum ModelFlags : int
 		{
-			VERTEX_SHADER	= 1 << 0,
-			PIXEL_SHADER	= 1 << 1,
-			GEOMETRY_SHADER = 1 << 2,
-			DRAW_TEXTURED	= 1 << 3,
-			DRAW_COLORED	= 1 << 4,
-			COMPUTE_NORMALS = 1 << 5,
-			XRAY			= 1 << 6,
-			INSTANCED		= 1 << 7,
+			VERTEX_SHADER		= 1 << 0,
+			PIXEL_SHADER		= 1 << 1,
+			GEOMETRY_SHADER		= 1 << 2,
+			DRAW_TEXTURED		= 1 << 3,
+			DRAW_COLORED		= 1 << 4,
+			COMPUTE_NORMALS		= 1 << 5,
+			XRAY				= 1 << 6,
+			INSTANCED			= 1 << 7,
+			USE_OVERALL_COLOR	= 1 << 8,
 		}
 
 
@@ -67,7 +69,11 @@ namespace Fusion.Engine.Graphics.GIS
 		protected Matrix[]	transforms;
 
 		public float	Transparency;
-		public bool		XRay = false;
+		public bool		XRay			= false;
+		public bool		UseOverallColor = false;
+
+		public Color4 OverallColor { get { return constData.OverallColor; } set { constData.OverallColor = value; }}
+
 
 		public ModelLayer(GameEngine engine, DVector2 lonLatPosition, string fileName, int maxInstancedCount = 0) : base(engine)
 		{
@@ -96,7 +102,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
-		{
+		{ 
 			var dev = GameEngine.GraphicsDevice;
 			var gis = GameEngine.GraphicsEngine.Gis;
 
@@ -129,7 +135,15 @@ namespace Fusion.Engine.Graphics.GIS
 			dev.VertexShaderConstants[1]	= modelBuf;
 			dev.PixelShaderConstants[1]		= modelBuf;
 
-			int flags = (int) (ModelFlags.VERTEX_SHADER | ModelFlags.PIXEL_SHADER | (XRay ? ModelFlags.XRAY : ModelFlags.DRAW_COLORED));
+
+			int flags = (int) (ModelFlags.VERTEX_SHADER | ModelFlags.PIXEL_SHADER);
+			if (XRay) {
+				flags |= (int) ModelFlags.XRAY;
+				if(UseOverallColor) flags |= (int) ModelFlags.USE_OVERALL_COLOR;
+			} else {
+				if (UseOverallColor) flags |= (int) ModelFlags.USE_OVERALL_COLOR;
+				else flags |= (int) ModelFlags.DRAW_COLORED;
+			}
 
 
 			if (InstancedDataCPU != null) {
@@ -145,8 +159,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			if (XRay) {
 				dev.PipelineState = factoryXray[flags];
-			}
-			else {
+			} else {
 				dev.PipelineState = factory[flags];
 			}
 			
