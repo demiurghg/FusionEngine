@@ -13,7 +13,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// Represnets mesh instance
 	/// </summary>
-	public class InstancedMesh {
+	public class MeshInstance {
 
 		/// <summary>
 		/// Indicates whether mesh instance visible.
@@ -96,6 +96,11 @@ namespace Fusion.Engine.Graphics {
 		readonly internal int indexCount;
 		readonly internal int vertexCount;
 
+		//struct ShadingGroup {
+		//	public int StartIndex;
+		//	public int IndicesCount;
+		//	public Material Material;
+		//}
 
 
 
@@ -104,7 +109,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="ge"></param>
 		/// <param name="mesh"></param>
-		public InstancedMesh ( GraphicsEngine ge, Mesh mesh )
+		public MeshInstance ( GraphicsEngine ge, Scene scene, Mesh mesh, Material[] materials )
 		{
 			Visible		=	true;
 			World		=	Matrix.Identity;
@@ -116,6 +121,13 @@ namespace Fusion.Engine.Graphics {
 			
 			vertexCount	=	mesh.VertexCount;
 			indexCount	=	mesh.IndexCount;
+
+
+			/*foreach ( var subset in mesh.Subsets ) {
+				
+				//var material	=	ge.GameEngine.C
+
+			} */
 
 			//	TODO : Get materials here
 			//	TODO : Get textures here

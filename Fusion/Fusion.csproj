@@ -149,6 +149,7 @@
     <Compile Include="Core\Utils\LogMessage.cs" />
     <Compile Include="Core\Utils\LogMessageType.cs" />
     <Compile Include="Core\Utils\Crc32.cs" />
+    <Compile Include="Core\Utils\DebugStrings.cs" />
     <Compile Include="Core\Utils\TimeProbe.cs" />
     <Compile Include="Drivers\Audio\AudioChannels.cs" />
     <Compile Include="Drivers\Audio\AudioDevice.cs" />
@@ -207,6 +208,7 @@
     <Compile Include="Engine\Common\Commands\CrashClient.cs" />
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
     <Compile Include="Engine\Common\GameInterface.Internal.cs" />
+    <Compile Include="Engine\Graphics\Effects\SkySphere.cs" />
     <Compile Include="Engine\Graphics\Commands\Screenshot.cs" />
     <Compile Include="Engine\Graphics\Effects\HdrSettings.cs" />
     <Compile Include="Engine\Graphics\Effects\Filter.cs" />
@@ -223,10 +225,12 @@
     <Compile Include="Engine\Graphics\Lights\LightRendererConfig.cs" />
     <Compile Include="Engine\Graphics\Lights\DirectLight.cs" />
     <Compile Include="Engine\Graphics\Lights\ShadowContext.cs" />
-    <Compile Include="Engine\Graphics\MaterialLoader.cs" />
-    <Compile Include="Engine\Graphics\MaterialOptions.cs" />
-    <Compile Include="Engine\Graphics\MaterialLayer.cs" />
+    <Compile Include="Engine\Graphics\Scene\Material.Gpu.cs" />
+    <Compile Include="Engine\Graphics\Scene\MaterialLoader.cs" />
+    <Compile Include="Engine\Graphics\Scene\MaterialOptions.cs" />
+    <Compile Include="Engine\Graphics\Scene\MaterialLayer.cs" />
     <Compile Include="Engine\Graphics\SceneRenderer.cs" />
+    <Compile Include="Engine\Graphics\Scene\MaterialRef.cs" />
     <Compile Include="Engine\Graphics\Scene\VertexColorTextureTBNSkinned.cs" />
     <Compile Include="Drivers\Graphics\States\StateFactory.cs" />
     <Compile Include="Drivers\Graphics\UbershaderLoader.cs" />
@@ -260,7 +264,6 @@
     <Compile Include="Drivers\Graphics\Enums.cs" />
     <Compile Include="Drivers\Graphics\Resources\StructuredBuffer.cs" />
     <Compile Include="Drivers\Graphics\Resources\Texture2D.cs" />
-    <Compile Include="Engine\Graphics\Scene\MeshMaterial.cs" />
     <Compile Include="Core\DisposableBase.cs" />
     <Compile Include="Engine\Common\Commands\Connect.cs" />
     <Compile Include="Engine\Common\Commands\Disconnect.cs" />
@@ -401,7 +404,7 @@
     <Compile Include="Engine\Graphics\Textures\DiscTexture.cs" />
     <Compile Include="Engine\Graphics\Textures\DynamicTexture.cs" />
     <Compile Include="Engine\Graphics\Textures\LightProbe.cs" />
-    <Compile Include="Engine\Graphics\Material.cs" />
+    <Compile Include="Engine\Graphics\Scene\Material.cs" />
     <Compile Include="Engine\Graphics\InstancedMesh.cs" />
     <Compile Include="Engine\Graphics\Lights\OmniLight.cs" />
     <Compile Include="Engine\Graphics\Lights\SpotLight.cs" />

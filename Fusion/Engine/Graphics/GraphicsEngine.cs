@@ -61,10 +61,12 @@ namespace Fusion.Engine.Graphics {
 
 		RenderTarget2D	hdrTarget;
 
+		public Texture	GrayTexture { get { return grayTexture; } }
 		public Texture	WhiteTexture { get { return whiteTexture; } }
 		public Texture	BlackTexture { get { return blackTexture; } }
 		public Texture	FlatNormalMap { get { return flatNormalMap; } }
 
+		DynamicTexture grayTexture;
 		DynamicTexture whiteTexture;
 		DynamicTexture blackTexture;
 		DynamicTexture flatNormalMap;
@@ -124,6 +126,9 @@ namespace Fusion.Engine.Graphics {
 		{
 			whiteTexture	=	new DynamicTexture( this, 4,4, typeof(Color), false, false );
 			whiteTexture.SetData( Enumerable.Range(0,16).Select( i => Color.White ).ToArray() );
+			
+			grayTexture		=	new DynamicTexture( this, 4,4, typeof(Color), false, false );
+			grayTexture.SetData( Enumerable.Range(0,16).Select( i => Color.Gray ).ToArray() );
 
 			blackTexture	=	new DynamicTexture( this, 4,4, typeof(Color), false, false );
 			blackTexture.SetData( Enumerable.Range(0,16).Select( i => Color.Black ).ToArray() );

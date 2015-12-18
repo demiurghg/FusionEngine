@@ -100,6 +100,12 @@ namespace SceneDemo1 {
 
 
 
+		public override void RequestToExit ()
+		{
+			GameEngine.Exit();
+		}
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -108,46 +114,6 @@ namespace SceneDemo1 {
 		public override void DiscoveryResponse ( System.Net.IPEndPoint endPoint, string serverInfo )
 		{
 			Log.Message( "DISCOVERY : {0} - {1}", endPoint.ToString(), serverInfo );
-		}
-
-
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public override void ShowMessage ( string message )
-		{
-		}
-
-
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public override void ShowWarning ( string message )
-		{
-		}
-
-
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public override void ShowError ( string message )
-		{
-		}
-
-
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public override void ChatMessage ( string message )
-		{
 		}
 	}
 }

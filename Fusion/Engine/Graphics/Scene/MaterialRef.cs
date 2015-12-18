@@ -14,9 +14,10 @@ namespace Fusion.Engine.Graphics {
 
 
 	/// <summary>
-	/// Material type
+	/// Material reference. 
+	/// Keeps material name, base texture and reference to material.
 	/// </summary>
-	public sealed class MeshMaterial : IEquatable<MeshMaterial> {
+	public sealed class MaterialRef : IEquatable<MaterialRef> {
 
 		/// <summary>
 		/// Material name.
@@ -26,19 +27,17 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Base texture path.
 		/// </summary>
-		public	string	TexturePath { get; set; }
+		public	string	Texture { get; set; }
+
 
 
 		/// <summary>
-		/// Gets or sets an object identifying this model.
+		/// Creates materail 
 		/// </summary>
-		public	object  Tag { get; set; }
-
-
-		public MeshMaterial ()
+		public MaterialRef ()
 		{
 			Name			=	"";
-			TexturePath		=	null;
+			Texture		=	null;
 		}
 
 
@@ -51,9 +50,9 @@ namespace Fusion.Engine.Graphics {
 		{
 			Name =  reader.ReadString();
 
-			TexturePath = null;
+			Texture = null;
 			if ( reader.ReadBoolean() == true ) {
-				TexturePath =  reader.ReadString();
+				Texture =  reader.ReadString();
 			}
 		}
 
@@ -66,23 +65,22 @@ namespace Fusion.Engine.Graphics {
 		{
 			writer.Write( Name );
 
-			if ( TexturePath == null ) {
+			if ( Texture == null ) {
 				writer.Write( false );
 			} else {
 				writer.Write( true );
-				writer.Write( TexturePath );
+				writer.Write( Texture );
 			}
 		}
 
 
 
-		public bool Equals ( MeshMaterial other )
+		public bool Equals ( MaterialRef other )
 		{
 			if (other==null) return false;
 
-			return ( Name		 == other.Name			)
-				&& ( TexturePath == other.TexturePath	)
-				&& ( Tag		 == other.Tag			)
+			return ( Name		== other.Name		)
+				&& ( Texture	== other.Texture	)
 				;
 		}
 
@@ -90,21 +88,21 @@ namespace Fusion.Engine.Graphics {
 		public override bool Equals ( object obj )
 		{
 			if (obj==null) return false;
-			if (obj as MeshMaterial==null) return false;
-			return Equals((MeshMaterial)obj);
+			if (obj as MaterialRef==null) return false;
+			return Equals((MaterialRef)obj);
 		}
 
 		public override int GetHashCode ()
 		{
 			int hashCode = 0;
             hashCode = (hashCode * 397) ^ Name.GetHashCode();
-            hashCode = (hashCode * 397) ^ TexturePath.GetHashCode();
-			hashCode = (hashCode * 397) ^ Tag.GetHashCode();
+            hashCode = (hashCode * 397) ^ Texture.GetHashCode();
+			//hashCode = (hashCode * 397) ^ Tag.GetHashCode(); ???
 			return hashCode;
 		}
 
 
-		public static bool operator == (MeshMaterial obj1, MeshMaterial obj2)
+		public static bool operator == (MaterialRef obj1, MaterialRef obj2)
 		{
 			if ((object)obj1 == null || ((object)obj2) == null)
 				return Object.Equals(obj1, obj2);
@@ -112,7 +110,7 @@ namespace Fusion.Engine.Graphics {
 			return obj1.Equals(obj2);
 		}
 
-		public static bool operator != (MeshMaterial obj1, MeshMaterial obj2)
+		public static bool operator != (MaterialRef obj1, MaterialRef obj2)
 		{
 			if (obj1 == null || obj2 == null)
 				return ! Object.Equals(obj1, obj2);

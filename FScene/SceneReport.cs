@@ -35,7 +35,7 @@ namespace FScene {
 
 				var index = scene.Materials.IndexOf(mtrl);
 				
-				sb.AppendFormat("{0,4}:  {1,-30} <i>{2}</i>\r\n", index, "\"" + mtrl.Name + "\"", mtrl.TexturePath );
+				sb.AppendFormat("{0,4}:  {1,-30} <i>{2}</i>\r\n", index, "\"" + mtrl.Name + "\"", mtrl.Texture );
 			}
 
 

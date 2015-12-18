@@ -45,6 +45,12 @@ namespace Fusion.Engine.Client {
 		public abstract void UnloadContent ();
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="message"></param>
+		public abstract void GameEnd ( string message );
+
+		/// <summary>
 		/// Runs one step of client-side simulation and render world state.
 		/// </summary>
 		/// <param name="gameTime"></param>

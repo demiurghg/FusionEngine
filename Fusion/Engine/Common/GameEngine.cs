@@ -191,6 +191,9 @@ namespace Fusion.Engine.Common {
 		bool	requestExit		=	false;
 		bool	requestReload	=	false;
 
+		internal bool ExitRequested { get { return requestExit; } }
+
+
 		AudioDevice			audioDevice		;
 		InputDevice			inputDevice		;
 		GraphicsDevice		graphicsDevice	;

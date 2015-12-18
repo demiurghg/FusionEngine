@@ -22,7 +22,7 @@ namespace Fusion.Engine.Client {
 			}
 
 
-			public override void Connect ( string host, int port )
+			public override void UserConnect ( string host, int port )
 			{
 				var endPoint	=	new IPEndPoint( IPAddress.Parse(host), port );
 				
@@ -31,7 +31,7 @@ namespace Fusion.Engine.Client {
 
 
 
-			public override void Disconnect ( string reason )
+			public override void UserDisconnect ( string reason )
 			{
 				Log.Warning("Not connected.");
 			}

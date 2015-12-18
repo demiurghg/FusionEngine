@@ -233,7 +233,7 @@ namespace Fusion.Core.Content {
 			Log.Message("Loading : {0}", assetPath );
 			using (var stream = OpenStream(assetPath) ) {
 				item = new Item() {
-					Object		= loader.Load( GameEngine, stream, typeof(T), assetPath ),
+					Object		= loader.Load( this, stream, typeof(T), assetPath ),
 					LoadTime	= File.GetLastWriteTime( GetRealAssetFileName( assetPath ) ),
 				};
 			}

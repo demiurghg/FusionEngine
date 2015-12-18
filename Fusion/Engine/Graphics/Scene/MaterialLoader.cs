@@ -23,14 +23,20 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="requestedType"></param>
 		/// <param name="assetPath"></param>
 		/// <returns></returns>
-		public override object Load ( GameEngine game, Stream stream, Type requestedType, string assetPath )
+		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 		{
 			using ( var sr = new BinaryReader(stream) ) {
-				var iniText = sr.ReadString();
-				return Material.FromINI( iniText );
+				var iniText		=	sr.ReadString();
+				var material	=	Material.FromINI( iniText );
+
+				material.LoadGpuResources( content );
+
+				return material;
 			}
 
 		}
+
+
 
 	}
 }

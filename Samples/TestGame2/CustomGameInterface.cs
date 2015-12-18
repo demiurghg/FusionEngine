@@ -127,7 +127,7 @@ namespace TestGame2 {
 			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
 			scene		=	GameEngine.Content.Load<Scene>( @"scenes\testScene" );
 
-			masterView.SkySettings.SunPosition			=	new Vector3(10,40,30);
+			masterView.SkySettings.SunPosition			=	new Vector3(10,20,30);
 
 			masterView.LightSet.SpotAtlas				=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
 			masterView.LightSet.DirectLight.Direction	=	masterView.SkySettings.SunLightDirection;
@@ -137,6 +137,8 @@ namespace TestGame2 {
 
 			var transforms = new Matrix[ scene.Nodes.Count ];
 			scene.ComputeAbsoluteTransforms( transforms );
+
+			var materials	=	scene.Materials.Select( m => GameEngine.Content.Load<Material>( m.Name ) ).ToArray();
 			
 			for ( int i=0; i<scene.Nodes.Count; i++ ) {
 			
@@ -146,7 +148,7 @@ namespace TestGame2 {
 					continue;
 				}
 				
-				var inst = new InstancedMesh( GameEngine.GraphicsEngine, scene.Meshes[meshIndex] );
+				var inst   = new MeshInstance( GameEngine.GraphicsEngine, scene, scene.Meshes[meshIndex], materials );
 				inst.World = transforms[ i ];
 			
 				masterView.Instances.Add( inst );
@@ -169,7 +171,8 @@ namespace TestGame2 {
 		void LoadContent ()
 		{
 			masterView.HdrSettings.BloomAmount	=	0.1f;
-			masterView.HdrSettings.DirtMask1	=	null;//GameEngine.Content.Load<DiscTexture>("bloomMask");
+			masterView.HdrSettings.DirtAmount	=	0.9f;
+			masterView.HdrSettings.DirtMask1	=	GameEngine.Content.Load<DiscTexture>("bloomMask");
 			masterView.HdrSettings.DirtMask2	=	null;//GameEngine.Content.Load<DiscTexture>("bloomMask2");
 		}
 
@@ -215,6 +218,12 @@ namespace TestGame2 {
 		Random rand = new Random();
 
 
+		public override void RequestToExit ()
+		{
+			GameEngine.Exit();
+		}
+
+
 		/// <summary>
 		/// Updates internal state of interface.
 		/// </summary>
@@ -235,10 +244,10 @@ namespace TestGame2 {
 
 			testLayer.Clear();
 			testLayer.BlendMode = SpriteBlendMode.Opaque;
-			testLayer.Draw( masterView.HdrTexture,	 -200,  0, 200,150, Color.White );
-			testLayer.Draw( masterView.DiffuseTexture,	    0,  0, 200,150, Color.White );
-			testLayer.Draw( masterView.SpecularTexture, 200,  0, 200,150, Color.White );
-			testLayer.Draw( masterView.NormalMapTexture, 400,  0, 200,150, Color.White );
+			//testLayer.Draw( masterView.HdrTexture,	 -200,  0, 200,150, Color.White );
+			//testLayer.Draw( masterView.DiffuseTexture,	    0,  0, 200,150, Color.White );
+			//testLayer.Draw( masterView.SpecularTexture, 200,  0, 200,150, Color.White );
+			//testLayer.Draw( masterView.NormalMapTexture, 400,  0, 200,150, Color.White );
 			//testLayer.Draw( masterView.Target, 200,200,300,200, Color.White);
 
 			//if (videoPlayer.State==MediaState.Playing) {
@@ -300,39 +309,6 @@ namespace TestGame2 {
 		public override void DiscoveryResponse ( System.Net.IPEndPoint endPoint, string serverInfo )
 		{
 			Log.Message("DISCOVERY : {0} - {1}", endPoint.ToString(), serverInfo );
-		}
-
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public override void ShowMessage ( string message )
-		{
-		}
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public override void ShowWarning ( string message )
-		{
-		}
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public override void ShowError ( string message )
-		{
-		}
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public override void ChatMessage ( string message )
-		{
 		}
 	}
 }

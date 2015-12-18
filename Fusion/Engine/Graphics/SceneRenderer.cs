@@ -169,6 +169,7 @@ namespace Fusion.Engine.Graphics {
 
 			var instances	=	viewLayer.Instances;
 
+			//#warning INSTANSING!
 			foreach ( var instance in instances ) {
 				
 				cbData.View			=	view;
@@ -192,7 +193,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="context"></param>
-		internal void RenderShadowMapCascade ( ShadowContext shadowRenderCtxt, IEnumerable<InstancedMesh> instances )
+		internal void RenderShadowMapCascade ( ShadowContext shadowRenderCtxt, IEnumerable<MeshInstance> instances )
 		{
 			if (surfaceShader==null) {
 				return;
@@ -220,6 +221,7 @@ namespace Fusion.Engine.Graphics {
 			cbData.BiasSlopeFar	=	new Vector4( shadowRenderCtxt.DepthBias, shadowRenderCtxt.SlopeBias, shadowRenderCtxt.FarDistance, 0 );
 
 
+			//#warning INSTANSING!
 			foreach ( var instance in instances ) {
 				
 				cbData.World		=	instance.World;

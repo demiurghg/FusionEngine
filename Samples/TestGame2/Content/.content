@@ -29,11 +29,11 @@ HKEY_CURRENT_USER\Software\FusionEngine@ContentDir
 
 [Scenes]
 *.fbx /geom /report
-scenes/testScene.fbx /geom /genmtrl /report
+scenes/testScene.fbx /geom /report /genmtrl
 
 [Copy]
 myDir/*.*
 *.wmv
 
 [Materials]
-*.mtrl
+*.material

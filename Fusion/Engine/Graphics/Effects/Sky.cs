@@ -9,6 +9,7 @@ using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace Fusion.Engine.Graphics {
 
@@ -41,8 +42,15 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(132)] public Vector3	ViewPos;
 		}
 
+
+		struct SkyVertex {
+			[Vertex("POSITION")]
+			public Vector4 Vertex;
+		}
+
 		GraphicsDevice	rs;
-		Scene			skySphere;
+		//Scene			skySphere;
+		VertexBuffer	skyVB;
 		Ubershader		sky;
 		ConstantBuffer	skyConstsCB;
 		SkyConsts		skyConstsData;
@@ -56,125 +64,8 @@ namespace Fusion.Engine.Graphics {
 		RenderTargetCube	skyCube;
 		Texture2D			clouds;
 
-		#if false
-		#region Sky model
-		float dot ( Vector3 a, Vector3 b ) { return Vector3.Dot(a, b); }
-		float dot ( Vector4 a, Vector4 b ) { return Vector4.Dot(a, b); }
-		float acos(float x) { return (float)Math.Acos(x);}
-		float tan (float x) { return (float)Math.Tan(x);}
-		float exp (float x) { return (float)Math.Exp(x);}
-
-		Vector3 perezZenith ( float t, float thetaSun )
-		{
-			float	pi = 3.1415926f;
-			Vector4	cx1 = new Vector4 ( 0.00000f,  0.00209f, -0.00375f,  0.00165f );
-			Vector4	cx2 = new Vector4 ( 0.00394f, -0.03202f,  0.06377f, -0.02903f );
-			Vector4	cx3 = new Vector4 ( 0.25886f,  0.06052f, -0.21196f,  0.11693f );
-			Vector4	cy1 = new Vector4 ( 0.00000f,  0.00317f, -0.00610f,  0.00275f );
-			Vector4	cy2 = new Vector4 ( 0.00516f, -0.04153f,  0.08970f, -0.04214f );
-			Vector4	cy3 = new Vector4 ( 0.26688f,  0.06670f, -0.26756f,  0.15346f );
-
-			float	t2    = t*t;
-			float	chi   = (4.0f / 9.0f - t / 120.0f ) * (pi - 2.0f * thetaSun );
-			Vector4	theta = new Vector4 ( 1, thetaSun, thetaSun*thetaSun, thetaSun*thetaSun*thetaSun );
-
-			float	Y = (4.0453f * t - 4.9710f) * tan ( chi ) - 0.2155f * t + 2.4192f;
-			float	x = t2 * dot ( cx1, theta ) + t * dot ( cx2, theta ) + dot ( cx3, theta );
-			float	y = t2 * dot ( cy1, theta ) + t * dot ( cy2, theta ) + dot ( cy3, theta );
-
-			return new Vector3 ( Y, x, y );//*/
-		}
-
-
-		Vector3  perezFunc ( float t, float cosTheta, float cosGamma )
-		{
-			//return 1;
-			float  gamma      = acos ( cosGamma );
-			float  cosGammaSq = cosGamma * cosGamma;
-			float  aY =  0.17872f * t - 1.46303f;	      float  bY = -0.35540f * t + 0.42749f;
-			float  cY = -0.02266f * t + 5.32505f;	      float  dY =  0.12064f * t - 2.57705f;
-			float  eY = -0.06696f * t + 0.37027f;	      float  ax = -0.01925f * t - 0.25922f;
-			float  bx = -0.06651f * t + 0.00081f;	      float  cx = -0.00041f * t + 0.21247f;
-			float  dx = -0.06409f * t - 0.89887f;	      float  ex = -0.00325f * t + 0.04517f;
-			float  ay = -0.01669f * t - 0.26078f;	      float  by = -0.09495f * t + 0.00921f;
-			float  cy = -0.00792f * t + 0.21023f;	      float  dy = -0.04405f * t - 1.65369f;
-			float  ey = -0.01092f * t + 0.05291f;	  
-			return new Vector3 ( (1.0f + aY * exp(bY/cosTheta)) * (1.0f + cY * exp(dY * gamma) + eY*cosGammaSq),
-							(1.0f + ax * exp(bx/cosTheta)) * (1.0f + cx * exp(dx * gamma) + ex*cosGammaSq),
-							(1.0f + ay * exp(by/cosTheta)) * (1.0f + cy * exp(dy * gamma) + ey*cosGammaSq) );
-		}
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="t">Turbidity</param>
-		/// <param name="cosTheta">cosine of view angle</param>
-		/// <param name="cosGamma">cosine of angle between view dir and sun dir</param>
-		/// <param name="cosThetaSun">cosine of sun angle</param>
-		/// <returns></returns>
-		Vector3  perezSky ( float t, float cosTheta, float cosGamma, float cosThetaSun )
-		{
-			float	thetaSun	=	acos ( cosThetaSun );
-			Vector3 zenith		=	perezZenith ( t, thetaSun );
-			Vector3 clrYxy		=	zenith * perezFunc ( t, cosTheta, cosGamma );
-			Vector3	perez1		=	perezFunc ( t, 1.0f, cosThetaSun );
-
-			clrYxy.X /= perez1.X;
-			clrYxy.Y /= perez1.Y;
-			clrYxy.Z /= perez1.Z;
-			//clrYxy.X = clrYxy.X * smoothstep ( 0.0f, 0.1f, cosThetaSun );			// make sure when thetaSun > PI/2 we have black color
-	
-			return clrYxy;
-		}
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="t">Turbidity</param>
-		/// <param name="viewDir">Normalized (!) view direction</param>
-		/// <param name="sunDir">Normalized (!) sun direction</param>
-		/// <returns></returns>
-		Vector3  perezSky ( float t, Vector3 viewDir, Vector3 sunDir )
-		{
-			return perezSky( t, Math.Max( 0, viewDir.Y ), Vector3.Dot( viewDir, sunDir ), Math.Max( 0, sunDir.Y ) );
-		}
-
-
-		Vector3 perezSun ( float t, float cosThetaSun, float boost=100 )
-		{
-			return perezSky( t, cosThetaSun, 1, cosThetaSun ) * new Vector3(boost,1,1);
-		}
-
-		Vector3 YxyToRGB ( Vector3 Yxy )
-		{
-			//var uc = GameEngine.GetService<Settings>().UserConfig;
-
-			Vector3  clrYxy = Yxy;
-
-			clrYxy.X = MathUtil.Clamp( clrYxy.X, 0, 999999 );
-
-			Vector3  XYZ;
-			//float tm = 0.7f * 1/(1 + clrYxy.X); 
-			float tm = 1;
-
-			//clrYxy.X = 1.0f - exp ( -clrYxy.X / uc.SkyExposure );
-
-			XYZ.X = clrYxy.X * clrYxy.Y / clrYxy.Z;     
-			XYZ.Y = clrYxy.X;              
-			XYZ.Z = (1 - clrYxy.Y - clrYxy.Z) * clrYxy.X / clrYxy.Z; 
-
-			Vector3 rCoeffs = new Vector3 ( 2.0413690f, -0.5649464f, -0.3446944f);
-			Vector3 gCoeffs = new Vector3 (-0.9692660f,  1.8760108f,  0.0415560f);
-			Vector3 bCoeffs = new Vector3 ( 0.0134474f, -0.1183897f,  1.0154096f);
-
-			return new Vector3 ( dot ( rCoeffs, XYZ ), dot ( gCoeffs, XYZ ), dot ( bCoeffs, XYZ ) ) * tm;
-		}
-		#endregion
-		#endif
-
 		Random	rand = new Random();
+
 
 
 		/// <summary>
@@ -201,6 +92,11 @@ namespace Fusion.Engine.Graphics {
 			GameEngine.Reloading += (s,e) => LoadContent();
 
 			
+			var skySphere	=	SkySphere.GetVertices(9);
+			skyVB			=	new VertexBuffer( GameEngine.GraphicsDevice, typeof(SkyVertex), skySphere.Length );
+			skyVB.SetData( skySphere );
+
+			
 			randVectors	=	new Vector3[64];
 
 			for (int i=0; i<randVectors.Length; i++) {
@@ -222,7 +118,6 @@ namespace Fusion.Engine.Graphics {
 		{
 			SafeDispose( ref factory );
 
-			skySphere	=	GameEngine.Content.Load<Scene>("skySphere");
 			sky			=	GameEngine.Content.Load<Ubershader>("sky");
 			factory		=	new StateFactory( sky, typeof(SkyFlags), (ps,i) => EnumFunc(ps, (SkyFlags)i) );
 		}
@@ -236,8 +131,8 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="flags"></param>
 		void EnumFunc ( PipelineState ps, SkyFlags flags )
 		{
-			ps.VertexInputElements	=	VertexInputElement.FromStructure<VertexColorTextureTBNRigid>();
-			ps.RasterizerState		=	RasterizerState.CullNone;
+			ps.VertexInputElements	=	VertexInputElement.FromStructure<SkyVertex>();
+			ps.RasterizerState		=	RasterizerState.CullCCW;
 			ps.BlendState			=	BlendState.Opaque;
 			ps.DepthStencilState	=	flags.HasFlag(SkyFlags.FOG) ? DepthStencilState.None : DepthStencilState.Readonly;
 		}
@@ -250,6 +145,7 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose( bool disposing )
 		{
 			if( disposing ) {
+				SafeDispose( ref skyVB );
 				SafeDispose( ref factory );
 				SafeDispose( ref skyCube );
 				SafeDispose( ref skyConstsCB );
@@ -259,6 +155,11 @@ namespace Fusion.Engine.Graphics {
 
 
 
+		/// <summary>
+		/// Selects colorspace in ubershader.
+		/// </summary>
+		/// <param name="flags"></param>
+		/// <param name="settings"></param>
 		void ApplyColorSpace ( ref SkyFlags flags, SkySettings settings )
 		{	
 			switch (settings.RgbSpace) {
@@ -306,12 +207,8 @@ namespace Fusion.Engine.Graphics {
 				rs.PixelShaderConstants[0] = skyConstsCB;
 
 
-				for ( int j=0; j<skySphere.Meshes.Count; j++) {
-					var mesh = skySphere.Meshes[j];
-
-					rs.SetupVertexInput( mesh.VertexBuffer, mesh.IndexBuffer );
-					rs.DrawIndexed( mesh.IndexCount, 0, 0 );
-				}
+				rs.SetupVertexInput( skyVB, null );
+				rs.Draw( skyVB.Capacity, 0 );
 			}
 
 			rs.ResetStates();
@@ -367,90 +264,10 @@ namespace Fusion.Engine.Graphics {
 				
 			rs.PipelineState	=	factory[(int)flags];
 						
-			for ( int j=0; j<skySphere.Meshes.Count; j++) {
-				var mesh = skySphere.Meshes[j];
-
-				rs.SetupVertexInput( mesh.VertexBuffer, mesh.IndexBuffer );
-				rs.DrawIndexed( mesh.IndexCount, 0, 0 );
-			}
+			rs.SetupVertexInput( skyVB, null );
+			rs.Draw( skyVB.Capacity, 0 );
 
 			rs.ResetStates();
 		}
-
-
-#if false
-		/// <summary>
-		/// Gets current Sun direction.
-		/// </summary>
-		/// <returns></returns>
-		public Vector3 GetSunDirection( SkySettings settings )
-		{
-			return settings.SunPosition.Normalized();
-		}
-
-
-
-		Color4 SunColor ( Vector3 dir, SkySettings settings )
-		{
-			Color4 dusk		=	new Color4(Temperature.Get(2000), 1);
-			Color4 zenith	=	new Color4(Temperature.Get(settings.SunTemperature), 1);
-
-			Vector3 ndir	=	dir.Normalized();
-
-			return Color4.Lerp( dusk, zenith, (float)Math.Pow(ndir.Y, 0.5f) );
-		}
-
-
-		/// <summary>
-		/// Gets Sun color.
-		/// </summary>
-		/// <returns></returns>
-		public Color4 GetSunLightColor(SkySettings settings)
-		{
-			var sunPos = GetSunDirection(settings);
-
-			return SunColor( sunPos, settings ) * settings.SunLightIntensity;
-		}
-
-
-
-		/// <summary>
-		/// Gets Sun color.
-		/// </summary>
-		/// <returns></returns>
-		public Color4 GetSunGlowColor(SkySettings settings)
-		{
-			var sunPos = GetSunDirection(settings);
-
-			return SunColor( sunPos, settings ) * settings.SunGlowIntensity;
-
-			/*var zenithColorYxy = perezZenith( Params.SkyTurbidity, sunPos.Y );
-			var sunColorYxy = perezSun( Params.SkyTurbidity, sunPos.Y, 10 );
-			
-			return new Color4( YxyToRGB( sunColorYxy * new Vector3( Params.SunGlowIntensity, 1, 1 ) ) * Temperature.Get( Params.SunTemperature ), 1 );*/
-		}
-
-
-
-		/// <summary>
-		/// Gets average sky color.
-		/// </summary>
-		/// <returns></returns>
-		public Color4 GetAmbientLevel(SkySettings settings)
-		{
-			var sunPos = GetSunDirection(settings);
-			var ambientLight = Vector3.Zero;
-
-			var norm = randVectors.Length;// * 2 * MathUtil.Pi;
-
-			for (int i = 0; i < randVectors.Length; i++) {
-				var yxy = SkyModel.perezSky( settings.SkyTurbidity, randVectors[i], sunPos );
-				var rgb = SkyModel.YxyToRGB( yxy );// * Temperature.Get( settings.SunTemperature );
-				ambientLight += rgb / norm;
-			}
-
-			return new Color4(ambientLight,1);
-		}
-#endif
 	}
 }

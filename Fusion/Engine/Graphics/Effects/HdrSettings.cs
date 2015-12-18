@@ -70,6 +70,12 @@ namespace Fusion.Engine.Graphics {
 		public float BloomAmount { get; set; }
 
 		/// <summary>
+		/// Amount of dirt. Zero means no bloom.
+		/// One means fully bloomed image.
+		/// </summary>
+		public float DirtAmount { get; set; }
+
+		/// <summary>
 		/// Dirt mask lerp factor.
 		/// Default value is zero.
 		/// </summary>
@@ -98,6 +104,7 @@ namespace Fusion.Engine.Graphics {
 			LuminanceHighBound	=	99999.0f;
 			BloomAmount			=	0.1f;
 			GaussBlurSigma		=	3.0f;
+			DirtAmount			=	0.9f;
 
 		}
 	}
