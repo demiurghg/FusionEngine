@@ -85,16 +85,6 @@ namespace TestGame2 {
 		}
 
 		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="message"></param>
-		public override void GameEnd ( string message )
-		{
-			Log.Message("GAME ENDED: {0}", message );
-		}
-
-
-		/// <summary>
 		/// Runs one step of client-side simulation and render world state.
 		/// Do not close the stream.
 		/// </summary>
