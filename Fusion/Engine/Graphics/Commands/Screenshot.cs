@@ -25,7 +25,7 @@ namespace Fusion.Engine.Graphics.Commands {
 
 		public override void Execute ()
 		{
-			Game.GraphicsEngine.Screenshot(Path);
+			Game.RenderSystem.Screenshot(Path);
 		}
 	}
 }

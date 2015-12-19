@@ -49,7 +49,7 @@ namespace SceneDemo1 {
 			master = new ViewLayerHdr( Game, 0, 0 );
 
 			//	add view to layer to scene :
-			Game.GraphicsEngine.AddLayer( master );
+			Game.RenderSystem.AddLayer( master );
 
 			//	add console sprite layer to master view layer :
 			master.SpriteLayers.Add( console.ConsoleSpriteLayer );

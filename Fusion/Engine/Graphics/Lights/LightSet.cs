@@ -67,8 +67,8 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="ge"></param>
-		public LightSet ( GraphicsEngine ge )
+		/// <param name="rs"></param>
+		public LightSet ( RenderSystem rs )
 		{
 			AmbientLevel	=	Color4.Zero;
 		}

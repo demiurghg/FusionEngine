@@ -11,7 +11,7 @@ using Fusion.Engine.Common;
 namespace Fusion.Engine.Graphics {
 	public class SpriteLayer : DisposableBase {
 
-		readonly GraphicsEngine ge;
+		readonly RenderSystem rs;
 
 		/// <summary>
 		/// Is current layer is visible. Default: True
@@ -71,11 +71,11 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Ctor
 		/// </summary>
-		/// <param name="ge"></param>
+		/// <param name="rs"></param>
 		/// <param name="capacity">Number of sprites</param>
-		public SpriteLayer ( GraphicsEngine ge, int capacity )
+		public SpriteLayer ( RenderSystem rs, int capacity )
 		{
-			this.ge		=	ge;
+			this.rs		=	rs;
 
 			Order		=	0;
 
@@ -121,7 +121,7 @@ namespace Fusion.Engine.Graphics {
 
 			SafeDispose( ref vertexBuffer );
 
-			vertexBuffer	=	new VertexBuffer( ge.Device, typeof(SpriteVertex), capacity * VertexPerSprite, VertexBufferOptions.Dynamic );
+			vertexBuffer	=	new VertexBuffer( rs.Device, typeof(SpriteVertex), capacity * VertexPerSprite, VertexBufferOptions.Dynamic );
 		}
 
 
@@ -151,12 +151,12 @@ namespace Fusion.Engine.Graphics {
 			}
 
 
-			ge.Device.SetupVertexInput( vertexBuffer, null );
+			rs.Device.SetupVertexInput( vertexBuffer, null );
 
 
 			foreach ( var group in groups ) {
-				ge.Device.PixelShaderResources[0] = group.Texture.Srv;
-				ge.Device.Draw( group.SpriteCount * VertexPerSprite, group.StartSprite * VertexPerSprite );
+				rs.Device.PixelShaderResources[0] = group.Texture.Srv;
+				rs.Device.Draw( group.SpriteCount * VertexPerSprite, group.StartSprite * VertexPerSprite );
 			}
 		}
 

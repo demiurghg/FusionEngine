@@ -260,7 +260,7 @@ namespace Fusion.Engine.Media {
 			mediaSource.Dispose();
 
 
-			videoFrame = new DynamicTexture(Game.Instance.GraphicsEngine, Width, Height, typeof(ColorBGRA), false, false);
+			videoFrame = new DynamicTexture(Game.Instance.RenderSystem, Width, Height, typeof(ColorBGRA), false, false);
 		}
 
 

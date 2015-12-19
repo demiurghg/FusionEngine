@@ -21,7 +21,7 @@ namespace Fusion.Engine.Graphics {
 			public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 			{
 				bool srgb = assetPath.ToLowerInvariant().Contains("|srgb");
-				return new DiscTexture( content.Game.GraphicsEngine, new Texture2D( content.Game.GraphicsDevice, stream, srgb ) );
+				return new DiscTexture( content.Game.RenderSystem, new Texture2D( content.Game.GraphicsDevice, stream, srgb ) );
 			}
 		}
 
@@ -32,9 +32,9 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		///
 		/// </summary>
-		/// <param name="ge"></param>
+		/// <param name="rs"></param>
 		/// <param name="texture"></param>
-		private DiscTexture ( GraphicsEngine ge, Texture2D texture )
+		private DiscTexture ( RenderSystem rs, Texture2D texture )
 		{
 			this.texture	=	texture;
 			this.Width		=	texture.Width;

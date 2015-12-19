@@ -117,9 +117,9 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Creates instance from mesh in scene.
 		/// </summary>
-		/// <param name="ge"></param>
+		/// <param name="rs"></param>
 		/// <param name="mesh"></param>
-		public MeshInstance ( GraphicsEngine ge, Scene scene, Mesh mesh, Material[] materials )
+		public MeshInstance ( RenderSystem rs, Scene scene, Mesh mesh, Material[] materials )
 		{
 			Visible		=	true;
 			World		=	Matrix.Identity;

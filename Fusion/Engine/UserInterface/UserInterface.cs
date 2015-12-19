@@ -128,7 +128,7 @@ namespace Fusion.Engine.UserInterface {
 			}
 
 			var sb	=	spriteLayer;
-			var vp  =	Game.GraphicsEngine.DisplayBounds;
+			var vp  =	Game.RenderSystem.DisplayBounds;
 
 			sb.Clear();
 		

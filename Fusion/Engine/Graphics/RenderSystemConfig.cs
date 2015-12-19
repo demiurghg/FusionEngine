@@ -8,7 +8,7 @@ using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Graphics {
 
-	public class GraphicsEngineConfig {
+	public class RenderSystemConfig {
 
 		/// <summary>
 		/// Screen width
@@ -60,7 +60,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Ctor
 		/// </summary>
-		public GraphicsEngineConfig ()
+		public RenderSystemConfig ()
 		{
 			Width			=	1024;
 			Height			=	768;

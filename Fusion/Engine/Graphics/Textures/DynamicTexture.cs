@@ -43,7 +43,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="width"></param>
 		/// <param name="height"></param>
 		/// <param name="format"></param>
-		public DynamicTexture ( GraphicsEngine ge, int width, int height, Type elementType, bool mips = false, bool srgb = false )
+		public DynamicTexture ( RenderSystem rs, int width, int height, Type elementType, bool mips = false, bool srgb = false )
 		{
 			Log.Message("DynamicTexture: {0}x{1}@{2} {3} {4}", width, height, elementType.Name, mips, srgb );
 			this.ElementType	=	elementType;
@@ -56,7 +56,7 @@ namespace Fusion.Engine.Graphics {
 				throw new ArgumentException("elementType must be " + string.Join(", ", formats.Select(f=>f.Item2.ToString())) );
 			}
 
-			texture			=	new Texture2D( ge.Device, width, height, format, mips, srgb );
+			texture			=	new Texture2D( rs.Device, width, height, format, mips, srgb );
 			Srv				=	texture;
 		}
 

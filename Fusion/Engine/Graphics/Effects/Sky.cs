@@ -62,7 +62,6 @@ namespace Fusion.Engine.Graphics {
 
 		public RenderTargetCube	SkyCube { get { return skyCube; } }
 		RenderTargetCube	skyCube;
-		Texture2D			clouds;
 
 		Random	rand = new Random();
 
@@ -92,7 +91,7 @@ namespace Fusion.Engine.Graphics {
 			Game.Reloading += (s,e) => LoadContent();
 
 			
-			var skySphere	=	SkySphere.GetVertices(9);
+			var skySphere	=	SkySphere.GetVertices(4).Select( v => new SkyVertex{ Vertex = v } ).ToArray();
 			skyVB			=	new VertexBuffer( Game.GraphicsDevice, typeof(SkyVertex), skySphere.Length );
 			skyVB.SetData( skySphere );
 

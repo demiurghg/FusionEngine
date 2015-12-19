@@ -21,11 +21,11 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Creates texture from stream.
 		/// </summary>
-		/// <param name="ge"></param>
+		/// <param name="rs"></param>
 		/// <param name="texture"></param>
-		public UserTexture ( GraphicsEngine ge, Stream stream, bool forceSRgb  )
+		public UserTexture ( RenderSystem rs, Stream stream, bool forceSRgb  )
 		{
-			this.texture	=	new Texture2D( ge.Device, stream, forceSRgb );
+			this.texture	=	new Texture2D( rs.Device, stream, forceSRgb );
 			this.Width		=	texture.Width;
 			this.Height		=	texture.Height;
 			this.Srv		=	texture;
@@ -35,11 +35,11 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Creates texture from file in memory 
 		/// </summary>
-		/// <param name="ge"></param>
+		/// <param name="rs"></param>
 		/// <param name="texture"></param>
-		public UserTexture ( GraphicsEngine ge, byte[] data, bool forceSRgb )
+		public UserTexture ( RenderSystem rs, byte[] data, bool forceSRgb )
 		{
-			this.texture	=	new Texture2D( ge.Device, data, forceSRgb );
+			this.texture	=	new Texture2D( rs.Device, data, forceSRgb );
 			this.Width		=	texture.Width;
 			this.Height		=	texture.Height;
 			this.Srv		=	texture;

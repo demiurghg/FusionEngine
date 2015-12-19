@@ -26,9 +26,9 @@ namespace Fusion.Engine.Common {
 		/// Constructor
 		/// </summary>
 		/// <param name="game"></param>
-		public GameModule ( Game Game )
+		public GameModule ( Game game )
 		{
-			Game = Game;
+			this.Game = game;
 		}
 
 

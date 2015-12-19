@@ -119,8 +119,8 @@ namespace Fusion.Engine.Graphics.GIS
 			if (TextureAtlas == null) return;
 
 
-			dotsData.View				= Game.GraphicsEngine.Gis.Camera.ViewMatrixFloat;
-			dotsData.Proj				= Game.GraphicsEngine.Gis.Camera.ProjMatrixFloat;
+			dotsData.View				= Game.RenderSystem.Gis.Camera.ViewMatrixFloat;
+			dotsData.Proj				= Game.RenderSystem.Gis.Camera.ProjMatrixFloat;
 			dotsData.AtlasSizeImgSize	= new Vector4(TextureAtlas.Width, TextureAtlas.Height, ImageSizeInAtlas.X, ImageSizeInAtlas.Y);
 			dotsData.SizeMult			= new Vector4(SizeMultiplier);
 

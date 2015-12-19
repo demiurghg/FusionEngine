@@ -95,7 +95,7 @@ namespace Fusion.Engine.Graphics {
 
 				//	skip two bytes :
 				var texData				=	stream.ReadAllBytes();
-				fontTexture				=	new UserTexture( rs.Game.GraphicsEngine, texData, false );
+				fontTexture				=	new UserTexture( rs.Game.RenderSystem, texData, false );
 			
 				//	Fill structure :
 				fontInfo.fontFace		=	input.Info.Face;

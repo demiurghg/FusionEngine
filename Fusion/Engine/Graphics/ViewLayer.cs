@@ -18,7 +18,7 @@ namespace Fusion.Engine.Graphics {
 	public class ViewLayer : DisposableBase {
 		
 		protected readonly Game		Game;
-		protected readonly GraphicsEngine	ge;
+		protected readonly RenderSystem	rs;
 
 		/// <summary>
 		/// Indicates whether view should be drawn.
@@ -96,15 +96,15 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="width">Target width. Specify zero value for backbuffer.</param>
 		/// <param name="height">Target height. Specify zero value for backbuffer.</param>
 		/// <param name="enableHdr">Indicates that ViewLayer has HDR capabilities.</param>
-		public ViewLayer ( Game Game )
+		public ViewLayer ( Game game )
 		{
-			Game		=	Game;
-			this.ge			=	Game.GraphicsEngine;
+			Game		=	game;
+			this.rs		=	Game.RenderSystem;
 
-			Visible			=	true;
-			Order			=	0;
+			Visible		=	true;
+			Order		=	0;
 
-			Camera			=	new Camera();
+			Camera		=	new Camera();
 
 			SpriteLayers	=	new List<SpriteLayer>();
 			GisLayers		=	new List<Gis.GisLayer>();
@@ -138,11 +138,11 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		internal virtual void RenderView ( GameTime gameTime, StereoEye stereoEye )
 		{
-			var targetSurface = (Target == null) ? ge.Device.BackbufferColor.Surface : Target.RenderTarget.Surface;
+			var targetSurface = (Target == null) ? rs.Device.BackbufferColor.Surface : Target.RenderTarget.Surface;
 
 			//	clear target buffer if necassary :
 			if (Clear) {
-				ge.Device.Clear( targetSurface, ClearColor );
+				rs.Device.Clear( targetSurface, ClearColor );
 			}
 
 			var viewport	=	new Viewport( 0,0, targetSurface.Width, targetSurface.Height );
@@ -151,7 +151,7 @@ namespace Fusion.Engine.Graphics {
 			RenderGIS( gameTime, stereoEye, viewport, targetSurface );
 
 			//	draw sprites :
-			ge.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );
+			rs.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );
 		}
 
 
@@ -176,15 +176,15 @@ namespace Fusion.Engine.Graphics {
 					GlobeDepthStencil = new DepthStencil2D(Game.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height);
 				}
 
-				ge.Device.Clear(GlobeDepthStencil.Surface);
+				rs.Device.Clear(GlobeDepthStencil.Surface);
 
 				Game.GraphicsDevice.SetTargets(GlobeDepthStencil.Surface, targetSurface);
 				
 				GlobeCamera.Viewport = viewport;
 				GlobeCamera.Update(gameTime);
 
-				ge.Gis.Camera = GlobeCamera;
-				ge.Gis.Draw(gameTime, stereoEye, GisLayers);
+				rs.Gis.Camera = GlobeCamera;
+				rs.Gis.Draw(gameTime, stereoEye, GisLayers);
 			}
 		}
 	}

@@ -29,7 +29,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="width"></param>
 		/// <param name="height"></param>
 		/// <param name="format"></param>
-		public TargetTexture ( GraphicsEngine ge, int width, int height, TargetFormat format )
+		public TargetTexture ( RenderSystem rs, int width, int height, TargetFormat format )
 		{
 			this.Width	=	width;
 			this.Height	=	height;
@@ -43,7 +43,7 @@ namespace Fusion.Engine.Graphics {
 				default: throw new ArgumentException("format");
 			}
 
-			RenderTarget	=	new RenderTarget2D( ge.Device, clrFrmt, width, height ); 
+			RenderTarget	=	new RenderTarget2D( rs.Device, clrFrmt, width, height ); 
 			Srv	=	RenderTarget;
 		}	
 		

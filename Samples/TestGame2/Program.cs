@@ -45,19 +45,19 @@ namespace TestGame2 {
 		public void Apply ( Game game )
 		{
 			if (Width>0) {
-				game.GraphicsEngine.Config.Width	=	Width;
+				game.RenderSystem.Config.Width	=	Width;
 			}
 			if (Height>0) {
-				game.GraphicsEngine.Config.Height	=	Height;
+				game.RenderSystem.Config.Height	=	Height;
 			}
 			if (Fullscreen) {
-				game.GraphicsEngine.Config.Fullscreen	=	Fullscreen;
+				game.RenderSystem.Config.Fullscreen	=	Fullscreen;
 			}
 			if (DebugDevice) {
-				game.GraphicsEngine.Config.UseDebugDevice =	DebugDevice;
+				game.RenderSystem.Config.UseDebugDevice =	DebugDevice;
 			}
 			if (StereoMode!=StereoMode.Disabled) {
-				game.GraphicsEngine.Config.StereoMode	=	StereoMode;
+				game.RenderSystem.Config.StereoMode	=	StereoMode;
 			}
 			if (!string.IsNullOrWhiteSpace(Command)) {
 				game.Invoker.Push( Command );
@@ -107,7 +107,7 @@ namespace TestGame2 {
 				engine.LoadConfiguration("Config.ini");
 
 				//	apply configuration here:
-				engine.GraphicsEngine.Config.UseDebugDevice =	false;
+				engine.RenderSystem.Config.UseDebugDevice =	false;
 				engine.TrackObjects		=	true;
 				engine.GameTitle		=	"Test Game 2";
 

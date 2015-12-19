@@ -86,8 +86,8 @@ namespace Fusion.Framework {
 		{
 			editBox.FeedHistory( Config.GetHistory() );
 
-			consoleLayer	=	new SpriteLayer( Game.GraphicsEngine, 1024 );
-			editLayer		=	new SpriteLayer( Game.GraphicsEngine, 1024 );
+			consoleLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
+			editLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
 			consoleLayer.Order = 9999;
 			consoleLayer.Layers.Add( editLayer );
 

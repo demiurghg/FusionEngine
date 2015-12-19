@@ -35,35 +35,35 @@ namespace SceneDemo1 {
 			//
 			//	Run game :
 			//
-			using (var engine = new Game( "SceneDemo1" )) {
+			using (var game = new Game( "SceneDemo1" )) {
 
 				//	create SV, CL and UI instances :
-				engine.GameServer = new SceneDemo1GameServer( engine );
-				engine.GameClient = new SceneDemo1GameClient( engine );
-				engine.GameInterface = new SceneDemo1GameInterface( engine );
+				game.GameServer = new SceneDemo1GameServer( game );
+				game.GameClient = new SceneDemo1GameClient( game );
+				game.GameInterface = new SceneDemo1GameInterface( game );
 
 				//	load configuration.
 				//	first run will cause warning, 
 				//	because configuration file still does not exist.
-				engine.LoadConfiguration( "Config.ini" );
+				game.LoadConfiguration( "Config.ini" );
 
 				//	enable and disable debug direct3d device :
-				engine.GraphicsEngine.Config.UseDebugDevice = false;
+				game.RenderSystem.Config.UseDebugDevice = false;
 
 				//	enable and disable object tracking :
-				engine.TrackObjects = true;
+				game.TrackObjects = true;
 
 				//	set game title :
-				engine.GameTitle = "SceneDemo1";
+				game.GameTitle = "SceneDemo1";
 
 				//	apply command-line options here:
 				//	...
 
 				//	run:
-				engine.Run();
+				game.Run();
 
 				//	save configuration :
-				engine.SaveConfiguration( "Config.ini" );
+				game.SaveConfiguration( "Config.ini" );
 			}
 
 			return 0;

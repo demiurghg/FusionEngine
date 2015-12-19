@@ -64,7 +64,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			averageLum	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 256,256, true, false );
 			paramsCB	=	new ConstantBuffer( Game.GraphicsDevice, typeof(Params) );
-			whiteTex	=	new DynamicTexture( Game.GraphicsEngine, 4,4, typeof(Color), false, false);
+			whiteTex	=	new DynamicTexture( Game.RenderSystem, 4,4, typeof(Color), false, false);
 			whiteTex.SetData( Enumerable.Range(0,16).Select( i=> Color.White ).ToArray() );
 
 			LoadContent();
@@ -113,7 +113,7 @@ namespace Fusion.Engine.Graphics {
 		public void Render ( GameTime gameTime, RenderTargetSurface target, ShaderResource hdrImage, ViewLayerHdr viewLayer )
 		{
 			var device	=	Game.GraphicsDevice;
-			var filter	=	Game.GraphicsEngine.Filter;
+			var filter	=	Game.RenderSystem.Filter;
 
 			var settings	=	viewLayer.HdrSettings;
 

@@ -61,8 +61,8 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Gets the current graphics engine
 		/// </summary>
-		[GameModule("Graphics", "ge", InitOrder.After)]
-		public	GraphicsEngine GraphicsEngine { get { return graphicsEngine; } }
+		[GameModule("Graphics", "rs", InitOrder.After)]
+		public	RenderSystem RenderSystem { get { return renderSystem; } }
 
 		[GameModule("Network", "net", InitOrder.After)]
 		public NetworkEngine Network { get { return network; } }
@@ -199,7 +199,7 @@ namespace Fusion.Engine.Common {
 		GraphicsDevice		graphicsDevice	;
 		//AudioEngine			audioEngine		;
 		//InputEngine			inputEngine		;
-		GraphicsEngine		graphicsEngine	;
+		RenderSystem		renderSystem	;
 		NetworkEngine		network			;
 		ContentManager		content			;
 		Invoker				invoker			;
@@ -312,7 +312,7 @@ namespace Fusion.Engine.Common {
 			audioDevice			=	new AudioDevice( this );
 			inputDevice			=	new InputDevice( this );
 			graphicsDevice		=	new GraphicsDevice( this );
-			graphicsEngine		=	new GraphicsEngine( this );
+			renderSystem		=	new RenderSystem( this );
 			network				=	new NetworkEngine( this );
 			content				=	new ContentManager( this );
 			gameTimeInternal	=	new GameTime();
@@ -373,7 +373,7 @@ namespace Fusion.Engine.Common {
 			Log.Message("-------- Game Initializing --------");
 
 			var p = new GraphicsParameters();
-			GraphicsEngine.ApplyParameters( ref p );
+			RenderSystem.ApplyParameters( ref p );
 
 			GraphicsDevice.Initialize( p );
 			InputDevice.Initialize();
@@ -548,7 +548,7 @@ namespace Fusion.Engine.Common {
 					gameTimeInternal.AddSubframe();
 				}
 
-				GraphicsDevice.Present(GraphicsEngine.Config.VSyncInterval);
+				GraphicsDevice.Present(RenderSystem.Config.VSyncInterval);
 
 				InputDevice.EndUpdateInput();
 			}
@@ -574,7 +574,7 @@ namespace Fusion.Engine.Common {
 		{
 			//GIS.Draw(gameTime, stereoEye);
 
-			GraphicsEngine.Draw( gameTime, stereoEye );
+			RenderSystem.Draw( gameTime, stereoEye );
 
 			GraphicsDevice.ResetStates();
 			GraphicsDevice.RestoreBackbuffer();

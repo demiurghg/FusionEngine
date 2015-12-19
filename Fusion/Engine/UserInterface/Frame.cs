@@ -728,7 +728,7 @@ namespace Fusion.Engine.UserInterface {
 			int br	=	BorderRight;
 			int bl	=	BorderLeft;
 
-			var whiteTex = Game.GraphicsEngine.WhiteTexture;
+			var whiteTex = Game.RenderSystem.WhiteTexture;
 
 			var clr	=	BorderColor * colorMultiplier;
 

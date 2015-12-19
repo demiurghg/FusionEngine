@@ -39,10 +39,10 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="ge"></param>
-		public SpriteEngine( GraphicsEngine ge ) : base(ge.Game)
+		/// <param name="rs"></param>
+		public SpriteEngine( RenderSystem rs ) : base(rs.Game)
 		{
-			this.device	=	ge.Device;
+			this.device	=	rs.Device;
 		}
 
 

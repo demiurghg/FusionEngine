@@ -76,7 +76,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="width">Target width. Specify zero value for backbuffer.</param>
 		/// <param name="height">Target height. Specify zero value for backbuffer.</param>
 		/// <param name="enableHdr">Indicates that ViewLayer has HDR capabilities.</param>
-		public ViewLayerHdr ( Game Game, int width, int height ) : base( Game )
+		public ViewLayerHdr ( Game game, int width, int height ) : base( game )
 		{
 			var vp	=	Game.GraphicsDevice.DisplayBounds;
 
@@ -91,7 +91,7 @@ namespace Fusion.Engine.Graphics {
 			SkySettings		=	new SkySettings();
 
 			Instances		=	new List<MeshInstance>();
-			LightSet		=	new LightSet( Game.GraphicsEngine );
+			LightSet		=	new LightSet( Game.RenderSystem );
 
 			MeasuredOld		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
 			MeasuredNew		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
@@ -183,11 +183,11 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		internal override void RenderView ( GameTime gameTime, StereoEye stereoEye )
 		{
-			var targetSurface = (Target == null) ? ge.Device.BackbufferColor.Surface : Target.RenderTarget.Surface;
+			var targetSurface = (Target == null) ? rs.Device.BackbufferColor.Surface : Target.RenderTarget.Surface;
 
 			//	clear target buffer if necassary :
 			if (Clear) {
-				ge.Device.Clear( targetSurface, ClearColor );
+				rs.Device.Clear( targetSurface, ClearColor );
 			}
 
 			var viewport	=	new Viewport( 0,0, targetSurface.Width, targetSurface.Height );
@@ -200,7 +200,7 @@ namespace Fusion.Engine.Graphics {
 			RenderGIS( gameTime, stereoEye, viewport, targetSurface );
 
 			//	draw sprites :
-			ge.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );
+			rs.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );
 		}
 
 
@@ -231,22 +231,22 @@ namespace Fusion.Engine.Graphics {
 			ClearBuffers();
 
 			//	render shadows :
-			ge.LightRenderer.RenderShadows( this );
+			rs.LightRenderer.RenderShadows( this );
 			
 			//	render g-buffer :
-			ge.SceneRenderer.RenderGBuffer( stereoEye, this );
+			rs.SceneRenderer.RenderGBuffer( stereoEye, this );
 
 			//	render sky :
-			ge.Sky.Render( Camera, stereoEye, gameTime, DepthBuffer.Surface, HdrBuffer.Surface, viewport, SkySettings );
+			rs.Sky.Render( Camera, stereoEye, gameTime, DepthBuffer.Surface, HdrBuffer.Surface, viewport, SkySettings );
 
 			//	render lights :
-			ge.LightRenderer.RenderLighting( stereoEye, this, Game.GraphicsEngine.WhiteTexture );
+			rs.LightRenderer.RenderLighting( stereoEye, this, Game.RenderSystem.WhiteTexture );
 
 			//	apply tonemapping and bloom :
-			ge.HdrFilter.Render( gameTime, TempFXBuffer.Surface, HdrBuffer, this );
+			rs.HdrFilter.Render( gameTime, TempFXBuffer.Surface, HdrBuffer, this );
 
 			//	apply FXAA
-			ge.Filter.Fxaa( targetSurface, TempFXBuffer );
+			rs.Filter.Fxaa( targetSurface, TempFXBuffer );
 		}
 
 

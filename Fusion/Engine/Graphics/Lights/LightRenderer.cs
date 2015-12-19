@@ -18,7 +18,7 @@ namespace Fusion.Engine.Graphics {
 		const int	MaxOmniLights	=	1024;
 		const int	MaxSpotLights	=	16;
 
-		GraphicsEngine ge { get { return Game.GraphicsEngine; } }
+		RenderSystem rs { get { return Game.RenderSystem; } }
 
 
 		[Config]
@@ -288,7 +288,7 @@ namespace Fusion.Engine.Graphics {
 				device.ComputeShaderResources[3]	=	viewLayer.DepthBuffer;
 				device.ComputeShaderResources[4]	=	csmColor;
 				device.ComputeShaderResources[5]	=	spotColor;
-				device.ComputeShaderResources[6]	=	viewLayer.LightSet.SpotAtlas==null ? ge.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
+				device.ComputeShaderResources[6]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
 				device.ComputeShaderResources[7]	=	omniLightBuffer;
 				device.ComputeShaderResources[8]	=	spotLightBuffer;
 				device.ComputeShaderResources[9]	=	occlusionMap.Srv;
@@ -310,7 +310,7 @@ namespace Fusion.Engine.Graphics {
 			//
 			//	Add accumulated light  :
 			//
-			ge.Filter.OverlayAdditive( viewLayer.HdrBuffer.Surface, viewLayer.LightAccumulator );
+			rs.Filter.OverlayAdditive( viewLayer.HdrBuffer.Surface, viewLayer.LightAccumulator );
 
 			device.ResetStates();
 		}
@@ -361,7 +361,7 @@ namespace Fusion.Engine.Graphics {
 				context.ColorBuffer			=	csmColor.Surface;
 				context.DepthBuffer			=	csmDepth.Surface;
 
-				Game.GraphicsEngine.SceneRenderer.RenderShadowMapCascade( context, instances );
+				Game.RenderSystem.SceneRenderer.RenderShadowMapCascade( context, instances );
 			}
 
 
@@ -389,7 +389,7 @@ namespace Fusion.Engine.Graphics {
 				context.ColorBuffer			=	spotColor.Surface;
 				context.DepthBuffer			=	spotDepth.Surface;
 
-				Game.GraphicsEngine.SceneRenderer.RenderShadowMapCascade( context, instances );
+				Game.RenderSystem.SceneRenderer.RenderShadowMapCascade( context, instances );
 			}
 		}
 

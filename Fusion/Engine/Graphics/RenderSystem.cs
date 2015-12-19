@@ -13,7 +13,7 @@ using Fusion.Engine.Graphics.GIS;
 
 namespace Fusion.Engine.Graphics {
 
-	public class GraphicsEngine : GameModule {
+	public class RenderSystem : GameModule {
 
 		internal readonly GraphicsDevice Device;
 
@@ -46,7 +46,7 @@ namespace Fusion.Engine.Graphics {
 		public Sky	sky;
 		
 		[Config]
-		public  GraphicsEngineConfig Config { get; private set; }
+		public  RenderSystemConfig Config { get; private set; }
 
 
 		/// <summary>
@@ -84,9 +84,9 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="engine"></param>
-		public GraphicsEngine ( Game Game ) : base(Game)
+		public RenderSystem ( Game Game ) : base(Game)
 		{
-			Config		=	new GraphicsEngineConfig();
+			Config		=	new RenderSystemConfig();
 			this.Device	=	Game.GraphicsDevice;
 
 			viewLayers	=	new List<ViewLayer>();

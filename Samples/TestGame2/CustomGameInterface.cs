@@ -106,24 +106,24 @@ namespace TestGame2 {
 
 			//var mtrl		=	GameEngine.Content.Load<Material>("testMtrl");
 
-			var bounds		=	Game.GraphicsEngine.DisplayBounds;
+			var bounds		=	Game.RenderSystem.DisplayBounds;
 			masterView		=	new ViewLayerHdr(Game, bounds.Width, bounds.Height);
 
 			masterView2		=	new ViewLayer(Game);
 
-			Game.GraphicsEngine.DisplayBoundsChanged += (s,e) => {
-				masterView.Resize( Game.GraphicsEngine.DisplayBounds.Width, Game.GraphicsEngine.DisplayBounds.Height );
+			Game.RenderSystem.DisplayBoundsChanged += (s,e) => {
+				masterView.Resize( Game.RenderSystem.DisplayBounds.Width, Game.RenderSystem.DisplayBounds.Height );
 				//Log.Warning("{0} {1}", GameEngine.GraphicsEngine.DisplayBounds.Width, GameEngine.GraphicsEngine.DisplayBounds.Height);
 			};
 
-			targetTexture		=	new TargetTexture(Game.GraphicsEngine, bounds.Width, bounds.Height, TargetFormat.LowDynamicRange );
+			targetTexture		=	new TargetTexture(Game.RenderSystem, bounds.Width, bounds.Height, TargetFormat.LowDynamicRange );
 			//masterView.Target	=	targetTexture;
 
-			Game.GraphicsEngine.AddLayer( masterView );
-			Game.GraphicsEngine.AddLayer( masterView2 );
+			Game.RenderSystem.AddLayer( masterView );
+			Game.RenderSystem.AddLayer( masterView2 );
 
-			testLayer	=	new SpriteLayer( Game.GraphicsEngine, 1024 );
-			uiLayer		=	new SpriteLayer( Game.GraphicsEngine, 1024 );
+			testLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
+			uiLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
 			texture		=	Game.Content.Load<DiscTexture>( "lena" );
 			scene		=	Game.Content.Load<Scene>( @"scenes\testScene" );
 
@@ -138,7 +138,7 @@ namespace TestGame2 {
 			var transforms = new Matrix[ scene.Nodes.Count ];
 			scene.ComputeAbsoluteTransforms( transforms );
 
-			var defMtrl		=	Game.GraphicsEngine.DefaultMaterial;
+			var defMtrl		=	Game.RenderSystem.DefaultMaterial;
 			var materials	=	scene.Materials.Select( m => Game.Content.Load<Material>( m.Name, defMtrl ) ).ToArray();
 			
 			for ( int i=0; i<scene.Nodes.Count; i++ ) {
@@ -149,7 +149,7 @@ namespace TestGame2 {
 					continue;
 				}
 				
-				var inst   = new MeshInstance( Game.GraphicsEngine, scene, scene.Meshes[meshIndex], materials );
+				var inst   = new MeshInstance( Game.RenderSystem, scene, scene.Meshes[meshIndex], materials );
 				inst.World = transforms[ i ];
 			
 				masterView.Instances.Add( inst );
@@ -269,7 +269,7 @@ namespace TestGame2 {
 
 			var m = UpdateCam( gameTime );
 
-			var vp = Game.GraphicsEngine.DisplayBounds;
+			var vp = Game.RenderSystem.DisplayBounds;
 			var ratio = vp.Width / (float)vp.Height;
 
 			masterView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1, 0, ratio);

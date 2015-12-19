@@ -113,7 +113,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			Game.GraphicsDevice.DeviceContext.CopyResource(HeatTexture.SRV.Resource, Final.Surface.Resource);
 
-			Game.GraphicsEngine.Filter.GaussBlur(Final, Temp, 1.5f, 0);
+			Game.RenderSystem.Filter.GaussBlur(Final, Temp, 1.5f, 0);
 
 			//game.GraphicsDevice.PipelineState = blurFactory[(int)(PolyFlags.COMPUTE_SHADER | PolyFlags.BLUR_VERTICAL)];
 			//
