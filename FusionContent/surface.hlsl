@@ -86,7 +86,7 @@ GBuffer PSMain( PSInput input )
 	float3	white		=	float3(1,1,1);
 	float3 	diffuse		=	DiffuseTexture.Sample( Sampler, input.TexCoord ).xyz;
 	float3 	specular	=	SpecularTexture.Sample( Sampler, input.TexCoord ).xyz;
-	float3 	normal		=	float3(0,0,1);// NormalMapTexture.Sample( Sampler, input.TexCoord ).xyz * 2 - 1;// input.WNormal.xyz;
+	float3 	normal		=	NormalMapTexture.Sample( Sampler, input.TexCoord ).xyz * 2 - 1;// input.WNormal.xyz;
 	float3 	normalBias	=	NormalMapTexture.SampleBias( Sampler, input.TexCoord,0 ).xyz * 2 - 1;// input.WNormal.xyz;
 	float3 	emission	=	EmissionTexture.Sample( Sampler, input.TexCoord ).xyz * 100;// input.WNormal.xyz;
 	

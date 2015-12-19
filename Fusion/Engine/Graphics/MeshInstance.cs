@@ -96,12 +96,22 @@ namespace Fusion.Engine.Graphics {
 		readonly internal int indexCount;
 		readonly internal int vertexCount;
 
-		//struct ShadingGroup {
-		//	public int StartIndex;
-		//	public int IndicesCount;
-		//	public Material Material;
-		//}
+		internal struct ShadingGroup {
 
+			public ShadingGroup( MeshSubset subset, Material material )
+			{
+				StartIndex	=	subset.StartPrimitive * 3;
+				IndicesCount=	subset.PrimitiveCount * 3;
+				Material	=	material;
+			}
+			
+			public int StartIndex;
+			public int IndicesCount;
+			public Material Material;
+		}
+
+
+		internal readonly ShadingGroup[] ShadingGroups;
 
 
 		/// <summary>
@@ -122,32 +132,9 @@ namespace Fusion.Engine.Graphics {
 			vertexCount	=	mesh.VertexCount;
 			indexCount	=	mesh.IndexCount;
 
-
-			/*foreach ( var subset in mesh.Subsets ) {
-				
-				//var material	=	ge.GameEngine.C
-
-			} */
-
-			//	TODO : Get materials here
-			//	TODO : Get textures here
-			//	Keep in mind hot reloading!
-		}
-
-
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="instanceIndex"></param>
-		/// <param name="world"></param>
-		/// <param name="color"></param>
-		/// <param name="blending"></param>
-		public void SetInstance ( int instanceIndex, Matrix world, Color4 color, Vector4 blending )
-		{
-			throw new NotImplementedException();
+			ShadingGroups	=	mesh.Subsets	
+							.Select( s => new ShadingGroup( s, materials[s.MaterialIndex] ) )
+							.ToArray();
 		}
 
 
@@ -155,41 +142,9 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="instanceIndex"></param>
-		/// <param name="bonesTransforms"></param>
-		/// <param name="boneColors"></param>
-		/// <param name="boneBlending"></param>
-		public void SetInstanceBones ( int instanceIndex, Matrix[] bonesTransforms, Color4[] boneColors, Vector4[] boneBlending )
+		public void RenderGBuffer ()
 		{
-			throw new NotImplementedException();
+			
 		}
-		
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="materialIndex"></param>
-		/// <param name="material"></param>
-		public void ReplaceMaterial ( int materialIndex, Material material )
-		{
-			throw new NotImplementedException();
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="materialIndex"></param>
-		/// <param name="material"></param>
-		public void RestoreMaterial ( int materialIndex, Material material )
-		{
-			throw new NotImplementedException();
-		}
-
-
-
-		
 	}
 }

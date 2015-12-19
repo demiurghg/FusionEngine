@@ -162,10 +162,6 @@ namespace Fusion.Engine.Graphics {
 
 			device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
 
-			device.PixelShaderResources[0]	=	defaultDiffuse	;
-			device.PixelShaderResources[1]	=	defaultSpecular	;
-			device.PixelShaderResources[2]	=	defaultNormalMap;
-			device.PixelShaderResources[3]	=	defaultEmission	;
 
 			var instances	=	viewLayer.Instances;
 
@@ -183,9 +179,16 @@ namespace Fusion.Engine.Graphics {
 				device.VertexShaderConstants[0]	= constBuffer ;
 
 				device.SetupVertexInput( instance.vb, instance.ib );
-				device.DrawIndexed( instance.indexCount, 0, 0 );
+
+				foreach ( var sg in instance.ShadingGroups ) {
+
+					sg.Material.SetTextures( device );
+
+					device.DrawIndexed( sg.IndicesCount, sg.StartIndex, 0 );
+				}
 			}
 		}
+
 
 
 

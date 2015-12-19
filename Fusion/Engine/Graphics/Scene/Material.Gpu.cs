@@ -46,16 +46,21 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="content"></param>
 		internal void LoadGpuResources ( ContentManager content )
 		{
+			var defaultColorTexture		=	content.GameEngine.GraphicsEngine.GrayTexture;
+			var defaultSurfaceTexture	=	content.GameEngine.GraphicsEngine.BlackTexture;
+			var defaultNormalMapTexture	=	content.GameEngine.GraphicsEngine.FlatNormalMap;
+			var defaultEmissionTexture	=	content.GameEngine.GraphicsEngine.BlackTexture;
+
 			constBuffer		=	new ConstantBuffer( content.GameEngine.GraphicsDevice, typeof(LayerData), 4 );
 
 			shaderResources	=	new ShaderResource[16];
 
 			for (int i=0; i<layers.Length; i++) {
 				if (layers[i]!=null) {
-					shaderResources[ i * 4 + 0]	=	LoadColorTexture( content, layers[i].ColorTexture		).Srv;
-					shaderResources[ i * 4 + 1]	=	LoadColorTexture( content, layers[i].SurfaceTexture		).Srv;
-					shaderResources[ i * 4 + 2]	=	LoadColorTexture( content, layers[i].NormalMapTexture	).Srv;
-					shaderResources[ i * 4 + 3]	=	LoadColorTexture( content, layers[i].EmissionTexture	).Srv;
+					shaderResources[ i * 4 + 0]	=	LoadTexture( content, layers[i].ColorTexture	, defaultColorTexture	  , true  ).Srv;
+					shaderResources[ i * 4 + 1]	=	LoadTexture( content, layers[i].SurfaceTexture	, defaultSurfaceTexture	  , false ).Srv;
+					shaderResources[ i * 4 + 2]	=	LoadTexture( content, layers[i].NormalMapTexture, defaultNormalMapTexture , false ).Srv;
+					shaderResources[ i * 4 + 3]	=	LoadTexture( content, layers[i].EmissionTexture , defaultEmissionTexture  , true  ).Srv;
 				} else {
 					shaderResources[ i * 4 + 0]	=	null;
 					shaderResources[ i * 4 + 1]	=	null;
@@ -99,20 +104,13 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="content"></param>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		Texture LoadColorTexture ( ContentManager content, string path )
+		/// <param name="LoadColorTexture"></param>
+		internal void SetTextures ( GraphicsDevice device )
 		{
-			var defaultTexture	=	content.GameEngine.GraphicsEngine.GrayTexture;
-
-			if (string.IsNullOrWhiteSpace(path)) {
-				return defaultTexture;
+			for (int i=0; i<16; i++) {
+				device.PixelShaderResources[i]	=	shaderResources[i];
 			}
-
-			return content.Load<Texture>( path + "|srgb", defaultTexture );
 		}
-
 
 
 		/// <summary>
@@ -121,56 +119,18 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="content"></param>
 		/// <param name="path"></param>
 		/// <returns></returns>
-		Texture LoadSpecularTexture ( ContentManager content, string path )
+		Texture LoadTexture ( ContentManager content, string path, Texture defaultTexture, bool srgb )
 		{
-			var defaultTexture	=	content.GameEngine.GraphicsEngine.BlackTexture;
-
 			if (string.IsNullOrWhiteSpace(path)) {
 				return defaultTexture;
 			}
 
-			return content.Load<Texture>( path, defaultTexture );
-		}
-
-
-
-		/// <summary>
-		/// Loads normal map texture
-		/// </summary>
-		/// <param name="content"></param>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		Texture LoadNormalMapTexture ( ContentManager content, string path )
-		{
-			var defaultTexture	=	content.GameEngine.GraphicsEngine.FlatNormalMap;
-
-			if (string.IsNullOrWhiteSpace(path)) {
+			if ( !content.Exists( path ) ) {
 				return defaultTexture;
 			}
-
-			return content.Load<Texture>( path, defaultTexture );
+			
+			return content.Load<DiscTexture>( srgb ? path+"|srgb" : path );
 		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="content"></param>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		Texture LoadEmissionTexture ( ContentManager content, string path )
-		{
-			var defaultTexture	=	content.GameEngine.GraphicsEngine.BlackTexture;
-
-			if (string.IsNullOrWhiteSpace(path)) {
-				return defaultTexture;
-			}
-
-			return content.Load<Texture>( path + "|srgb" );
-		}
-
-
 	}
 }
 																	    

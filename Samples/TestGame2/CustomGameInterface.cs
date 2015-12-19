@@ -138,7 +138,8 @@ namespace TestGame2 {
 			var transforms = new Matrix[ scene.Nodes.Count ];
 			scene.ComputeAbsoluteTransforms( transforms );
 
-			var materials	=	scene.Materials.Select( m => GameEngine.Content.Load<Material>( m.Name ) ).ToArray();
+			var defMtrl		=	GameEngine.GraphicsEngine.DefaultMaterial;
+			var materials	=	scene.Materials.Select( m => GameEngine.Content.Load<Material>( m.Name, defMtrl ) ).ToArray();
 			
 			for ( int i=0; i<scene.Nodes.Count; i++ ) {
 			
@@ -268,7 +269,10 @@ namespace TestGame2 {
 
 			var m = UpdateCam( gameTime );
 
-			masterView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1, 0, 1);
+			var vp = GameEngine.GraphicsEngine.DisplayBounds;
+			var ratio = vp.Width / (float)vp.Height;
+
+			masterView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1, 0, ratio);
 		}
 
 

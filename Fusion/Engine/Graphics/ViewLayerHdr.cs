@@ -154,12 +154,12 @@ namespace Fusion.Engine.Graphics {
 			int bloomWidth		=	( targetWidth/2  ) & 0xFFF0;
 			int bloomHeight		=	( targetHeight/2 ) & 0xFFF0;
 
-			HdrBuffer			=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, newWidth, newHeight,	false, false );
-			LightAccumulator	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, newWidth, newHeight,	false, true );
-			DepthBuffer			=	new DepthStencil2D( GameEngine.GraphicsDevice, DepthFormat.D24S8,	newWidth, newHeight,	1 );
-			DiffuseBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8,	newWidth, newHeight,	false, false );
-			SpecularBuffer 		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8,	newWidth, newHeight,	false, false );
-			NormalMapBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgb10A2, newWidth, newHeight,	false, false );
+			HdrBuffer			=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, newWidth,	newHeight,	false, false );
+			LightAccumulator	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, newWidth,	newHeight,	false, true );
+			DepthBuffer			=	new DepthStencil2D( GameEngine.GraphicsDevice, DepthFormat.D24S8,	newWidth,	newHeight,	1 );
+			DiffuseBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8,	newWidth,	newHeight,	false, false );
+			SpecularBuffer 		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8,	newWidth,	newHeight,	false, false );
+			NormalMapBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgb10A2, newWidth,	newHeight,	false, false );
 			
 			Bloom0				=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
 			Bloom1				=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
@@ -247,6 +247,16 @@ namespace Fusion.Engine.Graphics {
 
 			//	apply FXAA
 			ge.Filter.Fxaa( targetSurface, TempFXBuffer );
+		}
+
+
+
+
+		/// <summary>
+		/// Renders lit mesh instances.
+		/// </summary>
+		void RenderLitMeshInstances ()
+		{
 		}
 
 
