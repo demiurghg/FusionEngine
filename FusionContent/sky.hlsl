@@ -24,21 +24,13 @@ SamplerState SamplerLinear : register(s0);
 
 struct VS_INPUT {
 	float3 position		: POSITION;
-	float2 texcoord		: TEXCOORD0;
-	float3 normal		: NORMAL;
-	float3 tangent		: TANGENT;
-	float3 binormal		: BINORMAL;
 };
 	
 
 struct VS_OUTPUT {
 	float4 position		: SV_POSITION;
-	float2 texcoord		: TEXCOORD0;
 	float3 worldPos		: TEXCOORD1;
 	float3 skyColor		: COLOR0;
-	float3 normal		: TEXCOORD2;
-	float3 tangent		: TEXCOORD3;
-	float3 binormal		: TEXCOORD4;
 };
 
 #define PS_INPUT VS_OUTPUT
@@ -153,7 +145,7 @@ VS_OUTPUT VSMain( VS_INPUT input )
 	float3 l = normalize(SunPosition); 
 	output.skyColor		= perezSky( Turbidity, max ( v.y, 0.0 ) + 0.05, dot ( l, v ), l.y );
 	
-	output.texcoord =	input.texcoord;
+	/*output.texcoord =	input.texcoord;
 
 	float3 normalN = -input.position;
 	float c = dot(input.normal, normalN) / (length(input.normal) * length(normalN));
@@ -169,7 +161,7 @@ VS_OUTPUT VSMain( VS_INPUT input )
 
 	output.normal	=	normalize(normalN);
 	output.tangent	=	normalize(mul(input.tangent, rotationMatrix));
-	output.binormal	=	normalize(mul(input.binormal, rotationMatrix));
+	output.binormal	=	normalize(mul(input.binormal, rotationMatrix));*/
 
 	return output;
 }

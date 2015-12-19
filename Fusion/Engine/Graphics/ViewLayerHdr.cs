@@ -42,7 +42,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Gets collection of mesh instances.
 		/// </summary>
-		public ICollection<InstancedMesh> Instances {
+		public ICollection<MeshInstance> Instances {
 			get; private set;
 		}
 
@@ -63,10 +63,10 @@ namespace Fusion.Engine.Graphics {
 		internal RenderTarget2D	Bloom1;
 
 
-		public TargetTexture	HdrTexture			{ get; set; }
-		public TargetTexture	DiffuseTexture		{ get; set; }
-		public TargetTexture	SpecularTexture		{ get; set; }
-		public TargetTexture	NormalMapTexture	{ get; set; }
+		//public TargetTexture	HdrTexture			{ get; set; }
+		//public TargetTexture	DiffuseTexture		{ get; set; }
+		//public TargetTexture	SpecularTexture		{ get; set; }
+		//public TargetTexture	NormalMapTexture	{ get; set; }
 
 
 		/// <summary>
@@ -90,7 +90,7 @@ namespace Fusion.Engine.Graphics {
 			HdrSettings		=	new HdrSettings();
 			SkySettings		=	new SkySettings();
 
-			Instances		=	new List<InstancedMesh>();
+			Instances		=	new List<MeshInstance>();
 			LightSet		=	new LightSet( gameEngine.GraphicsEngine );
 
 			MeasuredOld		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
@@ -164,10 +164,10 @@ namespace Fusion.Engine.Graphics {
 			Bloom0				=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
 			Bloom1				=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
 
-			HdrTexture			=	new TargetTexture( HdrBuffer );
-			DiffuseTexture		=	new TargetTexture( DiffuseBuffer );
-			SpecularTexture		=	new TargetTexture( SpecularBuffer );
-			NormalMapTexture	=	new TargetTexture( NormalMapBuffer );
+			//HdrTexture			=	new TargetTexture( HdrBuffer );
+			//DiffuseTexture		=	new TargetTexture( DiffuseBuffer );
+			//SpecularTexture		=	new TargetTexture( SpecularBuffer );
+			//NormalMapTexture	=	new TargetTexture( NormalMapBuffer );
 		}
 
 
@@ -247,6 +247,12 @@ namespace Fusion.Engine.Graphics {
 
 			//	apply FXAA
 			ge.Filter.Fxaa( targetSurface, TempFXBuffer );
+		}
+
+
+
+		void BuildVisibility ()
+		{
 		}
 	}
 }

@@ -43,6 +43,13 @@ namespace Fusion.Engine.Graphics {
 		public float Displacement;
 
 		/// <summary>
+		/// Blend factor. 
+		/// Zero value means soft blend. 
+		/// One means harsh blending.
+		/// </summary>
+		public float BlendHardness;
+
+		/// <summary>
 		/// Rougheness mapping range (min, max).
 		/// </summary>
 		public Vector2 RoughnessRange;
@@ -51,13 +58,6 @@ namespace Fusion.Engine.Graphics {
 		/// Emission glow narrowness range (min, max, bias(?)).
 		/// </summary>
 		public Vector2 GlowNarrowness;
-
-		/// <summary>
-		/// Blend factor. 
-		/// Zero value means soft blend. 
-		/// One means harsh blending.
-		/// </summary>
-		public float BlendFactor;
 
 		/// <summary>
 		/// Tiling. Default value is (1, 1, 1).

@@ -16,7 +16,7 @@ namespace Fusion.Drivers.Audio {
 	[ContentLoader(typeof(SoundEffect))]
 	public class SoundEffectLoader : ContentLoader {
 
-		public override object Load ( GameEngine game, Stream stream, Type requestedType, string assetPath )
+		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 		{
 		#if false
 			return new SoundEffect( stream );
@@ -65,7 +65,7 @@ namespace Fusion.Drivers.Audio {
 			var sampleCount	=	byteArray.Length * 8 / bitDepth / channels;
 
 		//	return new SoundEffect( byteArray, 0, byteArray.Length, sampleRate, (AudioChannels)channels, 0, sampleCount );
-			return new SoundEffect( game.AudioDevice, byteArray, 0, byteArray.Length, sampleRate, (AudioChannels)channels, 0, sampleCount );
+			return new SoundEffect( content.GameEngine.AudioDevice, byteArray, 0, byteArray.Length, sampleRate, (AudioChannels)channels, 0, sampleCount );
 
 		#endif
 		}

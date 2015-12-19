@@ -19,7 +19,7 @@ namespace Fusion.Engine.Media {
 	[ContentLoader(typeof(Video))]
 	public class VideoLoader : ContentLoader {
 
-		public override object Load ( GameEngine game, Stream stream, Type requestedType, string assetPath )
+		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 		{
 			return new Video( stream );
 		}

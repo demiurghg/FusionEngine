@@ -24,14 +24,14 @@ namespace Fusion.Engine.Client {
 
 
 
-			public override void Connect ( string host, int port )
+			public override void UserConnect ( string host, int port )
 			{
 				Log.Warning("Already connected. Waiting for snapshot.");
 			}
 
 
 
-			public override void Disconnect ( string reason )
+			public override void UserDisconnect ( string reason )
 			{
 				client.Disconnect( reason );
 			}
