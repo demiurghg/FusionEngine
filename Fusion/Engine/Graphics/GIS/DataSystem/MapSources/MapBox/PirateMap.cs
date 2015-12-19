@@ -24,7 +24,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.MapBox
 			get { return "https://www.mapbox.com/"; }
 		}
 
-		public PirateMap(GameEngine game) : base(game)
+		public PirateMap(Game game) : base(game)
 		{
 			Example = "a3cad6da";
 		}

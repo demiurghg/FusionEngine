@@ -32,7 +32,7 @@ namespace TestGame2 {
 
 		public override void Execute ()
 		{
-			Invoker.GameEngine.GameInterface.StartDiscovery(4, new TimeSpan(0,0,10));
+			Invoker.Game.GameInterface.StartDiscovery(4, new TimeSpan(0,0,10));
 		}
 
 	}
@@ -46,7 +46,7 @@ namespace TestGame2 {
 
 		public override void Execute ()
 		{
-			Invoker.GameEngine.GameInterface.StopDiscovery();
+			Invoker.Game.GameInterface.StopDiscovery();
 		}
 
 	}
@@ -83,10 +83,10 @@ namespace TestGame2 {
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public CustomGameInterface ( GameEngine gameEngine ) : base(gameEngine)
+		public CustomGameInterface ( Game game ) : base(game)
 		{
-			console			=	new GameConsole( gameEngine, "conchars", "conback");
-			userInterface	=	new UserInterface( gameEngine, @"Fonts\textFont" );
+			console			=	new GameConsole( game, "conchars", "conback");
+			userInterface	=	new UserInterface( game, @"Fonts\textFont" );
 		}
 
 
@@ -106,30 +106,30 @@ namespace TestGame2 {
 
 			//var mtrl		=	GameEngine.Content.Load<Material>("testMtrl");
 
-			var bounds		=	GameEngine.GraphicsEngine.DisplayBounds;
-			masterView		=	new ViewLayerHdr(GameEngine, bounds.Width, bounds.Height);
+			var bounds		=	Game.GraphicsEngine.DisplayBounds;
+			masterView		=	new ViewLayerHdr(Game, bounds.Width, bounds.Height);
 
-			masterView2		=	new ViewLayer(GameEngine);
+			masterView2		=	new ViewLayer(Game);
 
-			GameEngine.GraphicsEngine.DisplayBoundsChanged += (s,e) => {
-				masterView.Resize( GameEngine.GraphicsEngine.DisplayBounds.Width, GameEngine.GraphicsEngine.DisplayBounds.Height );
+			Game.GraphicsEngine.DisplayBoundsChanged += (s,e) => {
+				masterView.Resize( Game.GraphicsEngine.DisplayBounds.Width, Game.GraphicsEngine.DisplayBounds.Height );
 				//Log.Warning("{0} {1}", GameEngine.GraphicsEngine.DisplayBounds.Width, GameEngine.GraphicsEngine.DisplayBounds.Height);
 			};
 
-			targetTexture		=	new TargetTexture(GameEngine.GraphicsEngine, bounds.Width, bounds.Height, TargetFormat.LowDynamicRange );
+			targetTexture		=	new TargetTexture(Game.GraphicsEngine, bounds.Width, bounds.Height, TargetFormat.LowDynamicRange );
 			//masterView.Target	=	targetTexture;
 
-			GameEngine.GraphicsEngine.AddLayer( masterView );
-			GameEngine.GraphicsEngine.AddLayer( masterView2 );
+			Game.GraphicsEngine.AddLayer( masterView );
+			Game.GraphicsEngine.AddLayer( masterView2 );
 
-			testLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
-			uiLayer		=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
-			texture		=	GameEngine.Content.Load<DiscTexture>( "lena" );
-			scene		=	GameEngine.Content.Load<Scene>( @"scenes\testScene" );
+			testLayer	=	new SpriteLayer( Game.GraphicsEngine, 1024 );
+			uiLayer		=	new SpriteLayer( Game.GraphicsEngine, 1024 );
+			texture		=	Game.Content.Load<DiscTexture>( "lena" );
+			scene		=	Game.Content.Load<Scene>( @"scenes\testScene" );
 
 			masterView.SkySettings.SunPosition			=	new Vector3(10,20,30);
 
-			masterView.LightSet.SpotAtlas				=	GameEngine.Content.Load<TextureAtlas>("spots/spots");
+			masterView.LightSet.SpotAtlas				=	Game.Content.Load<TextureAtlas>("spots/spots");
 			masterView.LightSet.DirectLight.Direction	=	masterView.SkySettings.SunLightDirection;
 			masterView.LightSet.DirectLight.Intensity	=	masterView.SkySettings.SunLightColor;
 			masterView.LightSet.DirectLight.Enabled		=	true;
@@ -138,8 +138,8 @@ namespace TestGame2 {
 			var transforms = new Matrix[ scene.Nodes.Count ];
 			scene.ComputeAbsoluteTransforms( transforms );
 
-			var defMtrl		=	GameEngine.GraphicsEngine.DefaultMaterial;
-			var materials	=	scene.Materials.Select( m => GameEngine.Content.Load<Material>( m.Name, defMtrl ) ).ToArray();
+			var defMtrl		=	Game.GraphicsEngine.DefaultMaterial;
+			var materials	=	scene.Materials.Select( m => Game.Content.Load<Material>( m.Name, defMtrl ) ).ToArray();
 			
 			for ( int i=0; i<scene.Nodes.Count; i++ ) {
 			
@@ -149,7 +149,7 @@ namespace TestGame2 {
 					continue;
 				}
 				
-				var inst   = new MeshInstance( GameEngine.GraphicsEngine, scene, scene.Meshes[meshIndex], materials );
+				var inst   = new MeshInstance( Game.GraphicsEngine, scene, scene.Meshes[meshIndex], materials );
 				inst.World = transforms[ i ];
 			
 				masterView.Instances.Add( inst );
@@ -160,11 +160,11 @@ namespace TestGame2 {
 			masterView2.SpriteLayers.Add( testLayer );
 
 
-			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
+			Game.Keyboard.KeyDown += Keyboard_KeyDown;
 
 			LoadContent();
 
-			GameEngine.Reloading += (s,e) => LoadContent();
+			Game.Reloading += (s,e) => LoadContent();
 		}
 
 
@@ -173,7 +173,7 @@ namespace TestGame2 {
 		{
 			masterView.HdrSettings.BloomAmount	=	0.1f;
 			masterView.HdrSettings.DirtAmount	=	0.9f;
-			masterView.HdrSettings.DirtMask1	=	GameEngine.Content.Load<DiscTexture>("bloomMask|srgb");
+			masterView.HdrSettings.DirtMask1	=	Game.Content.Load<DiscTexture>("bloomMask|srgb");
 			masterView.HdrSettings.DirtMask2	=	null;//GameEngine.Content.Load<DiscTexture>("bloomMask2");
 		}
 
@@ -184,7 +184,7 @@ namespace TestGame2 {
 
 				Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", null, false );
 
-				GameEngine.Reload();
+				Game.Reload();
 			}
 
 			//if (e.Key==Keys.P ) {
@@ -221,7 +221,7 @@ namespace TestGame2 {
 
 		public override void RequestToExit ()
 		{
-			GameEngine.Exit();
+			Game.Exit();
 		}
 
 
@@ -237,7 +237,7 @@ namespace TestGame2 {
 
 			//sceneView.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1,0, 1 );
 
-			/*if ( gameEngine.Keyboard.IsKeyDown(Keys.R) ) {
+			/*if ( game.Keyboard.IsKeyDown(Keys.R) ) {
 				testLayer.Clear();
 				testLayer.DrawDebugString( debugFont, 10, 276, rand.Next().ToString(), Color.White );
 
@@ -258,10 +258,10 @@ namespace TestGame2 {
 			//Log.Message("{0}", videoPlayer.State);
 
 
-			if ( GameEngine.Keyboard.IsKeyDown(Keys.PageDown) ) {
+			if ( Game.Keyboard.IsKeyDown(Keys.PageDown) ) {
 				angle -= 0.01f;
 			}
-			if ( GameEngine.Keyboard.IsKeyDown(Keys.PageUp) ) {
+			if ( Game.Keyboard.IsKeyDown(Keys.PageUp) ) {
 				angle += 0.01f;
 			}
 
@@ -269,7 +269,7 @@ namespace TestGame2 {
 
 			var m = UpdateCam( gameTime );
 
-			var vp = GameEngine.GraphicsEngine.DisplayBounds;
+			var vp = Game.GraphicsEngine.DisplayBounds;
 			var ratio = vp.Width / (float)vp.Height;
 
 			masterView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1, 0, ratio);
@@ -279,7 +279,7 @@ namespace TestGame2 {
 
 		Matrix UpdateCam ( GameTime gameTime )
 		{
-			var kb = GameEngine.Keyboard;
+			var kb = Game.Keyboard;
 
 			if (!Console.Show) {
 				if (kb.IsKeyDown( Keys.Left  )) yaw   += gameTime.ElapsedSec * 2f;

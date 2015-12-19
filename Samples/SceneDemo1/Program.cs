@@ -35,7 +35,7 @@ namespace SceneDemo1 {
 			//
 			//	Run game :
 			//
-			using (var engine = new GameEngine( "SceneDemo1" )) {
+			using (var engine = new Game( "SceneDemo1" )) {
 
 				//	create SV, CL and UI instances :
 				engine.GameServer = new SceneDemo1GameServer( engine );

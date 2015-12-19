@@ -40,7 +40,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="ge"></param>
-		public SpriteEngine( GraphicsEngine ge ) : base(ge.GameEngine)
+		public SpriteEngine( GraphicsEngine ge ) : base(ge.Game)
 		{
 			this.device	=	ge.Device;
 		}
@@ -52,7 +52,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize()
 		{
-			shader		=	device.GameEngine.Content.Load<Ubershader>("sprite");
+			shader		=	device.Game.Content.Load<Ubershader>("sprite");
 			factory		=	new StateFactory( shader, typeof(Flags), (ps,i) => StateEnum( ps, (Flags)i) );
 			constBuffer	=	new ConstantBuffer( device, typeof(ConstData) );
 			constData	=	new ConstData();

@@ -18,7 +18,7 @@ namespace Fusion.Engine.Graphics.GIS
 		private int lastFrame;
 
 
-		public AnimatedModelLayer(GameEngine engine, DVector2 lonLat, string fileName, int maxInstanceCount = 0) : base(engine, lonLat, fileName, maxInstanceCount)
+		public AnimatedModelLayer(Game engine, DVector2 lonLat, string fileName, int maxInstanceCount = 0) : base(engine, lonLat, fileName, maxInstanceCount)
 		{
 			localMatrices = new Matrix[model.Nodes.Count];
 

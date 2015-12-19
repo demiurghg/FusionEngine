@@ -14,7 +14,7 @@ namespace Fusion.Core.Content {
 		/// <summary>
 		/// Loads asset.
 		/// </summary>
-		/// <param name="game">GameEngine</param>
+		/// <param name="game">Game</param>
 		/// <param name="stream">Stream to read asset from.</param>
 		/// <param name="requestedType">Requested asset type. Type specified by ContentLoaderAttribute and requested type may differ.</param>
 		/// <param name="assetPath">Path to asset. This is requested asset path but not actual path to asset's file.</param>

@@ -30,7 +30,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.GoogleMaps
 		}
 
 
-		protected BaseGoogleMapSource(GameEngine game) : base(game)
+		protected BaseGoogleMapSource(Game game) : base(game)
 		{
 		}
 
@@ -59,7 +59,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.GoogleMaps
 			get { return "GM"; }
 		}
 
-		public GoogleMap(GameEngine game) : base(game)
+		public GoogleMap(Game game) : base(game)
 		{
 		}
 

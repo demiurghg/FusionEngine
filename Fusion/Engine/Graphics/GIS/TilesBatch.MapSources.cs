@@ -32,14 +32,14 @@ namespace Fusion.Engine.Graphics.GIS
 
 		protected void RegisterMapSources()
 		{
-			MapSources.Add(new OpenStreetMap(GameEngine)		);
-			MapSources.Add(new GoogleMap(GameEngine)			);
-			MapSources.Add(new GoogleSatelliteMap(GameEngine)	);
-			MapSources.Add(new YandexMap(GameEngine)			);
-			MapSources.Add(new YandexSatelliteMap(GameEngine)	);
-			MapSources.Add(new PencilMap(GameEngine)			);
-			MapSources.Add(new SpaceStationMap(GameEngine)		);
-			MapSources.Add(new PirateMap(GameEngine)			);
+			MapSources.Add(new OpenStreetMap(Game)		);
+			MapSources.Add(new GoogleMap(Game)			);
+			MapSources.Add(new GoogleSatelliteMap(Game)	);
+			MapSources.Add(new YandexMap(Game)			);
+			MapSources.Add(new YandexSatelliteMap(Game)	);
+			MapSources.Add(new PencilMap(Game)			);
+			MapSources.Add(new SpaceStationMap(Game)		);
+			MapSources.Add(new PirateMap(Game)			);
 		}
 
 

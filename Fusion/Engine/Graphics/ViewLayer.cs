@@ -17,7 +17,7 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	public class ViewLayer : DisposableBase {
 		
-		protected readonly GameEngine		GameEngine;
+		protected readonly Game		Game;
 		protected readonly GraphicsEngine	ge;
 
 		/// <summary>
@@ -92,14 +92,14 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Creates ViewLayer instance
 		/// </summary>
-		/// <param name="gameEngine">Game engine</param>
+		/// <param name="Game">Game engine</param>
 		/// <param name="width">Target width. Specify zero value for backbuffer.</param>
 		/// <param name="height">Target height. Specify zero value for backbuffer.</param>
 		/// <param name="enableHdr">Indicates that ViewLayer has HDR capabilities.</param>
-		public ViewLayer ( GameEngine gameEngine )
+		public ViewLayer ( Game Game )
 		{
-			GameEngine		=	gameEngine;
-			this.ge			=	gameEngine.GraphicsEngine;
+			Game		=	Game;
+			this.ge			=	Game.GraphicsEngine;
 
 			Visible			=	true;
 			Order			=	0;
@@ -108,7 +108,7 @@ namespace Fusion.Engine.Graphics {
 
 			SpriteLayers	=	new List<SpriteLayer>();
 			GisLayers		=	new List<Gis.GisLayer>();
-			GlobeCamera		=	new GlobeCamera(gameEngine);
+			GlobeCamera		=	new GlobeCamera(Game);
 
 			GlobeCamera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
 		}
@@ -168,17 +168,17 @@ namespace Fusion.Engine.Graphics {
 			if (GisLayers.Any()) {
 
 				if (GlobeDepthStencil == null) {
-					GlobeDepthStencil = new DepthStencil2D(GameEngine.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height);
+					GlobeDepthStencil = new DepthStencil2D(Game.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height);
 				}
 				else if (GlobeDepthStencil.Width != targetSurface.Width || GlobeDepthStencil.Height != targetSurface.Height) {
 					
 					GlobeDepthStencil.Dispose();
-					GlobeDepthStencil = new DepthStencil2D(GameEngine.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height);
+					GlobeDepthStencil = new DepthStencil2D(Game.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height);
 				}
 
 				ge.Device.Clear(GlobeDepthStencil.Surface);
 
-				GameEngine.GraphicsDevice.SetTargets(GlobeDepthStencil.Surface, targetSurface);
+				Game.GraphicsDevice.SetTargets(GlobeDepthStencil.Surface, targetSurface);
 				
 				GlobeCamera.Viewport = viewport;
 				GlobeCamera.Update(gameTime);

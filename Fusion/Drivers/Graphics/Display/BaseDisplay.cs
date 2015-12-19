@@ -19,7 +19,7 @@ using Fusion.Core.Mathematics;
 namespace Fusion.Drivers.Graphics.Display {
 	abstract class BaseDisplay : GraphicsResource {
 
-		protected readonly	GameEngine GameEngine;
+		protected readonly	Game Game;
 		public 		D3D.Device d3dDevice = null;
 
 		protected Ubershader	stereo;
@@ -39,9 +39,9 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// 
 		/// </summary>
 		/// <param name="parameters"></param>
-		public BaseDisplay( GameEngine game, GraphicsDevice device, GraphicsParameters parameters ) : base(device)
+		public BaseDisplay( Game game, GraphicsDevice device, GraphicsParameters parameters ) : base(device)
 		{
-			this.GameEngine	=	game;
+			this.Game	=	game;
 
 			ShowAdapterInfo( parameters );
 		}
@@ -53,7 +53,7 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// </summary>
 		public virtual void CreateDisplayResources ()
 		{
-			GameEngine.Reloading += (s,e) => LoadContent();
+			Game.Reloading += (s,e) => LoadContent();
 			LoadContent();
 		}
 
@@ -64,7 +64,7 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// </summary>
 		void LoadContent ()
 		{
-			stereo	=	GameEngine.Content.Load<Ubershader>("stereo");
+			stereo	=	Game.Content.Load<Ubershader>("stereo");
 			factory	=	new StateFactory( stereo, typeof(Flags), Primitive.TriangleList, VertexInputElement.Empty, BlendState.Opaque, RasterizerState.CullNone, DepthStencilState.None );
 		}
 
@@ -242,10 +242,10 @@ namespace Fusion.Drivers.Graphics.Display {
 		public Form CreateForm ( GraphicsParameters parameters, Output output )
 		{
 			var form = new Form() {
-				Text			=	GameEngine.GameTitle,
+				Text			=	Game.GameTitle,
 				BackColor		=	System.Drawing.Color.Black,
 				ClientSize		=	new System.Drawing.Size( parameters.Width, parameters.Height ),
-				Icon			=	GameEngine.Icon ?? Fusion.Properties.Resources.fusionIcon,
+				Icon			=	Game.Icon ?? Fusion.Properties.Resources.fusionIcon,
 				ControlBox		=	false,
 				StartPosition	=	output==null ? FormStartPosition.CenterScreen : FormStartPosition.Manual,
 			};
@@ -264,8 +264,8 @@ namespace Fusion.Drivers.Graphics.Display {
 			form.KeyDown += form_KeyDown;
 			form.KeyUp += form_KeyUp;
 			form.KeyPress += form_KeyPress;
-			form.Resize += (s,e) => GameEngine.InputDevice.RemoveAllPressedKeys();
-			form.Move += (s,e) => GameEngine.InputDevice.RemoveAllPressedKeys();
+			form.Resize += (s,e) => Game.InputDevice.RemoveAllPressedKeys();
+			form.Move += (s,e) => Game.InputDevice.RemoveAllPressedKeys();
 			form.FormClosing += form_FormClosing;
 
 			ChangeFullscreen( form, parameters.FullScreen );
@@ -277,10 +277,10 @@ namespace Fusion.Drivers.Graphics.Display {
 
 		void form_FormClosing ( object sender, FormClosingEventArgs e )
 		{
-			if (GameEngine.ExitRequested) {
+			if (Game.ExitRequested) {
 				e.Cancel	=	false;
 			} else {
-				GameEngine.GameInterface.RequestToExit();
+				Game.GameInterface.RequestToExit();
 				e.Cancel	=	true;
 			}
 		}
@@ -289,14 +289,14 @@ namespace Fusion.Drivers.Graphics.Display {
 
 		void form_KeyPress ( object sender, KeyPressEventArgs e )
 		{
-			GameEngine.InputDevice.NotifyKeyPress( e.KeyChar );
+			Game.InputDevice.NotifyKeyPress( e.KeyChar );
 		}
 
 
 
 		void form_KeyUp ( object sender, KeyEventArgs e )
 		{
-			GameEngine.InputDevice.NotifyKeyUp( (Fusion.Drivers.Input.Keys)(int)e.KeyCode, e.Alt, e.Shift, e.Control );
+			Game.InputDevice.NotifyKeyUp( (Fusion.Drivers.Input.Keys)(int)e.KeyCode, e.Alt, e.Shift, e.Control );
 		}
 
 
@@ -307,7 +307,7 @@ namespace Fusion.Drivers.Graphics.Display {
 				Fullscreen = !Fullscreen;
 			}
 
-			GameEngine.InputDevice.NotifyKeyDown( (Fusion.Drivers.Input.Keys)(int)e.KeyCode, e.Alt, e.Shift, e.Control );
+			Game.InputDevice.NotifyKeyDown( (Fusion.Drivers.Input.Keys)(int)e.KeyCode, e.Alt, e.Shift, e.Control );
 		}
 
 

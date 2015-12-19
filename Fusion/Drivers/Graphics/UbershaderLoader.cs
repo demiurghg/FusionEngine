@@ -20,7 +20,7 @@ namespace Fusion.Drivers.Graphics {
 
 		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 		{
-			return new Ubershader( content.GameEngine.GraphicsDevice, stream );
+			return new Ubershader( content.Game.GraphicsDevice, stream );
 		}
 	}
 }

@@ -87,9 +87,9 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public LinesGisLayer(GameEngine engine, int linesPointsCount, bool isDynamic = false) : base(engine)
+		public LinesGisLayer(Game engine, int linesPointsCount, bool isDynamic = false) : base(engine)
 		{
-			shader		= GameEngine.Content.Load<Ubershader>("globe.Line.hlsl");
+			shader		= Game.Content.Load<Ubershader>("globe.Line.hlsl");
 			factory		= new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
 			thinFactory = new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.Readonly);
 			
@@ -118,7 +118,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
-			var dev = GameEngine.GraphicsDevice;
+			var dev = Game.GraphicsDevice;
 
 			if (((LineFlags) Flags).HasFlag(LineFlags.THIN_LINE)) {
 				dev.PipelineState = thinFactory[Flags];
@@ -146,7 +146,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public static LinesGisLayer GenerateGrid(GameEngine gameEngine, DVector2 leftTop, DVector2 rightBottom, int dimX, int dimY, Color color, MapProjection projection, bool keepQuad = false)
+		public static LinesGisLayer GenerateGrid(Game Game, DVector2 leftTop, DVector2 rightBottom, int dimX, int dimY, Color color, MapProjection projection, bool keepQuad = false)
 		{
 			var lt = projection.WorldToTilePos(leftTop.X,		leftTop.Y, 0);
 			var rb = projection.WorldToTilePos(rightBottom.X,	rightBottom.Y, 0);
@@ -197,7 +197,7 @@ namespace Fusion.Engine.Graphics.GIS
 				} 
 			}
 
-			var linesLayer = new LinesGisLayer(gameEngine, points.Count);
+			var linesLayer = new LinesGisLayer(Game, points.Count);
 			Array.Copy(points.ToArray(), linesLayer.PointsCpu, points.Count);
 			linesLayer.UpdatePointsBuffer();
 			linesLayer.Flags = (int)(LineFlags.THIN_LINE);
@@ -207,7 +207,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 
-		public static LinesGisLayer GenerateDistanceGrid(GameEngine gameEngine, DVector2 lonLatLeftBottomCorner, double step, int xStepsCount, int yStepsCount, Color color)
+		public static LinesGisLayer GenerateDistanceGrid(Game Game, DVector2 lonLatLeftBottomCorner, double step, int xStepsCount, int yStepsCount, Color color)
 		{
 
 			List<Gis.GeoPoint> points = new List<Gis.GeoPoint>();
@@ -282,7 +282,7 @@ namespace Fusion.Engine.Graphics.GIS
 				newPoints.Add(points[ind]);
 			}
 
-			var linesLayer = new LinesGisLayer(gameEngine, newPoints.Count);
+			var linesLayer = new LinesGisLayer(Game, newPoints.Count);
 			Array.Copy(newPoints.ToArray(), linesLayer.PointsCpu, newPoints.Count);
 			linesLayer.UpdatePointsBuffer();
 			linesLayer.Flags = (int)(LineFlags.THIN_LINE);

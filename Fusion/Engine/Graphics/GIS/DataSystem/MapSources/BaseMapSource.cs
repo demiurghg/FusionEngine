@@ -18,7 +18,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 {
 	public abstract class BaseMapSource
 	{
-		public GameEngine Game;
+		public Game Game;
 		/// <summary>
 		/// minimum level of zoom
 		/// </summary>
@@ -49,7 +49,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 		bool isDisposed = false;
 
 
-		protected BaseMapSource(GameEngine game)
+		protected BaseMapSource(Game game)
 		{
 			Game = game;
 

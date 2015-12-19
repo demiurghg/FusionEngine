@@ -18,7 +18,7 @@ namespace Fusion.Engine.Common {
 
 	public abstract class GameModule : DisposableBase {
 
-		public GameEngine GameEngine { get; protected set; }
+		public Game Game { get; protected set; }
 		Queue<Action> actionQueue = new Queue<Action>();
 
 		
@@ -26,9 +26,9 @@ namespace Fusion.Engine.Common {
 		/// Constructor
 		/// </summary>
 		/// <param name="game"></param>
-		public GameModule ( GameEngine gameEngine )
+		public GameModule ( Game Game )
 		{
-			GameEngine = gameEngine;
+			Game = Game;
 		}
 
 

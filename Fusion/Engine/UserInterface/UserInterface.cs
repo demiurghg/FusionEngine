@@ -38,11 +38,11 @@ namespace Fusion.Engine.UserInterface {
 		/// </summary>
 		/// <param name="width"></param>
 		/// <param name="height"></param>
-		public UserInterface ( GameEngine game, string defaultFont ) : base(game)
+		public UserInterface ( Game game, string defaultFont ) : base(game)
 		{
 			Config				=	new Fusion.Engine.UserInterface.Config();
 			defaultFontPath		=	defaultFont;
-			mouseProcessor		=	new MouseProcessor( GameEngine, this );
+			mouseProcessor		=	new MouseProcessor( Game, this );
 		}
 
 
@@ -52,7 +52,7 @@ namespace Fusion.Engine.UserInterface {
 		/// </summary>
 		public override void Initialize()
 		{
-			 DefaultFont	=	GameEngine.Content.Load<SpriteFont>(defaultFontPath);
+			 DefaultFont	=	Game.Content.Load<SpriteFont>(defaultFontPath);
 
 			 mouseProcessor.Initialize();
 		}
@@ -128,7 +128,7 @@ namespace Fusion.Engine.UserInterface {
 			}
 
 			var sb	=	spriteLayer;
-			var vp  =	GameEngine.GraphicsEngine.DisplayBounds;
+			var vp  =	Game.GraphicsEngine.DisplayBounds;
 
 			sb.Clear();
 		

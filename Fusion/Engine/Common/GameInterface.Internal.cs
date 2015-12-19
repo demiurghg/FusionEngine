@@ -35,14 +35,14 @@ namespace Fusion.Engine.Common {
 
 				this.timeout	=	timeout;
 
-				var netConfig = new NetPeerConfiguration( GameEngine.GameID );
+				var netConfig = new NetPeerConfiguration( Game.GameID );
 				netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryRequest );
 				netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryResponse );
 
 				client	=	new NetClient( netConfig );
 				client.Start();
 
-				var svPort	=	GameEngine.Network.Config.Port;
+				var svPort	=	Game.Network.Config.Port;
 
 				var ports = Enumerable.Range(svPort, numPorts)
 							.Where( p => p <= ushort.MaxValue )

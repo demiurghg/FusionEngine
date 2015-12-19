@@ -39,7 +39,7 @@ namespace Fusion.Engine.Client {
 		{
 			SetState( new StandBy(this) );
 
-			var netConfig	=	new NetPeerConfiguration(GameEngine.GameID);
+			var netConfig	=	new NetPeerConfiguration(Game.GameID);
 
 			netConfig.AutoFlushSendQueue	=	true;
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
@@ -120,7 +120,7 @@ namespace Fusion.Engine.Client {
 			//	Should command be executed in Active state only?
 			//	
 			try {
-				GameEngine.Invoker.ExecuteQueue( gameTime, CommandAffinity.Client );
+				Game.Invoker.ExecuteQueue( gameTime, CommandAffinity.Client );
 			} catch ( Exception e ) {
 				Log.Error( e.Message );
 			}
@@ -176,7 +176,7 @@ namespace Fusion.Engine.Client {
 		/// </summary>
 		internal void SendDiscoveryRequest ()
 		{
-			client.DiscoverLocalPeers( GameEngine.Network.Config.Port );
+			client.DiscoverLocalPeers( Game.Network.Config.Port );
 		}
 
 

@@ -42,25 +42,25 @@ namespace TestGame2 {
 		[CommandLineParser.Name("command")]
 		public string Command { get; set; }
 
-		public void Apply ( GameEngine gameEngine )
+		public void Apply ( Game game )
 		{
 			if (Width>0) {
-				gameEngine.GraphicsEngine.Config.Width	=	Width;
+				game.GraphicsEngine.Config.Width	=	Width;
 			}
 			if (Height>0) {
-				gameEngine.GraphicsEngine.Config.Height	=	Height;
+				game.GraphicsEngine.Config.Height	=	Height;
 			}
 			if (Fullscreen) {
-				gameEngine.GraphicsEngine.Config.Fullscreen	=	Fullscreen;
+				game.GraphicsEngine.Config.Fullscreen	=	Fullscreen;
 			}
 			if (DebugDevice) {
-				gameEngine.GraphicsEngine.Config.UseDebugDevice =	DebugDevice;
+				game.GraphicsEngine.Config.UseDebugDevice =	DebugDevice;
 			}
 			if (StereoMode!=StereoMode.Disabled) {
-				gameEngine.GraphicsEngine.Config.StereoMode	=	StereoMode;
+				game.GraphicsEngine.Config.StereoMode	=	StereoMode;
 			}
 			if (!string.IsNullOrWhiteSpace(Command)) {
-				gameEngine.Invoker.Push( Command );
+				game.Invoker.Push( Command );
 			}
 		}
 	}
@@ -91,7 +91,7 @@ namespace TestGame2 {
 			//
 			//	Run engine.
 			//
-			using ( var engine = new GameEngine("TestGame") ) {
+			using ( var engine = new Game("TestGame") ) {
 
 				if (options.Dedicated) {
 					engine.GameServer		=	new CustomGameServer(engine);

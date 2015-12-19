@@ -18,7 +18,7 @@ namespace Fusion.Engine.Graphics {
 
 		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 		{
-			return new SpriteFont( content.GameEngine.GraphicsDevice, stream );
+			return new SpriteFont( content.Game.GraphicsDevice, stream );
 		}
 	}
 }

@@ -20,10 +20,10 @@ namespace Fusion.Engine.Input {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="gameEngine"></param>
-		internal Mouse ( GameEngine gameEngine ) : base(gameEngine)
+		/// <param name="Game"></param>
+		internal Mouse ( Game Game ) : base(Game)
 		{
-			this.device	=	gameEngine.InputDevice;
+			this.device	=	Game.InputDevice;
 
 			device.MouseScroll += device_MouseScroll;
 			device.MouseMove += device_MouseMove;

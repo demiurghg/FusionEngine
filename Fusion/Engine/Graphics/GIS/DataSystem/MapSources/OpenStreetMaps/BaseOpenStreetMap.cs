@@ -13,7 +13,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.OpenStreetMaps
 {
 	public abstract class BaseOpenStreetMap : BaseMapSource
 	{
-		protected BaseOpenStreetMap(GameEngine game) : base(game)
+		protected BaseOpenStreetMap(Game game) : base(game)
 		{
 		}
 
@@ -44,7 +44,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.OpenStreetMaps
 			get { return "http://www.openstreetmap.org/"; }
 		}
 
-		public OpenStreetMap(GameEngine game) : base(game)
+		public OpenStreetMap(Game game) : base(game)
 		{
 		}
 

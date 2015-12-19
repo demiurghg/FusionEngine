@@ -24,7 +24,7 @@ namespace Fusion.Engine.Common.Commands {
 
 		public override void Execute ()
 		{
-			Invoker.GameEngine.Disconnect(Message);
+			Invoker.Game.Disconnect(Message);
 		}
 	}
 }

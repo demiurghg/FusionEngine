@@ -13,8 +13,8 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="gameEngine"></param>
-		public GameInterface ( GameEngine gameEngine ) : base(gameEngine)
+		/// <param name="Game"></param>
+		public GameInterface ( Game Game ) : base(Game)
 		{
 		}
 

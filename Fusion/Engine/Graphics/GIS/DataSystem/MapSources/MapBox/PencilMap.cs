@@ -24,7 +24,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.MapBox
 			get { return "https://www.mapbox.com/"; }
 		}
 
-		public PencilMap(GameEngine game) : base(game)
+		public PencilMap(Game game) : base(game)
 		{
 			Example = "a4c252ab";
 		}

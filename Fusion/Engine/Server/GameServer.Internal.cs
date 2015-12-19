@@ -101,8 +101,8 @@ namespace Fusion.Engine.Server {
 		/// <param name="map"></param>
 		void ServerTaskFunc ( string map, string postCommand )
 		{
-			var netConfig		=	new NetPeerConfiguration(GameEngine.GameID);
-			netConfig.Port		=	GameEngine.Network.Config.Port;
+			var netConfig		=	new NetPeerConfiguration(Game.GameID);
+			netConfig.Port		=	Game.Network.Config.Port;
 			netConfig.MaximumConnections	=	32;
 			netConfig.UnreliableSizeBehaviour = NetUnreliableSizeBehaviour.NormalFragmentation;
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
@@ -133,7 +133,7 @@ namespace Fusion.Engine.Server {
 				//	invoke post-start command :
 				//
 				if (postCommand!=null) {
-					GameEngine.Invoker.Push( postCommand );
+					Game.Invoker.Push( postCommand );
 				}
 
 
@@ -147,7 +147,7 @@ namespace Fusion.Engine.Server {
 					svTime.Update();
 
 					#if DEBUG
-					server.Configuration.SimulatedLoss	=	GameEngine.Network.Config.SimulatePacketsLoss;
+					server.Configuration.SimulatedLoss	=	Game.Network.Config.SimulatePacketsLoss;
 					#endif
 
 					//	read input messages :
@@ -166,7 +166,7 @@ namespace Fusion.Engine.Server {
 					SendNotifications( server );
 
 					//	execute server's command queue :
-					GameEngine.Invoker.ExecuteQueue( svTime, CommandAffinity.Server );
+					Game.Invoker.ExecuteQueue( svTime, CommandAffinity.Server );
 
 					//	crash test for server :
 					CrashServer.CrashTest();
@@ -302,7 +302,7 @@ namespace Fusion.Engine.Server {
 		void SendSnapshot ( NetServer server, SnapshotQueue queue )
 		{
 			//	snapshot request is stored in connection's tag.s
-			var debug	=	GameEngine.Network.Config.ShowSnapshots;
+			var debug	=	Game.Network.Config.ShowSnapshots;
 			var conns	=	server.Connections.Where ( c => c.Tag is uint );
 
 			var sw		=	new Stopwatch();

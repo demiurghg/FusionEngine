@@ -5,6 +5,7 @@ using System.Runtime;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using System.Reflection;
+using System.Threading.Tasks;
 using Fusion.Drivers.Audio;
 using System.Globalization;
 using System.Threading;
@@ -17,8 +18,17 @@ using Fusion.Core;
 using Fusion.Core.Development;
 using Fusion.Core.Content;
 using Fusion.Core.Mathematics;
+using Fusion.Core.Configuration;
 using Fusion.Core.Shell;
-
+using Fusion.Core.IniParser;
+using Fusion.Engine.Graphics;
+using Fusion.Engine.Input;
+using Fusion.Engine.Network;
+using Fusion.Engine.Client;
+using Fusion.Engine.Graphics.GIS;
+using Fusion.Engine.Server;
+using Lidgren.Network;
+using Fusion.Engine.Storage;
 
 
 namespace Fusion.Engine.Common {
@@ -28,9 +38,6 @@ namespace Fusion.Engine.Common {
 	/// </summary>
 	public class Game : DisposableBase {
 
-
-
-
 		/// <summary>
 		/// Game instance.
 		/// </summary>
@@ -39,27 +46,113 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Gets the current audio device
 		/// </summary>
-		public	AudioDevice	AudioDevice { get { return audioDevice; } }
+		internal AudioDevice	AudioDevice { get { return audioDevice; } }
 
 		/// <summary>
 		/// Gets the current input device
 		/// </summary>
-		public	InputDevice	InputDevice { get { return inputDevice; } }
+		internal InputDevice	InputDevice { get { return inputDevice; } }
 
 		/// <summary>
 		/// Gets the current graphics device
 		/// </summary>
-		public	GraphicsDevice GraphicsDevice { get { return graphicsDevice; } }
+		internal GraphicsDevice GraphicsDevice { get { return graphicsDevice; } }
+
+		/// <summary>
+		/// Gets the current graphics engine
+		/// </summary>
+		[GameModule("Graphics", "ge", InitOrder.After)]
+		public	GraphicsEngine GraphicsEngine { get { return graphicsEngine; } }
+
+		[GameModule("Network", "net", InitOrder.After)]
+		public NetworkEngine Network { get { return network; } }
+
 
 		/// <summary>
 		/// Gets current content manager
 		/// </summary>
-		public	ContentManager Content { get { return content; } }
+		public ContentManager Content { get { return content; } }
+
+		/// <summary>
+		/// Gets keyboard.
+		/// </summary>
+		[GameModule("Keyboard", "kb", InitOrder.After)]
+		public Keyboard Keyboard { get { return keyboard; } }
+
+		/// <summary>
+		/// Gets mouse.
+		/// </summary>
+		[GameModule("Mouse", "mouse", InitOrder.After)]
+		public Mouse Mouse { get { return mouse; } }
+
+		/// <summary>
+		/// Gets gamepads
+		/// </summary>
+		public GamepadCollection Gamepads { get { return gamepads; } }
 
 		/// <summary>
 		/// Gets current content manager
 		/// </summary>
 		public	Invoker Invoker { get { return invoker; } }
+
+		/// <summary>
+		/// Gets user storage.
+		/// </summary>
+		public UserStorage UserStorage { get { return userStorage; } }
+
+
+		/// <summary>
+		/// Sets and gets game window icon.
+		/// </summary>
+		public System.Drawing.Icon Icon {
+			get {
+				return windowIcon;
+			}
+			set {
+				if (IsInitialized) {
+					throw new InvalidOperationException("Can not set Icon after game engine initialization");
+				}
+				windowIcon = value;
+			}
+		}
+		System.Drawing.Icon windowIcon = null;
+
+
+		/// <summary>
+		/// Gets and sets game window title.
+		/// </summary>
+		public string GameTitle { 
+			get {
+				return gameTitle;
+			} 
+			set {
+				if (value==null) {
+					throw new ArgumentNullException();
+				}
+				if (string.IsNullOrWhiteSpace(value)) {
+					throw new ArgumentException("GameTitle must be readable string", "value");
+				}
+				if (IsInitialized) {
+					throw new InvalidOperationException("Can not set GameTitle after game engine initialization");
+				}
+				gameTitle = value;
+			} 
+		}
+		string gameTitle = Path.GetFileNameWithoutExtension( Process.GetCurrentProcess().ProcessName );
+
+
+		/// <summary>
+		/// Enable COM object tracking
+		/// </summary>
+		public bool TrackObjects {
+			get {
+				return SharpDX.Configuration.EnableObjectTracking;
+			} 
+			set {
+				SharpDX.Configuration.EnableObjectTracking = value;
+			}
+		}
+
 
 		/// <summary>
 		/// Indicates whether the game is initialized.
@@ -70,11 +163,6 @@ namespace Fusion.Engine.Common {
 		/// Indicates whether Game.Update and Game.Draw should be called on each frame.
 		/// </summary>
 		public	bool Enabled { get; set; }
-
-		/// <summary>
-		/// Gets game parameters
-		/// </summary>
-		public	GameParameters Parameters { get { return gameParams; } }
 
 		/// <summary>
 		/// Raised when the game exiting before disposing
@@ -103,24 +191,48 @@ namespace Fusion.Engine.Common {
 		bool	requestExit		=	false;
 		bool	requestReload	=	false;
 
+		internal bool ExitRequested { get { return requestExit; } }
+
+
 		AudioDevice			audioDevice		;
 		InputDevice			inputDevice		;
 		GraphicsDevice		graphicsDevice	;
+		//AudioEngine			audioEngine		;
+		//InputEngine			inputEngine		;
+		GraphicsEngine		graphicsEngine	;
+		NetworkEngine		network			;
 		ContentManager		content			;
 		Invoker				invoker			;
+		Keyboard			keyboard		;
+		Mouse				mouse			;
+		GamepadCollection	gamepads		;
+		UserStorage			userStorage		;
 
-		List<GameService>	serviceList	=	new List<GameService>();
+
 		GameTime	gameTimeInternal;
 
-		GameParameters	gameParams = new GameParameters();
+		GameServer	sv;
+		GameClient cl;
+		GameInterface gi;
 
-		IGameServer	sv;
-		IGameClient cl;
-		IGameInterface gi;
 
-		public IGameServer		GameServer { get { return sv; } }
-		public IGameClient		GameClient { get { return cl; } }
-		public IGameInterface	GameInterface { get { return gi; } }
+		/// <summary>
+		/// Current game server.
+		/// </summary>
+		[GameModule("Server", "sv", InitOrder.After)]
+		public GameServer GameServer { get { return sv; } set { sv = value; } }
+		
+		/// <summary>
+		/// Current game client.
+		/// </summary>
+		[GameModule("Client", "cl", InitOrder.After)]
+		public GameClient GameClient { get { return cl; } set { cl = value; } }
+
+		/// <summary>
+		/// Current game interface.
+		/// </summary>
+		[GameModule("Interface", "ui", InitOrder.After)]
+		public GameInterface GameInterface { get { return gi; } set { gi = value; } }
 
 
 
@@ -131,7 +243,7 @@ namespace Fusion.Engine.Common {
 		/// <param name="sv"></param>
 		/// <param name="cl"></param>
 		/// <param name="gi"></param>
-		public void Run ( IGameServer sv, IGameClient cl, IGameInterface gi )
+		public void Run ()
 		{
 			InitInternal();
 			RenderLoop.Run( GraphicsDevice.Display.Window, UpdateInternal );
@@ -140,31 +252,12 @@ namespace Fusion.Engine.Common {
 
 
 		/// <summary>
-		/// Initializes a new instance of this class, which provides 
-		/// basic graphics device initialization, game logic, rendering code, and a game loop.
+		/// 
 		/// </summary>
-		public Game (GameParameters p, IGameServer sv, IGameClient cl, IGameInterface gi)
+		/// <returns></returns>
+		public string GetReleaseInfo ()
 		{
-			this.gameParams	=	p;
-
-			Enabled	=	true;
-
-
-
-			AppDomain currentDomain = AppDomain.CurrentDomain;
-			currentDomain.UnhandledException += currentDomain_UnhandledException;
-
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault( false );
-			CultureInfo.DefaultThreadCurrentCulture	=	CultureInfo.InvariantCulture;
-			Thread.CurrentThread.CurrentCulture		= CultureInfo.InvariantCulture;
-			Thread.CurrentThread.CurrentUICulture	= CultureInfo.InvariantCulture;
-
-			Debug.Assert( Instance == null );
-
-			Instance	=	this;
-
-			Log.Message("{0} {1} {2}", 
+			return string.Format("{0} {1} {2}", 
 				Assembly.GetExecutingAssembly().GetName().Name, 
 				Assembly.GetExecutingAssembly().GetName().Version,
 				#if DEBUG
@@ -172,7 +265,43 @@ namespace Fusion.Engine.Common {
 				#else
 					"release"
 				#endif
-				);
+			);
+		}
+
+
+
+		/// <summary>
+		/// Game ID is used for networking as application identifier.
+		/// </summary>
+		public string GameID {
+			get { return gameId; }
+		}
+		readonly string gameId;
+
+
+		/// <summary>
+		/// Initializes a new instance of this class, which provides 
+		/// basic graphics device initialization, game logic, rendering code, and a game loop.
+		/// </summary>
+		public Game (string gameId)
+		{
+			this.gameId	=	gameId;
+			Enabled	=	true;
+
+			AppDomain currentDomain = AppDomain.CurrentDomain;
+			currentDomain.UnhandledException += currentDomain_UnhandledException;
+
+			Application.EnableVisualStyles();
+			Application.SetCompatibleTextRenderingDefault( false );
+			CultureInfo.DefaultThreadCurrentCulture	=	CultureInfo.InvariantCulture;
+			Thread.CurrentThread.CurrentCulture		=	CultureInfo.InvariantCulture;
+			Thread.CurrentThread.CurrentUICulture	=	CultureInfo.InvariantCulture;
+
+			Debug.Assert( Instance == null );
+
+			Instance	=	this;
+
+			Log.Message(GetReleaseInfo());
 			Log.Message("Startup directory : {0}", AppDomain.CurrentDomain.BaseDirectory );
 			Log.Message("Current directory : {0}", Directory.GetCurrentDirectory() );
 
@@ -183,9 +312,17 @@ namespace Fusion.Engine.Common {
 			audioDevice			=	new AudioDevice( this );
 			inputDevice			=	new InputDevice( this );
 			graphicsDevice		=	new GraphicsDevice( this );
+			graphicsEngine		=	new GraphicsEngine( this );
+			network				=	new NetworkEngine( this );
 			content				=	new ContentManager( this );
 			gameTimeInternal	=	new GameTime();
-			invoker				=	new Invoker(this);
+			invoker				=	new Invoker(this, CommandAffinity.Default);
+
+			keyboard			=	new Keyboard(this);
+			mouse				=	new Mouse(this);
+			gamepads			=	new GamepadCollection(this);
+
+			userStorage			=	new UserStorage(this);
 
 		}
 
@@ -228,6 +365,38 @@ namespace Fusion.Engine.Common {
 
 
 		/// <summary>
+		/// InitInternal
+		/// </summary>
+		internal bool InitInternal ()
+		{
+			Log.Message("");
+			Log.Message("-------- Game Initializing --------");
+
+			var p = new GraphicsParameters();
+			GraphicsEngine.ApplyParameters( ref p );
+
+			GraphicsDevice.Initialize( p );
+			InputDevice.Initialize();
+			AudioDevice.Initialize();
+
+			//	init game :
+			Log.Message("");
+
+			GameModule.InitializeAll( this );
+
+			initialized	=	true;
+
+			Log.Message("-----------------------------------------");
+			Log.Message("");
+
+			return true;
+		}
+
+
+
+
+
+		/// <summary>
 		/// Overloaded. Immediately releases the unmanaged resources used by this object. 
 		/// </summary>
 		/// <param name="disposing"></param>
@@ -238,24 +407,22 @@ namespace Fusion.Engine.Common {
 			}
 
 			Log.Message("");
-			Log.Message("---------- Game Shutting Down ----------");
+			Log.Message("-------- Game Shutting Down --------");
 
+			//	wait for server 
+			//	if it is still running :
+			cl.Wait();
+			sv.Wait();
+
+			
+			//	call exit event :
 			if (Exiting!=null) {
 				Exiting(this, EventArgs.Empty);
 			}
 
 			if (disposing) {
-				
-				lock ( serviceList ) {
-					//	shutdown registered services in reverse order:
-					serviceList.Reverse();
 
-					foreach ( var svc in serviceList ) {
-						Log.Message("Disposing : {0}", svc.GetType().Name );
-						svc.Dispose();
-					}
-					serviceList.Clear();
-				}
+				GameModule.DisposeAll( this );
 
 				content.Dispose();
 
@@ -267,11 +434,14 @@ namespace Fusion.Engine.Common {
 
 				Log.Message("Disposing : Graphics Device");
 				SafeDispose( ref graphicsDevice );
+
+				Log.Message("Disposing : User Storage");
+				SafeDispose( ref userStorage );
 			}
 
 			base.Dispose(disposing);
 
-			Log.Message("----------------------------------------");
+			Log.Message("------------------------------------------");
 			Log.Message("");
 
 			ReportActiveComObjects();
@@ -306,38 +476,6 @@ namespace Fusion.Engine.Common {
 			get {
 				return GraphicsDevice.Display.Window.Focused;
 			}
-		}
-
-
-
-		/// <summary>
-		/// InitInternal
-		/// </summary>
-		internal bool InitInternal ()
-		{
-			Log.Message("");
-			Log.Message("---------- Game Initializing ----------");
-
-			GraphicsDevice.Initialize( Parameters );
-			InputDevice.Initialize();
-			AudioDevice.Initialize();
-
-			GraphicsDevice.FullScreen = Parameters.FullScreen;
-
-			//	init game :
-			Log.Message("");
-
-
-			lock ( serviceList ) {
-				Initialize();
-				initialized = true;
-			}
-
-
-			Log.Message("---------------------------------------");
-			Log.Message("");
-
-			return true;
 		}
 
 
@@ -385,10 +523,10 @@ namespace Fusion.Engine.Common {
 
 				InputDevice.UpdateInput();
 
-				//
-				//	Update :
-				//
-				this.Update( gameTimeInternal );
+				//GIS.Update(gameTimeInternal);
+
+				UpdateClientServerGame( gameTimeInternal );
+
 
 				//
 				//	Render :
@@ -410,55 +548,18 @@ namespace Fusion.Engine.Common {
 					gameTimeInternal.AddSubframe();
 				}
 
-				GraphicsDevice.Present();
+				GraphicsDevice.Present(GraphicsEngine.Config.VSyncInterval);
 
 				InputDevice.EndUpdateInput();
 			}
 
 			try {
-				invoker.ExecuteQueue( gameTimeInternal );
+				invoker.ExecuteQueue( gameTimeInternal, CommandAffinity.Default );
 			} catch ( Exception e ) {
 				Log.Error( e.Message );
 			}
 
 			CheckExitInternal();
-		}
-
-
-
-		/// <summary>
-		/// Called after the Game and GraphicsDevice are created.
-		/// Initializes all registerd services
-		/// </summary>
-		protected virtual void Initialize ()
-		{
-			//	init registered services :
-			foreach ( var svc in serviceList ) {
-				Log.Message("Initializing : {0}", svc.GetType().Name );
-				svc.Initialize();
-			}
-		}
-
-
-
-		/// <summary>
-		/// Called when the game has determined that game logic needs to be processed.
-		/// </summary>
-		/// <param name="gameTime"></param>
-		protected virtual void Update ( GameTime gameTime )
-		{
-			GameService[] svcList;
-
-			lock (serviceList) {
-				svcList = serviceList.OrderBy( a => a.UpdateOrder ).ToArray();
-			}
-
-			foreach ( var svc in svcList ) {
-					
-				if ( svc.Enabled ) {
-					svc.Update( gameTime );
-				}
-			}
 		}
 
 
@@ -471,21 +572,9 @@ namespace Fusion.Engine.Common {
 		/// <param name="stereoEye"></param>
 		protected virtual void Draw ( GameTime gameTime, StereoEye stereoEye )
 		{
-			GameService[] svcList;
+			//GIS.Draw(gameTime, stereoEye);
 
-			lock (serviceList) {
-				svcList = serviceList.OrderBy( a => a.DrawOrder ).ToArray();
-			}
-
-
-			foreach ( var svc in svcList ) {
-
-				if ( svc.Visible ) {
-					GraphicsDevice.ResetStates();
-					GraphicsDevice.RestoreBackbuffer();
-					svc.Draw( gameTime, stereoEye );
-				}
-			}
+			GraphicsEngine.Draw( gameTime, stereoEye );
 
 			GraphicsDevice.ResetStates();
 			GraphicsDevice.RestoreBackbuffer();
@@ -504,268 +593,99 @@ namespace Fusion.Engine.Common {
 		}
 
 
-
-		/*-----------------------------------------------------------------------------------------
-		 * 
-		 *	Service stuff :
-		 * 
-		-----------------------------------------------------------------------------------------*/
-
-		/// <summary>
-		/// Returns service list
-		/// </summary>
-		/// <returns></returns>
-		public List<GameService> GetServiceList ()
-		{
-			return serviceList.ToList();
-		}
-
-
-	
-		/// <summary>
-		/// Adds service. Note, services are initialized and updated in order of addition,
-		/// and shutted down in reverse order. Services can'not be removed.
-		/// </summary>
-		/// <param name="service"></param>
-		public void AddService ( GameService service )
-		{
-			lock (serviceList) {
-				if (IsInitialized) {
-					service.Initialize();
-				}
-
-				serviceList.Add( service );	
-			}
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public void RemoveService ( GameService service )
-		{
-			lock (serviceList) {
-
-				service.Dispose();
-
-				serviceList.Remove( service );	
-			}
-		}
-
-
-
-		/// <summary>
-		/// Adds service. Forces IsUpdateable and IsDrawable properties.
-		/// </summary>
-		/// <param name="service"></param>
-		/// <param name="updateable"></param>
-		/// <param name="drawable"></param>
-		public void AddService ( GameService service, bool enabled, bool visible, int updateOrder, int drawOrder )
-		{
-			service.Enabled		=	enabled;
-			service.Visible		=	visible;
-			service.DrawOrder	=	drawOrder;
-			service.UpdateOrder	=	updateOrder;
-
-			AddService ( service );
-		}
-
-
-
-		/// <summary>
-		/// Get service of specified type
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public T GetService<T> () where T : GameService
-		{
-			lock (serviceList) {
-				
-				foreach ( var svc in serviceList ) {
-					if (svc is T) {
-						return (T)svc;
-					}
-				}
-
-				throw new InvalidOperationException(string.Format("Game service of type \"{0}\" is not added", typeof(T).ToString()));
-			}
-		}
-
-
-
-		/// <summary>
-		/// Gets service by name.
-		/// </summary>
-		/// <param name="name"></param>
-		/// <returns></returns>
-		internal GameService GetServiceByName( string name )
-		{
-			lock (serviceList) {
-
-				var obj = serviceList.FirstOrDefault( svc => svc.GetType().Name.ToLower() == name.ToLower() );
-
-				if (obj==null) {
-					throw new InvalidOperationException(string.Format("Service '{0}' not found", name) );
-				}
-
-				return (GameService)obj;
-			}
-		}
-
-
-
-		/// <summary>
-		/// Gets service by name.
-		/// </summary>
-		/// <param name="name"></param>
-		/// <returns></returns>
-		internal object GetConfigObjectByServiceName( string name )
-		{
-			var svc = GetServiceByName( name );
-			return GameService.GetConfigObject( svc );
-		}
-
-
-
-		/// <summary>
-		/// Checks wether service of given type exist?
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public bool IsServiceExist<T>() where T : GameService 
-		{
-			lock (serviceList) {
-				
-				foreach ( var svc in serviceList ) {
-					if (svc is T) {
-						return true;
-					}
-				}
-
-				return false;
-			}
-		}
-
 		/*-----------------------------------------------------------------------------------------
 		 * 
 		 *	Configuration stuff :
 		 * 
 		-----------------------------------------------------------------------------------------*/
 
-		static void SaveToXml ( object obj, Type type, string fileName ) 
-		{
-			XmlSerializer serializer = new XmlSerializer( type );
-			TextWriter textWriter = new StreamWriter( fileName );
-			serializer.Serialize( textWriter, obj );
-			textWriter.Close();
-		}
-
-
-		static object LoadFromXml( Type type, string fileName )
-		{
-			XmlSerializer serializer = new XmlSerializer( type );
-			TextReader textReader = new StreamReader( fileName );
-			object obj = serializer.Deserialize( textReader );
-			textReader.Close();
-			return obj;
-		}
-
-
 
 		/// <summary>
-		/// 
+		/// Loads configuration for each subsystem
 		/// </summary>
-		/// <returns></returns>
-		internal KeyValuePair<string, object>[] GetConfiguration ()
+		/// <param name="path"></param>
+		public void LoadConfiguration ( string filename )
 		{
-			return serviceList
-				.Select( svc => new KeyValuePair<string,object>( svc.GetType().Name, GameService.GetConfigObject( svc ) ) )
-				.ToArray();
+			Log.Message("Loading configuration...");
+
+			Invoker.FeedConfigs( ConfigSerializer.GetConfigVariables( GameModule.Enumerate(this) ) );
+
+			if (userStorage.FileExists(filename)) {
+				ConfigSerializer.LoadFromStream( GameModule.Enumerate(this), UserStorage.OpenFile(filename, FileMode.Open, FileAccess.Read) );
+			} else {
+				Log.Warning("Can not load configuration from {0}", filename);
+			}
 		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="fileName"></param>
-		/// <returns></returns>
-		string GetConfigPath ( string fileName )
-		{
-			string myDocs	=	Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			string appName	=	Path.GetFileNameWithoutExtension( AppDomain.CurrentDomain.FriendlyName.Replace(".vshost","") );
-			return Path.Combine( myDocs, appName, fileName );
-		}
-
 
 
 		/// <summary>
 		/// Saves configuration to XML file	for each subsystem
 		/// </summary>
 		/// <param name="path"></param>
-		[UICommand("Save Configuration", 1)]
-		public void SaveConfiguration ()
+		public void SaveConfiguration ( string filename )
 		{	
 			Log.Message("Saving configuration...");
 
-			foreach ( var svc in serviceList ) {
-
-				string name = GetConfigPath( string.Format("Config.{0}.xml", svc.GetType().Name ) );
-				var cfgProp = GameService.GetConfigProperty( svc.GetType() );
-
-				if (cfgProp==null) {
-					continue;
-				}
-
-				Log.Message("Saving : {0}", name );
-
-				Directory.CreateDirectory( Path.GetDirectoryName(name) );
-
-				try {
-					SaveToXml( cfgProp.GetValue(svc), cfgProp.PropertyType, name );
-				} catch ( Exception ex ) {
-					Log.Error("Failed to save configuration:");
-					Log.Error( ex.Message );
-				}
-			}
+			UserStorage.DeleteFile(filename);
+			ConfigSerializer.SaveToStream( GameModule.Enumerate(this), UserStorage.OpenFile(filename, FileMode.Create, FileAccess.Write) );
 		}
 
 
 
 
+		/*-----------------------------------------------------------------------------------------
+		 * 
+		 *	Client-server stuff :
+		 * 
+		-----------------------------------------------------------------------------------------*/
+
+
+		
 		/// <summary>
-		/// Loads configuration for each subsystem
+		/// Updates game logic and client-server interaction.
 		/// </summary>
-		/// <param name="path"></param>
-		[UICommand("Load Configuration", 1)]
-		public void LoadConfiguration ()
+		/// <param name="gameTime"></param>
+		void UpdateClientServerGame ( GameTime gameTime )
 		{
-			Log.Message("Loading configuration...");
+			cl.UpdateInternal( gameTime );
 
-			foreach ( var svc in serviceList ) {
+			gi.UpdateInternal( gameTime );
+		}
 
-				string name = GetConfigPath( string.Format("Config.{0}.xml", svc.GetType().Name ) );
-				var cfgProp = GameService.GetConfigProperty( svc.GetType() );
 
-				if (cfgProp==null) {
-					continue;
-				}
 
-				Log.Message("Loading : {0}", name );
+		internal void StartServer ( string map )
+		{
+			var postCmd = string.Format("connect 127.0.0.1 {0}", Network.Config.Port );
 
-				Directory.CreateDirectory( Path.GetDirectoryName(name) );
+			//	Disconnect!
 
-				try {
-						
-					var cfg = LoadFromXml( cfgProp.PropertyType, name );
-					cfgProp.SetValue( svc, cfg );
-
-				} catch ( Exception ex ) {
-					Log.Warning("Failed to load configuration:");
-					Log.Warning( ex.Message );
-				}
+			if (GameClient!=null) {
+				GameServer.StartInternal( map, postCmd );
+			} else {
+				GameServer.StartInternal( map, null );
 			}
+		}
+
+
+		internal void KillServer ()
+		{
+			GameServer.KillInternal();
+		}
+
+
+
+		internal void Connect ( string host, int port )
+		{
+			GameClient.ConnectInternal(host, port);
+			//	Kill server!
+		}
+
+
+		internal void Disconnect ( string message )
+		{
+			GameClient.DisconnectInternal(message);
+			//	Kill server!
 		}
 	}
 }

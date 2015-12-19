@@ -20,7 +20,7 @@ namespace Fusion.Engine.Common.Commands {
 
 		public override void Execute ()
 		{
-			Invoker.GameEngine.StartServer( MapName );
+			Invoker.Game.StartServer( MapName );
 		}
 	}
 }

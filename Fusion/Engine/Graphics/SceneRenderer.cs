@@ -43,8 +43,8 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="gameEngine"></param>
-		public SceneRenderer ( GameEngine gameEngine ) : base( gameEngine )
+		/// <param name="Game"></param>
+		public SceneRenderer ( Game Game ) : base( Game )
 		{
 		}
 
@@ -56,23 +56,23 @@ namespace Fusion.Engine.Graphics {
 		{
 			LoadContent();
 
-			constBuffer	=	new ConstantBuffer( GameEngine.GraphicsDevice, typeof(CBSurfaceData) );
+			constBuffer	=	new ConstantBuffer( Game.GraphicsDevice, typeof(CBSurfaceData) );
 
 
-			defaultDiffuse	=	new Texture2D( GameEngine.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
+			defaultDiffuse	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
 			defaultDiffuse.SetData( Enumerable.Range(0,16).Select( i => Color.Gray ).ToArray() );
 
-			defaultSpecular	=	new Texture2D( GameEngine.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
+			defaultSpecular	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
 			defaultSpecular.SetData( Enumerable.Range(0,16).Select( i => new Color(0,128,0,255) ).ToArray() );
 
-			defaultNormalMap	=	new Texture2D( GameEngine.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
+			defaultNormalMap	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
 			defaultNormalMap.SetData( Enumerable.Range(0,16).Select( i => new Color(128,128,255,255) ).ToArray() );
 
-			defaultEmission	=	new Texture2D( GameEngine.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
+			defaultEmission	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
 			defaultEmission.SetData( Enumerable.Range(0,16).Select( i => Color.Black ).ToArray() );
 			
 
-			GameEngine.Reloading += (s,e) => LoadContent();
+			Game.Reloading += (s,e) => LoadContent();
 		}
 
 
@@ -84,7 +84,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			SafeDispose( ref factory );
 
-			surfaceShader	=	GameEngine.Content.Load<Ubershader>("surface");
+			surfaceShader	=	Game.Content.Load<Ubershader>("surface");
 			factory			=	new StateFactory( surfaceShader, typeof(SurfaceFlags), (ps,i) => Enum(ps, (SurfaceFlags)i ) );
 		}
 
@@ -138,7 +138,7 @@ namespace Fusion.Engine.Graphics {
 				return;
 			}
 
-			var device		=	GameEngine.GraphicsDevice;
+			var device		=	Game.GraphicsDevice;
 
 			var view			=	viewLayer.Camera.GetViewMatrix( stereoEye );
 			var projection		=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
@@ -202,7 +202,7 @@ namespace Fusion.Engine.Graphics {
 				return;
 			}
 
-			var device			= GameEngine.GraphicsDevice;
+			var device			= Game.GraphicsDevice;
 
 			var cbData			= new CBSurfaceData();
 

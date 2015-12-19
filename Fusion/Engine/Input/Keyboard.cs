@@ -35,10 +35,10 @@ namespace Fusion.Engine.Input {
 		/// <summary>
 		/// ctor
 		/// </summary>
-		/// <param name="gameEngine"></param>
-		internal Keyboard ( GameEngine gameEngine ) : base(gameEngine)
+		/// <param name="Game"></param>
+		internal Keyboard ( Game Game ) : base(Game)
 		{
-			this.device	=	gameEngine.InputDevice;
+			this.device	=	Game.InputDevice;
 
 			device.KeyDown += device_KeyDown;
 			device.KeyUp += device_KeyUp;
@@ -214,7 +214,7 @@ namespace Fusion.Engine.Input {
 			if (bindings.TryGetValue( (Keys)e.Key, out bind )) {
 				try {
 					if (!string.IsNullOrWhiteSpace(bind.KeyDownCommand)) {
-						GameEngine.Invoker.Push( bind.KeyDownCommand );
+						Game.Invoker.Push( bind.KeyDownCommand );
 					}
 				} catch ( Exception cmdLineEx ) {
 					Log.Error("{0}", cmdLineEx.Message );
@@ -234,7 +234,7 @@ namespace Fusion.Engine.Input {
 			if (bindings.TryGetValue( (Keys)e.Key, out bind )) {
 				try {
 					if (!string.IsNullOrWhiteSpace(bind.KeyUpCommand)) {
-						GameEngine.Invoker.Push( bind.KeyUpCommand );
+						Game.Invoker.Push( bind.KeyUpCommand );
 					}
 				} catch ( Exception cmdLineEx ) {
 					Log.Error("{0}", cmdLineEx.Message );

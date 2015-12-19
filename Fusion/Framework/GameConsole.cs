@@ -16,7 +16,7 @@ namespace Fusion.Framework {
 	
 	public class GameConsole : GameModule {
 
-		//readonly GameEngine gameEngine;
+		//readonly Game Game;
 		[Config]
 		public GameConsoleConfig Config { get; set; }
 
@@ -63,11 +63,11 @@ namespace Fusion.Framework {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="gameEngine"></param>
+		/// <param name="Game"></param>
 		/// <param name="font">Font texture. Must be 128x128.</param>
 		/// <param name="conback">Console background texture</param>
 		/// <param name="speed">Console fall speed</param>
-		public GameConsole ( GameEngine gameEngine, string font, string conback ) : base(gameEngine)
+		public GameConsole ( Game Game, string font, string conback ) : base(Game)
 		{
 			Config			=	new GameConsoleConfig();
 			
@@ -86,19 +86,19 @@ namespace Fusion.Framework {
 		{
 			editBox.FeedHistory( Config.GetHistory() );
 
-			consoleLayer	=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
-			editLayer		=	new SpriteLayer( GameEngine.GraphicsEngine, 1024 );
+			consoleLayer	=	new SpriteLayer( Game.GraphicsEngine, 1024 );
+			editLayer		=	new SpriteLayer( Game.GraphicsEngine, 1024 );
 			consoleLayer.Order = 9999;
 			consoleLayer.Layers.Add( editLayer );
 
 			LoadContent();
-			GameEngine.Reloading += (s,e) => LoadContent();
+			Game.Reloading += (s,e) => LoadContent();
 
-			GameEngine.GraphicsDevice.DisplayBoundsChanged += GraphicsDevice_DisplayBoundsChanged;
+			Game.GraphicsDevice.DisplayBoundsChanged += GraphicsDevice_DisplayBoundsChanged;
 			LogRecorder.TraceRecorded += TraceRecorder_TraceRecorded;
-			GameEngine.Keyboard.KeyDown += Keyboard_KeyDown;
-			GameEngine.Keyboard.FormKeyPress += Keyboard_FormKeyPress;
-			GameEngine.Keyboard.FormKeyDown += Keyboard_FormKeyDown;
+			Game.Keyboard.KeyDown += Keyboard_KeyDown;
+			Game.Keyboard.FormKeyPress += Keyboard_FormKeyPress;
+			Game.Keyboard.FormKeyDown += Keyboard_FormKeyDown;
 
 			RefreshConsole();
 			RefreshEdit();
@@ -126,8 +126,8 @@ namespace Fusion.Framework {
 		/// </summary>
 		void LoadContent ()
 		{
-			consoleFont			=	GameEngine.Content.Load<DiscTexture>(font);
-			consoleBackground	=	GameEngine.Content.Load<DiscTexture>(conback);
+			consoleFont			=	Game.Content.Load<DiscTexture>(font);
+			consoleBackground	=	Game.Content.Load<DiscTexture>(conback);
 
 			RefreshConsole();
 		}
@@ -157,7 +157,7 @@ namespace Fusion.Framework {
 		/// <param name="gameTime"></param>
 		public void Update ( GameTime gameTime )
 		{
-			var vp		=	GameEngine.GraphicsDevice.DisplayBounds;
+			var vp		=	Game.GraphicsDevice.DisplayBounds;
 
 			RefreshConsoleLayer();
 
@@ -184,7 +184,7 @@ namespace Fusion.Framework {
 			editLayer.DrawDebugString( consoleFont, charWidth + charWidth * editBox.Cursor,	0,  "_", cursorColor );
 
 
-			var version = GameEngine.GetReleaseInfo();
+			var version = Game.GetReleaseInfo();
 			editLayer.DrawDebugString( consoleFont, vp.Width - charWidth * version.Length, -charHeight, version, Config.VersionColor);
 
 			var frameRate = string.Format("fps = {0,7:0.00}", gameTime.Fps);
@@ -210,7 +210,7 @@ namespace Fusion.Framework {
 				return;
 			}
 
-			var vp		=	GameEngine.GraphicsDevice.DisplayBounds;
+			var vp		=	Game.GraphicsDevice.DisplayBounds;
 
 			int cols	=	vp.Width / charWidth;
 			int rows	=	vp.Height / charHeight / 2;
@@ -226,7 +226,7 @@ namespace Fusion.Framework {
 
 			scroll	=	MathUtil.Clamp( scroll, 0, lines.Count() );
 
-			/*var info = gameEngine.GetReleaseInfo();
+			/*var info = Game.GetReleaseInfo();
 			consoleFont.DrawString( consoleLayer, info, vp.Width - consoleFont.MeasureString(info).Width, vp.Height/2 - 1 * charHeight, ErrorColor );*/
 
 
@@ -271,7 +271,7 @@ namespace Fusion.Framework {
 			try {
 				var cmd  = editBox.Text;
 				Log.Message("]{0}", cmd);
-				GameEngine.Invoker.Push(cmd);
+				Game.Invoker.Push(cmd);
 			} catch ( Exception e ) {
 				Log.Error(e.Message);
 			}
@@ -281,7 +281,7 @@ namespace Fusion.Framework {
 
 		void TabCmd ()
 		{
-			editBox.Text = GameEngine.Invoker.AutoComplete( editBox.Text );
+			editBox.Text = Game.Invoker.AutoComplete( editBox.Text );
 		}
 
 

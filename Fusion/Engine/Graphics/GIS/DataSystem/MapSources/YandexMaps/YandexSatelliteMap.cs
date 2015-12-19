@@ -24,7 +24,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.YandexMaps
 			get { return "http://maps.yandex.ru/"; }
 		}
 
-		public YandexSatelliteMap(GameEngine game) : base(game)
+		public YandexSatelliteMap(Game game) : base(game)
 		{
 			Version = "4.28.0";
 			MaxZoom = 18;

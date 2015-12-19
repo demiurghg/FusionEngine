@@ -19,8 +19,8 @@ namespace Fusion.Engine.Server {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="gameEngine"></param>
-		public GameServer ( GameEngine gameEngine ) : base(gameEngine)
+		/// <param name="Game"></param>
+		public GameServer ( Game Game ) : base(Game)
 		{
 		}
 

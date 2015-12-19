@@ -51,9 +51,9 @@ namespace Fusion.Engine.Graphics
 		ConstantBuffer	sourceRectCB;
 		ConstantBuffer	bufLinearizeDepth;
 		
-		public Filter( GameEngine gameEngine ) : base( gameEngine )
+		public Filter( Game Game ) : base( Game )
 		{
-			rs = GameEngine.GraphicsDevice;
+			rs = Game.GraphicsDevice;
 		}
 
 
@@ -68,7 +68,7 @@ namespace Fusion.Engine.Graphics
 			sourceRectCB		= new ConstantBuffer( rs, typeof(Vector4) );
 
 			LoadContent();
-			GameEngine.Reloading += (s,e) => LoadContent();
+			Game.Reloading += (s,e) => LoadContent();
 		}
 
 
@@ -79,7 +79,7 @@ namespace Fusion.Engine.Graphics
 		void LoadContent ()
 		{
 			SafeDispose( ref factory );
-			shaders = GameEngine.Content.Load<Ubershader>( "filter" );
+			shaders = Game.Content.Load<Ubershader>( "filter" );
 			factory	= new StateFactory( shaders, typeof(ShaderFlags), (ps,i) => Enum(ps, (ShaderFlags)i) );
 		}
 

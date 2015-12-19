@@ -22,7 +22,7 @@ namespace Fusion.Core.Content {
 
 		object lockObject =  new object();
 
-		public readonly GameEngine GameEngine;
+		public readonly Game Game;
 		Dictionary<string, Item> content;
 		List<object> toDispose = new List<object>();
 		List<ContentLoader> loaders;
@@ -34,9 +34,9 @@ namespace Fusion.Core.Content {
 		/// Overloaded. Initializes a new instance of ContentManager. 
 		/// </summary>
 		/// <param name="game"></param>
-		public ContentManager ( GameEngine game, string contentDirectory = "Content" )
+		public ContentManager ( Game game, string contentDirectory = "Content" )
 		{
-			this.GameEngine = game;
+			this.Game = game;
 
 			this.contentDirectory = contentDirectory;
 

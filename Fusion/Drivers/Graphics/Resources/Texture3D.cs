@@ -30,7 +30,7 @@ namespace Fusion.Drivers.Graphics {
 			public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 			{
 				bool srgb = assetPath.ToLowerInvariant().Contains("|srgb");
-				return new Texture3D( content.GameEngine.GraphicsDevice, stream, srgb );
+				return new Texture3D( content.Game.GraphicsDevice, stream, srgb );
 			}
 		}
 		

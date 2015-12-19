@@ -18,7 +18,7 @@ namespace Fusion.Engine.Graphics {
 		const int	MaxOmniLights	=	1024;
 		const int	MaxSpotLights	=	16;
 
-		GraphicsEngine ge { get { return GameEngine.GraphicsEngine; } }
+		GraphicsEngine ge { get { return Game.GraphicsEngine; } }
 
 
 		[Config]
@@ -112,7 +112,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="game"></param>
-		public LightRenderer( GameEngine game ) : base(game)
+		public LightRenderer( Game game ) : base(game)
 		{
 			Config	=	new LightRendererConfig();
 		}
@@ -124,14 +124,14 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize ()
 		{
-			lightingCB		=	new ConstantBuffer( GameEngine.GraphicsDevice, typeof(LightingParams) );
-			omniLightBuffer	=	new StructuredBuffer( GameEngine.GraphicsDevice, typeof(OmniLightGPU), MaxOmniLights, StructuredBufferFlags.None );
-			spotLightBuffer	=	new StructuredBuffer( GameEngine.GraphicsDevice, typeof(SpotLightGPU), MaxSpotLights, StructuredBufferFlags.None );
+			lightingCB		=	new ConstantBuffer( Game.GraphicsDevice, typeof(LightingParams) );
+			omniLightBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(OmniLightGPU), MaxOmniLights, StructuredBufferFlags.None );
+			spotLightBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(SpotLightGPU), MaxSpotLights, StructuredBufferFlags.None );
 
 			CreateShadowMaps();
 
 			LoadContent();
-			GameEngine.Reloading += (s,e) => LoadContent();
+			Game.Reloading += (s,e) => LoadContent();
 		}
 
 
@@ -142,7 +142,7 @@ namespace Fusion.Engine.Graphics {
 		void LoadContent ()
 		{
 			SafeDispose( ref factory );
-			lightingShader	=	GameEngine.Content.Load<Ubershader>("lighting");
+			lightingShader	=	Game.Content.Load<Ubershader>("lighting");
 			factory			=	new StateFactory( lightingShader, typeof(LightingFlags), Primitive.TriangleList, VertexInputElement.Empty );
 		}
 
@@ -159,11 +159,11 @@ namespace Fusion.Engine.Graphics {
 			SafeDispose( ref spotColor );
 			SafeDispose( ref spotDepth );
 
-			csmColor	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.R32F,  Config.CSMSize * 4, Config.CSMSize );
-			csmDepth	=	new DepthStencil2D( GameEngine.GraphicsDevice, DepthFormat.D24S8, Config.CSMSize * 4, Config.CSMSize );
+			csmColor	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  Config.CSMSize * 4, Config.CSMSize );
+			csmDepth	=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, Config.CSMSize * 4, Config.CSMSize );
 
-			spotColor	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.R32F,  Config.SpotShadowSize * 4, Config.SpotShadowSize * 4 );
-			spotDepth	=	new DepthStencil2D( GameEngine.GraphicsDevice, DepthFormat.D24S8, Config.SpotShadowSize * 4, Config.SpotShadowSize * 4 );
+			spotColor	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  Config.SpotShadowSize * 4, Config.SpotShadowSize * 4 );
+			spotDepth	=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, Config.SpotShadowSize * 4, Config.SpotShadowSize * 4 );
 		}
 
 
@@ -202,7 +202,7 @@ namespace Fusion.Engine.Graphics {
 			var view		=	viewLayer.Camera.GetViewMatrix( stereoEye );
 			var projection	=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
 
-			var device = GameEngine.GraphicsDevice;
+			var device = Game.GraphicsDevice;
 			device.ResetStates();
 
 			LightingFlags	flags = LightingFlags.NONE;
@@ -330,13 +330,13 @@ namespace Fusion.Engine.Graphics {
 				return;
 			}
 
-			GameEngine.GraphicsDevice.ResetStates();
+			Game.GraphicsDevice.ResetStates();
 			
 			if ( csmDepth.Height!=Config.CSMSize || spotDepth.Height!=Config.SpotShadowSize * 4) {
 				CreateShadowMaps();
 			}
 
-			var device = GameEngine.GraphicsDevice;
+			var device = Game.GraphicsDevice;
 
 			device.Clear( csmDepth.Surface, 1, 0 );
 			device.Clear( csmColor.Surface, Color4.White );
@@ -361,7 +361,7 @@ namespace Fusion.Engine.Graphics {
 				context.ColorBuffer			=	csmColor.Surface;
 				context.DepthBuffer			=	csmDepth.Surface;
 
-				GameEngine.GraphicsEngine.SceneRenderer.RenderShadowMapCascade( context, instances );
+				Game.GraphicsEngine.SceneRenderer.RenderShadowMapCascade( context, instances );
 			}
 
 
@@ -389,7 +389,7 @@ namespace Fusion.Engine.Graphics {
 				context.ColorBuffer			=	spotColor.Surface;
 				context.DepthBuffer			=	spotDepth.Surface;
 
-				GameEngine.GraphicsEngine.SceneRenderer.RenderShadowMapCascade( context, instances );
+				Game.GraphicsEngine.SceneRenderer.RenderShadowMapCascade( context, instances );
 			}
 		}
 
@@ -446,7 +446,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			//t totalTileTo//
 
-			var vp = GameEngine.GraphicsDevice.DisplayBounds;
+			var vp = Game.GraphicsDevice.DisplayBounds;
 
 			omniLightData = Enumerable
 					.Range(0,MaxOmniLights)
@@ -476,7 +476,7 @@ namespace Fusion.Engine.Graphics {
 			//#warning Debug omni-lights.
 			#if false
 			if (Config.ShowOmniLights) {
-				var dr	=	GameEngine.GetService<DebugRender>();
+				var dr	=	Game.GetService<DebugRender>();
 
 				foreach ( var light in omniLights ) {
 					dr.DrawPoint( light.Position, 1, Color.LightYellow );
@@ -496,9 +496,9 @@ namespace Fusion.Engine.Graphics {
 		void PrepareSpotLights ( Matrix view, Matrix projection, LightSet lightSet )
 		{
 			var znear	=	projection.M34 * projection.M43 / projection.M33;
-			var vp		=	GameEngine.GraphicsDevice.DisplayBounds;
-			//var dr		=	GameEngine.GetService<DebugRender>();
-			//var sb		=	GameEngine.GetService<SpriteBatch>();
+			var vp		=	Game.GraphicsDevice.DisplayBounds;
+			//var dr		=	Game.GetService<DebugRender>();
+			//var sb		=	Game.GetService<SpriteBatch>();
 
 			spotLightData	=	Enumerable
 							.Range(0, MaxSpotLights)
@@ -604,7 +604,7 @@ namespace Fusion.Engine.Graphics {
 					.Select( p0 => Vector3.TransformCoordinate( p0, view ) )
 					.ToArray();
 
-			//var dr		=	GameEngine.GetService<DebugRender>();
+			//var dr		=	Game.GetService<DebugRender>();
 
 			var lines = new[]{
 				new Line( viewPoints[0], viewPoints[1] ),
@@ -692,7 +692,7 @@ namespace Fusion.Engine.Graphics {
 			min.Z		=	Vector3.TransformCoordinate( new Vector3(0,0, Math.Min( viewPos.Z + radius, znear )), projection ).Z;
 			max.Z		=	Vector3.TransformCoordinate( new Vector3(0,0, Math.Min( viewPos.Z - radius, znear )), projection ).Z;
 
-			//GameEngine.GetService<DebugStrings>().Add("Z-min = {0} | Z-max = {1}", min.Z, max.Z );
+			//Game.GetService<DebugStrings>().Add("Z-min = {0} | Z-max = {1}", min.Z, max.Z );
 
 			if (!r0) {
 				return false;

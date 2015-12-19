@@ -27,7 +27,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public TilesGisLayer(GameEngine engine, GlobeCamera camera) : base(engine)
+		public TilesGisLayer(Game engine, GlobeCamera camera) : base(engine)
 		{
 			RegisterMapSources();
 
@@ -35,8 +35,8 @@ namespace Fusion.Engine.Graphics.GIS
 
 			this.camera = camera;
 
-			frame	= GameEngine.Content.Load<Texture2D>("redframe.tga");
-			shader	= GameEngine.Content.Load<Ubershader>("globe.Tile.hlsl");
+			frame	= Game.Content.Load<Texture2D>("redframe.tga");
+			shader	= Game.Content.Load<Ubershader>("globe.Tile.hlsl");
 			factory = new StateFactory(shader, typeof(TileFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.Opaque, RasterizerState.CullCW, DepthStencilState.Default);
 		}
 
@@ -58,7 +58,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
-			var dev = GameEngine.GraphicsDevice;
+			var dev = Game.GraphicsDevice;
 
 			dev.VertexShaderConstants[0]	= constBuffer;
 			dev.PixelShaderSamplers[0]		= SamplerState.LinearClamp;

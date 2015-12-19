@@ -24,7 +24,7 @@ namespace Fusion.Engine.Common.Commands {
 
 		public override void Execute ()
 		{
-			Invoker.GameEngine.Connect( Host, Port );
+			Invoker.Game.Connect( Host, Port );
 		}
 	}
 

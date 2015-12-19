@@ -36,7 +36,7 @@ namespace Fusion.Engine.Input {
 
 		public override void Execute ()
 		{
-			var kb = GameEngine.Keyboard;
+			var kb = Game.Keyboard;
 
 			oldBind	=	kb.Bindings.FirstOrDefault( b => b.Key == Key );
 
@@ -51,7 +51,7 @@ namespace Fusion.Engine.Input {
 
 		public override void Rollback ()
 		{
-			var kb = GameEngine.Keyboard;
+			var kb = Game.Keyboard;
 
 			if (oldBind!=null) {
 				kb.Bind( oldBind.Key, oldBind.KeyDownCommand, oldBind.KeyUpCommand );

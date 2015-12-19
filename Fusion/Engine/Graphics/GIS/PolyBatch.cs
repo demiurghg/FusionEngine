@@ -65,10 +65,10 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public Gis.GeoPoint[] PointsCpu { get; protected set; }
 
-		protected PolyGisLayer(GameEngine engine) : base(engine) { }
+		protected PolyGisLayer(Game engine) : base(engine) { }
 
 
-		PolyGisLayer(GameEngine engine, Gis.GeoPoint[] points, int[] indeces, bool isDynamic) : base(engine)
+		PolyGisLayer(Game engine, Gis.GeoPoint[] points, int[] indeces, bool isDynamic) : base(engine)
 		{
 			//Console.WriteLine(points.Length + " _ " + indeces.Length);
 			Initialize(points, indeces, isDynamic);
@@ -92,22 +92,22 @@ namespace Fusion.Engine.Graphics.GIS
 
 		protected void Initialize(Gis.GeoPoint[] points, int[] indeces, bool isDynamic)
 		{
-			shader		= GameEngine.Content.Load<Ubershader>("globe.Poly.hlsl");
+			shader		= Game.Content.Load<Ubershader>("globe.Poly.hlsl");
 			factory		= new StateFactory(shader, typeof(PolyFlags), EnumFunc);
 			factoryXray = new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.Additive, RasterizerState.CullCW, DepthStencilState.None);
 
 			var vbOptions = isDynamic ? VertexBufferOptions.Dynamic : VertexBufferOptions.Default;
 
-			firstBuffer = new VertexBuffer(GameEngine.GraphicsDevice, typeof(Gis.GeoPoint), points.Length, vbOptions);
+			firstBuffer = new VertexBuffer(Game.GraphicsDevice, typeof(Gis.GeoPoint), points.Length, vbOptions);
 			firstBuffer.SetData(points);
 			currentBuffer = firstBuffer;
 
-			indexBuffer = new IndexBuffer(GameEngine.Instance.GraphicsDevice, indeces.Length);
+			indexBuffer = new IndexBuffer(Game.Instance.GraphicsDevice, indeces.Length);
 			indexBuffer.SetData(indeces);
 
 			PointsCpu = points;
 
-			cb			= new ConstantBuffer(GameEngine.GraphicsDevice, typeof(ConstData));
+			cb			= new ConstantBuffer(Game.GraphicsDevice, typeof(ConstData));
 			constData	= new ConstData();
 			constData.Data = Vector4.One;
 		}
@@ -129,42 +129,42 @@ namespace Fusion.Engine.Graphics.GIS
 			}
 
 			if (((PolyFlags) Flags).HasFlag(PolyFlags.XRAY)) {
-				GameEngine.GraphicsDevice.PipelineState = factoryXray[Flags];
+				Game.GraphicsDevice.PipelineState = factoryXray[Flags];
 			}
 			else {
-				GameEngine.GraphicsDevice.PipelineState = factory[Flags];
+				Game.GraphicsDevice.PipelineState = factory[Flags];
 			}
 
 			if (((PolyFlags)Flags).HasFlag(PolyFlags.DRAW_TEXTURED)) {
 				if(Texture != null)
-					GameEngine.GraphicsDevice.PixelShaderResources[0] = Texture; 
+					Game.GraphicsDevice.PixelShaderResources[0] = Texture; 
 
 				cb.SetData(constData);
 
-				GameEngine.GraphicsDevice.PixelShaderConstants[1] = cb;
+				Game.GraphicsDevice.PixelShaderConstants[1] = cb;
 			}
 
-			GameEngine.GraphicsDevice.VertexShaderConstants[0] = constBuffer;
+			Game.GraphicsDevice.VertexShaderConstants[0] = constBuffer;
 
-			GameEngine.GraphicsDevice.PixelShaderSamplers[0] = SamplerState.LinearClamp;
-			GameEngine.GraphicsDevice.PixelShaderSamplers[1] = SamplerState.AnisotropicClamp;
+			Game.GraphicsDevice.PixelShaderSamplers[0] = SamplerState.LinearClamp;
+			Game.GraphicsDevice.PixelShaderSamplers[1] = SamplerState.AnisotropicClamp;
 
-			GameEngine.GraphicsDevice.SetupVertexInput(currentBuffer, indexBuffer);
-			GameEngine.GraphicsDevice.DrawIndexed(indexBuffer.Capacity, 0, 0);
+			Game.GraphicsDevice.SetupVertexInput(currentBuffer, indexBuffer);
+			Game.GraphicsDevice.DrawIndexed(indexBuffer.Capacity, 0, 0);
 
 			//game.GraphicsDevice.ResetStates();
 		}
 
 
-		public static PolyGisLayer GenerateRegularGrid(GameEngine engine, double left, double right, double top, double bottom, int density, int dimX, int dimY, MapProjection projection)
+		public static PolyGisLayer GenerateRegularGrid(Game engine, double left, double right, double top, double bottom, int density, int dimX, int dimY, MapProjection projection)
 		{
 			int[] indexes;
 			Gis.GeoPoint[] vertices;
 
 			CalculateVertices(out vertices, out indexes, density, left, right, top, bottom, projection);
 
-			//var vb = new VertexBuffer(GameEngine.Instance.GraphicsDevice, typeof(Gis.GeoPoint), vertices.Length);
-			//var ib = new IndexBuffer(GameEngine.Instance.GraphicsDevice, indexes.Length);
+			//var vb = new VertexBuffer(Game.Instance.GraphicsDevice, typeof(Gis.GeoPoint), vertices.Length);
+			//var ib = new IndexBuffer(Game.Instance.GraphicsDevice, indexes.Length);
 			//ib.SetData(indexes);
 			//vb.SetData(vertices, 0, vertices.Length);
 
@@ -172,7 +172,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public static PolyGisLayer CreateFromContour(GameEngine engine, DVector2[] lonLatRad, Color color)
+		public static PolyGisLayer CreateFromContour(Game engine, DVector2[] lonLatRad, Color color)
 		{
 			var triangulator = new TriangleNet.Mesh();
 			triangulator.Behavior.Algorithm = TriangulationAlgorithm.SweepLine;
@@ -219,7 +219,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 
-		public static PolyGisLayer CreateFromUtmFbxModel(GameEngine engine, string fileName)
+		public static PolyGisLayer CreateFromUtmFbxModel(Game engine, string fileName)
 		{
 			var scene = engine.Content.Load<Scene>(fileName);
 

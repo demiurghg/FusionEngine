@@ -14,7 +14,7 @@ namespace Fusion.Engine.UserInterface {
 
 	class MouseProcessor {
 
-		public readonly GameEngine Game;
+		public readonly Game Game;
 		public UserInterface ui;
 
 		Point	oldMousePoint;
@@ -30,7 +30,7 @@ namespace Fusion.Engine.UserInterface {
 		/// 
 		/// </summary>
 		/// <param name="game"></param>
-		public MouseProcessor ( GameEngine game, UserInterface ui )
+		public MouseProcessor ( Game game, UserInterface ui )
 		{
 			this.Game	=	game;
 			this.ui		=	ui;

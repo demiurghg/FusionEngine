@@ -84,19 +84,19 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="engine"></param>
-		public GraphicsEngine ( GameEngine gameEngine ) : base(gameEngine)
+		public GraphicsEngine ( Game Game ) : base(Game)
 		{
 			Config		=	new GraphicsEngineConfig();
-			this.Device	=	gameEngine.GraphicsDevice;
+			this.Device	=	Game.GraphicsDevice;
 
 			viewLayers	=	new List<ViewLayer>();
 			spriteEngine	=	new SpriteEngine( this );
-			gis				=	new Gis(gameEngine);
-			filter			=	new Filter( gameEngine );
-			hdrFilter		=	new HdrFilter( gameEngine );
-			lightRenderer	=	new LightRenderer( gameEngine );
-			sceneRenderer	=	new SceneRenderer( gameEngine );
-			sky				=	new Sky( gameEngine );
+			gis				=	new Gis(Game);
+			filter			=	new Filter( Game );
+			hdrFilter		=	new HdrFilter( Game );
+			lightRenderer	=	new LightRenderer( Game );
+			sceneRenderer	=	new SceneRenderer( Game );
+			sky				=	new Sky( Game );
 
 			Device.DisplayBoundsChanged += (s,e) => {
 				var handler = DisplayBoundsChanged;
@@ -143,7 +143,7 @@ namespace Fusion.Engine.Graphics {
 			flatNormalMap.SetData( Enumerable.Range(0,16).Select( i => new Color(127,127,255,127) ).ToArray() );
 
 			defaultMaterial	=	new Material();
-			defaultMaterial.LoadGpuResources( GameEngine.Content );
+			defaultMaterial.LoadGpuResources( Game.Content );
 		}
 
 

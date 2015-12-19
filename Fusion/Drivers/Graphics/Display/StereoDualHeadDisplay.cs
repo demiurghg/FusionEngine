@@ -42,7 +42,7 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// 
 		/// </summary>
 		/// <param name="parameters"></param>
-		public StereoDualHeadDisplay( GameEngine game, GraphicsDevice device, GraphicsParameters parameters ) : base( game, device, parameters )
+		public StereoDualHeadDisplay( Game game, GraphicsDevice device, GraphicsParameters parameters ) : base( game, device, parameters )
 		{
 			try {
 				NvApi.Initialize();

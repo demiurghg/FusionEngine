@@ -58,7 +58,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 	    public class GisLayer
 	    {
-		    protected GameEngine GameEngine;
+		    protected Game Game;
 
 			public bool IsActive = true;
 			public bool IsVisible = true;
@@ -70,15 +70,15 @@ namespace Fusion.Engine.Graphics.GIS
 			public virtual void Dispose	() {}
 
 
-		    public GisLayer(GameEngine engine)
+		    public GisLayer(Game engine)
 		    {
-			    GameEngine = engine;
+			    Game = engine;
 		    }
 	    }
 
 		Vector2 previousMousePosition;
 
-	    public Gis(GameEngine gameEngine) : base(gameEngine)
+	    public Gis(Game Game) : base(Game)
 	    {
 			
 	    }
@@ -86,32 +86,32 @@ namespace Fusion.Engine.Graphics.GIS
 
 	    public override void Initialize()
 	    {
-			constBuffer = new ConstantBuffer(GameEngine.GraphicsDevice, typeof(ConstData));
+			constBuffer = new ConstantBuffer(Game.GraphicsDevice, typeof(ConstData));
 
 			#region Test input region
-			Camera		= new GlobeCamera(GameEngine);
+			Camera		= new GlobeCamera(Game);
 
-			Camera.Viewport = new Viewport(0, 0, GameEngine.GraphicsDevice.DisplayBounds.Width, GameEngine.GraphicsDevice.DisplayBounds.Height);
+			Camera.Viewport = new Viewport(0, 0, Game.GraphicsDevice.DisplayBounds.Width, Game.GraphicsDevice.DisplayBounds.Height);
 			Camera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
 
-		    GameEngine.GraphicsDevice.DisplayBoundsChanged +=
+		    Game.GraphicsDevice.DisplayBoundsChanged +=
 			    (sender, args) =>
 				    Camera.Viewport =
-					    new Viewport(0, 0, GameEngine.GraphicsDevice.DisplayBounds.Width,
-						    GameEngine.GraphicsDevice.DisplayBounds.Height);
+					    new Viewport(0, 0, Game.GraphicsDevice.DisplayBounds.Width,
+						    Game.GraphicsDevice.DisplayBounds.Height);
 
 
 			// Input bindings
-		    GameEngine.Mouse.Scroll += (sender, args) => {
+		    Game.Mouse.Scroll += (sender, args) => {
 				if(args.WheelDelta > 0)
 					Camera.CameraZoom(-0.05f);
 				else if(args.WheelDelta < 0)
 					Camera.CameraZoom(0.05f);
 		    };
 
-		    GameEngine.Mouse.Move += (sender, args) =>
+		    Game.Mouse.Move += (sender, args) =>
 		    {
-				if (GameEngine.InputDevice.IsKeyDown(Keys.LeftButton)) {
+				if (Game.InputDevice.IsKeyDown(Keys.LeftButton)) {
 					DVector2 before, after;
 					var beforeHit	= Camera.ScreenToSpherical(previousMousePosition.X, previousMousePosition.Y, out before, true);
 					var afterHit	= Camera.ScreenToSpherical(args.Position.X, args.Position.Y, out after, true);
@@ -121,20 +121,20 @@ namespace Fusion.Engine.Graphics.GIS
 						Camera.Pitch	+= after.Y - before.Y;
 					}
 				}
-				if(GameEngine.InputDevice.IsKeyDown(Keys.MiddleButton) && Camera.CameraState == GlobeCamera.CameraStates.ViewToPoint) {
-					Camera.RotateViewToPointCamera(GameEngine.InputDevice.RelativeMouseOffset);
+				if(Game.InputDevice.IsKeyDown(Keys.MiddleButton) && Camera.CameraState == GlobeCamera.CameraStates.ViewToPoint) {
+					Camera.RotateViewToPointCamera(Game.InputDevice.RelativeMouseOffset);
 			    }
-				if(GameEngine.InputDevice.IsKeyDown(Keys.RightButton) && Camera.CameraState == GlobeCamera.CameraStates.FreeSurface) {
-					Camera.RotateFreeSurfaceCamera(GameEngine.InputDevice.RelativeMouseOffset);
+				if(Game.InputDevice.IsKeyDown(Keys.RightButton) && Camera.CameraState == GlobeCamera.CameraStates.FreeSurface) {
+					Camera.RotateFreeSurfaceCamera(Game.InputDevice.RelativeMouseOffset);
 			    }
 				previousMousePosition = new Vector2(args.Position.X, args.Position.Y);
 		    };
 			#endregion
 
-			//Points = new PointsGisBatch(GameEngine, 100)
+			//Points = new PointsGisBatch(Game, 100)
 		    //{
 		    //	ImageSizeInAtlas	= new Vector2(36, 36),
-		    //	TextureAtlas		= GameEngine.Content.Load<Texture2D>("circles.tga")
+		    //	TextureAtlas		= Game.Content.Load<Texture2D>("circles.tga")
 		    //};
 		    //
 		    //var r = new Random();
@@ -150,7 +150,7 @@ namespace Fusion.Engine.Graphics.GIS
 		    //Points.UpdatePointsBuffer();
 
 
-			//lines = new LinesGisBatch(GameEngine, 2, true);
+			//lines = new LinesGisBatch(Game, 2, true);
 			//
 			//lines.PointsCpu[0] = new GeoPoint
 			//{

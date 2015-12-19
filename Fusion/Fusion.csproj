@@ -322,7 +322,7 @@
     <Compile Include="Engine\Media\VideoSampleGrabber.cs" />
     <Compile Include="Engine\Server\GameServer.Internal.cs" />
     <Compile Include="Engine\Common\GameModuleAttribute.cs" />
-    <Compile Include="Engine\Common\GameEngine.cs" />
+    <Compile Include="Engine\Common\Game.cs" />
     <Compile Include="Drivers\Graphics\GraphicsParameters.cs">
       <SubType>Code</SubType>
     </Compile>

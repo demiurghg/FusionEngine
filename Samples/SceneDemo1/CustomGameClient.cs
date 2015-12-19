@@ -19,8 +19,8 @@ namespace SceneDemo1 {
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public SceneDemo1GameClient ( GameEngine gameEngine )
-			: base( gameEngine )
+		public SceneDemo1GameClient ( Game game )
+			: base( game )
 		{
 		}
 
@@ -64,7 +64,7 @@ namespace SceneDemo1 {
 		/// <param name="gameTime"></param>
 		public override byte[] Update ( GameTime gameTime )
 		{
-			var mouse = GameEngine.Mouse;
+			var mouse = Game.Mouse;
 
 			return Encoding.UTF8.GetBytes( string.Format( "[{0} {1} {2}]", mouse.Position.X, mouse.Position.Y, UserInfo() ) );
 		}

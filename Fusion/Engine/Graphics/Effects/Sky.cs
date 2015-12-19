@@ -72,9 +72,9 @@ namespace Fusion.Engine.Graphics {
 		/// Constructor
 		/// </summary>
 		/// <param name="rs"></param>
-		public Sky ( GameEngine game ) : base( game )
+		public Sky ( Game game ) : base( game )
 		{
-			rs	=	GameEngine.GraphicsDevice;
+			rs	=	Game.GraphicsDevice;
 		}
 
 
@@ -89,11 +89,11 @@ namespace Fusion.Engine.Graphics {
 
 			LoadContent();
 
-			GameEngine.Reloading += (s,e) => LoadContent();
+			Game.Reloading += (s,e) => LoadContent();
 
 			
 			var skySphere	=	SkySphere.GetVertices(9);
-			skyVB			=	new VertexBuffer( GameEngine.GraphicsDevice, typeof(SkyVertex), skySphere.Length );
+			skyVB			=	new VertexBuffer( Game.GraphicsDevice, typeof(SkyVertex), skySphere.Length );
 			skyVB.SetData( skySphere );
 
 			
@@ -118,7 +118,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			SafeDispose( ref factory );
 
-			sky			=	GameEngine.Content.Load<Ubershader>("sky");
+			sky			=	Game.Content.Load<Ubershader>("sky");
 			factory		=	new StateFactory( sky, typeof(SkyFlags), (ps,i) => EnumFunc(ps, (SkyFlags)i) );
 		}
 

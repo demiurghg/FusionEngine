@@ -15,13 +15,13 @@ namespace Fusion.Engine.Input {
 		Gamepad[] gamepads;
 		
 
-		internal GamepadCollection ( GameEngine gameEngine )
+		internal GamepadCollection ( Game Game )
 		{
 			gamepads	=	new Gamepad[4];
-			gamepads[0]	=	new Gamepad( gameEngine.InputDevice.GetGamepad( 0 ) );
-			gamepads[1]	=	new Gamepad( gameEngine.InputDevice.GetGamepad( 1 ) );
-			gamepads[2]	=	new Gamepad( gameEngine.InputDevice.GetGamepad( 2 ) );
-			gamepads[3]	=	new Gamepad( gameEngine.InputDevice.GetGamepad( 3 ) );
+			gamepads[0]	=	new Gamepad( Game.InputDevice.GetGamepad( 0 ) );
+			gamepads[1]	=	new Gamepad( Game.InputDevice.GetGamepad( 1 ) );
+			gamepads[2]	=	new Gamepad( Game.InputDevice.GetGamepad( 2 ) );
+			gamepads[3]	=	new Gamepad( Game.InputDevice.GetGamepad( 3 ) );
 		}
 		
 

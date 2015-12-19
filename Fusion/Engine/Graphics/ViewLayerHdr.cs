@@ -72,13 +72,13 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Creates ViewLayer instance
 		/// </summary>
-		/// <param name="gameEngine">Game engine</param>
+		/// <param name="Game">Game engine</param>
 		/// <param name="width">Target width. Specify zero value for backbuffer.</param>
 		/// <param name="height">Target height. Specify zero value for backbuffer.</param>
 		/// <param name="enableHdr">Indicates that ViewLayer has HDR capabilities.</param>
-		public ViewLayerHdr ( GameEngine gameEngine, int width, int height ) : base( gameEngine )
+		public ViewLayerHdr ( Game Game, int width, int height ) : base( Game )
 		{
-			var vp	=	gameEngine.GraphicsDevice.DisplayBounds;
+			var vp	=	Game.GraphicsDevice.DisplayBounds;
 
 			if (width<=0) {
 				width	=	vp.Width;
@@ -91,10 +91,10 @@ namespace Fusion.Engine.Graphics {
 			SkySettings		=	new SkySettings();
 
 			Instances		=	new List<MeshInstance>();
-			LightSet		=	new LightSet( gameEngine.GraphicsEngine );
+			LightSet		=	new LightSet( Game.GraphicsEngine );
 
-			MeasuredOld		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
-			MeasuredNew		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
+			MeasuredOld		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
+			MeasuredNew		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
 
 			Resize( width, height );
 		}
@@ -154,15 +154,15 @@ namespace Fusion.Engine.Graphics {
 			int bloomWidth		=	( targetWidth/2  ) & 0xFFF0;
 			int bloomHeight		=	( targetHeight/2 ) & 0xFFF0;
 
-			HdrBuffer			=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, newWidth,	newHeight,	false, false );
-			LightAccumulator	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, newWidth,	newHeight,	false, true );
-			DepthBuffer			=	new DepthStencil2D( GameEngine.GraphicsDevice, DepthFormat.D24S8,	newWidth,	newHeight,	1 );
-			DiffuseBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8,	newWidth,	newHeight,	false, false );
-			SpecularBuffer 		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba8,	newWidth,	newHeight,	false, false );
-			NormalMapBuffer		=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgb10A2, newWidth,	newHeight,	false, false );
+			HdrBuffer			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, newWidth,	newHeight,	false, false );
+			LightAccumulator	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, newWidth,	newHeight,	false, true );
+			DepthBuffer			=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8,	newWidth,	newHeight,	1 );
+			DiffuseBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	newWidth,	newHeight,	false, false );
+			SpecularBuffer 		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	newWidth,	newHeight,	false, false );
+			NormalMapBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2, newWidth,	newHeight,	false, false );
 			
-			Bloom0				=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
-			Bloom1				=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
+			Bloom0				=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
+			Bloom1				=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
 
 			//HdrTexture			=	new TargetTexture( HdrBuffer );
 			//DiffuseTexture		=	new TargetTexture( DiffuseBuffer );
@@ -210,12 +210,12 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public void ClearBuffers ()
 		{
-			GameEngine.GraphicsDevice.Clear( DiffuseBuffer.Surface,		Color4.Black );
-			GameEngine.GraphicsDevice.Clear( SpecularBuffer.Surface,	Color4.Black );
-			GameEngine.GraphicsDevice.Clear( NormalMapBuffer.Surface,	Color4.Black );
+			Game.GraphicsDevice.Clear( DiffuseBuffer.Surface,		Color4.Black );
+			Game.GraphicsDevice.Clear( SpecularBuffer.Surface,	Color4.Black );
+			Game.GraphicsDevice.Clear( NormalMapBuffer.Surface,	Color4.Black );
 
-			GameEngine.GraphicsDevice.Clear( DepthBuffer.Surface,		1, 0 );
-			GameEngine.GraphicsDevice.Clear( HdrBuffer.Surface,			Color4.Black );
+			Game.GraphicsDevice.Clear( DepthBuffer.Surface,		1, 0 );
+			Game.GraphicsDevice.Clear( HdrBuffer.Surface,			Color4.Black );
 		}
 
 
@@ -240,7 +240,7 @@ namespace Fusion.Engine.Graphics {
 			ge.Sky.Render( Camera, stereoEye, gameTime, DepthBuffer.Surface, HdrBuffer.Surface, viewport, SkySettings );
 
 			//	render lights :
-			ge.LightRenderer.RenderLighting( stereoEye, this, GameEngine.GraphicsEngine.WhiteTexture );
+			ge.LightRenderer.RenderLighting( stereoEye, this, Game.GraphicsEngine.WhiteTexture );
 
 			//	apply tonemapping and bloom :
 			ge.HdrFilter.Render( gameTime, TempFXBuffer.Surface, HdrBuffer, this );

@@ -11,7 +11,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.YandexMaps
 {
 	public abstract class BaseYandexMap : BaseMapSource
 	{
-		protected BaseYandexMap(GameEngine game) : base(game)
+		protected BaseYandexMap(Game game) : base(game)
 		{
 		}
 
@@ -42,7 +42,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.YandexMaps
 			get { return "http://maps.yandex.ru/"; }
 		}
 
-		public YandexMap(GameEngine game) : base(game)
+		public YandexMap(Game game) : base(game)
 		{
 		}
 

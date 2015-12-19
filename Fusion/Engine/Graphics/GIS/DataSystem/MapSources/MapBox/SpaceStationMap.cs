@@ -24,7 +24,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.MapBox
 			get { return "https://www.mapbox.com/"; }
 		}
 
-		public SpaceStationMap(GameEngine game) : base(game)
+		public SpaceStationMap(Game game) : base(game)
 		{
 			Example = "3hqcl3di";
 		}

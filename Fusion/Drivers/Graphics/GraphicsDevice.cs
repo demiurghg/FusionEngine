@@ -35,9 +35,9 @@ namespace Fusion.Drivers.Graphics {
 		}
 
 		/// <summary>
-		///	GameEngine
+		///	Game
 		/// </summary>
-		public readonly GameEngine GameEngine;
+		public readonly Game Game;
 
 		/// <summary>
 		/// Gets current display bounds.
@@ -219,9 +219,9 @@ namespace Fusion.Drivers.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		public GraphicsDevice ( GameEngine game )
+		public GraphicsDevice ( Game game )
 		{
-			this.GameEngine	=	game;
+			this.Game	=	game;
 		}
 
 
@@ -236,11 +236,11 @@ namespace Fusion.Drivers.Graphics {
 			this.GraphicsProfile	=	parameters.GraphicsProfile;
 
 			try {
-				if (parameters.StereoMode==StereoMode.Disabled) 	display	=	new GenericDisplay( GameEngine, this, parameters ); else
-				if (parameters.StereoMode==StereoMode.NV3DVision)	display	=	new NV3DVisionDisplay( GameEngine, this, parameters ); else 
-				if (parameters.StereoMode==StereoMode.DualHead)		display	=	new StereoDualHeadDisplay( GameEngine, this, parameters ); else 
-				if (parameters.StereoMode==StereoMode.Interlaced)	display	=	new StereoInterlacedDisplay( GameEngine, this, parameters ); else 
-				//if (parameters.StereoMode==StereoMode.OculusRift)	display	=	new OculusRiftDisplay( GameEngine, this, parameters ); else 
+				if (parameters.StereoMode==StereoMode.Disabled) 	display	=	new GenericDisplay( Game, this, parameters ); else
+				if (parameters.StereoMode==StereoMode.NV3DVision)	display	=	new NV3DVisionDisplay( Game, this, parameters ); else 
+				if (parameters.StereoMode==StereoMode.DualHead)		display	=	new StereoDualHeadDisplay( Game, this, parameters ); else 
+				if (parameters.StereoMode==StereoMode.Interlaced)	display	=	new StereoInterlacedDisplay( Game, this, parameters ); else 
+				//if (parameters.StereoMode==StereoMode.OculusRift)	display	=	new OculusRiftDisplay( Game, this, parameters ); else 
 					throw new ArgumentException("parameters.StereoMode");
 
 			} catch ( GraphicsException e ) {
@@ -251,7 +251,7 @@ namespace Fusion.Drivers.Graphics {
 				parameters.FullScreen	=	false;
 				parameters.StereoMode	=	StereoMode.Disabled;
 
-				display	=	new GenericDisplay( GameEngine, this, parameters ); 
+				display	=	new GenericDisplay( Game, this, parameters ); 
 			}
 			
 

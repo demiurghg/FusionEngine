@@ -35,7 +35,7 @@ namespace Fusion.Engine.Graphics {
 			var scene = Scene.Load( stream );
 
 			foreach ( var mesh in scene.Meshes ) {	
-				mesh.CreateVertexAndIndexBuffers( content.GameEngine.GraphicsDevice );
+				mesh.CreateVertexAndIndexBuffers( content.Game.GraphicsDevice );
 			}
 
 			return scene;

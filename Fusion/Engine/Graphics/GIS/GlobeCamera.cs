@@ -14,7 +14,7 @@ namespace Fusion.Engine.Graphics.GIS
 {
 	public class GlobeCamera
 	{
-		GameEngine gameEngine;
+		Game Game;
 
 
 		public enum CameraStates
@@ -104,9 +104,9 @@ namespace Fusion.Engine.Graphics.GIS
 
 		
 
-		public GlobeCamera(GameEngine engine)
+		public GlobeCamera(Game engine)
 		{
-			gameEngine = engine;
+			Game = engine;
 
 			maxPitch = DMathUtil.DegreesToRadians(87.5);
 			minPitch = DMathUtil.DegreesToRadians(-87.5);
@@ -217,7 +217,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public void Update(GameTime gameTime)
 		{
-			var input = gameEngine.InputDevice;
+			var input = Game.InputDevice;
 			
 			
 			#region test
@@ -300,10 +300,10 @@ namespace Fusion.Engine.Graphics.GIS
 					//}
 
 
-					//if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Left))		FreeSurfaceYaw		-= gameTime.ElapsedSec * 0.7;
-					//if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Right))	FreeSurfaceYaw		+= gameTime.ElapsedSec * 0.7;
-					//if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Up))		FreeSurfacePitch	-= gameTime.ElapsedSec * 0.7;
-					//if (gameEngine.Keyboard.IsKeyDown(Input.Keys.Down))		FreeSurfacePitch	+= gameTime.ElapsedSec * 0.7;
+					//if (Game.Keyboard.IsKeyDown(Input.Keys.Left))		FreeSurfaceYaw		-= gameTime.ElapsedSec * 0.7;
+					//if (Game.Keyboard.IsKeyDown(Input.Keys.Right))	FreeSurfaceYaw		+= gameTime.ElapsedSec * 0.7;
+					//if (Game.Keyboard.IsKeyDown(Input.Keys.Up))		FreeSurfacePitch	-= gameTime.ElapsedSec * 0.7;
+					//if (Game.Keyboard.IsKeyDown(Input.Keys.Down))		FreeSurfacePitch	+= gameTime.ElapsedSec * 0.7;
 
 
 					//FreeSurfaceYaw = DMathUtil.Clamp(FreeSurfaceYaw, -DMathUtil.PiOverTwo, DMathUtil.PiOverTwo);

@@ -13,7 +13,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.OpenStreetMaps
 {
 	public abstract class BaseOpenStreetMapNodes : BaseMapSource
 	{
-		protected BaseOpenStreetMapNodes(GameEngine game) : base(game)
+		protected BaseOpenStreetMapNodes(Game game) : base(game)
 		{
 		}
 
@@ -45,7 +45,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.OpenStreetMaps
 		float longitudeStep	= 0.05f;
 		float latitudeStep	= 0.05f;
 
-		public OpenStreetMapNodes(GameEngine game) : base(game)
+		public OpenStreetMapNodes(Game game) : base(game)
 		{
 		}
 

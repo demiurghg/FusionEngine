@@ -62,7 +62,7 @@ namespace Fusion.Build {
 		void BuildTask ()
 		{
 			Builder.SafeBuild( InputDirectory, OutputDirectory, TempDirectory, CleanPattern, ForceRebuild );
-			Invoker.GameEngine.Reload();
+			Invoker.Game.Reload();
 		}
 	}
 }

@@ -65,7 +65,7 @@ namespace Fusion.Drivers.Audio {
 			var sampleCount	=	byteArray.Length * 8 / bitDepth / channels;
 
 		//	return new SoundEffect( byteArray, 0, byteArray.Length, sampleRate, (AudioChannels)channels, 0, sampleCount );
-			return new SoundEffect( content.GameEngine.AudioDevice, byteArray, 0, byteArray.Length, sampleRate, (AudioChannels)channels, 0, sampleCount );
+			return new SoundEffect( content.Game.AudioDevice, byteArray, 0, byteArray.Length, sampleRate, (AudioChannels)channels, 0, sampleCount );
 
 		#endif
 		}

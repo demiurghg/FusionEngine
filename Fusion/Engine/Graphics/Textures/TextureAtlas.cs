@@ -21,7 +21,7 @@ namespace Fusion.Engine.Graphics {
 		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 		{
 			bool srgb = assetPath.ToLowerInvariant().Contains("|srgb");
-			return new TextureAtlas( content.GameEngine.GraphicsEngine, stream, srgb );
+			return new TextureAtlas( content.Game.GraphicsEngine, stream, srgb );
 		}
 	}
 		
@@ -63,7 +63,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="device"></param>
 		public TextureAtlas ( GraphicsEngine ge, Stream stream, bool useSRgb = false )
 		{
-			var device = ge.GameEngine.GraphicsDevice;
+			var device = ge.Game.GraphicsDevice;
 
 			using ( var br = new BinaryReader(stream) ) {
 			

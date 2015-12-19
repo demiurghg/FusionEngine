@@ -75,7 +75,7 @@ namespace Fusion.Engine.Graphics.GIS
 		public Color4 OverallColor { get { return constData.OverallColor; } set { constData.OverallColor = value; }}
 
 
-		public ModelLayer(GameEngine engine, DVector2 lonLatPosition, string fileName, int maxInstancedCount = 0) : base(engine)
+		public ModelLayer(Game engine, DVector2 lonLatPosition, string fileName, int maxInstancedCount = 0) : base(engine)
 		{
 			model = engine.Content.Load<Scene>(fileName);
 
@@ -87,8 +87,8 @@ namespace Fusion.Engine.Graphics.GIS
 			Transparency = 1.0f;
 
 			constData	= new ConstDataStruct();
-			modelBuf	= new ConstantBuffer(GameEngine.GraphicsDevice, typeof(ConstDataStruct));
-			shader		= GameEngine.Content.Load<Ubershader>("globe.Model.hlsl");
+			modelBuf	= new ConstantBuffer(Game.GraphicsDevice, typeof(ConstDataStruct));
+			shader		= Game.Content.Load<Ubershader>("globe.Model.hlsl");
 			factory		= new StateFactory(shader, typeof(ModelFlags), Primitive.TriangleList, VertexInputElement.FromStructure<VertexColorTextureTBNRigid>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
 			factoryXray = new StateFactory(shader, typeof(ModelFlags), Primitive.TriangleList, VertexInputElement.FromStructure<VertexColorTextureTBNRigid>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
 			
@@ -103,8 +103,8 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{ 
-			var dev = GameEngine.GraphicsDevice;
-			var gis = GameEngine.GraphicsEngine.Gis;
+			var dev = Game.GraphicsDevice;
+			var gis = Game.GraphicsEngine.Gis;
 
 			CartesianPos = GeoHelper.SphericalToCartesian(DMathUtil.DegreesToRadians(LonLatPosition), gis.Camera.EarthRadius);
 

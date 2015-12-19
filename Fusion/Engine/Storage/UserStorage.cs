@@ -34,8 +34,8 @@ namespace Fusion.Engine.Storage {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="gameEngine"></param>
-		internal UserStorage ( GameEngine gameEngine )
+		/// <param name="Game"></param>
+		internal UserStorage ( Game Game )
 		{
 			string myDocs	=	Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 			string appName	=	Path.GetFileNameWithoutExtension( AppDomain.CurrentDomain.FriendlyName.Replace(".vshost","") );

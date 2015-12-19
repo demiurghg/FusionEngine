@@ -19,8 +19,8 @@ namespace SceneDemo1 {
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public SceneDemo1GameServer ( GameEngine gameEngine )
-			: base( gameEngine )
+		public SceneDemo1GameServer ( Game game )
+			: base( game )
 		{
 		}
 

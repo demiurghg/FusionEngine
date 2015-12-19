@@ -32,10 +32,10 @@ namespace SceneDemo1 {
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public SceneDemo1GameInterface ( GameEngine gameEngine )
-			: base( gameEngine )
+		public SceneDemo1GameInterface ( Game game )
+			: base( game )
 		{
-			console = new GameConsole( gameEngine, "conchars", "conback" );
+			console = new GameConsole( game, "conchars", "conback" );
 		}
 
 
@@ -46,17 +46,17 @@ namespace SceneDemo1 {
 		public override void Initialize ()
 		{
 			//	create view layer :
-			master = new ViewLayerHdr( GameEngine, 0, 0 );
+			master = new ViewLayerHdr( Game, 0, 0 );
 
 			//	add view to layer to scene :
-			GameEngine.GraphicsEngine.AddLayer( master );
+			Game.GraphicsEngine.AddLayer( master );
 
 			//	add console sprite layer to master view layer :
 			master.SpriteLayers.Add( console.ConsoleSpriteLayer );
 
 			//	load content and scubscribe on content reload.
 			LoadContent();
-			GameEngine.Reloading += (s,e) => LoadContent();
+			Game.Reloading += (s,e) => LoadContent();
 		}
 
 
@@ -66,7 +66,7 @@ namespace SceneDemo1 {
 		/// </summary>
 		void LoadContent ()
 		{
-			scene	=	GameEngine.Content.Load<Scene>(@"Scenes\testScene");
+			scene	=	Game.Content.Load<Scene>(@"Scenes\testScene");
 
 			//master.Instances.Add( new InstancedMesh(
 		}
@@ -102,7 +102,7 @@ namespace SceneDemo1 {
 
 		public override void RequestToExit ()
 		{
-			GameEngine.Exit();
+			Game.Exit();
 		}
 
 

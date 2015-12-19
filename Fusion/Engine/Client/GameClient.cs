@@ -16,8 +16,8 @@ namespace Fusion.Engine.Client {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="gameEngine"></param>
-		public GameClient ( GameEngine gameEngine ) : base(gameEngine) 
+		/// <param name="Game"></param>
+		public GameClient ( Game Game ) : base(Game) 
 		{
 			InitInternal();
 		}

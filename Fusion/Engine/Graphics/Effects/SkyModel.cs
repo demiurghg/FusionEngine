@@ -103,7 +103,7 @@ namespace Fusion.Engine.Graphics {
 
 		public static Vector3 YxyToRGB ( Vector3 Yxy )
 		{
-			//var uc = GameEngine.GetService<Settings>().UserConfig;
+			//var uc = Game.GetService<Settings>().UserConfig;
 
 			Vector3  clrYxy = Yxy;
 

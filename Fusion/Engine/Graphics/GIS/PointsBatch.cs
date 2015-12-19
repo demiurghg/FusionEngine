@@ -74,7 +74,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 
-		public PointsGisLayer(GameEngine engine, int maxPointsCount, bool isDynamic = false) : base(engine)
+		public PointsGisLayer(Game engine, int maxPointsCount, bool isDynamic = false) : base(engine)
 		{
 			DotsBuffer	= new ConstantBuffer(engine.GraphicsDevice, typeof(DotsData));
 			ColorBuffer = new ConstantBuffer(engine.GraphicsDevice, typeof(ColorData), 16);
@@ -94,7 +94,7 @@ namespace Fusion.Engine.Graphics.GIS
 			
 			Flags		= (int) (PointFlags.DOTS_WORLDSPACE | PointFlags.ROTATION_ANGLE);
 
-			shader	= GameEngine.Content.Load<Ubershader>("globe.Point.hlsl");
+			shader	= Game.Content.Load<Ubershader>("globe.Point.hlsl");
 			factory = new StateFactory(shader, typeof(PointFlags), Primitive.PointList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
 
 			ColorDatas = new ColorData[16];
@@ -119,8 +119,8 @@ namespace Fusion.Engine.Graphics.GIS
 			if (TextureAtlas == null) return;
 
 
-			dotsData.View				= GameEngine.GraphicsEngine.Gis.Camera.ViewMatrixFloat;
-			dotsData.Proj				= GameEngine.GraphicsEngine.Gis.Camera.ProjMatrixFloat;
+			dotsData.View				= Game.GraphicsEngine.Gis.Camera.ViewMatrixFloat;
+			dotsData.Proj				= Game.GraphicsEngine.Gis.Camera.ProjMatrixFloat;
 			dotsData.AtlasSizeImgSize	= new Vector4(TextureAtlas.Width, TextureAtlas.Height, ImageSizeInAtlas.X, ImageSizeInAtlas.Y);
 			dotsData.SizeMult			= new Vector4(SizeMultiplier);
 
@@ -135,7 +135,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			Update(gameTime);
 
-			var dev = GameEngine.GraphicsDevice;
+			var dev = Game.GraphicsDevice;
 
 			//dev.ResetStates();
 

@@ -26,9 +26,9 @@ namespace Fusion.Engine.Common.Commands {
 		/// </summary>
 		public override void Execute ()
 		{
-			if (Invoker.GameEngine.GameServer.IsAlive) {
+			if (Invoker.Game.GameServer.IsAlive) {
 				
-				//Invoker.GameEngine.GameServer.PrintServerInfo();
+				//Invoker.Game.GameServer.PrintServerInfo();
 
 			} else {
 				Log.Warning("Server is not running");

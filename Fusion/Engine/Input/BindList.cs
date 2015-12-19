@@ -25,7 +25,7 @@ namespace Fusion.Engine.Input {
 
 		public override void Execute ()
 		{
-			var kb = GameEngine.Keyboard;
+			var kb = Game.Keyboard;
 
 			Log.Message("");
 

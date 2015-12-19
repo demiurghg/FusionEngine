@@ -16,7 +16,7 @@ namespace Fusion.Engine.Common.Commands {
 
 		public override void Execute ()
 		{
-			Invoker.GameEngine.KillServer();
+			Invoker.Game.KillServer();
 		}
 	}
 }

@@ -51,7 +51,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="game"></param>
-		public HdrFilter ( GameEngine game ) : base(game)
+		public HdrFilter ( Game game ) : base(game)
 		{
 		}
 
@@ -62,14 +62,14 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize ()
 		{
-			averageLum	=	new RenderTarget2D( GameEngine.GraphicsDevice, ColorFormat.Rgba16F, 256,256, true, false );
-			paramsCB	=	new ConstantBuffer( GameEngine.GraphicsDevice, typeof(Params) );
-			whiteTex	=	new DynamicTexture( GameEngine.GraphicsEngine, 4,4, typeof(Color), false, false);
+			averageLum	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 256,256, true, false );
+			paramsCB	=	new ConstantBuffer( Game.GraphicsDevice, typeof(Params) );
+			whiteTex	=	new DynamicTexture( Game.GraphicsEngine, 4,4, typeof(Color), false, false);
 			whiteTex.SetData( Enumerable.Range(0,16).Select( i=> Color.White ).ToArray() );
 
 			LoadContent();
 
-			GameEngine.Reloading += (s,e) => LoadContent();
+			Game.Reloading += (s,e) => LoadContent();
 		}
 
 
@@ -81,7 +81,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			SafeDispose( ref factory );
 
-			shader	=	GameEngine.Content.Load<Ubershader>("hdr");
+			shader	=	Game.Content.Load<Ubershader>("hdr");
 			factory	=	new StateFactory( shader, typeof(Flags), Primitive.TriangleList, VertexInputElement.Empty, BlendState.Opaque, RasterizerState.CullNone, DepthStencilState.None );
 		}
 
@@ -112,8 +112,8 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="hdrImage">HDR source image.</param>
 		public void Render ( GameTime gameTime, RenderTargetSurface target, ShaderResource hdrImage, ViewLayerHdr viewLayer )
 		{
-			var device	=	GameEngine.GraphicsDevice;
-			var filter	=	GameEngine.GraphicsEngine.Filter;
+			var device	=	Game.GraphicsDevice;
+			var filter	=	Game.GraphicsEngine.Filter;
 
 			var settings	=	viewLayer.HdrSettings;
 

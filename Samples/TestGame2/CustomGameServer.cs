@@ -47,7 +47,7 @@ namespace TestGame2 {
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public CustomGameServer ( GameEngine gameEngine ) : base(gameEngine)
+		public CustomGameServer ( Game game ) : base(game)
 		{
 		}
 

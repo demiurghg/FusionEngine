@@ -41,7 +41,7 @@ namespace TestGame2 {
 
 			public override void Execute ()
 			{
-				Invoker.GameEngine.GameClient.NotifyServer("chat:" + string.Join(" ", Messages));
+				Invoker.Game.GameClient.NotifyServer("chat:" + string.Join(" ", Messages));
 			}
 		}
 
@@ -49,7 +49,7 @@ namespace TestGame2 {
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public CustomGameClient ( GameEngine gameEngine )	: base(gameEngine)
+		public CustomGameClient ( Game game )	: base(game)
 		{
 			Config	= new Config();
 		}
@@ -91,7 +91,7 @@ namespace TestGame2 {
 		/// <param name="gameTime"></param>
 		public override byte[] Update ( GameTime gameTime )
 		{
-			var mouse = GameEngine.Mouse;
+			var mouse = Game.Mouse;
 			
 			return Encoding.UTF8.GetBytes( string.Format("[{0} {1} {2}]", mouse.Position.X, mouse.Position.Y, UserInfo() ) );
 		}

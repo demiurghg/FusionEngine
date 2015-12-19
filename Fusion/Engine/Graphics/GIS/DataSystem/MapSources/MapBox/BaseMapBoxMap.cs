@@ -11,7 +11,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.MapBox
 {
 	public abstract class BaseMapBoxMap : BaseMapSource
 	{
-		protected BaseMapBoxMap(GameEngine game) : base(game)
+		protected BaseMapBoxMap(Game game) : base(game)
 		{
 		}
 

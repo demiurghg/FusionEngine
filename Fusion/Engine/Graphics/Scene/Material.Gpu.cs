@@ -46,12 +46,12 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="content"></param>
 		internal void LoadGpuResources ( ContentManager content )
 		{
-			var defaultColorTexture		=	content.GameEngine.GraphicsEngine.GrayTexture;
-			var defaultSurfaceTexture	=	content.GameEngine.GraphicsEngine.BlackTexture;
-			var defaultNormalMapTexture	=	content.GameEngine.GraphicsEngine.FlatNormalMap;
-			var defaultEmissionTexture	=	content.GameEngine.GraphicsEngine.BlackTexture;
+			var defaultColorTexture		=	content.Game.GraphicsEngine.GrayTexture;
+			var defaultSurfaceTexture	=	content.Game.GraphicsEngine.BlackTexture;
+			var defaultNormalMapTexture	=	content.Game.GraphicsEngine.FlatNormalMap;
+			var defaultEmissionTexture	=	content.Game.GraphicsEngine.BlackTexture;
 
-			constBuffer		=	new ConstantBuffer( content.GameEngine.GraphicsDevice, typeof(LayerData), 4 );
+			constBuffer		=	new ConstantBuffer( content.Game.GraphicsDevice, typeof(LayerData), 4 );
 
 			shaderResources	=	new ShaderResource[16];
 

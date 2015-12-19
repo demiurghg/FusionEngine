@@ -16,7 +16,7 @@ namespace Fusion.Engine.UserInterface {
 
 	public partial class Frame {
 
-		public readonly	GameEngine	Game;
+		public readonly	Game	Game;
 		readonly UserInterface	ui;
 
 		/// <summary>
@@ -297,7 +297,7 @@ namespace Fusion.Engine.UserInterface {
 		/// <param name="id"></param>
 		public Frame ( UserInterface ui )
 		{
-			Game	=	ui.GameEngine;
+			Game	=	ui.Game;
 			this.ui	=	ui;
 			Init();
 		}
@@ -341,7 +341,7 @@ namespace Fusion.Engine.UserInterface {
 		/// <param name="backColor"></param>
 		public Frame ( UserInterface ui, int x, int y, int w, int h, string text, Color backColor )
 		{
-			Game	=	ui.GameEngine;
+			Game	=	ui.Game;
 			this.ui	=	ui;
 			Init();
 

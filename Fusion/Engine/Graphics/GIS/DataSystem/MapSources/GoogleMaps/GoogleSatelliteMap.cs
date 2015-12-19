@@ -21,7 +21,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.GoogleMaps
 			get { return "GSM"; }
 		}
 
-		public GoogleSatelliteMap(GameEngine game) : base(game)
+		public GoogleSatelliteMap(Game game) : base(game)
 		{
 			UrlFormatServer		= "khm";
 			UrlFormatRequest	= "kh";

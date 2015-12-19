@@ -11,9 +11,9 @@ namespace Fusion.Core.Shell {
 	public partial class Invoker {
 
 		/// <summary>
-		/// GameEngine reference.
+		/// Game reference.
 		/// </summary>
-		public GameEngine GameEngine { get; private set; }
+		public Game Game { get; private set; }
 
 
 		/// <summary>
@@ -50,8 +50,8 @@ namespace Fusion.Core.Shell {
 		/// <summary>
 		/// Creates instance of Invoker.
 		/// </summary>
-		/// <param name="game">GameEngine instance</param>
-		public Invoker ( GameEngine game, CommandAffinity affinity )
+		/// <param name="game">Game instance</param>
+		public Invoker ( Game game, CommandAffinity affinity )
 		{
 			Initialize( game, Command.GatherCommands() );
 		}
@@ -63,10 +63,10 @@ namespace Fusion.Core.Shell {
 		/// </summary>
 		/// <param name="game"></param>
 		/// <param name="types"></param>
-		void Initialize ( GameEngine game, Type[] types )
+		void Initialize ( Game game, Type[] types )
 		{
 			Context		=	null;
-			GameEngine		=	game;
+			Game		=	game;
 			commands	=	types
 						.Where( t1 => t1.IsSubclassOf(typeof(Command)) )
 						.Where( t2 => t2.HasAttribute<CommandAttribute>() )

@@ -25,8 +25,8 @@ namespace Fusion.Engine.Network {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="gameEngine"></param>
-		internal NetworkEngine ( GameEngine gameEngine ) : base( gameEngine )
+		/// <param name="Game"></param>
+		internal NetworkEngine ( Game Game ) : base( Game )
 		{
 			Config	=	new NetworkConfig();
 		}
