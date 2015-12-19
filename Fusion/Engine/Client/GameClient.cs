@@ -35,7 +35,7 @@ namespace Fusion.Engine.Client {
 		/// The method can be invoked in parallel task.
 		/// Thus this method should not setup scene.
 		/// </summary>
-		/// <param name="host"></param>
+		/// <param name="serverInfo"></param>
 		public abstract void LoadContent ( string serverInfo );
 
 		/// <summary>
@@ -43,12 +43,6 @@ namespace Fusion.Engine.Client {
 		///	Client must purge all level-associated content.
 		/// </summary>
 		public abstract void UnloadContent ();
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="message"></param>
-		public abstract void GameEnd ( string message );
 
 		/// <summary>
 		/// Runs one step of client-side simulation and render world state.

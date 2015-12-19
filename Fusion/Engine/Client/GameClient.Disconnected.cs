@@ -19,8 +19,9 @@ namespace Fusion.Engine.Client {
 
 			public Disconnected ( GameClient gameClient, string reason ) : base(gameClient)
 			{
+				//	Notify client that game ended?
 				gameClient.UnloadContent();
-				gameClient.GameEnd( reason );
+
 				client.Shutdown( reason );
 			}
 

@@ -7,8 +7,8 @@ using Fusion.Core.Shell;
 
 namespace Fusion.Engine.Common.Commands {
 
-	[Command("crashServer", CommandAffinity.Server)]
-	public class CrashServer : NoRollbackCommand {
+	[Command("crashClient", CommandAffinity.Client)]
+	public class CrashClient : NoRollbackCommand {
 
 		static public bool crashRequested = false;
 
@@ -17,18 +17,18 @@ namespace Fusion.Engine.Common.Commands {
 		{
 			if (crashRequested) {
 				crashRequested = false;
-				throw new Exception("*SERVER CRASHTEST*");
+				throw new Exception("*CLIENT CRASHTEST*");
 			}
 		}
 
 			
-		public CrashServer ( Invoker invoker ) : base(invoker) 
+		public CrashClient ( Invoker invoker ) : base(invoker) 
 		{
 		}
 
 		public override void Execute ()
 		{
-			crashRequested	= 	true;
+			crashRequested	=	true;
 		}
 	}
 }

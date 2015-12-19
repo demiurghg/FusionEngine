@@ -9,6 +9,8 @@ using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
 using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
 using Fusion.Engine.Graphics.GIS.GlobeMath;
+using TriangleNet;
+using TriangleNet.Geometry;
 
 namespace Fusion.Engine.Graphics.GIS
 {
@@ -31,6 +33,10 @@ namespace Fusion.Engine.Graphics.GIS
 			BLUR_VERTICAL	= 1 << 7,
 			DRAW_COLORED	= 1 << 8,
 			XRAY			= 1 << 9,
+			NO_DEPTH	= 1 << 10,
+			CULL_NONE	= 1 << 11,
+
+			USE_PALETTE_COLOR = 1 << 12,
 		}
 
 		public int Flags;
@@ -40,8 +46,17 @@ namespace Fusion.Engine.Graphics.GIS
 		public Texture2D Texture;
 		public Texture2D Palette;
 
-		public Vector2	PatternSize;
-		public float	ArrowsScale;
+		public float PaletteValue			{ get { return constData.Data.X; } set { constData.Data.X = value; } }
+		public float PaletteTransparency	{ get { return constData.Data.Y; } set { constData.Data.Y = value; } }
+
+		protected struct ConstData {
+			public Vector4 Data;
+		}
+		protected ConstData			constData;
+		protected ConstantBuffer	cb;
+
+		//public Vector2	PatternSize;
+		//public float	ArrowsScale;
 
 		protected VertexBuffer	firstBuffer;
 		protected VertexBuffer	secondBuffer;
@@ -62,10 +77,23 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
+		void EnumFunc(PipelineState ps, int flag)
+		{
+			var flags = (PolyFlags)flag;
+
+			ps.VertexInputElements	= VertexInputElement.FromStructure<Gis.GeoPoint>();
+			ps.BlendState			= flags.HasFlag(PolyFlags.XRAY)			? BlendState.Additive		: BlendState.AlphaBlend;
+			ps.DepthStencilState	= flags.HasFlag(PolyFlags.NO_DEPTH)		? DepthStencilState.None	: DepthStencilState.Default;
+			ps.RasterizerState		= flags.HasFlag(PolyFlags.CULL_NONE)	? RasterizerState.CullNone	: RasterizerState.CullCW;
+
+			ps.Primitive = Primitive.TriangleList;
+		}
+
+
 		protected void Initialize(Gis.GeoPoint[] points, int[] indeces, bool isDynamic)
 		{
 			shader		= GameEngine.Content.Load<Ubershader>("globe.Poly.hlsl");
-			factory		= new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
+			factory		= new StateFactory(shader, typeof(PolyFlags), EnumFunc);
 			factoryXray = new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.Additive, RasterizerState.CullCW, DepthStencilState.None);
 
 			var vbOptions = isDynamic ? VertexBufferOptions.Dynamic : VertexBufferOptions.Default;
@@ -78,6 +106,10 @@ namespace Fusion.Engine.Graphics.GIS
 			indexBuffer.SetData(indeces);
 
 			PointsCpu = points;
+
+			cb			= new ConstantBuffer(GameEngine.GraphicsDevice, typeof(ConstData));
+			constData	= new ConstData();
+			constData.Data = Vector4.One;
 		}
 		
 
@@ -91,11 +123,25 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
+			if (currentBuffer == null || indexBuffer == null) {
+				Log.Warning("Poly layer null reference");
+				return;
+			}
+
 			if (((PolyFlags) Flags).HasFlag(PolyFlags.XRAY)) {
 				GameEngine.GraphicsDevice.PipelineState = factoryXray[Flags];
 			}
 			else {
 				GameEngine.GraphicsDevice.PipelineState = factory[Flags];
+			}
+
+			if (((PolyFlags)Flags).HasFlag(PolyFlags.DRAW_TEXTURED)) {
+				if(Texture != null)
+					GameEngine.GraphicsDevice.PixelShaderResources[0] = Texture; 
+
+				cb.SetData(constData);
+
+				GameEngine.GraphicsDevice.PixelShaderConstants[1] = cb;
 			}
 
 			GameEngine.GraphicsDevice.VertexShaderConstants[0] = constBuffer;
@@ -126,9 +172,49 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public static PolyGisLayer CreateFromContour()
+		public static PolyGisLayer CreateFromContour(GameEngine engine, DVector2[] lonLatRad, Color color)
 		{
-			return null;
+			var triangulator = new TriangleNet.Mesh();
+			triangulator.Behavior.Algorithm = TriangulationAlgorithm.SweepLine;
+			
+			InputGeometry ig = new InputGeometry();
+
+			ig.AddPoint(lonLatRad[0].X, lonLatRad[0].Y);
+			for (int v = 1; v < lonLatRad.Length; v++) {
+				ig.AddPoint(lonLatRad[v].X, lonLatRad[v].Y);
+				ig.AddSegment(v-1, v);
+			}
+			ig.AddSegment(lonLatRad.Length - 1, 0);
+			
+			triangulator.Triangulate(ig);
+
+			if (triangulator.Vertices.Count != lonLatRad.Length) {
+				Log.Warning("Vertices count not match");
+				return null;
+			}
+
+
+			var points = new List<Gis.GeoPoint>();
+			foreach (var pp in triangulator.Vertices) {
+				points.Add(new Gis.GeoPoint {
+					Lon		= pp.X,
+					Lat		= pp.Y,
+					Color	= color
+				});
+			}
+
+
+			var indeces = new List<int>();
+			foreach (var tr in triangulator.Triangles) {
+				indeces.Add(tr.P0);
+				indeces.Add(tr.P1);
+				indeces.Add(tr.P2);
+			}
+
+
+			return new PolyGisLayer(engine, points.ToArray(), indeces.ToArray(), true) {
+				Flags = (int)(PolyFlags.NO_DEPTH | PolyFlags.DRAW_TEXTURED | PolyFlags.CULL_NONE | PolyFlags.VERTEX_SHADER | PolyFlags.PIXEL_SHADER | PolyFlags.USE_PALETTE_COLOR) 
+			};
 		}
 
 

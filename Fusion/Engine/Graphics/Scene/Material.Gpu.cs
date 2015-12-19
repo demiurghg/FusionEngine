@@ -19,7 +19,7 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	public partial class Material : DisposableBase {
 
-		struct ConstData {
+		struct LayerData {
 			public Vector4	Tiling;
 			public Vector4	Offset;
 			public Vector2	RoughnessRange;
@@ -46,36 +46,40 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="content"></param>
 		internal void LoadGpuResources ( ContentManager content )
 		{
-			constBuffer		=	new ConstantBuffer( content.GameEngine.GraphicsDevice, typeof(ConstData) );
+			constBuffer		=	new ConstantBuffer( content.GameEngine.GraphicsDevice, typeof(LayerData), 4 );
 
 			shaderResources	=	new ShaderResource[16];
 
-			if (Layer0!=null) {
-				shaderResources[ 0]	=	LoadColorTexture( content, Layer0.ColorTexture		).Srv;
-				shaderResources[ 1]	=	LoadColorTexture( content, Layer0.SurfaceTexture	).Srv;
-				shaderResources[ 2]	=	LoadColorTexture( content, Layer0.NormalMapTexture	).Srv;
-				shaderResources[ 3]	=	LoadColorTexture( content, Layer0.EmissionTexture	).Srv;
+			for (int i=0; i<layers.Length; i++) {
+				if (layers[i]!=null) {
+					shaderResources[ i * 4 + 0]	=	LoadColorTexture( content, layers[i].ColorTexture		).Srv;
+					shaderResources[ i * 4 + 1]	=	LoadColorTexture( content, layers[i].SurfaceTexture		).Srv;
+					shaderResources[ i * 4 + 2]	=	LoadColorTexture( content, layers[i].NormalMapTexture	).Srv;
+					shaderResources[ i * 4 + 3]	=	LoadColorTexture( content, layers[i].EmissionTexture	).Srv;
+				} else {
+					shaderResources[ i * 4 + 0]	=	null;
+					shaderResources[ i * 4 + 1]	=	null;
+					shaderResources[ i * 4 + 2]	=	null;
+					shaderResources[ i * 4 + 3]	=	null;
+				}
 			}
-			
-			if (Layer1!=null) {				 
-				shaderResources[ 4]	=	LoadColorTexture( content, Layer1.ColorTexture		).Srv;
-				shaderResources[ 5]	=	LoadColorTexture( content, Layer1.SurfaceTexture	).Srv;
-				shaderResources[ 6]	=	LoadColorTexture( content, Layer1.NormalMapTexture	).Srv;
-				shaderResources[ 7]	=	LoadColorTexture( content, Layer1.EmissionTexture	).Srv;
-			}
-							 
-			if (Layer1!=null) {				 
-				shaderResources[ 8]	=	LoadColorTexture( content, Layer2.ColorTexture		).Srv;
-				shaderResources[ 9]	=	LoadColorTexture( content, Layer2.SurfaceTexture	).Srv;
-				shaderResources[10]	=	LoadColorTexture( content, Layer2.NormalMapTexture	).Srv;
-				shaderResources[11]	=	LoadColorTexture( content, Layer2.EmissionTexture	).Srv;
-			}
-							 
-			if (Layer1!=null) {				 
-				shaderResources[12]	=	LoadColorTexture( content, Layer3.ColorTexture		).Srv;
-				shaderResources[13]	=	LoadColorTexture( content, Layer3.SurfaceTexture	).Srv;
-				shaderResources[14]	=	LoadColorTexture( content, Layer3.NormalMapTexture	).Srv;
-				shaderResources[15]	=	LoadColorTexture( content, Layer3.EmissionTexture	).Srv;
+
+			var constData = new LayerData[4];
+
+			for (int i=0; i<layers.Length; i++) {
+				if (layers[i]!=null) {
+					constData[i].Tiling				=	new Vector4(layers[i].Tiling, 0);
+					constData[i].Offset				=	new Vector4(layers[i].Offset, 0);
+					constData[i].RoughnessRange		=	layers[i].RoughnessRange ;
+					constData[i].GlowNarrowness		=	layers[i].GlowNarrowness ;
+					constData[i].ColorLevel			=	layers[i].ColorLevel	 ;
+					constData[i].AlphaLevel			=	layers[i].AlphaLevel	 ;
+					constData[i].SpecularLevel		=	layers[i].SpecularLevel	 ;
+					constData[i].EmissionLevel		=	layers[i].EmissionLevel	 ;
+					constData[i].Displacement		=	layers[i].Displacement	 ;
+					constData[i].BlendHardness		=	layers[i].BlendHardness	 ;
+					constData[i].Dummy				=	0;
+				}
 			}
 		}
 

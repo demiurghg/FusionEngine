@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Fusion;
@@ -86,6 +87,8 @@ namespace Fusion.Engine.Graphics.GIS
 	    public override void Initialize()
 	    {
 			constBuffer = new ConstantBuffer(GameEngine.GraphicsDevice, typeof(ConstData));
+
+			#region Test input region
 			Camera		= new GlobeCamera(GameEngine);
 
 			Camera.Viewport = new Viewport(0, 0, GameEngine.GraphicsDevice.DisplayBounds.Width, GameEngine.GraphicsDevice.DisplayBounds.Height);
@@ -118,12 +121,17 @@ namespace Fusion.Engine.Graphics.GIS
 						Camera.Pitch	+= after.Y - before.Y;
 					}
 				}
-
+				if(GameEngine.InputDevice.IsKeyDown(Keys.MiddleButton) && Camera.CameraState == GlobeCamera.CameraStates.ViewToPoint) {
+					Camera.RotateViewToPointCamera(GameEngine.InputDevice.RelativeMouseOffset);
+			    }
+				if(GameEngine.InputDevice.IsKeyDown(Keys.RightButton) && Camera.CameraState == GlobeCamera.CameraStates.FreeSurface) {
+					Camera.RotateFreeSurfaceCamera(GameEngine.InputDevice.RelativeMouseOffset);
+			    }
 				previousMousePosition = new Vector2(args.Position.X, args.Position.Y);
 		    };
+			#endregion
 
-
-		    //Points = new PointsGisBatch(GameEngine, 100)
+			//Points = new PointsGisBatch(GameEngine, 100)
 		    //{
 		    //	ImageSizeInAtlas	= new Vector2(36, 36),
 		    //	TextureAtlas		= GameEngine.Content.Load<Texture2D>("circles.tga")

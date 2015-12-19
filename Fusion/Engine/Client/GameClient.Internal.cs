@@ -10,6 +10,7 @@ using Fusion.Core.Shell;
 using Fusion.Engine.Common;
 using Lidgren.Network;
 using Fusion.Engine.Server;
+using Fusion.Engine.Common.Commands;
 
 
 namespace Fusion.Engine.Client {
@@ -43,7 +44,6 @@ namespace Fusion.Engine.Client {
 			netConfig.AutoFlushSendQueue	=	true;
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryRequest );
-			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryResponse );
 			netConfig.UnreliableSizeBehaviour = NetUnreliableSizeBehaviour.NormalFragmentation;
 
 
@@ -109,6 +109,21 @@ namespace Fusion.Engine.Client {
 			//	Update client-side game :
 			//
 			state.Update( gameTime );
+
+			//
+			//	Crash test :
+			//
+			CrashClient.CrashTest();
+
+			//
+			//	Execute command :
+			//	Should command be executed in Active state only?
+			//	
+			try {
+				GameEngine.Invoker.ExecuteQueue( gameTime, CommandAffinity.Client );
+			} catch ( Exception e ) {
+				Log.Error( e.Message );
+			}
 		}
 
 
@@ -128,10 +143,6 @@ namespace Fusion.Engine.Client {
 					case NetIncomingMessageType.DebugMessage:		Log.Verbose	("CL Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.WarningMessage:		Log.Warning	("CL Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.ErrorMessage:		Log.Error	("CL Net: " + msg.ReadString()); break;
-
-					case NetIncomingMessageType.DiscoveryResponse:
-						GameEngine.GameInterface.DiscoveryResponse( msg.SenderEndPoint, msg.ReadString() );
-						break;
 
 					case NetIncomingMessageType.StatusChanged:		
 

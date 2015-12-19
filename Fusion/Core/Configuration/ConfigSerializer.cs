@@ -22,13 +22,15 @@ namespace Fusion.Core.Configuration {
 	/// </summary>
 	internal static class ConfigSerializer {
 
+		static IniData globalIniData = null;
+
 
 		public static void SaveToStream ( IEnumerable<GameModule.ModuleBinding> bindings, Stream stream )
 		{
 			try {
 		
 				//	prepare ini data :			
-				IniData iniData = new IniData();
+				IniData iniData = globalIniData ?? new IniData();
 				iniData.Configuration.CommentString	=	"# ";
 
 				foreach ( var bind in bindings ) {
@@ -94,6 +96,8 @@ namespace Fusion.Core.Configuration {
 
 					bind.Module.SetConfiguration( section.Keys );
 				}
+
+				globalIniData = iniData;
 
 			} catch (Exception e) {
 				Log.Message("{0}", e.Message);

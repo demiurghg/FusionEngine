@@ -111,6 +111,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Triangle">
+      <HintPath>..\SDKs\Triangle\Triangle.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Configuration\ConfigSerializer.cs" />
@@ -202,9 +205,11 @@
     <Compile Include="Engine\Client\GameClient.Loading.cs" />
     <Compile Include="Engine\Client\GameClient.Connecting.cs" />
     <Compile Include="Engine\Client\GameClient.State.cs" />
+    <Compile Include="Engine\Common\Commands\CrashClient.cs" />
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
     <Compile Include="Engine\Common\GameInterface.Internal.cs" />
     <Compile Include="Engine\Graphics\Effects\SkySphere.cs" />
+    <Compile Include="Engine\Graphics\Commands\Screenshot.cs" />
     <Compile Include="Engine\Graphics\Effects\HdrSettings.cs" />
     <Compile Include="Engine\Graphics\Effects\Filter.cs" />
     <Compile Include="Engine\Graphics\Effects\HdrFilter.cs">
@@ -400,7 +405,7 @@
     <Compile Include="Engine\Graphics\Textures\DynamicTexture.cs" />
     <Compile Include="Engine\Graphics\Textures\LightProbe.cs" />
     <Compile Include="Engine\Graphics\Scene\Material.cs" />
-    <Compile Include="Engine\Graphics\InstancedMesh.cs" />
+    <Compile Include="Engine\Graphics\MeshInstance.cs" />
     <Compile Include="Engine\Graphics\Lights\OmniLight.cs" />
     <Compile Include="Engine\Graphics\Lights\SpotLight.cs" />
     <Compile Include="Engine\Graphics\Textures\TargetTexture.cs" />

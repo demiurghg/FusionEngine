@@ -39,7 +39,7 @@ namespace Fusion.Core.Shell {
 		/// <summary>
 		/// Gets dictionary of all available variables.
 		/// </summary>
-		public Dictionary<string, ConfigVariable> Variables {
+		internal Dictionary<string, ConfigVariable> Variables {
 			get {
 				return variables;
 			}

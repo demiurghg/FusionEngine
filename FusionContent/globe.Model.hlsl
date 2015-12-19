@@ -9,6 +9,7 @@ struct ConstData {
 struct ModelConstData {
 	float4x4 	World;
 	float4 		ViewPositionTransparency;
+	float4 		OverallColor;
 };
 
 struct InstancingData {
@@ -47,7 +48,8 @@ StructuredBuffer<InstancingData> InstData : register(t1);
 
 #if 0
 $ubershader VERTEX_SHADER PIXEL_SHADER DRAW_COLORED +INSTANCED
-$ubershader VERTEX_SHADER PIXEL_SHADER XRAY +INSTANCED
+$ubershader VERTEX_SHADER PIXEL_SHADER USE_OVERALL_COLOR +INSTANCED
+$ubershader VERTEX_SHADER PIXEL_SHADER XRAY +INSTANCED +USE_OVERALL_COLOR
 #endif
 
 
@@ -89,24 +91,33 @@ VS_OUTPUT VSMain ( VS_INPUT v
 #ifdef PIXEL_SHADER
 float4 PSMain ( VS_OUTPUT input ) : SV_Target
 {
+	float4 color = float4(0,0,0,0);
+
 	#ifdef XRAY
 		float3 ndir	= normalize(-input.WPos);
 		
 		float  ndot = abs(dot( ndir, input.Normal ));
 		float  frsn	= pow(saturate(1.2f-ndot), 0.5);
 		
-		return frsn*float4(input.Color.xyz, input.Color.a);
-	#endif
-
-	float4 color = float4(0,0,0,0);
-	#ifdef DRAW_COLORED
-		color = input.Color;
-	#endif
-
+		#ifdef USE_OVERALL_COLOR
+			color = ModelStage.OverallColor;
+		#else
+			color = input.Color;
+		#endif
+		
+		return frsn*float4(color.xyz, color.a);
+	#else
+		#ifdef DRAW_COLORED
+			color = input.Color;
+		#endif
+		#ifdef USE_OVERALL_COLOR
+			color = ModelStage.OverallColor;
+		#endif
+		
+		float t = dot(normalize(float3(1.0f, 0.0f, 0.0f)), input.Normal);
+		float v = 0.5 * (1 + abs(t));
 	
-	float t = dot(normalize(float3(1.0f, 0.0f, 0.0f)), input.Normal);
-	float v = 0.5 * (1 + abs(t));
- 
-	return float4(v * color.rgb, ModelStage.ViewPositionTransparency.a);
+		return float4(v * color.rgb, ModelStage.ViewPositionTransparency.a);
+	#endif
 }
 #endif
