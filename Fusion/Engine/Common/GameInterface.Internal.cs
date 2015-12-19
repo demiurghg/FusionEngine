@@ -13,7 +13,6 @@ namespace Fusion.Engine.Common {
 	public abstract partial class GameInterface : GameModule {
 
 		NetClient client;
-		Stopwatch timer;
 
 		TimeSpan timeout;
 
