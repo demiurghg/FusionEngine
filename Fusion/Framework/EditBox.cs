@@ -48,6 +48,10 @@ namespace Fusion.Framework {
 		}
 
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="history"></param>
 		public void FeedHistory ( string[] history )
 		{
 			this.history.AddRange(history);
@@ -56,6 +60,10 @@ namespace Fusion.Framework {
 
 
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="ch"></param>
 		public void TypeChar ( char ch )
 		{						
 			if (cursor>=text.Length) {
@@ -70,7 +78,7 @@ namespace Fusion.Framework {
 
 		public void Enter ()
 		{
-			if (Text!="") {
+			if (Text!="" /*&& history.FirstOrDefault()!=Text*/) {
 				history.Insert( 0, Text );
 				console.Config.UpdateHistory( history );
 				historyCursor = -1;

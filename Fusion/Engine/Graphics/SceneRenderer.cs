@@ -9,6 +9,7 @@ using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
+using Fusion.Core.Development;
 
 
 namespace Fusion.Engine.Graphics {
@@ -25,8 +26,24 @@ namespace Fusion.Engine.Graphics {
 		Texture2D		defaultEmission	;
 
 		enum SurfaceFlags {
-			GBUFFER = 1,
-			SHADOW = 2,
+			GBUFFER					=	1 << 0,
+			SHADOW					=	1 << 1,
+
+			RIGID					=	1 << 2,
+			SKINNED					=	1 << 3,
+			
+			LAYER0					=	1 << 4,
+			LAYER1					=	1 << 5,
+			LAYER2					=	1 << 6,
+			LAYER3					=	1 << 7,
+
+			TERRAIN					=	1 << 8,
+
+			TRIPLANAR_SINGLE		=	1 << 9,
+			TRIPLANAR_DOUBLE		=	1 << 10,
+			TRIPLANAR_TRIPLE		=	1 << 11,
+
+			DISPLACEMENT_MAPPING	=	1 << 12,
 		}
 
 		struct CBSurfaceData {
@@ -97,7 +114,16 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="flags"></param>
 		void Enum ( PipelineState ps, SurfaceFlags flags )
 		{
-			ps.VertexInputElements	=	VertexColorTextureTBNRigid.Elements;
+			if (flags.HasFlag( SurfaceFlags.SKINNED )) {
+				ps.VertexInputElements	=	VertexColorTextureTBNSkinned.Elements;
+			}
+			
+			if (flags.HasFlag( SurfaceFlags.RIGID )) {
+				ps.VertexInputElements	=	VertexColorTextureTBNRigid.Elements;
+			}
+
+			
+
 		}
 
 
@@ -158,7 +184,6 @@ namespace Fusion.Engine.Graphics {
 
 			//device.SetViewport(viewport); 
 
-			device.PipelineState	=	factory[ (int)SurfaceFlags.GBUFFER ];
 
 			device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
 
@@ -168,6 +193,8 @@ namespace Fusion.Engine.Graphics {
 			//#warning INSTANSING!
 			foreach ( var instance in instances ) {
 				
+				SurfaceFlags	flags	=	SurfaceFlags.GBUFFER;
+
 				cbData.View			=	view;
 				cbData.Projection	=	projection;
 				cbData.World		=	instance.World;
@@ -180,15 +207,61 @@ namespace Fusion.Engine.Graphics {
 
 				device.SetupVertexInput( instance.vb, instance.ib );
 
-				foreach ( var sg in instance.ShadingGroups ) {
+				try {
 
-					sg.Material.SetTextures( device );
+					foreach ( var sg in instance.ShadingGroups ) {
 
-					device.DrawIndexed( sg.IndicesCount, sg.StartIndex, 0 );
+						device.PipelineState	=	factory[ (int)ApplyFlags(sg.Material, instance, flags) ];
+
+						device.PixelShaderConstants[1]	= sg.Material.LayerConstBuffer;
+						device.VertexShaderConstants[1]	= sg.Material.LayerConstBuffer;
+
+						sg.Material.SetTextures( device );
+
+						device.DrawIndexed( sg.IndicesCount, sg.StartIndex, 0 );
+					}
+				} catch ( UbershaderException e ) {
+					Log.Warning( e.Message );					
+					ExceptionDialog.Show( e );
 				}
 			}
 		}
 
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="material"></param>
+		/// <param name="flags"></param>
+		/// <returns></returns>
+		SurfaceFlags ApplyFlags ( Material material, MeshInstance instance, SurfaceFlags flags )
+		{
+			switch ( material.Options ) {
+				case MaterialOptions.SingleLayer : flags |= SurfaceFlags.LAYER0; break;	
+				case MaterialOptions.DoubleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1; break;
+				case MaterialOptions.TripleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2; break;
+				case MaterialOptions.QuadLayer	 : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2|SurfaceFlags.LAYER3; break;
+
+				case MaterialOptions.Terrain : flags |= SurfaceFlags.TERRAIN; break;
+
+				case MaterialOptions.TriplanarWorldSingle : flags |= SurfaceFlags.TRIPLANAR_SINGLE; break;
+				case MaterialOptions.TriplanarWorldDouble : flags |= SurfaceFlags.TRIPLANAR_DOUBLE; break;
+				case MaterialOptions.TriplanarWorldTriple : flags |= SurfaceFlags.TRIPLANAR_TRIPLE; break;
+			}
+
+			if (material.DisplacementMapping) {
+				flags |= SurfaceFlags.DISPLACEMENT_MAPPING;
+			}
+
+			if (instance.IsSkinned) {
+				flags |= SurfaceFlags.SKINNED;
+			} else {
+				flags |= SurfaceFlags.RIGID;
+			}
+
+			return flags;
+		}
 
 
 

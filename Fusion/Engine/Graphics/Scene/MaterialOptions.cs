@@ -18,35 +18,38 @@ namespace Fusion.Engine.Graphics {
 		SingleLayer,
 		
 		/// <summary>
-		/// Double layer material
+		/// Double layer material with alpha blending 
+		/// modulated by material blend weights and bone material blend weights.
 		/// </summary>
 		DoubleLayer,
 		
 		/// <summary>
-		/// Triple layer material
+		/// Triple layer material with alpha blending
+		/// modulated by material blend weights and bone material blend weights.
 		/// </summary>
 		TripleLayer,
 		
 		/// <summary>
-		/// Quadruple layer material
+		/// Quadruple layer material with alpha blending
+		/// modulated by material blend weights and bone material blend weights.
 		/// </summary>
 		QuadLayer,
 		
 		/// <summary>
-		/// Use vertex color as blend weights 
+		/// Use vertex color as blend weights
 		/// for material's layers.
 		/// </summary>
 		Terrain,
 
 		/// <summary>
-		/// Triplanar mapping in orld space with single layer 
+		/// Triplanar mapping in world space with single layer 
 		/// aplied for each side.
 		/// </summary>
 		TriplanarWorldSingle,
 
 		/// <summary>
 		/// Triplanar mapping in world space with two layers.
-		/// First layer is applied on top and bottom size.
+		/// First layer is applied on top and bottom side.
 		/// Second layer is applied on left, right, front and back side of the object.
 		/// </summary>
 		TriplanarWorldDouble,

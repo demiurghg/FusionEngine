@@ -303,7 +303,7 @@ namespace Fusion.Engine.Graphics {
 				device.Dispatch( MathUtil.IntDivUp( width, BlockSizeX ), MathUtil.IntDivUp( height, BlockSizeY ), 1 );
 
 			} catch ( UbershaderException e ) {
-				e.Report();
+				Log.Warning("{0}", e.Message );
 			}
 
 

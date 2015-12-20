@@ -35,6 +35,9 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public float SkySphereSize { get; set; }
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public float AerialFogDensity { get; set; }
 
 		/// <summary>
@@ -131,9 +134,9 @@ namespace Fusion.Engine.Graphics {
 			AerialFogDensity	= 0.001f;
 			SkySphereSize		= 1000.0f;
 			SkyTurbidity		= 4.0f;
-			SunPosition		= new Vector3( 1.0f, 1.0f, 1.0f );
+			SunPosition		= new Vector3( 1.0f, 0.1f, 1.0f );
 			SunGlowIntensity	= Half.MaxValue;
-			SunLightIntensity	= 1000.0f;
+			SunLightIntensity	= 300.0f;
 			SunTemperature		= 5500;
 			SkyIntensity		= 1.0f;
 

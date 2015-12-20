@@ -33,7 +33,7 @@ namespace Fusion.Engine.Graphics {
 		public HdrFilter HdrFilter { get{ return hdrFilter; } }
 		public HdrFilter hdrFilter;
 		
-		[GameModule("LightRenderer", "light", InitOrder.After)]
+		[GameModule("LightRenderer", "rs", InitOrder.After)]
 		public LightRenderer	LightRenderer { get { return lightRenderer; } }
 		public LightRenderer	lightRenderer;
 		

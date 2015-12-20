@@ -40,6 +40,8 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(116)] public Vector3	Ambient;
 			[FieldOffset(128)] public float		Time;
 			[FieldOffset(132)] public Vector3	ViewPos;
+			[FieldOffset(136)] public float		SunAngularSize;
+
 		}
 
 

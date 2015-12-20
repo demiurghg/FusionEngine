@@ -130,7 +130,7 @@ namespace Fusion.Drivers.Graphics {
 
 				if (!pipelineStates.TryGetValue( combination, out ps )) {
 					var path	=	device.Game.Content.GetPathTo( ubershader );
-					var message =	string.Format("Ubershader '{0}' does not contain given combination", path );
+					var message =	string.Format("{0}: bad combination", path );
 					throw new UbershaderException( message, combination, combinerEnum );
 				}
 

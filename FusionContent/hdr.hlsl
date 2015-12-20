@@ -117,9 +117,9 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 	float	luminance	=	MasuredLuminance.Load(int3(0,0,0)).r;
 
 	float3	bloom		=	( bloom0 * 1.000f  
-							+ bloom1 * 1.000f  
-							+ bloom2 * 1.000f  
-							+ bloom3 * 1.000f )/4.000f;//*/
+							+ bloom1 * 2.000f  
+							+ bloom2 * 3.000f  
+							+ bloom3 * 4.000f )/10.000f;//*/
 					
 	//
 	//	Make bloom :

@@ -125,7 +125,6 @@ namespace TestGame2 {
 			testLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
 			uiLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
 			texture		=	Game.Content.Load<DiscTexture>( "lena" );
-			scene		=	Game.Content.Load<Scene>( @"scenes\testScene" );
 
 			masterView.SkySettings.SunPosition			=	new Vector3(10,20,30);
 
@@ -134,6 +133,28 @@ namespace TestGame2 {
 			masterView.LightSet.DirectLight.Intensity	=	masterView.SkySettings.SunLightColor;
 			masterView.LightSet.DirectLight.Enabled		=	true;
 			masterView.LightSet.AmbientLevel			=	masterView.SkySettings.AmbientLevel;
+
+
+
+			masterView2.SpriteLayers.Add( console.ConsoleSpriteLayer );
+			masterView2.SpriteLayers.Add( uiLayer );
+			masterView2.SpriteLayers.Add( testLayer );
+
+
+			Game.Keyboard.KeyDown += Keyboard_KeyDown;
+
+			LoadContent();
+
+			Game.Reloading += (s,e) => LoadContent();
+		}
+
+
+
+		void LoadContent ()
+		{
+			masterView.Instances.Clear();
+
+			scene		=	Game.Content.Load<Scene>( @"scenes\testScene" );
 
 			var transforms = new Matrix[ scene.Nodes.Count ];
 			scene.ComputeAbsoluteTransforms( transforms );
@@ -155,22 +176,7 @@ namespace TestGame2 {
 				masterView.Instances.Add( inst );
 			}
 
-			masterView2.SpriteLayers.Add( console.ConsoleSpriteLayer );
-			masterView2.SpriteLayers.Add( uiLayer );
-			masterView2.SpriteLayers.Add( testLayer );
 
-
-			Game.Keyboard.KeyDown += Keyboard_KeyDown;
-
-			LoadContent();
-
-			Game.Reloading += (s,e) => LoadContent();
-		}
-
-
-
-		void LoadContent ()
-		{
 			masterView.HdrSettings.BloomAmount	=	0.1f;
 			masterView.HdrSettings.DirtAmount	=	0.9f;
 			masterView.HdrSettings.DirtMask1	=	Game.Content.Load<DiscTexture>("bloomMask|srgb");

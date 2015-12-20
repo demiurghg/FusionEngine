@@ -38,7 +38,7 @@ namespace Fusion.Drivers.Graphics {
 
 
 
-		public UbershaderException ()
+		/*public UbershaderException ()
 		{
 		}
 		
@@ -56,7 +56,7 @@ namespace Fusion.Drivers.Graphics {
 
 		public UbershaderException ( string message, Exception inner ) : base( message, inner )
 		{
-		}
+		} */
 
 
 		public UbershaderException ( string message, int combination, Type combinerEnum ) : base( message )
@@ -77,17 +77,10 @@ namespace Fusion.Drivers.Graphics {
 		}
 
 
-
-		public void Report ()
-		{
-			Log.Warning("Message : {0}", Message );
-			Log.Warning("Combination : 0x{0:X}", Combination );
-			Log.Warning("Defines :");
-			foreach (var def in Defines ) {
-				Log.Warning("   {0}", def);
+		public override string Message {
+			get	{
+				return base.Message + ": 0x" + Combination.ToString("X8") + ": " + string.Join(" ", Defines);
 			}
-			Log.Warning("");
 		}
-
 	}
 }

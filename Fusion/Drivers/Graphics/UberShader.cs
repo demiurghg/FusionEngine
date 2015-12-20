@@ -114,6 +114,10 @@ namespace Fusion.Drivers.Graphics {
 					//PrintSignature( bytecode, "ISGN" );
 					//PrintSignature( bytecode, "OSGN" );
 					//PrintSignature( bytecode, "OSG5" );
+					if (database.ContainsKey(defines)) {
+						Log.Warning("Duplicate definitions: {0}", defines );
+						continue;
+					}
 
 					database.Add( defines, new UsdbEntry( defines, ps, vs, gs, hs, ds, cs ) );
 				}

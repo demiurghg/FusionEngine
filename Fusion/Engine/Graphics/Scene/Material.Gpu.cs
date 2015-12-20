@@ -39,6 +39,12 @@ namespace Fusion.Engine.Graphics {
 		ConstantBuffer		constBuffer;
 		ShaderResource[]	shaderResources;
 
+		internal ConstantBuffer LayerConstBuffer { 
+			get {
+				return constBuffer;
+			}
+		}
+
 
 		/// <summary>
 		/// 
@@ -86,6 +92,8 @@ namespace Fusion.Engine.Graphics {
 					constData[i].Dummy				=	0;
 				}
 			}
+
+			constBuffer.SetData( constData );
 		}
 
 
