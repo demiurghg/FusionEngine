@@ -11,7 +11,7 @@ namespace Fusion.Engine.Common {
 	public abstract partial class UserInterface : GameModule {
 
 		/// <summary>
-		/// 
+		/// Creates instance of UserInterface
 		/// </summary>
 		/// <param name="Game"></param>
 		public UserInterface ( Game Game ) : base(Game)
@@ -20,7 +20,7 @@ namespace Fusion.Engine.Common {
 
 
 		/// <summary>
-		/// Disposes GameInterface
+		/// Overloaded. Immediately releases the unmanaged resources used by this object. 
 		/// </summary>
 		/// <param name="disposing"></param>
 		protected override void Dispose ( bool disposing )
@@ -36,7 +36,7 @@ namespace Fusion.Engine.Common {
 
 
 		/// <summary>
-		/// Updates internal state of interface.
+		/// Called when the game has determined that UI logic needs to be processed.
 		/// </summary>
 		/// <param name="gameTime"></param>
 		public abstract void Update ( GameTime gameTime );

@@ -32,7 +32,7 @@ namespace Fusion.Engine.Server {
 
 		/// <summary>
 		/// Method is invoked when server shuts down.
-		/// This method will be also called when server crashes to clean-up.
+		/// This method will be also called when server crashes.
 		/// </summary>
 		/// <param name="map"></param>
 		public abstract void UnloadContent ();
@@ -62,7 +62,6 @@ namespace Fusion.Engine.Server {
 		/// Gets server information that required for client to load the game.
 		/// This information usually contains map name and game type.
 		/// This information is also used for discovery response.
-		/// This information shoud not be changed within session.
 		/// </summary>
 		/// <returns></returns>
 		public abstract string ServerInfo ();
@@ -75,7 +74,7 @@ namespace Fusion.Engine.Server {
 		public abstract void ClientConnected ( string id, string userInfo );
 
 		/// <summary>
-		/// Called when client connected.
+		/// Called when client disconnected.
 		/// </summary>
 		/// <param name="clientIP">Client IP in format 123.45.67.89:PORT. Could be used as client identifier.</param>
 		public abstract void ClientDisconnected ( string id, string userInfo );

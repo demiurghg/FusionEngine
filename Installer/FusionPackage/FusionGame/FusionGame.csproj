@@ -60,7 +60,7 @@
   <ItemGroup>
     <None Include=".content" />
     <None Include="CustomGameClient.cs" />
-    <None Include="CustomGameInterface.cs" />
+    <None Include="CustomUserInterface.cs" />
     <None Include="CustomGameServer.cs" />
     <None Include="Program.cs" />
     <None Include="AssemblyInfo.cs" />

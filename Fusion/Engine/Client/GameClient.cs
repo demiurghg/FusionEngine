@@ -22,18 +22,17 @@ namespace Fusion.Engine.Client {
 			InitInternal();
 		}
 
-
 		protected override void Dispose ( bool disposing )
 		{
 			base.Dispose( disposing );
 		}
-
 
 		/// <summary>
 		/// Called when connection request accepted by server.
 		/// Client could start loading models, textures, models etc.
 		/// The method can be invoked in parallel task.
 		/// Thus this method should not setup scene.
+		/// Only resource creation is allowed.
 		/// </summary>
 		/// <param name="serverInfo"></param>
 		public abstract void LoadContent ( string serverInfo );
@@ -45,7 +44,7 @@ namespace Fusion.Engine.Client {
 		public abstract void UnloadContent ();
 
 		/// <summary>
-		/// Runs one step of client-side simulation and render world state.
+		/// Called when the game has determined that client-side logic needs to be processed.
 		/// </summary>
 		/// <param name="gameTime"></param>
 		/// <returns>User command bytes</returns>
@@ -68,11 +67,11 @@ namespace Fusion.Engine.Client {
 		public abstract void FeedNotification ( string message );
 
 		/// <summary>
-		/// Gets user information.
+		/// Gets user information. 
+		/// Called when client-server game logic has determined that server needs user information.
 		/// </summary>
 		/// <returns>User information</returns>
 		public abstract string UserInfo ();
-
 
 		/// <summary>
 		/// Sends server string message.

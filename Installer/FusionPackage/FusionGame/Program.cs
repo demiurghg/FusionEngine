@@ -35,12 +35,12 @@ namespace $safeprojectname$ {
 			//
 			//	Run game :
 			//
-			using ( var engine = new GameEngine("$safeprojectname$") ) {
+			using ( var engine = new Game("$safeprojectname$") ) {
 
 				//	create SV, CL and UI instances :
 				engine.GameServer		=	new $safeprojectname$GameServer(engine);
 				engine.GameClient		=	new $safeprojectname$GameClient(engine);
-				engine.GameInterface	=	new $safeprojectname$GameInterface(engine);
+				engine.GameInterface	=	new $safeprojectname$UserInterface(engine);
 
 				//	load configuration.
 				//	first run will cause warning, 
@@ -48,7 +48,7 @@ namespace $safeprojectname$ {
 				engine.LoadConfiguration("Config.ini");
 
 				//	enable and disable debug direct3d device :
-				engine.GraphicsEngine.Config.UseDebugDevice =	false;
+				engine.RenderSystem.Config.UseDebugDevice =	false;
 
 				//	enable and disable object tracking :
 				engine.TrackObjects	= true;

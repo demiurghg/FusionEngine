@@ -10,6 +10,7 @@ using Fusion.Core.Mathematics;
 using Fusion.Engine.Common;
 using Fusion.Engine.Client;
 using Fusion.Engine.Server;
+using Fusion.Engine.Graphics;
 
 
 namespace $safeprojectname$ {
@@ -19,7 +20,7 @@ namespace $safeprojectname$ {
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public $safeprojectname$GameClient ( GameEngine gameEngine )	: base(gameEngine)
+		public $safeprojectname$GameClient ( Game game )	: base(game)
 		{
 		}
 
@@ -64,7 +65,7 @@ namespace $safeprojectname$ {
 		/// <param name="gameTime"></param>
 		public override byte[] Update ( GameTime gameTime )
 		{
-			var mouse = GameEngine.Mouse;
+			var mouse = Game.Mouse;
 			
 			return Encoding.UTF8.GetBytes( string.Format("[{0} {1} {2}]", mouse.Position.X, mouse.Position.Y, UserInfo() ) );
 		}
@@ -86,7 +87,6 @@ namespace $safeprojectname$ {
 
 		/// <summary>
 		/// Feed server notification to client.
-		/// Called when fresh snapshot arrived.
 		/// </summary>
 		/// <param name="snapshot"></param>
 		public override void FeedNotification ( string message )
@@ -97,7 +97,7 @@ namespace $safeprojectname$ {
 
 
 		/// <summary>
-		/// 
+		/// Returns user informations.
 		/// </summary>
 		/// <returns></returns>
 		public override string UserInfo ()
