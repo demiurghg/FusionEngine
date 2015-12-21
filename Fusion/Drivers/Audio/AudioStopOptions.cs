@@ -43,7 +43,7 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Drivers.Audio
 {
-	public enum AudioStopOptions
+	internal enum AudioStopOptions
 	{
 		AsAuthored,
 		Immediate

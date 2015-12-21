@@ -199,120 +199,122 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="projection"></param>
 		public void RenderLighting ( StereoEye stereoEye, ViewLayerHdr viewLayer, Texture occlusionMap )
 		{
-			var view		=	viewLayer.Camera.GetViewMatrix( stereoEye );
-			var projection	=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
+			using ( new PixEvent("TiledLighting") ) {
+				var view		=	viewLayer.Camera.GetViewMatrix( stereoEye );
+				var projection	=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
 
-			var device = Game.GraphicsDevice;
-			device.ResetStates();
+				var device = Game.GraphicsDevice;
+				device.ResetStates();
 
-			LightingFlags	flags = LightingFlags.NONE;
+				LightingFlags	flags = LightingFlags.NONE;
 
-			if (!Config.SkipDirectLight) {
-				flags	|=	LightingFlags.DIRECT;
+				if (!Config.SkipDirectLight) {
+					flags	|=	LightingFlags.DIRECT;
 
-				if (Config.ShowCSMSplits) {
-					flags |= LightingFlags.SHOW_SPLITS;
+					if (Config.ShowCSMSplits) {
+						flags |= LightingFlags.SHOW_SPLITS;
+					}
 				}
-			}
-			if (!Config.SkipOmniLights) {
-				flags	|=	LightingFlags.OMNI;
+				if (!Config.SkipOmniLights) {
+					flags	|=	LightingFlags.OMNI;
 
-				if (Config.ShowOmniLightTileLoad) {
-					flags |= LightingFlags.SHOW_OMNI_LOAD;
+					if (Config.ShowOmniLightTileLoad) {
+						flags |= LightingFlags.SHOW_OMNI_LOAD;
+					}
 				}
-			}
-			if (!Config.SkipSpotLights) {
-				flags	|=	LightingFlags.SPOT;
+				if (!Config.SkipSpotLights) {
+					flags	|=	LightingFlags.SPOT;
 
-				if (Config.ShowSpotLightTileLoad) {
-					flags |= LightingFlags.SHOW_SPOT_LOAD;
+					if (Config.ShowSpotLightTileLoad) {
+						flags |= LightingFlags.SHOW_SPOT_LOAD;
+					}
 				}
+				if (Config.UseUE4LightingModel) {
+					flags |= LightingFlags.USE_UE4;
+				}
+
+
+				var width	=	viewLayer.HdrBuffer.Width;
+				var height	=	viewLayer.HdrBuffer.Height;
+
+
+				//
+				//	Setup compute shader parameters and states :
+				//
+				try {
+					device.PipelineState	=	factory[ (int)flags ];
+
+					//lightingShader.SetComputeShader((int)flags);
+
+					var cbData	=	new LightingParams();
+					var invView	=	Matrix.Invert( view );
+					var invVP	=	Matrix.Invert( view * projection );
+					var viewPos	=	invView.TranslationVector;
+
+
+					cbData.DirectLightDirection		=	new Vector4( viewLayer.LightSet.DirectLight.Direction, 0 );
+					cbData.DirectLightIntensity		=	viewLayer.LightSet.DirectLight.Intensity.ToVector4();
+					cbData.Projection				=	projection;
+
+					cbData.CSMViewProjection0		=	csmViewProjections[0];
+					cbData.CSMViewProjection1		=	csmViewProjections[1];
+					cbData.CSMViewProjection2		=	csmViewProjections[2];
+					cbData.CSMViewProjection3		=	csmViewProjections[3];
+
+					cbData.View						=	view;
+					cbData.ViewPosition				=	new Vector4(viewPos,1);
+					cbData.InverseViewProjection	=	invVP;
+					cbData.CSMFilterRadius			=	new Vector4( Config.CSMFilterSize );
+
+					cbData.AmbientColor				=	viewLayer.LightSet.AmbientLevel;
+					cbData.Viewport					=	new Vector4( 0, 0, width, height );
+
+					PrepareOmniLights( view, projection, viewLayer.LightSet );
+					PrepareSpotLights( view, projection, viewLayer.LightSet );
+
+					//
+					//	set states :
+					//
+					device.SetTargets( null, viewLayer.HdrBuffer.Surface );
+
+					lightingCB.SetData( cbData );
+
+					device.ComputeShaderSamplers[0]	=	SamplerState.PointClamp;
+					device.ComputeShaderSamplers[1]	=	SamplerState.LinearClamp;
+					device.ComputeShaderSamplers[2]	=	SamplerState.ShadowSampler;
+
+					device.ComputeShaderResources[0]	=	viewLayer.DiffuseBuffer;
+					device.ComputeShaderResources[1]	=	viewLayer.SpecularBuffer;
+					device.ComputeShaderResources[2]	=	viewLayer.NormalMapBuffer;
+					device.ComputeShaderResources[3]	=	viewLayer.DepthBuffer;
+					device.ComputeShaderResources[4]	=	csmColor;
+					device.ComputeShaderResources[5]	=	spotColor;
+					device.ComputeShaderResources[6]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
+					device.ComputeShaderResources[7]	=	omniLightBuffer;
+					device.ComputeShaderResources[8]	=	spotLightBuffer;
+					device.ComputeShaderResources[9]	=	occlusionMap.Srv;
+
+					device.ComputeShaderConstants[0]	=	lightingCB;
+
+					device.SetCSRWTexture( 0, viewLayer.LightAccumulator.Surface );
+
+					//
+					//	Dispatch :
+					//
+					device.Dispatch( MathUtil.IntDivUp( width, BlockSizeX ), MathUtil.IntDivUp( height, BlockSizeY ), 1 );
+
+				} catch ( UbershaderException e ) {
+					Log.Warning("{0}", e.Message );
+				}
+
+
+				//
+				//	Add accumulated light  :
+				//
+				rs.Filter.OverlayAdditive( viewLayer.HdrBuffer.Surface, viewLayer.LightAccumulator );
+
+				device.ResetStates();
 			}
-			if (Config.UseUE4LightingModel) {
-				flags |= LightingFlags.USE_UE4;
-			}
-
-
-			var width	=	viewLayer.HdrBuffer.Width;
-			var height	=	viewLayer.HdrBuffer.Height;
-
-
-			//
-			//	Setup compute shader parameters and states :
-			//
-			try {
-				device.PipelineState	=	factory[ (int)flags ];
-
-				//lightingShader.SetComputeShader((int)flags);
-
-				var cbData	=	new LightingParams();
-				var invView	=	Matrix.Invert( view );
-				var invVP	=	Matrix.Invert( view * projection );
-				var viewPos	=	invView.TranslationVector;
-
-
-				cbData.DirectLightDirection		=	new Vector4( viewLayer.LightSet.DirectLight.Direction, 0 );
-				cbData.DirectLightIntensity		=	viewLayer.LightSet.DirectLight.Intensity.ToVector4();
-				cbData.Projection				=	projection;
-
-				cbData.CSMViewProjection0		=	csmViewProjections[0];
-				cbData.CSMViewProjection1		=	csmViewProjections[1];
-				cbData.CSMViewProjection2		=	csmViewProjections[2];
-				cbData.CSMViewProjection3		=	csmViewProjections[3];
-
-				cbData.View						=	view;
-				cbData.ViewPosition				=	new Vector4(viewPos,1);
-				cbData.InverseViewProjection	=	invVP;
-				cbData.CSMFilterRadius			=	new Vector4( Config.CSMFilterSize );
-
-				cbData.AmbientColor				=	viewLayer.LightSet.AmbientLevel;
-				cbData.Viewport					=	new Vector4( 0, 0, width, height );
-
-				PrepareOmniLights( view, projection, viewLayer.LightSet );
-				PrepareSpotLights( view, projection, viewLayer.LightSet );
-
-				//
-				//	set states :
-				//
-				device.SetTargets( null, viewLayer.HdrBuffer.Surface );
-
-				lightingCB.SetData( cbData );
-
-				device.ComputeShaderSamplers[0]	=	SamplerState.PointClamp;
-				device.ComputeShaderSamplers[1]	=	SamplerState.LinearClamp;
-				device.ComputeShaderSamplers[2]	=	SamplerState.ShadowSampler;
-
-				device.ComputeShaderResources[0]	=	viewLayer.DiffuseBuffer;
-				device.ComputeShaderResources[1]	=	viewLayer.SpecularBuffer;
-				device.ComputeShaderResources[2]	=	viewLayer.NormalMapBuffer;
-				device.ComputeShaderResources[3]	=	viewLayer.DepthBuffer;
-				device.ComputeShaderResources[4]	=	csmColor;
-				device.ComputeShaderResources[5]	=	spotColor;
-				device.ComputeShaderResources[6]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
-				device.ComputeShaderResources[7]	=	omniLightBuffer;
-				device.ComputeShaderResources[8]	=	spotLightBuffer;
-				device.ComputeShaderResources[9]	=	occlusionMap.Srv;
-
-				device.ComputeShaderConstants[0]	=	lightingCB;
-
-				device.SetCSRWTexture( 0, viewLayer.LightAccumulator.Surface );
-
-				//
-				//	Dispatch :
-				//
-				device.Dispatch( MathUtil.IntDivUp( width, BlockSizeX ), MathUtil.IntDivUp( height, BlockSizeY ), 1 );
-
-			} catch ( UbershaderException e ) {
-				Log.Warning("{0}", e.Message );
-			}
-
-
-			//
-			//	Add accumulated light  :
-			//
-			rs.Filter.OverlayAdditive( viewLayer.HdrBuffer.Surface, viewLayer.LightAccumulator );
-
-			device.ResetStates();
 		}
 
 

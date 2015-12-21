@@ -213,7 +213,7 @@ namespace Fusion.Engine.Common {
 
 		GameServer	sv;
 		GameClient cl;
-		GameInterface gi;
+		UserInterface gi;
 
 
 		/// <summary>
@@ -232,7 +232,7 @@ namespace Fusion.Engine.Common {
 		/// Current game interface.
 		/// </summary>
 		[GameModule("Interface", "ui", InitOrder.After)]
-		public GameInterface GameInterface { get { return gi; } set { gi = value; } }
+		public UserInterface GameInterface { get { return gi; } set { gi = value; } }
 
 
 

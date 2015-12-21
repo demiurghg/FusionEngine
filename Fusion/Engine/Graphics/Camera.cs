@@ -19,7 +19,6 @@ namespace Fusion.Engine.Graphics {
 		private Matrix	projMatrix		;
 		private Matrix	projMatrixL		;
 		private Matrix	projMatrixR		;
-		private Vector3	velocity;
 
 
 		/// <summary>
@@ -27,7 +26,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public Camera ()
 		{
-			SetupCameraFov(Matrix.Identity, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.125f, 1024f, 1, 0, 1 );
+			SetupCameraFov(Matrix.Identity, MathUtil.DegreesToRadians(90), 0.125f, 1024f, 1, 0, 1 );
 		}
 
 
@@ -42,7 +41,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="far">Camera far clipping plane distance.</param>
 		/// <param name="convergenceDistance">Stereo convergence distance. </param>
 		/// <param name="separation">Stereo separation or distance between eyes.</param>
-		public void SetupCamera ( Matrix viewMatrix, Vector3 velocity, float height, float width, float near, float far, float convergence, float separation )
+		public void SetupCamera ( Matrix viewMatrix, float height, float width, float near, float far, float convergence, float separation )
 		{
 			if (convergence<=0) {	
 				throw new ArgumentOutOfRangeException("convergence must be > 0");
@@ -66,9 +65,6 @@ namespace Fusion.Engine.Graphics {
 			this.cameraMatrix	=	Matrix.Invert( viewMatrix );
 			this.cameraMatrixL	=	Matrix.Invert( viewMatrixL );
 			this.cameraMatrixR	=	Matrix.Invert( viewMatrixR );
-
-			//	Camera velocity :
-			this.velocity	=	velocity;
 		}
 
 
@@ -86,13 +82,13 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="convergence">Stereo convergence distance</param>
 		/// <param name="separation">Stereo camera separation</param>
 		/// <param name="aspectRatio">Viewport width divided by viewport height</param>
-		public void SetupCameraFov ( Vector3 origin, Vector3 target, Vector3 up, Vector3 velocity, float fov, float near, float far, float convergence, float separation, float aspectRatio )
+		public void SetupCameraFov ( Vector3 origin, Vector3 target, Vector3 up, float fov, float near, float far, float convergence, float separation, float aspectRatio )
 		{
 			var nearHeight	=	near * (float)Math.Tan( fov/2 ) * 2;
 			var nearWidth	=	nearHeight * aspectRatio;
 			var view		=	Matrix.LookAtRH( origin, target, up );
 
-			SetupCamera( view, velocity, nearHeight, nearWidth, near, far, convergence, separation );
+			SetupCamera( view, nearHeight, nearWidth, near, far, convergence, separation );
 		}
 
 
@@ -107,12 +103,12 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="far"></param>
 		/// <param name="convergence"></param>
 		/// <param name="separation"></param>
-		public void SetupCameraFov ( Matrix view, Vector3 velocity, float fov, float near, float far, float convergence, float separation, float aspectRatio )
+		public void SetupCameraFov ( Matrix view, float fov, float near, float far, float convergence, float separation, float aspectRatio )
 		{
 			var nearHeight	=	near * (float)Math.Tan( fov/2 ) * 2;
 			var nearWidth	=	nearHeight * aspectRatio;
 
-			SetupCamera( view, velocity, nearHeight, nearWidth, near, far, convergence, separation );
+			SetupCamera( view, nearHeight, nearWidth, near, far, convergence, separation );
 		}
 
 
@@ -196,35 +192,6 @@ namespace Fusion.Engine.Graphics {
 		public BoundingFrustum Frustum {
 			get {
 				return new BoundingFrustum( viewMatrix * projMatrix );
-			}
-		}
-
-
-
-		/// <summary>
-		/// Gets audio listener attached to camera 
-		/// </summary>
-		/// <returns></returns>
-		public AudioListener Listener {
-			get {
-				return new Drivers.Audio.AudioListener() {
-					Position	=	cameraMatrix.TranslationVector,
-					Up			=	cameraMatrix.Up,
-					Forward		=	cameraMatrix.Forward,
-					Velocity	=	velocity,
-				};
-			}
-		}
-
-
-
-		/// <summary>
-		/// Gets current camera velocity
-		/// </summary>
-		/// <returns></returns>
-		public Vector3 Velocity {
-			get {
-				return velocity;
 			}
 		}
 	}

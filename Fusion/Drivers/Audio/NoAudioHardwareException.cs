@@ -50,7 +50,7 @@ namespace Fusion.Drivers.Audio
 #if WINRT
     public sealed class NoAudioHardwareException : Exception
 #else
-    public sealed class NoAudioHardwareException : ExternalException
+    internal sealed class NoAudioHardwareException : ExternalException
 #endif
     {
         public NoAudioHardwareException(string msg)

@@ -10,12 +10,12 @@ using Fusion.Engine.Input;
 using Fusion.Engine.Common;
 
 
-namespace Fusion.Engine.UserInterface {
+namespace Fusion.Engine.Frames {
 
 	class MouseProcessor {
 
 		public readonly Game Game;
-		public UserInterface ui;
+		public FrameProcessor ui;
 
 		Point	oldMousePoint;
 
@@ -30,7 +30,7 @@ namespace Fusion.Engine.UserInterface {
 		/// 
 		/// </summary>
 		/// <param name="game"></param>
-		public MouseProcessor ( Game game, UserInterface ui )
+		public MouseProcessor ( Game game, FrameProcessor ui )
 		{
 			this.Game	=	game;
 			this.ui		=	ui;

@@ -42,8 +42,6 @@ namespace Fusion.Engine.Graphics {
 			TRIPLANAR_SINGLE		=	1 << 9,
 			TRIPLANAR_DOUBLE		=	1 << 10,
 			TRIPLANAR_TRIPLE		=	1 << 11,
-
-			DISPLACEMENT_MAPPING	=	1 << 12,
 		}
 
 		struct CBSurfaceData {
@@ -160,69 +158,65 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="normals"></param>
 		internal void RenderGBuffer ( StereoEye stereoEye, ViewLayerHdr viewLayer )
 		{		
-			if (surfaceShader==null) {	
-				return;
-			}
+			using ( new PixEvent("RenderGBuffer") ) {
+				if (surfaceShader==null) {	
+					return;
+				}
 
-			var device		=	Game.GraphicsDevice;
+				var device		=	Game.GraphicsDevice;
 
-			var view			=	viewLayer.Camera.GetViewMatrix( stereoEye );
-			var projection		=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
-			var viewPosition	=	viewLayer.Camera.GetCameraPosition4( stereoEye );
+				var view			=	viewLayer.Camera.GetViewMatrix( stereoEye );
+				var projection		=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
+				var viewPosition	=	viewLayer.Camera.GetCameraPosition4( stereoEye );
 
-			var cbData		=	new CBSurfaceData();
+				var cbData		=	new CBSurfaceData();
 
-			var hdr			=	viewLayer.HdrBuffer.Surface;
-			var depth		=	viewLayer.DepthBuffer.Surface;
-			var diffuse		=	viewLayer.DiffuseBuffer.Surface;
-			var specular	=	viewLayer.SpecularBuffer.Surface;
-			var normals		=	viewLayer.NormalMapBuffer.Surface;
+				var hdr			=	viewLayer.HdrBuffer.Surface;
+				var depth		=	viewLayer.DepthBuffer.Surface;
+				var diffuse		=	viewLayer.DiffuseBuffer.Surface;
+				var specular	=	viewLayer.SpecularBuffer.Surface;
+				var normals		=	viewLayer.NormalMapBuffer.Surface;
 
-			device.ResetStates();
+				device.ResetStates();
 
-			device.SetTargets( depth, hdr, diffuse, specular, normals );
-
-			//device.SetViewport(viewport); 
-
-
-			device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
+				device.SetTargets( depth, hdr, diffuse, specular, normals );
+				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
 
 
-			var instances	=	viewLayer.Instances;
+				var instances	=	viewLayer.Instances;
 
-			//#warning INSTANSING!
-			foreach ( var instance in instances ) {
-				
-				SurfaceFlags	flags	=	SurfaceFlags.GBUFFER;
+				//#warning INSTANSING!
+				foreach ( var instance in instances ) {
 
-				cbData.View			=	view;
-				cbData.Projection	=	projection;
-				cbData.World		=	instance.World;
-				cbData.ViewPos		=	viewPosition;
+					cbData.View			=	view;
+					cbData.Projection	=	projection;
+					cbData.World		=	instance.World;
+					cbData.ViewPos		=	viewPosition;
 
-				constBuffer.SetData( cbData );
+					constBuffer.SetData( cbData );
 
-				device.PixelShaderConstants[0]	= constBuffer ;
-				device.VertexShaderConstants[0]	= constBuffer ;
+					device.PixelShaderConstants[0]	= constBuffer ;
+					device.VertexShaderConstants[0]	= constBuffer ;
 
-				device.SetupVertexInput( instance.vb, instance.ib );
+					device.SetupVertexInput( instance.vb, instance.ib );
 
-				try {
+					try {
 
-					foreach ( var sg in instance.ShadingGroups ) {
+						foreach ( var sg in instance.ShadingGroups ) {
 
-						device.PipelineState	=	factory[ (int)ApplyFlags(sg.Material, instance, flags) ];
+							device.PipelineState	=	factory[ (int)ApplyFlags(sg.Material, instance, SurfaceFlags.GBUFFER) ];
 
-						device.PixelShaderConstants[1]	= sg.Material.LayerConstBuffer;
-						device.VertexShaderConstants[1]	= sg.Material.LayerConstBuffer;
+							device.PixelShaderConstants[1]	= sg.Material.LayerConstBuffer;
+							device.VertexShaderConstants[1]	= sg.Material.LayerConstBuffer;
 
-						sg.Material.SetTextures( device );
+							sg.Material.SetTextures( device );
 
-						device.DrawIndexed( sg.IndicesCount, sg.StartIndex, 0 );
+							device.DrawIndexed( sg.IndicesCount, sg.StartIndex, 0 );
+						}
+					} catch ( UbershaderException e ) {
+						Log.Warning( e.Message );					
+						ExceptionDialog.Show( e );
 					}
-				} catch ( UbershaderException e ) {
-					Log.Warning( e.Message );					
-					ExceptionDialog.Show( e );
 				}
 			}
 		}
@@ -237,21 +231,19 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		SurfaceFlags ApplyFlags ( Material material, MeshInstance instance, SurfaceFlags flags )
 		{
-			switch ( material.Options ) {
-				case MaterialOptions.SingleLayer : flags |= SurfaceFlags.LAYER0; break;	
-				case MaterialOptions.DoubleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1; break;
-				case MaterialOptions.TripleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2; break;
-				case MaterialOptions.QuadLayer	 : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2|SurfaceFlags.LAYER3; break;
+			if (material!=null) {
+				switch ( material.Options ) {
+					case MaterialOptions.SingleLayer : flags |= SurfaceFlags.LAYER0; break;	
+					case MaterialOptions.DoubleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1; break;
+					case MaterialOptions.TripleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2; break;
+					case MaterialOptions.QuadLayer	 : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2|SurfaceFlags.LAYER3; break;
 
-				case MaterialOptions.Terrain : flags |= SurfaceFlags.TERRAIN; break;
+					case MaterialOptions.Terrain : flags |= SurfaceFlags.TERRAIN; break;
 
-				case MaterialOptions.TriplanarWorldSingle : flags |= SurfaceFlags.TRIPLANAR_SINGLE; break;
-				case MaterialOptions.TriplanarWorldDouble : flags |= SurfaceFlags.TRIPLANAR_DOUBLE; break;
-				case MaterialOptions.TriplanarWorldTriple : flags |= SurfaceFlags.TRIPLANAR_TRIPLE; break;
-			}
-
-			if (material.DisplacementMapping) {
-				flags |= SurfaceFlags.DISPLACEMENT_MAPPING;
+					case MaterialOptions.TriplanarWorldSingle : flags |= SurfaceFlags.TRIPLANAR_SINGLE; break;
+					case MaterialOptions.TriplanarWorldDouble : flags |= SurfaceFlags.TRIPLANAR_DOUBLE; break;
+					case MaterialOptions.TriplanarWorldTriple : flags |= SurfaceFlags.TRIPLANAR_TRIPLE; break;
+				}
 			}
 
 			if (instance.IsSkinned) {
@@ -271,41 +263,41 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="context"></param>
 		internal void RenderShadowMapCascade ( ShadowContext shadowRenderCtxt, IEnumerable<MeshInstance> instances )
 		{
-			if (surfaceShader==null) {
-				return;
-			}
+			using ( new PixEvent("ShadowMap") ) {
+				if (surfaceShader==null) {
+					return;
+				}
 
-			var device			= Game.GraphicsDevice;
+				var device			= Game.GraphicsDevice;
 
-			var cbData			= new CBSurfaceData();
+				var cbData			= new CBSurfaceData();
 
-			var viewPosition	= Matrix.Invert( shadowRenderCtxt.ShadowView ).TranslationVector;
+				var viewPosition	= Matrix.Invert( shadowRenderCtxt.ShadowView ).TranslationVector;
 
-			device.SetTargets( shadowRenderCtxt.DepthBuffer, shadowRenderCtxt.ColorBuffer );
-			device.SetViewport( shadowRenderCtxt.ShadowViewport );
+				device.SetTargets( shadowRenderCtxt.DepthBuffer, shadowRenderCtxt.ColorBuffer );
+				device.SetViewport( shadowRenderCtxt.ShadowViewport );
 
-			device.PipelineState	=	factory[ (int)SurfaceFlags.SHADOW ];
+				device.PixelShaderConstants[0]	= constBuffer ;
+				device.VertexShaderConstants[0]	= constBuffer ;
+				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
 
-			device.PixelShaderConstants[0]	= constBuffer ;
-			device.VertexShaderConstants[0]	= constBuffer ;
-			device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
-
-
-			cbData.Projection	=	shadowRenderCtxt.ShadowProjection;
-			cbData.View			=	shadowRenderCtxt.ShadowView;
-			cbData.ViewPos		=	new Vector4( viewPosition, 1 );
-			cbData.BiasSlopeFar	=	new Vector4( shadowRenderCtxt.DepthBias, shadowRenderCtxt.SlopeBias, shadowRenderCtxt.FarDistance, 0 );
+				cbData.Projection	=	shadowRenderCtxt.ShadowProjection;
+				cbData.View			=	shadowRenderCtxt.ShadowView;
+				cbData.ViewPos		=	new Vector4( viewPosition, 1 );
+				cbData.BiasSlopeFar	=	new Vector4( shadowRenderCtxt.DepthBias, shadowRenderCtxt.SlopeBias, shadowRenderCtxt.FarDistance, 0 );
 
 
-			//#warning INSTANSING!
-			foreach ( var instance in instances ) {
-				
-				cbData.World		=	instance.World;
+				//#warning INSTANSING!
+				foreach ( var instance in instances ) {
 
-				constBuffer.SetData( cbData );
+					device.PipelineState	=	factory[ (int)ApplyFlags( null, instance, SurfaceFlags.SHADOW ) ];
+					cbData.World			=	instance.World;
 
-				device.SetupVertexInput( instance.vb, instance.ib );
-				device.DrawIndexed( instance.indexCount, 0, 0 );
+					constBuffer.SetData( cbData );
+
+					device.SetupVertexInput( instance.vb, instance.ib );
+					device.DrawIndexed( instance.indexCount, 0, 0 );
+				}
 			}
 		}
 	}

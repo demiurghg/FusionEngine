@@ -8,13 +8,13 @@ using System.Net;
 
 namespace Fusion.Engine.Common {
 
-	public abstract partial class GameInterface : GameModule {
+	public abstract partial class UserInterface : GameModule {
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="Game"></param>
-		public GameInterface ( Game Game ) : base(Game)
+		public UserInterface ( Game Game ) : base(Game)
 		{
 		}
 
@@ -41,10 +41,12 @@ namespace Fusion.Engine.Common {
 		/// <param name="gameTime"></param>
 		public abstract void Update ( GameTime gameTime );
 
+
 		/// <summary>
 		/// Called when user tries to close program using Alt-F4 or from windows menu.
 		/// </summary>
 		public abstract void RequestToExit ();
+
 
 		/// <summary>
 		/// This method called each time when discovery responce arrived.
@@ -52,6 +54,7 @@ namespace Fusion.Engine.Common {
 		/// <param name="endPoint"></param>
 		/// <param name="serverInfo"></param>
 		public abstract void DiscoveryResponse ( IPEndPoint endPoint, string serverInfo );
+
 
 		/// <summary>
 		/// Starts server discovery.
@@ -62,6 +65,7 @@ namespace Fusion.Engine.Common {
 		{
 			StartDiscoveryInternal(numPorts, timeout);
 		}
+
 
 		/// <summary>
 		/// Stops server discovery.

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using SharpDX;
 using Fusion.Core.Mathematics;
 
-namespace Fusion.Engine.UserInterface {
+namespace Fusion.Engine.Frames {
 
 	public class ViewContext {
 		public Point	MousePoint;

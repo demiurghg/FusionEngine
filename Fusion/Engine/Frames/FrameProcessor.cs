@@ -15,10 +15,10 @@ using Fusion.Engine.Common;
 using Fusion.Engine.Graphics;
 
 
-namespace Fusion.Engine.UserInterface {
+namespace Fusion.Engine.Frames {
 
 
-	public class UserInterface : GameModule {
+	public class FrameProcessor : GameModule {
 
 		[Config]
 		public Config	Config	{ get; set; }
@@ -38,9 +38,9 @@ namespace Fusion.Engine.UserInterface {
 		/// </summary>
 		/// <param name="width"></param>
 		/// <param name="height"></param>
-		public UserInterface ( Game game, string defaultFont ) : base(game)
+		public FrameProcessor ( Game game, string defaultFont ) : base(game)
 		{
-			Config				=	new Fusion.Engine.UserInterface.Config();
+			Config				=	new Fusion.Engine.Frames.Config();
 			defaultFontPath		=	defaultFont;
 			mouseProcessor		=	new MouseProcessor( Game, this );
 		}

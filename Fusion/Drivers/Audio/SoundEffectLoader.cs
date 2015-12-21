@@ -14,7 +14,7 @@ using Fusion.Engine.Common;
 
 namespace Fusion.Drivers.Audio {
 	[ContentLoader(typeof(SoundEffect))]
-	public class SoundEffectLoader : ContentLoader {
+	internal class SoundEffectLoader : ContentLoader {
 
 		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 		{

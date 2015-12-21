@@ -10,7 +10,7 @@ using Fusion.Core.Mathematics;
 using Fusion.Engine.Common;
 
 
-namespace Fusion.Engine.UserInterface {
+namespace Fusion.Engine.Frames {
 
 	public interface ITransition {
 		void	Update	( GameTime gameTime );

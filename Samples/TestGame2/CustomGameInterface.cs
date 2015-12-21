@@ -14,7 +14,7 @@ using Fusion.Framework;
 using Fusion.Build;
 using Fusion.Engine.Graphics.GIS;
 using Fusion.Engine.Graphics.GIS.GlobeMath;
-using Fusion.Engine.UserInterface;
+using Fusion.Engine.Frames;
 using Fusion;
 using Fusion.Core.Shell;
 using System.IO;
@@ -52,7 +52,7 @@ namespace TestGame2 {
 	}
 
 
-	class CustomGameInterface : Fusion.Engine.Common.GameInterface {
+	class CustomGameInterface : Fusion.Engine.Common.UserInterface {
 
 		[GameModule("Console", "con", InitOrder.Before)]
 		public GameConsole Console { get { return console; } }
@@ -60,8 +60,8 @@ namespace TestGame2 {
 
 
 		[GameModule("GUI", "gui", InitOrder.Before)]
-		public UserInterface UserInterface { get { return userInterface; } }
-		UserInterface userInterface;
+		public FrameProcessor FrameProcessor { get { return userInterface; } }
+		FrameProcessor userInterface;
 
 		//VideoPlayer	videoPlayer;
 		//Video		video;
@@ -86,7 +86,7 @@ namespace TestGame2 {
 		public CustomGameInterface ( Game game ) : base(game)
 		{
 			console			=	new GameConsole( game, "conchars", "conback");
-			userInterface	=	new UserInterface( game, @"Fonts\textFont" );
+			userInterface	=	new FrameProcessor( game, @"Fonts\textFont" );
 		}
 
 
@@ -278,7 +278,7 @@ namespace TestGame2 {
 			var vp = Game.RenderSystem.DisplayBounds;
 			var ratio = vp.Width / (float)vp.Height;
 
-			masterView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1, 0, ratio);
+			masterView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1, 0, ratio);
 		}
 
 

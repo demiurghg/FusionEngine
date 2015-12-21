@@ -30,10 +30,10 @@ namespace Fusion.Engine.Graphics {
 			public float	SpecularLevel;
 			public float	EmissionLevel;
 			public float	BumpLevel;
-			public float	Displacement;
 			public float	BlendHardness;
 			
-			public float	Dummy;
+			public float	Dummy0;
+			public float	Dummy1;
 		}
 		
 		ConstantBuffer		constBuffer;
@@ -87,9 +87,9 @@ namespace Fusion.Engine.Graphics {
 					constData[i].AlphaLevel			=	layers[i].AlphaLevel	 ;
 					constData[i].SpecularLevel		=	layers[i].SpecularLevel	 ;
 					constData[i].EmissionLevel		=	layers[i].EmissionLevel	 ;
-					constData[i].Displacement		=	layers[i].Displacement	 ;
 					constData[i].BlendHardness		=	layers[i].BlendHardness	 ;
-					constData[i].Dummy				=	0;
+					constData[i].Dummy0				=	0;
+					constData[i].Dummy1				=	1;
 				}
 			}
 

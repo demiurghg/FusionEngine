@@ -421,7 +421,6 @@ float3	ComputeCSM ( float4 worldPos )
 	float4	smProj;
 	float4 	smProj2;
 
-
 	//	select cascade :
 	smProj	   =  mul( worldPos, Params.CSMViewProjection3 );
 	smProj.xy /=  smProj.w;	smProj.w   =  1;

@@ -48,7 +48,7 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Drivers.Audio
 {
-	public sealed class SoundEffectInstance : IDisposable
+	internal sealed class SoundEffectInstance : IDisposable
 	{
 		readonly AudioDevice device;
 		private bool isDisposed = false;

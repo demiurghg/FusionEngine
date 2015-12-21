@@ -48,7 +48,7 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Drivers.Audio
 {
-	public class AudioEmitter
+	internal class AudioEmitter
 	{
 		/// <summary>
 		/// 

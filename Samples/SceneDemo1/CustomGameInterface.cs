@@ -18,7 +18,7 @@ using Fusion.Engine.Server;
 namespace SceneDemo1 {
 
 
-	class SceneDemo1GameInterface : Fusion.Engine.Common.GameInterface {
+	class SceneDemo1GameInterface : Fusion.Engine.Common.UserInterface {
 
 		[GameModule( "Console", "con", InitOrder.Before )]
 		public GameConsole Console { get { return console; } }
@@ -92,7 +92,7 @@ namespace SceneDemo1 {
 		/// <param name="gameTime"></param>
 		public override void Update ( GameTime gameTime )
 		{
-			master.Camera.SetupCameraFov( Vector3.One * 10, Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.Rad(120), 0.1f, 1000.0f, 1, 0, 1 );
+			master.Camera.SetupCameraFov( Vector3.One * 10, Vector3.Up, Vector3.Zero, MathUtil.Rad(120), 0.1f, 1000.0f, 1, 0, 1 );
 
 			//	update console :
 			console.Update( gameTime );

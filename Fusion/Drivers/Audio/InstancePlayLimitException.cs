@@ -48,7 +48,7 @@ namespace Fusion.Drivers.Audio
 #if WINRT
     public sealed class InstancePlayLimitException : Exception
 #else
-    public sealed class InstancePlayLimitException : ExternalException
+    internal sealed class InstancePlayLimitException : ExternalException
 #endif
 	{
 	}

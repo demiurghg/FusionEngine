@@ -38,11 +38,6 @@ namespace Fusion.Engine.Graphics {
 		public float BumpLevel;
 
 		/// <summary>
-		/// Displacement level.
-		/// </summary>
-		public float Displacement;
-
-		/// <summary>
 		/// Blend factor. 
 		/// Zero value means soft blend. 
 		/// One means harsh blending.
@@ -102,7 +97,6 @@ namespace Fusion.Engine.Graphics {
 			SpecularLevel	=	1;
 			BumpLevel		=	1;
 			EmissionLevel	=	1;
-			Displacement	=	1;
 
 			GlowNarrowness	=	new Vector2(0,0);
 

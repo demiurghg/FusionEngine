@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Fusion.Core.Mathematics;
 
 namespace Fusion.Drivers.Audio {
-	public struct CurvePoint {
+	internal struct CurvePoint {
 		public float	Distance;
 		public float	DspSetting;
 	}

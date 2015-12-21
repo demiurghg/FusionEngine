@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fusion.Engine.UserInterface {
+namespace Fusion.Engine.Frames {
 
 
 	/// <summary>

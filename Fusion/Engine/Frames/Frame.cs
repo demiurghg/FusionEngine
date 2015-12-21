@@ -12,12 +12,12 @@ using Fusion.Engine.Common;
 using Forms = System.Windows.Forms;
 
 
-namespace Fusion.Engine.UserInterface {
+namespace Fusion.Engine.Frames {
 
 	public partial class Frame {
 
 		public readonly	Game	Game;
-		readonly UserInterface	ui;
+		readonly FrameProcessor	ui;
 
 		/// <summary>
 		/// 
@@ -295,7 +295,7 @@ namespace Fusion.Engine.UserInterface {
 		/// Constructor
 		/// </summary>
 		/// <param name="id"></param>
-		public Frame ( UserInterface ui )
+		public Frame ( FrameProcessor ui )
 		{
 			Game	=	ui.Game;
 			this.ui	=	ui;
@@ -315,7 +315,7 @@ namespace Fusion.Engine.UserInterface {
 		/// <param name="text"></param>
 		/// <param name="backColor"></param>
 		/// <returns></returns>
-		public static Frame Create ( UserInterface ui, int x, int y, int w, int h, string text, Color backColor )
+		public static Frame Create ( FrameProcessor ui, int x, int y, int w, int h, string text, Color backColor )
 		{
 			return new Frame( ui ) {
 				X = x,
@@ -339,7 +339,7 @@ namespace Fusion.Engine.UserInterface {
 		/// <param name="h"></param>
 		/// <param name="text"></param>
 		/// <param name="backColor"></param>
-		public Frame ( UserInterface ui, int x, int y, int w, int h, string text, Color backColor )
+		public Frame ( FrameProcessor ui, int x, int y, int w, int h, string text, Color backColor )
 		{
 			Game	=	ui.Game;
 			this.ui	=	ui;

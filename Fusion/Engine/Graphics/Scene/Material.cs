@@ -29,11 +29,6 @@ namespace Fusion.Engine.Graphics {
 		public bool CastShadow;
 		
 		/// <summary>
-		/// Indicates that material uses displacement mapping.
-		/// </summary>
-		public bool DisplacementMapping;
-
-		/// <summary>
 		/// Material options for mapping and layer blending.
 		/// Default value is SingleLayer.
 		/// </summary>
@@ -91,9 +86,8 @@ namespace Fusion.Engine.Graphics {
 			this.Layer2	=	null;
 			this.Layer3	=	null;
 
-			this.DisplacementMapping	=	false;
-			this.Transparent			=	false;
-			this.CastShadow				=	true;
+			this.Transparent	=	false;
+			this.CastShadow		=	true;
 		}
 
 
@@ -132,7 +126,6 @@ namespace Fusion.Engine.Graphics {
 			mtrl.Layer2	=	null;
 			mtrl.Layer3	=	null;
 
-			mtrl.DisplacementMapping	=	false;
 			mtrl.Transparent			=	false;
 			mtrl.CastShadow				=	true;
 

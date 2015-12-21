@@ -50,7 +50,7 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Drivers.Audio
 {
-    public sealed class SoundEffect : IDisposable
+    internal sealed class SoundEffect : IDisposable
     {
         private bool isDisposed = false;
 		readonly AudioDevice	device;

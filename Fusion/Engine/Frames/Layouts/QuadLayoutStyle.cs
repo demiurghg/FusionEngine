@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Fusion.Engine.UserInterface;
+using Fusion.Engine.Frames;
 
 
-namespace Fusion.Engine.UserInterface.Layouts {
+namespace Fusion.Engine.Frames.Layouts {
 	public enum QuadLayoutStyle {
 		SinglePanel,
 		TwoPanelsSideBySide,

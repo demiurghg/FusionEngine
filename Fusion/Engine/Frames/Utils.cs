@@ -9,20 +9,11 @@ using Fusion;
 using Fusion.Core.Mathematics;
 using Fusion.Engine.Common;
 
-namespace Fusion.Engine.UserInterface {
-
+namespace Fusion.Engine.Frames {
 
 	public enum AutoImageSize {
 		Stretch,
 		FitWidth,
-	}
-
-
-
-	[Flags]
-	public enum FrameBahavior {
-		AllowDragEvents		=	0x0001,
-		PassScrollEvenetsUp	=	0x0002,
 	}
 
 
