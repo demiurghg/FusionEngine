@@ -11,8 +11,11 @@ using Fusion.Core.IniParser.Model;
 using Fusion.Core.IniParser.Model.Formatting;
 using Fusion.Core.Content;
 using Fusion.Drivers.Graphics;
+using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Graphics {
+
+	#pragma warning disable 0649
 
 	/// <summary>
 	/// Reprsents material.
@@ -46,34 +49,20 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		Game Game;
+		ContentManager content;
+
+
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="content"></param>
 		internal void LoadGpuResources ( ContentManager content )
 		{
-			var defaultColorTexture		=	content.Game.RenderSystem.GrayTexture;
-			var defaultSurfaceTexture	=	content.Game.RenderSystem.BlackTexture;
-			var defaultNormalMapTexture	=	content.Game.RenderSystem.FlatNormalMap;
-			var defaultEmissionTexture	=	content.Game.RenderSystem.BlackTexture;
+			this.Game		=	content.Game;
+			this.content	=	content;
 
 			constBuffer		=	new ConstantBuffer( content.Game.GraphicsDevice, typeof(LayerData), 4 );
-
-			shaderResources	=	new ShaderResource[16];
-
-			for (int i=0; i<layers.Length; i++) {
-				if (layers[i]!=null) {
-					shaderResources[ i * 4 + 0]	=	LoadTexture( content, layers[i].ColorTexture	, defaultColorTexture	  , true  ).Srv;
-					shaderResources[ i * 4 + 1]	=	LoadTexture( content, layers[i].SurfaceTexture	, defaultSurfaceTexture	  , false ).Srv;
-					shaderResources[ i * 4 + 2]	=	LoadTexture( content, layers[i].NormalMapTexture, defaultNormalMapTexture , false ).Srv;
-					shaderResources[ i * 4 + 3]	=	LoadTexture( content, layers[i].EmissionTexture , defaultEmissionTexture  , true  ).Srv;
-				} else {
-					shaderResources[ i * 4 + 0]	=	null;
-					shaderResources[ i * 4 + 1]	=	null;
-					shaderResources[ i * 4 + 2]	=	null;
-					shaderResources[ i * 4 + 3]	=	null;
-				}
-			}
 
 			var constData = new LayerData[4];
 
@@ -93,9 +82,48 @@ namespace Fusion.Engine.Graphics {
 				}
 			}
 
+			LoadTextures();
+
+			content.Game.Reloading += Game_Reloading;
+
 			constBuffer.SetData( constData );
 		}
 
+
+
+		void Game_Reloading ( object sender, EventArgs e )
+		{
+			LoadTextures();
+		}
+
+
+
+		void LoadTextures ()
+		{
+			//SafeDispose( ref shaderResources );
+
+			var defaultColorTexture		=	content.Game.RenderSystem.GrayTexture;
+			var defaultSurfaceTexture	=	content.Game.RenderSystem.BlackTexture;
+			var defaultNormalMapTexture	=	content.Game.RenderSystem.FlatNormalMap;
+			var defaultEmissionTexture	=	content.Game.RenderSystem.BlackTexture;
+
+			shaderResources	=	new ShaderResource[16];
+
+			for (int i=0; i<layers.Length; i++) {
+				if (layers[i]!=null) {
+					shaderResources[ i * 4 + 0]	=	LoadTexture( content, layers[i].ColorTexture	, defaultColorTexture	  , true  ).Srv;
+					shaderResources[ i * 4 + 1]	=	LoadTexture( content, layers[i].SurfaceTexture	, defaultSurfaceTexture	  , false ).Srv;
+					shaderResources[ i * 4 + 2]	=	LoadTexture( content, layers[i].NormalMapTexture, defaultNormalMapTexture , false ).Srv;
+					shaderResources[ i * 4 + 3]	=	LoadTexture( content, layers[i].EmissionTexture , defaultEmissionTexture  , true  ).Srv;
+				} else {
+					shaderResources[ i * 4 + 0]	=	null;
+					shaderResources[ i * 4 + 1]	=	null;
+					shaderResources[ i * 4 + 2]	=	null;
+					shaderResources[ i * 4 + 3]	=	null;
+				}
+			}
+
+		}
 
 
 		/// <summary>
@@ -103,8 +131,9 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void DisposeGpuResources ()
 		{
+			Game.Reloading -= Game_Reloading;
 			SafeDispose( ref constBuffer );
-			SafeDispose( ref shaderResources );
+			//SafeDispose( ref shaderResources );
 		}
 
 

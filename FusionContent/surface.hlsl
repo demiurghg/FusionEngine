@@ -101,6 +101,18 @@ struct LAYERPROPS {
 	float3	Emission;
 };
 
+LAYERPROPS OverlayLayers ( LAYERPROPS layerA, LAYERPROPS layerB )
+{
+	LAYERPROPS layer;
+	float factor = layerB.Color.a;
+	
+	layer.Color		=	lerp( layerA.Color		, layerB.Color		, factor );
+	layer.Surface	=	lerp( layerA.Surface	, layerB.Surface	, factor );
+	layer.Emission	=	lerp( layerA.Emission	, layerB.Emission	, factor );
+	layer.Normal	=	lerp( layerA.Normal		, layerB.Normal		, factor );
+	
+	return layer;
+}
 	// float4	Tiling;
 	// float4	Offset;
 	// float2	RoughnessRange;
@@ -147,8 +159,25 @@ GBuffer PSMain( PSInput input )
 			input.Binormal.x,	input.Binormal.y,	input.Binormal.z,	
 			input.Normal.x,		input.Normal.y,		input.Normal.z		
 		);
+		
+	LAYERPROPS layer;
+	layer.Color = 0;
+	layer.Surface = 0;
+	layer.Normal = 0;
+	layer.Emission = 0;
 	
-	LAYERPROPS layer = ReadLayerUV( 0, input.TexCoord, tbnToWorld );
+	#ifdef LAYER0
+		layer 	= ReadLayerUV( 0, input.TexCoord, tbnToWorld );
+	#endif
+	#ifdef LAYER1
+		layer 	= OverlayLayers( layer, ReadLayerUV( 1, input.TexCoord, tbnToWorld ) );
+	#endif
+	#ifdef LAYER2
+		layer 	= OverlayLayers( layer, ReadLayerUV( 2, input.TexCoord, tbnToWorld ) );
+	#endif
+	#ifdef LAYER3
+		layer 	= OverlayLayers( layer, ReadLayerUV( 3, input.TexCoord, tbnToWorld ) );
+	#endif
 	
 	//	decode specular :
 	float3	white		=	float3(1,1,1);

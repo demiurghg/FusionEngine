@@ -133,7 +133,10 @@ namespace Fusion.Engine.Graphics {
 		void EnumFunc ( PipelineState ps, SkyFlags flags )
 		{
 			ps.VertexInputElements	=	VertexInputElement.FromStructure<SkyVertex>();
-			ps.RasterizerState		=	RasterizerState.CullCCW;
+
+			//	do not cull triangles for both for RH and LH coordinates 
+			//	for direct view and cubemaps.
+			ps.RasterizerState		=	RasterizerState.CullNone; 
 			ps.BlendState			=	BlendState.Opaque;
 			ps.DepthStencilState	=	flags.HasFlag(SkyFlags.FOG) ? DepthStencilState.None : DepthStencilState.Readonly;
 		}
@@ -224,7 +227,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="rendCtxt"></param>
 		/// <param name="techName"></param>
-		internal void Render( Camera camera, StereoEye stereoEye, GameTime gameTime, DepthStencilSurface depthBuffer, RenderTargetSurface hdrTarget, Viewport viewport, SkySettings settings )
+		internal void Render( Camera camera, StereoEye stereoEye, GameTime gameTime, HdrFrame frame, SkySettings settings )
 		{
 			var scale		=	Matrix.Scaling( settings.SkySphereSize );
 			var rotation	=	Matrix.Identity;
@@ -236,9 +239,7 @@ namespace Fusion.Engine.Graphics {
 
 			//rs.DepthStencilState = depthBuffer==null? DepthStencilState.None : DepthStencilState.Default ;
 
-			rs.SetTargets( depthBuffer, hdrTarget );
-
-			rs.SetViewport( viewport );
+			rs.SetTargets( frame.DepthBuffer.Surface, frame.HdrBuffer.Surface );
 
 			var viewMatrix = camera.GetViewMatrix( stereoEye );
 			var projMatrix = camera.GetProjectionMatrix( stereoEye );

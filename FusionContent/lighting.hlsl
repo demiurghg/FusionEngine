@@ -11,7 +11,7 @@ $ubershader	+DIRECT +OMNI +SPOT
 
 static const float PI = 3.141592f;
 
-float	sqr(float a) {
+float sqr(float a) {
 	return a * a;
 }
 
@@ -34,7 +34,7 @@ float3	Lambert( float3 normal, float3 light_dir, float3 intensity, float3 diff_c
 
 float	Fresnel( float c, float Fn )
 {
-	//return Fn;
+	//	UE4 (5) :
 	return Fn + (1-Fn) * pow(2, (-5.55473 * c - 6.98316)*c );
 	//return Fn + (1-Fn) * pow(1-c, 5);
 }
@@ -45,47 +45,25 @@ float3	CookTorrance( float3 N, float3 V, float3 L, float3 I, float3 F, float m )
 			L	=	normalize(L);
 			V	=	normalize(V);
 	float3	H	=	normalize(V+L);
-	
+
+	//	to remove harsh edge on glazing angles :
 	float	edgeDecay	=	saturate(dot(L,N)*10);
+
+	float	g1	=	2 * dot(N,H) * dot(N,V) / dot(V,H);
+	float	g2	=	2 * dot(N,H) * dot(N,L) / dot(V,H);
+	float 	G	=	min(1, min(g1, g2));
 	
-	#ifdef USE_UE4
-		/*float 	k	=	sqr(m+1)/8;
-		float	g1	=	dot(N,L) / ( dot(N,L) * (1-k) + k );
-		float	g2	=	dot(N,V) / ( dot(N,V) * (1-k) + k );
-		float	G	=	g1 * g2;//*/
+	float	cos_a	=	dot(N,H);
+	float	sin_a	=	sqrt(abs(1 - cos_a * cos_a)); // 'abs' to avoid negative values
+	
+	//m *= m;
+	float	D	=	exp( -(sin_a*sin_a) / (cos_a*cos_a) / (m*m) ) / (PI * m*m * cos_a * cos_a * cos_a * cos_a );
 
-		float G = 0;
-		float	g1	=	2 * dot(N,H) * dot(N,V) / dot(V,H);
-		float	g2	=	2 * dot(N,H) * dot(N,L) / dot(V,H);
-		G	=	min(1, min(g1, g2));//*/
-		
-		float	a	=	m*m;
-		float	D	=	a * a / PI / sqr(sqr(dot(N,H)) * (a*a-1)+1);
-
-		F.r  = Fresnel(dot(V,H), F.r);
-		F.g  = Fresnel(dot(V,H), F.g);
-		F.b  = Fresnel(dot(V,H), F.b);
-							  
-		return max(0, I * F * D * G / (4*abs(dot(N,L))*dot(V,N))) * edgeDecay;
-	#else
-
-		float G = 0;
-		float	g1	=	2 * dot(N,H) * dot(N,V) / dot(V,H);
-		float	g2	=	2 * dot(N,H) * dot(N,L) / dot(V,H);
-		G	=	min(1, min(g1, g2));
-		
-		float	cos_a	=	dot(N,H);
-		float	sin_a	=	sqrt(abs(1 - cos_a * cos_a)); // ABS to avoid negative values
-		
-		//m *= m;
-		float	D	=	exp( -(sin_a*sin_a) / (cos_a*cos_a) / (m*m) ) / (PI * m*m * cos_a * cos_a * cos_a * cos_a );
-
-		F.r  = Fresnel(dot(V,H), F.r);
-		F.g  = Fresnel(dot(V,H), F.g);
-		F.b  = Fresnel(dot(V,H), F.b);//*/
-							  
-		return max(0, I * F * D * G / (4*abs(dot(N,L))*dot(V,N))) * edgeDecay;
-	#endif
+	F.r  = Fresnel(dot(V,H), F.r);
+	F.g  = Fresnel(dot(V,H), F.g);
+	F.b  = Fresnel(dot(V,H), F.b);//*/
+						  
+	return max(0, I * F * D * G / (4*abs(dot(N,L))*dot(V,N))) * edgeDecay;
 }
 
 
@@ -155,6 +133,7 @@ Texture2D 		SpotMaskAtlas			: register(t6);
 StructuredBuffer<OMNILIGHT>	OmniLights	: register(t7);
 StructuredBuffer<SPOTLIGHT>	SpotLights	: register(t8);
 Texture2D 		OcclusionMap			: register(t9);
+TextureCube		EnvMap					: register(t10);
 
 
 float3	ComputeCSM ( float4 worldPos );
@@ -219,6 +198,13 @@ void CSMain(
 		totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, Params.DirectLightIntensity.rgb, specular.rgb, specular.a );
 	#endif
 	
+
+	//totalLight.xyz	=	0;
+
+	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 0 ).rgb * diffuse.rgb * PI;
+	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), 0 ).rgb * specular.rgb;
+	//totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), 0 ).rgb * (specular.rgb + diffuse.rgb);
+	
 	//-----------------------------------------------------
 	//	Common tile-related stuff :
 	//-----------------------------------------------------
@@ -239,7 +225,7 @@ void CSMain(
 	//-----------------------------------------------------
 	//	OMNI lights :
 	//-----------------------------------------------------
-#if 1	
+#if 0	
 	#ifdef OMNI
 		uint lightCount = OMNI_LIGHT_COUNT;
 		
@@ -294,7 +280,7 @@ void CSMain(
 	
 	GroupMemoryBarrierWithGroupSync();
 	
-	if (1) {
+	if (0) {
 	#ifdef SPOT
 		uint lightCount = SPOT_LIGHT_COUNT;
 		uint lightIndex = groupIndex;

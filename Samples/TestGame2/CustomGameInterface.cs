@@ -132,8 +132,21 @@ namespace TestGame2 {
 			masterView.LightSet.DirectLight.Direction	=	masterView.SkySettings.SunLightDirection;
 			masterView.LightSet.DirectLight.Intensity	=	masterView.SkySettings.SunLightColor;
 			masterView.LightSet.DirectLight.Enabled		=	true;
-			masterView.LightSet.AmbientLevel			=	masterView.SkySettings.AmbientLevel;
+			masterView.LightSet.AmbientLevel			=	Color4.Zero;//masterView.SkySettings.AmbientLevel;
 
+			masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,0), 1, 50 ) );
+
+
+			var rand = new Random();
+
+			/*for (int i=0; i<64; i++) {
+				var light = new OmniLight();
+				light.Position		=	new Vector3( 8*(i/8-4), 4, 8*(i%8-4) );
+				light.RadiusInner	=	1;
+				light.RadiusOuter	=	8;
+				light.Intensity		=	rand.NextColor4() * 100;
+				masterView.LightSet.OmniLights.Add( light );
+			} */
 
 
 			masterView2.SpriteLayers.Add( console.ConsoleSpriteLayer );

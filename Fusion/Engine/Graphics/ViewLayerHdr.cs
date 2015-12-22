@@ -9,6 +9,7 @@ using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
 using Fusion.Engine.Graphics.GIS;
 using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
+using System.Diagnostics;
 
 namespace Fusion.Engine.Graphics {
 
@@ -47,35 +48,26 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		internal RenderTarget2D	HdrBuffer		;
-		internal RenderTarget2D	LightAccumulator;
-		internal DepthStencil2D	DepthBuffer		;
-		internal RenderTarget2D	DiffuseBuffer	;
-		internal RenderTarget2D	SpecularBuffer	;
-		internal RenderTarget2D	NormalMapBuffer	;
+		readonly HdrFrame viewHdrFrame = new HdrFrame();
+		readonly HdrFrame radianceFrame = new HdrFrame();
 
 		//	reuse diffuse buffer as temporal buffer for effects.
-		internal RenderTarget2D TempFXBuffer { get { return DiffuseBuffer; } }
+		internal RenderTarget2D TempFXBuffer { get { return viewHdrFrame.DiffuseBuffer; } }
 
 		internal RenderTarget2D	MeasuredOld;
 		internal RenderTarget2D	MeasuredNew;
 		internal RenderTarget2D	Bloom0;
 		internal RenderTarget2D	Bloom1;
 
-
-		//public TargetTexture	HdrTexture			{ get; set; }
-		//public TargetTexture	DiffuseTexture		{ get; set; }
-		//public TargetTexture	SpecularTexture		{ get; set; }
-		//public TargetTexture	NormalMapTexture	{ get; set; }
+		internal RenderTargetCube Radiance;
 
 
 		/// <summary>
-		/// Creates ViewLayer instance
+		/// Creates ViewLayerHDR instance
 		/// </summary>
 		/// <param name="Game">Game engine</param>
-		/// <param name="width">Target width. Specify zero value for backbuffer.</param>
-		/// <param name="height">Target height. Specify zero value for backbuffer.</param>
-		/// <param name="enableHdr">Indicates that ViewLayer has HDR capabilities.</param>
+		/// <param name="width">Target width.</param>
+		/// <param name="height">Target height.</param>
 		public ViewLayerHdr ( Game game, int width, int height ) : base( game )
 		{
 			var vp	=	Game.GraphicsDevice.DisplayBounds;
@@ -96,6 +88,15 @@ namespace Fusion.Engine.Graphics {
 			MeasuredOld		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
 			MeasuredNew		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
 
+			radianceFrame.HdrBuffer			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 256,	256,	false, false );
+			radianceFrame.LightAccumulator	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 256,	256,	false, true );
+			radianceFrame.DepthBuffer		=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8,	  256,	256,	1 );
+			radianceFrame.DiffuseBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  256,	256,	false, false );
+			radianceFrame.SpecularBuffer 	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  256,	256,	false, false );
+			radianceFrame.NormalMapBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2, 256,	256,	false, false );
+
+			Radiance	=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, 256 );
+
 			Resize( width, height );
 		}
 
@@ -108,12 +109,21 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				SafeDispose( ref HdrBuffer );
-				SafeDispose( ref LightAccumulator );
-				SafeDispose( ref DepthBuffer );
-				SafeDispose( ref DiffuseBuffer );
-				SafeDispose( ref SpecularBuffer );
-				SafeDispose( ref NormalMapBuffer );
+				SafeDispose( ref Radiance );
+
+				SafeDispose( ref viewHdrFrame.HdrBuffer );
+				SafeDispose( ref viewHdrFrame.LightAccumulator );
+				SafeDispose( ref viewHdrFrame.DepthBuffer );
+				SafeDispose( ref viewHdrFrame.DiffuseBuffer );
+				SafeDispose( ref viewHdrFrame.SpecularBuffer );
+				SafeDispose( ref viewHdrFrame.NormalMapBuffer );
+
+				SafeDispose( ref radianceFrame.HdrBuffer );
+				SafeDispose( ref radianceFrame.LightAccumulator );
+				SafeDispose( ref radianceFrame.DepthBuffer );
+				SafeDispose( ref radianceFrame.DiffuseBuffer );
+				SafeDispose( ref radianceFrame.SpecularBuffer );
+				SafeDispose( ref radianceFrame.NormalMapBuffer );
 
 				SafeDispose( ref Bloom0 );
 				SafeDispose( ref Bloom1 );
@@ -134,12 +144,12 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="height"></param>
 		public void Resize ( int newWidth, int newHeight )
 		{
-			SafeDispose( ref HdrBuffer );
-			SafeDispose( ref LightAccumulator );
-			SafeDispose( ref DepthBuffer );
-			SafeDispose( ref DiffuseBuffer );
-			SafeDispose( ref SpecularBuffer );
-			SafeDispose( ref NormalMapBuffer );
+			SafeDispose( ref viewHdrFrame.HdrBuffer );
+			SafeDispose( ref viewHdrFrame.LightAccumulator );
+			SafeDispose( ref viewHdrFrame.DepthBuffer );
+			SafeDispose( ref viewHdrFrame.DiffuseBuffer );
+			SafeDispose( ref viewHdrFrame.SpecularBuffer );
+			SafeDispose( ref viewHdrFrame.NormalMapBuffer );
 
 			SafeDispose( ref Bloom0 );
 			SafeDispose( ref Bloom1 );
@@ -154,12 +164,12 @@ namespace Fusion.Engine.Graphics {
 			int bloomWidth		=	( targetWidth/2  ) & 0xFFF0;
 			int bloomHeight		=	( targetHeight/2 ) & 0xFFF0;
 
-			HdrBuffer			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, newWidth,	newHeight,	false, false );
-			LightAccumulator	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, newWidth,	newHeight,	false, true );
-			DepthBuffer			=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8,	newWidth,	newHeight,	1 );
-			DiffuseBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	newWidth,	newHeight,	false, false );
-			SpecularBuffer 		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	newWidth,	newHeight,	false, false );
-			NormalMapBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2, newWidth,	newHeight,	false, false );
+			viewHdrFrame.HdrBuffer			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, newWidth,	newHeight,	false, false );
+			viewHdrFrame.LightAccumulator	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, newWidth,	newHeight,	false, true );
+			viewHdrFrame.DepthBuffer		=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8,	  newWidth,	newHeight,	1 );
+			viewHdrFrame.DiffuseBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  newWidth,	newHeight,	false, false );
+			viewHdrFrame.SpecularBuffer 	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  newWidth,	newHeight,	false, false );
+			viewHdrFrame.NormalMapBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2, newWidth,	newHeight,	false, false );
 			
 			Bloom0				=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
 			Bloom1				=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
@@ -208,14 +218,14 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void ClearBuffers ()
+		void ClearBuffers ( HdrFrame frame )
 		{
-			Game.GraphicsDevice.Clear( DiffuseBuffer.Surface,		Color4.Black );
-			Game.GraphicsDevice.Clear( SpecularBuffer.Surface,	Color4.Black );
-			Game.GraphicsDevice.Clear( NormalMapBuffer.Surface,	Color4.Black );
+			Game.GraphicsDevice.Clear( frame.DiffuseBuffer.Surface,		Color4.Black );
+			Game.GraphicsDevice.Clear( frame.SpecularBuffer.Surface,	Color4.Black );
+			Game.GraphicsDevice.Clear( frame.NormalMapBuffer.Surface,	Color4.Black );
 
-			Game.GraphicsDevice.Clear( DepthBuffer.Surface,		1, 0 );
-			Game.GraphicsDevice.Clear( HdrBuffer.Surface,			Color4.Black );
+			Game.GraphicsDevice.Clear( frame.DepthBuffer.Surface,		1, 0 );
+			Game.GraphicsDevice.Clear( frame.HdrBuffer.Surface,			Color4.Black );
 		}
 
 
@@ -228,27 +238,70 @@ namespace Fusion.Engine.Graphics {
 		void RenderHdrScene ( GameTime gameTime, StereoEye stereoEye, Viewport viewport, RenderTargetSurface targetSurface )
 		{
 			//	clear g-buffer and hdr-buffers:
-			ClearBuffers();
+			ClearBuffers( viewHdrFrame );
 
 			//	render shadows :
-			rs.LightRenderer.RenderShadows( this );
+			rs.LightRenderer.RenderShadows( this, this.LightSet );
 			
+			//	render reflections :
+			RenderRadiance( gameTime );
+
 			//	render g-buffer :
-			rs.SceneRenderer.RenderGBuffer( stereoEye, this );
+			rs.SceneRenderer.RenderGBuffer( stereoEye, Camera, viewHdrFrame, this );
 
 			//	render sky :
-			rs.Sky.Render( Camera, stereoEye, gameTime, DepthBuffer.Surface, HdrBuffer.Surface, viewport, SkySettings );
+			rs.Sky.Render( Camera, stereoEye, gameTime, viewHdrFrame, SkySettings );
+			rs.Sky.RenderFogTable( SkySettings );
 
 			//	render lights :
-			rs.LightRenderer.RenderLighting( stereoEye, this, Game.RenderSystem.WhiteTexture );
+			rs.LightRenderer.RenderLighting( stereoEye, Camera, viewHdrFrame, this, Game.RenderSystem.WhiteTexture, Radiance );
 
 			//	apply tonemapping and bloom :
-			rs.HdrFilter.Render( gameTime, TempFXBuffer.Surface, HdrBuffer, this );
+			rs.HdrFilter.Render( gameTime, TempFXBuffer.Surface, viewHdrFrame.HdrBuffer, this );
 
 			//	apply FXAA
 			rs.Filter.Fxaa( targetSurface, TempFXBuffer );
 		}
 
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="gameTime"></param>
+		void RenderRadiance ( GameTime gameTime )
+		{
+			var sw = new Stopwatch();
+
+			sw.Start();
+
+			foreach ( var envLight in LightSet.EnvLights ) {
+
+				for (int i=0; i<6; i++) {
+					
+					ClearBuffers( radianceFrame );
+
+					var camera = new Camera();
+					camera.SetupCameraFov( envLight.Position, envLight.Position + Vector3.UnitX, Vector3.Up, MathUtil.Rad(90), 0.125f, 5000, 1,0, 1 );
+
+					//	render g-buffer :
+					rs.SceneRenderer.RenderGBuffer( StereoEye.Mono, camera, radianceFrame, this );
+
+					//	render sky :
+					rs.Sky.Render( Camera, StereoEye.Mono, gameTime, radianceFrame, SkySettings );
+
+					//	render lights :
+					rs.LightRenderer.RenderLighting( StereoEye.Mono, camera, radianceFrame, this, Game.RenderSystem.WhiteTexture, rs.Sky.SkyCube );
+
+					rs.Filter.StretchRect( Radiance.GetSurface( 0, (CubeFace)i ), radianceFrame.HdrBuffer );
+				}
+				
+			}
+			sw.Stop();
+
+			Log.Message("{0}", sw.Elapsed );
+		}
 
 
 

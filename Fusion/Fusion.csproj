@@ -221,14 +221,16 @@
     <Compile Include="Engine\Graphics\GIS\AnimatedModelLayer.cs" />
     <Compile Include="Engine\Graphics\GIS\HeatMapLayer.cs" />
     <Compile Include="Engine\Graphics\GIS\ModelLayer.cs" />
+    <Compile Include="Engine\Graphics\HdrFrame.cs" />
+    <Compile Include="Engine\Graphics\Lights\EnvLight.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRendererConfig.cs" />
     <Compile Include="Engine\Graphics\Lights\DirectLight.cs" />
     <Compile Include="Engine\Graphics\Lights\ShadowContext.cs" />
-    <Compile Include="Engine\Graphics\Scene\Material.Gpu.cs" />
-    <Compile Include="Engine\Graphics\Scene\MaterialLoader.cs" />
-    <Compile Include="Engine\Graphics\Scene\MaterialOptions.cs" />
-    <Compile Include="Engine\Graphics\Scene\MaterialLayer.cs" />
+    <Compile Include="Engine\Graphics\Materials\Material.Gpu.cs" />
+    <Compile Include="Engine\Graphics\Materials\MaterialLoader.cs" />
+    <Compile Include="Engine\Graphics\Materials\MaterialOptions.cs" />
+    <Compile Include="Engine\Graphics\Materials\MaterialLayer.cs" />
     <Compile Include="Engine\Graphics\SceneRenderer.cs" />
     <Compile Include="Engine\Graphics\Scene\MaterialRef.cs" />
     <Compile Include="Engine\Graphics\Scene\VertexColorTextureTBNSkinned.cs" />
@@ -243,6 +245,7 @@
     <Compile Include="Drivers\Graphics\Display\StereoDualHeadDisplay.cs" />
     <Compile Include="Drivers\Graphics\Display\StereoInterlacedDisplay.cs" />
     <Compile Include="Engine\Graphics\Scene\AnimMode.cs" />
+    <Compile Include="Engine\Graphics\TargetPool.cs" />
     <Compile Include="Engine\Graphics\Textures\TextureAtlas.cs" />
     <Compile Include="Engine\Graphics\Scene\VertexColorTextureNormal.cs" />
     <Compile Include="Engine\Graphics\Scene\SceneLoader.cs" />
@@ -404,7 +407,7 @@
     <Compile Include="Engine\Graphics\Textures\DiscTexture.cs" />
     <Compile Include="Engine\Graphics\Textures\DynamicTexture.cs" />
     <Compile Include="Engine\Graphics\Textures\LightProbe.cs" />
-    <Compile Include="Engine\Graphics\Scene\Material.cs" />
+    <Compile Include="Engine\Graphics\Materials\Material.cs" />
     <Compile Include="Engine\Graphics\MeshInstance.cs" />
     <Compile Include="Engine\Graphics\Lights\OmniLight.cs" />
     <Compile Include="Engine\Graphics\Lights\SpotLight.cs" />

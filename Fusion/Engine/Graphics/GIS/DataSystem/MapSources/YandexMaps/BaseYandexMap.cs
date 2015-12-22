@@ -7,6 +7,8 @@ using Fusion.Engine.Common;
 using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
 using Fusion.Engine.Graphics.GIS.DataSystem.MapSources;
 
+#pragma warning disable 0414
+
 namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.YandexMaps
 {
 	public abstract class BaseYandexMap : BaseMapSource
