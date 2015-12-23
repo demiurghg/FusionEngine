@@ -88,14 +88,14 @@ namespace Fusion.Engine.Graphics {
 			MeasuredOld		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
 			MeasuredNew		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
 
-			radianceFrame.HdrBuffer			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 256,	256,	false, false );
-			radianceFrame.LightAccumulator	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 256,	256,	false, true );
-			radianceFrame.DepthBuffer		=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8,	  256,	256,	1 );
-			radianceFrame.DiffuseBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  256,	256,	false, false );
-			radianceFrame.SpecularBuffer 	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  256,	256,	false, false );
-			radianceFrame.NormalMapBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2, 256,	256,	false, false );
+			radianceFrame.HdrBuffer			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 512,	512,	false, false );
+			radianceFrame.LightAccumulator	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 512,	512,	false, true );
+			radianceFrame.DepthBuffer		=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8,	  512,	512,	1 );
+			radianceFrame.DiffuseBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  512,	512,	false, false );
+			radianceFrame.SpecularBuffer 	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  512,	512,	false, false );
+			radianceFrame.NormalMapBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2, 512,	512,	false, false );
 
-			Radiance	=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, 256 );
+			Radiance	=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, 256, true );
 
 			Resize( width, height );
 		}
@@ -283,24 +283,26 @@ namespace Fusion.Engine.Graphics {
 					ClearBuffers( radianceFrame );
 
 					var camera = new Camera();
-					camera.SetupCameraFov( envLight.Position, envLight.Position + Vector3.UnitX, Vector3.Up, MathUtil.Rad(90), 0.125f, 5000, 1,0, 1 );
+					camera.SetupCameraCubeFace( envLight.Position, (CubeFace)i, 0.125f, 5000 );
 
 					//	render g-buffer :
 					rs.SceneRenderer.RenderGBuffer( StereoEye.Mono, camera, radianceFrame, this );
 
 					//	render sky :
-					rs.Sky.Render( Camera, StereoEye.Mono, gameTime, radianceFrame, SkySettings );
+					rs.Sky.Render( camera, StereoEye.Mono, gameTime, radianceFrame, SkySettings );
 
 					//	render lights :
 					rs.LightRenderer.RenderLighting( StereoEye.Mono, camera, radianceFrame, this, Game.RenderSystem.WhiteTexture, rs.Sky.SkyCube );
 
-					rs.Filter.StretchRect( Radiance.GetSurface( 0, (CubeFace)i ), radianceFrame.HdrBuffer );
+					rs.Filter.StretchRect( Radiance.GetSurface( 0, (CubeFace)i ), radianceFrame.HdrBuffer, SamplerState.LinearClamp, null, true );
+
+					Radiance.BuildMipmaps();
 				}
 				
 			}
 			sw.Stop();
 
-			Log.Message("{0}", sw.Elapsed );
+			//Log.Message("{0}", sw.Elapsed );
 		}
 
 

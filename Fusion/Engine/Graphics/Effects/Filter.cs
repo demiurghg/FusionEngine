@@ -143,7 +143,7 @@ namespace Fusion.Engine.Graphics
 		/// <param name="src"></param>
 		/// <param name="filter"></param>
 		/// <param name="rect"></param>
-		public void StretchRect( RenderTargetSurface dst, ShaderResource src, SamplerState filter = null, Rectangle? sourceRectangle = null )
+		public void StretchRect( RenderTargetSurface dst, ShaderResource src, SamplerState filter = null, Rectangle? sourceRectangle = null, bool flipToCubeFace = false )
 		{
 			SetDefaultRenderStates();
 
@@ -162,7 +162,11 @@ namespace Fusion.Engine.Graphics
 					sourceRectCB.SetData( new Vector4( 0,0, 1, 1 ) );
 				}
 
-				rs.PipelineState			=	factory[ (int)ShaderFlags.STRETCH_RECT ];
+				if (flipToCubeFace) {
+					rs.PipelineState		=	factory[ (int)(ShaderFlags.STRETCH_RECT|ShaderFlags.TO_CUBE_FACE) ];
+				} else {
+					rs.PipelineState		=	factory[ (int)ShaderFlags.STRETCH_RECT ];
+				}
 				rs.VertexShaderResources[0] =	src;
 				rs.PixelShaderResources[0]	=	src;
 				rs.PixelShaderSamplers[0]	=	filter ?? SamplerState.LinearPointClamp;

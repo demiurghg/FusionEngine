@@ -114,6 +114,30 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="origin"></param>
+		/// <param name="rightHanded"></param>
+		public void SetupCameraCubeFace ( Vector3 origin, CubeFace cubeFace, float near, float far )
+		{
+			Matrix view = Matrix.Identity;
+			Matrix proj = Matrix.Identity;
+
+			switch (cubeFace) {
+				case CubeFace.FacePosX : view = Matrix.LookAtLH( origin, -Vector3.UnitX + origin, Vector3.UnitY ); break;
+				case CubeFace.FaceNegX : view = Matrix.LookAtLH( origin,  Vector3.UnitX + origin, Vector3.UnitY ); break;
+				case CubeFace.FacePosY : view = Matrix.LookAtLH( origin, -Vector3.UnitY + origin,-Vector3.UnitZ ); break;
+				case CubeFace.FaceNegY : view = Matrix.LookAtLH( origin,  Vector3.UnitY + origin, Vector3.UnitZ ); break;
+				case CubeFace.FacePosZ : view = Matrix.LookAtLH( origin, -Vector3.UnitZ + origin, Vector3.UnitY ); break;
+				case CubeFace.FaceNegZ : view = Matrix.LookAtLH( origin,  Vector3.UnitZ + origin, Vector3.UnitY ); break;
+			}
+			
+			SetupCamera( view, 2*near, 2*near, near, far, 1, 0 );
+		}
+
+
+
+		/// <summary>
 		/// Gets view matrix for given stereo eye.
 		/// </summary>
 		/// <param name="stereoEye"></param>

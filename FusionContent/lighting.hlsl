@@ -5,11 +5,13 @@
 $ubershader	+DIRECT +OMNI +SPOT
 #endif
 
+static const float PI = 3.141592f;
+
+
 /*-----------------------------------------------------------------------------
 	Lighting models :
 -----------------------------------------------------------------------------*/
 
-static const float PI = 3.141592f;
 
 float sqr(float a) {
 	return a * a;
@@ -198,12 +200,12 @@ void CSMain(
 		totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, Params.DirectLightIntensity.rgb, specular.rgb, specular.a );
 	#endif
 	
+	float Fc = pow( 1 - saturate(dot(viewDirN,normal)), 5 );
+	float3 F = (1 - Fc) * specular.rgb + Fc;
 
-	//totalLight.xyz	=	0;
+	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 8 ).rgb * diffuse.rgb * PI;
+	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), pow(specular.w,0.25)*7 ).rgb * specular.rgb;
 
-	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 0 ).rgb * diffuse.rgb * PI;
-	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), 0 ).rgb * specular.rgb;
-	//totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), 0 ).rgb * (specular.rgb + diffuse.rgb);
 	
 	//-----------------------------------------------------
 	//	Common tile-related stuff :

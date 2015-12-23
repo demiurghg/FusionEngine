@@ -95,21 +95,25 @@ PSInput VSMain( VSInput input )
 -----------------------------------------------------------------------------*/
 
 struct LAYERPROPS {
-	float4	Color;
-	float4	Surface;
-	float3	Normal;
-	float3	Emission;
-};
+	float3	Diffuse		;
+	float	Alpha		;
+	float3 	Specular	;
+	float 	Roughness	;
+	float3	Normal		;
+	float3	Emission	;
+};	
 
 LAYERPROPS OverlayLayers ( LAYERPROPS layerA, LAYERPROPS layerB )
 {
 	LAYERPROPS layer;
-	float factor = layerB.Color.a;
+	float factor = layerB.Alpha;
 	
-	layer.Color		=	lerp( layerA.Color		, layerB.Color		, factor );
-	layer.Surface	=	lerp( layerA.Surface	, layerB.Surface	, factor );
-	layer.Emission	=	lerp( layerA.Emission	, layerB.Emission	, factor );
+	layer.Diffuse	=	lerp( layerA.Diffuse	, layerB.Diffuse	, factor );
+	layer.Alpha		=	lerp( layerA.Alpha		, layerB.Alpha		, factor );
+	layer.Specular	=	lerp( layerA.Specular	, layerB.Specular	, factor );
+	layer.Roughness	=	lerp( layerA.Roughness	, layerB.Roughness	, factor );
 	layer.Normal	=	lerp( layerA.Normal		, layerB.Normal		, factor );
+	layer.Emission	=	lerp( layerA.Emission	, layerB.Emission	, factor );
 	
 	return layer;
 }
@@ -133,17 +137,26 @@ LAYERPROPS ReadLayerUV ( int id, float2 uv, float3x3 tbnMatrix )
 	LAYERDATA	layerData =	Layers[id];
 	
 	uv = uv * layerData.Tiling.xy + layerData.Offset.xy;
-
-	layer.Color		=	Textures[id*4+0].Sample( Sampler, uv ).rgba;
-	layer.Surface	=	Textures[id*4+1].Sample( Sampler, uv ).rgba;
-	layer.Normal	=	Textures[id*4+2].Sample( Sampler, uv ).xyz * 2 - 1;
-	layer.Emission	=	Textures[id*4+3].Sample( Sampler, uv ).xyz;
 	
-	layer.Color.rgb	 *=	layerData.ColorLevel;
-	layer.Color.a 	 *=	layerData.AlphaLevel;
-	layer.Emission   *=	layerData.EmissionLevel;
-	layer.Surface.r	 *=	layerData.SpecularLevel;
-	layer.Surface.g  = 	lerp( layerData.RoughnessRange.x, layerData.RoughnessRange.y, layer.Surface.g );
+	float4	color		=	Textures[id*4+0].Sample( Sampler, uv ).rgba;
+	float4	surface		=	Textures[id*4+1].Sample( Sampler, uv ).rgba;
+	float4	normalMap	=	Textures[id*4+2].Sample( Sampler, uv ).rgba * 2 - 1;
+	float4	emission	=	Textures[id*4+3].Sample( Sampler, uv ).rgba;
+	
+	float3 nonmetal		=	float3(80,80,80)/256.0f;
+
+	layer.Diffuse		=	color.rgb * (1-surface.r);
+	layer.Alpha			=	color.a;
+	layer.Specular		=	lerp(nonmetal, color.rgb, surface.b) * surface.r;
+	layer.Roughness		=	surface.g;
+	layer.Normal		=	normalMap.xyz;
+	layer.Emission		=	emission.rgb;
+	
+	layer.Diffuse	 	*=	layerData.ColorLevel;
+	layer.Alpha 	 	*=	layerData.AlphaLevel;
+	layer.Emission   	*=	layerData.EmissionLevel;
+	layer.Specular	 	*=	layerData.SpecularLevel;
+	layer.Roughness 	= 	lerp( layerData.RoughnessRange.x, layerData.RoughnessRange.y, layer.Roughness );
 	
 	return layer;
 }
@@ -161,8 +174,10 @@ GBuffer PSMain( PSInput input )
 		);
 		
 	LAYERPROPS layer;
-	layer.Color = 0;
-	layer.Surface = 0;
+	layer.Diffuse = 0;
+	layer.Alpha = 0;
+	layer.Specular = 0;
+	layer.Roughness = 0;
 	layer.Normal = 0;
 	layer.Emission = 0;
 	
@@ -179,17 +194,11 @@ GBuffer PSMain( PSInput input )
 		layer 	= OverlayLayers( layer, ReadLayerUV( 3, input.TexCoord, tbnToWorld ) );
 	#endif
 	
-	//	decode specular :
-	float3	white		=	float3(1,1,1);
-	float  	roughness	=	layer.Surface.g;
-	float3	specular	=	lerp( white, layer.Color.rgb, layer.Surface.b ) * layer.Surface.r;
-	float3	diffuse		=	layer.Color.rgb * (1-layer.Surface.r);
-			
 	float3 worldNormal 	= 	normalize( mul( layer.Normal, tbnToWorld ) );
 
 	output.hdr		=	float4( layer.Emission, 0 );
-	output.diffuse	=	float4( diffuse, 1 );
-	output.specular =	float4( specular, roughness );
+	output.diffuse	=	float4( layer.Diffuse, 1 );
+	output.specular =	float4( layer.Specular, layer.Roughness );
 	output.normals	=	float4( worldNormal * 0.5 + 0.5, 1 );
 	
 	return output;
