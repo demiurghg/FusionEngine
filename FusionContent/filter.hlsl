@@ -4,6 +4,7 @@ $ubershader (STRETCH_RECT..TO_CUBE_FACE)|(DOWNSAMPLE_2_4x4..TO_CUBE_FACE)
 $ubershader GAUSS_BLUR_3x3 PASS1|PASS2
 $ubershader GAUSS_BLUR PASS1|PASS2
 $ubershader LINEARIZE_DEPTH|RESOLVE_AND_LINEARIZE_DEPTH_MSAA
+$ubershader PREFILTER_ENVMAP POSX|POSY|POSZ|NEGX|NEGY|NEGZ
 #endif
 
 
@@ -203,6 +204,77 @@ float4 PSMain( VSOutput input) : SV_Target
 	float4 fxaaImage = FxaaPixelShader( uv, float4(uv-dudv/2, uv+dudv/2), fxaaTex, dudv, float4(2 * dudv, 0.5 * dudv) );
 
 	return float4(fxaaImage.rgb, 1);
+}
+
+#endif
+
+
+//-------------------------------------------------------------------------------
+#ifdef PREFILTER_ENVMAP
+
+SamplerState	SamplerLinearClamp : register(s0);
+TextureCube 	Source : register(t0);
+	
+cbuffer CBuffer : register(b0) {
+	 float4x4	Transform;
+};
+
+
+struct PS_IN {
+    float4 position 	  : SV_POSITION;
+  	float3 cubeTexCoord   : TEXCOORD0;
+};
+
+
+PS_IN VSMain(uint VertexID : SV_VertexID)
+{
+	PS_IN output;
+	output.position.x = (VertexID == 0) ? 3.0f : -1.0f;
+	output.position.y = (VertexID == 2) ? 3.0f : -1.0f;
+	output.position.zw = 1.0f;
+	output.cubeTexCoord = 0;
+
+	#ifdef POSX
+		output.cubeTexCoord.z = -((VertexID == 0) ? 3.0f : -1.0f);
+		output.cubeTexCoord.y =  ((VertexID == 2) ? 3.0f : -1.0f);
+		output.cubeTexCoord.x = 1.0f;
+	#endif
+	#ifdef POSY
+		output.cubeTexCoord.x =  ((VertexID == 0) ? 3.0f : -1.0f);
+		output.cubeTexCoord.z = -((VertexID == 2) ? 3.0f : -1.0f);
+		output.cubeTexCoord.y = 1.0f;
+	#endif
+	#ifdef POSZ
+		output.cubeTexCoord.x =  ((VertexID == 0) ? 3.0f : -1.0f);
+		output.cubeTexCoord.y =  ((VertexID == 2) ? 3.0f : -1.0f);
+		output.cubeTexCoord.z = 1.0f;
+	#endif
+
+	#ifdef NEGX
+		output.cubeTexCoord.z =  ((VertexID == 0) ? 3.0f : -1.0f);
+		output.cubeTexCoord.y =  ((VertexID == 2) ? 3.0f : -1.0f);
+		output.cubeTexCoord.x = -1.0f;
+	#endif
+	#ifdef NEGY
+		output.cubeTexCoord.x =  ((VertexID == 0) ? 3.0f : -1.0f);
+		output.cubeTexCoord.z =  ((VertexID == 2) ? 3.0f : -1.0f);
+		output.cubeTexCoord.y = -1.0f;
+	#endif
+	#ifdef NEGZ
+		output.cubeTexCoord.x = -((VertexID == 0) ? 3.0f : -1.0f);
+		output.cubeTexCoord.y =  ((VertexID == 2) ? 3.0f : -1.0f);
+		output.cubeTexCoord.z = -1.0f;
+	#endif
+
+	return output;
+}
+
+
+float4 PSMain(PS_IN input) : SV_Target
+{
+	float4 result = Source.SampleLevel(SamplerLinearClamp, input.cubeTexCoord, 1);
+	
+	return result ;
 }
 
 #endif

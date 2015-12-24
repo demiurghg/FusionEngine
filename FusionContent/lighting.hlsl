@@ -1,4 +1,6 @@
-
+#define DIRECT 1
+#define OMNI 1
+#define SPOT 1
 
 #if 0
 //$ubershader	+DIRECT..SHOW_SPLITS +OMNI..SHOW_OMNI_LOAD +SPOT..SHOW_SPOT_LOAD
@@ -203,9 +205,10 @@ void CSMain(
 	float Fc = pow( 1 - saturate(dot(viewDirN,normal)), 5 );
 	float3 F = (1 - Fc) * specular.rgb + Fc;
 
-	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 8 ).rgb * diffuse.rgb * PI;
-	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), pow(specular.w,0.25)*7 ).rgb * specular.rgb;
+	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 8 * 0).rgb * diffuse.rgb * PI;
+	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), pow(specular.w,0.25)*7 * 0  + 1 ).rgb * specular.rgb;
 
+	totalLight.xyz	=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 1 ).rgb;
 	
 	//-----------------------------------------------------
 	//	Common tile-related stuff :

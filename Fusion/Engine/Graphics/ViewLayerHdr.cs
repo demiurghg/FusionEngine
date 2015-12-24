@@ -275,32 +275,40 @@ namespace Fusion.Engine.Graphics {
 			var sw = new Stopwatch();
 
 			sw.Start();
+			using (new PixEvent("Capture Radiance")) {
 
-			foreach ( var envLight in LightSet.EnvLights ) {
+				var sun	=	SkySettings.SunGlowIntensity;
+				SkySettings.SunGlowIntensity = 0;
 
-				for (int i=0; i<6; i++) {
+				foreach ( var envLight in LightSet.EnvLights ) {
+
+					for (int i=0; i<6; i++) {
 					
-					ClearBuffers( radianceFrame );
+						ClearBuffers( radianceFrame );
 
-					var camera = new Camera();
-					camera.SetupCameraCubeFace( envLight.Position, (CubeFace)i, 0.125f, 5000 );
+						var camera = new Camera();
+						camera.SetupCameraCubeFace( envLight.Position, (CubeFace)i, 0.125f, 5000 );
 
-					//	render g-buffer :
-					rs.SceneRenderer.RenderGBuffer( StereoEye.Mono, camera, radianceFrame, this );
+						//	render g-buffer :
+						rs.SceneRenderer.RenderGBuffer( StereoEye.Mono, camera, radianceFrame, this );
 
-					//	render sky :
-					rs.Sky.Render( camera, StereoEye.Mono, gameTime, radianceFrame, SkySettings );
+						//	render sky :
+						rs.Sky.Render( camera, StereoEye.Mono, gameTime, radianceFrame, SkySettings );
 
-					//	render lights :
-					rs.LightRenderer.RenderLighting( StereoEye.Mono, camera, radianceFrame, this, Game.RenderSystem.WhiteTexture, rs.Sky.SkyCube );
+						//	render lights :
+						rs.LightRenderer.RenderLighting( StereoEye.Mono, camera, radianceFrame, this, Game.RenderSystem.WhiteTexture, rs.Sky.SkyCube );
 
-					rs.Filter.StretchRect( Radiance.GetSurface( 0, (CubeFace)i ), radianceFrame.HdrBuffer, SamplerState.LinearClamp, null, true );
+						rs.Filter.StretchRect( Radiance.GetSurface( 0, (CubeFace)i ), radianceFrame.HdrBuffer, SamplerState.LinearClamp, null, true );
 
-					Radiance.BuildMipmaps();
-				}
+						rs.Filter.PrefilterEnvMap( Radiance, 1 );
+						//Radiance.BuildMipmaps();
+					}
 				
+				}
+				sw.Stop();
+	
+				SkySettings.SunGlowIntensity = sun;
 			}
-			sw.Stop();
 
 			//Log.Message("{0}", sw.Elapsed );
 		}

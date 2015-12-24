@@ -195,6 +195,7 @@
     <Compile Include="Drivers\Graphics\GraphicsResource.cs" />
     <Compile Include="Drivers\Graphics\Pix.cs" />
     <Compile Include="Drivers\Graphics\Resources\FormattedBuffer.cs" />
+    <Compile Include="Drivers\Graphics\Resources\TextureCubeArray.cs" />
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
     <Compile Include="Drivers\Graphics\Resources\UnorderedAccess.cs" />
     <Compile Include="Engine\Client\ClientState.cs" />

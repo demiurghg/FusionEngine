@@ -134,7 +134,7 @@ namespace TestGame2 {
 			masterView.LightSet.DirectLight.Enabled		=	true;
 			masterView.LightSet.AmbientLevel			=	Color4.Zero;//masterView.SkySettings.AmbientLevel;
 
-			masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,0), 1, 50 ) );
+			masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,40,0), 1, 50 ) );
 
 
 			var rand = new Random();
