@@ -54,16 +54,25 @@ namespace Fusion.Engine.Graphics
 		}
 
 
+		Vector3[] envMapSamples;
+
+
 		Ubershader		shaders;
 		StateFactory	factory;
 		ConstantBuffer	gaussWeightsCB;
 		ConstantBuffer	sourceRectCB;
 		ConstantBuffer	matrixCB;
+		ConstantBuffer	vectorCB;
 		ConstantBuffer	bufLinearizeDepth;
 		
 		public Filter( Game Game ) : base( Game )
 		{
 			rs = Game.GraphicsDevice;
+
+			var rand		=	new Random();
+			envMapSamples	=	Enumerable.Range( 0, RenderSystemConfig.EnvMapFilterSampleCount )
+								.Select( i => rand.NextVector3OnSphere() )
+								.ToArray();
 		}
 
 
@@ -77,6 +86,7 @@ namespace Fusion.Engine.Graphics
 			gaussWeightsCB		= new ConstantBuffer( rs, typeof(Vector4), MaxBlurTaps );
 			sourceRectCB		= new ConstantBuffer( rs, typeof(Vector4) );
 			matrixCB			= new ConstantBuffer( rs, typeof(Matrix), 1 );
+			vectorCB			= new ConstantBuffer( rs, typeof(Vector4), 1 );
 
 			LoadContent();
 			Game.Reloading += (s,e) => LoadContent();
@@ -127,6 +137,7 @@ namespace Fusion.Engine.Graphics
 				SafeDispose( ref sourceRectCB );
 				SafeDispose( ref bufLinearizeDepth );
 				SafeDispose( ref matrixCB );
+				SafeDispose( ref vectorCB );
 			}
 
 			base.Dispose( disposing );
@@ -364,40 +375,51 @@ namespace Fusion.Engine.Graphics
 
 
 
-
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="dst"></param>
 		/// <param name="cubeSrc"></param>
 		/// <param name="sampleCount"></param>
-		public void PrefilterEnvMap ( RenderTargetCube envMap, float roughness )
+		public void PrefilterEnvMap ( RenderTargetCube envMap )
 		{
-			var rand		=	new Random();
-			var randVectors =	Enumerable.Range( 0, 64 ).Select( i => rand.NextVector3OnSphere() ).ToArray();
-
 			SetDefaultRenderStates();
+
+			int width  = envMap.Width / 2;
+			int height = envMap.Height / 2;
 
 			using( new PixEvent("PrefilterEnvMap") ) {
 
 				var sides =	new[]{ ShaderFlags.PREFILTER_ENVMAP | ShaderFlags.POSX, ShaderFlags.PREFILTER_ENVMAP | ShaderFlags.NEGX, 
 								   ShaderFlags.PREFILTER_ENVMAP | ShaderFlags.POSY, ShaderFlags.PREFILTER_ENVMAP | ShaderFlags.NEGY, 
 								   ShaderFlags.PREFILTER_ENVMAP | ShaderFlags.POSZ, ShaderFlags.PREFILTER_ENVMAP | ShaderFlags.NEGZ };
+
+				//	loop through mip levels from second to last specular mip level :
+				for (int mip=1; mip<RenderSystemConfig.EnvMapSpecularMipCount; mip++) {
+
+					float roughness = MathUtil.Lerp( 0.0f, 1.0f, (float)mip / (float)(RenderSystemConfig.EnvMapSpecularMipCount-1) );
+
+					vectorCB.SetData( new Vector4( roughness, 0,0,0 ) );
+					
 								
-				for (int face=0; face<6; face++) {
+					for (int face=0; face<6; face++) {
 
+						rs.SetTargets( null, envMap.GetSurface( mip, (CubeFace)face ) );
+					
+						rs.SetViewport( 0,0, width, height );
 
-					rs.SetTargets( null, envMap.GetSurface( 1, (CubeFace)face ) );
-					rs.SetViewport( 0,0, envMap.Width/2, envMap.Height/2 );
+						rs.PixelShaderConstants[0]	=	vectorCB;
+						rs.PipelineState			=	factory[ (int)sides[face] ];
+						rs.VertexShaderResources[0] =	envMap.UpperMipLevel;
+						rs.PixelShaderResources[0]	=	envMap.UpperMipLevel;
+						rs.PixelShaderSamplers[0]	=	SamplerState.LinearWrap;
+						rs.VertexShaderConstants[0]	=	matrixCB;
 
+						rs.Draw( 3, 0 );
+					}
 
-					rs.PipelineState			=	factory[ (int)sides[face] ];
-					rs.VertexShaderResources[0] =	envMap.UpperMipLevel;
-					rs.PixelShaderResources[0]	=	envMap.UpperMipLevel;
-					rs.PixelShaderSamplers[0]	=	SamplerState.LinearWrap;
-					rs.VertexShaderConstants[0]	=	matrixCB;
-
-					rs.Draw( 3, 0 );
+					width /= 2;
+					height /= 2;
 				}
 			}
 

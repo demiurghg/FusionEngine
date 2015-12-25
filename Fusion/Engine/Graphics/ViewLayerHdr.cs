@@ -95,7 +95,7 @@ namespace Fusion.Engine.Graphics {
 			radianceFrame.SpecularBuffer 	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  512,	512,	false, false );
 			radianceFrame.NormalMapBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2, 512,	512,	false, false );
 
-			Radiance	=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, 256, true );
+			Radiance	=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, RenderSystemConfig.EnvMapSize, true );
 
 			Resize( width, height );
 		}
@@ -300,7 +300,7 @@ namespace Fusion.Engine.Graphics {
 
 						rs.Filter.StretchRect( Radiance.GetSurface( 0, (CubeFace)i ), radianceFrame.HdrBuffer, SamplerState.LinearClamp, null, true );
 
-						rs.Filter.PrefilterEnvMap( Radiance, 1 );
+						rs.Filter.PrefilterEnvMap( Radiance );
 						//Radiance.BuildMipmaps();
 					}
 				

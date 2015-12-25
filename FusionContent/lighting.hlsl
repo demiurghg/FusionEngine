@@ -205,10 +205,10 @@ void CSMain(
 	float Fc = pow( 1 - saturate(dot(viewDirN,normal)), 5 );
 	float3 F = (1 - Fc) * specular.rgb + Fc;
 
-	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 8 * 0).rgb * diffuse.rgb * PI;
-	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), pow(specular.w,0.25)*7 * 0  + 1 ).rgb * specular.rgb;
+	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 4).rgb * diffuse.rgb * PI * 4;
+	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), sqrt(specular.w) * 6 ).rgb * specular.rgb;//*/
 
-	totalLight.xyz	=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 1 ).rgb;
+	//totalLight.xyz	=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 4 ).rgb;
 	
 	//-----------------------------------------------------
 	//	Common tile-related stuff :

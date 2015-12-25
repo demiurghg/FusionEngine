@@ -216,14 +216,51 @@ SamplerState	SamplerLinearClamp : register(s0);
 TextureCube 	Source : register(t0);
 	
 cbuffer CBuffer : register(b0) {
-	 float4x4	Transform;
+	 float4	Roughness;
 };
+
 
 
 struct PS_IN {
     float4 position 	  : SV_POSITION;
   	float3 cubeTexCoord   : TEXCOORD0;
 };
+
+
+float radicalInverse_VdC(uint bits) {
+	bits = (bits << 16u) | (bits >> 16u);
+	bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+	bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+	bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+	bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+	return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+}
+
+//The ith point xi is then computed by         
+float2 Hammersley(uint i, uint N)
+{
+	return float2(float(i)/float(N), radicalInverse_VdC(i));
+}
+
+float3 ImportanceSampleGGX( float2 E, float Roughness, float3 N )
+{
+	float m = Roughness * Roughness;
+
+	float Phi = 2 * 3.1415 * E.x;
+	float CosTheta = sqrt( (1 - E.y) / ( 1 + (m*m - 1) * E.y ) );
+	float SinTheta = sqrt( 1 - CosTheta * CosTheta );
+
+	float3 H;
+	H.x = SinTheta * cos( Phi );
+	H.y = SinTheta * sin( Phi );
+	H.z = CosTheta;
+
+	float3 UpVector = abs(N.z) < 0.999 ? float3(0,0,1) : float3(1,0,0);
+	float3 TangentX = normalize( cross( UpVector, N ) );
+	float3 TangentY = cross( N, TangentX );
+	// tangent to world space
+	return TangentX * H.x + TangentY * H.y + N * H.z;
+}
 
 
 PS_IN VSMain(uint VertexID : SV_VertexID)
@@ -272,9 +309,18 @@ PS_IN VSMain(uint VertexID : SV_VertexID)
 
 float4 PSMain(PS_IN input) : SV_Target
 {
-	float4 result = Source.SampleLevel(SamplerLinearClamp, input.cubeTexCoord, 1);
-	
-	return result ;
+	float4 result = 0;
+	float weight = 0;
+	int count = 48;
+	for (int i=0; i<count; i++) {
+		float2 E = Hammersley(i,count);
+		float3 H = ImportanceSampleGGX( E, Roughness, input.cubeTexCoord );
+		float3 N = input.cubeTexCoord;
+
+		result.rgb += Source.SampleLevel(SamplerLinearClamp, H, 0).rgb * saturate(dot(N,H));
+	}
+
+	return result / count;
 }
 
 #endif
