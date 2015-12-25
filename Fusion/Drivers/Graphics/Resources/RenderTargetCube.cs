@@ -40,9 +40,7 @@ namespace Fusion.Drivers.Graphics {
 		/// <summary>
 		///	Gets topmost miplevel as shader resource.
 		/// </summary>
-		public ShaderResource UpperMipLevel { get { return upperMipLevelSrv; } }
-
-		ShaderResource	upperMipLevelSrv;
+		ShaderResource[]	cubeMipShaderResources;
 
 
 		/// <summary>
@@ -136,13 +134,18 @@ namespace Fusion.Drivers.Graphics {
 			//
 			//	Top mipmap level :
 			//
-			var srvDesc = new ShaderResourceViewDescription();
-				srvDesc.TextureCube.MipLevels		=	1;
-				srvDesc.TextureCube.MostDetailedMip	=	0;
-				srvDesc.Format		=	Converter.Convert( format );
-				srvDesc.Dimension	=	ShaderResourceViewDimension.TextureCube;
+			cubeMipShaderResources = new ShaderResource[MipCount];
 
-			upperMipLevelSrv	=	new ShaderResource( device, new ShaderResourceView(device.Device, texCube, srvDesc), size, size, 1 );
+			for (int mip=0; mip<MipCount; mip++) {
+
+				var srvDesc = new ShaderResourceViewDescription();
+					srvDesc.TextureCube.MipLevels		=	1;
+					srvDesc.TextureCube.MostDetailedMip	=	mip;
+					srvDesc.Format		=	Converter.Convert( format );
+					srvDesc.Dimension	=	ShaderResourceViewDimension.TextureCube;
+
+				cubeMipShaderResources[mip]	=	new ShaderResource( device, new ShaderResourceView(device.Device, texCube, srvDesc), size>>mip, size>>mip, 1 );
+			}
 
 
 
@@ -183,6 +186,12 @@ namespace Fusion.Drivers.Graphics {
 		public RenderTargetSurface FacePosZ { get {	return GetSurface( 0, CubeFace.FacePosZ );	} }
 		public RenderTargetSurface FaceNegZ { get {	return GetSurface( 0, CubeFace.FaceNegZ );	} }
 
+
+
+		public ShaderResource GetCubeShaderResource ( int mipLevel )
+		{
+			return cubeMipShaderResources[mipLevel];
+		}
 
 
 		/// <summary>

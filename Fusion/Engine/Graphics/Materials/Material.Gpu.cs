@@ -112,7 +112,7 @@ namespace Fusion.Engine.Graphics {
 			for (int i=0; i<layers.Length; i++) {
 				if (layers[i]!=null) {
 					shaderResources[ i * 4 + 0]	=	LoadTexture( content, layers[i].ColorTexture	, defaultColorTexture	  , true  ).Srv;
-					shaderResources[ i * 4 + 1]	=	LoadTexture( content, layers[i].SurfaceTexture	, defaultSurfaceTexture	  , false ).Srv;
+					shaderResources[ i * 4 + 1]	=	LoadTexture( content, layers[i].SurfaceTexture	, defaultSurfaceTexture	  , false  ).Srv;
 					shaderResources[ i * 4 + 2]	=	LoadTexture( content, layers[i].NormalMapTexture, defaultNormalMapTexture , false ).Srv;
 					shaderResources[ i * 4 + 3]	=	LoadTexture( content, layers[i].EmissionTexture , defaultEmissionTexture  , true  ).Srv;
 				} else {

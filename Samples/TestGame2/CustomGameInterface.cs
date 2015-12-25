@@ -139,14 +139,14 @@ namespace TestGame2 {
 
 			var rand = new Random();
 
-			/*for (int i=0; i<64; i++) {
+			for (int i=0; i<64; i++) {
 				var light = new OmniLight();
 				light.Position		=	new Vector3( 8*(i/8-4), 4, 8*(i%8-4) );
 				light.RadiusInner	=	1;
 				light.RadiusOuter	=	8;
 				light.Intensity		=	rand.NextColor4() * 100;
 				masterView.LightSet.OmniLights.Add( light );
-			} */
+			} //*/
 
 
 			masterView2.SpriteLayers.Add( console.ConsoleSpriteLayer );

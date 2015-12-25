@@ -216,7 +216,7 @@ SamplerState	SamplerLinearClamp : register(s0);
 TextureCube 	Source : register(t0);
 	
 cbuffer CBuffer : register(b0) {
-	 float4	Roughness;
+	 float4	Roughness;	// = roughness, 1/texelSize, 0, 0
 };
 
 
@@ -307,20 +307,57 @@ PS_IN VSMain(uint VertexID : SV_VertexID)
 }
 
 
+float Beckmann( float3 N, float3 H, float roughness)
+{
+	float 	m		=	roughness * roughness;
+	float	cos_a	=	dot(N,H);
+	float	sin_a	=	sqrt(abs(1 - cos_a * cos_a)); // 'abs' to avoid negative values
+	return	exp( -(sin_a*sin_a) / (cos_a*cos_a) / (m*m) ) / (3.1415927 * m*m * cos_a * cos_a * cos_a * cos_a );
+}
+
 float4 PSMain(PS_IN input) : SV_Target
 {
+#if 1	
+	float weight = 0;
+	float3 result = 0;
+	
+	
+	float3 N		= normalize(input.cubeTexCoord);
+	float3 upVector = abs(N.z) < 0.71 ? float3(0,0,1) : float3(1,0,0);
+	float3 tangentX = normalize( cross( upVector, N ) );
+	float3 tangentY = cross( N, tangentX );
+	
+	//	this "magic" code enlarge sampling kernel for each miplevel.
+	float dxy	=	Roughness.y * (1+ (Roughness - 0.14286f)*6);
+	
+	//	11 steps is perfect number of steps to pick every texel 
+	//	of cubemap with initial size 256x256 and get all important 
+	//	samples of Beckmann distrubution.
+	for (float x=-6; x<=6; x+=1 ) {
+		for (float y=-6; y<=6; y+=1 ) {
+			float3 H = normalize(N + tangentX * x * dxy + tangentY * y * dxy);
+			float d = Beckmann(H,N,Roughness.x);
+			weight += d;
+			result.rgb += Source.SampleLevel(SamplerLinearClamp, H, 0).rgb * d;
+		}
+	}
+	return float4(result/weight, 1);//*/
+
+#else
 	float4 result = 0;
 	float weight = 0;
-	int count = 48;
+	int count = 91;
+	int rand = input.position.x * 17846 + input.position.y * 14734;
+	
 	for (int i=0; i<count; i++) {
-		float2 E = Hammersley(i,count);
+		float2 E = Hammersley(i+rand,count);
 		float3 H = ImportanceSampleGGX( E, Roughness, input.cubeTexCoord );
 		float3 N = input.cubeTexCoord;
 
-		result.rgb += Source.SampleLevel(SamplerLinearClamp, H, 0).rgb * saturate(dot(N,H));
+		result.rgb += Source.SampleLevel(SamplerLinearClamp, H, 0).rgb;// * saturate(dot(N,H));
 	}
-
 	return result / count;
+#endif
 }
 
 #endif

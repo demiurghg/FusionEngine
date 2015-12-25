@@ -397,9 +397,10 @@ namespace Fusion.Engine.Graphics
 				//	loop through mip levels from second to last specular mip level :
 				for (int mip=1; mip<RenderSystemConfig.EnvMapSpecularMipCount; mip++) {
 
-					float roughness = MathUtil.Lerp( 0.0f, 1.0f, (float)mip / (float)(RenderSystemConfig.EnvMapSpecularMipCount-1) );
+					float roughness = (float)mip / (float)(RenderSystemConfig.EnvMapSpecularMipCount-1);
+					float step		= 1.0f / width;
 
-					vectorCB.SetData( new Vector4( roughness, 0,0,0 ) );
+					vectorCB.SetData( new Vector4( roughness, step,0,0 ) );
 					
 								
 					for (int face=0; face<6; face++) {
@@ -410,8 +411,8 @@ namespace Fusion.Engine.Graphics
 
 						rs.PixelShaderConstants[0]	=	vectorCB;
 						rs.PipelineState			=	factory[ (int)sides[face] ];
-						rs.VertexShaderResources[0] =	envMap.UpperMipLevel;
-						rs.PixelShaderResources[0]	=	envMap.UpperMipLevel;
+						rs.VertexShaderResources[0] =	envMap.GetCubeShaderResource( mip-1 );
+						rs.PixelShaderResources[0]	=	envMap.GetCubeShaderResource( mip-1 );
 						rs.PixelShaderSamplers[0]	=	SamplerState.LinearWrap;
 						rs.VertexShaderConstants[0]	=	matrixCB;
 

@@ -26,50 +26,9 @@ GlowNarrowness   = 0, 0
 BlendFactor      = 0
 Tiling           = 4, 4, 1
 Offset           = 0, 0, 0
-ColorTexture     = Scenes/textures/redball.tga
-SurfaceTexture   = Scenes/textures/nonmetal_spec.tga
+ColorTexture     = Scenes/textures/lena.tga
+SurfaceTexture   = Scenes/textures/floorHeavyA_spec.tga
 ;ColorTexture     = Scenes/textures/gold.tga
 ;SurfaceTexture   = Scenes/textures/gold_spec.tga
-NormalMapTexture = 
-EmissionTexture  = 
-
-
-[Layer1]
-ColorLevel       = 1
-AlphaLevel       = 1
-EmissionLevel    = 1
-SpecularLevel    = 0
-BumpLevel        = 1
-Displacement     = 1
-RoughnessRange   = 0.5, 0.5
-GlowNarrowness   = 0, 0
-BlendFactor      = 0
-Tiling           = 2, 2, 1
-Offset           = 0, 0, 0
-; ColorTexture     = Scenes/textures/gold.tga
-; SurfaceTexture   = Scenes/textures/nonmetal_spec.tga
-ColorTexture     = Scenes/textures/stain.tga
-SurfaceTexture   = Scenes/textures/stain_spec.tga
-NormalMapTexture = 
-EmissionTexture  = 
-
-
-
-[Layer2]
-ColorLevel       = 0.5
-AlphaLevel       = 1
-EmissionLevel    = 1
-SpecularLevel    = 1
-BumpLevel        = 1
-Displacement     = 1
-RoughnessRange   = 1, 0
-GlowNarrowness   = 0, 0
-BlendFactor      = 0
-Tiling           = 2, 2, 1
-Offset           = 0, 0, 0
-; ColorTexture     = Scenes/textures/gold.tga
-; SurfaceTexture   = Scenes/textures/nonmetal_spec.tga
-ColorTexture     = Scenes/textures/gold.tga
-SurfaceTexture   = Scenes/textures/gold_spec.tga
 NormalMapTexture = 
 EmissionTexture  = 

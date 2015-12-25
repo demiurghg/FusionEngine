@@ -11,8 +11,8 @@ namespace Fusion.Engine.Graphics {
 	public class RenderSystemConfig {
 
 		internal static int EnvMapSize = 256;
-		internal static int EnvMapSpecularMipCount = 7;
-		internal static int EnvMapDiffuseMipLevel = 7;
+		internal static int EnvMapSpecularMipCount = 8;
+		internal static int EnvMapDiffuseMipLevel = 8;
 		internal static int EnvMapFilterSampleCount = 64;
 
 		/// <summary>
