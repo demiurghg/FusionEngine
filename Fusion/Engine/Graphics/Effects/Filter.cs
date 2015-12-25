@@ -36,6 +36,14 @@ namespace Fusion.Engine.Graphics
 			LINEARIZE_DEPTH						= 1 << 10,
 			RESOLVE_AND_LINEARIZE_DEPTH_MSAA	= 1 << 11,
 			OVERLAY_ADDITIVE					= 1 << 12,
+			PREFILTER_ENVMAP					= 1 << 13,
+			POSX								= 1 << 14,
+			POSY								= 1 << 15,
+			POSZ								= 1 << 16,
+			NEGX								= 1 << 17,
+			NEGY								= 1 << 18,
+			NEGZ								= 1 << 19,
+
 		}
 
 		[StructLayout( LayoutKind.Explicit )]
@@ -45,10 +53,12 @@ namespace Fusion.Engine.Graphics
 			[FieldOffset(4)]	public	float	linearizeDepthB;        
 		}
 
+
 		Ubershader		shaders;
 		StateFactory	factory;
 		ConstantBuffer	gaussWeightsCB;
 		ConstantBuffer	sourceRectCB;
+		ConstantBuffer	matrixCB;
 		ConstantBuffer	bufLinearizeDepth;
 		
 		public Filter( Game Game ) : base( Game )
@@ -66,6 +76,7 @@ namespace Fusion.Engine.Graphics
 			bufLinearizeDepth	= new ConstantBuffer( rs, 128 );
 			gaussWeightsCB		= new ConstantBuffer( rs, typeof(Vector4), MaxBlurTaps );
 			sourceRectCB		= new ConstantBuffer( rs, typeof(Vector4) );
+			matrixCB			= new ConstantBuffer( rs, typeof(Matrix), 1 );
 
 			LoadContent();
 			Game.Reloading += (s,e) => LoadContent();
@@ -115,6 +126,7 @@ namespace Fusion.Engine.Graphics
 				SafeDispose( ref gaussWeightsCB );
 				SafeDispose( ref sourceRectCB );
 				SafeDispose( ref bufLinearizeDepth );
+				SafeDispose( ref matrixCB );
 			}
 
 			base.Dispose( disposing );
@@ -143,7 +155,7 @@ namespace Fusion.Engine.Graphics
 		/// <param name="src"></param>
 		/// <param name="filter"></param>
 		/// <param name="rect"></param>
-		public void StretchRect( RenderTargetSurface dst, ShaderResource src, SamplerState filter = null, Rectangle? sourceRectangle = null )
+		public void StretchRect( RenderTargetSurface dst, ShaderResource src, SamplerState filter = null, Rectangle? sourceRectangle = null, bool flipToCubeFace = false )
 		{
 			SetDefaultRenderStates();
 
@@ -162,7 +174,11 @@ namespace Fusion.Engine.Graphics
 					sourceRectCB.SetData( new Vector4( 0,0, 1, 1 ) );
 				}
 
-				rs.PipelineState			=	factory[ (int)ShaderFlags.STRETCH_RECT ];
+				if (flipToCubeFace) {
+					rs.PipelineState		=	factory[ (int)(ShaderFlags.STRETCH_RECT|ShaderFlags.TO_CUBE_FACE) ];
+				} else {
+					rs.PipelineState		=	factory[ (int)ShaderFlags.STRETCH_RECT ];
+				}
 				rs.VertexShaderResources[0] =	src;
 				rs.PixelShaderResources[0]	=	src;
 				rs.PixelShaderSamplers[0]	=	filter ?? SamplerState.LinearPointClamp;
@@ -343,6 +359,49 @@ namespace Fusion.Engine.Graphics
 
 				rs.Draw( 3, 0 );
 			}
+			rs.ResetStates();
+		}
+
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="dst"></param>
+		/// <param name="cubeSrc"></param>
+		/// <param name="sampleCount"></param>
+		public void PrefilterEnvMap ( RenderTargetCube envMap, float roughness )
+		{
+			var rand		=	new Random();
+			var randVectors =	Enumerable.Range( 0, 64 ).Select( i => rand.NextVector3OnSphere() ).ToArray();
+
+			SetDefaultRenderStates();
+
+			using( new PixEvent("PrefilterEnvMap") ) {
+
+				var sides =	new[]{ ShaderFlags.PREFILTER_ENVMAP | ShaderFlags.POSX, ShaderFlags.PREFILTER_ENVMAP | ShaderFlags.NEGX, 
+								   ShaderFlags.PREFILTER_ENVMAP | ShaderFlags.POSY, ShaderFlags.PREFILTER_ENVMAP | ShaderFlags.NEGY, 
+								   ShaderFlags.PREFILTER_ENVMAP | ShaderFlags.POSZ, ShaderFlags.PREFILTER_ENVMAP | ShaderFlags.NEGZ };
+								
+				for (int face=0; face<6; face++) {
+
+
+					rs.SetTargets( null, envMap.GetSurface( 1, (CubeFace)face ) );
+					rs.SetViewport( 0,0, envMap.Width/2, envMap.Height/2 );
+
+
+					rs.PipelineState			=	factory[ (int)sides[face] ];
+					rs.VertexShaderResources[0] =	envMap.UpperMipLevel;
+					rs.PixelShaderResources[0]	=	envMap.UpperMipLevel;
+					rs.PixelShaderSamplers[0]	=	SamplerState.LinearWrap;
+					rs.VertexShaderConstants[0]	=	matrixCB;
+
+					rs.Draw( 3, 0 );
+				}
+			}
+
+
 			rs.ResetStates();
 		}
 

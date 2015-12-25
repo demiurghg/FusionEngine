@@ -157,6 +157,7 @@ namespace Fusion.Engine.Graphics {
 			if (disposing) {
 				SafeDispose( ref spriteEngine );
 
+				SafeDispose( ref grayTexture );
 				SafeDispose( ref whiteTexture );
 				SafeDispose( ref blackTexture );
 				SafeDispose( ref flatNormalMap );

@@ -28,8 +28,8 @@ namespace Fusion.Engine.Graphics {
 		//public Color4	DirectLightIntensity	=	new Color4(10,10,10,1);
 		//public Color4	AmbientLevel			=	new Color4(0,0,0,0);
 
-		List<OmniLight>	omniLights = new List<OmniLight>();
-		List<SpotLight>	spotLights = new List<SpotLight>();
+		//List<OmniLight>	omniLights = new List<OmniLight>();
+		//List<SpotLight>	spotLights = new List<SpotLight>();
 
 
 		DepthStencil2D		csmDepth		;
@@ -197,11 +197,11 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="view"></param>
 		/// <param name="projection"></param>
-		public void RenderLighting ( StereoEye stereoEye, ViewLayerHdr viewLayer, Texture occlusionMap )
+		internal void RenderLighting ( StereoEye stereoEye, Camera camera, HdrFrame frame, ViewLayerHdr viewLayer, Texture occlusionMap, RenderTargetCube envLight )
 		{
 			using ( new PixEvent("TiledLighting") ) {
-				var view		=	viewLayer.Camera.GetViewMatrix( stereoEye );
-				var projection	=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
+				var view		=	camera.GetViewMatrix( stereoEye );
+				var projection	=	camera.GetProjectionMatrix( stereoEye );
 
 				var device = Game.GraphicsDevice;
 				device.ResetStates();
@@ -234,8 +234,8 @@ namespace Fusion.Engine.Graphics {
 				}
 
 
-				var width	=	viewLayer.HdrBuffer.Width;
-				var height	=	viewLayer.HdrBuffer.Height;
+				var width	=	frame.HdrBuffer.Width;
+				var height	=	frame.HdrBuffer.Height;
 
 
 				//
@@ -275,7 +275,7 @@ namespace Fusion.Engine.Graphics {
 					//
 					//	set states :
 					//
-					device.SetTargets( null, viewLayer.HdrBuffer.Surface );
+					device.SetTargets( null, frame.HdrBuffer.Surface );
 
 					lightingCB.SetData( cbData );
 
@@ -283,20 +283,21 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderSamplers[1]	=	SamplerState.LinearClamp;
 					device.ComputeShaderSamplers[2]	=	SamplerState.ShadowSampler;
 
-					device.ComputeShaderResources[0]	=	viewLayer.DiffuseBuffer;
-					device.ComputeShaderResources[1]	=	viewLayer.SpecularBuffer;
-					device.ComputeShaderResources[2]	=	viewLayer.NormalMapBuffer;
-					device.ComputeShaderResources[3]	=	viewLayer.DepthBuffer;
+					device.ComputeShaderResources[0]	=	frame.DiffuseBuffer;
+					device.ComputeShaderResources[1]	=	frame.SpecularBuffer;
+					device.ComputeShaderResources[2]	=	frame.NormalMapBuffer;
+					device.ComputeShaderResources[3]	=	frame.DepthBuffer;
 					device.ComputeShaderResources[4]	=	csmColor;
 					device.ComputeShaderResources[5]	=	spotColor;
 					device.ComputeShaderResources[6]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
 					device.ComputeShaderResources[7]	=	omniLightBuffer;
 					device.ComputeShaderResources[8]	=	spotLightBuffer;
 					device.ComputeShaderResources[9]	=	occlusionMap.Srv;
+					device.ComputeShaderResources[10]	=	envLight;
 
 					device.ComputeShaderConstants[0]	=	lightingCB;
 
-					device.SetCSRWTexture( 0, viewLayer.LightAccumulator.Surface );
+					device.SetCSRWTexture( 0, frame.LightAccumulator.Surface );
 
 					//
 					//	Dispatch :
@@ -311,7 +312,7 @@ namespace Fusion.Engine.Graphics {
 				//
 				//	Add accumulated light  :
 				//
-				rs.Filter.OverlayAdditive( viewLayer.HdrBuffer.Surface, viewLayer.LightAccumulator );
+				rs.Filter.OverlayAdditive( frame.HdrBuffer.Surface, frame.LightAccumulator );
 
 				device.ResetStates();
 			}
@@ -323,7 +324,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="?"></param>
-		internal void RenderShadows ( ViewLayerHdr viewLayer )
+		internal void RenderShadows ( ViewLayerHdr viewLayer, LightSet lightSet )
 		{
 			var camera		=	viewLayer.Camera;
 			var instances	=	viewLayer.Instances;
@@ -372,15 +373,17 @@ namespace Fusion.Engine.Graphics {
 			//
 			device.Clear( spotDepth.Surface, 1, 0 );
 			device.Clear( spotColor.Surface, Color4.White );
+			int index = 0;
 
-			for (int i=0; i<spotLights.Count; i++) {
+			foreach ( var spot in lightSet.SpotLights ) {
 
-				var spot	= spotLights[i];
 				var smSize	= Config.SpotShadowSize;
 				var context = new ShadowContext();
-				var dx      = i % 4;
-				var dy		= i / 4;
+				var dx      = index % 4;
+				var dy		= index / 4;
 				var far		= spot.Projection.GetFarPlaneDistance();
+
+				index++;
 
 				context.ShadowView			=	spot.SpotView;
 				context.ShadowProjection	=	spot.Projection;
@@ -457,7 +460,7 @@ namespace Fusion.Engine.Graphics {
 
 			int index = 0;
 
-			foreach ( var light in omniLights ) {
+			foreach ( var light in lightSet.OmniLights ) {
 
 				Vector4 min, max;
 
@@ -508,12 +511,13 @@ namespace Fusion.Engine.Graphics {
 							.ToArray();
 
 			int index	=	0;
+			int spotId	=	0;
 
 			
 			foreach ( var spot in lightSet.SpotLights ) {
 
-				var spotId		=	spotLights.IndexOf( spot );
 				var shadowSO	=	new Vector4( 0.125f, -0.125f, 0.25f*(spotId % 4)+0.125f, 0.25f*(spotId / 4)+0.125f );
+				spotId ++;
 				
 				var maskRect	=	lightSet.SpotAtlas.GetSubImageRectangle( spot.MaskName );
 				var maskX		=	maskRect.Left   / (float)lightSet.SpotAtlas.Texture.Width;
@@ -548,6 +552,7 @@ namespace Fusion.Engine.Graphics {
 					spotLightData[index].ShadowScaleOffset	=	shadowSO;
 					index ++;
 				}
+
 			}
 
 			spotLightBuffer.SetData( spotLightData );

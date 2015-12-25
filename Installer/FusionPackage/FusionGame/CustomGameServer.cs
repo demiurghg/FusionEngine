@@ -19,7 +19,7 @@ namespace $safeprojectname$ {
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public $safeprojectname$GameServer ( GameEngine gameEngine ) : base(gameEngine)
+		public $safeprojectname$GameServer ( Game game ) : base(game)
 		{
 		}
 
@@ -35,7 +35,7 @@ namespace $safeprojectname$ {
 
 
 		/// <summary>
-		/// Starts server with given map/level.
+		/// Method is invoked when server started.
 		/// </summary>
 		/// <param name="map"></param>
 		public override void LoadContent ( string map )
@@ -46,7 +46,8 @@ namespace $safeprojectname$ {
 
 
 		/// <summary>
-		/// Kills server
+		/// Method is invoked when server shuts down.
+		/// This method will be also called when server crashes.
 		/// </summary>
 		public override void UnloadContent ()
 		{
@@ -58,9 +59,9 @@ namespace $safeprojectname$ {
 
 		/// <summary>
 		/// Runs one step of server-side world simulation.
-		/// Do not close the stream.
 		/// </summary>
 		/// <param name="gameTime"></param>
+		/// <returns>Snapshot bytes</returns>
 		public override byte[] Update ( GameTime gameTime )
 		{
 			Thread.Sleep(10);
@@ -97,7 +98,9 @@ namespace $safeprojectname$ {
 
 
 		/// <summary>
-		/// Gets server info.
+		/// Gets server information that required for client to load the game.
+		/// This information usually contains map name and game type.
+		/// This information is also used for discovery response.
 		/// </summary>
 		/// <returns></returns>
 		public override string ServerInfo ()

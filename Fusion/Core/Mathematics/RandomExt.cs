@@ -27,6 +27,22 @@ namespace Fusion.Core.Mathematics
     /// </summary>
     public static class RandomExt
     {
+		/// <summary>
+        /// Gets random <see cref="Vector3"/> on sphere.
+		/// </summary>
+		/// <param name="random">Current <see cref="System.Random"/>.</param>
+		/// <param name="radius">Sphere radius</param>
+		/// <returns></returns>
+		public static Vector3 NextVector3OnSphere ( this Random random )
+		{
+			Vector3 r;
+			do {
+				r = NextVector3( random, -Vector3.One, Vector3.One );
+			} while ( r.Length()>1 || r.Length()<0.1f );
+			return r.Normalized();
+		}
+
+
         /// <summary>
         /// Gets random <c>float</c> number within range.
         /// </summary>

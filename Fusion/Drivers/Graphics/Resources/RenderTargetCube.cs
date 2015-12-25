@@ -37,6 +37,13 @@ namespace Fusion.Drivers.Graphics {
 		RenderTargetSurface[,]	surfaces;
 			
 
+		/// <summary>
+		///	Gets topmost miplevel as shader resource.
+		/// </summary>
+		public ShaderResource UpperMipLevel { get { return upperMipLevelSrv; } }
+
+		ShaderResource	upperMipLevelSrv;
+
 
 		/// <summary>
 		/// Creates render target
@@ -125,6 +132,17 @@ namespace Fusion.Drivers.Graphics {
 			texCube	=	new D3D.Texture2D( device.Device, texDesc );
 			SRV		=	new ShaderResourceView( device.Device, texCube );
 
+
+			//
+			//	Top mipmap level :
+			//
+			var srvDesc = new ShaderResourceViewDescription();
+				srvDesc.TextureCube.MipLevels		=	1;
+				srvDesc.TextureCube.MostDetailedMip	=	0;
+				srvDesc.Format		=	Converter.Convert( format );
+				srvDesc.Dimension	=	ShaderResourceViewDimension.TextureCube;
+
+			upperMipLevelSrv	=	new ShaderResource( device, new ShaderResourceView(device.Device, texCube, srvDesc), size, size, 1 );
 
 
 

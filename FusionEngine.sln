@@ -35,6 +35,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGame2", "Samples\TestGa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneDemo1", "Samples\SceneDemo1\SceneDemo1.csproj", "{37E88AE1-A152-49EA-B00C-45533776989D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B95926E1-3B22-4FFF-A3AD-4212DE69E0C6}"
+	ProjectSection(SolutionItems) = preProject
+		Performance1.psess = Performance1.psess
+		Performance2.psess = Performance2.psess
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -138,5 +144,8 @@ Global
 		{EBDD2FD0-EC00-45D9-B38B-C7E674016FAB} = {2222BAA4-08B2-43BF-B61D-6FF6453C7D73}
 		{D96959A0-C84A-4843-94CD-07371ACB752A} = {53ABA7DF-B4AE-4E9B-A616-AB3BB439283E}
 		{37E88AE1-A152-49EA-B00C-45533776989D} = {53ABA7DF-B4AE-4E9B-A616-AB3BB439283E}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

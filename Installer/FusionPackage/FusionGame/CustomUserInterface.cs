@@ -18,7 +18,7 @@ using Fusion.Engine.Server;
 namespace $safeprojectname$ {
 
 
-	class $safeprojectname$GameInterface : Fusion.Engine.Common.GameInterface {
+	class $safeprojectname$UserInterface : UserInterface {
 
 		[GameModule("Console", "con", InitOrder.Before)]
 		public GameConsole Console { get { return console; } }
@@ -28,26 +28,26 @@ namespace $safeprojectname$ {
 
 
 		/// <summary>
-		/// Ctor
+		/// Creates instance of $safeprojectname$UserInterface
 		/// </summary>
 		/// <param name="engine"></param>
-		public $safeprojectname$GameInterface ( GameEngine gameEngine ) : base(gameEngine)
+		public $safeprojectname$UserInterface ( Game game ) : base(game)
 		{
-			console		=	new GameConsole( gameEngine, "conchars", "conback");
+			console		=	new GameConsole( game, "conchars", "conback");
 		}
 
 
 
 		/// <summary>
-		/// 
+		/// Called after the $safeprojectname$UserInterface is created,
 		/// </summary>
 		public override void Initialize ()
 		{
 			//	create view layer :
-			master		=	new ViewLayer(GameEngine);
+			master		=	new ViewLayer(Game);
 
 			//	add view to layer to scene :
-			GameEngine.GraphicsEngine.AddLayer( master );
+			Game.RenderSystem.AddLayer( master );
 
 			//	add console sprite layer to master view layer :
 			master.SpriteLayers.Add( console.ConsoleSpriteLayer );
@@ -56,7 +56,7 @@ namespace $safeprojectname$ {
 
 
 		/// <summary>
-		/// 
+		/// Overloaded. Immediately releases the unmanaged resources used by this object. 
 		/// </summary>
 		protected override void Dispose ( bool disposing )
 		{
@@ -69,7 +69,7 @@ namespace $safeprojectname$ {
 
 
 		/// <summary>
-		/// Updates internal state of interface.
+		/// Called when the game has determined that UI logic needs to be processed.
 		/// </summary>
 		/// <param name="gameTime"></param>
 		public override void Update ( GameTime gameTime )
@@ -81,53 +81,23 @@ namespace $safeprojectname$ {
 
 
 		/// <summary>
-		/// 
+		/// Called when user closes game window using Close button or Alt+F4.
+		/// </summary>
+		public override void RequestToExit ()
+		{
+			Game.Exit();
+		}
+
+
+
+		/// <summary>
+		/// Called when discovery respone arrives.
 		/// </summary>
 		/// <param name="endPoint"></param>
 		/// <param name="serverInfo"></param>
 		public override void DiscoveryResponse ( System.Net.IPEndPoint endPoint, string serverInfo )
 		{
 			Log.Message("DISCOVERY : {0} - {1}", endPoint.ToString(), serverInfo );
-		}
-
-
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public override void ShowMessage ( string message )
-		{
-		}
-
-
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public override void ShowWarning ( string message )
-		{
-		}
-
-
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public override void ShowError ( string message )
-		{
-		}
-
-
-
-		/// <summary>
-		/// Shows message to user.
-		/// </summary>
-		/// <param name="message"></param>
-		public override void ChatMessage ( string message )
-		{
 		}
 	}
 }

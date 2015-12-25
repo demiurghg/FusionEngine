@@ -2,6 +2,8 @@
 using Fusion.Core.Mathematics;
 using Fusion.Engine.Graphics.GIS.GlobeMath;
 
+#pragma warning disable 0414
+
 namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections
 {
 	public class MercatorProjection : MapProjection

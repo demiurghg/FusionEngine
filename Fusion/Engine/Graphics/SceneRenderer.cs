@@ -156,7 +156,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="diffuse"></param>
 		/// <param name="specular"></param>
 		/// <param name="normals"></param>
-		internal void RenderGBuffer ( StereoEye stereoEye, ViewLayerHdr viewLayer )
+		internal void RenderGBuffer ( StereoEye stereoEye, Camera camera, HdrFrame frame, ViewLayerHdr viewLayer )
 		{		
 			using ( new PixEvent("RenderGBuffer") ) {
 				if (surfaceShader==null) {	
@@ -165,17 +165,17 @@ namespace Fusion.Engine.Graphics {
 
 				var device		=	Game.GraphicsDevice;
 
-				var view			=	viewLayer.Camera.GetViewMatrix( stereoEye );
-				var projection		=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
-				var viewPosition	=	viewLayer.Camera.GetCameraPosition4( stereoEye );
+				var view			=	camera.GetViewMatrix( stereoEye );
+				var projection		=	camera.GetProjectionMatrix( stereoEye );
+				var viewPosition	=	camera.GetCameraPosition4( stereoEye );
 
 				var cbData		=	new CBSurfaceData();
 
-				var hdr			=	viewLayer.HdrBuffer.Surface;
-				var depth		=	viewLayer.DepthBuffer.Surface;
-				var diffuse		=	viewLayer.DiffuseBuffer.Surface;
-				var specular	=	viewLayer.SpecularBuffer.Surface;
-				var normals		=	viewLayer.NormalMapBuffer.Surface;
+				var hdr			=	frame.HdrBuffer.Surface;
+				var depth		=	frame.DepthBuffer.Surface;
+				var diffuse		=	frame.DiffuseBuffer.Surface;
+				var specular	=	frame.SpecularBuffer.Surface;
+				var normals		=	frame.NormalMapBuffer.Surface;
 
 				device.ResetStates();
 

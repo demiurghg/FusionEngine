@@ -13,6 +13,7 @@ using Fusion.Engine.Common;
 using Fusion.Engine.Graphics.GIS.DataSystem.MapSources;
 using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
 
+#pragma warning disable 0414
 
 namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 {

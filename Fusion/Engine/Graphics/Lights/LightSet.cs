@@ -32,6 +32,16 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// Collection of environment lights.
+		/// </summary>
+		public ICollection<EnvLight> EnvLights {
+			get {
+				return envLights;	
+			}
+		}
+
+
+		/// <summary>
 		/// Due to technical limitations only one source of direct 
 		/// light is avaiable foreach LightSet.
 		/// </summary>
@@ -62,6 +72,7 @@ namespace Fusion.Engine.Graphics {
 		DirectLight		directLight = new DirectLight();
 		List<OmniLight> omniLights = new List<OmniLight>();
 		List<SpotLight> spotLights = new List<SpotLight>();
+		List<EnvLight> envLights  = new List<EnvLight>();
 
 
 		/// <summary>
