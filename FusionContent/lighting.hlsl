@@ -50,6 +50,8 @@ float3	CookTorrance( float3 N, float3 V, float3 L, float3 I, float3 F, float rou
 			V	=	normalize(V);
 	float3	H	=	normalize(V+L);
 	
+	roughness = roughness * 0.85 + 0.15;
+	
 	float m = roughness * roughness;
 
 	//	to remove harsh edge on glazing angles :
@@ -181,6 +183,8 @@ void CSMain(
 	float4	specular  	=	GBufferSpecular .Load( location );
 	float4	normal	 	=	GBufferNormalMap.Load( location ) * 2 - 1;
 	float	depth 	 	=	GBufferDepth 	.Load( location ).r;
+	
+	normal.xyz			=	normalize(normal.xyz);
 
 	float4	projPos		=	float4( location.x/(float)width*2-1, location.y/(float)height*(-2)+1, depth, 1 );
 	//float4	projPos		=	float4( input.projPos.xy / input.projPos.w, depth, 1 );
@@ -206,7 +210,7 @@ void CSMain(
 	float Fc = pow( 1 - saturate(dot(viewDirN,normal)), 5 );
 	float3 F = (1 - Fc) * specular.rgb + Fc;
 
-	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 4).rgb * diffuse.rgb * 0;
+	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 7).rgb * diffuse.rgb * 1;
 	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), specular.w*7 ).rgb * specular.rgb;//*/
 	//totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), sqrt(specular.w)*6 ).rgb * specular.rgb;//*/
 
@@ -232,7 +236,7 @@ void CSMain(
 	//-----------------------------------------------------
 	//	OMNI lights :
 	//-----------------------------------------------------
-#if 0	
+#if 1	
 	#ifdef OMNI
 		uint lightCount = OMNI_LIGHT_COUNT;
 		

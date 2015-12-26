@@ -162,6 +162,7 @@ LAYERPROPS ReadLayerUV ( int id, float2 uv, float3x3 tbnMatrix )
 }
 
 
+
 #ifdef GBUFFER
 GBuffer PSMain( PSInput input )
 {
@@ -195,11 +196,12 @@ GBuffer PSMain( PSInput input )
 	#endif
 	
 	float3 worldNormal 	= 	normalize( mul( layer.Normal, tbnToWorld ) );
+	//FitNormalToGBuffer(worldNormal);
 
 	output.hdr		=	float4( layer.Emission, 0 );
 	output.diffuse	=	float4( layer.Diffuse, 1 );
 	output.specular =	float4( layer.Specular, layer.Roughness );
-	output.normals	=	float4( worldNormal * 0.5 + 0.5, 1 );
+	output.normals	=	float4( worldNormal * 0.5f + 0.5f, 1 );
 	
 	return output;
 }

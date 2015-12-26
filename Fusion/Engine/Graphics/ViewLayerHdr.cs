@@ -274,6 +274,10 @@ namespace Fusion.Engine.Graphics {
 		{
 			var sw = new Stopwatch();
 
+			if (!Game.Keyboard.IsKeyDown(Input.Keys.R)) {
+				return;
+			}
+
 			sw.Start();
 			using (new PixEvent("Capture Radiance")) {
 
