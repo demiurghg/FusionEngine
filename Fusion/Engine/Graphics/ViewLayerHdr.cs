@@ -276,7 +276,7 @@ namespace Fusion.Engine.Graphics {
 
 			if (!Game.Keyboard.IsKeyDown(Input.Keys.R)) {
 				return;
-			}
+			} //*/
 
 			sw.Start();
 			using (new PixEvent("Capture Radiance")) {
@@ -302,7 +302,7 @@ namespace Fusion.Engine.Graphics {
 						//	render lights :
 						rs.LightRenderer.RenderLighting( StereoEye.Mono, camera, radianceFrame, this, Game.RenderSystem.WhiteTexture, rs.Sky.SkyCube );
 
-						rs.Filter.StretchRect( Radiance.GetSurface( 0, (CubeFace)i ), radianceFrame.HdrBuffer, SamplerState.LinearClamp, null, true );
+						rs.Filter.StretchRect4x4( Radiance.GetSurface( 0, (CubeFace)i ), radianceFrame.HdrBuffer, SamplerState.LinearClamp, true );
 
 						rs.Filter.PrefilterEnvMap( Radiance );
 						//Radiance.BuildMipmaps();

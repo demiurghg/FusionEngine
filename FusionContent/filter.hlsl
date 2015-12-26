@@ -28,10 +28,6 @@ float4 PSMain(float4 position : SV_POSITION) : SV_Target
 //-------------------------------------------------------------------------------
 #ifdef STRETCH_RECT
 
-cbuffer CBuffer : register(b0) {
-	float4 sourceRect : register(c0);  // x,y,w,h
-};
-
 SamplerState	SamplerLinearClamp : register(s0);
 Texture2D Source : register(t0);
 
@@ -49,7 +45,6 @@ PS_IN VSMain(uint VertexID : SV_VertexID)
 	output.position.zw = 1.0f;
 
 	output.uv 	=	output.position.xy * float2(0.5f, -0.5f) + 0.5f;
-	output.uv 	*=	sourceRect.zw;
 
 	#ifdef TO_CUBE_FACE
 		output.uv 	= 	output.position.xy * float2(-0.5f, -0.5f) + 0.5f;
@@ -328,13 +323,13 @@ float4 PSMain(PS_IN input) : SV_Target
 	float3 tangentY = cross( N, tangentX );
 	
 	//	this "magic" code enlarge sampling kernel for each miplevel.
-	float dxy	=	Roughness.y * (1+ (Roughness - 0.14286f)*6);
+	float dxy	=	Roughness.y;// * (1+ (Roughness - 0.14286f)*6);
 	
 	//	11 steps is perfect number of steps to pick every texel 
 	//	of cubemap with initial size 256x256 and get all important 
 	//	samples of Beckmann distrubution.
-	for (float x=-6; x<=6; x+=1 ) {
-		for (float y=-6; y<=6; y+=1 ) {
+	for (float x=-5; x<=5; x+=1 ) {
+		for (float y=-5; y<=5; y+=1 ) {
 			float3 H = normalize(N + tangentX * x * dxy + tangentY * y * dxy);
 			float d = Beckmann(H,N,Roughness.x);
 			weight += d;

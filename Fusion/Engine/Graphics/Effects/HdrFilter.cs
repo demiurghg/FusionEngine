@@ -120,13 +120,13 @@ namespace Fusion.Engine.Graphics {
 			//
 			//	Rough downsampling of source HDR-image :
 			//
-			filter.StretchRect( averageLum.Surface, hdrImage, SamplerState.PointClamp, null );
+			filter.StretchRect( averageLum.Surface, hdrImage, SamplerState.PointClamp );
 			averageLum.BuildMipmaps();
 
 			//
 			//	Make bloom :
 			//
-			filter.StretchRect( viewLayer.Bloom0.Surface, hdrImage, SamplerState.LinearClamp, null );
+			filter.StretchRect( viewLayer.Bloom0.Surface, hdrImage, SamplerState.LinearClamp );
 			viewLayer.Bloom0.BuildMipmaps();
 
 			filter.GaussBlur( viewLayer.Bloom0, viewLayer.Bloom1, settings.GaussBlurSigma, 0 );

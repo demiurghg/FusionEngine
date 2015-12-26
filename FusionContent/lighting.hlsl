@@ -50,7 +50,9 @@ float3	CookTorrance( float3 N, float3 V, float3 L, float3 I, float3 F, float rou
 			V	=	normalize(V);
 	float3	H	=	normalize(V+L);
 	
-	roughness = roughness * 0.85 + 0.15;
+	//	increase slightly low roughness value to 
+	//	avoid point light flickering on shiny surfaces.
+	roughness = roughness * 0.9f + 0.1f;
 	
 	float m = roughness * roughness;
 
@@ -211,7 +213,7 @@ void CSMain(
 	float3 F = (1 - Fc) * specular.rgb + Fc;
 
 	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 7).rgb * diffuse.rgb * 1;
-	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), specular.w*7 ).rgb * specular.rgb;//*/
+	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), specular.w*6 ).rgb * specular.rgb;//*/
 	//totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), sqrt(specular.w)*6 ).rgb * specular.rgb;//*/
 
 	//totalLight.xyz	=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 4 ).rgb;
@@ -236,7 +238,7 @@ void CSMain(
 	//-----------------------------------------------------
 	//	OMNI lights :
 	//-----------------------------------------------------
-#if 1	
+#if 0	
 	#ifdef OMNI
 		uint lightCount = OMNI_LIGHT_COUNT;
 		

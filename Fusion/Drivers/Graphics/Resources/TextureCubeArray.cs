@@ -63,5 +63,11 @@ namespace Fusion.Drivers.Graphics.Resources {
 			SRV				=	new ShaderResourceView( device.Device, texCubeArray );
 		}
 
+
+		public void UpdateFromRenderTargetCube ( RenderTargetCube rtCube )
+		{
+			
+		}
+
 	}
 }

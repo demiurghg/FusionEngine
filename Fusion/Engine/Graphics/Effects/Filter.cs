@@ -166,7 +166,7 @@ namespace Fusion.Engine.Graphics
 		/// <param name="src"></param>
 		/// <param name="filter"></param>
 		/// <param name="rect"></param>
-		public void StretchRect( RenderTargetSurface dst, ShaderResource src, SamplerState filter = null, Rectangle? sourceRectangle = null, bool flipToCubeFace = false )
+		public void StretchRect( RenderTargetSurface dst, ShaderResource src, SamplerState filter = null, bool flipToCubeFace = false )
 		{
 			SetDefaultRenderStates();
 
@@ -174,16 +174,6 @@ namespace Fusion.Engine.Graphics
 
 				SetViewport(dst);
 				rs.SetTargets( null, dst );
-
-				float srcW = src.Width;
-				float srcH = src.Height;
-
-				if (sourceRectangle.HasValue) {
-					var rect = sourceRectangle.Value;
-					sourceRectCB.SetData( new Vector4( 0, 0, rect.Width/srcW, rect.Height/srcH ) );
-				} else {
-					sourceRectCB.SetData( new Vector4( 0,0, 1, 1 ) );
-				}
 
 				if (flipToCubeFace) {
 					rs.PipelineState		=	factory[ (int)(ShaderFlags.STRETCH_RECT|ShaderFlags.TO_CUBE_FACE) ];
@@ -202,17 +192,20 @@ namespace Fusion.Engine.Graphics
 
 
 
-		public void StretchRect4x4( RenderTargetSurface dst, RenderTarget2D src, SamplerState filter = null )
+		public void StretchRect4x4( RenderTargetSurface dst, RenderTarget2D src, SamplerState filter = null, bool flipToCubeFace = false )
 		{
 			SetDefaultRenderStates();
-
 
 			using( new PixEvent("StretchRect4x4") ) {
 
 				rs.SetTargets( null, dst );
 				SetViewport(dst);
 				
-				rs.PipelineState			=	factory[ (int)ShaderFlags.DOWNSAMPLE_2_4x4 ];
+				if (flipToCubeFace) {
+					rs.PipelineState		=	factory[ (int)(ShaderFlags.DOWNSAMPLE_2_4x4|ShaderFlags.TO_CUBE_FACE) ];
+				} else {
+					rs.PipelineState		=	factory[ (int)ShaderFlags.DOWNSAMPLE_2_4x4 ];
+				}
 				rs.VertexShaderResources[0] =	src;
 				rs.PixelShaderResources[0]	=	src;
 				rs.PixelShaderSamplers[0]	=	filter ?? SamplerState.LinearPointClamp;

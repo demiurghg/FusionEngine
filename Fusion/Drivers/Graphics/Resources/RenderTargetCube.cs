@@ -8,6 +8,7 @@ using System.Collections.Specialized;
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
+using Fusion.Core.Mathematics;
 using D3D = SharpDX.Direct3D11;
 using DXGI = SharpDX.DXGI;
 
@@ -173,6 +174,8 @@ namespace Fusion.Drivers.Graphics {
 					int subResId	=	Resource.CalculateSubResourceIndex( mip, face, MipCount );
 
 					surfaces[mip,face]	=	new RenderTargetSurface( rtv, null, texCube, subResId, format, Width, Height, samples );
+
+					GraphicsDevice.Clear( surfaces[mip,face], Color4.Zero );
 				}
 			}
 		}
