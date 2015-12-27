@@ -105,6 +105,12 @@ namespace Fusion.Engine.Server {
 			netConfig.Port		=	Game.Network.Config.Port;
 			netConfig.MaximumConnections	=	32;
 			netConfig.UnreliableSizeBehaviour = NetUnreliableSizeBehaviour.NormalFragmentation;
+			
+			if (Debugger.IsAttached) {
+				netConfig.ConnectionTimeout		=	float.MaxValue;	
+				Log.Message("SV: Debugger is attached: ConnectionTimeout = {0} sec", netConfig.ConnectionTimeout);
+			}
+
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryRequest );
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryResponse );
@@ -170,6 +176,7 @@ namespace Fusion.Engine.Server {
 
 					//	crash test for server :
 					CrashServer.CrashTest();
+					FreezeServer.FreezeTest();
 				}
 
 				foreach ( var conn in server.Connections ) {

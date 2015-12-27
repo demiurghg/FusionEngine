@@ -11,6 +11,7 @@ using Fusion.Engine.Common;
 using Lidgren.Network;
 using Fusion.Engine.Server;
 using Fusion.Engine.Common.Commands;
+using System.Diagnostics;
 
 
 namespace Fusion.Engine.Client {
@@ -46,6 +47,10 @@ namespace Fusion.Engine.Client {
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryRequest );
 			netConfig.UnreliableSizeBehaviour = NetUnreliableSizeBehaviour.NormalFragmentation;
 
+			if (Debugger.IsAttached) {
+				netConfig.ConnectionTimeout		=	float.MaxValue;	
+				Log.Message("CL: Debugger is attached: ConnectionTimeout = {0} sec", netConfig.ConnectionTimeout);
+			}
 
 			client	=	new NetClient( netConfig );
 		}
@@ -114,6 +119,7 @@ namespace Fusion.Engine.Client {
 			//	Crash test :
 			//
 			CrashClient.CrashTest();
+			FreezeClient.FreezeTest();
 
 			//
 			//	Execute command :

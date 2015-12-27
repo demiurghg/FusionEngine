@@ -155,6 +155,8 @@ RWTexture2D<float4> hdrTexture : register(u0);
 
 //#ifdef __COMPUTE_SHADER__
 
+//	warning X3584: race condition writing to shared memory detected, note that threads 
+//	will be writing the same value, but performance may be diminished due to contention.
 groupshared uint minDepthInt = 0xFFFFFFFF; 
 groupshared uint maxDepthInt = 0;
 groupshared uint visibleLightCount = 0; 
@@ -209,7 +211,7 @@ void CSMain(
 		totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, Params.DirectLightIntensity.rgb, specular.rgb, specular.a );
 	#endif
 	
-	float Fc = pow( 1 - saturate(dot(viewDirN,normal)), 5 );
+	float Fc = pow( 1 - saturate(dot(viewDirN,normal.xyz)), 5 );
 	float3 F = (1 - Fc) * specular.rgb + Fc;
 
 	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 7).rgb * diffuse.rgb * 1;
@@ -238,7 +240,7 @@ void CSMain(
 	//-----------------------------------------------------
 	//	OMNI lights :
 	//-----------------------------------------------------
-#if 0	
+#if 1	
 	#ifdef OMNI
 		uint lightCount = OMNI_LIGHT_COUNT;
 		

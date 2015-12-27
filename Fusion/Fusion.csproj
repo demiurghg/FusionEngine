@@ -207,6 +207,8 @@
     <Compile Include="Engine\Client\GameClient.Loading.cs" />
     <Compile Include="Engine\Client\GameClient.Connecting.cs" />
     <Compile Include="Engine\Client\GameClient.State.cs" />
+    <Compile Include="Engine\Common\Commands\FreezeClient.cs" />
+    <Compile Include="Engine\Common\Commands\FreezeServer.cs" />
     <Compile Include="Engine\Common\Commands\CrashClient.cs" />
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
     <Compile Include="Engine\Common\GameInterface.Internal.cs" />
