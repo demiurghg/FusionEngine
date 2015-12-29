@@ -33,6 +33,14 @@ namespace Fusion.Drivers.Graphics {
 		/// </summary>
 		public ColorFormat	Format { get; private set; }
 
+		/// <summary>
+		/// Texture resource
+		/// </summary>
+		internal D3D.Texture2D TextureResource {
+			get {
+				return texCube;
+			}
+		}
 
 		D3D.Texture2D			texCube;
 		RenderTargetSurface[,]	surfaces;

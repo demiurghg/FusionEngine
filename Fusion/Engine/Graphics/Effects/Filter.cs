@@ -54,9 +54,6 @@ namespace Fusion.Engine.Graphics
 		}
 
 
-		Vector3[] envMapSamples;
-
-
 		Ubershader		shaders;
 		StateFactory	factory;
 		ConstantBuffer	gaussWeightsCB;
@@ -68,11 +65,6 @@ namespace Fusion.Engine.Graphics
 		public Filter( Game Game ) : base( Game )
 		{
 			rs = Game.GraphicsDevice;
-
-			var rand		=	new Random();
-			envMapSamples	=	Enumerable.Range( 0, RenderSystemConfig.EnvMapFilterSampleCount )
-								.Select( i => rand.NextVector3OnSphere() )
-								.ToArray();
 		}
 
 

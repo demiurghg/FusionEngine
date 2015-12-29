@@ -18,10 +18,12 @@ using Fusion.Core;
 using Fusion.Engine.Common;
 
 
-namespace Fusion.Drivers.Graphics.Resources {
-	class TextureCubeArray : ShaderResource {
+namespace Fusion.Drivers.Graphics {
+	internal class TextureCubeArray : ShaderResource {
 
-		D3D.Texture2D	texCubeArray;
+		internal readonly D3D.Texture2D	texCubeArray;
+
+		public readonly int MipCount;
 
 
 		/// <summary>
@@ -41,8 +43,7 @@ namespace Fusion.Drivers.Graphics.Resources {
 			this.Width		=	size;
 			this.Depth		=	1;
 			this.Height		=	size;
-			//this.Format		=	format;
-			//this.mipCount	=	mips ? ShaderResource.CalculateMipLevels(Width,Height) : 1;
+			this.MipCount	=	mips ? ShaderResource.CalculateMipLevels(Width,Height) : 1;
 
 			var texDesc = new Texture2DDescription();
 
@@ -64,9 +65,33 @@ namespace Fusion.Drivers.Graphics.Resources {
 		}
 
 
-		public void UpdateFromRenderTargetCube ( RenderTargetCube rtCube )
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="rtCube"></param>
+		public void CopyFromRenderTargetCube ( int index, RenderTargetCube rtCube )
 		{
+			if (rtCube.MipCount!=this.MipCount) {
+				throw new GraphicsException("CopyFromRenderTargetCube: source and destination have different mip count");
+			}
+
+			if (rtCube.Width!=this.Width) {
+				throw new GraphicsException("CopyFromRenderTargetCube: source and destination have different width");
+			}
+			if (rtCube.Height!=this.Height) {
+				throw new GraphicsException("CopyFromRenderTargetCube: source and destination have different height");
+			}
+
+			int subResourceCount = 6 * rtCube.MipCount;
 			
+			for (int i=0; i<subResourceCount; i++) {
+				
+				int srcIndex = i;
+				int dstIndex = i + subResourceCount * index;
+
+				GraphicsDevice.DeviceContext.CopySubresourceRegion( rtCube.TextureResource, srcIndex, null, texCubeArray, dstIndex );
+			}
 		}
 
 	}

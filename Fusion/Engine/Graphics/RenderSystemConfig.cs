@@ -10,10 +10,14 @@ namespace Fusion.Engine.Graphics {
 
 	public class RenderSystemConfig {
 
-		internal static int EnvMapSize = 128;
-		internal static int EnvMapSpecularMipCount = 7;
-		internal static int EnvMapDiffuseMipLevel = 7;
-		internal static int EnvMapFilterSampleCount = 64;
+		public const int	EnvMapSize = 128;
+		public const int	EnvMapSpecularMipCount = 7;
+		public const int	EnvMapDiffuseMipLevel = 7;
+
+		public const int	MaxOmniLights	=	1024;
+		public const int	MaxEnvLights	=	256;
+		public const int	MaxSpotLights	=	16;
+
 
 		/// <summary>
 		/// Screen width

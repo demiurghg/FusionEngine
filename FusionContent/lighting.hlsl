@@ -1,14 +1,11 @@
-#define DIRECT 1
-#define OMNI 1
-#define SPOT 1
 
 #if 0
-//$ubershader	+DIRECT..SHOW_SPLITS +OMNI..SHOW_OMNI_LOAD +SPOT..SHOW_SPOT_LOAD
-$ubershader	+DIRECT +OMNI +SPOT
+$ubershader
 #endif
 
 static const float PI = 3.141592f;
 
+#pragma warning(disable:3557)
 
 /*-----------------------------------------------------------------------------
 	Lighting models :
@@ -118,6 +115,14 @@ struct OMNILIGHT {
 	float4	ExtentMax;
 };
 
+struct ENVLIGHT {
+	float4	Position;
+	float4	Intensity;
+	float4	ExtentMin;
+	float4	ExtentMax;
+	float4  InnerOuterRadius;
+};
+
 struct SPOTLIGHT {
 	float4x4	ViewProjection;
 	float4		PositionRadius;
@@ -131,18 +136,19 @@ struct SPOTLIGHT {
 
 SamplerState			SamplerNearestClamp : register(s0);
 SamplerState			SamplerLinearClamp : register(s1);
-SamplerComparisonState	ShadowSampler		: register(s2);
-Texture2D 		GBufferDiffuse 			: register(t0);
-Texture2D 		GBufferSpecular 		: register(t1);
-Texture2D 		GBufferNormalMap 		: register(t2);
-Texture2D 		GBufferDepth 			: register(t3);
-Texture2D 		CSMTexture	 			: register(t4);
-Texture2D 		SpotShadowMap 			: register(t5);
-Texture2D 		SpotMaskAtlas			: register(t6);
+SamplerComparisonState	ShadowSampler	: register(s2);
+Texture2D 			GBufferDiffuse 		: register(t0);
+Texture2D 			GBufferSpecular 	: register(t1);
+Texture2D 			GBufferNormalMap 	: register(t2);
+Texture2D 			GBufferDepth 		: register(t3);
+Texture2D 			CSMTexture	 		: register(t4);
+Texture2D 			SpotShadowMap 		: register(t5);
+Texture2D 			SpotMaskAtlas		: register(t6);
 StructuredBuffer<OMNILIGHT>	OmniLights	: register(t7);
 StructuredBuffer<SPOTLIGHT>	SpotLights	: register(t8);
-Texture2D 		OcclusionMap			: register(t9);
-TextureCube		EnvMap					: register(t10);
+StructuredBuffer<ENVLIGHT>	EnvLights	: register(t9);
+Texture2D 			OcclusionMap		: register(t10);
+TextureCubeArray	EnvMap				: register(t11);
 
 
 float3	ComputeCSM ( float4 worldPos );
@@ -167,6 +173,7 @@ groupshared uint visibleLightIndices[1024];
 #define BLOCK_SIZE_Y 16 
 #define OMNI_LIGHT_COUNT 1024
 #define SPOT_LIGHT_COUNT 256
+#define ENV_LIGHT_COUNT 256
 [numthreads(BLOCK_SIZE_X,BLOCK_SIZE_Y,1)] 
 void CSMain( 
 	uint3 groupId : SV_GroupID, 
@@ -198,27 +205,17 @@ void CSMain(
 	float3	viewDirN	=	normalize( viewDir );
 	
 	float4	totalLight	=	0;//hdrTexture[dispatchThreadId.xy];
-	//GroupMemoryBarrierWithGroupSync(); 
-	
 	
 	//-----------------------------------------------------
 	//	Direct light :
 	//-----------------------------------------------------
-	#ifdef DIRECT
-		float3 csmFactor	=	ComputeCSM( worldPos );
-		float3 lightDir		=	-normalize(Params.DirectLightDirection.xyz);
-		totalLight.xyz		+=	csmFactor.rgb * Lambert	( normal.xyz,  lightDir, Params.DirectLightIntensity.rgb, diffuse.rgb );
-		totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, Params.DirectLightIntensity.rgb, specular.rgb, specular.a );
-	#endif
+	float3 csmFactor	=	ComputeCSM( worldPos );
+	float3 lightDir		=	-normalize(Params.DirectLightDirection.xyz);
+	totalLight.xyz		+=	csmFactor.rgb * Lambert	( normal.xyz,  lightDir, Params.DirectLightIntensity.rgb, diffuse.rgb );
+	totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, Params.DirectLightIntensity.rgb, specular.rgb, specular.a );
 	
 	float Fc = pow( 1 - saturate(dot(viewDirN,normal.xyz)), 5 );
 	float3 F = (1 - Fc) * specular.rgb + Fc;
-
-	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 7).rgb * diffuse.rgb * 1;
-	totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), specular.w*6 ).rgb * specular.rgb;//*/
-	//totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, reflect(-viewDir, normal.xyz), sqrt(specular.w)*6 ).rgb * specular.rgb;//*/
-
-	//totalLight.xyz	=	EnvMap.SampleLevel( SamplerLinearClamp, normal.xyz, 4 ).rgb;
 	
 	//-----------------------------------------------------
 	//	Common tile-related stuff :
@@ -228,7 +225,6 @@ void CSMain(
 
 	uint depthInt = asuint(depth); 
 
-	//GroupMemoryBarrierWithGroupSync(); 
 	InterlockedMin(minDepthInt, depthInt); 
 	InterlockedMax(maxDepthInt, depthInt); 
 	GroupMemoryBarrierWithGroupSync(); 
@@ -238,10 +234,10 @@ void CSMain(
 	
 
 	//-----------------------------------------------------
-	//	OMNI lights :
+	//	OMNI LIGHTS :
 	//-----------------------------------------------------
-#if 1	
-	#ifdef OMNI
+	
+	if (0) {
 		uint lightCount = OMNI_LIGHT_COUNT;
 		
 		uint threadCount = BLOCK_SIZE_X * BLOCK_SIZE_Y; 
@@ -250,7 +246,6 @@ void CSMain(
 		for (uint passIt = 0; passIt < passCount; passIt++ ) {
 		
 			uint lightIndex = passIt * threadCount + groupIndex;
-			//uint lightIndex = BLOCK_SIZE * groupThreadId.y + groupThreadId.x;
 			
 			OMNILIGHT ol = OmniLights[lightIndex];
 			
@@ -287,16 +282,69 @@ void CSMain(
 				totalLight.rgb += falloff * CookTorrance( normal.xyz, viewDirN, lightDir, intensity, specular.rgb, specular.a );
 			}
 		#endif
-	#endif
+	}
 	
 	//-----------------------------------------------------
-	//	SPOT lights :
+	//	ENVIRONMENT LIGHTS / RADIANCE CACHE :
+	//-----------------------------------------------------
+	
+	GroupMemoryBarrierWithGroupSync();
+
+	if (1) {
+		uint lightCount = ENV_LIGHT_COUNT;
+		
+		uint threadCount = BLOCK_SIZE_X * BLOCK_SIZE_Y; 
+		uint passCount = (lightCount+threadCount-1) / threadCount;
+		
+		for (uint passIt = 0; passIt < passCount; passIt++ ) {
+		
+			uint lightIndex = passIt * threadCount + groupIndex;
+			
+			ENVLIGHT el = EnvLights[lightIndex];
+			
+			float3 tileMin = float3( groupId.x*BLOCK_SIZE_X,    		  groupId.y*BLOCK_SIZE_Y,    			minGroupDepth);
+			float3 tileMax = float3( groupId.x*BLOCK_SIZE_X+BLOCK_SIZE_X, groupId.y*BLOCK_SIZE_Y+BLOCK_SIZE_Y, 	maxGroupDepth);
+			
+			if ( el.ExtentMax.x > tileMin.x && tileMax.x > el.ExtentMin.x 
+			  && el.ExtentMax.y > tileMin.y && tileMax.y > el.ExtentMin.y 
+			  && el.ExtentMax.z > tileMin.z && tileMax.z > el.ExtentMin.z ) 
+			{
+				uint offset; 
+				InterlockedAdd(visibleLightCount, 1, offset); 
+				visibleLightIndices[offset] = lightIndex;
+			}
+		}
+		
+		GroupMemoryBarrierWithGroupSync();
+				
+		#if 0
+			totalLight.rgb += visibleLightCount * float3(0.5, 0.25, 0.125);
+		#else
+			for (uint i = 0; i < visibleLightCount; i++) {
+			
+				uint lightIndex = visibleLightIndices[i];
+				ENVLIGHT light = EnvLights[lightIndex];
+
+				float3 intensity = light.Intensity.rgb;
+				float3 position	 = light.Position.rgb;
+				float  radius    = light.InnerOuterRadius.y;
+				float3 lightDir	 = position - worldPos.xyz;
+				float  falloff	 = LinearFalloff( length(lightDir), radius );
+				
+				totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 7).rgb * diffuse.rgb * falloff;
+				totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * specular.rgb * falloff;//*/
+
+			}
+		#endif
+	}
+
+	//-----------------------------------------------------
+	//	SPOT LIGHTS :
 	//-----------------------------------------------------
 	
 	GroupMemoryBarrierWithGroupSync();
 	
 	if (0) {
-	#ifdef SPOT
 		uint lightCount = SPOT_LIGHT_COUNT;
 		uint lightIndex = groupIndex;
 		
@@ -337,12 +385,10 @@ void CSMain(
 				totalLight.rgb += shadow * falloff * CookTorrance( normal.xyz, viewDirN, lightDir, intensity, specular.rgb, specular.a );
 			}
 		#endif
-	#endif
 	}
-#endif
 
 	//-----------------------------------------------------
-	//	Ambient & Tonemapping :
+	//	Ambient :
 	//-----------------------------------------------------
 	float4 ssao	=	OcclusionMap.SampleLevel(SamplerLinearClamp, location.xy/float2(width,height), 0 );
 	
@@ -350,7 +396,6 @@ void CSMain(
 
 	hdrTexture[dispatchThreadId.xy] = totalLight;
 }
-//#endif
 
 
 /*-----------------------------------------------------------------------------------------------------

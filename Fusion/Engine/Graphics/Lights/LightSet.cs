@@ -72,7 +72,7 @@ namespace Fusion.Engine.Graphics {
 		DirectLight		directLight = new DirectLight();
 		List<OmniLight> omniLights = new List<OmniLight>();
 		List<SpotLight> spotLights = new List<SpotLight>();
-		List<EnvLight> envLights  = new List<EnvLight>();
+		List<EnvLight>  envLights  = new List<EnvLight>();
 
 
 		/// <summary>

@@ -61,6 +61,8 @@ namespace Fusion.Engine.Graphics {
 
 		internal RenderTargetCube Radiance;
 
+		internal TextureCubeArray RadianceCache;
+
 
 		/// <summary>
 		/// Creates ViewLayerHDR instance
@@ -95,7 +97,8 @@ namespace Fusion.Engine.Graphics {
 			radianceFrame.SpecularBuffer 	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  512,	512,	false, false );
 			radianceFrame.NormalMapBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2, 512,	512,	false, false );
 
-			Radiance	=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, RenderSystemConfig.EnvMapSize, true );
+			Radiance		=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, RenderSystemConfig.EnvMapSize, true );
+			RadianceCache	=	new TextureCubeArray( Game.GraphicsDevice, 128, RenderSystemConfig.MaxEnvLights, ColorFormat.Rgba16F, true );
 
 			Resize( width, height );
 		}
@@ -110,6 +113,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			if (disposing) {
 				SafeDispose( ref Radiance );
+				SafeDispose( ref RadianceCache );
 
 				SafeDispose( ref viewHdrFrame.HdrBuffer );
 				SafeDispose( ref viewHdrFrame.LightAccumulator );
@@ -284,6 +288,8 @@ namespace Fusion.Engine.Graphics {
 				var sun	=	SkySettings.SunGlowIntensity;
 				SkySettings.SunGlowIntensity = 0;
 
+				int index = 0;
+
 				foreach ( var envLight in LightSet.EnvLights ) {
 
 					for (int i=0; i<6; i++) {
@@ -302,12 +308,15 @@ namespace Fusion.Engine.Graphics {
 						//	render lights :
 						rs.LightRenderer.RenderLighting( StereoEye.Mono, camera, radianceFrame, this, Game.RenderSystem.WhiteTexture, rs.Sky.SkyCube );
 
+						//	downsample captured frame to cube face.
 						rs.Filter.StretchRect4x4( Radiance.GetSurface( 0, (CubeFace)i ), radianceFrame.HdrBuffer, SamplerState.LinearClamp, true );
 
+						//	prefilter cubemap :
 						rs.Filter.PrefilterEnvMap( Radiance );
-						//Radiance.BuildMipmaps();
 					}
 				
+					RadianceCache.CopyFromRenderTargetCube( index, Radiance );
+					index ++;
 				}
 				sw.Stop();
 	

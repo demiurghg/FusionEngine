@@ -15,8 +15,6 @@ namespace Fusion.Engine.Graphics {
 
 		const int	BlockSizeX		=	16;
 		const int	BlockSizeY		=	16;
-		const int	MaxOmniLights	=	1024;
-		const int	MaxSpotLights	=	16;
 
 		RenderSystem rs { get { return Game.RenderSystem; } }
 
@@ -40,8 +38,10 @@ namespace Fusion.Engine.Graphics {
 
 		OmniLightGPU[]		omniLightData;
 		SpotLightGPU[]		spotLightData;
+		EnvLightGPU[]		envLightData;
 		StructuredBuffer	omniLightBuffer	;
 		StructuredBuffer	spotLightBuffer	;
+		StructuredBuffer	envLightBuffer	;
 
 		public RenderTarget2D	CSMColor { get { return csmColor; } }
 		public DepthStencil2D	CSMDepth { get { return csmDepth; } }
@@ -53,13 +53,6 @@ namespace Fusion.Engine.Graphics {
 
 		enum LightingFlags {
 			NONE			=	0x0000,
-			DIRECT			=	0x0001,
-			OMNI			=	0x0002,
-			SPOT			=	0x0004,
-			SHOW_SPLITS		=	0x0008,
-			SHOW_OMNI_LOAD	=	0x0010,
-			SHOW_SPOT_LOAD	=	0x0020,
-			USE_UE4			=	0x0040,
 		}
 
 
@@ -89,6 +82,15 @@ namespace Fusion.Engine.Graphics {
 			public Vector4	Intensity;
 			public Vector4	ExtentMin;	// x,y, depth
 			public Vector4	ExtentMax;	// x,y, depth
+		}
+
+
+		struct EnvLightGPU {
+			public Vector4	Position;
+			public Vector4	Intensity;
+			public Vector4	ExtentMin;	// x,y, depth
+			public Vector4	ExtentMax;	// x,y, depth
+			public Vector4	InnerOuterRadius;
 		}
 
 
@@ -125,8 +127,9 @@ namespace Fusion.Engine.Graphics {
 		public override void Initialize ()
 		{
 			lightingCB		=	new ConstantBuffer( Game.GraphicsDevice, typeof(LightingParams) );
-			omniLightBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(OmniLightGPU), MaxOmniLights, StructuredBufferFlags.None );
-			spotLightBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(SpotLightGPU), MaxSpotLights, StructuredBufferFlags.None );
+			omniLightBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(OmniLightGPU), RenderSystemConfig.MaxOmniLights, StructuredBufferFlags.None );
+			spotLightBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(SpotLightGPU), RenderSystemConfig.MaxSpotLights, StructuredBufferFlags.None );
+			envLightBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(EnvLightGPU),  RenderSystemConfig.MaxEnvLights, StructuredBufferFlags.None );
 
 			CreateShadowMaps();
 
@@ -208,32 +211,6 @@ namespace Fusion.Engine.Graphics {
 
 				LightingFlags	flags = LightingFlags.NONE;
 
-				if (!Config.SkipDirectLight) {
-					flags	|=	LightingFlags.DIRECT;
-
-					if (Config.ShowCSMSplits) {
-						flags |= LightingFlags.SHOW_SPLITS;
-					}
-				}
-				if (!Config.SkipOmniLights) {
-					flags	|=	LightingFlags.OMNI;
-
-					if (Config.ShowOmniLightTileLoad) {
-						flags |= LightingFlags.SHOW_OMNI_LOAD;
-					}
-				}
-				if (!Config.SkipSpotLights) {
-					flags	|=	LightingFlags.SPOT;
-
-					if (Config.ShowSpotLightTileLoad) {
-						flags |= LightingFlags.SHOW_SPOT_LOAD;
-					}
-				}
-				if (Config.UseUE4LightingModel) {
-					flags |= LightingFlags.USE_UE4;
-				}
-
-
 				var width	=	frame.HdrBuffer.Width;
 				var height	=	frame.HdrBuffer.Height;
 
@@ -271,6 +248,7 @@ namespace Fusion.Engine.Graphics {
 
 					PrepareOmniLights( view, projection, viewLayer.LightSet );
 					PrepareSpotLights( view, projection, viewLayer.LightSet );
+					PrepareEnvLights(  view, projection, viewLayer.LightSet );
 
 					//
 					//	set states :
@@ -292,8 +270,9 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderResources[6]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
 					device.ComputeShaderResources[7]	=	omniLightBuffer;
 					device.ComputeShaderResources[8]	=	spotLightBuffer;
-					device.ComputeShaderResources[9]	=	occlusionMap.Srv;
-					device.ComputeShaderResources[10]	=	envLight;
+					device.ComputeShaderResources[9]	=	envLightBuffer;
+					device.ComputeShaderResources[10]	=	occlusionMap.Srv;
+					device.ComputeShaderResources[11]	=	viewLayer.RadianceCache;
 
 					device.ComputeShaderConstants[0]	=	lightingCB;
 
@@ -454,7 +433,7 @@ namespace Fusion.Engine.Graphics {
 			var vp = Game.GraphicsDevice.DisplayBounds;
 
 			omniLightData = Enumerable
-					.Range(0,MaxOmniLights)
+					.Range(0,RenderSystemConfig.MaxOmniLights)
 					.Select( i => new OmniLightGPU(){ PositionRadius = Vector4.Zero, Intensity = Vector4.Zero })
 					.ToArray();
 
@@ -498,6 +477,56 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
+		void PrepareEnvLights ( Matrix view, Matrix proj, LightSet lightSet )
+		{
+			var vp = Game.GraphicsDevice.DisplayBounds;
+
+			envLightData = Enumerable
+					.Range(0,RenderSystemConfig.MaxEnvLights)
+					.Select( i => new EnvLightGPU(){ Position = Vector4.Zero, Intensity = Vector4.Zero })
+					.ToArray();
+
+			int index = 0;
+
+			foreach ( var light in lightSet.EnvLights ) {
+
+				Vector4 min, max;
+
+				var visible = GetSphereExtent( view, proj, light.Position, vp, light.RadiusOuter, out min, out max );
+
+				/*if (!visible) {
+					continue;
+				} */
+
+				envLightData[index].Position		=	new Vector4( light.Position, light.RadiusOuter );
+				envLightData[index].Intensity		=	new Vector4( light.Intensity.ToVector3(), 1.0f / light.RadiusOuter / light.RadiusOuter );
+				envLightData[index].ExtentMax		=	max;
+				envLightData[index].ExtentMin		=	min;
+				envLightData[index].InnerOuterRadius=	new Vector4( light.RadiusInner, light.RadiusOuter, 0, 0 );
+
+				index++;
+			}
+
+			//#warning Debug omni-lights.
+			#if false
+			if (Config.ShowOmniLights) {
+				var dr	=	Game.GetService<DebugRender>();
+
+				foreach ( var light in omniLights ) {
+					dr.DrawPoint( light.Position, 1, Color.LightYellow );
+					dr.DrawSphere( light.Position, light.RadiusOuter, Color.LightYellow, 16 );
+				}
+			}
+			#endif
+
+			envLightBuffer.SetData( envLightData );
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
 		void PrepareSpotLights ( Matrix view, Matrix projection, LightSet lightSet )
 		{
 			var znear	=	projection.M34 * projection.M43 / projection.M33;
@@ -506,7 +535,7 @@ namespace Fusion.Engine.Graphics {
 			//var sb		=	Game.GetService<SpriteBatch>();
 
 			spotLightData	=	Enumerable
-							.Range(0, MaxSpotLights)
+							.Range(0, RenderSystemConfig.MaxSpotLights)
 							.Select( i => new SpotLightGPU() )
 							.ToArray();
 
