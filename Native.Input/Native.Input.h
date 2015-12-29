@@ -1,12 +1,11 @@
-// NativeInput.h
+// Native.Input.h
 
 #pragma once
-#include "stdafx.h"
-#include <windows.h>
+
 using namespace System;
 
-namespace Native {
-		namespace Input {
+namespace Native{
+	namespace Input {
 		//public struct Position
 		//{
 		//	public:
@@ -37,6 +36,8 @@ namespace Native {
 
 		public:
 			int getEvent();
+			int RegisteDevice(USHORT, USHORT, DWORD);
+
 
 
 		//int			TotalMouseScroll;

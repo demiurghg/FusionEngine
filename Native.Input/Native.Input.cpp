@@ -2,7 +2,9 @@
 
 #include "stdafx.h"
 #include <stdio.h>
-#include "NativeInput.h"
+#include <windows.h>
+#include "Native.Input.h"
+#pragma comment(lib, "user32.lib")
 
 void ErrorExit(LPSTR);
 void KeyEventProc(KEY_EVENT_RECORD);
@@ -11,6 +13,7 @@ void ResizeEventProc(WINDOW_BUFFER_SIZE_RECORD);
 
 HANDLE hStdin;
 DWORD fdwSaveOldMode;
+
 int Native::Input::InputDevice::getEvent()
 {
 	DWORD cNumRead, fdwMode, i;
@@ -72,6 +75,22 @@ int Native::Input::InputDevice::getEvent()
 
 	return 0;
 }
+
+int Native::Input::InputDevice::RegisteDevice(USHORT  usagePage, USHORT  usageId, DWORD flags)
+{
+	RAWINPUTDEVICE Rid;
+	Rid.usUsagePage = usagePage;
+	Rid.usUsage = usageId;
+	Rid.dwFlags = flags;
+	//Rid.hwndTarget = hWnd;
+    //RegisterRawInputDevices(rawInputDevicesRef, 1, Utilities.SizeOf<RawInputDevice>());
+	if (RegisterRawInputDevices(&Rid, 1, sizeof(Rid)) == FALSE) 
+	{
+		DWORD err = GetLastError();
+	}
+	return 0;
+}
+
 
 VOID ErrorExit(LPSTR lpszMessage)
 {

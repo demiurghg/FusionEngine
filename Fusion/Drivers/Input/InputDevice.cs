@@ -9,6 +9,8 @@ using Drawing = System.Drawing;
 using Forms = System.Windows.Forms;
 using System.Reflection;
 using System.ComponentModel;
+using System.Net;
+using System.Threading.Tasks;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 using Fusion.Engine.Common;
@@ -89,6 +91,19 @@ namespace Fusion.Drivers.Input {
 
 			[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
 			private static extern IntPtr LoadCursorFromFile(string path);
+
+		    public static void getType()
+		    {
+		        Native.Input.InputDevice a = new Native.Input.InputDevice();
+		        a.getEvent();
+		        Task.Factory.StartNew(() =>
+		        {
+		            while (true)
+		            {
+                        a.getEvent(); 
+		            }
+		        });
+		    }
 		}		
 
 
