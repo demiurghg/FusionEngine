@@ -110,7 +110,7 @@ namespace Fusion.Engine.Graphics {
 			GisLayers		=	new List<Gis.GisLayer>();
 			GlobeCamera		=	new GlobeCamera(Game);
 
-			GlobeCamera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
+			//GlobeCamera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
 		}
 
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
+using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.YandexMaps;
 using Fusion.Engine.Graphics.GIS.GlobeMath;
 
 namespace Fusion.Engine.Graphics.GIS
@@ -65,25 +66,18 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			var ms = CurrentMapSource;
 
-			var d = Math.Log((camera.CameraDistance - camera.EarthRadius) * 1000.0, 2.0);
-			double lod = 29.3 - d;
-
-
+			//var d = Math.Log((camera.CameraDistance - camera.EarthRadius) * 1000.0, 2.0);
+			double lod = 3;
+			
 			if (camera.Viewport.Width != 0) {
 				int closestZoom = 3;
 				double closestRadius = 100;
 
-				for (int zoom = 3; zoom < ms.MaxZoom; zoom++) {
-					double eps	= 256.0 / (1 << zoom);
-					double xx	= camera.Viewport.Height;
-					double dd	= camera.CameraDistance - camera.EarthRadius;
-					double eta	= DMathUtil.DegreesToRadians(camera.camFov);
+				for (int zoom = 3; zoom < ms.MaxZoom; zoom++)
+				{
+					var dis = GetLevelScreenSpaceError(zoom, camera.CameraDistance - camera.EarthRadius);
 
-					double p = (eps * xx) / (2 * dd * Math.Tan(eta));
-
-					var dis = Math.Abs(1.0 - p);
-
-					if (dis < closestRadius) {
+					if (dis < closestRadius && dis >= 0.0f) {
 						closestRadius	= dis;
 						closestZoom		= zoom;
 					}
@@ -137,7 +131,7 @@ namespace Fusion.Engine.Graphics.GIS
 			info[0].Length = 7;
 
 			var offNode = new Node { X = info[0].CentralNode.X + info[0].Offset, Y = info[0].CentralNode.Y + info[0].Offset, Z = info[0].CentralNode.Z };
-			GetChilds(offNode);
+			GetChilds(ref offNode);
 
 			info[1].CentralNode = offNode.Childs[0];
 			info[1].Offset = 3;
@@ -171,6 +165,19 @@ namespace Fusion.Engine.Graphics.GIS
 			tilesOld.Clear();
 		}
 
+		private double GetLevelScreenSpaceError(int zoom, double distance)
+		{
+			double eps	= 256.0/(1 << zoom);
+			double xx	= camera.Viewport.Height;
+			double dd	= distance;
+			double eta	= DMathUtil.DegreesToRadians(camera.camFov);
+
+			double p = (eps*xx)/(2*dd*Math.Tan(eta));
+
+			var dis = 1.0 - p;
+			return dis;
+		}
+
 
 		void QuadTreeTraversalDownTop(TraversalInfo[] info, Node node, int step)
 		{
@@ -183,7 +190,7 @@ namespace Fusion.Engine.Graphics.GIS
 				return;
 			}
 
-			GetChilds(node);
+			GetChilds(ref node);
 
 			int offX = node.X - info[step].CentralNode.X;
 			int offY = node.Y - info[step].CentralNode.Y;
@@ -220,6 +227,97 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
+		void DetermineTiles(int startZoomLevel)
+		{
+			////////////////////////////////////////////////////
+			if (updateTiles) {
+				foreach (var tile in tilesToRender) {
+					tilesFree.Add(tile.Key, tile.Value);
+				}
+				updateTiles = false;
+			} else {
+				foreach (var tile in tilesToRender) {
+					tilesOld.Add(tile.Key, tile.Value);
+				}
+			}
+
+			tilesToRender.Clear();
+			/////////////////////////////////////////////////////
+
+			var cameraPos = camera.FinalCamPosition;
+
+
+			Stack<Node> nodes = new Stack<Node>();
+			long numTiles = 1 << startZoomLevel;
+
+
+			//for(int i = 0; i < numTiles; i++)
+			//	for (int j = 0; j < numTiles; j++)
+			//		nodes.Push(new Node {
+			//			X = i,
+			//			Y = j,
+			//			Z = startZoomLevel
+			//		});
+
+			nodes.Push(new Node {
+				X = 3,
+				Y = 2,
+				Z = startZoomLevel
+			});
+
+			while (nodes.Any()) {
+				var node = nodes.Pop();
+
+				var nodePos = GetTileCenterPosition(node.X, node.Y, node.Z);
+				var dist	= (nodePos - cameraPos).Length();
+
+				Console.WriteLine();
+				Console.WriteLine(dist);
+				Console.WriteLine(GetLevelScreenSpaceError(node.Z, dist));
+
+				if (GetLevelScreenSpaceError(node.Z, dist) < 0.0) // Break this tile to pieces
+				{
+					GetChilds(ref node);
+
+					foreach (var child in node.Childs) {
+						nodes.Push(child);
+					}
+				}
+				else {
+					AddTileToRenderList(node.X, node.Y, node.Z);
+				}
+			}
+
+			foreach (var node in nodes) {
+				AddTileToRenderList(node.X, node.Y, node.Z);
+			}
+
+			/////////////////////////////////////////////////////
+			foreach (var tile in tilesOld) {
+				tilesFree.Add(tile.Key, tile.Value);
+			}
+			tilesOld.Clear();
+		}
+
+
+
+		DVector3 GetTileCenterPosition(int x, int y, int z)
+		{
+			long numTiles = 1 << z;
+
+			double x0 = ((double)(x + 0) / (double)numTiles);
+			double y0 = ((double)(y + 0) / (double)numTiles);
+			double x1 = ((double)(x + 1) / (double)numTiles);
+			double y1 = ((double)(y + 1) / (double)numTiles);
+
+			var xHalf = (x0 + x1)/2.0;
+			var yHalf = (y0 + y1)/2.0;
+
+			var lonLat = CurrentMapSource.Projection.TileToWorldPos(xHalf, yHalf);
+			return GeoHelper.SphericalToCartesian(lonLat, GeoHelper.EarthRadius);
+		}
+
+
 		void AddTileToRenderList(int x, int y, int zoom)
 		{
 			string key = GenerateKey(x, y, zoom);
@@ -242,15 +340,12 @@ namespace Fusion.Engine.Graphics.GIS
 			double y1 = ((double)(y + 1) / (double)numTiles);
 
 
-			if (tilesFree.Any())
-			{
-
+			if (tilesFree.Any()) {
 				GlobeTile tile;
 				if (tilesFree.ContainsKey(key)) {
 					tile = tilesFree[key];
 					tilesFree.Remove(key);
-				}
-				else {
+				} else {
 					var temp = tilesFree.First();
 					tile = temp.Value;
 					tilesFree.Remove(temp.Key);
@@ -269,26 +364,23 @@ namespace Fusion.Engine.Graphics.GIS
 				int[] indexes;
 				Gis.GeoPoint[] vertices;
 
-				CalculateVertices(out vertices, out indexes, tileDensity, x0, x1, y0, y1, zoom);
+				CalculateVertices(out vertices, out indexes, tileDensity, x0, x1, y0, y1);
 
 				tile.VertexBuf.SetData(vertices, 0, vertices.Length);
 				tile.IndexBuf.SetData(indexes, 0, indexes.Length);
 
 				tilesToRender.Add(key, tile);
 
-			}
-			else
-			{
+			} else {
 
-				var tile = new GlobeTile
-				{
-					X = x,
-					Y = y,
-					Z = zoom,
-					left = x0,
-					right = x1,
-					top = y0,
-					bottom = y1
+				var tile = new GlobeTile {
+					X		= x,
+					Y		= y,
+					Z		= zoom,
+					left	= x0,
+					right	= x1,
+					top		= y0,
+					bottom	= y1
 				};
 
 
@@ -306,7 +398,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			DisposableBase.SafeDispose(ref vb);
 
-			CalculateVertices(out vertices, out indexes, density, left, right, top, bottom, zoom);
+			CalculateVertices(out vertices, out indexes, density, left, right, top, bottom);
 
 			vb = new VertexBuffer(Game.GraphicsDevice, typeof(Gis.GeoPoint), vertices.Length);
 			ib = new IndexBuffer(Game.GraphicsDevice, indexes.Length);
@@ -315,7 +407,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		void CalculateVertices(out Gis.GeoPoint[] vertices, out int[] indeces, int density, double left, double right, double top, double bottom, int zoom)
+		void CalculateVertices(out Gis.GeoPoint[] vertices, out int[] indeces, int density, double left, double right, double top, double bottom)
 		{
 			int RowsCount		= density + 2;
 			int ColumnsCount	= RowsCount;
@@ -344,9 +436,9 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 					verts.Add(new Gis.GeoPoint {
-						Tex0 = new Vector4(step * col, step * row, 0, 0),
-						Lon = lon,
-						Lat = lat
+						Tex0	= new Vector4(step * col, step * row, 0, 0),
+						Lon		= lon,
+						Lat		= lat
 					});
 				}
 
@@ -375,7 +467,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 
-		void GetChilds(Node node)
+		void GetChilds(ref Node node)
 		{
 			long tilesCurrentLevel = 1 << node.Z;
 			long tilesNextLevel = 1 << (node.Z + 1);

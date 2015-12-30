@@ -92,7 +92,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public readonly double EarthRadius = 6378.137;
 		double maxCameraDistance	= 100000.0;
-		double cameraDistance		= 6500.0;
+		double cameraDistance		= 90000.0;
 		
 
 
@@ -337,6 +337,7 @@ namespace Fusion.Engine.Graphics.GIS
 				// Update camera position
 				FinalCamPosition	= FreeSurfacePosition = FreeSurfacePosition + velDir * FreeSurfaceVelocityMagnitude * gameTime.ElapsedSec;
 				CameraPosition		= FinalCamPosition;
+
 
 				velocityDirection = DVector3.Zero;
 

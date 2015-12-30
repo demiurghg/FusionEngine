@@ -45,7 +45,13 @@ namespace Fusion.Engine.Graphics.GIS
 
 	    public void SetMapSource(MapSource map)
 	    {
-		    CurrentMapSource = MapSources[(int)map];
+			var oldProj = CurrentMapSource.Projection;
+
+			CurrentMapSource = MapSources[(int)map];
+
+			if (!oldProj.Equals(CurrentMapSource.Projection)) {
+				updateTiles = true;
+			}
 	    }
 
 	}

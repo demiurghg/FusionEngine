@@ -37,20 +37,22 @@ namespace Fusion.Engine.Graphics.GIS
 
 			frame	= Game.Content.Load<Texture2D>("redframe.tga");
 			shader	= Game.Content.Load<Ubershader>("globe.Tile.hlsl");
-			factory = new StateFactory(shader, typeof(TileFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.Opaque, RasterizerState.CullCW, DepthStencilState.Default);
+			factory = new StateFactory(shader, typeof(TileFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
 		}
 
 
 		public override void Update(GameTime gameTime)
 		{
-			var oldProj = CurrentMapSource.Projection;
 
-			CurrentMapSource.Update(gameTime);
+			//Console.Clear();
+			//Console.WriteLine("Current Zoom Level: " + CurrentLevel);
+			//
+			//for(int i = 0; i < 15; i++)
+			//	Console.WriteLine("Zoom: " + i + "\tError: " + GetLevelScreenSpaceError(i, camera.CameraDistance - camera.EarthRadius));
+			//
+			//Console.WriteLine(camera.FinalCamPosition);
 
-			if (!oldProj.Equals(CurrentMapSource.Projection)) {
-				updateTiles = true;
-			}
-
+			CurrentMapSource.Update(gameTime);			
 
 			DetermineTiles();
 		}
@@ -64,7 +66,7 @@ namespace Fusion.Engine.Graphics.GIS
 			dev.PixelShaderSamplers[0]		= SamplerState.LinearClamp;
 			dev.PixelShaderResources[1]		= frame;
 
-			dev.PipelineState = factory[(int)(0)];
+			dev.PipelineState = factory[(int)(TileFlags.SHOW_FRAMES)];
 
 
 			foreach (var globeTile in tilesToRender) {
@@ -89,6 +91,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			if (BaseMapSource.EmptyTile != null) {
 				BaseMapSource.EmptyTile.Dispose();
+				BaseMapSource.EmptyTile = null;
 			}
 
 			foreach (var tile in tilesToRender) {

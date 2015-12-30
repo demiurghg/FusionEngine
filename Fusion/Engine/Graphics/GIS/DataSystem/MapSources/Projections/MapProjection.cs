@@ -14,7 +14,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections
 			return new DVector2();
 		}
 
-		public virtual DVector2 TileToWorldPos(double x, double y, int zoom)
+		public virtual DVector2 TileToWorldPos(double x, double y, int zoom = 0)
 		{
 			return new DVector2();
 		}
