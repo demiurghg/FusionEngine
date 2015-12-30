@@ -42,6 +42,7 @@ struct PSInput {
 	float3	Binormal	: TEXCOORD2;
 	float3	Normal 		: TEXCOORD3;
 	float4	ProjPos		: TEXCOORD4;
+	float3 	WorldPos	: TEXCOORD5;
 };
 
 struct GBuffer {
@@ -85,6 +86,7 @@ PSInput VSMain( VSInput input )
 	output.Normal		= 	normalize(normal.xyz);
 	output.Tangent 		=  	normalize(tangent.xyz);
 	output.Binormal		=  	normalize(binormal.xyz);
+	output.WorldPos		=	wPos.xyz;
 	
 	return output;
 }
@@ -130,7 +132,7 @@ LAYERPROPS OverlayLayers ( LAYERPROPS layerA, LAYERPROPS layerB )
 	// float	Displacement;
 	// float	BlendHardness;
 
-LAYERPROPS ReadLayerUV ( int id, float2 uv, float3x3 tbnMatrix )
+LAYERPROPS ReadLayerUV ( int id, float2 uv, float3x3 tbnMatrix, float3 viewDir )
 {
 	LAYERPROPS layer;
 	
@@ -142,12 +144,18 @@ LAYERPROPS ReadLayerUV ( int id, float2 uv, float3x3 tbnMatrix )
 	float4	surface		=	Textures[id*4+1].Sample( Sampler, uv ).rgba;
 	float4	normalMap	=	Textures[id*4+2].Sample( Sampler, uv ).rgba * 2 - 1;
 	float4	emission	=	Textures[id*4+3].Sample( Sampler, uv ).rgba;
-	
-	float3 nonmetal		=	float3(80,80,80)/256.0f;
 
-	layer.Diffuse		=	color.rgb * (1-surface.r);
+	float Fc = pow( 1 - saturate(dot(viewDir,mul(normalMap.xyz,tbnMatrix))), 5 );
+	//float3 F = (1 - Fc) * specular.rgb + Fc;
+	
+	float3 metalS		=	color.rgb;
+	float3 nonmetalS	=	float3(80,80,80)/256.0f * surface.r + float3(Fc,Fc,Fc);
+	float3 metalD		=	float3(0,0,0);
+	float3 nonmetalD	=	color.rgb;
+
+	layer.Diffuse		=	lerp(nonmetalD, metalD, surface.b);
 	layer.Alpha			=	color.a;
-	layer.Specular		=	lerp(nonmetal, color.rgb, surface.b) * surface.r;
+	layer.Specular		=	lerp(nonmetalS, metalS, surface.b);
 	layer.Roughness		=	surface.g;
 	layer.Normal		=	normalMap.xyz;
 	layer.Emission		=	emission.rgb;
@@ -182,20 +190,22 @@ GBuffer PSMain( PSInput input )
 	layer.Normal = 0;
 	layer.Emission = 0;
 	
+	float3 viewDir	=	normalize(Batch.ViewPos.xyz - input.WorldPos.xyz);
+	
 	#ifdef LAYER0
-		layer 	= ReadLayerUV( 0, input.TexCoord, tbnToWorld );
+		layer 	= ReadLayerUV( 0, input.TexCoord, tbnToWorld, viewDir );
 	#endif
 	#ifdef LAYER1
-		layer 	= OverlayLayers( layer, ReadLayerUV( 1, input.TexCoord, tbnToWorld ) );
+		layer 	= OverlayLayers( layer, ReadLayerUV( 1, input.TexCoord, tbnToWorld, viewDir ) );
 	#endif
 	#ifdef LAYER2
-		layer 	= OverlayLayers( layer, ReadLayerUV( 2, input.TexCoord, tbnToWorld ) );
+		layer 	= OverlayLayers( layer, ReadLayerUV( 2, input.TexCoord, tbnToWorld, viewDir ) );
 	#endif
 	#ifdef LAYER3
-		layer 	= OverlayLayers( layer, ReadLayerUV( 3, input.TexCoord, tbnToWorld ) );
+		layer 	= OverlayLayers( layer, ReadLayerUV( 3, input.TexCoord, tbnToWorld, viewDir ) );
 	#endif
 	
-	float3 worldNormal 	= 	normalize( mul( layer.Normal, tbnToWorld ) );
+	float3 worldNormal 	= 	normalize( mul( layer.Normal, tbnToWorld ).xyz );
 	//FitNormalToGBuffer(worldNormal);
 
 	output.hdr		=	float4( layer.Emission, 0 );

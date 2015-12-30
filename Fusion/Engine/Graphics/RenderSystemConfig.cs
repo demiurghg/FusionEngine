@@ -61,12 +61,6 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
-		/// 
-		/// </summary>
-		public bool TrackObjects { get; set; }
-
-
-		/// <summary>
 		/// Ctor
 		/// </summary>
 		public RenderSystemConfig ()
@@ -77,7 +71,6 @@ namespace Fusion.Engine.Graphics {
 			StereoMode		=	StereoMode.Disabled;
 			InterlacingMode	=	InterlacingMode.HorizontalLR;
 			UseDebugDevice	=	false;
-			TrackObjects	=	true;
 			VSyncInterval	=	1;
 			MsaaEnabled		=	false;
 		}

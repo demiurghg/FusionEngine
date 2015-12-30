@@ -56,7 +56,7 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		[StructLayout(LayoutKind.Explicit, Size=560)]
+		[StructLayout(LayoutKind.Explicit, Size=576)]
 		struct LightingParams {
 			[FieldOffset(  0)] public Matrix	View;
 			[FieldOffset( 64)] public Matrix	Projection;
@@ -72,8 +72,9 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(512)] public Vector4	CSMFilterRadius;
 			[FieldOffset(528)] public Color4	AmbientColor;
 			[FieldOffset(544)] public Vector4	Viewport;
-
-
+			[FieldOffset(560)] public float		ShowCSLoadOmni;
+			[FieldOffset(564)] public float		ShowCSLoadEnv;
+			[FieldOffset(568)] public float		ShowCSLoadSpot;
 		}
 
 
@@ -245,6 +246,9 @@ namespace Fusion.Engine.Graphics {
 
 					cbData.AmbientColor				=	viewLayer.LightSet.AmbientLevel;
 					cbData.Viewport					=	new Vector4( 0, 0, width, height );
+					cbData.ShowCSLoadOmni			=	Config.ShowOmniLightTileLoad ? 1 : 0;
+					cbData.ShowCSLoadEnv			=	Config.ShowEnvLightTileLoad  ? 1 : 0;
+					cbData.ShowCSLoadSpot			=	Config.ShowSpotLightTileLoad ? 1 : 0;
 
 					PrepareOmniLights( view, projection, viewLayer.LightSet );
 					PrepareSpotLights( view, projection, viewLayer.LightSet );

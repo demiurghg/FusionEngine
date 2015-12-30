@@ -136,7 +136,10 @@ namespace TestGame2 {
 			masterView.LightSet.DirectLight.Enabled		=	true;
 			masterView.LightSet.AmbientLevel			=	Color4.Zero;//masterView.SkySettings.AmbientLevel;
 
-			masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,40,0), 1, 500 ) );
+			masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,-10), 1,  500 ) );
+
+			//masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,-10), 1,  15 ) );
+			//masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4, 10), 1, 15 ) );
 
 
 			var rand = new Random();
@@ -150,11 +153,11 @@ namespace TestGame2 {
 				masterView.LightSet.OmniLights.Add( light );
 			} //*/
 														 
-			for (int i=0; i<64; i++) {
+			/*for (int i=0; i<64; i++) {
 				var light = new EnvLight();
-				light.Position		=	new Vector3( 9*(i/8-4), 4, 9*(i%8-4) );
-				light.RadiusInner	=	8;
-				light.RadiusOuter	=	16;
+				light.Position		=	new Vector3( 9*(i/8-4), 6, 9*(i%8-4) );
+				light.RadiusInner	=	2;
+				light.RadiusOuter	=	8;
 				masterView.LightSet.EnvLights.Add( light );
 			} //*/
 

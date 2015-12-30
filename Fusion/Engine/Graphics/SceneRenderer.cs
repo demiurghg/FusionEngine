@@ -112,6 +112,8 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="flags"></param>
 		void Enum ( PipelineState ps, SurfaceFlags flags )
 		{
+			ps.RasterizerState	=	RasterizerState.CullCW;
+
 			if (flags.HasFlag( SurfaceFlags.SKINNED )) {
 				ps.VertexInputElements	=	VertexColorTextureTBNSkinned.Elements;
 			}

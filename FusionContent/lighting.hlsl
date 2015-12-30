@@ -22,7 +22,7 @@ float	LinearFalloff( float dist, float max_range )
 	float fade = 0;
 	fade = saturate(1 - (dist / max_range));
 	fade *= fade;
-	return fade;
+	return saturate(fade);
 }
 
 
@@ -96,6 +96,9 @@ struct LightingParams {
 	float4		AmbientColor;
 	
 	float4		Viewport;			//	x,y,w,h,
+	float		ShowCSLoadOmni;
+	float		ShowCSLoadEnv;
+	float		ShowCSLoadSpot;
 };
 
 
@@ -167,6 +170,7 @@ groupshared uint minDepthInt = 0xFFFFFFFF;
 groupshared uint maxDepthInt = 0;
 groupshared uint visibleLightCount = 0; 
 groupshared uint visibleLightCountSpot = 0; 
+groupshared uint visibleLightCountEnv = 0; 
 groupshared uint visibleLightIndices[1024];
 
 #define BLOCK_SIZE_X 16 
@@ -237,7 +241,7 @@ void CSMain(
 	//	OMNI LIGHTS :
 	//-----------------------------------------------------
 	
-	if (0) {
+	if (1) {
 		uint lightCount = OMNI_LIGHT_COUNT;
 		
 		uint threadCount = BLOCK_SIZE_X * BLOCK_SIZE_Y; 
@@ -264,24 +268,22 @@ void CSMain(
 		
 		GroupMemoryBarrierWithGroupSync();
 				
-		#if SHOW_OMNI_LOAD
-			totalLight.rgb += visibleLightCount * float3(0.5, 0.25, 0.125);
-		#else
-			for (uint i = 0; i < visibleLightCount; i++) {
-			
-				uint lightIndex = visibleLightIndices[i];
-				OMNILIGHT light = OmniLights[lightIndex];
+		totalLight.rgb += visibleLightCount * float3(0.5, 0.0, 0.0) * Params.ShowCSLoadOmni;
+		
+		for (uint i = 0; i < visibleLightCount; i++) {
+		
+			uint lightIndex = visibleLightIndices[i];
+			OMNILIGHT light = OmniLights[lightIndex];
 
-				float3 intensity = light.Intensity.rgb;
-				float3 position	 = light.PositionRadius.rgb;
-				float  radius    = light.PositionRadius.w;
-				float3 lightDir	 = position - worldPos.xyz;
-				float  falloff	 = LinearFalloff( length(lightDir), radius );
-				
-				totalLight.rgb += falloff * Lambert ( normal.xyz,  lightDir, intensity, diffuse.rgb );
-				totalLight.rgb += falloff * CookTorrance( normal.xyz, viewDirN, lightDir, intensity, specular.rgb, specular.a );
-			}
-		#endif
+			float3 intensity = light.Intensity.rgb;
+			float3 position	 = light.PositionRadius.rgb;
+			float  radius    = light.PositionRadius.w;
+			float3 lightDir	 = position - worldPos.xyz;
+			float  falloff	 = LinearFalloff( length(lightDir), radius );
+			
+			totalLight.rgb += falloff * Lambert ( normal.xyz,  lightDir, intensity, diffuse.rgb );
+			totalLight.rgb += falloff * CookTorrance( normal.xyz, viewDirN, lightDir, intensity, specular.rgb, specular.a );
+		}
 	}
 	
 	//-----------------------------------------------------
@@ -310,32 +312,33 @@ void CSMain(
 			  && el.ExtentMax.z > tileMin.z && tileMax.z > el.ExtentMin.z ) 
 			{
 				uint offset; 
-				InterlockedAdd(visibleLightCount, 1, offset); 
+				InterlockedAdd(visibleLightCountEnv, 1, offset); 
 				visibleLightIndices[offset] = lightIndex;
 			}
 		}
 		
 		GroupMemoryBarrierWithGroupSync();
 				
-		#if 0
-			totalLight.rgb += visibleLightCount * float3(0.5, 0.25, 0.125);
-		#else
-			for (uint i = 0; i < visibleLightCount; i++) {
+		totalLight.rgb += visibleLightCountEnv * float3(0.0, 0.5, 0.0) * Params.ShowCSLoadEnv;
+
+		for (uint i = 0; i < visibleLightCountEnv; i++) {
+		
+			uint lightIndex = visibleLightIndices[i];
+			ENVLIGHT light = EnvLights[lightIndex];
+
+			float3 intensity = light.Intensity.rgb;
+			float3 position	 = light.Position.rgb;
+			float  radius    = light.InnerOuterRadius.y;
+			float3 lightDir	 = position - worldPos.xyz;
+			float  falloff	 = LinearFalloff( length(lightDir), radius );
 			
-				uint lightIndex = visibleLightIndices[i];
-				ENVLIGHT light = EnvLights[lightIndex];
+			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 6).rgb * diffuse.rgb * falloff;
+			
+			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * specular.rgb * falloff;
+			
+			//totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w * 6 ).rgb * falloff * 1 ;//*/
 
-				float3 intensity = light.Intensity.rgb;
-				float3 position	 = light.Position.rgb;
-				float  radius    = light.InnerOuterRadius.y;
-				float3 lightDir	 = position - worldPos.xyz;
-				float  falloff	 = LinearFalloff( length(lightDir), radius );
-				
-				totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 7).rgb * diffuse.rgb * falloff;
-				totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * specular.rgb * falloff;//*/
-
-			}
-		#endif
+		}
 	}
 
 	//-----------------------------------------------------
@@ -344,7 +347,7 @@ void CSMain(
 	
 	GroupMemoryBarrierWithGroupSync();
 	
-	if (0) {
+	if (1) {
 		uint lightCount = SPOT_LIGHT_COUNT;
 		uint lightIndex = groupIndex;
 		
@@ -365,26 +368,24 @@ void CSMain(
 		
 		GroupMemoryBarrierWithGroupSync();
 				
-		#if SHOW_SPOT_LOAD
-			totalLight.rgb += visibleLightCountSpot * float3(0.5, 0.25, 0.125);
-		#else
-			for (uint i = 0; i < visibleLightCountSpot; i++) {
-			
-				uint lightIndex = visibleLightIndices[i];
-				SPOTLIGHT light = SpotLights[lightIndex];
+		totalLight.rgb += visibleLightCountSpot * float3(0, 0.0, 0.5)  * Params.ShowCSLoadSpot;
 
-				float3 intensity = light.IntensityFar.rgb;
-				float3 position	 = light.PositionRadius.rgb;
-				float  radius    = light.PositionRadius.w;
-				float3 lightDir	 = position - worldPos.xyz;
-				float  falloff	 = LinearFalloff( length(lightDir), radius );
-				
-				float3 shadow	 = ComputeSpotShadow( worldPos, light );
-				
-				totalLight.rgb += shadow * falloff * Lambert ( normal.xyz,  lightDir, intensity, diffuse.rgb );
-				totalLight.rgb += shadow * falloff * CookTorrance( normal.xyz, viewDirN, lightDir, intensity, specular.rgb, specular.a );
-			}
-		#endif
+		for (uint i = 0; i < visibleLightCountSpot; i++) {
+		
+			uint lightIndex = visibleLightIndices[i];
+			SPOTLIGHT light = SpotLights[lightIndex];
+
+			float3 intensity = light.IntensityFar.rgb;
+			float3 position	 = light.PositionRadius.rgb;
+			float  radius    = light.PositionRadius.w;
+			float3 lightDir	 = position - worldPos.xyz;
+			float  falloff	 = LinearFalloff( length(lightDir), radius );
+			
+			float3 shadow	 = ComputeSpotShadow( worldPos, light );
+			
+			totalLight.rgb += shadow * falloff * Lambert ( normal.xyz,  lightDir, intensity, diffuse.rgb );
+			totalLight.rgb += shadow * falloff * CookTorrance( normal.xyz, viewDirN, lightDir, intensity, specular.rgb, specular.a );
+		}
 	}
 
 	//-----------------------------------------------------

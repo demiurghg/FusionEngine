@@ -278,7 +278,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			var sw = new Stopwatch();
 
-			if (!Game.Keyboard.IsKeyDown(Input.Keys.R)) {
+			if (!Game.Keyboard.IsKeyDown(Input.Keys.F3)) {
 				return;
 			} //*/
 
