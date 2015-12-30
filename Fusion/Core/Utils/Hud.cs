@@ -8,15 +8,15 @@ using System.Threading;
 
 namespace Fusion {
 
-	public class DebugString {
+	public class HudString {
 		public readonly Color Color;
-		public readonly int	ThreadID;
+		public readonly string Category;
 		public readonly string Text;
 
-		internal DebugString ( int threadId, Color color, string text )
+		internal HudString ( string category, Color color, string text )
 		{
 			this.Color		=	color;
-			this.ThreadID	=	threadId;
+			this.Category	=	category;
 			this.Text		=	text;
 		}
 	}
@@ -25,21 +25,20 @@ namespace Fusion {
 	/// <summary>
 	/// Represents class to monitor everything.
 	/// </summary>
-	public static class DebugStrings {
+	public static class Hud {
 
 		static object lockObj = new object();
 
-		static List<DebugString>	lines = new List<DebugString>();
+		static List<HudString>	lines = new List<HudString>();
 
 
 		/// <summary>
 		/// Clears all lines added from current thread.
 		/// </summary>
-		static public void Clear ()
+		static public void Clear (string category)
 		{
 			lock (lockObj) {
-				var id = Thread.CurrentThread.ManagedThreadId;
-				lines.RemoveAll( line => line.ThreadID == id );
+				lines.RemoveAll( line => line.Category == category );
 			}
 		}
 
@@ -49,10 +48,10 @@ namespace Fusion {
 		/// </summary>
 		/// <param name="color"></param>
 		/// <param name="text"></param>
-		static public void Add ( Color color, string text )
+		static public void Add ( Color color, string category, string text )
 		{
 			lock (lockObj) {
-				lines.Add( new DebugString( Thread.CurrentThread.ManagedThreadId, color, text ) );
+				lines.Add( new HudString( category, color, text ) );
 			}
 		}
 
@@ -63,9 +62,9 @@ namespace Fusion {
 		/// </summary>
 		/// <param name="color"></param>
 		/// <param name="text"></param>
-		static public void Add ( Color color, string format, params object[] args )
+		static public void Add ( Color color, string category, string format, params object[] args )
 		{
-			Add( color, string.Format(format, args) );
+			Add( color, category, string.Format(format, args) );
 		}
 
 
@@ -74,10 +73,10 @@ namespace Fusion {
 		/// Gets lines.
 		/// </summary>
 		/// <returns></returns>
-		static IEnumerable<DebugString> GetLines ()
+		public static IEnumerable<HudString> GetLines ()
 		{
 			lock (lockObj) {
-				return lines.OrderBy( line => line.ThreadID ).ToArray();
+				return lines.OrderBy( line => line.Category ).ToArray();
 			}
 		}
 	}

@@ -72,6 +72,7 @@ namespace TestGame2 {
 		ViewLayerHdr	masterView;
 		ViewLayer		masterView2;
 		TargetTexture	targetTexture;
+		DiscTexture		debugFont;
 
 		Scene		scene;
 
@@ -99,6 +100,7 @@ namespace TestGame2 {
 		/// </summary>
 		public override void Initialize ()
 		{
+			debugFont		=	Game.Content.Load<DiscTexture>("conchars");
 			//videoPlayer	=	new VideoPlayer();
 			//video		=	new Video(@"C:\infection_demo.wmv");//*/
 			////video		=	GameEngine.Content.Load<Video>("infection_demo");
@@ -134,7 +136,7 @@ namespace TestGame2 {
 			masterView.LightSet.DirectLight.Enabled		=	true;
 			masterView.LightSet.AmbientLevel			=	Color4.Zero;//masterView.SkySettings.AmbientLevel;
 
-			//masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,0), 1, 50 ) );
+			masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,40,0), 1, 500 ) );
 
 
 			var rand = new Random();
@@ -263,15 +265,23 @@ namespace TestGame2 {
 			testLayer.Color	=	Color.White;
 
 			//sceneView.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1,0, 1 );
+			DebugStrings.Clear("UI");
+			DebugStrings.Add(Color.White, "UI", "FPS = {0}", gameTime.Fps );
 
+
+			testLayer.Clear();
+			testLayer.BlendMode = SpriteBlendMode.AlphaBlend;
+
+			int line = 0;
+			foreach ( var debugString in DebugStrings.GetLines() ) {
+				testLayer.DrawDebugString( debugFont, 0+1, line*8+1, debugString.Text, Color.Black );
+				testLayer.DrawDebugString( debugFont, 0+0, line*8+0, debugString.Text, debugString.Color );
+			}
 			/*if ( game.Keyboard.IsKeyDown(Keys.R) ) {
 				testLayer.Clear();
 				testLayer.DrawDebugString( debugFont, 10, 276, rand.Next().ToString(), Color.White );
 
 			} */
-
-			testLayer.Clear();
-			testLayer.BlendMode = SpriteBlendMode.Opaque;
 			//testLayer.Draw( masterView.HdrTexture,	 -200,  0, 200,150, Color.White );
 			//testLayer.Draw( masterView.DiffuseTexture,	    0,  0, 200,150, Color.White );
 			//testLayer.Draw( masterView.SpecularTexture, 200,  0, 200,150, Color.White );
@@ -292,7 +302,7 @@ namespace TestGame2 {
 				angle += 0.01f;
 			}
 
-			testLayer.SetTransform( new Vector2(200,0), new Vector2(128+5,128+5), angle );
+			//testLayer.SetTransform( new Vector2(200,0), new Vector2(128+5,128+5), angle );
 
 			var m = UpdateCam( gameTime );
 

@@ -282,6 +282,8 @@ namespace Fusion.Engine.Graphics {
 				return;
 			} //*/
 
+			Log.Message("Radiance capture...");
+
 			sw.Start();
 			using (new PixEvent("Capture Radiance")) {
 
@@ -323,7 +325,7 @@ namespace Fusion.Engine.Graphics {
 				SkySettings.SunGlowIntensity = sun;
 			}
 
-			//Log.Message("{0}", sw.Elapsed );
+			Log.Message("{0} light probes - {1} ms", LightSet.EnvLights.Count, sw.ElapsedMilliseconds);
 		}
 
 

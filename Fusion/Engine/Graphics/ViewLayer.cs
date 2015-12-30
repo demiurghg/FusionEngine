@@ -150,6 +150,8 @@ namespace Fusion.Engine.Graphics {
 			//	Render GIS stuff :
 			RenderGIS( gameTime, stereoEye, viewport, targetSurface );
 
+			//	draw debug stuff :
+
 			//	draw sprites :
 			rs.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );
 		}
