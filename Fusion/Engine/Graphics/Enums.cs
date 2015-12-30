@@ -126,6 +126,11 @@ namespace Fusion.Engine.Graphics {
 		/// Inverse multiply
 		/// </summary>
 		NegMultiply,
+
+		/// <summary>
+		/// Inverse multiply
+		/// </summary>
+		AlphaOnly,
 	}
 
 

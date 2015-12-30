@@ -20,6 +20,7 @@ namespace Fusion.Engine.Graphics {
 			SCREEN				=	0x0010, 
 			MULTIPLY			=	0x0020, 
 			NEG_MULTIPLY		=	0x0040,
+			ALPHA_ONLY			=	0x0080,
 		}
 
 
@@ -66,13 +67,16 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="flags"></param>
 		void StateEnum ( PipelineState ps, Flags flags )
 		{
-			if ( flags==Flags.OPAQUE			) ps.BlendState		=	BlendState.Opaque			; else
-			if ( flags==Flags.ALPHA_BLEND		) ps.BlendState		=	BlendState.AlphaBlend		; else
-			if ( flags==Flags.ALPHA_BLEND_PREMUL) ps.BlendState		=	BlendState.AlphaBlendPremul	; else
-			if ( flags==Flags.ADDITIVE			) ps.BlendState		=	BlendState.Additive			; else
-			if ( flags==Flags.SCREEN			) ps.BlendState		=	BlendState.Screen			; else
-			if ( flags==Flags.MULTIPLY			) ps.BlendState		=	BlendState.Multiply			; else
-			if ( flags==Flags.NEG_MULTIPLY		) ps.BlendState		=	BlendState.NegMultiply		; else
+			switch ( flags ) {																			   
+				case Flags.OPAQUE				: ps.BlendState		=	BlendState.Opaque			; break;
+				case Flags.ALPHA_BLEND			: ps.BlendState		=	BlendState.AlphaBlend		; break;
+				case Flags.ALPHA_BLEND_PREMUL	: ps.BlendState		=	BlendState.AlphaBlendPremul	; break;
+				case Flags.ADDITIVE				: ps.BlendState		=	BlendState.Additive			; break;
+				case Flags.SCREEN				: ps.BlendState		=	BlendState.Screen			; break;
+				case Flags.MULTIPLY				: ps.BlendState		=	BlendState.Multiply			; break;
+				case Flags.NEG_MULTIPLY			: ps.BlendState		=	BlendState.NegMultiply		; break;
+				case Flags.ALPHA_ONLY			: ps.BlendState		=	BlendState.AlphaMaskWrite	; break;
+			}
 
 			ps.RasterizerState		=	RasterizerState.CullNone;
 			ps.DepthStencilState	=	DepthStencilState.None;
@@ -167,6 +171,7 @@ namespace Fusion.Engine.Graphics {
 					case SpriteBlendMode.Screen				: ps = factory[(int)Flags.SCREEN			]; break;
 					case SpriteBlendMode.Multiply			: ps = factory[(int)Flags.MULTIPLY			]; break;
 					case SpriteBlendMode.NegMultiply		: ps = factory[(int)Flags.NEG_MULTIPLY		]; break;
+					case SpriteBlendMode.AlphaOnly			: ps = factory[(int)Flags.ALPHA_ONLY		]; break;
 				}
 
 				device.PipelineState			=	ps;

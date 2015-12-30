@@ -122,7 +122,7 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				if(GlobeDepthStencil != null) GlobeDepthStencil.Dispose();
+				SafeDispose( ref GlobeDepthStencil );
 			}
 			base.Dispose( disposing );
 		}
@@ -132,6 +132,7 @@ namespace Fusion.Engine.Graphics {
 		 *	Rendering :
 		 * 
 		-----------------------------------------------------------------------------------------*/
+			Random rand2222 = new Random();
 
 		/// <summary>
 		/// Renders view
@@ -150,8 +151,13 @@ namespace Fusion.Engine.Graphics {
 			//	Render GIS stuff :
 			RenderGIS( gameTime, stereoEye, viewport, targetSurface );
 
+			//	draw debug stuff :
+			//  ...
+
 			//	draw sprites :
 			rs.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );
+
+			rs.Filter.FillAlphaOne( targetSurface );
 		}
 
 

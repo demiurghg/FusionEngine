@@ -5,6 +5,7 @@ $ubershader GAUSS_BLUR_3x3 PASS1|PASS2
 $ubershader GAUSS_BLUR PASS1|PASS2
 $ubershader LINEARIZE_DEPTH|RESOLVE_AND_LINEARIZE_DEPTH_MSAA
 $ubershader PREFILTER_ENVMAP POSX|POSY|POSZ|NEGX|NEGY|NEGZ
+$ubershader FILL_ALPHA_ONE
 #endif
 
 
@@ -21,6 +22,21 @@ float4 VSMain(uint VertexID : SV_VertexID) : SV_POSITION
 float4 PSMain(float4 position : SV_POSITION) : SV_Target
 {
 	return Source.Load(int3(position.xy, 0));
+}
+
+#endif
+
+//-------------------------------------------------------------------------------
+#ifdef FILL_ALPHA_ONE
+
+float4 VSMain(uint VertexID : SV_VertexID) : SV_POSITION
+{
+	return float4((VertexID == 0) ? 3.0f : -1.0f, (VertexID == 2) ? 3.0f : -1.0f, 1.0f, 1.0f);
+}
+
+float4 PSMain(float4 position : SV_POSITION) : SV_Target
+{
+	return float4(0,0,0,1);
 }
 
 #endif
