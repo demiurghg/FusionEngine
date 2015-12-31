@@ -132,6 +132,11 @@ LAYERPROPS OverlayLayers ( LAYERPROPS layerA, LAYERPROPS layerB )
 	// float	Displacement;
 	// float	BlendHardness;
 
+//	https://www.marmoset.co/toolbag/learn/pbr-theory	
+//	This means that in theory conductors will not show any evidence of diffuse light. 
+//	In practice however there are often oxides or other residues on the surface of a 
+//	metal that will scatter some small amounts of light.	
+	
 LAYERPROPS ReadLayerUV ( int id, float2 uv, float3x3 tbnMatrix, float3 viewDir )
 {
 	LAYERPROPS layer;
@@ -144,14 +149,11 @@ LAYERPROPS ReadLayerUV ( int id, float2 uv, float3x3 tbnMatrix, float3 viewDir )
 	float4	surface		=	Textures[id*4+1].Sample( Sampler, uv ).rgba;
 	float4	normalMap	=	Textures[id*4+2].Sample( Sampler, uv ).rgba * 2 - 1;
 	float4	emission	=	Textures[id*4+3].Sample( Sampler, uv ).rgba;
-
-	float Fc = pow( 1 - saturate(dot(viewDir,mul(normalMap.xyz,tbnMatrix))), 5 );
-	//float3 F = (1 - Fc) * specular.rgb + Fc;
 	
-	float3 metalS		=	color.rgb;
-	float3 nonmetalS	=	float3(80,80,80)/256.0f * surface.r + float3(Fc,Fc,Fc);
-	float3 metalD		=	float3(0,0,0);
-	float3 nonmetalD	=	color.rgb;
+	float3 metalS		=	color.rgb * (surface.r);
+	float3 nonmetalS	=	float3(0.31,0.31,0.31) * surface.r;
+	float3 metalD		=	color.rgb * (1-surface.r);
+	float3 nonmetalD	=	color.rgb * (1-surface.r*0.31);
 
 	layer.Diffuse		=	lerp(nonmetalD, metalD, surface.b);
 	layer.Alpha			=	color.a;
@@ -205,9 +207,12 @@ GBuffer PSMain( PSInput input )
 		layer 	= OverlayLayers( layer, ReadLayerUV( 3, input.TexCoord, tbnToWorld, viewDir ) );
 	#endif
 	
-	float3 worldNormal 	= 	normalize( mul( layer.Normal, tbnToWorld ).xyz );
-	//FitNormalToGBuffer(worldNormal);
-
+	//	NB: Multiply normal length by local normal projection on surface normal.
+	//	Shortened normal will be used as Fresnel decay (self occlusion) factor.
+	float3 worldNormal 	= 	normalize( mul( layer.Normal, tbnToWorld ).xyz ) * (0.5+0.5*layer.Normal.z);
+	
+	//	Use sRGB texture or 'sqrt' for better 
+	//	diffuse/specular intensity distribution?
 	output.hdr		=	float4( layer.Emission, 0 );
 	output.diffuse	=	float4( layer.Diffuse, 1 );
 	output.specular =	float4( layer.Specular, layer.Roughness );

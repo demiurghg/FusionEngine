@@ -21,7 +21,7 @@ EmissionLevel    = 1
 SpecularLevel    = 1
 BumpLevel        = 1
 Displacement     = 1
-RoughnessRange   = 0, 1
+RoughnessRange   = 0.1, 0.1
 GlowNarrowness   = 0, 0
 BlendFactor      = 0
 Tiling           = 2, 2, 1
@@ -30,7 +30,7 @@ ColorTexture     = Scenes/textures/redball.tga
 SurfaceTexture   = Scenes/textures/nonmetal_spec.tga
 ;ColorTexture     = Scenes/textures/gold.tga
 ;SurfaceTexture   = Scenes/textures/gold_spec.tga
-NormalMapTexture = 
+NormalMapTexture = Scenes\Textures\floorHeavyA_local.tga
 EmissionTexture  = 
 
 

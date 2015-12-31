@@ -128,15 +128,18 @@ namespace TestGame2 {
 			uiLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
 			texture		=	Game.Content.Load<DiscTexture>( "lena" );
 
-			masterView.SkySettings.SunPosition			=	new Vector3(10,20,30);
+			masterView.SkySettings.SunPosition			=	new Vector3(10,40,30);
+			masterView.SkySettings.SunLightIntensity	=	100;
+			masterView.SkySettings.SkyTurbidity			=	8;
 
 			masterView.LightSet.SpotAtlas				=	Game.Content.Load<TextureAtlas>("spots/spots");
 			masterView.LightSet.DirectLight.Direction	=	masterView.SkySettings.SunLightDirection;
 			masterView.LightSet.DirectLight.Intensity	=	masterView.SkySettings.SunLightColor;
 			masterView.LightSet.DirectLight.Enabled		=	true;
-			masterView.LightSet.AmbientLevel			=	Color4.Zero;//masterView.SkySettings.AmbientLevel;
+			masterView.LightSet.AmbientLevel			=	Color4.Zero;
+			//masterView.LightSet.AmbientLevel			=	masterView.SkySettings.AmbientLevel;
 
-			masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,-10), 1,  500 ) );
+			//masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,-10), 1,  500 ) );
 
 			//masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,-10), 1,  15 ) );
 			//masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4, 10), 1, 15 ) );
@@ -144,7 +147,7 @@ namespace TestGame2 {
 
 			var rand = new Random();
 
-			for (int i=0; i<64; i++) {
+			/*for (int i=0; i<64; i++) {
 				var light = new OmniLight();
 				light.Position		=	new Vector3( 8*(i/8-4), 4, 8*(i%8-4) );
 				light.RadiusInner	=	1;
@@ -153,9 +156,9 @@ namespace TestGame2 {
 				masterView.LightSet.OmniLights.Add( light );
 			} //*/
 														 
-			/*for (int i=0; i<64; i++) {
+			for (int i=0; i<256; i++) {
 				var light = new EnvLight();
-				light.Position		=	new Vector3( 9*(i/8-4), 6, 9*(i%8-4) );
+				light.Position		=	new Vector3( 7*(i/16-8), 6, 7*(i%16-8) );
 				light.RadiusInner	=	2;
 				light.RadiusOuter	=	8;
 				masterView.LightSet.EnvLights.Add( light );

@@ -47,13 +47,13 @@ float3	CookTorrance( float3 N, float3 V, float3 L, float3 I, float3 F, float rou
 			V	=	normalize(V);
 	float3	H	=	normalize(V+L);
 	
-	//	increase slightly low roughness value to 
+	//	Increase slightly low roughness value to 
 	//	avoid point light flickering on shiny surfaces.
 	roughness = roughness * 0.9f + 0.1f;
 	
 	float m = roughness * roughness;
 
-	//	to remove harsh edge on glazing angles :
+	//	NB: To remove harsh edge on grazing angles :
 	float	edgeDecay	=	saturate(dot(L,N)*10);
 
 	float	g1	=	2 * dot(N,H) * dot(N,V) / dot(V,H);
@@ -199,6 +199,7 @@ void CSMain(
 	float4	normal	 	=	GBufferNormalMap.Load( location ) * 2 - 1;
 	float	depth 	 	=	GBufferDepth 	.Load( location ).r;
 	
+	float fresnelDecay	=	length(normal.xyz) * 2 - 1;
 	normal.xyz			=	normalize(normal.xyz);
 
 	float4	projPos		=	float4( location.x/(float)width*2-1, location.y/(float)height*(-2)+1, depth, 1 );
@@ -218,7 +219,7 @@ void CSMain(
 	totalLight.xyz		+=	csmFactor.rgb * Lambert	( normal.xyz,  lightDir, Params.DirectLightIntensity.rgb, diffuse.rgb );
 	totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, Params.DirectLightIntensity.rgb, specular.rgb, specular.a );
 	
-	float Fc = pow( 1 - saturate(dot(viewDirN,normal.xyz)), 5 );
+	float Fc = pow( 1 - abs(dot(viewDirN,normal.xyz)), 5 );
 	float3 F = (1 - Fc) * specular.rgb + Fc;
 	
 	//-----------------------------------------------------
@@ -332,12 +333,17 @@ void CSMain(
 			float3 lightDir	 = position - worldPos.xyz;
 			float  falloff	 = LinearFalloff( length(lightDir), radius );
 			
-			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 6).rgb * diffuse.rgb * falloff;
-			
-			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * specular.rgb * falloff;
-			
-			//totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w * 6 ).rgb * falloff * 1 ;//*/
+			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 6).rgb * diffuse.rgb * falloff * (1-Fc);
 
+			float3	F = specular.rgb;
+
+			/*F.r  = Fresnel(dot(viewDirN,normal.xyz), F.r);
+			F.g  = Fresnel(dot(viewDirN,normal.xyz), F.g);
+			F.b  = Fresnel(dot(viewDirN,normal.xyz), F.b);//*/
+			//F = lerp( F, float3(1,1,1), Fc * pow(fresnelDecay,10) );
+			F = lerp( F, float3(1,1,1), Fc * saturate(fresnelDecay*4-3) );
+			
+			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * F * falloff;
 		}
 	}
 
