@@ -337,11 +337,8 @@ void CSMain(
 
 			float3	F = specular.rgb;
 
-			/*F.r  = Fresnel(dot(viewDirN,normal.xyz), F.r);
-			F.g  = Fresnel(dot(viewDirN,normal.xyz), F.g);
-			F.b  = Fresnel(dot(viewDirN,normal.xyz), F.b);//*/
-			//F = lerp( F, float3(1,1,1), Fc * pow(fresnelDecay,10) );
-			F = lerp( F, float3(1,1,1), Fc * saturate(fresnelDecay*4-3) );
+			//F = lerp( F, float3(1,1,1), Fc * pow(fresnelDecay,6) );
+			F = lerp( F, float3(1,1,1), Fc * saturate(fresnelDecay*3-2) );
 			
 			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * F * falloff;
 		}
