@@ -253,6 +253,12 @@ namespace Fusion.Engine.Graphics {
 			//	render g-buffer :
 			rs.SceneRenderer.RenderGBuffer( stereoEye, Camera, viewHdrFrame, this );
 
+			switch (rs.Config.ShowGBuffer) {
+				case 1 : rs.Filter.Copy( targetSurface, viewHdrFrame.DiffuseBuffer ); return;
+				case 2 : rs.Filter.Copy( targetSurface, viewHdrFrame.SpecularBuffer ); return;
+				case 3 : rs.Filter.Copy( targetSurface, viewHdrFrame.NormalMapBuffer ); return;
+			}
+
 			//	render sky :
 			rs.Sky.Render( Camera, stereoEye, gameTime, viewHdrFrame, SkySettings );
 			rs.Sky.RenderFogTable( SkySettings );

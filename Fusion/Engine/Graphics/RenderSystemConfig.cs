@@ -61,6 +61,16 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// Shows G-buffer content.
+		///		0 - show final image
+		///		1 - show diffuse
+		///		2 - show specular
+		///		3 - show normal map
+		/// </summary>
+		public int ShowGBuffer { get; set; }
+
+
+		/// <summary>
 		/// Ctor
 		/// </summary>
 		public RenderSystemConfig ()
