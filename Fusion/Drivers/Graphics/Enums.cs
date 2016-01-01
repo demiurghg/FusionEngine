@@ -81,6 +81,7 @@ namespace Fusion.Drivers.Graphics {
 		R16F,
 		Rg16F,
 		Rgba8,
+		Rgba8_sRGB,
 		Bgra8,
 		Rgb10A2,
 		Rgba16F,
@@ -383,6 +384,7 @@ namespace Fusion.Drivers.Graphics {
 				case ColorFormat.R16F		: return Format.R16_Float;
 				case ColorFormat.Rg16F		: return Format.R16G16_Float;
 				case ColorFormat.Rgba8		: return Format.R8G8B8A8_UNorm;
+				case ColorFormat.Rgba8_sRGB	: return Format.R8G8B8A8_UNorm_SRgb;
 				case ColorFormat.Bgra8		: return Format.B8G8R8A8_UNorm;
 				case ColorFormat.Rgb10A2	: return Format.R10G10B10A2_UNorm;
 				case ColorFormat.Rgba16F	: return Format.R16G16B16A16_Float;
@@ -391,6 +393,7 @@ namespace Fusion.Drivers.Graphics {
 				case ColorFormat.Dxt1		: return Format.BC1_UNorm;
 				case ColorFormat.Dxt3		: return Format.BC2_UNorm;
 				case ColorFormat.Dxt5		: return Format.BC3_UNorm;
+
 			}
 
 			throw new ArgumentException("bad format");

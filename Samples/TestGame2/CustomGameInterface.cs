@@ -129,8 +129,8 @@ namespace TestGame2 {
 			texture		=	Game.Content.Load<DiscTexture>( "lena" );
 
 			masterView.SkySettings.SunPosition			=	new Vector3(10,40,30);
-			masterView.SkySettings.SunLightIntensity	=	100;
-			masterView.SkySettings.SkyTurbidity			=	8;
+			masterView.SkySettings.SunLightIntensity	=	300;
+			masterView.SkySettings.SkyTurbidity			=	3;
 
 			masterView.LightSet.SpotAtlas				=	Game.Content.Load<TextureAtlas>("spots/spots");
 			masterView.LightSet.DirectLight.Direction	=	masterView.SkySettings.SunLightDirection;
@@ -139,7 +139,7 @@ namespace TestGame2 {
 			masterView.LightSet.AmbientLevel			=	Color4.Zero;
 			//masterView.LightSet.AmbientLevel			=	masterView.SkySettings.AmbientLevel;
 
-			//masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,-10), 1,  500 ) );
+			masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,-10), 1,  500 ) );
 
 			//masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,-10), 1,  15 ) );
 			//masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4, 10), 1, 15 ) );
@@ -156,7 +156,7 @@ namespace TestGame2 {
 				masterView.LightSet.OmniLights.Add( light );
 			} //*/
 														 
-			for (int i=0; i<256; i++) {
+			/*for (int i=0; i<256; i++) {
 				var light = new EnvLight();
 				light.Position		=	new Vector3( 7*(i/16-8), 6, 7*(i%16-8) );
 				light.RadiusInner	=	2;
@@ -206,8 +206,8 @@ namespace TestGame2 {
 			}
 
 
-			masterView.HdrSettings.BloomAmount	=	0.1f;
-			masterView.HdrSettings.DirtAmount	=	0.9f;
+			masterView.HdrSettings.BloomAmount	=	0.05f;
+			masterView.HdrSettings.DirtAmount	=	0.95f;
 			masterView.HdrSettings.DirtMask1	=	Game.Content.Load<DiscTexture>("bloomMask|srgb");
 			masterView.HdrSettings.DirtMask2	=	null;//GameEngine.Content.Load<DiscTexture>("bloomMask2");
 		}

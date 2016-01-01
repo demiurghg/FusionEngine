@@ -115,7 +115,7 @@ LAYERPROPS OverlayLayers ( LAYERPROPS layerA, LAYERPROPS layerB )
 	layer.Specular	=	lerp( layerA.Specular	, layerB.Specular	, factor );
 	layer.Roughness	=	lerp( layerA.Roughness	, layerB.Roughness	, factor );
 	layer.Normal	=	lerp( layerA.Normal		, layerB.Normal		, factor );
-	layer.Emission	=	lerp( layerA.Emission	, layerB.Emission	, factor );
+	layer.Emission	=	lerp( layerA.Emission	, layerB.Emission	, factor );//*/
 	
 	return layer;
 }
@@ -153,7 +153,7 @@ LAYERPROPS ReadLayerUV ( int id, float2 uv, float3x3 tbnMatrix, float3 viewDir )
 	float3 metalS		=	color.rgb * (surface.r);
 	float3 nonmetalS	=	float3(0.31,0.31,0.31) * surface.r;
 	float3 metalD		=	color.rgb * (1-surface.r);
-	float3 nonmetalD	=	color.rgb * (1-surface.r*0.31);
+	float3 nonmetalD	=	color.rgb * (1-surface.r*0.31) * 0.31;
 
 	layer.Diffuse		=	lerp(nonmetalD, metalD, surface.b);
 	layer.Alpha			=	color.a;

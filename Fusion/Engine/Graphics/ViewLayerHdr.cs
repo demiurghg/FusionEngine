@@ -168,12 +168,12 @@ namespace Fusion.Engine.Graphics {
 			int bloomWidth		=	( targetWidth/2  ) & 0xFFF0;
 			int bloomHeight		=	( targetHeight/2 ) & 0xFFF0;
 
-			viewHdrFrame.HdrBuffer			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, newWidth,	newHeight,	false, false );
-			viewHdrFrame.LightAccumulator	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, newWidth,	newHeight,	false, true );
-			viewHdrFrame.DepthBuffer		=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8,	  newWidth,	newHeight,	1 );
-			viewHdrFrame.DiffuseBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  newWidth,	newHeight,	false, false );
-			viewHdrFrame.SpecularBuffer 	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  newWidth,	newHeight,	false, false );
-			viewHdrFrame.NormalMapBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2, newWidth,	newHeight,	false, false );
+			viewHdrFrame.HdrBuffer			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F,		newWidth,	newHeight,	false, false );
+			viewHdrFrame.LightAccumulator	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F,		newWidth,	newHeight,	false, true );
+			viewHdrFrame.DepthBuffer		=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8,			newWidth,	newHeight,	1 );
+			viewHdrFrame.DiffuseBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8_sRGB,	newWidth,	newHeight,	false, false );
+			viewHdrFrame.SpecularBuffer 	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8_sRGB,	newWidth,	newHeight,	false, false );
+			viewHdrFrame.NormalMapBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2,		newWidth,	newHeight,	false, false );
 			
 			Bloom0				=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
 			Bloom1				=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );

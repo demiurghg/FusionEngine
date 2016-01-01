@@ -333,12 +333,12 @@ void CSMain(
 			float3 lightDir	 = position - worldPos.xyz;
 			float  falloff	 = LinearFalloff( length(lightDir), radius );
 			
-			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 6).rgb * diffuse.rgb * falloff * (1-Fc);
+			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 6).rgb * diffuse.rgb * falloff;
 
 			float3	F = specular.rgb;
 
 			//F = lerp( F, float3(1,1,1), Fc * pow(fresnelDecay,6) );
-			F = lerp( F, float3(1,1,1), Fc * saturate(fresnelDecay*3-2) );
+			F = lerp( F, float3(1,1,1), Fc * saturate(fresnelDecay*4-3) );
 			
 			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * F * falloff;
 		}
@@ -396,7 +396,7 @@ void CSMain(
 	//-----------------------------------------------------
 	float4 ssao	=	OcclusionMap.SampleLevel(SamplerLinearClamp, location.xy/float2(width,height), 0 );
 	
-	totalLight	+=	(diffuse + specular) * Params.AmbientColor * ssao;// * pow(normal.y*0.5+0.5, 1);
+	totalLight	+=	(diffuse + specular) * Params.AmbientColor * ssao * fresnelDecay;// * pow(normal.y*0.5+0.5, 1);
 
 	hdrTexture[dispatchThreadId.xy] = totalLight;
 }
