@@ -52,7 +52,64 @@ namespace Fusion.Drivers.Graphics {
 		}
 
 
+
+		/// <summary>
+		/// Ubershader's texture parameters
+		/// </summary>
+		public class TextureParameter {
+			public int Index { get; private set; }
+			public string Name  { get; private set; }
+			public string Default  { get; private set; }
+			public string Comment  { get; private set; }
+
+			public TextureParameter ( int index, string name, string defValue, string comment )
+			{
+				this.Index		=	index;
+				this.Name		=	name;
+				this.Comment	=	comment;
+				this.Default	=	defValue;
+			}
+		}
+
+
+
+		/// <summary>
+		/// Ubershader's texture parameters
+		/// </summary>
+		public class UniformParameter {
+			public int Index { get; private set; }
+			public string Name  { get; private set; }
+			public float Default  { get; private set; }
+			public string Comment  { get; private set; }
+
+			public UniformParameter ( int index, string name, float defValue, string comment )
+			{
+				this.Index		=	index;
+				this.Name		=	name;
+				this.Comment	=	comment;
+				this.Default	=	defValue;
+			}
+		}
+
+
+
 		Dictionary<string,UsdbEntry>	database = new Dictionary<string,UsdbEntry>();
+
+
+		/// <summary>
+		/// Shader tag. From $tag 'TagName'.
+		/// </summary>
+		public string ShaderTag { get; private set; }
+
+		/// <summary>
+		/// Gets texture parameters
+		/// </summary>
+		public TextureParameter[]	Textures { get; private set; }
+
+		/// <summary>
+		/// Gets texture parameters
+		/// </summary>
+		public UniformParameter[]	Uniforms { get; private set; }
 
 
 		/// <summary>

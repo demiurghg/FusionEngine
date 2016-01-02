@@ -49,7 +49,7 @@ float3	CookTorrance( float3 N, float3 V, float3 L, float3 I, float3 F, float rou
 	
 	//	Increase slightly low roughness value to 
 	//	avoid point light flickering on shiny surfaces.
-	roughness = roughness * 0.9f + 0.1f;
+	//roughness = roughness;
 	
 	float m = roughness * roughness;
 

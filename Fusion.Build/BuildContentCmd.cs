@@ -15,17 +15,6 @@ namespace Fusion.Build {
 	[Command("contentBuild", CommandAffinity.Default)]
 	public class BuildContentCmd : NoRollbackCommand {
 
-		[CommandLineParser.Required]
-		[CommandLineParser.Name("in")]
-		public string InputDirectory { get; set; }
-			
-		[CommandLineParser.Required]
-		[CommandLineParser.Name("out")]
-		public string OutputDirectory { get; set; }
-			
-		[CommandLineParser.Name("temp")]
-		public string TempDirectory { get; set; }
-			
 		[CommandLineParser.Name("force")]
 		public bool ForceRebuild { get; set; }
 			
@@ -47,13 +36,6 @@ namespace Fusion.Build {
 		/// </summary>
 		public override void Execute ()
 		{
-			if (string.IsNullOrWhiteSpace(InputDirectory)) {
-				throw new ArgumentException("InputDirectory", "input directory must be specified");
-			}
-			if (string.IsNullOrWhiteSpace(OutputDirectory)) {
-				throw new ArgumentException("InputDirectory", "input directory must be specified");
-			}
-
 			var task = new Task( BuildTask );
 			task.Start();
 		}
@@ -61,7 +43,7 @@ namespace Fusion.Build {
 
 		void BuildTask ()
 		{
-			Builder.SafeBuild( InputDirectory, OutputDirectory, TempDirectory, CleanPattern, ForceRebuild );
+			Builder.SafeBuild( ForceRebuild, CleanPattern );
 			Invoker.Game.Reload();
 		}
 	}

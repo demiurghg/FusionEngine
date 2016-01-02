@@ -57,6 +57,9 @@ cbuffer 		CBLayer 	: 	register(b1) { LAYERDATA Layers[4] : packoffset( c0 ); }
 SamplerState	Sampler		: 	register(s0);
 Texture2D		Textures[16]		: 	register(t0);
 
+///	https://code.google.com/p/core-fusion/source/browse/tags/Fusion_v0.3/Fusion.Shaders/surfaceShader.fx
+///	https://code.google.com/p/core-fusion/source/browse/tags/Fusion_v0.3/Fusion.Shaders/surface.Monitor.fx
+
 //+DISPLACEMENT_MAPPING !!
 #if 0
 $ubershader GBUFFER (LAYER0..LAYER1..LAYER2..LAYER3)|TERRAIN|TRIPLANAR_SINGLE|TRIPLANAR_DOUBLE|TRIPLANAR_TRIPLE RIGID|SKINNED
@@ -108,7 +111,7 @@ struct LAYERPROPS {
 LAYERPROPS OverlayLayers ( LAYERPROPS layerA, LAYERPROPS layerB )
 {
 	LAYERPROPS layer;
-	float factor = layerB.Alpha;
+	float factor = saturate(layerB.Alpha);
 	
 	layer.Diffuse	=	lerp( layerA.Diffuse	, layerB.Diffuse	, factor );
 	layer.Alpha		=	lerp( layerA.Alpha		, layerB.Alpha		, factor );
@@ -153,7 +156,7 @@ LAYERPROPS ReadLayerUV ( int id, float2 uv, float3x3 tbnMatrix, float3 viewDir )
 	float3 metalS		=	color.rgb * (surface.r);
 	float3 nonmetalS	=	float3(0.31,0.31,0.31) * surface.r;
 	float3 metalD		=	color.rgb * (1-surface.r);
-	float3 nonmetalD	=	color.rgb * (1-surface.r*0.31) * 0.31;
+	float3 nonmetalD	=	color.rgb * (1-surface.r*0.31);// * 0.31;
 
 	layer.Diffuse		=	lerp(nonmetalD, metalD, surface.b);
 	layer.Alpha			=	color.a;

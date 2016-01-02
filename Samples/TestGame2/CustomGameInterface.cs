@@ -129,7 +129,7 @@ namespace TestGame2 {
 			texture		=	Game.Content.Load<DiscTexture>( "lena" );
 
 			masterView.SkySettings.SunPosition			=	new Vector3(10,40,30);
-			masterView.SkySettings.SunLightIntensity	=	300;
+			masterView.SkySettings.SunLightIntensity	=	50;
 			masterView.SkySettings.SkyTurbidity			=	3;
 
 			masterView.LightSet.SpotAtlas				=	Game.Content.Load<TextureAtlas>("spots/spots");
@@ -217,8 +217,7 @@ namespace TestGame2 {
 		{
 			if (e.Key==Keys.F5) {
 
-				Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", null, false );
-
+				Builder.SafeBuild();
 				Game.Reload();
 			}
 

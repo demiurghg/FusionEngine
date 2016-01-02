@@ -19,12 +19,20 @@ namespace Fusion.Build {
 
 		BuildContext	context;
 
+		public static BuildOptions	Options { get; private set; }
+
 
 		public int Total { get; private set; }
 		public int Ignored { get; private set; }
 		public int Succeded { get; private set; }
 		public int Skipped { get; private set; }
 		public int Failed { get; private set; }
+
+
+		static Builder()
+		{
+			Options	=	new BuildOptions();
+		}
 
 
 		/// <summary>
@@ -40,29 +48,6 @@ namespace Fusion.Build {
 
 
 
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="inputDirectory"></param>
-		/// <param name="outputDirectory"></param>
-		/// <param name="temporaryDirectory"></param>
-		/// <param name="force"></param>
-		public static void Build ( string inputDirectory, string outputDirectory, string temporaryDirectory, string cleanPattern, bool force )
-		{
-			var options = new BuildOptions();
-			options.InputDirectory	=	inputDirectory;
-			options.OutputDirectory	=	outputDirectory;
-			options.TempDirectory	=	temporaryDirectory;
-			options.ForceRebuild	=	force;
-			options.CleanPattern	=	cleanPattern;
-
-			Build( options );
-		}
-
-
 		/// <summary>
 		/// 
 		/// </summary>
@@ -71,21 +56,27 @@ namespace Fusion.Build {
 		/// <param name="temporaryDirectory"></param>
 		/// <param name="force"></param>
 		/// <returns></returns>
-		public static bool SafeBuild ( string inputDirectory, string outputDirectory, string temporaryDirectory, string cleanPattern, bool force )
+		public static bool SafeBuild ( bool force = false, string cleanPattern = null )
 		{
 			try {
-				
-				var contentFile = Path.Combine(inputDirectory, ".content");
 
-				if (File.Exists(contentFile)) {
-					Build( inputDirectory, outputDirectory, temporaryDirectory, cleanPattern, force );
+				Options.ForceRebuild	=	force;
+				Options.CleanPattern	=	cleanPattern;
+				
+				if (File.Exists(Options.ContentIniFile)) {
+
+					Build( Options );
 					return true;
+
 				} else {
-					Log.Message("{0} does not exist. Build skipped.", contentFile );
+
+					Log.Message("{0} does not exist. Build skipped.", Options.ContentIniFile );
 					return false;
+
 				}
 
 			} catch ( BuildException be ) {
+
 				Log.Error("{0}", be.Message);
 				return false;
 			}

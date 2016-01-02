@@ -31,7 +31,10 @@ namespace TestGame2 {
 			//	Build content on startup.
 			//	Remove this line in release code.
 			//
-			Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", null, false );
+			Builder.Options.InputDirectory	=	@"..\..\..\Content";
+			Builder.Options.TempDirectory	=	@"..\..\..\Temp";
+			Builder.Options.OutputDirectory	=	@"Content";
+			Builder.SafeBuild();
 	
 			//
 			//	Run engine.

@@ -14,6 +14,9 @@ Displacement = False
 #   TriplanarWorldTriple
 Options      = SingleLayer
 
+
+# https://docs.unrealengine.com/latest/INT/Engine/Rendering/Materials/PhysicallyBased/index.html
+
 [Layer0]
 ColorLevel       = 1
 AlphaLevel       = 1
@@ -21,7 +24,7 @@ EmissionLevel    = 1
 SpecularLevel    = 1
 BumpLevel        = 1
 Displacement     = 1
-RoughnessRange   = 0.0, 0.5
+RoughnessRange   = 0.1, 0.5
 GlowNarrowness   = 0, 0
 BlendFactor      = 0
 Tiling           = 2, 2, 1
