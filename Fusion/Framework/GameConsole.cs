@@ -141,7 +141,12 @@ namespace Fusion.Framework {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
+				Game.GraphicsDevice.DisplayBoundsChanged -= GraphicsDevice_DisplayBoundsChanged;
 				LogRecorder.TraceRecorded -= TraceRecorder_TraceRecorded;
+				Game.Keyboard.KeyDown -= Keyboard_KeyDown;
+				Game.Keyboard.FormKeyPress -= Keyboard_FormKeyPress;
+				Game.Keyboard.FormKeyDown -= Keyboard_FormKeyDown;
+
 				SafeDispose( ref consoleLayer );
 				SafeDispose( ref editLayer );
 			}
