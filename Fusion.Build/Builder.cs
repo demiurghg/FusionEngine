@@ -171,17 +171,17 @@ namespace Fusion.Build {
 
 			//
 			//	gather files on source folder ignoring 
-			//	files that match ignore patter :
+			//	files that match ignore pattern :
 			//
 			Log.Message("Gathering files...");
-			var files		=	GatherAssetFiles( ignorePatterns, ref result );
+			var assetSources =	GatherAssetFiles( ignorePatterns, iniData, context, ref result );
 			Log.Message("");
 
 
 			//
 			//	Check hash collisions :
 			//
-			var collisions	=	files
+			var collisions	=	assetSources
 								.GroupBy( file0 => file0.TargetName )
 								.Where( fileGroup1 => fileGroup1.Count() > 1 )
 								.Distinct()
@@ -204,40 +204,104 @@ namespace Fusion.Build {
 			//	remove stale built content :
 			//
 			Log.Message("Cleaning stale content up...");
-			CleanStaleContent( options.FullOutputDirectory, files );			
+			CleanStaleContent( options.FullOutputDirectory, assetSources );			
 			Log.Message("");
 
-			result.Total	=	files.Count;
 
 			//
 			//	Build everything :
 			//
+			foreach ( var assetSource in assetSources ) {
+				
+				var proc = assetSource.CreateProcessor();
+				BuildAsset( proc, assetSource.BuildArguments, assetSource, ref result );
+
+			}
+
+			return result;
+		}
+
+
+
+		class LocalFile {
+			public bool Handled;
+			public readonly string KeyPath;
+			public readonly string BaseDir;
+			public readonly string FullPath;
+
+			public LocalFile ( string baseDir, string fullPath )
+			{
+				this.Handled	=	false;
+				this.BaseDir	=	baseDir;
+				this.FullPath	=	fullPath;
+				this.KeyPath	=	ContentUtils.BackslashesToSlashes( ContentUtils.MakeRelativePath(baseDir+"/", fullPath) );
+			}
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="sourceFolder"></param>
+		/// <returns></returns>
+		List<AssetSource> GatherAssetFiles ( string[] ignorePatterns, IniData iniData, BuildContext context, ref BuildResult result )
+		{
+			var assetSources = new List<AssetSource>();
+
+			//	key contain key path
+			//	value containt full path
+			var files	=	new List<LocalFile>();
+
+			//	gather files from all directories 
+			//	and then distinct them by key path.
+			foreach ( var contentDir in context.ContentDirectories ) {
+
+				var localFiles	=	Directory.EnumerateFiles( contentDir, "*", SearchOption.AllDirectories )
+								.Where( f1 => Path.GetFileName(f1).ToLowerInvariant() != ".content" );
+							
+				files.AddRange( localFiles.Select( fullpath => new LocalFile( contentDir, fullpath ) ) );
+			}
+
+			files			=	files.DistinctBy( file => file.KeyPath ).ToList();
+			result.Total	=	files.Count;
+
+
+			//	ignore files by ignore pattern
+			//	and count ignored files :
+			result.Ignored = files.RemoveAll( file => {
+				foreach ( var pattern in ignorePatterns ) {
+					if (Wildcard.Match( file.KeyPath, pattern )) {
+						return true;
+					}
+				}
+				return false;
+			});
+
+
+
+			//foreach ( var keyValue in files ) {
+			//	Log.Message("{0,-20} - {1}", keyValue.KeyPath, keyValue.BaseDir );
+			//}
+
+
 			foreach ( var section in iniData.Sections ) {
 
 				//	'Ingore' is a special section.
-				if (section.SectionName=="Ignore") {
-					continue;
-				}
-				if (section.SectionName=="ContentDirectories") {
-					continue;
-				}
-				if (section.SectionName=="BinaryDirectories") {
-					continue;
-				}
-				if (section.SectionName=="Download") {
-					continue;
-				}
+				if (section.SectionName=="Ignore") { continue; }
+				if (section.SectionName=="ContentDirectories") { continue; }
+				if (section.SectionName=="BinaryDirectories") { continue; }
+				if (section.SectionName=="Download") { continue; }
 
-				Log.Message("-------- {0} --------", section.SectionName );
-
+				//	get processor :
 				if (!processors.ContainsKey(section.SectionName)) {
 					Log.Warning("Asset processor '{0}' not found. Files will be skipped.", section.SectionName );
 					Log.Message("");
 					continue;
 				}
+				
+				var procBind = processors[section.SectionName];
 
-				var proc = processors[section.SectionName];
-
+				//	get mask and arguments :
 				var maskArgs = section.Keys
 					.Reverse()
 					.Select( key => new {
@@ -245,28 +309,29 @@ namespace Fusion.Build {
 						Args = CommandLineParser.SplitCommandLine( key.KeyName ).Skip(1).ToArray()
 					 })
 					.ToList();
-
+					
 
 				foreach ( var file in files ) {
 
+					if (file.Handled) {
+						continue;
+					}
+
 					foreach ( var maskArg in maskArgs ) {
-						
 						if ( Wildcard.Match( file.KeyPath, maskArg.Mask, true ) ) {
-
-							var processor = proc.CreateAssetProcessor();
-
-							BuildAsset( processor, maskArg.Args, file, ref result );
-
+							file.Handled = true;
+							assetSources.Add( new AssetSource( file.KeyPath, file.BaseDir, procBind.Type, maskArg.Args, context ) ); 
 							break;
 						}
-
 					}
 				}
 
-				Log.Message("");
+				//	count unhandled files :
+				result.Skipped = files.Count( f => !f.Handled );
 			}
 
-			return result;
+
+			return assetSources;
 		}
 
 
@@ -293,6 +358,7 @@ namespace Fusion.Build {
 
 			Log.Message("{0} stale files from {1} are removed", totalStale, totalOutput );
 		}
+
 
 
 		/// <summary>
@@ -385,17 +451,11 @@ namespace Fusion.Build {
 		/// <param name="fileName"></param>
 		void BuildAsset ( AssetProcessor processor, string[] args, AssetSource assetFile, ref BuildResult buildResult )
 		{					
-			if (assetFile.IsProcessed) {
-				Log.Warning("{0} : already proccessed. Skipped.", assetFile.KeyPath );
-				return;
-			}
-
 			try {
 				
 				//	Is up-to-date?
 				if ( assetFile.IsUpToDate && !context.Options.ForceRebuild && !Wildcard.Match(assetFile.KeyPath, context.Options.CleanPattern, true) ) {
 					buildResult.UpToDate ++;
-					assetFile.IsProcessed = true;
 					return;
 				} 																   
 
@@ -420,51 +480,12 @@ namespace Fusion.Build {
 				//
 				processor.Process( assetFile, context );
 
-				assetFile.IsProcessed = true;
-
 				buildResult.Succeded ++;
 
 			} catch ( Exception e ) {
 				Log.Error( "{0} : {1}", assetFile.KeyPath, e.Message );
 				buildResult.Failed ++;
 			}
-		}
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="sourceFolder"></param>
-		/// <returns></returns>
-		List<AssetSource> GatherAssetFiles ( string[] ignorePatterns, ref BuildResult result )
-		{
-			var list = new List<AssetSource>();
-
-			foreach ( var contentDir in context.ContentDirectories ) {
-
-				var files = Directory	
-							.EnumerateFiles( contentDir, "*", SearchOption.AllDirectories )
-							.Select( path => new AssetSource( path, contentDir, context ) )
-							.Where( file => file.KeyPath != ".content" )
-							.ToList();
-
-				int ignored = files.RemoveAll( file => {
-
-						foreach ( var patten in ignorePatterns ) {
-							if (Wildcard.Match( file.KeyPath, patten )) {
-								return true;
-							}
-						}
-						return false;
-					} );
-
-				result.Ignored += ignored;
-
-				list.AddRange( files );
-			}
-
-
-			return list.DistinctBy( file => file.KeyPath ).ToList();
 		}
 
 	}

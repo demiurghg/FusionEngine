@@ -65,7 +65,7 @@ namespace Fusion.Build.Processors {
 			var cmdLine			=	string.Format("\"{0}\" /out:\"{1}\" /base:\"{2}\" /merge:{3} {4} {5} {6} {7}", 
 				resolvedPath, 
 				destPath, 
-				assetFile.BasePath,
+				assetFile.BaseDirectory,
 				MergeTolerance, 
 				ImportAnimation ? "/anim":"", 
 				ImportGeometry ? "/geom":"", 

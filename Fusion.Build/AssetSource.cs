@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using Fusion;
 using Fusion.Core.Content;
+using Fusion.Build.Processors;
 
 namespace Fusion.Build {
 
@@ -14,9 +15,8 @@ namespace Fusion.Build {
 			
 		string fullPath;
 		string keyPath;
+		string baseDir;
 		string outputDir;
-		string basePath;
-		bool processed;
 
 		/// <summary>
 		/// Logical relativee path to file to be built.
@@ -39,24 +39,8 @@ namespace Fusion.Build {
 		/// <summary>
 		/// Base directory for this file
 		/// </summary>
-		public string BasePath { 
-			get { 
-				return basePath; 
-			} 
-		}
-
-		/// <summary>
-		/// Is file have been proceessed.
-		/// Could be assigned to TRUE only.
-		/// </summary>
-		public bool IsProcessed { 
-			get { return processed; }
-			set {
-				if (value==false) {
-					throw new BuildException("BuildFile.IsProcessed may be assigned to True only");
-				}
-				processed = value;
-			}
+		public string BaseDirectory { 
+			get { return baseDir; } 
 		}
 
 
@@ -113,22 +97,44 @@ namespace Fusion.Build {
 		}
 
 
+		/// <summary>
+		/// Gets build parameters.
+		/// </summary>
+		public string[] BuildArguments {
+			get; private set;
+		}
+
+
+		readonly Type assetProcessorType;
+
 
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="fullPath">Full path to this asset file</param>
-		/// <param name="contentDir">Directory where file had been found.</param>
-		/// <param name="context">Build context</param>
-		public AssetSource ( string fullPath, string contentDir, BuildContext context )
+		/// <param name="keyPath">Key path</param>
+		/// <param name="baseDir">Base directory</param>
+		/// <param name="buildParameters"></param>
+		/// <param name="context"></param>
+		public AssetSource ( string keyPath, string baseDir, Type assetProcessorType, string[] buildArgs, BuildContext context )
 		{
-			this.outputDir		=	context.Options.FullOutputDirectory;
-			this.fullPath		=	fullPath;
-			this.basePath		=	contentDir;
-			this.keyPath		=	ContentUtils.BackslashesToSlashes( ContentUtils.MakeRelativePath( contentDir + "\\", fullPath ) );
-
-			this.processed		=	false;
+			this.assetProcessorType	=	assetProcessorType;
+			this.outputDir			=	context.Options.FullOutputDirectory;
+			this.fullPath			=	Path.Combine( baseDir, keyPath );
+			this.baseDir			=	baseDir;
+			this.keyPath			=	keyPath;
+			this.BuildArguments		=	buildArgs;
 		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public AssetProcessor CreateProcessor()
+		{
+			return (AssetProcessor)Activator.CreateInstance( assetProcessorType );
+		} 
 
 
 
