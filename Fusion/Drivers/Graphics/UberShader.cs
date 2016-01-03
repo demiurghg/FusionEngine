@@ -11,6 +11,7 @@ using D3D11 = SharpDX.Direct3D11;
 using Fusion.Core;
 using Fusion.Core.Content;
 using Fusion.Core.Mathematics;
+using System.Text.RegularExpressions;
 
 
 namespace Fusion.Drivers.Graphics {
@@ -57,17 +58,30 @@ namespace Fusion.Drivers.Graphics {
 		/// Ubershader's texture parameters
 		/// </summary>
 		public class TextureParameter {
-			public int Index { get; private set; }
+			
+			static Regex	Pattern	=	new Regex(@"\$texture\s+(\w+)\s+([a-zA-Z\.\\/]+)(?:\s*\/\/\s*(.*))?");
+
 			public string Name  { get; private set; }
 			public string Default  { get; private set; }
 			public string Comment  { get; private set; }
 
-			public TextureParameter ( int index, string name, string defValue, string comment )
+			public TextureParameter ( string declaration )
 			{
-				this.Index		=	index;
+				declaration		=	declaration.Trim();
+
+				var match		=	Pattern.Match( declaration );
+				var captures	=	match.Groups.Cast<Group>().Select( c => c.Value ).ToArray();
+
+				this.Name		=	captures[1];
+				this.Default	=	captures[2];
+				this.Comment	=	captures.Length > 3 ? captures[3] : "";
+			}
+
+			public TextureParameter ( string name, string defValue, string comment )
+			{
 				this.Name		=	name;
-				this.Comment	=	comment;
 				this.Default	=	defValue;
+				this.Comment	=	comment;
 			}
 		}
 
@@ -77,17 +91,30 @@ namespace Fusion.Drivers.Graphics {
 		/// Ubershader's texture parameters
 		/// </summary>
 		public class UniformParameter {
-			public int Index { get; private set; }
+													
+			static Regex	Pattern	=	new Regex(@"\$uniform\s+(\w+)\s+(\-?\d(?:\.\d+)?)(?:\s*\/\/\s*(.*))?");
+
 			public string Name  { get; private set; }
 			public float Default  { get; private set; }
 			public string Comment  { get; private set; }
 
-			public UniformParameter ( int index, string name, float defValue, string comment )
+			public UniformParameter ( string declaration )
 			{
-				this.Index		=	index;
+				declaration	=	declaration.Trim();
+
+				var match		=	Pattern.Match( declaration );
+				var captures	=	match.Groups.Cast<Group>().Select( c => c.Value ).ToArray();
+
+				this.Name		=	captures[1];
+				this.Default	=	float.Parse(captures[2]);
+				this.Comment	=	captures.Length > 3 ? captures[3] : "";
+			}
+
+			public UniformParameter ( string name, float defValue, string comment )
+			{
 				this.Name		=	name;
-				this.Comment	=	comment;
 				this.Default	=	defValue;
+				this.Comment	=	comment;
 			}
 		}
 

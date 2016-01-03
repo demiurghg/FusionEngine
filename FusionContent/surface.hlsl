@@ -24,7 +24,6 @@ struct LAYERDATA {
 	float	Dummy;
 };
 
-
 struct VSInput {
 	float3 Position : POSITION;
 	float3 Tangent 	: TANGENT;
@@ -62,6 +61,9 @@ Texture2D		Textures[16]		: 	register(t0);
 
 //+DISPLACEMENT_MAPPING !!
 #if 0
+$texture BaseColor			defaultGray.tga		//	Base color texture
+$uniform SpecularLevel		1					//	Specular level
+
 $ubershader GBUFFER (LAYER0..LAYER1..LAYER2..LAYER3)|TERRAIN|TRIPLANAR_SINGLE|TRIPLANAR_DOUBLE|TRIPLANAR_TRIPLE RIGID|SKINNED
 $ubershader SHADOW RIGID|SKINNED
 #endif
