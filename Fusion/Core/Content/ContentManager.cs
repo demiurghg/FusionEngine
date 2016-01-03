@@ -143,15 +143,10 @@ namespace Fusion.Core.Content {
 		{
 			var realName =  GetRealAssetFileName( assetPath );
 
-			var leadingHash = new byte[16];
-
 			try {
-				var fileStream	=	File.OpenRead( realName );
-				var zipStream	=	new DeflateStream( fileStream, CompressionMode.Decompress, false );
-				
-				zipStream.Read( leadingHash, 0, 16 );
 
-				return zipStream;
+				var stream	 =	AssetStream.OpenRead( realName );
+				return stream;
 
 			} catch ( IOException ioex ) {
 				throw new IOException( string.Format("Could not open file: '{0}'\r\nHashed file name: '({1})'", assetPath, realName ), ioex );

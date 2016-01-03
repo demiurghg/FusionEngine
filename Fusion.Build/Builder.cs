@@ -276,7 +276,7 @@ namespace Fusion.Build {
 		/// </summary>
 		/// <param name="outputFolder"></param>
 		/// <param name="files"></param>
-		void CleanStaleContent ( string outputFolder, IEnumerable<AssetFile> inputFiles )
+		void CleanStaleContent ( string outputFolder, IEnumerable<AssetSource> inputFiles )
 		{
 			var dictinary	=	inputFiles.ToDictionary( file => file.Hash );
 			var outputFiles =	Directory.EnumerateFiles( outputFolder );
@@ -383,7 +383,7 @@ namespace Fusion.Build {
 		/// </summary>
 		/// <param name="processor"></param>
 		/// <param name="fileName"></param>
-		void BuildAsset ( AssetProcessor processor, string[] args, AssetFile assetFile, ref BuildResult buildResult )
+		void BuildAsset ( AssetProcessor processor, string[] args, AssetSource assetFile, ref BuildResult buildResult )
 		{					
 			if (assetFile.IsProcessed) {
 				Log.Warning("{0} : already proccessed. Skipped.", assetFile.KeyPath );
@@ -391,21 +391,12 @@ namespace Fusion.Build {
 			}
 
 			try {
-				assetFile.BuildArgs	=	args;
-
-				//	Is up-to-date:
-				//	Write time and 
-				string status	=	"...";
-
+				
+				//	Is up-to-date?
 				if ( assetFile.IsUpToDate && !context.Options.ForceRebuild && !Wildcard.Match(assetFile.KeyPath, context.Options.CleanPattern, true) ) {
-					if ( assetFile.IsParametersEqual() ) {
-						status = "UTD";
-						buildResult.UpToDate ++;
-						assetFile.IsProcessed = true;
-						return;
-					} else {
-						status = "HSH";
-					}
+					buildResult.UpToDate ++;
+					assetFile.IsProcessed = true;
+					return;
 				} 																   
 
 
@@ -415,7 +406,7 @@ namespace Fusion.Build {
 					keyPath = "..." + keyPath.Substring( keyPath.Length - 40 + 3 );
 				}
 
-				Log.Message("{0,-40} {1,-5} {2}  {3}", keyPath, Path.GetExtension(keyPath), status, string.Join(" ", args), assetFile.Hash );
+				Log.Message("{0,-40} {1,-5}   {3}", keyPath, Path.GetExtension(keyPath), string.Join(" ", args), assetFile.Hash );
 
 				// Apply attribute :
 				var parser =	new CommandLineParser( processor );
@@ -445,15 +436,15 @@ namespace Fusion.Build {
 		/// </summary>
 		/// <param name="sourceFolder"></param>
 		/// <returns></returns>
-		List<AssetFile> GatherAssetFiles ( string[] ignorePatterns, ref BuildResult result )
+		List<AssetSource> GatherAssetFiles ( string[] ignorePatterns, ref BuildResult result )
 		{
-			var list = new List<AssetFile>();
+			var list = new List<AssetSource>();
 
 			foreach ( var contentDir in context.ContentDirectories ) {
 
 				var files = Directory	
 							.EnumerateFiles( contentDir, "*", SearchOption.AllDirectories )
-							.Select( path => new AssetFile( path, contentDir, context ) )
+							.Select( path => new AssetSource( path, contentDir, context ) )
 							.Where( file => file.KeyPath != ".content" )
 							.ToList();
 

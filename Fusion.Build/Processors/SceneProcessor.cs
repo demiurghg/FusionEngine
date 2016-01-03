@@ -57,7 +57,7 @@ namespace Fusion.Build.Processors {
 		/// </summary>
 		/// <param name="sourceStream"></param>
 		/// <param name="targetStream"></param>
-		public override void Process ( AssetFile assetFile, BuildContext context )
+		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
 			var resolvedPath	=	assetFile.FullSourcePath;
 			var destPath		=	context.GetTempFileName( assetFile.KeyPath, ".scene" );

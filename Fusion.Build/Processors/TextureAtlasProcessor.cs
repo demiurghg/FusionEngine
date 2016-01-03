@@ -51,7 +51,7 @@ namespace Fusion.Build.Processors {
 		/// 
 		/// </summary>
 		/// <param name="buildContext"></param>
-		public override void Process ( AssetFile assetFile, BuildContext context )
+		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
 			var fileDir		=	Path.GetDirectoryName( assetFile.FullSourcePath );
 

@@ -23,6 +23,6 @@ namespace Fusion.Build.Processors {
 		/// </summary>
 		/// <param name="sourceStream"></param>
 		/// <param name="targetStream"></param>
-		public abstract void Process ( AssetFile assetFile, BuildContext context );
+		public abstract void Process ( AssetSource assetFile, BuildContext context );
 	}
 }

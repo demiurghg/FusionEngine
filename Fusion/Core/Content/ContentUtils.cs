@@ -15,6 +15,30 @@ namespace Fusion.Core.Content {
 	public static class ContentUtils {
 
 
+		/// <summary>
+		/// Makes four bytes from FourCC.
+		/// </summary>
+		/// <param name="fourCC"></param>
+		/// <returns></returns>
+		public static string MakeFourCC ( uint fourCC )
+		{
+			return Encoding.ASCII.GetString( BitConverter.GetBytes(fourCC) );
+		}
+
+
+		/// <summary>
+		/// Makes four bytes from FourCC.
+		/// </summary>
+		/// <param name="fourCC"></param>
+		/// <returns></returns>
+		public static uint MakeFourCC ( string fourCC )
+		{
+			if (fourCC.Length!=4) {
+				throw new ArgumentException("fourCC must contain exactly four characters");
+			}
+			return BitConverter.ToUInt32(Encoding.ASCII.GetBytes( fourCC ).Take(4).ToArray(), 0);
+		}
+
 
 		/// <summary>
 		/// Creates a relative path from one file or folder to another.

@@ -91,7 +91,7 @@ namespace Fusion.Build.Processors {
 		/// 
 		/// </summary>
 		/// <param name="buildContext"></param>
-		public override void Process ( AssetFile assetFile, BuildContext buildContext )
+		public override void Process ( AssetSource assetFile, BuildContext buildContext )
 		{
 			//
 			//	Get combinations :

@@ -57,7 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssetFile.cs" />
+    <Compile Include="AssetSource.cs" />
     <Compile Include="BuildContentCmd.cs" />
     <Compile Include="BuildContext.cs" />
     <Compile Include="Builder.cs" />

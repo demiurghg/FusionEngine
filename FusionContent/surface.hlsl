@@ -7,6 +7,7 @@ struct BATCH {
 	float4		BiasSlopeFar	;
 };
 
+
 struct LAYERDATA {
 	float4	Tiling;
 	float4	Offset;

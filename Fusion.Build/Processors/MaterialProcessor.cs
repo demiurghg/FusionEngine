@@ -26,7 +26,7 @@ namespace Fusion.Build.Processors {
 		/// </summary>
 		/// <param name="sourceStream"></param>
 		/// <param name="targetStream"></param>
-		public override void Process ( AssetFile assetFile, BuildContext context )
+		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
 			var mtrl	=	Material.FromINI ( File.ReadAllText(assetFile.FullSourcePath) );
 
