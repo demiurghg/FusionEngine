@@ -17,6 +17,7 @@ namespace Fusion.Build {
 		string keyPath;
 		string baseDir;
 		string outputDir;
+		readonly BuildContext context;
 
 		/// <summary>
 		/// Logical relativee path to file to be built.
@@ -86,10 +87,25 @@ namespace Fusion.Build {
 				}
 
 				var targetTime	=	File.GetLastWriteTime( FullTargetPath );
-				var sourceTime	=	File.GetLastWriteTime( FullSourcePath );
+				var buildArgs	=	string.Join(" ", BuildArguments);
 
-				if (targetTime < sourceTime) {
-					return false;
+				using ( var assetStream = AssetStream.OpenRead( FullTargetPath ) ) {
+					
+					if (assetStream.BuildParameters!=buildArgs) {
+						return false;
+					}
+
+					foreach ( var dependency in assetStream.Dependencies ) {
+						if ( context.ContentFileExists(dependency) ) {
+							var fullDependencyPath = context.ResolveContentPath(dependency);
+
+							var sourceTime	=	File.GetLastWriteTime(fullDependencyPath);
+
+							if (targetTime < sourceTime) {
+								return false;
+							}
+						}
+					}
 				}
 
 				return true;
@@ -123,6 +139,7 @@ namespace Fusion.Build {
 			this.baseDir			=	baseDir;
 			this.keyPath			=	keyPath;
 			this.BuildArguments		=	buildArgs;
+			this.context			=	context;
 		}
 
 
@@ -145,7 +162,8 @@ namespace Fusion.Build {
 		/// <returns></returns>
 		public Stream OpenTargetStream ( IEnumerable<string> dependencies )
 		{
-			return AssetStream.OpenWrite( FullTargetPath, "", dependencies.Concat( new[]{ KeyPath } ).Distinct().ToArray() );
+			var args	=	string.Join(" ", BuildArguments);
+			return AssetStream.OpenWrite( FullTargetPath, args, dependencies.Concat( new[]{ KeyPath } ).Distinct().ToArray() );
 		}
 
 

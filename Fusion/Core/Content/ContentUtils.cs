@@ -181,9 +181,9 @@ namespace Fusion.Core.Content {
 		/// <param name="assetPath"></param>
 		/// <param name="ext"></param>
 		/// <returns></returns>
-		public static string GetHashedFileName ( string assetPath, string ext )
+		public static string GetHashedFileName ( string keyAssetPath, string ext )
 		{
-			return CalculateMD5Hash( GetPathWithoutExtension( BackslashesToSlashes(assetPath).ToLower()) ) + ext;
+			return CalculateMD5Hash( GetPathWithoutExtension( BackslashesToSlashes(keyAssetPath).ToLower()) ) + ext;
 		}
 
 

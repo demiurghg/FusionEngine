@@ -137,6 +137,10 @@ namespace Fusion.Build.Processors {
 			htmlBuilder.AppendLine("");
 			htmlBuilder.AppendLine("<b>Source:</b> <i>" + assetFile.KeyPath + "</i>" );
 			htmlBuilder.AppendLine("");
+
+			//	insert includes here bit later:
+			var includeInsert = htmlBuilder.Length;
+
 			htmlBuilder.AppendLine("<b>Declarations:</b>");
 
 			foreach ( var comb in ubershaderDecl ) {
@@ -161,7 +165,11 @@ namespace Fusion.Build.Processors {
 			htmlBuilder.AppendLine("");
 
 
+
 			var usdb = new List<UsdbEntry>();
+
+			var include = new IncludeHandler(buildContext);
+
 
 			//
 			//	Build all :
@@ -170,26 +178,26 @@ namespace Fusion.Build.Processors {
 
 				var id		=	defineList.IndexOf( defines );
 
-				var psbc	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D8") + ".PS.dxbc" );
-				var vsbc	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D8") + ".VS.dxbc" );
-				var gsbc	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D8") + ".GS.dxbc" );
-				var hsbc	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D8") + ".HS.dxbc" );
-				var dsbc	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D8") + ".DS.dxbc" );
-				var csbc	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D8") + ".CS.dxbc" );
+				var psbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".PS.dxbc" );
+				var vsbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".VS.dxbc" );
+				var gsbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".GS.dxbc" );
+				var hsbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".HS.dxbc" );
+				var dsbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".DS.dxbc" );
+				var csbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".CS.dxbc" );
+															  
+				var pshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".PS.html" );
+				var vshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".VS.html" );
+				var gshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".GS.html" );
+				var hshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".HS.html" );
+				var dshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".DS.html" );
+				var cshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".CS.html" );
 
-				var pshtm	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D8") + ".PS.html" );
-				var vshtm	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D8") + ".VS.html" );
-				var gshtm	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D8") + ".GS.html" );
-				var hshtm	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D8") + ".HS.html" );
-				var dshtm	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D8") + ".DS.html" );
-				var cshtm	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D8") + ".CS.html" );
-
-				var ps = Compile( buildContext, shaderSource, assetFile.FullSourcePath, "ps_5_0", PSEntryPoint, defines, psbc, pshtm );
-				var vs = Compile( buildContext, shaderSource, assetFile.FullSourcePath, "vs_5_0", VSEntryPoint, defines, vsbc, vshtm );
-				var gs = Compile( buildContext, shaderSource, assetFile.FullSourcePath, "gs_5_0", GSEntryPoint, defines, gsbc, gshtm );
-				var hs = Compile( buildContext, shaderSource, assetFile.FullSourcePath, "hs_5_0", HSEntryPoint, defines, hsbc, hshtm );
-				var ds = Compile( buildContext, shaderSource, assetFile.FullSourcePath, "ds_5_0", DSEntryPoint, defines, dsbc, dshtm );
-				var cs = Compile( buildContext, shaderSource, assetFile.FullSourcePath, "cs_5_0", CSEntryPoint, defines, csbc, cshtm );
+				var ps = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "ps_5_0", PSEntryPoint, defines, psbc, pshtm );
+				var vs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "vs_5_0", VSEntryPoint, defines, vsbc, vshtm );
+				var gs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "gs_5_0", GSEntryPoint, defines, gsbc, gshtm );
+				var hs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "hs_5_0", HSEntryPoint, defines, hsbc, hshtm );
+				var ds = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "ds_5_0", DSEntryPoint, defines, dsbc, dshtm );
+				var cs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "cs_5_0", CSEntryPoint, defines, csbc, cshtm );
 				
 
 				htmlBuilder.AppendFormat( (vs.Length==0) ? ".. " : "<a href=\"{0}\">vs</a> ", Path.GetFileName(vshtm) );
@@ -204,13 +212,20 @@ namespace Fusion.Build.Processors {
 				usdb.Add( new UsdbEntry( defines, ps, vs, gs, hs, ds, cs ) );
 			}
 
+
+			htmlBuilder.Insert( includeInsert, 
+				"<b>Includes:</b>\r\n" 
+				+ string.Join("", include.Includes.Select(s=>"  <i>" + s + "</i>\r\n") )
+				+ "\r\n");
+
+
 			File.WriteAllText( buildContext.GetTempFileName(assetFile.KeyPath, ".html"), htmlBuilder.ToString() );
 
 
 			//
 			//	Write ubershader :
 			//
-			using ( var fs = assetFile.OpenTargetStream() ) {
+			using ( var fs = assetFile.OpenTargetStream(include.Includes) ) {
 
 				using ( var bw = new BinaryWriter( fs ) ) {
 
@@ -253,6 +268,8 @@ namespace Fusion.Build.Processors {
 
 		class IncludeHandler : FX.Include {
 
+			public readonly HashSet<string> Includes = new HashSet<string>();
+
 			readonly BuildContext buildContext;
 		
 			public IncludeHandler ( BuildContext buildContext )
@@ -263,6 +280,10 @@ namespace Fusion.Build.Processors {
 
 			public Stream Open( IncludeType type, string fileName, Stream parentStream )
 			{
+				Log.Debug("...include: {0}", fileName);
+				if (!Includes.Contains(fileName)) {
+					Includes.Add(fileName);
+				}
 				return File.OpenRead( buildContext.ResolveContentPath( fileName ) );
 			}
 
@@ -297,7 +318,7 @@ namespace Fusion.Build.Processors {
 		/// <param name="output"></param>
 		/// <param name="listing"></param>
 		/// <returns></returns>
-		byte[] Compile (  BuildContext buildContext, string shaderSource, string sourceFile, string profile, string entryPoint, string defines, string output, string listing )
+		byte[] Compile (  BuildContext buildContext, Include include, string shaderSource, string sourceFile, string profile, string entryPoint, string defines, string output, string listing )
 		{
 			Log.Debug("{0} {1} {2} {3}", sourceFile, profile, entryPoint, defines );
 
@@ -318,7 +339,7 @@ namespace Fusion.Build.Processors {
 			try {
 			
 				var sourceBytes = Encoding.UTF8.GetBytes(shaderSource);
-				var result = FX.ShaderBytecode.Compile( sourceBytes, entryPoint, profile, flags, FX.EffectFlags.None, defs, new IncludeHandler(buildContext), sourceFile );
+				var result = FX.ShaderBytecode.Compile( sourceBytes, entryPoint, profile, flags, FX.EffectFlags.None, defs, include, sourceFile );
 			
 				if ( result.Message!=null ) {
 					Log.Warning( result.Message );

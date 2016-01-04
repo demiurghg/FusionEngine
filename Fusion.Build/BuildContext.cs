@@ -214,6 +214,12 @@ namespace Fusion.Build {
 
 
 
+		/// <summary>
+		/// Try to resolve source file path.
+		/// If succeded returns true. False otherwice.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
 		public bool ContentFileExists ( string path )
 		{
 			try {
@@ -235,9 +241,9 @@ namespace Fusion.Build {
 		/// <returns>Full path for generated file name.</returns>
 		public string GetTempFileName ( string key, string ext )
 		{
-			var fileName	=	ContentUtils.CalculateMD5Hash( key.ToLower(), true );
+			var fileName	=	ContentUtils.GetHashedFileName( key, ext );
 
-			return Path.Combine( Options.FullTempDirectory, fileName ) + ext;
+			return Path.Combine( Options.FullTempDirectory, fileName );
 		}
 
 
