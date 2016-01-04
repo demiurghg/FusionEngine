@@ -279,11 +279,6 @@ namespace Fusion.Build {
 
 
 
-			//foreach ( var keyValue in files ) {
-			//	Log.Message("{0,-20} - {1}", keyValue.KeyPath, keyValue.BaseDir );
-			//}
-
-
 			foreach ( var section in iniData.Sections ) {
 
 				//	'Ingore' is a special section.
@@ -454,10 +449,14 @@ namespace Fusion.Build {
 			try {
 				
 				//	Is up-to-date?
-				if ( assetFile.IsUpToDate && !context.Options.ForceRebuild && !Wildcard.Match(assetFile.KeyPath, context.Options.CleanPattern, true) ) {
-					buildResult.UpToDate ++;
-					return;
-				} 																   
+				if (!context.Options.ForceRebuild) {
+					if (!Wildcard.Match(assetFile.KeyPath, context.Options.CleanPattern, true)) {
+						if (assetFile.IsUpToDate) {
+							buildResult.UpToDate ++;
+							return;
+						}
+					}
+				}
 
 
 				var keyPath = assetFile.KeyPath;
