@@ -82,9 +82,23 @@ namespace Fusion.Engine.Graphics {
 			this.Layer0.NormalMapTexture	=	"";
 			this.Layer0.EmissionTexture		=	"";
 
-			this.Layer1	=	null;
-			this.Layer2	=	null;
-			this.Layer3	=	null;
+			this.Layer1	=	new MaterialLayer();
+			this.Layer1.ColorTexture		=	"";
+			this.Layer1.SurfaceTexture		=	"";
+			this.Layer1.NormalMapTexture	=	"";
+			this.Layer1.EmissionTexture		=	"";
+
+			this.Layer2	=	new MaterialLayer();
+			this.Layer2.ColorTexture		=	"";
+			this.Layer2.SurfaceTexture		=	"";
+			this.Layer2.NormalMapTexture	=	"";
+			this.Layer2.EmissionTexture		=	"";
+
+			this.Layer3	=	new MaterialLayer();
+			this.Layer3.ColorTexture		=	"";
+			this.Layer3.SurfaceTexture		=	"";
+			this.Layer3.NormalMapTexture	=	"";
+			this.Layer3.EmissionTexture		=	"";
 
 			this.Transparent	=	false;
 			this.CastShadow		=	true;
@@ -105,34 +119,6 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-
-
-		/// <summary>
-		/// Creates non-transparent material that casts shadow from color texture.
-		/// Method search for existing textures with postfixes like "_s", "_n", "_e" 
-		/// and substitutes them into material.
-		/// </summary>
-		/// <param name="path"></param>
-		public static Material CreateFromTexture ( string path )
-		{
-			var mtrl = new Material();
-			mtrl.Layer0	=	new MaterialLayer();
-			mtrl.Layer0.ColorTexture		=	path + "|srgb";
-			mtrl.Layer0.SurfaceTexture		=	path + "_s";
-			mtrl.Layer0.NormalMapTexture	=	path + "_n";
-			mtrl.Layer0.EmissionTexture		=	path + "_e|srgb";
-
-			mtrl.Layer1	=	null;
-			mtrl.Layer2	=	null;
-			mtrl.Layer3	=	null;
-
-			mtrl.Transparent			=	false;
-			mtrl.CastShadow				=	true;
-
-			return mtrl;
-		}
-
-
 		/*-----------------------------------------------------------------------------------------
 		 * 
 		 *	Serialization :
@@ -148,7 +134,7 @@ namespace Fusion.Engine.Graphics {
 		static void SectionToObject<T>( ref T obj, KeyDataCollection keyDataCollection )
 		{
 			if (keyDataCollection==null) {
-				obj = default(T);
+				//obj = default(T);
 				return;
 			}
 

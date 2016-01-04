@@ -30,9 +30,25 @@ namespace Fusion.Build.Processors {
 		{
 			var mtrl	=	Material.FromINI ( File.ReadAllText(assetFile.FullSourcePath) );
 
+			//	get dependencies :
+			var depList	=	new[]{
+					mtrl.Layer0.ColorTexture, mtrl.Layer0.SurfaceTexture, mtrl.Layer0.NormalMapTexture, mtrl.Layer0.EmissionTexture,
+					mtrl.Layer1.ColorTexture, mtrl.Layer1.SurfaceTexture, mtrl.Layer1.NormalMapTexture, mtrl.Layer1.EmissionTexture,
+					mtrl.Layer2.ColorTexture, mtrl.Layer2.SurfaceTexture, mtrl.Layer2.NormalMapTexture, mtrl.Layer2.EmissionTexture,
+					mtrl.Layer3.ColorTexture, mtrl.Layer3.SurfaceTexture, mtrl.Layer3.NormalMapTexture, mtrl.Layer3.EmissionTexture,
+				};
+
+			depList	=	depList
+				.Where( s0 => !string.IsNullOrWhiteSpace(s0) )
+				.Where( s1 => !s1.StartsWith("*") )
+				.Distinct()
+				.ToArray();
+
+
+
 			var file	=	mtrl.ToINI();
 
-			using ( var target = assetFile.OpenTargetStream() ) {
+			using ( var target = assetFile.OpenTargetStream(depList) ) {
 				using ( var bw = new BinaryWriter(target) ) {
 					bw.Write(file);
 				}

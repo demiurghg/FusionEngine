@@ -84,16 +84,7 @@ namespace Fusion.Engine.Graphics {
 
 			LoadTextures();
 
-			content.Game.Reloading += Game_Reloading;
-
 			constBuffer.SetData( constData );
-		}
-
-
-
-		void Game_Reloading ( object sender, EventArgs e )
-		{
-			LoadTextures();
 		}
 
 
@@ -131,9 +122,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void DisposeGpuResources ()
 		{
-			Game.Reloading -= Game_Reloading;
 			SafeDispose( ref constBuffer );
-			//SafeDispose( ref shaderResources );
 		}
 
 
