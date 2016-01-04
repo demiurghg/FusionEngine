@@ -54,8 +54,10 @@ struct GBuffer {
 
 cbuffer 		CBBatch 	: 	register(b0) { BATCH     Batch     : packoffset( c0 ); }	
 cbuffer 		CBLayer 	: 	register(b1) { LAYERDATA Layers[4] : packoffset( c0 ); }	
+cbuffer			CBUniforms	:	register(b2) { float __uniforms[32] : packoffset( c0 ); }
 SamplerState	Sampler		: 	register(s0);
 Texture2D		Textures[16]		: 	register(t0);
+Texture2D		__textures[16]		: 	register(t1);
 
 ///	https://code.google.com/p/core-fusion/source/browse/tags/Fusion_v0.3/Fusion.Shaders/surfaceShader.fx
 ///	https://code.google.com/p/core-fusion/source/browse/tags/Fusion_v0.3/Fusion.Shaders/surface.Monitor.fx
@@ -76,7 +78,7 @@ PSInput VSMain( VSInput input )
 {
 	PSInput output;
 
-	
+	$BaseColor.Sample(Sampler, input.TexCoord + float2(0, $SpecularLevel) ); 
 	float4 	pos			=	float4( input.Position, 1 );
 	float4	wPos		=	mul( pos,  Batch.World 		);
 	float4	vPos		=	mul( wPos, Batch.View 		);

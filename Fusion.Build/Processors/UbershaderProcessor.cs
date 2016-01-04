@@ -15,6 +15,7 @@ using Fusion.Core.Mathematics;
 using FX = SharpDX.D3DCompiler;
 using SharpDX.D3DCompiler;
 using Fusion.Core.Shell;
+using Fusion.Core.Content;
 
 
 namespace Fusion.Build.Processors {
@@ -123,7 +124,22 @@ namespace Fusion.Build.Processors {
 								.Where( line0 => line0.StartsWith("$uniform") )
 								.Select( line1 => new Ubershader.UniformParameter(line1) )
 								.ToArray();
+
+			if (textureDecl.Length>16) {
+				throw new BuildException("Texture ubershader parameters count exceeded maximum allowed.");
+			}
+			if (uniformDecl.Length>32) {
+				throw new BuildException("Uniform ubershader parameters count exceeded maximum allowed.");
+			}
 			
+
+			for ( int i=0; i<textureDecl.Length; i++ ) {
+				shaderSource	=	shaderSource.Replace( "$"+textureDecl[i].Name, string.Format("__textures[{0}]", i) );
+			}
+
+			for ( int i=0; i<uniformDecl.Length; i++ ) {
+				shaderSource	=	shaderSource.Replace( "$"+uniformDecl[i].Name, string.Format("__uniforms[{0}]", i) );
+			}
 
 
 			//
@@ -229,35 +245,52 @@ namespace Fusion.Build.Processors {
 
 				using ( var bw = new BinaryWriter( fs ) ) {
 
-					bw.Write( new[]{'U','S','D','B'});
+					bw.WriteFourCC( Ubershader.UbershaderSignature );
 
+					//	params :
+					bw.Write( textureDecl.Length );
+					foreach ( var decl in textureDecl ) {
+						bw.Write( decl.Name );
+						bw.Write( decl.Default );
+						bw.Write( decl.Comment );
+					}
+
+					bw.Write( uniformDecl.Length );
+					foreach ( var decl in uniformDecl ) {
+						bw.Write( decl.Name );
+						bw.Write( decl.Default );
+						bw.Write( decl.Comment );
+					}
+
+
+					//	bytecodes :
 					bw.Write( usdb.Count );
 
 					foreach ( var entry in usdb ) {
 
 						bw.Write( entry.Defines );
 
-						bw.Write( new[]{'P','S','B','C'});
+						bw.WriteFourCC( Ubershader.PSBytecodeSignature );
 						bw.Write( entry.PSBytecode.Length );
 						bw.Write( entry.PSBytecode );
 
-						bw.Write( new[]{'V','S','B','C'});
+						bw.WriteFourCC( Ubershader.VSBytecodeSignature );
 						bw.Write( entry.VSBytecode.Length );
 						bw.Write( entry.VSBytecode );
 
-						bw.Write( new[]{'G','S','B','C'});
+						bw.WriteFourCC( Ubershader.GSBytecodeSignature );
 						bw.Write( entry.GSBytecode.Length );
 						bw.Write( entry.GSBytecode );
 
-						bw.Write( new[]{'H','S','B','C'});
+						bw.WriteFourCC( Ubershader.HSBytecodeSignature );
 						bw.Write( entry.HSBytecode.Length );
 						bw.Write( entry.HSBytecode );
 
-						bw.Write( new[]{'D','S','B','C'});
+						bw.WriteFourCC( Ubershader.DSBytecodeSignature );
 						bw.Write( entry.DSBytecode.Length );
 						bw.Write( entry.DSBytecode );
 
-						bw.Write( new[]{'C','S','B','C'});
+						bw.WriteFourCC( Ubershader.CSBytecodeSignature );
 						bw.Write( entry.CSBytecode.Length );
 						bw.Write( entry.CSBytecode );
 					}

@@ -249,6 +249,7 @@ namespace Fusion.Core {
 		/// </summary>
 		/// <param name="?"></param>
 		/// <param name="magic"></param>
+		[Obsolete]
 		public static void ExpectMagic ( this BinaryReader reader, string magic, string fileType )
 		{
 			if (!reader.CheckMagic(magic)) {
@@ -264,6 +265,7 @@ namespace Fusion.Core {
 		/// <param name="reader"></param>
 		/// <param name="magic"></param>
 		/// <returns></returns>
+		[Obsolete]
 		public static bool CheckMagic ( this BinaryReader reader, string magic )
 		{
 			if (magic.Length!=4) {

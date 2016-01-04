@@ -19,6 +19,13 @@ namespace Fusion.Drivers.Graphics {
 
 	public partial class Ubershader : GraphicsResource {
 
+		public const string UbershaderSignature = "USH1";
+		public const string PSBytecodeSignature = "PSBC";
+		public const string VSBytecodeSignature = "VSBC";
+		public const string GSBytecodeSignature = "GSBC";
+		public const string HSBytecodeSignature = "HSBC";
+		public const string DSBytecodeSignature = "DSBC";
+		public const string CSBytecodeSignature = "CSBC";
 
 		class UsdbEntry {
 
@@ -162,7 +169,23 @@ namespace Fusion.Drivers.Graphics {
 
 			using ( var br = new BinaryReader( stream ) ) {
 
-				br.ExpectMagic("USDB", "ubershader");
+				var foucCC = br.ReadFourCC();
+
+				if (foucCC!=UbershaderSignature) {
+					throw new IOException("Bad ubershader signature");
+				}
+
+				this.Textures	=	new TextureParameter[ br.ReadInt32() ];
+				for (int i=0; i<Textures.Length; i++) {
+					Textures[i] = new TextureParameter( br.ReadString(), br.ReadString(), br.ReadString() );
+				}
+
+				this.Uniforms	=	new UniformParameter[ br.ReadInt32() ];
+				for (int i=0; i<Uniforms.Length; i++) {
+					Uniforms[i]	=	new UniformParameter( br.ReadString(), br.ReadSingle(), br.ReadString() );
+				}
+
+
 
 				var count = br.ReadInt32();
 

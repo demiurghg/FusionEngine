@@ -14,6 +14,22 @@ using System.Runtime.InteropServices;
 namespace Fusion.Core.Content {
 	public static class ContentUtils {
 
+		public static string ReadFourCC ( this BinaryReader reader )
+		{
+			return MakeFourCC( reader.ReadUInt32() );
+		}
+
+
+		/// <summary>
+		/// Writes FourCC string.
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="fourCC"></param>
+		public static void WriteFourCC ( this BinaryWriter writer, string fourCC )
+		{
+			writer.Write( MakeFourCC(fourCC) );
+		}
+
 
 		/// <summary>
 		/// Makes four bytes from FourCC.
