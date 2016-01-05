@@ -18,5 +18,6 @@ namespace Fusion.Engine.Graphics {
 		public RenderTarget2D	DiffuseBuffer	;
 		public RenderTarget2D	SpecularBuffer	;
 		public RenderTarget2D	NormalMapBuffer	;
+		public RenderTarget2D	ScatteringBuffer;
 	}
 }

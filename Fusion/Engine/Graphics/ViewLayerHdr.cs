@@ -96,6 +96,7 @@ namespace Fusion.Engine.Graphics {
 			radianceFrame.DiffuseBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  512,	512,	false, false );
 			radianceFrame.SpecularBuffer 	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  512,	512,	false, false );
 			radianceFrame.NormalMapBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2, 512,	512,	false, false );
+			radianceFrame.ScatteringBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  512,	512,	false, false );
 
 			Radiance		=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, RenderSystemConfig.EnvMapSize, true );
 			RadianceCache	=	new TextureCubeArray( Game.GraphicsDevice, 128, RenderSystemConfig.MaxEnvLights, ColorFormat.Rgba16F, true );
@@ -174,6 +175,7 @@ namespace Fusion.Engine.Graphics {
 			viewHdrFrame.DiffuseBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8_sRGB,	newWidth,	newHeight,	false, false );
 			viewHdrFrame.SpecularBuffer 	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8_sRGB,	newWidth,	newHeight,	false, false );
 			viewHdrFrame.NormalMapBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2,		newWidth,	newHeight,	false, false );
+			viewHdrFrame.ScatteringBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,			newWidth,	newHeight,	false, false );
 			
 			Bloom0				=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
 			Bloom1				=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
@@ -227,6 +229,7 @@ namespace Fusion.Engine.Graphics {
 			Game.GraphicsDevice.Clear( frame.DiffuseBuffer.Surface,		Color4.Black );
 			Game.GraphicsDevice.Clear( frame.SpecularBuffer.Surface,	Color4.Black );
 			Game.GraphicsDevice.Clear( frame.NormalMapBuffer.Surface,	Color4.Black );
+			Game.GraphicsDevice.Clear( frame.ScatteringBuffer.Surface,	Color4.Black );
 
 			Game.GraphicsDevice.Clear( frame.DepthBuffer.Surface,		1, 0 );
 			Game.GraphicsDevice.Clear( frame.HdrBuffer.Surface,			Color4.Black );
@@ -257,6 +260,7 @@ namespace Fusion.Engine.Graphics {
 				case 1 : rs.Filter.Copy( targetSurface, viewHdrFrame.DiffuseBuffer ); return;
 				case 2 : rs.Filter.Copy( targetSurface, viewHdrFrame.SpecularBuffer ); return;
 				case 3 : rs.Filter.Copy( targetSurface, viewHdrFrame.NormalMapBuffer ); return;
+				case 4 : rs.Filter.Copy( targetSurface, viewHdrFrame.ScatteringBuffer ); return;
 			}
 
 			//	render sky :

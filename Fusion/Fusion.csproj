@@ -213,6 +213,7 @@
     <Compile Include="Engine\Common\Commands\CrashClient.cs" />
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
     <Compile Include="Engine\Common\GameInterface.Internal.cs" />
+    <Compile Include="Engine\Graphics\RenderCounters.cs" />
     <Compile Include="Engine\Graphics\Utils\DebugLayer.cs" />
     <Compile Include="Engine\Graphics\Utils\DebugRender.cs" />
     <Compile Include="Engine\Graphics\Utils\DebugRenderConfig.cs" />

@@ -71,6 +71,12 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// Shows counters
+		/// </summary>
+		public bool ShowCounters { get; set; }
+
+
+		/// <summary>
 		/// Ctor
 		/// </summary>
 		public RenderSystemConfig ()

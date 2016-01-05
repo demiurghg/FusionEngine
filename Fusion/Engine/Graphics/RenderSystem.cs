@@ -48,6 +48,11 @@ namespace Fusion.Engine.Graphics {
 		[Config]
 		public  RenderSystemConfig Config { get; private set; }
 
+		/// <summary>
+		/// Gets render counters.
+		/// </summary>
+		internal RenderCounters Counters { get; private set; }
+
 
 		/// <summary>
 		/// Fullscreen
@@ -86,6 +91,8 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="engine"></param>
 		public RenderSystem ( Game Game ) : base(Game)
 		{
+			Counters	=	new RenderCounters();
+
 			Config		=	new RenderSystemConfig();
 			this.Device	=	Game.GraphicsDevice;
 
@@ -95,7 +102,7 @@ namespace Fusion.Engine.Graphics {
 			filter			=	new Filter( Game );
 			hdrFilter		=	new HdrFilter( Game );
 			lightRenderer	=	new LightRenderer( Game );
-			sceneRenderer	=	new SceneRenderer( Game );
+			sceneRenderer	=	new SceneRenderer( Game, this );
 			sky				=	new Sky( Game );
 
 			Device.DisplayBoundsChanged += (s,e) => {
@@ -176,6 +183,8 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="stereoEye"></param>
 		internal void Draw ( GameTime gameTime, StereoEye stereoEye )
 		{
+			Counters.Reset();
+
 			Gis.Update(gameTime);
 			//GIS.Draw(gameTime, StereoEye.Mono);
 
@@ -190,6 +199,10 @@ namespace Fusion.Engine.Graphics {
 
 			foreach ( var viewLayer in layersToDraw ) {
 				viewLayer.RenderView( gameTime, stereoEye );
+			}
+
+			if (Config.ShowCounters) {
+				Counters.PrintCounters();
 			}
 		}
 

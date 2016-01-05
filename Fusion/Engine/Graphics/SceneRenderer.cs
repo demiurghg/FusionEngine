@@ -16,6 +16,8 @@ namespace Fusion.Engine.Graphics {
 
 	public class SceneRenderer : GameModule {
 
+		readonly RenderSystem	rs;
+
 		ConstantBuffer	constBuffer;
 		Ubershader		surfaceShader;
 		StateFactory	factory;
@@ -59,8 +61,9 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="Game"></param>
-		public SceneRenderer ( Game Game ) : base( Game )
+		public SceneRenderer ( Game Game, RenderSystem rs ) : base( Game )
 		{
+			this.rs	=	rs;
 		}
 
 
@@ -178,10 +181,11 @@ namespace Fusion.Engine.Graphics {
 				var diffuse		=	frame.DiffuseBuffer.Surface;
 				var specular	=	frame.SpecularBuffer.Surface;
 				var normals		=	frame.NormalMapBuffer.Surface;
+				var scattering	=	frame.ScatteringBuffer.Surface;
 
 				device.ResetStates();
 
-				device.SetTargets( depth, hdr, diffuse, specular, normals );
+				device.SetTargets( depth, hdr, diffuse, specular, normals, scattering );
 				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
 
 
@@ -214,6 +218,8 @@ namespace Fusion.Engine.Graphics {
 							sg.Material.SetTextures( device );
 
 							device.DrawIndexed( sg.IndicesCount, sg.StartIndex, 0 );
+
+							rs.Counters.SceneDIPs++;
 						}
 					} catch ( UbershaderException e ) {
 						Log.Warning( e.Message );					
@@ -299,6 +305,8 @@ namespace Fusion.Engine.Graphics {
 
 					device.SetupVertexInput( instance.vb, instance.ib );
 					device.DrawIndexed( instance.indexCount, 0, 0 );
+
+					rs.Counters.ShadowDIPs++;
 				}
 			}
 		}

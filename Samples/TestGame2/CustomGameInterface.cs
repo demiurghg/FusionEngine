@@ -258,6 +258,7 @@ namespace TestGame2 {
 			Game.Exit();
 		}
 
+		static readonly Guid HudFps = Guid.NewGuid();
 
 		/// <summary>
 		/// Updates internal state of interface.
@@ -270,8 +271,8 @@ namespace TestGame2 {
 			testLayer.Color	=	Color.White;
 
 			//sceneView.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1,0, 1 );
-			Hud.Clear("UI");
-			Hud.Add(Color.White, "UI", "FPS = {0}", gameTime.Fps );
+			Hud.Clear(HudFps);
+			Hud.Add(HudFps, Color.White, "FPS = {0}", gameTime.Fps );
 
 
 			testLayer.Clear();
@@ -281,6 +282,7 @@ namespace TestGame2 {
 			foreach ( var debugString in Hud.GetLines() ) {
 				testLayer.DrawDebugString( debugFont, 0+1, line*8+1, debugString.Text, Color.Black );
 				testLayer.DrawDebugString( debugFont, 0+0, line*8+0, debugString.Text, debugString.Color );
+				line++;
 			}
 			/*if ( game.Keyboard.IsKeyDown(Keys.R) ) {
 				testLayer.Clear();
