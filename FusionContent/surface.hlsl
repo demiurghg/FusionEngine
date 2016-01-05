@@ -46,10 +46,11 @@ struct PSInput {
 };
 
 struct GBuffer {
-	float4	hdr		 : SV_Target0;
-	float4	diffuse	 : SV_Target1;
-	float4	specular : SV_Target2;
-	float4	normals	 : SV_Target3;
+	float4	hdr		 	: SV_Target0;
+	float4	diffuse	 	: SV_Target1;
+	float4	specular 	: SV_Target2;
+	float4	normals	 	: SV_Target3;
+	float4	scattering	: SV_Target4;
 };
 
 cbuffer 		CBBatch 	: 	register(b0) { BATCH     Batch     : packoffset( c0 ); }	
@@ -221,10 +222,11 @@ GBuffer PSMain( PSInput input )
 	
 	//	Use sRGB texture or 'sqrt' for better 
 	//	diffuse/specular intensity distribution?
-	output.hdr		=	float4( layer.Emission, 0 );
-	output.diffuse	=	float4( layer.Diffuse, 1 );
-	output.specular =	float4( layer.Specular, layer.Roughness );
-	output.normals	=	float4( worldNormal * 0.5f + 0.5f, 1 );
+	output.hdr			=	float4( layer.Emission, 0 );
+	output.diffuse		=	float4( layer.Diffuse, 1 );
+	output.specular 	=	float4( layer.Specular, layer.Roughness );
+	output.normals		=	float4( worldNormal * 0.5f + 0.5f, 1 );
+	output.scattering	=	0;//float4( float3(0.85,0.85,1.00) * 0.3, 0.33f );
 	
 	return output;
 }

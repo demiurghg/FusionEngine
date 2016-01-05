@@ -128,7 +128,7 @@ namespace TestGame2 {
 			uiLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
 			texture		=	Game.Content.Load<DiscTexture>( "lena" );
 
-			masterView.SkySettings.SunPosition			=	new Vector3(10,40,30);
+			masterView.SkySettings.SunPosition			=	new Vector3(20,30,40);
 			masterView.SkySettings.SunLightIntensity	=	50;
 			masterView.SkySettings.SkyTurbidity			=	3;
 

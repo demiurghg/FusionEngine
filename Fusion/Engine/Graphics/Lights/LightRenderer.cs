@@ -268,19 +268,21 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderResources[0]	=	frame.DiffuseBuffer;
 					device.ComputeShaderResources[1]	=	frame.SpecularBuffer;
 					device.ComputeShaderResources[2]	=	frame.NormalMapBuffer;
-					device.ComputeShaderResources[3]	=	frame.DepthBuffer;
-					device.ComputeShaderResources[4]	=	csmColor;
-					device.ComputeShaderResources[5]	=	spotColor;
-					device.ComputeShaderResources[6]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
-					device.ComputeShaderResources[7]	=	omniLightBuffer;
-					device.ComputeShaderResources[8]	=	spotLightBuffer;
-					device.ComputeShaderResources[9]	=	envLightBuffer;
-					device.ComputeShaderResources[10]	=	occlusionMap.Srv;
-					device.ComputeShaderResources[11]	=	viewLayer.RadianceCache;
+					device.ComputeShaderResources[3]	=	frame.ScatteringBuffer;
+					device.ComputeShaderResources[4]	=	frame.DepthBuffer;
+					device.ComputeShaderResources[5]	=	csmColor;
+					device.ComputeShaderResources[6]	=	spotColor;
+					device.ComputeShaderResources[7]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
+					device.ComputeShaderResources[8]	=	omniLightBuffer;
+					device.ComputeShaderResources[9]	=	spotLightBuffer;
+					device.ComputeShaderResources[10]	=	envLightBuffer;
+					device.ComputeShaderResources[11]	=	occlusionMap.Srv;
+					device.ComputeShaderResources[12]	=	viewLayer.RadianceCache;
 
 					device.ComputeShaderConstants[0]	=	lightingCB;
 
 					device.SetCSRWTexture( 0, frame.LightAccumulator.Surface );
+					device.SetCSRWTexture( 1, frame.SSSAccumulator.Surface );
 
 					//
 					//	Dispatch :
@@ -296,6 +298,12 @@ namespace Fusion.Engine.Graphics {
 				//	Add accumulated light  :
 				//
 				rs.Filter.OverlayAdditive( frame.HdrBuffer.Surface, frame.LightAccumulator );
+
+				//	Uncomment to enable SSS :
+				#if false
+				rs.Filter.GaussBlur( frame.SSSAccumulator, frame.LightAccumulator, 5, 0 ); 
+				rs.Filter.OverlayAdditive( frame.HdrBuffer.Surface, frame.SSSAccumulator );
+				#endif
 
 				device.ResetStates();
 			}

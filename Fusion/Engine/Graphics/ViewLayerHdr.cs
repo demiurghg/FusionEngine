@@ -48,8 +48,8 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		readonly HdrFrame viewHdrFrame = new HdrFrame();
-		readonly HdrFrame radianceFrame = new HdrFrame();
+		HdrFrame viewHdrFrame;
+		HdrFrame radianceFrame;
 
 		//	reuse diffuse buffer as temporal buffer for effects.
 		internal RenderTarget2D TempFXBuffer { get { return viewHdrFrame.DiffuseBuffer; } }
@@ -90,13 +90,7 @@ namespace Fusion.Engine.Graphics {
 			MeasuredOld		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
 			MeasuredNew		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
 
-			radianceFrame.HdrBuffer			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 512,	512,	false, false );
-			radianceFrame.LightAccumulator	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 512,	512,	false, true );
-			radianceFrame.DepthBuffer		=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8,	  512,	512,	1 );
-			radianceFrame.DiffuseBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  512,	512,	false, false );
-			radianceFrame.SpecularBuffer 	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  512,	512,	false, false );
-			radianceFrame.NormalMapBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2, 512,	512,	false, false );
-			radianceFrame.ScatteringBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,	  512,	512,	false, false );
+			radianceFrame	=	new HdrFrame( Game, 512,512 );
 
 			Radiance		=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, RenderSystemConfig.EnvMapSize, true );
 			RadianceCache	=	new TextureCubeArray( Game.GraphicsDevice, 128, RenderSystemConfig.MaxEnvLights, ColorFormat.Rgba16F, true );
@@ -116,19 +110,8 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref Radiance );
 				SafeDispose( ref RadianceCache );
 
-				SafeDispose( ref viewHdrFrame.HdrBuffer );
-				SafeDispose( ref viewHdrFrame.LightAccumulator );
-				SafeDispose( ref viewHdrFrame.DepthBuffer );
-				SafeDispose( ref viewHdrFrame.DiffuseBuffer );
-				SafeDispose( ref viewHdrFrame.SpecularBuffer );
-				SafeDispose( ref viewHdrFrame.NormalMapBuffer );
-
-				SafeDispose( ref radianceFrame.HdrBuffer );
-				SafeDispose( ref radianceFrame.LightAccumulator );
-				SafeDispose( ref radianceFrame.DepthBuffer );
-				SafeDispose( ref radianceFrame.DiffuseBuffer );
-				SafeDispose( ref radianceFrame.SpecularBuffer );
-				SafeDispose( ref radianceFrame.NormalMapBuffer );
+				SafeDispose( ref viewHdrFrame );
+				SafeDispose( ref radianceFrame );
 
 				SafeDispose( ref Bloom0 );
 				SafeDispose( ref Bloom1 );
@@ -149,12 +132,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="height"></param>
 		public void Resize ( int newWidth, int newHeight )
 		{
-			SafeDispose( ref viewHdrFrame.HdrBuffer );
-			SafeDispose( ref viewHdrFrame.LightAccumulator );
-			SafeDispose( ref viewHdrFrame.DepthBuffer );
-			SafeDispose( ref viewHdrFrame.DiffuseBuffer );
-			SafeDispose( ref viewHdrFrame.SpecularBuffer );
-			SafeDispose( ref viewHdrFrame.NormalMapBuffer );
+			SafeDispose( ref viewHdrFrame );
 
 			SafeDispose( ref Bloom0 );
 			SafeDispose( ref Bloom1 );
@@ -169,13 +147,7 @@ namespace Fusion.Engine.Graphics {
 			int bloomWidth		=	( targetWidth/2  ) & 0xFFF0;
 			int bloomHeight		=	( targetHeight/2 ) & 0xFFF0;
 
-			viewHdrFrame.HdrBuffer			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F,		newWidth,	newHeight,	false, false );
-			viewHdrFrame.LightAccumulator	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F,		newWidth,	newHeight,	false, true );
-			viewHdrFrame.DepthBuffer		=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8,			newWidth,	newHeight,	1 );
-			viewHdrFrame.DiffuseBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8_sRGB,	newWidth,	newHeight,	false, false );
-			viewHdrFrame.SpecularBuffer 	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8_sRGB,	newWidth,	newHeight,	false, false );
-			viewHdrFrame.NormalMapBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgb10A2,		newWidth,	newHeight,	false, false );
-			viewHdrFrame.ScatteringBuffer	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8,			newWidth,	newHeight,	false, false );
+			viewHdrFrame		=	new HdrFrame ( Game, targetWidth, targetHeight );
 			
 			Bloom0				=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );
 			Bloom1				=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, bloomWidth, bloomHeight, true, false );

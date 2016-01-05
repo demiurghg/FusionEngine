@@ -140,18 +140,20 @@ struct SPOTLIGHT {
 SamplerState			SamplerNearestClamp : register(s0);
 SamplerState			SamplerLinearClamp : register(s1);
 SamplerComparisonState	ShadowSampler	: register(s2);
+
 Texture2D 			GBufferDiffuse 		: register(t0);
 Texture2D 			GBufferSpecular 	: register(t1);
 Texture2D 			GBufferNormalMap 	: register(t2);
-Texture2D 			GBufferDepth 		: register(t3);
-Texture2D 			CSMTexture	 		: register(t4);
-Texture2D 			SpotShadowMap 		: register(t5);
-Texture2D 			SpotMaskAtlas		: register(t6);
-StructuredBuffer<OMNILIGHT>	OmniLights	: register(t7);
-StructuredBuffer<SPOTLIGHT>	SpotLights	: register(t8);
-StructuredBuffer<ENVLIGHT>	EnvLights	: register(t9);
-Texture2D 			OcclusionMap		: register(t10);
-TextureCubeArray	EnvMap				: register(t11);
+Texture2D 			GBufferScatter 		: register(t3);
+Texture2D 			GBufferDepth 		: register(t4);
+Texture2D 			CSMTexture	 		: register(t5);
+Texture2D 			SpotShadowMap 		: register(t6);
+Texture2D 			SpotMaskAtlas		: register(t7);
+StructuredBuffer<OMNILIGHT>	OmniLights	: register(t8);
+StructuredBuffer<SPOTLIGHT>	SpotLights	: register(t9);
+StructuredBuffer<ENVLIGHT>	EnvLights	: register(t10);
+Texture2D 			OcclusionMap		: register(t11);
+TextureCubeArray	EnvMap				: register(t12);
 
 
 float3	ComputeCSM ( float4 worldPos );
@@ -160,7 +162,8 @@ float3	ComputeSpotShadow ( float4 worldPos, SPOTLIGHT spot );
 /*-----------------------------------------------------------------------------------------------------
 	OMNI light
 -----------------------------------------------------------------------------------------------------*/
-RWTexture2D<float4> hdrTexture : register(u0); 
+RWTexture2D<float4> hdrTexture  : register(u0); 
+RWTexture2D<float4> hdrSSS 		: register(u1); 
 
 //#ifdef __COMPUTE_SHADER__
 
@@ -198,6 +201,7 @@ void CSMain(
 	float4	specular  	=	GBufferSpecular .Load( location );
 	float4	normal	 	=	GBufferNormalMap.Load( location ) * 2 - 1;
 	float	depth 	 	=	GBufferDepth 	.Load( location ).r;
+	float4	scatter 	=	GBufferScatter 	.Load( location );
 	
 	float fresnelDecay	=	length(normal.xyz) * 2 - 1;
 	normal.xyz			=	normalize(normal.xyz);
@@ -209,15 +213,21 @@ void CSMain(
 	float3	viewDir		=	Params.ViewPosition.xyz - worldPos.xyz;
 	float3	viewDirN	=	normalize( viewDir );
 	
-	float4	totalLight	=	0;//hdrTexture[dispatchThreadId.xy];
+	float4	totalLight	=	0;
+	float4	totalSSS	=	float4( 0,0,0, scatter.w );
 	
 	//-----------------------------------------------------
 	//	Direct light :
 	//-----------------------------------------------------
 	float3 csmFactor	=	ComputeCSM( worldPos );
 	float3 lightDir		=	-normalize(Params.DirectLightDirection.xyz);
-	totalLight.xyz		+=	csmFactor.rgb * Lambert	( normal.xyz,  lightDir, Params.DirectLightIntensity.rgb, diffuse.rgb );
+	float3 diffuseTerm	=	Lambert	( normal.xyz,  lightDir, Params.DirectLightIntensity.rgb, float3(1,1,1) );
+	float3 diffuseTerm2	=	Lambert	( normal.xyz,  lightDir, Params.DirectLightIntensity.rgb, float3(1,1,1), 1 );
+	totalLight.xyz		+=	csmFactor.rgb * diffuseTerm * diffuse.rgb;
 	totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, Params.DirectLightIntensity.rgb, specular.rgb, specular.a );
+	
+	totalSSS.rgb		+=	csmFactor.rgb * diffuseTerm2 * scatter.rgb;
+
 	
 	float Fc = pow( 1 - abs(dot(viewDirN,normal.xyz)), 5 );
 	float3 F = (1 - Fc) * specular.rgb + Fc;
@@ -399,6 +409,7 @@ void CSMain(
 	totalLight	+=	(diffuse + specular) * Params.AmbientColor * ssao * fresnelDecay;// * pow(normal.y*0.5+0.5, 1);
 
 	hdrTexture[dispatchThreadId.xy] = totalLight;
+	hdrSSS[dispatchThreadId.xy] = totalSSS;
 }
 
 
