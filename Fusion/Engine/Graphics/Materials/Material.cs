@@ -18,16 +18,63 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	public partial class Material : DisposableBase {
 
+		MaterialCBData parameters = new MaterialCBData();
+										
 		/// <summary>
-		/// Indicates that material is tranparent.
+		/// Defines the way how input textures and parameters will be combined.
 		/// </summary>
-		public bool Transparent;
+		public ShaderCombiner Combiner { get; set; }
 
 		/// <summary>
 		/// Indicates that object with this material should cast shadow.
 		/// </summary>
-		public bool CastShadow;
-		
+		public bool CastShadow { get; set; }
+
+
+		/// <summary>
+		/// Color level
+		/// </summary>
+		public float ColorLevel { 
+			get { return parameters.ColorLevel; }
+			set { parameters.ColorLevel = value; }
+		}
+
+		/// <summary>
+		/// Gloss level
+		/// </summary>
+		public float SpecularLevel {
+			get { return parameters.SpecularLevel; }
+			set { parameters.SpecularLevel = value; }
+		}
+
+		/// <summary>
+		/// Color level
+		/// </summary>
+		public float EmissionLevel {
+			get { return parameters.SpecularLevel; }
+			set { parameters.SpecularLevel = value; }
+		}
+
+		/// <summary>
+		/// Minimum roughness level.
+		/// </summary>
+		public float RoughnessMinimum {
+			get { return parameters.SpecularLevel; }
+			set { parameters.SpecularLevel = value; }
+		}
+
+		/// <summary>
+		/// Maximum roughness level.
+		/// </summary>
+		public float RoughnessMaximum {
+			get { return parameters.SpecularLevel; }
+			set { parameters.SpecularLevel = value; }
+		}
+
+
+
+
+
 		/// <summary>
 		/// Material options for mapping and layer blending.
 		/// Default value is SingleLayer.
@@ -99,9 +146,6 @@ namespace Fusion.Engine.Graphics {
 			this.Layer3.SurfaceTexture		=	"";
 			this.Layer3.NormalMapTexture	=	"";
 			this.Layer3.EmissionTexture		=	"";
-
-			this.Transparent	=	false;
-			this.CastShadow		=	true;
 		}
 
 

@@ -22,6 +22,15 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	public partial class Material : DisposableBase {
 
+		struct MaterialCBData {
+			public float ColorLevel;
+			public float SpecularLevel;
+			public float EmissionLevel;
+			public float RoughnessMinimum;
+			public float RoughnessMaximum;
+		}
+
+
 		struct LayerData {
 			public Vector4	Tiling;
 			public Vector4	Offset;
