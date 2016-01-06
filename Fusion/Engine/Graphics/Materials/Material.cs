@@ -18,7 +18,7 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	public partial class Material : DisposableBase {
 
-		MaterialCBData parameters = new MaterialCBData();
+		public const int MaxTextures = 16;
 										
 		/// <summary>
 		/// Defines the way how input textures and parameters will be combined.
@@ -34,45 +34,72 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Color level
 		/// </summary>
-		public float ColorLevel { 
-			get { return parameters.ColorLevel; }
-			set { parameters.ColorLevel = value; }
-		}
+		public float ColorLevel { get; set; }
 
 		/// <summary>
 		/// Gloss level
 		/// </summary>
-		public float SpecularLevel {
-			get { return parameters.SpecularLevel; }
-			set { parameters.SpecularLevel = value; }
-		}
+		public float SpecularLevel { get; set; }
 
 		/// <summary>
 		/// Color level
 		/// </summary>
-		public float EmissionLevel {
-			get { return parameters.SpecularLevel; }
-			set { parameters.SpecularLevel = value; }
-		}
+		public float EmissionLevel { get; set; }
 
 		/// <summary>
 		/// Minimum roughness level.
 		/// </summary>
-		public float RoughnessMinimum {
-			get { return parameters.SpecularLevel; }
-			set { parameters.SpecularLevel = value; }
-		}
+		public float RoughnessMinimum { get; set; }
 
 		/// <summary>
 		/// Maximum roughness level.
 		/// </summary>
-		public float RoughnessMaximum {
-			get { return parameters.SpecularLevel; }
-			set { parameters.SpecularLevel = value; }
+		public float RoughnessMaximum { get; set; }
+
+
+
+		/// <summary>
+		/// Array of texture paths:
+		/// </summary>
+		readonly MaterialTexture[] textures = new MaterialTexture[MaxTextures];
+
+
+		/// <summary>
+		/// Color texture.
+		/// Alpha contains emission, detail or alpha-kill mask.
+		/// </summary>
+		public MaterialTexture ColorTexture { 
+			get { return textures[0]; }				
+			set { textures[0] = value; }				
 		}
 
 
+		/// <summary>
+		/// Surface texture. Red channel contains specular level.
+		/// Green channel contains roughness.
+		/// Blue channel contains metallicity.
+		/// </summary>
+		public MaterialTexture SurfaceTexture { 
+			get { return textures[1]; }				
+			set { textures[1] = value; }				
+		}
 
+
+		/// <summary>
+		/// Normal map texture.
+		/// </summary>
+		public MaterialTexture NormalMapTexture { 
+			get { return textures[2]; }				
+			set { textures[2] = value; }				
+		}
+
+		/// <summary>
+		/// Color texture.
+		/// </summary>
+		public MaterialTexture EmissionTexture { 
+			get { return textures[3]; }				
+			set { textures[3] = value; }				
+		}
 
 
 		/// <summary>
@@ -186,6 +213,10 @@ namespace Fusion.Engine.Graphics {
 
 			foreach ( var field in type.GetFields() ) {
 
+				if (field.IsLiteral) {
+					continue;
+				}
+
 				if (field.FieldType==typeof(MaterialLayer)) {
 					continue;
 				}
@@ -214,6 +245,10 @@ namespace Fusion.Engine.Graphics {
 
 			foreach ( var field in type.GetFields() ) {
 				
+				if (field.IsLiteral) {
+					continue;
+				}
+
 				if (field.FieldType==typeof(MaterialLayer)) {
 					continue;
 				}

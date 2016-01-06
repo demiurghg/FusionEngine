@@ -23,6 +23,7 @@ namespace Fusion.Engine.Graphics {
 	public partial class Material : DisposableBase {
 
 		struct MaterialCBData {
+			
 			public float ColorLevel;
 			public float SpecularLevel;
 			public float EmissionLevel;

@@ -1,7 +1,4 @@
 [Material]
-Transparent  = False
-CastShadow   = True
-Displacement = False
 
 # Possible values:
 #   SingleLayer
@@ -12,21 +9,69 @@ Displacement = False
 #   TriplanarWorldSingle
 #   TriplanarWorldDouble
 #   TriplanarWorldTriple
-Options      = SingleLayer
+Options     = SingleLayer
+MaxTextures = 16
 
 [Layer0]
 ColorLevel       = 1
-AlphaLevel       = 0
+AlphaLevel       = 1
 EmissionLevel    = 1
 SpecularLevel    = 1
 BumpLevel        = 1
-Displacement     = 1
-RoughnessRange   = 0, 1
+BlendHardness    = 0
+RoughnessRange   = 0.1, 1
 GlowNarrowness   = 0, 0
-BlendFactor      = 0
 Tiling           = 1, 1, 1
 Offset           = 0, 0, 0
-ColorTexture     = Scenes\Textures\lena.tga
+ColorTexture     = scenes\Textures\lena.tga
+SurfaceTexture   = 
+NormalMapTexture = 
+EmissionTexture  = 
+
+[Layer1]
+ColorLevel       = 1
+AlphaLevel       = 1
+EmissionLevel    = 1
+SpecularLevel    = 1
+BumpLevel        = 1
+BlendHardness    = 0
+RoughnessRange   = 0, 1
+GlowNarrowness   = 0, 0
+Tiling           = 1, 1, 1
+Offset           = 0, 0, 0
+ColorTexture     = 
+SurfaceTexture   = 
+NormalMapTexture = 
+EmissionTexture  = 
+
+[Layer2]
+ColorLevel       = 1
+AlphaLevel       = 1
+EmissionLevel    = 1
+SpecularLevel    = 1
+BumpLevel        = 1
+BlendHardness    = 0
+RoughnessRange   = 0, 1
+GlowNarrowness   = 0, 0
+Tiling           = 1, 1, 1
+Offset           = 0, 0, 0
+ColorTexture     = 
+SurfaceTexture   = 
+NormalMapTexture = 
+EmissionTexture  = 
+
+[Layer3]
+ColorLevel       = 1
+AlphaLevel       = 1
+EmissionLevel    = 1
+SpecularLevel    = 1
+BumpLevel        = 1
+BlendHardness    = 0
+RoughnessRange   = 0, 1
+GlowNarrowness   = 0, 0
+Tiling           = 1, 1, 1
+Offset           = 0, 0, 0
+ColorTexture     = 
 SurfaceTexture   = 
 NormalMapTexture = 
 EmissionTexture  = 

@@ -214,6 +214,7 @@
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
     <Compile Include="Engine\Common\GameInterface.Internal.cs" />
     <Compile Include="Engine\Graphics\Materials\Material.New.cs" />
+    <Compile Include="Engine\Graphics\Materials\MaterialTexture.cs" />
     <Compile Include="Engine\Graphics\Materials\ShaderCombiner.cs" />
     <Compile Include="Engine\Graphics\RenderCounters.cs" />
     <Compile Include="Engine\Graphics\Utils\DebugLayer.cs" />
