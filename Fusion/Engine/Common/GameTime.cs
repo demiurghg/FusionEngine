@@ -21,7 +21,6 @@ namespace Fusion.Engine.Common {
 		float			lastElapsedSec;
 
 		List<TimeSpan>	timeRecord = new List<TimeSpan>();
-		double			average;
 
 		/// <summary>
 		/// Total game time since game had been started.
@@ -41,27 +40,59 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Frames per second.
 		/// </summary>
-		public	float Fps { get { return 1 / ElapsedSec; } }
+		public float Fps { get { return 1 / ElapsedSec; } }
 
 		/// <summary>
 		/// Average frame time (milliseconds) within AveragingFrameCount frames.
 		/// </summary>
-		public	float AverageFrameTime	{ get { return (float)average; } }
+		public float AverageFrameTime { 
+			get { 
+				return (float)timeRecord.Average( t => t.TotalMilliseconds ); 
+			} 
+		}
 
 		/// <summary>
 		/// Average frame rate (FPS) within AveragingFrameCount frames.
 		/// </summary>
-		public	float AverageFrameRate	{ get { return 1000.0f / (float)average; } }
+		public float AverageFrameRate { 
+			get { 
+				return (float)(1000/timeRecord.Average( t => t.TotalMilliseconds )); 
+			}
+		}
+
+		/// <summary>
+		/// Average frame rate (FPS) within AveragingFrameCount frames.
+		/// </summary>
+		public float MaxFrameRate { 
+			get { 
+				return (float)(1000/timeRecord.Min( t => t.TotalMilliseconds )); 
+			}
+		}
+
+		/// <summary>
+		/// Average frame rate (FPS) within AveragingFrameCount frames.
+		/// </summary>
+		public float MinFrameRate { 
+			get { 
+				return (float)(1000/timeRecord.Max( t => t.TotalMilliseconds )); 
+			}
+		}
 
 		/// <summary>
 		/// Frame count since game had been started.
 		/// </summary>
-		public	long FrameID		{ get; private set; }
+		public long FrameID { 
+			get; 
+			private set; 
+		}
 
 		/// <summary>
 		/// Subframe index. For stereo rendering Game.Draw and GameService.Draw are called twice for each eye.
 		/// </summary>
-		public	int	SubframeID	{ get; private set; }
+		public int	SubframeID { 
+			get; 
+			private set; 
+		}
 
 
 		
@@ -103,8 +134,6 @@ namespace Fusion.Engine.Common {
 				while ( timeRecord.Count>=AveragingFrameCount ) {
 					timeRecord.RemoveAt(0);
 				}
-
-				average	=	timeRecord.Average( t => t.TotalMilliseconds );
 
 			#else
 

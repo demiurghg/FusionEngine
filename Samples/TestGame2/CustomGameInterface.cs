@@ -272,7 +272,10 @@ namespace TestGame2 {
 
 			//sceneView.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1,0, 1 );
 			Hud.Clear(HudFps);
-			Hud.Add(HudFps, Color.White, "FPS = {0}", gameTime.Fps );
+			Hud.Add(HudFps, Color.Orange, "FPS     : {0:000.00}", gameTime.Fps );
+			Hud.Add(HudFps, Color.Orange, "FPS avg : {0:000.00}", gameTime.AverageFrameRate );
+			Hud.Add(HudFps, Color.Orange, "FPS max : {0:000.00}", gameTime.MaxFrameRate );
+			Hud.Add(HudFps, Color.Orange, "FPS min : {0:000.00}", gameTime.MinFrameRate );
 
 
 			testLayer.Clear();
