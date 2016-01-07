@@ -27,9 +27,9 @@ namespace Fusion.Engine.Graphics {
 		{
 			using ( var sr = new BinaryReader(stream) ) {
 				var iniText		=	sr.ReadString();
-				var material	=	Material.FromINI( iniText );
+				var material	=	BaseIllum.ImportFromXml( iniText );
 
-				material.LoadGpuResources( content );
+				return material.CreateGpuMaterial( content.Game.RenderSystem, content );
 
 				return material;
 			}

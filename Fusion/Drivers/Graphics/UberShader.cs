@@ -193,27 +193,27 @@ namespace Fusion.Drivers.Graphics {
 					var defines		=	br.ReadString();
 					int length;
 
-					br.ExpectMagic("PSBC", "ubershader");
+					br.ExpectFourCC("PSBC");
 					length	=	br.ReadInt32();
 					var ps	=	br.ReadBytes( length );
 
-					br.ExpectMagic("VSBC", "ubershader");
+					br.ExpectFourCC("VSBC");
 					length	=	br.ReadInt32();
 					var vs	=	br.ReadBytes( length );
 
-					br.ExpectMagic("GSBC", "ubershader");
+					br.ExpectFourCC("GSBC");
 					length	=	br.ReadInt32();
 					var gs	=	br.ReadBytes( length );
 
-					br.ExpectMagic("HSBC", "ubershader");
+					br.ExpectFourCC("HSBC");
 					length	=	br.ReadInt32();
 					var hs	=	br.ReadBytes( length );
 
-					br.ExpectMagic("DSBC", "ubershader");
+					br.ExpectFourCC("DSBC");
 					length	=	br.ReadInt32();
 					var ds	=	br.ReadBytes( length );
 
-					br.ExpectMagic("CSBC", "ubershader");
+					br.ExpectFourCC("CSBC");
 					length	=	br.ReadInt32();
 					var cs	=	br.ReadBytes( length );
 

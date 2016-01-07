@@ -149,8 +149,8 @@ namespace Fusion.Engine.Graphics {
 			flatNormalMap	=	new DynamicTexture( this, 4,4, typeof(Color), false, false );
 			flatNormalMap.SetData( Enumerable.Range(0,16).Select( i => new Color(127,127,255,127) ).ToArray() );
 
-			defaultMaterial	=	new Material();
-			defaultMaterial.LoadGpuResources( Game.Content );
+			var baseIllum = new BaseIllum();
+			defaultMaterial	=	baseIllum.CreateGpuMaterial(this, Game.Content);
 		}
 
 

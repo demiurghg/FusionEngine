@@ -1,51 +1,12 @@
-[Material]
-Transparent  = False
-CastShadow   = True
-Displacement = False
-
-# Possible values:
-#   SingleLayer
-#   DoubleLayer
-#   TripleLayer
-#   QuadLayer
-#   Terrain
-#   TriplanarWorldSingle
-#   TriplanarWorldDouble
-#   TriplanarWorldTriple
-Options      = SingleLayer
-
-[Layer1]
-ColorLevel       = 1
-AlphaLevel       = 1
-EmissionLevel    = 1
-SpecularLevel    = 0.05
-BumpLevel        = 1
-Displacement     = 1
-RoughnessRange   = 0, 0.2
-GlowNarrowness   = 0, 0
-BlendFactor      = 0
-Tiling           = 0.2, 0.2, 1
-Offset           = 0, 0, 0
-ColorTexture     = Scenes\Textures\dirt.tga
-SurfaceTexture   = 
-#NormalMapTexture = Scenes\Textures\lunarRock_local.tga
-EmissionTexture  = 
-
-
-[Layer0]
-ColorLevel       = 1
-AlphaLevel       = 1
-EmissionLevel    = 1
-SpecularLevel    = 1
-BumpLevel        = 1
-Displacement     = 1
-RoughnessRange   = 0.3, 0.9
-GlowNarrowness   = 0, 1
-BlendFactor      = 0
-Tiling           = 1, 1, 1
-Offset           = 0, 0, 0
-ColorTexture     = Scenes\Textures\floorHeavyA.tga
-SurfaceTexture   = Scenes\Textures\floorHeavyA_spec.tga
-NormalMapTexture = Scenes\Textures\floorHeavyA_local.tga
-EmissionTexture  = 
-
+<?xml version="1.0" encoding="utf-16"?>
+<BaseIllum xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ColorLevel>1</ColorLevel>
+  <SpecularLevel>1</SpecularLevel>
+  <EmissionLevel>1</EmissionLevel>
+  <RoughnessMinimum>0.05</RoughnessMinimum>
+  <RoughnessMaximum>1</RoughnessMaximum>
+  <ColorTexture Path="scenes\Textures\floorHeavyA.tga" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <SurfaceTexture Path="scenes\Textures\floorHeavyA_spec.tga" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <NormalMapTexture Path="scenes\Textures\floorHeavyA_local.tga" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <EmissionTexture Path="defaultBlack" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+</BaseIllum>

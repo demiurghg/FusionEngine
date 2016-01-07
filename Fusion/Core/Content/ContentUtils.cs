@@ -14,6 +14,16 @@ using System.Runtime.InteropServices;
 namespace Fusion.Core.Content {
 	public static class ContentUtils {
 
+		public static void ExpectFourCC ( this BinaryReader reader, string fourCC )
+		{
+			var readFourCC = reader.ReadFourCC();
+
+			if (readFourCC!=fourCC) {
+				throw new IOException(string.Format("Bad FourCC: expected:{0}, got:{1}", fourCC, readFourCC)); 
+			}
+		}
+
+
 		public static string ReadFourCC ( this BinaryReader reader )
 		{
 			return MakeFourCC( reader.ReadUInt32() );

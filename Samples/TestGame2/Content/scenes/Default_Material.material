@@ -1,79 +1,12 @@
-[Material]
-Transparent  = False
-CastShadow   = True
-Displacement = False
-
-# Possible values:
-#   SingleLayer
-#   DoubleLayer
-#   TripleLayer
-#   QuadLayer
-#   Terrain
-#   TriplanarWorldSingle
-#   TriplanarWorldDouble
-#   TriplanarWorldTriple
-Options      = SingleLayer
-
-
-# https://docs.unrealengine.com/latest/INT/Engine/Rendering/Materials/PhysicallyBased/index.html
-
-[Layer0]
-ColorLevel       = 1
-AlphaLevel       = 1
-EmissionLevel    = 1
-SpecularLevel    = 1
-BumpLevel        = 1
-Displacement     = 1
-RoughnessRange   = 0.1, 0.4
-GlowNarrowness   = 0, 0
-BlendFactor      = 0
-Tiling           = 2, 2, 1
-Offset           = 0, 0, 0
-ColorTexture     = Scenes/textures/redball.tga
-SurfaceTexture   = Scenes/textures/nonmetal_spec.tga
-;ColorTexture     = Scenes/textures/gold.tga
-;SurfaceTexture   = Scenes/textures/gold_spec.tga
-;NormalMapTexture = Scenes\Textures\floorHeavyA_local.tga
-;NormalMapTexture = Scenes\Textures\skin_local.tga
-EmissionTexture  = 
-
-
-[Layer1]
-ColorLevel       = 1
-AlphaLevel       = 1
-EmissionLevel    = 1
-SpecularLevel    = 0
-BumpLevel        = 1
-Displacement     = 1
-RoughnessRange   = 0.5, 0.5
-GlowNarrowness   = 0, 0
-BlendFactor      = 0
-Tiling           = 4, 4, 1
-Offset           = 0, 0, 0
-; ColorTexture     = Scenes/textures/gold.tga
-; SurfaceTexture   = Scenes/textures/nonmetal_spec.tga
-ColorTexture     = Scenes/textures/stain.tga
-SurfaceTexture   = Scenes/textures/stain_spec.tga
-NormalMapTexture = 
-EmissionTexture  = 
-
-
-
-[Layer2]
-ColorLevel       = 0.5
-AlphaLevel       = 1
-EmissionLevel    = 1
-SpecularLevel    = 1
-BumpLevel        = 1
-Displacement     = 1
-RoughnessRange   = 1, 0
-GlowNarrowness   = 0, 0
-BlendFactor      = 0
-Tiling           = 2, 2, 1
-Offset           = 0, 0, 0
-; ColorTexture     = Scenes/textures/gold.tga
-; SurfaceTexture   = Scenes/textures/nonmetal_spec.tga
-ColorTexture     = Scenes/textures/gold.tga
-SurfaceTexture   = Scenes/textures/gold_spec.tga
-NormalMapTexture = 
-EmissionTexture  = 
+<?xml version="1.0" encoding="utf-16"?>
+<BaseIllum xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ColorLevel>1</ColorLevel>
+  <SpecularLevel>1</SpecularLevel>
+  <EmissionLevel>1</EmissionLevel>
+  <RoughnessMinimum>0.05</RoughnessMinimum>
+  <RoughnessMaximum>1</RoughnessMaximum>
+  <ColorTexture Path="" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <SurfaceTexture Path="" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <NormalMapTexture Path="" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <EmissionTexture Path="" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+</BaseIllum>

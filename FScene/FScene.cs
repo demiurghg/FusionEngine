@@ -125,31 +125,31 @@ namespace FScene {
 
 		static void ResolveMaterial ( MaterialRef material, string relativeSceneDir, string fullSceneDir )
 		{
-			var mtrlName			=	ContentUtils.CreateSafeName( material.Name );
-			var texPath				=	material.Texture ?? "";
+			var mtrlName		=	ContentUtils.CreateSafeName( material.Name );
+			var texPath			=	material.Texture ?? "";
 
-			material.Name			=	Path.Combine( relativeSceneDir, mtrlName );
+			material.Name		=	Path.Combine( relativeSceneDir, mtrlName );
 			material.Texture	=	Path.Combine( relativeSceneDir, texPath );
-			var mtrlFileName		=	Path.Combine( fullSceneDir, mtrlName + ".material" );
+			var mtrlFileName	=	Path.Combine( fullSceneDir, mtrlName + ".material" );
 
 
 			if (!File.Exists(mtrlFileName)) {
 
-				var newMtrl =	new Material();
+				var newMtrl =	new BaseIllum();
 
-				newMtrl.Layer0.ColorTexture		=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "" ); 
-				newMtrl.Layer0.SurfaceTexture	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_surf" ); 
-				newMtrl.Layer0.NormalMapTexture	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_local" ); 
-				newMtrl.Layer0.EmissionTexture	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_glow" ); 
+				newMtrl.ColorTexture.Path		=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, ""			, newMtrl.ColorTexture.Path		);  
+				newMtrl.SurfaceTexture.Path		=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_surf"	, newMtrl.SurfaceTexture.Path	);  
+				newMtrl.NormalMapTexture.Path	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_local"	, newMtrl.NormalMapTexture.Path	);  
+				newMtrl.EmissionTexture.Path	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_glow"	, newMtrl.EmissionTexture.Path	);  
 
-				File.WriteAllText( mtrlFileName, newMtrl.ToINI() );
+				File.WriteAllText( mtrlFileName, BaseIllum.ExportToXml(newMtrl) );
 			}
 
 		}
 
 
 
-		static string ResolveTexture ( string relativeSceneDir, string fullSceneDir, string textureName, string postfix )
+		static string ResolveTexture ( string relativeSceneDir, string fullSceneDir, string textureName, string postfix, string fallback )
 		{	
 			if (string.IsNullOrWhiteSpace(textureName)) {
 				return "";
@@ -163,8 +163,7 @@ namespace FScene {
 			if ( File.Exists(fileName) ) {
 				return Path.Combine( relativeSceneDir, noExt + postfix + ext );
 			} else {
-				//Log.Warning("{0}", fileName); 
-				return "";
+				return fallback;
 			}
 		}
 	}

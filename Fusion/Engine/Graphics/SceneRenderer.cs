@@ -212,8 +212,8 @@ namespace Fusion.Engine.Graphics {
 
 							device.PipelineState	=	factory[ (int)ApplyFlags(sg.Material, instance, SurfaceFlags.GBUFFER) ];
 
-							device.PixelShaderConstants[1]	= sg.Material.LayerConstBuffer;
-							device.VertexShaderConstants[1]	= sg.Material.LayerConstBuffer;
+							device.PixelShaderConstants[1]	= sg.Material.ConstantBuffer;
+							device.VertexShaderConstants[1]	= sg.Material.ConstantBuffer;
 
 							sg.Material.SetTextures( device );
 
@@ -239,20 +239,20 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		SurfaceFlags ApplyFlags ( Material material, MeshInstance instance, SurfaceFlags flags )
 		{
-			if (material!=null) {
-				switch ( material.Options ) {
-					case MaterialOptions.SingleLayer : flags |= SurfaceFlags.LAYER0; break;	
-					case MaterialOptions.DoubleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1; break;
-					case MaterialOptions.TripleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2; break;
-					case MaterialOptions.QuadLayer	 : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2|SurfaceFlags.LAYER3; break;
+			//if (material!=null) {
+			//	switch ( material.Options ) {
+			//		case MaterialOptions.SingleLayer : flags |= SurfaceFlags.LAYER0; break;	
+			//		case MaterialOptions.DoubleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1; break;
+			//		case MaterialOptions.TripleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2; break;
+			//		case MaterialOptions.QuadLayer	 : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2|SurfaceFlags.LAYER3; break;
 
-					case MaterialOptions.Terrain : flags |= SurfaceFlags.TERRAIN; break;
+			//		case MaterialOptions.Terrain : flags |= SurfaceFlags.TERRAIN; break;
 
-					case MaterialOptions.TriplanarWorldSingle : flags |= SurfaceFlags.TRIPLANAR_SINGLE; break;
-					case MaterialOptions.TriplanarWorldDouble : flags |= SurfaceFlags.TRIPLANAR_DOUBLE; break;
-					case MaterialOptions.TriplanarWorldTriple : flags |= SurfaceFlags.TRIPLANAR_TRIPLE; break;
-				}
-			}
+			//		case MaterialOptions.TriplanarWorldSingle : flags |= SurfaceFlags.TRIPLANAR_SINGLE; break;
+			//		case MaterialOptions.TriplanarWorldDouble : flags |= SurfaceFlags.TRIPLANAR_DOUBLE; break;
+			//		case MaterialOptions.TriplanarWorldTriple : flags |= SurfaceFlags.TRIPLANAR_TRIPLE; break;
+			//	}
+			//}
 
 			if (instance.IsSkinned) {
 				flags |= SurfaceFlags.SKINNED;

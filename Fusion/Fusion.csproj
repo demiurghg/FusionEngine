@@ -213,9 +213,12 @@
     <Compile Include="Engine\Common\Commands\CrashClient.cs" />
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
     <Compile Include="Engine\Common\GameInterface.Internal.cs" />
-    <Compile Include="Engine\Graphics\Materials\Material.New.cs" />
-    <Compile Include="Engine\Graphics\Materials\MaterialTexture.cs" />
-    <Compile Include="Engine\Graphics\Materials\ShaderCombiner.cs" />
+    <Compile Include="Engine\Graphics\Materials\BaseIllum.cs" />
+    <Compile Include="Engine\Graphics\Materials\TextureMapAttribute.cs" />
+    <Compile Include="Engine\Graphics\Materials\MaterialData.cs" />
+    <Compile Include="Engine\Graphics\Materials\TextureMap.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Engine\Graphics\RenderCounters.cs" />
     <Compile Include="Engine\Graphics\Utils\DebugLayer.cs" />
     <Compile Include="Engine\Graphics\Utils\DebugRender.cs" />
@@ -239,10 +242,7 @@
     <Compile Include="Engine\Graphics\Lights\LightRendererConfig.cs" />
     <Compile Include="Engine\Graphics\Lights\DirectLight.cs" />
     <Compile Include="Engine\Graphics\Lights\ShadowContext.cs" />
-    <Compile Include="Engine\Graphics\Materials\Material.Gpu.cs" />
     <Compile Include="Engine\Graphics\Materials\MaterialLoader.cs" />
-    <Compile Include="Engine\Graphics\Materials\MaterialOptions.cs" />
-    <Compile Include="Engine\Graphics\Materials\MaterialLayer.cs" />
     <Compile Include="Engine\Graphics\SceneRenderer.cs" />
     <Compile Include="Engine\Graphics\Scene\MaterialRef.cs" />
     <Compile Include="Engine\Graphics\Scene\VertexColorTextureTBNSkinned.cs" />
