@@ -214,7 +214,6 @@
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
     <Compile Include="Engine\Common\GameInterface.Internal.cs" />
     <Compile Include="Engine\Graphics\Materials\BaseIllum.cs" />
-    <Compile Include="Engine\Graphics\Materials\TextureMapAttribute.cs" />
     <Compile Include="Engine\Graphics\Materials\MaterialData.cs" />
     <Compile Include="Engine\Graphics\Materials\TextureMap.cs">
       <SubType>Code</SubType>
