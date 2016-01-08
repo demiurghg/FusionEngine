@@ -3,10 +3,11 @@
   <ColorLevel>1</ColorLevel>
   <SpecularLevel>1</SpecularLevel>
   <EmissionLevel>1</EmissionLevel>
-  <RoughnessMinimum>0.05</RoughnessMinimum>
-  <RoughnessMaximum>1</RoughnessMaximum>
-  <ColorTexture Path="" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
-  <SurfaceTexture Path="" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <RoughnessMinimum>0.1</RoughnessMinimum>
+  <RoughnessMaximum>0.4</RoughnessMaximum>
+  <ColorTexture Path="scenes\Textures\redball.tga" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <SurfaceTexture Path="scenes\Textures\nonmetal_spec.tga" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
   <NormalMapTexture Path="" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
   <EmissionTexture Path="" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <DirtTexture Path="scenes\Textures\stain.tga" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
 </BaseIllum>

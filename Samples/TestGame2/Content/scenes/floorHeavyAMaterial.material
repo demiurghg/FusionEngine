@@ -9,4 +9,5 @@
   <SurfaceTexture Path="scenes\Textures\floorHeavyA_spec.tga" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
   <NormalMapTexture Path="scenes\Textures\floorHeavyA_local.tga" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
   <EmissionTexture Path="defaultBlack" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <DirtTexture Path="scenes\Textures\stain.tga" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
 </BaseIllum>

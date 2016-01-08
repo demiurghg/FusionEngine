@@ -97,7 +97,10 @@ struct SURFACE {
 //	https://www.marmoset.co/toolbag/learn/pbr-theory	
 //	This means that in theory conductors will not show any evidence of diffuse light. 
 //	In practice however there are often oxides or other residues on the surface of a 
-//	metal that will scatter some small amounts of light.	
+//	metal that will scatter some small amounts of light.
+
+//	Blend mode refernce:
+//	http://www.deepskycolors.com/archivo/2010/04/21/formulas-for-Photoshop-blending-modes.html	
 	
 SURFACE MaterialCombiner ( float2 uv )
 {
@@ -111,6 +114,11 @@ SURFACE MaterialCombiner ( float2 uv )
 	float4 surfMap		=	Textures[1].Sample( Sampler, uv ).rgba;
 	float4 normalMap	=	Textures[2].Sample( Sampler, uv ).rgba * 2 - 1;
 	float4 emission		=	Textures[3].Sample( Sampler, uv ).rgba;
+	float4 dirt			=	Textures[4].Sample( Sampler, uv ).rgba;
+	
+	color.rgb *= dirt.rgb;
+	//	screen blend mode:
+	surfMap.g = 1 - (1-dirt.a) * (1-surfMap.g);
 	
 	float3 metalS		=	color.rgb * (surfMap.r);
 	float3 nonmetalS	=	float3(0.31,0.31,0.31) * surfMap.r;

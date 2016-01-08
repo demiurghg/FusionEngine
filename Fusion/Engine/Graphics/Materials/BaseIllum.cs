@@ -27,6 +27,9 @@ namespace Fusion.Engine.Graphics {
 		public TextureMap NormalMapTexture { get; set; }
 		public TextureMap EmissionTexture { get; set; }
 
+		public TextureMap DirtTexture { get; set; }
+		public TextureMap DetailTexture { get; set; }
+
 
 		/// <summary>
 		/// Constructor
@@ -43,6 +46,8 @@ namespace Fusion.Engine.Graphics {
 			SurfaceTexture		=	new TextureMap( "defaultMatte"  , false );
 			NormalMapTexture	=	new TextureMap( "defaultNormals", false );
 			EmissionTexture		=	new TextureMap( "defaultBlack"  , true );
+			DirtTexture			=	new TextureMap( "defaultDirt"   , true );
+			DetailTexture		=	new TextureMap( "defaultDetail" , true );
 		}
 
 
@@ -88,10 +93,12 @@ namespace Fusion.Engine.Graphics {
 		protected virtual Texture[] GetTextures ( ContentManager content )
 		{
 			return new Texture[] {
-				ColorTexture	.LoadTexture( content, "defaultColor" ),
-				SurfaceTexture	.LoadTexture( content, "defaultMatte" ),
+				ColorTexture	.LoadTexture( content, "defaultColor"	),
+				SurfaceTexture	.LoadTexture( content, "defaultMatte"	),
 				NormalMapTexture.LoadTexture( content, "defaultNormals" ),
-				EmissionTexture	.LoadTexture( content, "defaultBlack" ),
+				EmissionTexture	.LoadTexture( content, "defaultBlack"	),
+				DirtTexture		.LoadTexture( content, "defaultDirt"	),
+				DetailTexture	.LoadTexture( content, "defaultDetail"	),
 			};
 		}
 
