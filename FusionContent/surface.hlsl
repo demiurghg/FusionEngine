@@ -9,11 +9,11 @@ struct BATCH {
 
 
 struct MATERIAL {
-	float ColorLevel;
-	float SpecularLevel;
-	float EmissionLevel;
-	float RoughnessMinimum;
-	float RoughnessMaximum;
+	float 	ColorLevel;
+	float 	SpecularLevel;
+	float 	EmissionLevel;
+	float 	RoughnessMinimum;
+	float 	RoughnessMaximum;
 };
 
 struct VSInput {
@@ -45,7 +45,8 @@ struct GBuffer {
 };
 
 cbuffer 		CBBatch 	: 	register(b0) { BATCH    Batch     : packoffset( c0 ); }	
-cbuffer 		CBLayer 	: 	register(b1) { MATERIAL Material : packoffset( c0 ); }	
+cbuffer 		CBLayer 	: 	register(b1) { MATERIAL Material  : packoffset( c0 ); }	
+cbuffer 		CBLayer 	: 	register(b2) { float4   UVMods[16]: packoffset( c0 ); }	
 SamplerState	Sampler		: 	register(s0);
 Texture2D		Textures[16]		: 	register(t0);
 
@@ -101,6 +102,14 @@ struct SURFACE {
 
 //	Blend mode refernce:
 //	http://www.deepskycolors.com/archivo/2010/04/21/formulas-for-Photoshop-blending-modes.html	
+
+float Overlay ( float target, float blend )
+{
+	return lerp( 
+		(1 - (1-2*(target-0.5)) * (1-blend)),
+		((2*target) * blend),
+		step(target, 0.5));
+}
 	
 SURFACE MaterialCombiner ( float2 uv )
 {
@@ -110,14 +119,19 @@ SURFACE MaterialCombiner ( float2 uv )
 	
 	//uv = uv * layerData.Tiling.xy + layerData.Offset.xy;
 	
-	float4 color		=	Textures[0].Sample( Sampler, uv ).rgba;
-	float4 surfMap		=	Textures[1].Sample( Sampler, uv ).rgba;
-	float4 normalMap	=	Textures[2].Sample( Sampler, uv ).rgba * 2 - 1;
-	float4 emission		=	Textures[3].Sample( Sampler, uv ).rgba;
-	float4 dirt			=	Textures[4].Sample( Sampler, uv ).rgba;
+	float4 color		=	Textures[0].Sample( Sampler, uv * UVMods[0].xy + UVMods[0].zw ).rgba;
+	float4 surfMap		=	Textures[1].Sample( Sampler, uv * UVMods[1].xy + UVMods[1].zw ).rgba;
+	float4 normalMap	=	Textures[2].Sample( Sampler, uv * UVMods[2].xy + UVMods[2].zw ).rgba * 2 - 1;
+	float4 emission		=	Textures[3].Sample( Sampler, uv * UVMods[3].xy + UVMods[4].zw ).rgba;
+	float4 dirt			=	Textures[4].Sample( Sampler, uv * UVMods[4].xy + UVMods[4].zw ).rgba;
+	
+	//	experimental:
+	/*color.r 	=	Overlay( color.r, dirt.r );
+	color.g 	=	Overlay( color.g, dirt.g );
+	color.b 	=	Overlay( color.b, dirt.b );
+	surfMap.g 	=	Overlay( surfMap.g, dirt.a );*/
 	
 	color.rgb *= dirt.rgb;
-	//	screen blend mode:
 	surfMap.g = 1 - (1-dirt.a) * (1-surfMap.g);
 	
 	float3 metalS		=	color.rgb * (surfMap.r);

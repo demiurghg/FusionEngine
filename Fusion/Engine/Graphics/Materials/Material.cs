@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using Fusion.Core.IniParser;
 using System.IO;
 using Fusion.Core;
+using Fusion.Core.Mathematics;
 using Fusion.Core.IniParser.Model;
 using Fusion.Core.IniParser.Model.Formatting;
 using Fusion.Core.Content;
@@ -16,20 +17,31 @@ namespace Fusion.Engine.Graphics {
 	
 	/// <summary>
 	/// Reprsents material.
+	/// MaterialInstance???
 	/// </summary>
 	public partial class Material : DisposableBase {
 
 		const int MaxTextures = 16;
 
 		ShaderResource[]	shaderResources;
-		ConstantBuffer		constBuffer;
+		ConstantBuffer		constBufferParams;
+		ConstantBuffer		constBufferUVMods;
 
 		/// <summary>
 		/// Gets material's constant buffer :
 		/// </summary>
-		internal ConstantBuffer ConstantBuffer {
+		internal ConstantBuffer ConstantBufferParameters {
 			get {
-				return constBuffer;
+				return constBufferParams;
+			}
+		}
+
+		/// <summary>
+		/// Gets material's constant buffer :
+		/// </summary>
+		internal ConstantBuffer ConstantBufferUVModifiers {
+			get {
+				return constBufferUVMods;
 			}
 		}
 
@@ -40,20 +52,35 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="rs"></param>
 		/// <param name="maxTextures"></param>
-		internal Material ( RenderSystem rs, MaterialData parameters, IEnumerable<Texture> textures )
+		internal Material ( RenderSystem rs, ContentManager content, MaterialData parameters, IEnumerable<TextureMapBind> textureBinds )
 		{
 			if (rs==null) {
 				throw new ArgumentNullException("rs");
 			}
 
-			if (textures.Count()<0 || textures.Count()>MaxTextures) {
+			if (textureBinds.Count()<0 || textureBinds.Count()>MaxTextures) {
 				throw new ArgumentException("textureCount", "Must be less or equal to " + MaxTextures.ToString() );
 			}
 
-			shaderResources	=	textures.Select( tex => tex.Srv ).ToArray();
 
-			constBuffer		=	new ConstantBuffer( rs.Device, typeof(MaterialData) );
-			constBuffer.SetData( parameters );
+			var textures = textureBinds
+				.Select( texBind => texBind.TextureMap.LoadTexture( content, texBind.FallbackPath ) );
+
+			var uvMods = new Vector4[MaxTextures];
+
+			textureBinds
+				.Select( tb => tb.TextureMap )
+				.Select( tm => new Vector4( tm.ScaleU, tm.ScaleV, tm.OffsetU, tm.OffsetV ) )
+				.ToArray()
+				.CopyTo( uvMods, 0 );
+
+			shaderResources		=	textures.Select( tex => tex.Srv ).ToArray();
+
+			constBufferParams	=	new ConstantBuffer( rs.Device, typeof(MaterialData) );
+			constBufferParams.SetData( parameters );
+
+			constBufferUVMods	=	new ConstantBuffer( rs.Device, typeof(Vector4), MaxTextures );
+			constBufferUVMods.SetData( uvMods );
 		}
 
 
@@ -65,7 +92,8 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				SafeDispose( ref constBuffer );
+				SafeDispose( ref constBufferParams );
+				SafeDispose( ref constBufferUVMods );
 			}
 			base.Dispose( disposing );
 		}

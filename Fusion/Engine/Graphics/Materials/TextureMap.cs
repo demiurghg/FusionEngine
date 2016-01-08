@@ -11,7 +11,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// 
 	/// </summary>
-	public class TextureMap {
+	public sealed class TextureMap {
 		
 		/// <summary>
 		/// Path to textyre
@@ -56,7 +56,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="defaultPath"></param>
 		public TextureMap ()
 		{
-			Path		=	"defaultColor";
+			Path		=	"";
 			ScaleU		=	1;
 			ScaleV		=	1;
 			OffsetU		=	0;
@@ -106,6 +106,22 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			return content.Load<DiscTexture>( Path + (SRgb ? "|srgb" : "") );
+		}
+	}
+
+
+
+	public class TextureMapAttribute : Attribute {
+
+		public readonly int Slot;
+		public readonly string Default;
+		public readonly bool SRgb;
+
+		public TextureMapAttribute ( int slot, string defaultPath, bool srgb )
+		{
+			Slot	=	slot;
+			Default	=	defaultPath;
+			SRgb	=	srgb;
 		}
 	}
 }

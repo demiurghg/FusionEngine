@@ -212,8 +212,10 @@ namespace Fusion.Engine.Graphics {
 
 							device.PipelineState	=	factory[ (int)ApplyFlags(sg.Material, instance, SurfaceFlags.GBUFFER) ];
 
-							device.PixelShaderConstants[1]	= sg.Material.ConstantBuffer;
-							device.VertexShaderConstants[1]	= sg.Material.ConstantBuffer;
+							device.PixelShaderConstants[1]	= sg.Material.ConstantBufferParameters;
+							device.PixelShaderConstants[2]	= sg.Material.ConstantBufferUVModifiers;
+							device.VertexShaderConstants[1]	= sg.Material.ConstantBufferParameters;
+							device.VertexShaderConstants[2]	= sg.Material.ConstantBufferUVModifiers;
 
 							sg.Material.SetTextures( device );
 

@@ -5,7 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core;
 using Fusion.Core.Content;
+using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
+
 
 namespace Fusion.Engine.Graphics {
 
@@ -26,7 +28,6 @@ namespace Fusion.Engine.Graphics {
 		public TextureMap SurfaceTexture { get; set; }
 		public TextureMap NormalMapTexture { get; set; }
 		public TextureMap EmissionTexture { get; set; }
-
 		public TextureMap DirtTexture { get; set; }
 		public TextureMap DetailTexture { get; set; }
 
@@ -42,12 +43,12 @@ namespace Fusion.Engine.Graphics {
 			RoughnessMinimum	=	0.05f;
 			RoughnessMaximum	=	1.00f;
 
-			ColorTexture		=	new TextureMap( "defaultColor"  , true );
-			SurfaceTexture		=	new TextureMap( "defaultMatte"  , false );
-			NormalMapTexture	=	new TextureMap( "defaultNormals", false );
-			EmissionTexture		=	new TextureMap( "defaultBlack"  , true );
-			DirtTexture			=	new TextureMap( "defaultDirt"   , true );
-			DetailTexture		=	new TextureMap( "defaultDetail" , true );
+			ColorTexture		=	new TextureMap("defaultColor"	, true );
+			SurfaceTexture		=	new TextureMap("defaultMatte"	, false);
+			NormalMapTexture	=	new TextureMap("defaultNormals"	, false);
+			EmissionTexture		=	new TextureMap("defaultBlack"	, true );
+			DirtTexture			=	new TextureMap("defaultDirt"	, true );
+			DetailTexture		=	new TextureMap("defaultDetail"	, false);
 		}
 
 
@@ -63,7 +64,7 @@ namespace Fusion.Engine.Graphics {
 			
 			GetMaterialData( ref data );
 
-			var mtrl = new Material( rs, data, GetTextures(content) );
+			var mtrl = new Material( rs, content, data, GetTextureBindings() );
 
 			return mtrl;
 		}
@@ -90,15 +91,15 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="content"></param>
 		/// <returns></returns>
-		protected virtual Texture[] GetTextures ( ContentManager content )
+		protected virtual TextureMapBind[] GetTextureBindings ()
 		{
-			return new Texture[] {
-				ColorTexture	.LoadTexture( content, "defaultColor"	),
-				SurfaceTexture	.LoadTexture( content, "defaultMatte"	),
-				NormalMapTexture.LoadTexture( content, "defaultNormals" ),
-				EmissionTexture	.LoadTexture( content, "defaultBlack"	),
-				DirtTexture		.LoadTexture( content, "defaultDirt"	),
-				DetailTexture	.LoadTexture( content, "defaultDetail"	),
+			return new TextureMapBind[] {
+				new TextureMapBind( ColorTexture	, "defaultColor"	),
+				new TextureMapBind( SurfaceTexture	, "defaultMatte"	),
+				new TextureMapBind( NormalMapTexture, "defaultNormals"	),
+				new TextureMapBind( EmissionTexture	, "defaultBlack"	),
+				new TextureMapBind( DirtTexture		, "defaultDirt"		),
+				new TextureMapBind( DetailTexture	, "defaultDetail"	),
 			};
 		}
 

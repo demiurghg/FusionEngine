@@ -203,7 +203,7 @@ void CSMain(
 	float	depth 	 	=	GBufferDepth 	.Load( location ).r;
 	float4	scatter 	=	GBufferScatter 	.Load( location );
 	
-	float fresnelDecay	=	length(normal.xyz) * 2 - 1;
+	float fresnelDecay	=	(length(normal.xyz) * 2 - 1);// * (1-0.5*specular.a);
 	normal.xyz			=	normalize(normal.xyz);
 
 	float4	projPos		=	float4( location.x/(float)width*2-1, location.y/(float)height*(-2)+1, depth, 1 );
