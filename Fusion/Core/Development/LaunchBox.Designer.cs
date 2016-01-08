@@ -55,7 +55,7 @@
 			// 
 			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.button1.Location = new System.Drawing.Point(178, 433);
+			this.button1.Location = new System.Drawing.Point(178, 483);
 			this.button1.Name = "button1";
 			this.button1.Size = new System.Drawing.Size(110, 32);
 			this.button1.TabIndex = 0;
@@ -66,7 +66,7 @@
 			// trackObjects
 			// 
 			this.trackObjects.AutoSize = true;
-			this.trackObjects.Location = new System.Drawing.Point(114, 197);
+			this.trackObjects.Location = new System.Drawing.Point(114, 240);
 			this.trackObjects.Name = "trackObjects";
 			this.trackObjects.Size = new System.Drawing.Size(93, 17);
 			this.trackObjects.TabIndex = 5;
@@ -76,7 +76,7 @@
 			// debugDevice
 			// 
 			this.debugDevice.AutoSize = true;
-			this.debugDevice.Location = new System.Drawing.Point(114, 220);
+			this.debugDevice.Location = new System.Drawing.Point(114, 263);
 			this.debugDevice.Name = "debugDevice";
 			this.debugDevice.Size = new System.Drawing.Size(162, 17);
 			this.debugDevice.TabIndex = 6;
@@ -86,7 +86,7 @@
 			// button3
 			// 
 			this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.button3.Location = new System.Drawing.Point(12, 433);
+			this.button3.Location = new System.Drawing.Point(12, 483);
 			this.button3.Name = "button3";
 			this.button3.Size = new System.Drawing.Size(83, 32);
 			this.button3.TabIndex = 14;
@@ -97,7 +97,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(18, 246);
+			this.label1.Location = new System.Drawing.Point(18, 289);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(90, 13);
 			this.label1.TabIndex = 4;
@@ -106,14 +106,14 @@
 			// 
 			// startupCommand
 			// 
-			this.startupCommand.Location = new System.Drawing.Point(114, 243);
+			this.startupCommand.Location = new System.Drawing.Point(114, 286);
 			this.startupCommand.Name = "startupCommand";
 			this.startupCommand.Size = new System.Drawing.Size(174, 20);
 			this.startupCommand.TabIndex = 7;
 			// 
 			// openConfig
 			// 
-			this.openConfig.Location = new System.Drawing.Point(114, 269);
+			this.openConfig.Location = new System.Drawing.Point(114, 312);
 			this.openConfig.Name = "openConfig";
 			this.openConfig.Size = new System.Drawing.Size(144, 23);
 			this.openConfig.TabIndex = 8;
@@ -123,7 +123,7 @@
 			// 
 			// openContent
 			// 
-			this.openContent.Location = new System.Drawing.Point(114, 298);
+			this.openContent.Location = new System.Drawing.Point(114, 341);
 			this.openContent.Name = "openContent";
 			this.openContent.Size = new System.Drawing.Size(144, 23);
 			this.openContent.TabIndex = 10;
@@ -133,7 +133,7 @@
 			// 
 			// buildContent
 			// 
-			this.buildContent.Location = new System.Drawing.Point(114, 327);
+			this.buildContent.Location = new System.Drawing.Point(114, 370);
 			this.buildContent.Name = "buildContent";
 			this.buildContent.Size = new System.Drawing.Size(144, 23);
 			this.buildContent.TabIndex = 12;
@@ -143,7 +143,7 @@
 			// 
 			// rebuildContent
 			// 
-			this.rebuildContent.Location = new System.Drawing.Point(114, 356);
+			this.rebuildContent.Location = new System.Drawing.Point(114, 399);
 			this.rebuildContent.Name = "rebuildContent";
 			this.rebuildContent.Size = new System.Drawing.Size(144, 23);
 			this.rebuildContent.TabIndex = 13;
@@ -154,7 +154,7 @@
 			// fullscreen
 			// 
 			this.fullscreen.AutoSize = true;
-			this.fullscreen.Location = new System.Drawing.Point(114, 174);
+			this.fullscreen.Location = new System.Drawing.Point(114, 217);
 			this.fullscreen.Name = "fullscreen";
 			this.fullscreen.Size = new System.Drawing.Size(74, 17);
 			this.fullscreen.TabIndex = 4;
@@ -166,13 +166,13 @@
 			this.pictureBox1.Image = global::Fusion.Properties.Resources.launchHeader;
 			this.pictureBox1.Location = new System.Drawing.Point(0, 0);
 			this.pictureBox1.Name = "pictureBox1";
-			this.pictureBox1.Size = new System.Drawing.Size(300, 100);
+			this.pictureBox1.Size = new System.Drawing.Size(300, 150);
 			this.pictureBox1.TabIndex = 14;
 			this.pictureBox1.TabStop = false;
 			// 
 			// versionLabel
 			// 
-			this.versionLabel.Location = new System.Drawing.Point(12, 397);
+			this.versionLabel.Location = new System.Drawing.Point(12, 447);
 			this.versionLabel.Name = "versionLabel";
 			this.versionLabel.Size = new System.Drawing.Size(276, 23);
 			this.versionLabel.TabIndex = 15;
@@ -181,7 +181,7 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(46, 124);
+			this.label2.Location = new System.Drawing.Point(46, 167);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(62, 13);
 			this.label2.TabIndex = 18;
@@ -193,7 +193,7 @@
 			this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.label4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.label4.Location = new System.Drawing.Point(12, 420);
+			this.label4.Location = new System.Drawing.Point(12, 470);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(276, 2);
 			this.label4.TabIndex = 19;
@@ -202,7 +202,7 @@
 			// 
 			this.stereoMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.stereoMode.FormattingEnabled = true;
-			this.stereoMode.Location = new System.Drawing.Point(114, 147);
+			this.stereoMode.Location = new System.Drawing.Point(114, 190);
 			this.stereoMode.Name = "stereoMode";
 			this.stereoMode.Size = new System.Drawing.Size(174, 21);
 			this.stereoMode.TabIndex = 3;
@@ -210,7 +210,7 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(41, 150);
+			this.label5.Location = new System.Drawing.Point(41, 193);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(67, 13);
 			this.label5.TabIndex = 21;
@@ -219,7 +219,7 @@
 			// 
 			// displayWidth
 			// 
-			this.displayWidth.Location = new System.Drawing.Point(114, 121);
+			this.displayWidth.Location = new System.Drawing.Point(114, 164);
 			this.displayWidth.Maximum = new decimal(new int[] {
             4096,
             0,
@@ -241,7 +241,7 @@
 			// 
 			// displayHeight
 			// 
-			this.displayHeight.Location = new System.Drawing.Point(204, 121);
+			this.displayHeight.Location = new System.Drawing.Point(204, 164);
 			this.displayHeight.Maximum = new decimal(new int[] {
             4096,
             0,
@@ -263,7 +263,7 @@
 			// 
 			// button2
 			// 
-			this.button2.Location = new System.Drawing.Point(264, 269);
+			this.button2.Location = new System.Drawing.Point(264, 312);
 			this.button2.Name = "button2";
 			this.button2.Size = new System.Drawing.Size(24, 23);
 			this.button2.TabIndex = 9;
@@ -273,7 +273,7 @@
 			// 
 			// button4
 			// 
-			this.button4.Location = new System.Drawing.Point(264, 298);
+			this.button4.Location = new System.Drawing.Point(264, 341);
 			this.button4.Name = "button4";
 			this.button4.Size = new System.Drawing.Size(24, 23);
 			this.button4.TabIndex = 11;
@@ -285,8 +285,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(300, 477);
-			this.ControlBox = false;
+			this.ClientSize = new System.Drawing.Size(300, 527);
 			this.Controls.Add(this.button4);
 			this.Controls.Add(this.button2);
 			this.Controls.Add(this.displayHeight);
@@ -309,6 +308,8 @@
 			this.Controls.Add(this.trackObjects);
 			this.Controls.Add(this.button1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+			this.MaximizeBox = false;
+			this.MinimizeBox = false;
 			this.Name = "LaunchBox";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "LaunchBox";
