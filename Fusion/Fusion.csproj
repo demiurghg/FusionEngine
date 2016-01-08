@@ -121,6 +121,12 @@
     <Compile Include="Core\Content\AssetStream.cs" />
     <Compile Include="Core\Content\BytesLoader.cs" />
     <Compile Include="Core\Content\StringLoader.cs" />
+    <Compile Include="Core\Development\LaunchBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Core\Development\LaunchBox.Designer.cs">
+      <DependentUpon>LaunchBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="Core\IniParser\Exceptions\ParsingException.cs" />
     <Compile Include="Core\IniParser\FileIniParser.cs" />
     <Compile Include="Core\IniParser\Helpers\Assert.cs" />
@@ -504,6 +510,9 @@
     <EmbeddedResource Include="Core\Development\ExceptionDialog.resx">
       <DependentUpon>ExceptionDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Core\Development\LaunchBox.resx">
+      <DependentUpon>LaunchBox.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
@@ -512,7 +521,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="fusionIcon.ico" />
+    <None Include="launchHeader.png" />
     <None Include="fusionSplash.png" />
+    <None Include="Properties\DataSources\Fusion.Properties.Resources.datasource" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SDKs\BEPUPhysics\BEPUphysics\BEPUphysics.csproj">

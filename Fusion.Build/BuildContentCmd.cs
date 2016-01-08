@@ -21,6 +21,9 @@ namespace Fusion.Build {
 		[CommandLineParser.Name("clean")]
 		public string CleanPattern { get; set; }
 			
+		[CommandLineParser.Name("async")]
+		public bool ASync { get; set; }
+			
 		
 		/// <summary>
 		/// 
@@ -36,15 +39,21 @@ namespace Fusion.Build {
 		/// </summary>
 		public override void Execute ()
 		{
-			var task = new Task( BuildTask );
-			task.Start();
+			if (ASync) {
+				var task = new Task( BuildTask );
+				task.Start();
+			} else {
+				BuildTask();
+			}
 		}
 
 
 		void BuildTask ()
 		{
 			Builder.SafeBuild( ForceRebuild, CleanPattern );
-			Invoker.Game.Reload();
+			if (Game.IsInitialized) {
+				Invoker.Game.Reload();
+			}
 		}
 	}
 }

@@ -13,6 +13,7 @@ using Fusion.Core.Utils;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 using Fusion.Engine.Graphics;
+using Fusion.Core.Development;
 
 namespace TestGame2 {
 
@@ -55,6 +56,9 @@ namespace TestGame2 {
 
 				//	apply command-line options here:
 				//	...
+				if (!LaunchBox.Show(engine, "Config.ini")) {
+					return 0;
+				}
 
 				//	run:
 				engine.Run();

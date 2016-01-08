@@ -138,6 +138,18 @@ namespace Fusion.Core.Shell {
 			}
 		}
 
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public object PushAndExecute ( string commandLine )
+		{
+			var cmd = Push( commandLine );
+			ExecuteQueue( new GameTime(), CommandAffinity.Default, true );
+			return cmd.Result;
+		}
+
 		
 
 		/// <summary>

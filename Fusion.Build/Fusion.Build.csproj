@@ -64,6 +64,7 @@
     <Compile Include="BuildException.cs" />
     <Compile Include="BuildOptions.cs" />
     <Compile Include="BuildResult.cs" />
+    <Compile Include="BuildContentFileCmd.cs" />
     <Compile Include="ImageUtils\Image.cs" />
     <Compile Include="ImageUtils\Image.Noise.cs" />
     <Compile Include="ImageUtils\Image.Tga.cs" />

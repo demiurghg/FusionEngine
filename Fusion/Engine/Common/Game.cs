@@ -257,14 +257,15 @@ namespace Fusion.Engine.Common {
 		/// <returns></returns>
 		public string GetReleaseInfo ()
 		{
-			return string.Format("{0} {1} {2}", 
+			return string.Format("{0} {1} {2} {3}", 
 				Assembly.GetExecutingAssembly().GetName().Name, 
 				Assembly.GetExecutingAssembly().GetName().Version,
 				#if DEBUG
-					"debug"
+					"debug",
 				#else
-					"release"
+					"release",
 				#endif
+				(IntPtr.Size==4? "x86" : "x64")
 			);
 		}
 
