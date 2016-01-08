@@ -34,16 +34,26 @@ namespace Fusion.Core.Development {
 
 
 		string configPath;
+		string configName;
 
 
 		private LaunchBox ( Game game, string config )
 		{
 			this.game	=	game;
+			configName	=	config;
 			configPath	=	game.UserStorage.GetFullPath(config);
 
 			InitializeComponent();
 
 			this.Text	=	game.GameTitle;
+
+			UpdateControls();
+		}
+
+
+
+		void UpdateControls ()
+		{
 
 			//	version :
 			versionLabel.Text	=	game.GetReleaseInfo();
@@ -65,6 +75,8 @@ namespace Fusion.Core.Development {
 			//	use debug device :
 			debugDevice.Checked	=	game.RenderSystem.Config.UseDebugDevice;
 		}
+
+
 
 		private void button1_Click ( object sender, EventArgs e )
 		{
@@ -92,29 +104,42 @@ namespace Fusion.Core.Development {
 			this.Close();
 		}
 
+
+
 		private void button3_Click ( object sender, EventArgs e )
 		{
 			this.Close();
 		}
 
 
-		void ShellExecute ( string path )
+
+		void ShellExecute ( string path, bool wait = false )
 		{
 			ProcessStartInfo psi = new ProcessStartInfo(path);
 			psi.UseShellExecute = true;
-			Process.Start(psi);
+			var proc = Process.Start(psi);
+			if (wait) {
+				proc.WaitForExit();
+			}
 		}
+
 
 
 		private void openConfig_Click ( object sender, EventArgs e )
 		{
-			ShellExecute( configPath );
+			ShellExecute( configPath, true );
+			game.LoadConfiguration(configName);
+			UpdateControls();
 		}
+
+
 
 		private void button2_Click ( object sender, EventArgs e )
 		{
 			ShellExecute( Path.GetDirectoryName(configPath) );
 		}
+
+
 
 		private void openContent_Click ( object sender, EventArgs e )
 		{
@@ -122,16 +147,22 @@ namespace Fusion.Core.Development {
 			ShellExecute(file);
 		}
 
+
+
 		private void button4_Click ( object sender, EventArgs e )
 		{
 			var file = (string)game.Invoker.PushAndExecute("contentFile");
 			ShellExecute(Path.GetDirectoryName(file));
 		}
 
+
+
 		private void buildContent_Click ( object sender, EventArgs e )
 		{
 			game.Invoker.PushAndExecute("contentBuild");
 		}
+
+
 
 		private void rebuildContent_Click ( object sender, EventArgs e )
 		{
