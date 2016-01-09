@@ -52,10 +52,22 @@ cbuffer 		CBLayer 	: 	register(b2) { float4   UVMods[16]: packoffset( c0 ); }
 SamplerState	Sampler		: 	register(s0);
 Texture2D		Textures[16]: 	register(t0);
 
-#if 0
+#ifdef _UBERSHADER
 $ubershader GBUFFER RIGID|SKINNED BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
 $ubershader SHADOW RIGID|SKINNED  BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
 $ubershader SHADOW RIGID|SKINNED
+
+	#ifdef RIGID
+		$vertexFormat	VertexColorTextureTBNRigid
+		$vertexFormat	VertexColorTextureTBNRigidOLOLO
+		$DepthStencilState	Default
+	#endif
+	#ifdef SKINNED
+		$VertexFormat		VertexColorTextureTBNSkinned			
+		$BlendState 		Additive
+		$RasterizerState	CullNone	
+		$DepthStencilState	ReadOnly
+	#endif
 #endif
 
 

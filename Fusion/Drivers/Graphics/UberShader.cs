@@ -15,7 +15,7 @@ using System.Text.RegularExpressions;
 
 
 namespace Fusion.Drivers.Graphics {
-
+	
 
 	public partial class Ubershader : GraphicsResource {
 

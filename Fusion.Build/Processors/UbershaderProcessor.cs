@@ -86,7 +86,6 @@ namespace Fusion.Build.Processors {
 			}
 		}
 
-	
 
 		/// <summary>
 		/// 
@@ -208,6 +207,10 @@ namespace Fusion.Build.Processors {
 				var dshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".DS.html" );
 				var cshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".CS.html" );
 
+				var sthtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".ST.html" );
+
+				var st		=	ExtractPipelineStates( buildContext, include, shaderSource, assetFile.FullSourcePath, defines, sthtm );
+
 				var ps = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "ps_5_0", PSEntryPoint, defines, psbc, pshtm );
 				var vs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "vs_5_0", VSEntryPoint, defines, vsbc, vshtm );
 				var gs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "gs_5_0", GSEntryPoint, defines, gsbc, gshtm );
@@ -216,12 +219,13 @@ namespace Fusion.Build.Processors {
 				var cs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "cs_5_0", CSEntryPoint, defines, csbc, cshtm );
 				
 
-				htmlBuilder.AppendFormat( (vs.Length==0) ? ".. " : "<a href=\"{0}\">vs</a> ", Path.GetFileName(vshtm) );
-				htmlBuilder.AppendFormat( (ps.Length==0) ? ".. " : "<a href=\"{0}\">ps</a> ", Path.GetFileName(pshtm) );
-				htmlBuilder.AppendFormat( (hs.Length==0) ? ".. " : "<a href=\"{0}\">hs</a> ", Path.GetFileName(hshtm) );
-				htmlBuilder.AppendFormat( (ds.Length==0) ? ".. " : "<a href=\"{0}\">ds</a> ", Path.GetFileName(dshtm) );
-				htmlBuilder.AppendFormat( (gs.Length==0) ? ".. " : "<a href=\"{0}\">gs</a> ", Path.GetFileName(gshtm) );
-				htmlBuilder.AppendFormat( (cs.Length==0) ? ".. " : "<a href=\"{0}\">cs</a> ", Path.GetFileName(cshtm) );
+				htmlBuilder.AppendFormat( (vs.Length==0) ? ".. " : "<a href=\"{0}\">vs</a> ",	Path.GetFileName(vshtm) );
+				htmlBuilder.AppendFormat( (ps.Length==0) ? ".. " : "<a href=\"{0}\">ps</a> ",	Path.GetFileName(pshtm) );
+				htmlBuilder.AppendFormat( (hs.Length==0) ? ".. " : "<a href=\"{0}\">hs</a> ",	Path.GetFileName(hshtm) );
+				htmlBuilder.AppendFormat( (ds.Length==0) ? ".. " : "<a href=\"{0}\">ds</a> ",	Path.GetFileName(dshtm) );
+				htmlBuilder.AppendFormat( (gs.Length==0) ? ".. " : "<a href=\"{0}\">gs</a> ",	Path.GetFileName(gshtm) );
+				htmlBuilder.AppendFormat( (cs.Length==0) ? ".. " : "<a href=\"{0}\">cs</a> ",	Path.GetFileName(cshtm) );
+				htmlBuilder.AppendFormat( (st.Length==0) ? ".. " : "<a href=\"{0}\">st</a> ",	Path.GetFileName(sthtm) );
 
 				htmlBuilder.Append( "[" + defines + "]<br>" );
 
@@ -340,6 +344,75 @@ namespace Fusion.Build.Processors {
 		}
 
 
+
+		/// <summary>
+		/// Extracts pipeline states
+		/// </summary>
+		/// <param name="buildContext"></param>
+		/// <param name="include"></param>
+		/// <param name="shaderSource"></param>
+		/// <param name="defines"></param>
+		/// <returns></returns>
+		KeyValuePair<string,string>[] ExtractPipelineStates ( BuildContext buildContext, Include include, string shaderSource, string sourceFile, string defines, string listing )
+		{
+			defines = defines + " _UBERSHADER";
+
+			var defs = defines.Split(new[]{' ','\t'}, StringSplitOptions.RemoveEmptyEntries)	
+						.Select( entry => new SharpDX.Direct3D.ShaderMacro( entry, "1" ) )
+						.ToArray();
+			
+			string errors		=	null;
+			var preprocessed	=	FX.ShaderBytecode.Preprocess( shaderSource, defs, include, out errors, sourceFile );
+
+			var stateList = new List<KeyValuePair<string,string>>();
+
+			using ( var sr = new StringReader(preprocessed) ) {
+
+				while (true) {
+					var line = sr.ReadLine();
+
+					if (line==null) {
+						break;
+					}
+
+					line = line.Trim();
+
+					if (line.StartsWith("$")) {
+						var words = line.Split(new[]{' ','\t'}, StringSplitOptions.RemoveEmptyEntries );
+
+						if (words.Contains("ubershader")) {
+							continue;
+						}
+
+						if (words.Length==2) {
+							stateList.Add( new KeyValuePair<string,string>( words[1], "" ) );
+						} else
+						if (words.Length==3) {
+							stateList.Add( new KeyValuePair<string,string>( words[1], words[2] ) );
+						} else {
+							Log.Warning("Bad ubershader $-statement: {0}", line);
+						}
+					}
+				}
+			}
+
+			stateList	=	stateList
+							.DistinctBy( s0 => s0.Key )
+							.ToList();
+
+ 
+			var html = "<pre>"
+				+ "<b>Pipeline States:</b>\r\n\r\n"
+				+ string.Join("\r\n", stateList.Select( s => string.Format("{0,-20} = <i>{1}</i>", s.Key, s.Value ) ) )
+				+ "</pre>";
+			
+			File.WriteAllText( listing, html );
+
+			return stateList.ToArray();
+		}
+
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -351,7 +424,7 @@ namespace Fusion.Build.Processors {
 		/// <param name="output"></param>
 		/// <param name="listing"></param>
 		/// <returns></returns>
-		byte[] Compile (  BuildContext buildContext, Include include, string shaderSource, string sourceFile, string profile, string entryPoint, string defines, string output, string listing )
+		byte[] Compile ( BuildContext buildContext, Include include, string shaderSource, string sourceFile, string profile, string entryPoint, string defines, string output, string listing )
 		{
 			Log.Debug("{0} {1} {2} {3}", sourceFile, profile, entryPoint, defines );
 
