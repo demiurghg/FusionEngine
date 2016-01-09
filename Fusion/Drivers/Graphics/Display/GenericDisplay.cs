@@ -57,7 +57,7 @@ namespace Fusion.Drivers.Graphics.Display {
 
 
 			swapChainDesc = new SwapChainDescription () {
-				BufferCount			=	2,
+				BufferCount			=	1,	// UE4 use this.
 				ModeDescription		=	new ModeDescription( parameters.Width, parameters.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm ),
 				IsWindowed			=	true,
 				OutputHandle		=	window.Handle,

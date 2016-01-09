@@ -15,5 +15,6 @@ namespace Fusion.Engine.Graphics {
 		[FieldOffset(  8)] public float EmissionLevel;
 		[FieldOffset( 12)] public float RoughnessMinimum;
 		[FieldOffset( 16)] public float RoughnessMaximum;
+		[FieldOffset( 20)] public float DirtLevel;
 	}
 }

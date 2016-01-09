@@ -11,67 +11,7 @@ static const float PI = 3.141592f;
 	Lighting models :
 -----------------------------------------------------------------------------*/
 
-
-float sqr(float a) {
-	return a * a;
-}
-
-
-float	LinearFalloff( float dist, float max_range )
-{
-	float fade = 0;
-	fade = saturate(1 - (dist / max_range));
-	fade *= fade;
-	return saturate(fade);
-}
-
-
-float3	Lambert( float3 normal, float3 light_dir, float3 intensity, float3 diff_color, float bias = 0 )
-{
-	light_dir	=	normalize(light_dir);
-	return intensity * diff_color * max( 0, dot(light_dir, normal) + bias ) / (1+bias);
-}
-
-
-float	Fresnel( float c, float Fn )
-{
-	//	UE4 (5) :
-	return Fn + (1-Fn) * pow(2, (-5.55473 * c - 6.98316)*c );
-	//return Fn + (1-Fn) * pow(1-c, 5);
-}
-
-
-float3	CookTorrance( float3 N, float3 V, float3 L, float3 I, float3 F, float roughness )
-{
-			L	=	normalize(L);
-			V	=	normalize(V);
-	float3	H	=	normalize(V+L);
-	
-	//	Increase slightly low roughness value to 
-	//	avoid point light flickering on shiny surfaces.
-	//roughness = roughness;
-	
-	float m = roughness * roughness;
-
-	//	NB: To remove harsh edge on grazing angles :
-	float	edgeDecay	=	saturate(dot(L,N)*10);
-
-	float	g1	=	2 * dot(N,H) * dot(N,V) / dot(V,H);
-	float	g2	=	2 * dot(N,H) * dot(N,L) / dot(V,H);
-	float 	G	=	min(1, min(g1, g2));
-	
-	float	cos_a	=	dot(N,H);
-	float	sin_a	=	sqrt(abs(1 - cos_a * cos_a)); // 'abs' to avoid negative values
-	
-	float	D	=	exp( -(sin_a*sin_a) / (cos_a*cos_a) / (m*m) ) / (PI * m*m * cos_a * cos_a * cos_a * cos_a );
-
-	F.r  = Fresnel(dot(V,H), F.r);
-	F.g  = Fresnel(dot(V,H), F.g);
-	F.b  = Fresnel(dot(V,H), F.b);//*/
-						  
-	return max(0, I * F * D * G / (4*abs(dot(N,L))*dot(V,N))) * edgeDecay;
-}
-
+#include "brdf.hlsl"
 
 /*-----------------------------------------------------------------------------
 	Cook-Torrance lighting model
@@ -204,6 +144,7 @@ void CSMain(
 	float4	scatter 	=	GBufferScatter 	.Load( location );
 	
 	float fresnelDecay	=	(length(normal.xyz) * 2 - 1);// * (1-0.5*specular.a);
+	
 	normal.xyz			=	normalize(normal.xyz);
 
 	float4	projPos		=	float4( location.x/(float)width*2-1, location.y/(float)height*(-2)+1, depth, 1 );
@@ -228,10 +169,6 @@ void CSMain(
 	
 	totalSSS.rgb		+=	csmFactor.rgb * diffuseTerm2 * scatter.rgb;
 
-	
-	float Fc = pow( 1 - abs(dot(viewDirN,normal.xyz)), 5 );
-	float3 F = (1 - Fc) * specular.rgb + Fc;
-	
 	//-----------------------------------------------------
 	//	Common tile-related stuff :
 	//-----------------------------------------------------
@@ -345,12 +282,13 @@ void CSMain(
 			
 			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 6).rgb * diffuse.rgb * falloff;
 
-			float3	F = specular.rgb;
+			float3	F = Fresnel(dot(viewDirN, normal.xyz), specular.rgb) * saturate(fresnelDecay*4-3);
+			float G = GTerm( specular.w, viewDirN, normal.xyz );
 
 			//F = lerp( F, float3(1,1,1), Fc * pow(fresnelDecay,6) );
-			F = lerp( F, float3(1,1,1), Fc * saturate(fresnelDecay*4-3) );
+			//F = lerp( F, float3(1,1,1), F * saturate(fresnelDecay*4-3) );
 			
-			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * F * falloff;
+			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * F * falloff * G;
 		}
 	}
 

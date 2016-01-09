@@ -14,6 +14,7 @@ struct MATERIAL {
 	float 	EmissionLevel;
 	float 	RoughnessMinimum;
 	float 	RoughnessMaximum;
+	float	DirtLevel;
 };
 
 struct VSInput {
@@ -48,7 +49,7 @@ cbuffer 		CBBatch 	: 	register(b0) { BATCH    Batch     : packoffset( c0 ); }
 cbuffer 		CBLayer 	: 	register(b1) { MATERIAL Material  : packoffset( c0 ); }	
 cbuffer 		CBLayer 	: 	register(b2) { float4   UVMods[16]: packoffset( c0 ); }	
 SamplerState	Sampler		: 	register(s0);
-Texture2D		Textures[16]		: 	register(t0);
+Texture2D		Textures[16]: 	register(t0);
 
 #if 0
 $ubershader GBUFFER RIGID|SKINNED
@@ -125,14 +126,16 @@ SURFACE MaterialCombiner ( float2 uv )
 	float4 emission		=	Textures[3].Sample( Sampler, uv * UVMods[3].xy + UVMods[4].zw ).rgba;
 	float4 dirt			=	Textures[4].Sample( Sampler, uv * UVMods[4].xy + UVMods[4].zw ).rgba;
 	
+	//emission *= emission;
+	
 	//	experimental:
 	/*color.r 	=	Overlay( color.r, dirt.r );
 	color.g 	=	Overlay( color.g, dirt.g );
 	color.b 	=	Overlay( color.b, dirt.b );
 	surfMap.g 	=	Overlay( surfMap.g, dirt.a );*/
 	
-	color.rgb *= dirt.rgb;
-	surfMap.g = 1 - (1-dirt.a) * (1-surfMap.g);
+	color.rgb = lerp(color.rgb, color.rgb*dirt.rgb, mtrl.DirtLevel);
+	surfMap.g = 1 - (1-dirt.a*mtrl.DirtLevel) * (1-surfMap.g);
 	
 	float3 metalS		=	color.rgb * (surfMap.r);
 	float3 nonmetalS	=	float3(0.31,0.31,0.31) * surfMap.r;

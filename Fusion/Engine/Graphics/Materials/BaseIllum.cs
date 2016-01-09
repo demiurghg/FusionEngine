@@ -23,6 +23,7 @@ namespace Fusion.Engine.Graphics {
 		public float EmissionLevel { get; set; }
 		public float RoughnessMinimum { get; set; }
 		public float RoughnessMaximum { get; set; }
+		public float DirtLevel { get; set; }
 
 		public TextureMap ColorTexture { get; set; }
 		public TextureMap SurfaceTexture { get; set; }
@@ -42,6 +43,7 @@ namespace Fusion.Engine.Graphics {
 			EmissionLevel		=	1;
 			RoughnessMinimum	=	0.05f;
 			RoughnessMaximum	=	1.00f;
+			DirtLevel			=	0.0f;
 
 			ColorTexture		=	new TextureMap("defaultColor"	, true );
 			SurfaceTexture		=	new TextureMap("defaultMatte"	, false);
@@ -82,6 +84,7 @@ namespace Fusion.Engine.Graphics {
 			data.EmissionLevel		=	EmissionLevel	;
 			data.RoughnessMinimum	=	RoughnessMinimum;
 			data.RoughnessMaximum	=	RoughnessMaximum;
+			data.DirtLevel			=	DirtLevel;
 		}
 
 
