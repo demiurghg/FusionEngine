@@ -60,13 +60,13 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="rs"></param>
 		/// <returns></returns>
-		internal Material CreateGpuMaterial ( RenderSystem rs, ContentManager content )
+		internal MaterialInstance CreateGpuMaterial ( RenderSystem rs, ContentManager content )
 		{
 			var data = new MaterialData();
 			
 			GetMaterialData( ref data );
 
-			var mtrl = new Material( rs, content, data, GetTextureBindings() );
+			var mtrl = new MaterialInstance( rs, content, data, GetTextureBindings() );
 
 			return mtrl;
 		}

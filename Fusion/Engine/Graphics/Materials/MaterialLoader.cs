@@ -12,7 +12,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// 
 	/// </summary>
-	[ContentLoader(typeof(Material))]
+	[ContentLoader(typeof(MaterialInstance))]
 	internal class MaterialLoader : ContentLoader {
 
 		/// <summary>

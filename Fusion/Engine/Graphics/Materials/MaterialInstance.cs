@@ -19,7 +19,7 @@ namespace Fusion.Engine.Graphics {
 	/// Reprsents material.
 	/// MaterialInstance???
 	/// </summary>
-	public partial class Material : DisposableBase {
+	public partial class MaterialInstance : DisposableBase {
 
 		const int MaxTextures = 16;
 
@@ -52,7 +52,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="rs"></param>
 		/// <param name="maxTextures"></param>
-		internal Material ( RenderSystem rs, ContentManager content, MaterialData parameters, IEnumerable<TextureMapBind> textureBinds )
+		internal MaterialInstance ( RenderSystem rs, ContentManager content, MaterialData parameters, IEnumerable<TextureMapBind> textureBinds )
 		{
 			if (rs==null) {
 				throw new ArgumentNullException("rs");

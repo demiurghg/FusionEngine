@@ -79,8 +79,8 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Gets default material.
 		/// </summary>
-		public Material	DefaultMaterial { get { return defaultMaterial; } }
-		Material defaultMaterial;
+		public MaterialInstance	DefaultMaterial { get { return defaultMaterial; } }
+		MaterialInstance defaultMaterial;
 
 
 

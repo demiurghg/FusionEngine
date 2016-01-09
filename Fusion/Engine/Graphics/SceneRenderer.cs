@@ -239,7 +239,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="material"></param>
 		/// <param name="flags"></param>
 		/// <returns></returns>
-		SurfaceFlags ApplyFlags ( Material material, MeshInstance instance, SurfaceFlags flags )
+		SurfaceFlags ApplyFlags ( MaterialInstance material, MeshInstance instance, SurfaceFlags flags )
 		{
 			//if (material!=null) {
 			//	switch ( material.Options ) {

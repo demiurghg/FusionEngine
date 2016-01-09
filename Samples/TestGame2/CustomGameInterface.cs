@@ -189,7 +189,7 @@ namespace TestGame2 {
 			scene.ComputeAbsoluteTransforms( transforms );
 
 			var defMtrl		=	Game.RenderSystem.DefaultMaterial;
-			var materials	=	scene.Materials.Select( m => Game.Content.Load<Material>( m.Name, defMtrl ) ).ToArray();
+			var materials	=	scene.Materials.Select( m => Game.Content.Load<MaterialInstance>( m.Name, defMtrl ) ).ToArray();
 			
 			for ( int i=0; i<scene.Nodes.Count; i++ ) {
 			
