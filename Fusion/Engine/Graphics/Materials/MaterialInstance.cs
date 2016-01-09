@@ -46,13 +46,18 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		internal readonly PipelineState GBufferRigid;
+		internal readonly PipelineState GBufferSkinned;
+		internal readonly PipelineState ShadowRigid;
+		internal readonly PipelineState ShadowSkinned;
+
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="rs"></param>
 		/// <param name="maxTextures"></param>
-		internal MaterialInstance ( RenderSystem rs, ContentManager content, MaterialData parameters, IEnumerable<TextureMapBind> textureBinds )
+		internal MaterialInstance ( RenderSystem rs, ContentManager content, MaterialData parameters, IEnumerable<TextureMapBind> textureBinds, SurfaceFlags surfaceFlags )
 		{
 			if (rs==null) {
 				throw new ArgumentNullException("rs");
@@ -63,6 +68,26 @@ namespace Fusion.Engine.Graphics {
 			}
 
 
+			//
+			//	Pipeline states :
+			//
+			var factory	=	rs.SceneRenderer.Factory;
+
+			var gbufferRigid	=	SurfaceFlags.GBUFFER | SurfaceFlags.RIGID | surfaceFlags ;
+			var gbufferSkinned	=	SurfaceFlags.GBUFFER | SurfaceFlags.RIGID | surfaceFlags ;
+			var shadowRigid		=	SurfaceFlags.SHADOW  | SurfaceFlags.RIGID | surfaceFlags ;
+			var shadowSkinned	=	SurfaceFlags.SHADOW  | SurfaceFlags.RIGID | surfaceFlags ;
+
+			GBufferRigid	=	factory[ (int)gbufferRigid ];
+			GBufferSkinned	=	factory[ (int)gbufferSkinned ];
+
+			ShadowRigid		=	factory[ (int)shadowRigid ];
+			ShadowSkinned	=	factory[ (int)shadowSkinned ];
+
+
+			//
+			//	Textures :
+			//
 			var textures = textureBinds
 				.Select( texBind => texBind.TextureMap.LoadTexture( content, texBind.FallbackPath ) );
 
@@ -76,6 +101,9 @@ namespace Fusion.Engine.Graphics {
 
 			shaderResources		=	textures.Select( tex => tex.Srv ).ToArray();
 
+			//
+			//	Constants :
+			//
 			constBufferParams	=	new ConstantBuffer( rs.Device, typeof(MaterialData) );
 			constBufferParams.SetData( parameters );
 

@@ -29,7 +29,7 @@ namespace Fusion.Engine.Graphics {
 				var iniText		=	sr.ReadString();
 				var material	=	BaseIllum.ImportFromXml( iniText );
 
-				return material.CreateGpuMaterial( content.Game.RenderSystem, content );
+				return material.CreateMaterialInstance( content.Game.RenderSystem, content );
 
 				return material;
 			}

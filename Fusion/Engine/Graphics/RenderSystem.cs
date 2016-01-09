@@ -33,11 +33,11 @@ namespace Fusion.Engine.Graphics {
 		public HdrFilter HdrFilter { get{ return hdrFilter; } }
 		public HdrFilter hdrFilter;
 		
-		[GameModule("LightRenderer", "rs", InitOrder.After)]
+		[GameModule("LightRenderer", "rs", InitOrder.Before)]
 		public LightRenderer	LightRenderer { get { return lightRenderer; } }
 		public LightRenderer	lightRenderer;
 		
-		[GameModule("SceneRendere", "scene", InitOrder.After)]
+		[GameModule("SceneRendere", "scene", InitOrder.Before)]
 		public SceneRenderer	SceneRenderer { get { return sceneRenderer; } }
 		public SceneRenderer	sceneRenderer;
 		
@@ -150,7 +150,7 @@ namespace Fusion.Engine.Graphics {
 			flatNormalMap.SetData( Enumerable.Range(0,16).Select( i => new Color(127,127,255,127) ).ToArray() );
 
 			var baseIllum = new BaseIllum();
-			defaultMaterial	=	baseIllum.CreateGpuMaterial(this, Game.Content);
+			defaultMaterial	=	baseIllum.CreateMaterialInstance(this, Game.Content);
 		}
 
 

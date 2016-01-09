@@ -27,26 +27,8 @@ namespace Fusion.Engine.Graphics {
 		Texture2D		defaultNormalMap;
 		Texture2D		defaultEmission	;
 
-		enum SurfaceFlags {
-			GBUFFER					=	1 << 0,
-			SHADOW					=	1 << 1,
 
-			RIGID					=	1 << 2,
-			SKINNED					=	1 << 3,
-			
-			LAYER0					=	1 << 4,
-			LAYER1					=	1 << 5,
-			LAYER2					=	1 << 6,
-			LAYER3					=	1 << 7,
-
-			TERRAIN					=	1 << 8,
-
-			TRIPLANAR_SINGLE		=	1 << 9,
-			TRIPLANAR_DOUBLE		=	1 << 10,
-			TRIPLANAR_TRIPLE		=	1 << 11,
-		}
-
-		struct CBSurfaceData {
+		struct CBMeshInstanceData {
 			public Matrix	Projection;
 			public Matrix	View;
 			public Matrix	World;
@@ -55,6 +37,14 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		/// <summary>
+		/// Gets pipeline state factory
+		/// </summary>
+		internal StateFactory Factory {
+			get {
+				return factory;
+			}
+		}
 
 
 		/// <summary>
@@ -74,7 +64,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			LoadContent();
 
-			constBuffer	=	new ConstantBuffer( Game.GraphicsDevice, typeof(CBSurfaceData) );
+			constBuffer	=	new ConstantBuffer( Game.GraphicsDevice, typeof(CBMeshInstanceData) );
 
 
 			defaultDiffuse	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
@@ -124,11 +114,11 @@ namespace Fusion.Engine.Graphics {
 			if (flags.HasFlag( SurfaceFlags.RIGID )) {
 				ps.VertexInputElements	=	VertexColorTextureTBNRigid.Elements;
 			}
-
-			
-
 		}
 
+
+
+		
 
 
 		/// <summary>
@@ -151,6 +141,7 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		float t = 0;
 
 		/// <summary>
 		/// 
@@ -174,7 +165,7 @@ namespace Fusion.Engine.Graphics {
 				var projection		=	camera.GetProjectionMatrix( stereoEye );
 				var viewPosition	=	camera.GetCameraPosition4( stereoEye );
 
-				var cbData		=	new CBSurfaceData();
+				var cbData		=	new CBMeshInstanceData();
 
 				var hdr			=	frame.HdrBuffer.Surface;
 				var depth		=	frame.DepthBuffer.Surface;
@@ -188,6 +179,7 @@ namespace Fusion.Engine.Graphics {
 				device.SetTargets( depth, hdr, diffuse, specular, normals, scattering );
 				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
 
+				t += 1/60.0f;
 
 				var instances	=	viewLayer.Instances;
 
@@ -198,7 +190,7 @@ namespace Fusion.Engine.Graphics {
 					cbData.Projection	=	projection;
 					cbData.World		=	instance.World;
 					cbData.ViewPos		=	viewPosition;
-
+					
 					constBuffer.SetData( cbData );
 
 					device.PixelShaderConstants[0]	= constBuffer ;
@@ -210,7 +202,7 @@ namespace Fusion.Engine.Graphics {
 
 						foreach ( var sg in instance.ShadingGroups ) {
 
-							device.PipelineState	=	factory[ (int)ApplyFlags(sg.Material, instance, SurfaceFlags.GBUFFER) ];
+							device.PipelineState	=	instance.IsSkinned ? sg.Material.GBufferSkinned : sg.Material.GBufferRigid;
 
 							device.PixelShaderConstants[1]	= sg.Material.ConstantBufferParameters;
 							device.PixelShaderConstants[2]	= sg.Material.ConstantBufferUVModifiers;
@@ -280,7 +272,7 @@ namespace Fusion.Engine.Graphics {
 
 				var device			= Game.GraphicsDevice;
 
-				var cbData			= new CBSurfaceData();
+				var cbData			= new CBMeshInstanceData();
 
 				var viewPosition	= Matrix.Invert( shadowRenderCtxt.ShadowView ).TranslationVector;
 

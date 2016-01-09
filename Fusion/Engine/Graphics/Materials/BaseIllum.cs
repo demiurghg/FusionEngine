@@ -10,6 +10,13 @@ using Fusion.Drivers.Graphics;
 
 
 namespace Fusion.Engine.Graphics {
+	
+	public enum AlphaUsage {
+		None,
+		EmissionMask,
+		DetailMask,
+	}
+
 
 	/// <summary>
 	/// Base material with color texture, surface texture, normal map and emission texture.
@@ -24,6 +31,8 @@ namespace Fusion.Engine.Graphics {
 		public float RoughnessMinimum { get; set; }
 		public float RoughnessMaximum { get; set; }
 		public float DirtLevel { get; set; }
+		
+		public AlphaUsage AlphaUsage { get; set; }
 
 		public TextureMap ColorTexture { get; set; }
 		public TextureMap SurfaceTexture { get; set; }
@@ -44,6 +53,7 @@ namespace Fusion.Engine.Graphics {
 			RoughnessMinimum	=	0.05f;
 			RoughnessMaximum	=	1.00f;
 			DirtLevel			=	0.0f;
+			AlphaUsage			=	AlphaUsage.None;
 
 			ColorTexture		=	new TextureMap("defaultColor"	, true );
 			SurfaceTexture		=	new TextureMap("defaultMatte"	, false);
@@ -60,17 +70,29 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="rs"></param>
 		/// <returns></returns>
-		internal MaterialInstance CreateGpuMaterial ( RenderSystem rs, ContentManager content )
+		internal MaterialInstance CreateMaterialInstance ( RenderSystem rs, ContentManager content )
 		{
 			var data = new MaterialData();
 			
 			GetMaterialData( ref data );
 
-			var mtrl = new MaterialInstance( rs, content, data, GetTextureBindings() );
+			var mtrl = new MaterialInstance( rs, content, data, GetTextureBindings(), GetSurfaceFlags() );
 
 			return mtrl;
 		}
 
+
+		protected virtual SurfaceFlags GetSurfaceFlags ()
+		{
+			SurfaceFlags flags = SurfaceFlags.BASE_ILLUM;
+			
+			switch (AlphaUsage) {
+				case AlphaUsage.EmissionMask : flags |= SurfaceFlags.ALPHA_EMISSION_MASK; break;
+				case AlphaUsage.DetailMask   : flags |= SurfaceFlags.ALPHA_DETAIL_MASK; break;
+			}	
+
+			return flags;
+		}
 
 
 		/// <summary>

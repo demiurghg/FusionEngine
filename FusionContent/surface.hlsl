@@ -5,6 +5,7 @@ struct BATCH {
 	float4x4	World			;
 	float4		ViewPos			;
 	float4		BiasSlopeFar	;
+	float		Time;
 };
 
 
@@ -52,9 +53,12 @@ SamplerState	Sampler		: 	register(s0);
 Texture2D		Textures[16]: 	register(t0);
 
 #if 0
-$ubershader GBUFFER RIGID|SKINNED
+$ubershader GBUFFER RIGID|SKINNED BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
+$ubershader SHADOW RIGID|SKINNED  BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
 $ubershader SHADOW RIGID|SKINNED
 #endif
+
+
  
 /*-----------------------------------------------------------------------------
 	Vertex shader :
@@ -112,11 +116,13 @@ float Overlay ( float target, float blend )
 		step(target, 0.5));
 }
 	
+	
 SURFACE MaterialCombiner ( float2 uv )
 {
 	SURFACE surface;
 	
 	MATERIAL mtrl =	Material;
+	
 	
 	//uv = uv * layerData.Tiling.xy + layerData.Offset.xy;
 	
@@ -126,6 +132,9 @@ SURFACE MaterialCombiner ( float2 uv )
 	float4 emission		=	Textures[3].Sample( Sampler, uv * UVMods[3].xy + UVMods[4].zw ).rgba;
 	float4 dirt			=	Textures[4].Sample( Sampler, uv * UVMods[4].xy + UVMods[4].zw ).rgba;
 	
+#ifdef ALPHA_EMISSION_MASK
+	emission *= (1 - color.a); 
+#endif
 	//emission *= emission;
 	
 	//	experimental:
