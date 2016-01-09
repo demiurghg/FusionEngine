@@ -12,15 +12,20 @@ using Fusion.Core;
 using Fusion.Core.Content;
 using Fusion.Core.Mathematics;
 using System.Text.RegularExpressions;
+using Fusion.Engine.Graphics;
+using Fusion.Engine.Common;
 
 
 namespace Fusion.Drivers.Graphics {
 	
+	public interface IUbershaderEnum {
+		void Enumerate ( PipelineState pipelineState, int combination );
+	}
+
 
 	public partial class Ubershader : GraphicsResource {
 
 		public const string UbershaderSignature = "USH1";
-		public const string PipelineSignature	= "PIPE";
 		public const string PSBytecodeSignature = "PSBC";
 		public const string VSBytecodeSignature = "VSBC";
 		public const string GSBytecodeSignature = "GSBC";
