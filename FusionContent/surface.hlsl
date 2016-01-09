@@ -58,12 +58,13 @@ $ubershader SHADOW RIGID|SKINNED  BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_
 $ubershader SHADOW RIGID|SKINNED
 
 	#ifdef RIGID
-		$vertexFormat	VertexColorTextureTBNRigid
-		$vertexFormat	VertexColorTextureTBNRigidOLOLO
+		$VertexInputFormat	VertexColorTextureTBNRigid
+		$VertexInputFormat	VertexColorTextureTBNRigidOLOLO
 		$DepthStencilState	Default
+		$BlendState			
 	#endif
 	#ifdef SKINNED
-		$VertexFormat		VertexColorTextureTBNSkinned			
+		$VertexInputFormat	VertexColorTextureTBNSkinned			
 		$BlendState 		Additive
 		$RasterizerState	CullNone	
 		$DepthStencilState	ReadOnly

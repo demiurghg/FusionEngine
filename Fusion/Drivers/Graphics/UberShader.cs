@@ -20,6 +20,7 @@ namespace Fusion.Drivers.Graphics {
 	public partial class Ubershader : GraphicsResource {
 
 		public const string UbershaderSignature = "USH1";
+		public const string PipelineSignature	= "PIPE";
 		public const string PSBytecodeSignature = "PSBC";
 		public const string VSBytecodeSignature = "VSBC";
 		public const string GSBytecodeSignature = "GSBC";
@@ -30,6 +31,15 @@ namespace Fusion.Drivers.Graphics {
 		class UsdbEntry {
 
 			public string Defines;
+
+			public string BlendState;
+			public string RasterizerState;
+			public string DepthStencilState;
+			public string PrimitiveType;
+			public string VertexInputElements;
+			public string VertexOutputElements;
+			public string RasterizedStream;
+
 			public ShaderBytecode PixelShader;
 			public ShaderBytecode VertexShader;
 			public ShaderBytecode GeometryShader;
@@ -192,6 +202,13 @@ namespace Fusion.Drivers.Graphics {
 				for (int i=0; i<count; i++) {
 					var defines		=	br.ReadString();
 					int length;
+
+					/*br.ExpectFourCC(PipelineSignature);
+					length	=	br.ReadInt32();
+					for (int i=0; i<length; i++) {
+						var key = br.ReadString();
+						var value = br.ReadString();
+					} */
 
 					br.ExpectFourCC("PSBC");
 					length	=	br.ReadInt32();
