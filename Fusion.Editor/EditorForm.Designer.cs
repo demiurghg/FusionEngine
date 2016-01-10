@@ -114,6 +114,7 @@
 			// mainPropertyGrid
 			// 
 			this.mainPropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.mainPropertyGrid.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.mainPropertyGrid.Location = new System.Drawing.Point(216, 4);
 			this.mainPropertyGrid.Name = "mainPropertyGrid";
 			this.mainPropertyGrid.Size = new System.Drawing.Size(271, 528);
