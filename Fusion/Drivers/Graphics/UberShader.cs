@@ -37,14 +37,6 @@ namespace Fusion.Drivers.Graphics {
 
 			public string Defines;
 
-			public string BlendState;
-			public string RasterizerState;
-			public string DepthStencilState;
-			public string PrimitiveType;
-			public string VertexInputElements;
-			public string VertexOutputElements;
-			public string RasterizedStream;
-
 			public ShaderBytecode PixelShader;
 			public ShaderBytecode VertexShader;
 			public ShaderBytecode GeometryShader;
@@ -75,91 +67,8 @@ namespace Fusion.Drivers.Graphics {
 		}
 
 
-
-		/// <summary>
-		/// Ubershader's texture parameters
-		/// </summary>
-		public class TextureParameter {
-			
-			static Regex	Pattern	=	new Regex(@"\$texture\s+(\w+)\s+([a-zA-Z\.\\/]+)(?:\s*\/\/\s*(.*))?");
-
-			public string Name  { get; private set; }
-			public string Default  { get; private set; }
-			public string Comment  { get; private set; }
-
-			public TextureParameter ( string declaration )
-			{
-				declaration		=	declaration.Trim();
-
-				var match		=	Pattern.Match( declaration );
-				var captures	=	match.Groups.Cast<Group>().Select( c => c.Value ).ToArray();
-
-				this.Name		=	captures[1];
-				this.Default	=	captures[2];
-				this.Comment	=	captures.Length > 3 ? captures[3] : "";
-			}
-
-			public TextureParameter ( string name, string defValue, string comment )
-			{
-				this.Name		=	name;
-				this.Default	=	defValue;
-				this.Comment	=	comment;
-			}
-		}
-
-
-
-		/// <summary>
-		/// Ubershader's texture parameters
-		/// </summary>
-		public class UniformParameter {
-													
-			static Regex	Pattern	=	new Regex(@"\$uniform\s+(\w+)\s+(\-?\d(?:\.\d+)?)(?:\s*\/\/\s*(.*))?");
-
-			public string Name  { get; private set; }
-			public float Default  { get; private set; }
-			public string Comment  { get; private set; }
-
-			public UniformParameter ( string declaration )
-			{
-				declaration	=	declaration.Trim();
-
-				var match		=	Pattern.Match( declaration );
-				var captures	=	match.Groups.Cast<Group>().Select( c => c.Value ).ToArray();
-
-				this.Name		=	captures[1];
-				this.Default	=	float.Parse(captures[2]);
-				this.Comment	=	captures.Length > 3 ? captures[3] : "";
-			}
-
-			public UniformParameter ( string name, float defValue, string comment )
-			{
-				this.Name		=	name;
-				this.Default	=	defValue;
-				this.Comment	=	comment;
-			}
-		}
-
-
-
-		Dictionary<string,UsdbEntry>	database = new Dictionary<string,UsdbEntry>();
-
-
-		/// <summary>
-		/// Shader tag. From $tag 'TagName'.
-		/// </summary>
-		public string ShaderTag { get; private set; }
-
-		/// <summary>
-		/// Gets texture parameters
-		/// </summary>
-		public TextureParameter[]	Textures { get; private set; }
-
-		/// <summary>
-		/// Gets texture parameters
-		/// </summary>
-		public UniformParameter[]	Uniforms { get; private set; }
-
+		List<StateFactory> factories = new List<StateFactory>();
+		Dictionary<string,UsdbEntry> database = new Dictionary<string,UsdbEntry>();
 
 		/// <summary>
 		/// Constructor
@@ -168,17 +77,6 @@ namespace Fusion.Drivers.Graphics {
 		/// <param name="path"></param>
 		/// <param name="combinerEnum"></param>
 		public Ubershader ( GraphicsDevice device, Stream stream ) : base(device)
-		{
-			Recreate( stream );
-		}
-
-
-
-		/// <summary>
-		/// Resets all data and recreates UberShader
-		/// </summary>
-		/// <param name="path"></param>
-		void Recreate ( Stream stream )
 		{
 			database.Clear();
 
@@ -190,17 +88,6 @@ namespace Fusion.Drivers.Graphics {
 					throw new IOException("Bad ubershader signature");
 				}
 
-				this.Textures	=	new TextureParameter[ br.ReadInt32() ];
-				for (int i=0; i<Textures.Length; i++) {
-					Textures[i] = new TextureParameter( br.ReadString(), br.ReadString(), br.ReadString() );
-				}
-
-				this.Uniforms	=	new UniformParameter[ br.ReadInt32() ];
-				for (int i=0; i<Uniforms.Length; i++) {
-					Uniforms[i]	=	new UniformParameter( br.ReadString(), br.ReadSingle(), br.ReadString() );
-				}
-
-
 
 				var count = br.ReadInt32();
 
@@ -208,34 +95,27 @@ namespace Fusion.Drivers.Graphics {
 					var defines		=	br.ReadString();
 					int length;
 
-					/*br.ExpectFourCC(PipelineSignature);
-					length	=	br.ReadInt32();
-					for (int i=0; i<length; i++) {
-						var key = br.ReadString();
-						var value = br.ReadString();
-					} */
-
-					br.ExpectFourCC("PSBC");
+					br.ExpectFourCC("PSBC", "ubershader");
 					length	=	br.ReadInt32();
 					var ps	=	br.ReadBytes( length );
 
-					br.ExpectFourCC("VSBC");
+					br.ExpectFourCC("VSBC", "ubershader");
 					length	=	br.ReadInt32();
 					var vs	=	br.ReadBytes( length );
 
-					br.ExpectFourCC("GSBC");
+					br.ExpectFourCC("GSBC", "ubershader");
 					length	=	br.ReadInt32();
 					var gs	=	br.ReadBytes( length );
 
-					br.ExpectFourCC("HSBC");
+					br.ExpectFourCC("HSBC", "ubershader");
 					length	=	br.ReadInt32();
 					var hs	=	br.ReadBytes( length );
 
-					br.ExpectFourCC("DSBC");
+					br.ExpectFourCC("DSBC", "ubershader");
 					length	=	br.ReadInt32();
 					var ds	=	br.ReadBytes( length );
 
-					br.ExpectFourCC("CSBC");
+					br.ExpectFourCC("CSBC", "ubershader");
 					length	=	br.ReadInt32();
 					var cs	=	br.ReadBytes( length );
 
@@ -253,6 +133,89 @@ namespace Fusion.Drivers.Graphics {
 			}
 
 			Log.Debug("Ubershader: {0} shaders", database.Count );
+		}
+
+
+
+		/// <summary>
+		/// Creates pipeline state factory
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="enumerator"></param>
+		/// <returns></returns>
+		public StateFactory CreateFactory ( Type type, Action<PipelineState,int> enumerator )
+		{
+			lock (factories) {
+				var factory = new StateFactory( this, type, enumerator );
+				factories.Add(factory);
+				return factory;
+			}
+		}
+
+
+
+		/// <summary>
+		/// Creates pipeline state factory
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="primitive"></param>
+		/// <param name="vertexInputElements"></param>
+		/// <returns></returns>
+		public StateFactory CreateFactory ( Type type, Primitive primitive, VertexInputElement[] vertexInputElements )
+		{
+			return CreateFactory( type, (ps,i) => { 
+					ps.VertexInputElements = vertexInputElements; ps.Primitive = primitive; 
+				});
+		}
+
+
+
+		/// <summary>
+		/// Creates pipeline state factory
+		/// </summary>
+		public StateFactory CreateFactory ( Type type, Primitive primitive, VertexInputElement[] vertexInputElements, BlendState blendState, RasterizerState rasterizerState )
+		{
+			return CreateFactory( type, (ps,i) => { 
+					ps.Primitive = primitive;
+					ps.VertexInputElements = vertexInputElements; 
+					ps.BlendState		=	blendState;
+					ps.RasterizerState	=	rasterizerState;
+				});
+		}
+
+
+
+		/// <summary>
+		/// Creates pipeline state factory
+		/// </summary>
+		public StateFactory CreateFactory ( Type type, Primitive primitive, VertexInputElement[] vertexInputElements, BlendState blendState, RasterizerState rasterizerState, DepthStencilState depthStencilState )
+		{
+			return CreateFactory( type, (ps,i) => { 
+					ps.Primitive = primitive;
+					ps.VertexInputElements	=	vertexInputElements; 
+					ps.BlendState			=	blendState;
+					ps.RasterizerState		=	rasterizerState;
+					ps.DepthStencilState	=	depthStencilState;
+				});
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void Dispose ( bool disposing )
+		{
+			if (disposing) {
+				foreach ( var obj in factories ) {
+					if (obj!=null) {
+						obj.Dispose();
+					}
+				}
+				factories.Clear();
+			}
+			base.Dispose( disposing );
 		}
 
 

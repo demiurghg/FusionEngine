@@ -145,9 +145,8 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ()
 		{
-			SafeDispose( ref factory );
 			lightingShader	=	Game.Content.Load<Ubershader>("lighting");
-			factory			=	new StateFactory( lightingShader, typeof(LightingFlags), Primitive.TriangleList, VertexInputElement.Empty );
+			factory			=	lightingShader.CreateFactory( typeof(LightingFlags), Primitive.TriangleList, VertexInputElement.Empty );
 		}
 
 
@@ -179,7 +178,6 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				SafeDispose( ref factory );
 				SafeDispose( ref csmDepth );
 				SafeDispose( ref csmColor );
 				SafeDispose( ref spotDepth );
@@ -188,6 +186,7 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref lightingCB );
 				SafeDispose( ref omniLightBuffer );
 				SafeDispose( ref spotLightBuffer );
+				SafeDispose( ref envLightBuffer );
 			}
 
 			base.Dispose( disposing );

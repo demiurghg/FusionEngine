@@ -51,7 +51,6 @@ namespace Fusion.Engine.Graphics.GIS
 			if(FirstFinal	!= null) FirstFinal.Dispose();	
 			if(SecondFinal	!= null) SecondFinal.Dispose();
 			if(cb			!= null) cb.Dispose();
-			if(blurFactory	!= null) blurFactory.Dispose();
 			
 			base.Dispose();
 		}
@@ -61,7 +60,7 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			Initialize(points, indeces, isDynamic);
 
-			factory = new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
+			factory = shader.CreateFactory( typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
 
 			MapDimX = mapDimX;
 			MapDimY = mapDimY;
@@ -85,7 +84,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			Flags = (int)(PolyFlags.PIXEL_SHADER | PolyFlags.VERTEX_SHADER | PolyFlags.DRAW_HEAT);
 
-			blurFactory = new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList,
+			blurFactory = shader.CreateFactory( typeof(PolyFlags), Primitive.TriangleList,
 					null,
 					BlendState.AlphaBlend,
 					RasterizerState.CullNone,

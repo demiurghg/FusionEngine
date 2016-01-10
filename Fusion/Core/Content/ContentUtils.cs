@@ -14,12 +14,17 @@ using System.Runtime.InteropServices;
 namespace Fusion.Core.Content {
 	public static class ContentUtils {
 
-		public static void ExpectFourCC ( this BinaryReader reader, string fourCC )
+		/// <summary>
+		/// C
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <param name="fourCC"></param>
+		public static void ExpectFourCC ( this BinaryReader reader, string fourCC, string what )
 		{
 			var readFourCC = reader.ReadFourCC();
 
 			if (readFourCC!=fourCC) {
-				throw new IOException(string.Format("Bad FourCC: expected:{0}, got:{1}", fourCC, readFourCC)); 
+				throw new IOException(string.Format("Bad {2}: expected {0}, got {1}", fourCC, readFourCC, what)); 
 			}
 		}
 

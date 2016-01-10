@@ -473,9 +473,7 @@ namespace Fusion.Engine.Graphics {
 			
 			using( var reader = new BinaryReader( stream ) ) {
 
-				if (!reader.CheckMagic("SCN1")) {
-					throw new Exception("Bad scene format. SCN1 expected.");
-				}
+				reader.ExpectFourCC("SCN1", "scene");
 
 				//---------------------------------------------
 				scene.StartTime		=	new TimeSpan( reader.ReadInt64() );
@@ -484,9 +482,7 @@ namespace Fusion.Engine.Graphics {
 				scene.lastFrame		=	reader.ReadInt32();
 				scene.trackCount	=	reader.ReadInt32();
 
-				if (!reader.CheckMagic("ANIM")) {
-					throw new Exception("Bad scene format. ANIM expected.");
-				}
+				reader.ExpectFourCC("ANIM", "scene");
 
 				if (scene.trackCount!=0) {
 					scene.CreateAnimation( scene.FirstFrame, scene.LastFrame, scene.trackCount );
@@ -499,9 +495,7 @@ namespace Fusion.Engine.Graphics {
 				}
 
 				//---------------------------------------------
-				if (!reader.CheckMagic("MTRL")) {
-					throw new Exception("Bad scene format. MTRL expected.");
-				}
+				reader.ExpectFourCC("MTRL", "scene");
 
 				var mtrlCount = reader.ReadInt32();
 
@@ -520,9 +514,7 @@ namespace Fusion.Engine.Graphics {
 				}
 
 				//---------------------------------------------
-				if (!reader.CheckMagic("NODE")) {
-					throw new Exception("Bad scene format. NODE expected.");
-				}
+				reader.ExpectFourCC("NODE", "scene");
 				
 				var nodeCount = reader.ReadInt32();
 				
@@ -538,9 +530,7 @@ namespace Fusion.Engine.Graphics {
 				}
 
 				//---------------------------------------------
-				if (!reader.CheckMagic("MESH")) {
-					throw new Exception("Bad scene format. MESH expected.");
-				}
+				reader.ExpectFourCC("MESH", "scene");
 				
 				var meshCount = reader.ReadInt32();
 

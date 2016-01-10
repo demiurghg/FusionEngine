@@ -2,7 +2,7 @@
     xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
     <ItemGroup>
-        <FusionOutputFiles Include="$(OutDir)*.dll;$(OutDir)*.exe"/>
+        <FusionOutputFiles Include="$(OutDir)*.dll;$(OutDir)*.exe;$(OutDir)*.pdb;"/>
         <ThirdPartyFiles Include="$(ProjectDir)..\SDKs\FbxSdk\lib\x64\$(ConfigurationName)\libfbxsdk.dll"/>
         <ToolBoxFiles Include="$(ProjectDir)..\Tools\*.com;$(ProjectDir)..\Tools\*.exe;$(ProjectDir)..\Tools\*.dll;"/>
         <ContentFiles Include="$(ProjectDir)..\FusionContent\*.*"/>

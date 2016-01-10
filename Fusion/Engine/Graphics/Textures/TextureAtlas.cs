@@ -67,9 +67,7 @@ namespace Fusion.Engine.Graphics {
 
 			using ( var br = new BinaryReader(stream) ) {
 			
-				if (!br.CheckMagic("ATLS")) {
-					throw new IOException("Bad texture atlas file");
-				}
+				br.ExpectFourCC("ATLS", "texture atlas");
 				
 				int count = br.ReadInt32();
 				

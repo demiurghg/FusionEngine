@@ -235,16 +235,11 @@ namespace TestGame2 {
 		{
 			if (disposing) {
 
-				//SafeDispose( ref video );
-				//SafeDispose( ref videoPlayer );//*/
-
 				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
 				SafeDispose( ref masterView );
 				SafeDispose( ref masterView2 );
 				SafeDispose( ref targetTexture );
-				/*SafeDispose( ref sceneView );
-				SafeDispose( ref sceneView1 );**/
 			}
 			base.Dispose( disposing );
 		}

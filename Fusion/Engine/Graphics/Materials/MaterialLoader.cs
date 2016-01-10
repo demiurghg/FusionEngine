@@ -30,8 +30,6 @@ namespace Fusion.Engine.Graphics {
 				var material	=	BaseIllum.ImportFromXml( iniText );
 
 				return material.CreateMaterialInstance( content.Game.RenderSystem, content );
-
-				return material;
 			}
 
 		}

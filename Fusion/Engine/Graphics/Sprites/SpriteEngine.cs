@@ -54,7 +54,7 @@ namespace Fusion.Engine.Graphics {
 		public override void Initialize()
 		{
 			shader		=	device.Game.Content.Load<Ubershader>("sprite");
-			factory		=	new StateFactory( shader, typeof(Flags), (ps,i) => StateEnum( ps, (Flags)i) );
+			factory		=	shader.CreateFactory( typeof(Flags), (ps,i) => StateEnum( ps, (Flags)i) );
 			constBuffer	=	new ConstantBuffer( device, typeof(ConstData) );
 			constData	=	new ConstData();
 		}
@@ -94,7 +94,6 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				SafeDispose( ref factory );
 				SafeDispose( ref constBuffer );
 			}
 

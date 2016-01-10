@@ -79,6 +79,7 @@ namespace Fusion.Engine.Graphics {
 			defaultEmission	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
 			defaultEmission.SetData( Enumerable.Range(0,16).Select( i => Color.Black ).ToArray() );
 			
+			//Ubershader.AddEnumerator( "SceneRenderer", (t
 
 			Game.Reloading += (s,e) => LoadContent();
 		}
@@ -90,10 +91,8 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ()
 		{
-			SafeDispose( ref factory );
-
 			surfaceShader	=	Game.Content.Load<Ubershader>("surface");
-			factory			=	new StateFactory( surfaceShader, typeof(SurfaceFlags), (ps,i) => Enum(ps, (SurfaceFlags)i ) );
+			factory			=	surfaceShader.CreateFactory( typeof(SurfaceFlags), (ps,i) => Enum(ps, (SurfaceFlags)i ) );
 		}
 
 
@@ -129,7 +128,6 @@ namespace Fusion.Engine.Graphics {
 		{
 			if (disposing) {
 				SafeDispose( ref constBuffer );
-				SafeDispose( ref factory );
 
 				SafeDispose( ref defaultDiffuse		);
 				SafeDispose( ref defaultSpecular	);

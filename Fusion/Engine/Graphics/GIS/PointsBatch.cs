@@ -95,7 +95,7 @@ namespace Fusion.Engine.Graphics.GIS
 			Flags		= (int) (PointFlags.DOTS_WORLDSPACE | PointFlags.ROTATION_ANGLE);
 
 			shader	= Game.Content.Load<Ubershader>("globe.Point.hlsl");
-			factory = new StateFactory(shader, typeof(PointFlags), Primitive.PointList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
+			factory = shader.CreateFactory( typeof(PointFlags), Primitive.PointList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
 
 			ColorDatas = new ColorData[16];
 			for (int i = 0; i < ColorDatas.Length; i++) {

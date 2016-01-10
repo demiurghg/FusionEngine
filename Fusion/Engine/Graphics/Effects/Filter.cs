@@ -92,9 +92,8 @@ namespace Fusion.Engine.Graphics
 		/// </summary>
 		void LoadContent ()
 		{
-			SafeDispose( ref factory );
 			shaders = Game.Content.Load<Ubershader>( "filter" );
-			factory	= new StateFactory( shaders, typeof(ShaderFlags), (ps,i) => Enum(ps, (ShaderFlags)i) );
+			factory	= shaders.CreateFactory( typeof(ShaderFlags), (ps,i) => Enum(ps, (ShaderFlags)i) );
 		}
 
 
@@ -129,7 +128,6 @@ namespace Fusion.Engine.Graphics
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing) {
-				SafeDispose( ref factory );
 				SafeDispose( ref gaussWeightsCB );
 				SafeDispose( ref sourceRectCB );
 				SafeDispose( ref bufLinearizeDepth );

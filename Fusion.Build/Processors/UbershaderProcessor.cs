@@ -98,12 +98,10 @@ namespace Fusion.Build.Processors {
 			//
 			string shaderSource	=	File.ReadAllText( assetFile.FullSourcePath );
 
-			var declarations	=	shaderSource.Split( new[]{Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries )
+			var ubershaderDecl	=	shaderSource.Split( new[]{Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries )
 									.Select( line0 => line0.Trim() )
-									.Where( line1 => line1.StartsWith("$") )
-									.ToArray();
-
-			var ubershaderDecl	=	declarations.Where( line0 => line0.StartsWith("$ubershader") ).ToList();
+									.Where( line1 => line1.StartsWith("$ubershader") )
+									.ToList();
 
 			var defineList = new List<string>();
 
@@ -113,33 +111,6 @@ namespace Fusion.Build.Processors {
 			}
 
 			
-			
-			var textureDecl	=	declarations
-								.Where( line0 => line0.StartsWith("$texture") )
-								.Select( line1 => new Ubershader.TextureParameter(line1) )
-								.ToArray();
-
-			var uniformDecl	=	declarations
-								.Where( line0 => line0.StartsWith("$uniform") )
-								.Select( line1 => new Ubershader.UniformParameter(line1) )
-								.ToArray();
-
-			if (textureDecl.Length>16) {
-				throw new BuildException("Texture ubershader parameters count exceeded maximum allowed.");
-			}
-			if (uniformDecl.Length>32) {
-				throw new BuildException("Uniform ubershader parameters count exceeded maximum allowed.");
-			}
-			
-
-			for ( int i=0; i<textureDecl.Length; i++ ) {
-				shaderSource	=	shaderSource.Replace( "$"+textureDecl[i].Name, string.Format("__textures[{0}]", i) );
-			}
-
-			for ( int i=0; i<uniformDecl.Length; i++ ) {
-				shaderSource	=	shaderSource.Replace( "$"+uniformDecl[i].Name, string.Format("__uniforms[{0}]", i) );
-			}
-
 
 			//
 			//	Start listing builder :
@@ -164,22 +135,6 @@ namespace Fusion.Build.Processors {
 			htmlBuilder.AppendLine("");
 
 			
-			htmlBuilder.AppendLine("<b>Textures:</b>");
-				htmlBuilder.AppendFormat("  {0,-16}   {1,-20} {2}\r\n", "Name", "Value", "Comment" );
-			foreach ( var tex in textureDecl ) {
-				htmlBuilder.AppendFormat("  {0,-16}   {1,-20} {2}\r\n", tex.Name, tex.Default, tex.Comment );
-			}
-			htmlBuilder.AppendLine("");
-
-			
-			htmlBuilder.AppendLine("<b>Uniforms:</b>");
-				htmlBuilder.AppendFormat("  {0,-16}   {1,-20} {2}\r\n", "Name", "Value", "Comment" );
-			foreach ( var uniform in uniformDecl ) {
-				htmlBuilder.AppendFormat("  {0,-16}   {1,-20} {2}\r\n", uniform.Name, uniform.Default, uniform.Comment );
-			}
-			htmlBuilder.AppendLine("");
-
-
 
 			var usdb = new List<UsdbEntry>();
 
@@ -207,10 +162,6 @@ namespace Fusion.Build.Processors {
 				var dshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".DS.html" );
 				var cshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".CS.html" );
 
-				var sthtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".ST.html" );
-
-				var st		=	ExtractPipelineStates( buildContext, include, shaderSource, assetFile.FullSourcePath, defines, sthtm );
-
 				var ps = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "ps_5_0", PSEntryPoint, defines, psbc, pshtm );
 				var vs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "vs_5_0", VSEntryPoint, defines, vsbc, vshtm );
 				var gs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "gs_5_0", GSEntryPoint, defines, gsbc, gshtm );
@@ -225,7 +176,6 @@ namespace Fusion.Build.Processors {
 				htmlBuilder.AppendFormat( (ds.Length==0) ? ".. " : "<a href=\"{0}\">ds</a> ",	Path.GetFileName(dshtm) );
 				htmlBuilder.AppendFormat( (gs.Length==0) ? ".. " : "<a href=\"{0}\">gs</a> ",	Path.GetFileName(gshtm) );
 				htmlBuilder.AppendFormat( (cs.Length==0) ? ".. " : "<a href=\"{0}\">cs</a> ",	Path.GetFileName(cshtm) );
-				htmlBuilder.AppendFormat( (st.Length==0) ? ".. " : "<a href=\"{0}\">st</a> ",	Path.GetFileName(sthtm) );
 
 				htmlBuilder.Append( "[" + defines + "]<br>" );
 
@@ -252,20 +202,6 @@ namespace Fusion.Build.Processors {
 					bw.WriteFourCC( Ubershader.UbershaderSignature );
 
 					//	params :
-					bw.Write( textureDecl.Length );
-					foreach ( var decl in textureDecl ) {
-						bw.Write( decl.Name );
-						bw.Write( decl.Default );
-						bw.Write( decl.Comment );
-					}
-
-					bw.Write( uniformDecl.Length );
-					foreach ( var decl in uniformDecl ) {
-						bw.Write( decl.Name );
-						bw.Write( decl.Default );
-						bw.Write( decl.Comment );
-					}
-
 
 					//	bytecodes :
 					bw.Write( usdb.Count );

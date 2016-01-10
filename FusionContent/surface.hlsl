@@ -18,6 +18,7 @@ struct MATERIAL {
 	float	DirtLevel;
 };
 
+
 struct VSInput {
 	float3 Position : POSITION;
 	float3 Tangent 	: TANGENT;

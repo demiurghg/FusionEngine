@@ -117,10 +117,8 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ()
 		{
-			SafeDispose( ref factory );
-
 			sky			=	Game.Content.Load<Ubershader>("sky");
-			factory		=	new StateFactory( sky, typeof(SkyFlags), (ps,i) => EnumFunc(ps, (SkyFlags)i) );
+			factory		=	sky.CreateFactory( typeof(SkyFlags), (ps,i) => EnumFunc(ps, (SkyFlags)i) );
 		}
 
 
@@ -150,7 +148,6 @@ namespace Fusion.Engine.Graphics {
 		{
 			if( disposing ) {
 				SafeDispose( ref skyVB );
-				SafeDispose( ref factory );
 				SafeDispose( ref skyCube );
 				SafeDispose( ref skyConstsCB );
 			}

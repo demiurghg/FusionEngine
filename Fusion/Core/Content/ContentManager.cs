@@ -79,27 +79,6 @@ namespace Fusion.Core.Content {
 
 
 		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="name"></param>
-		/// <param name="abstractAsset"></param>
-		/// <returns></returns>
-		/*
-		public void PatchAbstractAsset ( string name, AbstractAsset sourceAsset )
-		{
-			var targetAsset = content[ name ].Object;
-
-			if (targetAsset.GetType()!=sourceAsset.GetType()) {
-				throw new ContentException(string.Format("Could not patch abstract asset object '{0}' because diferrent types. Target type: {1}. Source type: {2}", name, targetAsset.GetType(), sourceAsset.GetType() ));
-			}
-
-			Misc.CopyPropertyValues( sourceAsset, targetAsset );
-		}
-		*/
-
-
-
-		/// <summary>
 		/// Determines whether the specified asset exists.
 		/// </summary>
 		/// <param name="assetPath"></param>
@@ -240,6 +219,9 @@ namespace Fusion.Core.Content {
 			lock (lockObject) {
 				Item anotherItem;
 
+				//	put object to dispose list :
+				toDispose.Add( item.Object );
+
 				//	content item already loaded in another thread.
 				if ( content.TryGetValue( assetPath, out anotherItem ) ) {
 					if (item.Object is IDisposable) {
@@ -250,7 +232,6 @@ namespace Fusion.Core.Content {
 
 				} else {
 					content.Add( assetPath, item );
-					toDispose.Add( item.Object );
 					return (T)item.Object;
 				}
 			}
@@ -346,6 +327,11 @@ namespace Fusion.Core.Content {
 				Log.Message("Unloading content");
 
 				foreach ( var item in toDispose ) {
+					if ( item is DisposableBase ) {
+						if ( (item as DisposableBase).IsDisposed ) {
+							Log.Error("Item {0} has been disposed!", item.ToString() );
+						}
+					}
 					if ( item is IDisposable ) {
 						((IDisposable)item).Dispose();
 					}

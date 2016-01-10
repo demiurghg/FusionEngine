@@ -37,7 +37,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			frame	= Game.Content.Load<Texture2D>("redframe.tga");
 			shader	= Game.Content.Load<Ubershader>("globe.Tile.hlsl");
-			factory = new StateFactory(shader, typeof(TileFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
+			factory = shader.CreateFactory( typeof(TileFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
 		}
 
 
@@ -82,9 +82,6 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public override void Dispose()
 		{
-			factory.Dispose();
-			shader.Dispose();
-
 			foreach (var mapSource in MapSources) {
 				mapSource.Dispose();
 			}
