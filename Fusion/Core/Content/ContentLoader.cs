@@ -38,7 +38,7 @@ namespace Fusion.Core.Content {
 		/// <returns></returns>
 		public static Type[] GatherContentLoaders ()
 		{
-			return Misc.GetAllSubclassedOf( typeof(ContentLoader) )
+			return Misc.GetAllSubclassesOf( typeof(ContentLoader) )
 				.Where( t => t.HasAttribute<ContentLoaderAttribute>() )
 				.ToArray();
 		}

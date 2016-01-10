@@ -7,6 +7,7 @@ using Fusion.Core;
 using Fusion.Core.Content;
 using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
+using System.ComponentModel;
 
 
 namespace Fusion.Engine.Graphics {
@@ -25,20 +26,33 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	public class BaseIllum {
 
+		[Category("Parameters")]
 		public float ColorLevel { get; set; }
+		[Category("Parameters")]
 		public float SpecularLevel { get; set; }
+		[Category("Parameters")]
 		public float EmissionLevel { get; set; }
+		[Category("Parameters")]
 		public float RoughnessMinimum { get; set; }
+		[Category("Parameters")]
 		public float RoughnessMaximum { get; set; }
+		[Category("Parameters")]
 		public float DirtLevel { get; set; }
 		
+		[Category("Generation")]
 		public AlphaUsage AlphaUsage { get; set; }
 
+		[Category("Texture Maps")]
 		public TextureMap ColorTexture { get; set; }
+		[Category("Texture Maps")]
 		public TextureMap SurfaceTexture { get; set; }
+		[Category("Texture Maps")]
 		public TextureMap NormalMapTexture { get; set; }
+		[Category("Texture Maps")]
 		public TextureMap EmissionTexture { get; set; }
+		[Category("Texture Maps")]
 		public TextureMap DirtTexture { get; set; }
+		[Category("Texture Maps")]
 		public TextureMap DetailTexture { get; set; }
 
 
@@ -159,7 +173,7 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		public static string ExportToXml ( BaseIllum material )
 		{
-			return Misc.SaveObjectToXml( material, material.GetType(), Misc.GetAllSubclassedOf( typeof(BaseIllum) ) );
+			return Misc.SaveObjectToXml( material, material.GetType(), Misc.GetAllSubclassesOf( typeof(BaseIllum) ) );
 		}
 
 
@@ -171,7 +185,7 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		public static BaseIllum ImportFromXml ( string xmlString )
 		{
-			return (BaseIllum)Misc.LoadObjectFromXml( typeof(BaseIllum), xmlString, Misc.GetAllSubclassedOf( typeof(BaseIllum) ) );
+			return (BaseIllum)Misc.LoadObjectFromXml( typeof(BaseIllum), xmlString, Misc.GetAllSubclassesOf( typeof(BaseIllum) ) );
 		}
 
 	}

@@ -458,13 +458,17 @@ namespace Fusion.Core {
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		public static Type[] GetAllSubclassedOf ( Type type )
+		public static Type[] GetAllSubclassesOf ( Type type, bool includeBaseClass = false )
 		{	
 			List<Type> types = new List<Type>();
 
 			foreach ( var a in AppDomain.CurrentDomain.GetAssemblies() ) {
 
 				foreach ( var t in a.GetTypes() ) {
+					
+					if (includeBaseClass && (t==type)) {
+						types.Add(t);
+					}
 
 					if (t.IsSubclassOf( type )) {
 

@@ -5,18 +5,25 @@ using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core.Content;
 using System.Xml.Serialization;
+using System.ComponentModel;
+using Fusion.Engine.Graphics.Design;
+using System.ComponentModel;
+using System.ComponentModel.Design;
+using System.Drawing.Design;
 
 namespace Fusion.Engine.Graphics {
 
 	/// <summary>
 	/// 
 	/// </summary>
+	[TypeConverter(typeof(ExpandableObjectConverter))]
 	public sealed class TextureMap {
 		
 		/// <summary>
 		/// Path to textyre
 		/// </summary>
 		[XmlAttribute]
+		[Editor(typeof(TextureLocationEditor), typeof(UITypeEditor))]
 		public string Path { get; set; }
 
 		/// <summary>
@@ -48,6 +55,11 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		[XmlAttribute]
 		public float OffsetV { get; set; }
+
+		public override string ToString ()
+		{
+			return Path;
+		}
 
 
 		/// <summary>

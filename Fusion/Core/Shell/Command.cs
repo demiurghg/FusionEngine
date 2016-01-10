@@ -111,7 +111,7 @@ namespace Fusion.Core.Shell {
 		/// <returns></returns>
 		internal static Type[] GatherCommands ()
 		{
-			return Misc.GetAllSubclassedOf( typeof(Command) )
+			return Misc.GetAllSubclassesOf( typeof(Command) )
 				.Where( t => t.HasAttribute<CommandAttribute>() )
 				.ToArray();
 		}
