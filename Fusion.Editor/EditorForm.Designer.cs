@@ -63,17 +63,17 @@
 			this.panel1.Controls.Add(this.button1);
 			this.panel1.Controls.Add(this.updateButton);
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panel1.Location = new System.Drawing.Point(0, 563);
+			this.panel1.Location = new System.Drawing.Point(0, 569);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(491, 41);
+			this.panel1.Size = new System.Drawing.Size(491, 35);
 			this.panel1.TabIndex = 6;
 			// 
 			// exitButton
 			// 
 			this.exitButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.exitButton.Location = new System.Drawing.Point(3, 3);
+			this.exitButton.Location = new System.Drawing.Point(3, 2);
 			this.exitButton.Name = "exitButton";
-			this.exitButton.Size = new System.Drawing.Size(75, 35);
+			this.exitButton.Size = new System.Drawing.Size(75, 30);
 			this.exitButton.TabIndex = 7;
 			this.exitButton.Text = "Exit";
 			this.exitButton.UseVisualStyleBackColor = true;
@@ -81,9 +81,9 @@
 			// button1
 			// 
 			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.button1.Location = new System.Drawing.Point(84, 3);
+			this.button1.Location = new System.Drawing.Point(84, 2);
 			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(75, 35);
+			this.button1.Size = new System.Drawing.Size(75, 30);
 			this.button1.TabIndex = 6;
 			this.button1.Text = "Exit";
 			this.button1.UseVisualStyleBackColor = true;
@@ -92,9 +92,9 @@
 			// 
 			this.updateButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.updateButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.updateButton.Location = new System.Drawing.Point(376, 3);
+			this.updateButton.Location = new System.Drawing.Point(376, 2);
 			this.updateButton.Name = "updateButton";
-			this.updateButton.Size = new System.Drawing.Size(112, 35);
+			this.updateButton.Size = new System.Drawing.Size(112, 30);
 			this.updateButton.TabIndex = 1;
 			this.updateButton.Text = "Update";
 			this.updateButton.UseVisualStyleBackColor = true;
@@ -108,7 +108,7 @@
 			this.panel2.Location = new System.Drawing.Point(0, 24);
 			this.panel2.Name = "panel2";
 			this.panel2.Padding = new System.Windows.Forms.Padding(4);
-			this.panel2.Size = new System.Drawing.Size(491, 536);
+			this.panel2.Size = new System.Drawing.Size(491, 542);
 			this.panel2.TabIndex = 7;
 			// 
 			// mainPropertyGrid
@@ -117,23 +117,24 @@
 			this.mainPropertyGrid.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.mainPropertyGrid.Location = new System.Drawing.Point(216, 4);
 			this.mainPropertyGrid.Name = "mainPropertyGrid";
-			this.mainPropertyGrid.Size = new System.Drawing.Size(271, 528);
+			this.mainPropertyGrid.Size = new System.Drawing.Size(271, 534);
 			this.mainPropertyGrid.TabIndex = 0;
 			// 
 			// splitter1
 			// 
 			this.splitter1.Location = new System.Drawing.Point(212, 4);
 			this.splitter1.Name = "splitter1";
-			this.splitter1.Size = new System.Drawing.Size(4, 528);
+			this.splitter1.Size = new System.Drawing.Size(4, 534);
 			this.splitter1.TabIndex = 2;
 			this.splitter1.TabStop = false;
 			// 
 			// mainTreeView
 			// 
 			this.mainTreeView.Dock = System.Windows.Forms.DockStyle.Left;
+			this.mainTreeView.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.mainTreeView.Location = new System.Drawing.Point(4, 4);
 			this.mainTreeView.Name = "mainTreeView";
-			this.mainTreeView.Size = new System.Drawing.Size(208, 528);
+			this.mainTreeView.Size = new System.Drawing.Size(208, 534);
 			this.mainTreeView.TabIndex = 1;
 			this.mainTreeView.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.mainTreeView_NodeMouseClick);
 			// 
@@ -141,7 +142,7 @@
 			// 
 			this.label1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
 			this.label1.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.label1.Location = new System.Drawing.Point(0, 560);
+			this.label1.Location = new System.Drawing.Point(0, 566);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(491, 3);
 			this.label1.TabIndex = 9;
