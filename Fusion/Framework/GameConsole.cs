@@ -11,6 +11,7 @@ using Fusion.Engine.Common;
 using Fusion.Core.Configuration;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Input;
+using Fusion.Core.Shell;
 
 namespace Fusion.Framework {
 	
@@ -56,6 +57,8 @@ namespace Fusion.Framework {
 		/// </summary>
 		public bool Show { get; set; }
 
+
+		Invoker.Suggestion suggestion = null;
 
 
 
@@ -194,6 +197,40 @@ namespace Fusion.Framework {
 
 			var frameRate = string.Format("fps = {0,7:0.00}", gameTime.Fps);
 			editLayer.DrawDebugString( consoleFont, vp.Width - charWidth * frameRate.Length, 0, frameRate, Config.VersionColor);
+
+			
+			//
+			//	Draw suggestions :
+			//	
+			if (suggestion!=null && suggestion.Candidates.Any()) {
+
+				var candidates = suggestion.Candidates;
+
+				var x = 0;
+				var y = charHeight;
+				var w = (candidates.Max( s => s.Length ) + 2) * charWidth;
+				var h = (candidates.Count() + 1) * charHeight;
+
+				w = Math.Max( w, charWidth * 16 );
+
+				editLayer.Draw( consoleBackground, x, y, w, h, Color.White );
+
+				int line = 0;
+				foreach (var candidate in candidates ) {
+					editLayer.DrawDebugString(consoleFont, x + charWidth, y + charHeight * line, candidate, Color.Gray);
+					line ++;
+				}
+			} /*else {
+				string text = "Type beginning of the command and press TAB for suggestions.";
+
+				var x = charWidth * 1;
+				var y = charHeight;
+				var w = text.Length * charWidth;
+				var h = 1 * charHeight;
+
+				editLayer.Draw( consoleBackground, x, y, w, h, Color.White );
+				editLayer.DrawDebugString(consoleFont, x, y, text, Color.Gray);
+			}*/
 		}
 
 
@@ -283,10 +320,26 @@ namespace Fusion.Framework {
 		}
 
 
+		string AutoComplete ()
+		{
+			var sw = new Stopwatch();
+			sw.Start();
+			suggestion = Game.Invoker.AutoComplete( editBox.Text );
+			sw.Stop();
+
+			if (suggestion.Candidates.Any()) {
+				suggestion.Add("");
+				suggestion.Add(string.Format("({0} ms)", sw.Elapsed.TotalMilliseconds));
+			}
+
+			return suggestion.CommandLine;
+		}
+
+
 
 		void TabCmd ()
 		{
-			editBox.Text = Game.Invoker.AutoComplete( editBox.Text );
+			editBox.Text = AutoComplete();
 		}
 
 
@@ -344,7 +397,8 @@ namespace Fusion.Framework {
 				default			: editBox.TypeChar( e.KeyChar ); break;
 			}
 
-			//Log.Message("{0}", (int)e.KeyChar);
+			// Run AutoComplete twice on TAB for better results :
+			AutoComplete();
 
 			RefreshEdit();
 		}

@@ -21,7 +21,8 @@ namespace Fusion.Build {
 
 		public static BuildOptions	Options { get; private set; }
 
-		/// <summary>
+		/// <summary>					
+		///	Same as Options.FullInputDirectory.
 		/// Freaky hack to gain access to Builder's input directory from LocationEditors.
 		/// </summary>
 		public static string FullInputDirectory {

@@ -51,7 +51,7 @@ namespace TestGame2 {
 
 				//	apply configuration here:
 				engine.RenderSystem.Config.UseDebugDevice =	false;
-				engine.TrackObjects		=	true;
+				engine.TrackObjects		=	false;
 				engine.GameTitle		=	"Test Game 2";
 
 				//	apply command-line options here:

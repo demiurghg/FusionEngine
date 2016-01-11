@@ -7,7 +7,6 @@ using Fusion.Core.Content;
 using System.Xml.Serialization;
 using System.ComponentModel;
 using Fusion.Engine.Graphics.Design;
-using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing.Design;
 
