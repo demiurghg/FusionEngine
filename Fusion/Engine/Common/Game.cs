@@ -299,7 +299,7 @@ namespace Fusion.Engine.Common {
 			Thread.CurrentThread.CurrentUICulture	=	CultureInfo.InvariantCulture;
 
 
-			ForceAssemblies();
+			//ForceAssemblies();
 
 
 			Debug.Assert( Instance == null );

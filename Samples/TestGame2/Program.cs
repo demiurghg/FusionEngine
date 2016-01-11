@@ -14,7 +14,6 @@ using Fusion.Core;
 using Fusion.Core.Mathematics;
 using Fusion.Engine.Graphics;
 using Fusion.Core.Development;
-using Fusion.Editor;
 
 namespace TestGame2 {
 
@@ -37,9 +36,6 @@ namespace TestGame2 {
 			Builder.Options.TempDirectory	=	@"..\..\..\Temp";
 			Builder.Options.OutputDirectory	=	@"Content";
 			Builder.SafeBuild();
-
-			//Editor.Initialize();
-			//Editor.Open("qq", "qq", null);
 	
 			//
 			//	Run engine.
@@ -67,8 +63,6 @@ namespace TestGame2 {
 				//	run:
 				engine.Run();
 
-				Editor.CloseAll();
-				
 				//	save configuration:
 				engine.SaveConfiguration("Config.ini"); 				
 			}

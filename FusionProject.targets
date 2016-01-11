@@ -9,9 +9,9 @@
 		<Reference Include="Fusion.Build">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\Fusion.Build.dll</HintPath>
 		</Reference>
-		<Reference Include="Fusion.Editor">
+		<!--Reference Include="Fusion.Editor">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\Fusion.Editor.dll</HintPath>
-		</Reference>
+		</Reference-->
     </ItemGroup>
 
 	<!-- Include core RELEASE assemblies (HYBRID) --> 
@@ -22,9 +22,9 @@
 		<Reference Include="Fusion.Build">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\Fusion.Build.dll</HintPath>
 		</Reference>
-		<Reference Include="Fusion.Editor">
+		<!--Reference Include="Fusion.Editor">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\Fusion.Editor.dll</HintPath>
-		</Reference>
+		</Reference-->
     </ItemGroup>
 
 	<!-- Include core DEBUG assemblies --> 
@@ -35,9 +35,9 @@
 		<Reference Include="Fusion.Build">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)\Fusion.Build.dll</HintPath>
 		</Reference>
-		<Reference Include="Fusion.Editor">
+		<!--Reference Include="Fusion.Editor">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)\Fusion.Editor.dll</HintPath>
-		</Reference>
+		</Reference-->
     </ItemGroup>
 
 </Project>
