@@ -35,7 +35,7 @@ namespace SceneDemo1 {
 		public SceneDemo1GameInterface ( Game game )
 			: base( game )
 		{
-			console = new GameConsole( game, "conchars", "conback" );
+			console = new GameConsole( game, "conchars" );
 		}
 
 

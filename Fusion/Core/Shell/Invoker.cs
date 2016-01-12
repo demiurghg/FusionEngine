@@ -121,7 +121,7 @@ namespace Fusion.Core.Shell {
 						Log.Message("{0} = {1}", variable.FullName, variable.Get() );
 						return null;
 					} else {
-						return Push( string.Format("set {0} {1}", cmdName, string.Join(" ", argList) ) );
+						return Push( string.Format("set {0} \"{1}\"", cmdName, string.Join(" ", argList) ) );
 					}
 				}
 				var command	=	GetCommand( cmdName );

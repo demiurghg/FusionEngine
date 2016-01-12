@@ -70,7 +70,25 @@ namespace Fusion.Framework {
 		/// <param name="font">Font texture. Must be 128x128.</param>
 		/// <param name="conback">Console background texture</param>
 		/// <param name="speed">Console fall speed</param>
+		[Obsolete("Parameter 'conback' is not used")]
 		public GameConsole ( Game Game, string font, string conback ) : base(Game)
+		{
+			Config			=	new GameConsoleConfig();
+			
+			this.font		=	font;
+			this.conback	=	conback;
+
+			editBox		=	new EditBox(this);
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="Game"></param>
+		/// <param name="font"></param>
+		public GameConsole ( Game Game, string font ) : base(Game)
 		{
 			Config			=	new GameConsoleConfig();
 			
@@ -213,11 +231,11 @@ namespace Fusion.Framework {
 
 				w = Math.Max( w, charWidth * 16 );
 
-				editLayer.Draw( consoleBackground, x, y, w, h, Color.White );
+				editLayer.Draw( null, x, y, w, h, Config.BackColor );
 
 				int line = 0;
 				foreach (var candidate in candidates ) {
-					editLayer.DrawDebugString(consoleFont, x + charWidth, y + charHeight * line, candidate, Color.Gray);
+					editLayer.DrawDebugString(consoleFont, x + charWidth, y + charHeight * line, candidate, Config.HelpColor );
 					line ++;
 				}
 			} /*else {
@@ -262,7 +280,7 @@ namespace Fusion.Framework {
 			consoleLayer.Clear();
 
 			//	add small gap below command line...
-			consoleLayer.Draw( consoleBackground, 0,0, vp.Width, vp.Height/2+1, Color.White );
+			consoleLayer.Draw( null, 0,0, vp.Width, vp.Height/2+1, Config.BackColor );
 
 			var lines	=	LogRecorder.GetLines();
 
