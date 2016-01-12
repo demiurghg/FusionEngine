@@ -185,7 +185,8 @@ void Native::Fbx::FbxLoader::IterateChildren( FbxNode *fbxNode, FbxScene *fbxSce
 	}
 
 	//	Get transform
-	FbxAMatrix	transform	=	fbxNode->EvaluateLocalTransform();
+	FbxAMatrix	transform	=	fbxNode->GetScene()->GetEvaluator()->GetNodeLocalTransform( fbxNode );
+	//FbxAMatrix	transform	=	fbxNode->EvaluateLocalTransform();
 	node->Transform			=	FbxAMatrix2Matrix( transform );
 	node->BindPose			=	Matrix::Identity;
 
