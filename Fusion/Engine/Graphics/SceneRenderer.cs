@@ -177,8 +177,6 @@ namespace Fusion.Engine.Graphics {
 				device.SetTargets( depth, hdr, diffuse, specular, normals, scattering );
 				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
 
-				t += 1/60.0f;
-
 				var instances	=	viewLayer.Instances;
 
 				//#warning INSTANSING!

@@ -30,6 +30,7 @@ HKEY_CURRENT_USER\Software\FusionEngine@ContentDir
 [Scenes]
 *.fbx /geom
 scenes/testScene.fbx /geom /report
+scenes/testAnim.fbx /geom /report /anim
 
 [Copy]
 myDir/*.*

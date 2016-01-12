@@ -75,6 +75,7 @@ namespace TestGame2 {
 		DiscTexture		debugFont;
 
 		Scene		scene;
+		Scene		animScene;
 
 		Vector3		position = new Vector3(0,10,0);
 		float		yaw = 0, pitch = 0;
@@ -178,10 +179,14 @@ namespace TestGame2 {
 		}
 
 
+		List<Tuple<MeshInstance,int>> animInstances = new List<Tuple<MeshInstance,int>>();
+
 
 		void LoadContent ()
 		{
 			masterView.Instances.Clear();
+
+			//-------------------------------------
 
 			scene		=	Game.Content.Load<Scene>( @"scenes\testScene" );
 
@@ -205,6 +210,35 @@ namespace TestGame2 {
 				masterView.Instances.Add( inst );
 			}
 
+
+			//-------------------------------------
+
+			animScene =	Game.Content.Load<Scene>(@"scenes\testAnim");
+			animInstances.Clear();
+
+			transforms = new Matrix[ animScene.Nodes.Count ];
+			animScene.ComputeAbsoluteTransforms( transforms );
+
+			materials	=	animScene.Materials.Select( m => Game.Content.Load<MaterialInstance>( m.Name, defMtrl ) ).ToArray();
+			
+			for ( int i=0; i<animScene.Nodes.Count; i++ ) {
+			
+				var meshIndex  = animScene.Nodes[i].MeshIndex;
+			
+				if (meshIndex<0) {
+					continue;
+				}
+				
+				var inst   = new MeshInstance( Game.RenderSystem, animScene, animScene.Meshes[meshIndex], materials );
+				inst.World = transforms[ i ];
+
+				animInstances.Add( new Tuple<MeshInstance,int>( inst, i ) );
+			
+				masterView.Instances.Add( inst );
+			}
+
+
+			//-------------------------------------
 
 			masterView.HdrSettings.BloomAmount	=	0.05f;
 			masterView.HdrSettings.DirtAmount	=	0.95f;
@@ -255,6 +289,8 @@ namespace TestGame2 {
 
 		static readonly Guid HudFps = Guid.NewGuid();
 
+		float frame = 0;
+
 		/// <summary>
 		/// Updates internal state of interface.
 		/// </summary>
@@ -281,6 +317,19 @@ namespace TestGame2 {
 				testLayer.DrawDebugString( debugFont, 0+1, line*8+1, debugString.Text, Color.Black );
 				testLayer.DrawDebugString( debugFont, 0+0, line*8+0, debugString.Text, debugString.Color );
 				line++;
+			}
+
+
+			frame += gameTime.ElapsedSec * 24;
+
+			var transformsLocal  = new Matrix[ animScene.Nodes.Count ];
+			var transformsGlobal = new Matrix[ animScene.Nodes.Count ];
+
+			animScene.GetAnimSnapshot( frame, animScene.FirstFrame, animScene.LastFrame, AnimationMode.Repeat, transformsLocal );
+			animScene.ComputeAbsoluteTransforms( transformsLocal, transformsGlobal );
+
+			for (int i=0; i<animInstances.Count; i++) {
+				animInstances[i].Item1.World = transformsGlobal[ animInstances[i].Item2 ];
 			}
 			/*if ( game.Keyboard.IsKeyDown(Keys.R) ) {
 				testLayer.Clear();
