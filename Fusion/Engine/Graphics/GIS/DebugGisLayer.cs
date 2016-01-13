@@ -30,7 +30,7 @@ namespace Fusion.Engine.Graphics.GIS
 		public DebugGisLayer(Game game) : base(game)
 		{
 			shader	= game.Content.Load<Ubershader>("globe.Debug.hlsl");
-			factory = new StateFactory(shader, typeof(DebugFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.CartPoint>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
+			factory = shader.CreateFactory(typeof(DebugFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.CartPoint>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
 
 			buf = new VertexBuffer(Game.GraphicsDevice, typeof(Gis.CartPoint), 10000, VertexBufferOptions.Dynamic);
 
