@@ -76,6 +76,7 @@ namespace TestGame2 {
 
 		Scene		scene;
 		Scene		animScene;
+		Scene		skinScene;
 
 		Vector3		position = new Vector3(0,10,0);
 		float		yaw = 0, pitch = 0;
@@ -180,6 +181,7 @@ namespace TestGame2 {
 
 
 		List<Tuple<MeshInstance,int>> animInstances = new List<Tuple<MeshInstance,int>>();
+		List<Tuple<MeshInstance,int>> skinInstances = new List<Tuple<MeshInstance,int>>();
 
 
 		void LoadContent ()
@@ -237,6 +239,40 @@ namespace TestGame2 {
 				masterView.Instances.Add( inst );
 			}
 
+			//-------------------------------------
+
+			skinScene =	Game.Content.Load<Scene>(@"scenes\testSkin");
+			skinInstances.Clear();
+
+			transforms = new Matrix[ skinScene.Nodes.Count ];
+			skinScene.ComputeAbsoluteTransforms( transforms );
+
+			materials	=	skinScene.Materials.Select( m => Game.Content.Load<MaterialInstance>( m.Name, defMtrl ) ).ToArray();
+			
+			for ( int i=0; i<skinScene.Nodes.Count; i++ ) {
+			
+				var meshIndex  = skinScene.Nodes[i].MeshIndex;
+			
+				if (meshIndex<0) {
+					continue;
+				}
+
+				for (int j = 0; j<8; j++) {
+				
+					var inst   = new MeshInstance( Game.RenderSystem, skinScene, skinScene.Meshes[meshIndex], materials );
+					inst.World = transforms[ i ] * Matrix.Translation(0,2,5 * j);
+				
+					skinInstances.Add( new Tuple<MeshInstance,int>( inst, i ) );
+
+					if (inst.IsSkinned) {
+						var bones = new Matrix[skinScene.Nodes.Count];
+						skinScene.GetAnimSnapshot( 8, bones );
+						skinScene.ComputeBoneTransforms( bones, inst.BoneTransforms );
+					}
+
+					masterView.Instances.Add( inst );
+				}
+			}
 
 			//-------------------------------------
 
@@ -319,6 +355,7 @@ namespace TestGame2 {
 				line++;
 			}
 
+			//-- animation --
 
 			frame += gameTime.ElapsedSec * 24;
 
@@ -331,6 +368,22 @@ namespace TestGame2 {
 			for (int i=0; i<animInstances.Count; i++) {
 				animInstances[i].Item1.World = transformsGlobal[ animInstances[i].Item2 ];
 			}
+
+			//-- skinning --
+
+			var bonesLocal  = new Matrix[ skinScene.Nodes.Count ];
+
+			var rand = new Random(4546);
+			
+			for (int i=0; i<skinInstances.Count; i++) {
+				skinScene.GetAnimSnapshot( frame * rand.NextFloat(0.7f, 1.3f)/3.0f + rand.NextFloat(0,20), skinScene.FirstFrame, skinScene.LastFrame, AnimationMode.Repeat, bonesLocal );
+				skinScene.ComputeBoneTransforms( bonesLocal, skinInstances[i].Item1.BoneTransforms );
+				//skinInstances[i].Item1.World = transformsGlobal[ animInstances[i].Item2 ];
+			}
+
+
+
+
 			/*if ( game.Keyboard.IsKeyDown(Keys.R) ) {
 				testLayer.Clear();
 				testLayer.DrawDebugString( debugFont, 10, 276, rand.Next().ToString(), Color.White );

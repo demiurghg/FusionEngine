@@ -220,6 +220,14 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="destinationGlobalTransforms"></param>
 		public void ComputeAbsoluteTransforms ( Matrix[] source, Matrix[] destination )
 		{
+			if ( source == null ) {
+				throw new ArgumentNullException("source");
+			}
+
+			if ( destination == null ) {
+				throw new ArgumentNullException("destination");
+			}
+
 			if ( source.Length < Nodes.Count ) {
 				throw new ArgumentOutOfRangeException("source.Length must be greater of equal to Nodes.Count");
 			}

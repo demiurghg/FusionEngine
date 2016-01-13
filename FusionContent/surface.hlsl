@@ -26,6 +26,10 @@ struct VSInput {
 	float3 Normal 	: NORMAL;
 	float4 Color 	: COLOR;
 	float2 TexCoord : TEXCOORD0;
+#ifdef SKINNED
+    int4   BoneIndices  : BLENDINDICES0;
+    float4 BoneWeights  : BLENDWEIGHTS0;
+#endif	
 };
 
 struct PSInput {
@@ -47,9 +51,10 @@ struct GBuffer {
 	float4	scattering	: SV_Target4;
 };
 
-cbuffer 		CBBatch 	: 	register(b0) { BATCH    Batch     : packoffset( c0 ); }	
-cbuffer 		CBLayer 	: 	register(b1) { MATERIAL Material  : packoffset( c0 ); }	
-cbuffer 		CBLayer 	: 	register(b2) { float4   UVMods[16]: packoffset( c0 ); }	
+cbuffer 		CBBatch 	: 	register(b0) { BATCH    Batch      : packoffset( c0 ); }	
+cbuffer 		CBLayer 	: 	register(b1) { MATERIAL Material   : packoffset( c0 ); }	
+cbuffer 		CBLayer 	: 	register(b2) { float4   UVMods[16] : packoffset( c0 ); }	
+cbuffer 		CBBatch 	: 	register(b3) { float4x4 Bones[128] : packoffset( c0 ); }	
 SamplerState	Sampler		: 	register(s0);
 Texture2D		Textures[16]: 	register(t0);
 
@@ -57,37 +62,88 @@ Texture2D		Textures[16]: 	register(t0);
 $ubershader GBUFFER RIGID|SKINNED BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
 $ubershader SHADOW RIGID|SKINNED  BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
 $ubershader SHADOW RIGID|SKINNED
-
-	#ifdef RIGID
-		$VertexInputFormat	VertexColorTextureTBNRigid
-		$VertexInputFormat	VertexColorTextureTBNRigidOLOLO
-		$DepthStencilState	Default
-		$BlendState			
-	#endif
-	#ifdef SKINNED
-		$VertexInputFormat	VertexColorTextureTBNSkinned			
-		$BlendState 		Additive
-		$RasterizerState	CullNone	
-		$DepthStencilState	ReadOnly
-	#endif
 #endif
 
 
  
 /*-----------------------------------------------------------------------------
 	Vertex shader :
+	Note on prefixes:
+		s - means skinned
+		w - means world
+		v - means view
+		p - means projected
 -----------------------------------------------------------------------------*/
+
+float4x3 ToFloat4x3 ( float4x4 m )
+{
+	return float4x3( m._m00_m10_m20_m30, 
+					 m._m01_m11_m21_m31, 
+					 m._m02_m11_m22_m32 );
+}
+
+float4x4 AccumulateSkin( float4 boneWeights, int4 boneIndices )
+{
+	float4x4 result = boneWeights.x * Bones[boneIndices.x];
+	result = result + boneWeights.y * Bones[boneIndices.y];
+	result = result + boneWeights.z * Bones[boneIndices.z];
+	result = result + boneWeights.w * Bones[boneIndices.w];
+	// float4x3 result = boneWeights.x * ToFloat4x3( Bones[boneIndices.x] );
+	// result = result + boneWeights.y * ToFloat4x3( Bones[boneIndices.y] );
+	// result = result + boneWeights.z * ToFloat4x3( Bones[boneIndices.z] );
+	// result = result + boneWeights.w * ToFloat4x3( Bones[boneIndices.w] );
+	return result;
+}
+
+float4 TransformPosition( int4 boneIndices, float4 boneWeights, float3 inputPos )
+{
+	float4 position = 0; 
+	
+	float4x4 xform  = AccumulateSkin(boneWeights, boneIndices); 
+	position = mul( float4(inputPos,1), xform );
+	
+	return position;
+}
+
+
+float4 TransformNormal( int4 boneIndices, float4 boneWeights, float3 inputNormal )
+{
+    float4 normal = 0;
+
+	float4x4 xform  = AccumulateSkin(boneWeights, boneIndices); 
+	normal = mul( float4(inputNormal,0), xform );
+	
+	return float4(normal.xyz,0);	// force w to zero
+}
+
+
+
 PSInput VSMain( VSInput input )
 {
 	PSInput output;
 
-	float4 	pos			=	float4( input.Position, 1 );
-	float4	wPos		=	mul( pos,  Batch.World 		);
-	float4	vPos		=	mul( wPos, Batch.View 		);
-	float4	pPos		=	mul( vPos, Batch.Projection );
-	float4	normal		=	mul( float4(input.Normal,0),  Batch.World 		);
-	float4	tangent		=	mul( float4(input.Tangent,0),  Batch.World 		);
-	float4	binormal	=	mul( float4(input.Binormal,0),  Batch.World 	);
+	#if RIGID
+		float4 	pos			=	float4( input.Position, 1 );
+		float4	wPos		=	mul( pos,  Batch.World 		);
+		float4	vPos		=	mul( wPos, Batch.View 		);
+		float4	pPos		=	mul( vPos, Batch.Projection );
+		float4	normal		=	mul( float4(input.Normal,0),  Batch.World 		);
+		float4	tangent		=	mul( float4(input.Tangent,0),  Batch.World 		);
+		float4	binormal	=	mul( float4(input.Binormal,0),  Batch.World 	);
+	#endif
+	#if SKINNED
+		float4 	sPos		=	TransformPosition	( input.BoneIndices, input.BoneWeights, input.Position	);
+		float4  sNormal		=	TransformNormal		( input.BoneIndices, input.BoneWeights, input.Normal	);
+		float4  sTangent	=	TransformNormal		( input.BoneIndices, input.BoneWeights, input.Tangent	);
+		float4  sBinormal	=	TransformNormal		( input.BoneIndices, input.BoneWeights, input.Binormal	);
+		
+		float4	wPos		=	mul( sPos, Batch.World 		);
+		float4	vPos		=	mul( wPos, Batch.View 		);
+		float4	pPos		=	mul( vPos, Batch.Projection );
+		float4	normal		=	mul( sNormal,  Batch.World 	);
+		float4	tangent		=	mul( sTangent,  Batch.World 	);
+		float4	binormal	=	mul( sBinormal,  Batch.World 	);
+	#endif
 	
 	output.Position 	= 	pPos;
 	output.ProjPos		=	pPos;

@@ -81,14 +81,6 @@ namespace Fusion.Engine.Graphics {
 			get; private set;
 		}
 
-		/// <summary>
-		/// Gets array of bone material blend options..
-		/// If skinning is not applied to mesh, this array is Null.
-		/// </summary>
-		public Color4[] BoneBlending {
-			get; private set;
-		}
-
 
 		readonly internal VertexBuffer	vb;
 		readonly internal IndexBuffer	ib;
@@ -135,16 +127,19 @@ namespace Fusion.Engine.Graphics {
 			ShadingGroups	=	mesh.Subsets	
 							.Select( s => new ShadingGroup( s, materials[s.MaterialIndex] ) )
 							.ToArray();
-		}
 
+			IsSkinned	=	mesh.IsSkinned;
 
+			if (IsSkinned && scene.Nodes.Count > SceneRenderer.MaxBones) {
+				throw new ArgumentOutOfRangeException( string.Format("Scene contains more than {0} bones and cannot be used for skinning.", SceneRenderer.MaxBones ) );
+			}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		public void RenderGBuffer ()
-		{
-			
+			if (IsSkinned) {
+				BoneTransforms	=	Enumerable
+					.Range(0, SceneRenderer.MaxBones)
+					.Select( i => Matrix.Identity )
+					.ToArray();
+			}
 		}
 	}
 }

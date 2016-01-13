@@ -17,8 +17,10 @@ namespace Fusion.Engine.Graphics {
 	public class SceneRenderer : GameModule {
 
 		readonly RenderSystem	rs;
+		internal const int MaxBones = 128;
 
 		ConstantBuffer	constBuffer;
+		ConstantBuffer	constBufferBones;
 		Ubershader		surfaceShader;
 		StateFactory	factory;
 
@@ -64,7 +66,8 @@ namespace Fusion.Engine.Graphics {
 		{
 			LoadContent();
 
-			constBuffer	=	new ConstantBuffer( Game.GraphicsDevice, typeof(CBMeshInstanceData) );
+			constBuffer			=	new ConstantBuffer( Game.GraphicsDevice, typeof(CBMeshInstanceData) );
+			constBufferBones	=	new ConstantBuffer( Game.GraphicsDevice, typeof(Matrix), MaxBones );
 
 
 			defaultDiffuse	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
@@ -128,6 +131,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			if (disposing) {
 				SafeDispose( ref constBuffer );
+				SafeDispose( ref constBufferBones );
 
 				SafeDispose( ref defaultDiffuse		);
 				SafeDispose( ref defaultSpecular	);
@@ -193,6 +197,11 @@ namespace Fusion.Engine.Graphics {
 					device.VertexShaderConstants[0]	= constBuffer ;
 
 					device.SetupVertexInput( instance.vb, instance.ib );
+
+					if (instance.IsSkinned) {
+						constBufferBones.SetData( instance.BoneTransforms );
+						device.VertexShaderConstants[3]	= constBufferBones ;
+					}
 
 					try {
 
@@ -284,7 +293,6 @@ namespace Fusion.Engine.Graphics {
 				cbData.ViewPos		=	new Vector4( viewPosition, 1 );
 				cbData.BiasSlopeFar	=	new Vector4( shadowRenderCtxt.DepthBias, shadowRenderCtxt.SlopeBias, shadowRenderCtxt.FarDistance, 0 );
 
-
 				//#warning INSTANSING!
 				foreach ( var instance in instances ) {
 
@@ -292,6 +300,11 @@ namespace Fusion.Engine.Graphics {
 					cbData.World			=	instance.World;
 
 					constBuffer.SetData( cbData );
+
+					if (instance.IsSkinned) {
+						constBufferBones.SetData( instance.BoneTransforms );
+						device.VertexShaderConstants[3]	= constBufferBones ;
+					}
 
 					device.SetupVertexInput( instance.vb, instance.ib );
 					device.DrawIndexed( instance.indexCount, 0, 0 );

@@ -73,10 +73,10 @@ namespace Fusion.Engine.Graphics {
 			//
 			var factory	=	rs.SceneRenderer.Factory;
 
-			var gbufferRigid	=	SurfaceFlags.GBUFFER | SurfaceFlags.RIGID | surfaceFlags ;
-			var gbufferSkinned	=	SurfaceFlags.GBUFFER | SurfaceFlags.RIGID | surfaceFlags ;
-			var shadowRigid		=	SurfaceFlags.SHADOW  | SurfaceFlags.RIGID | surfaceFlags ;
-			var shadowSkinned	=	SurfaceFlags.SHADOW  | SurfaceFlags.RIGID | surfaceFlags ;
+			var gbufferRigid	=	SurfaceFlags.GBUFFER | SurfaceFlags.RIGID	| surfaceFlags ;
+			var gbufferSkinned	=	SurfaceFlags.GBUFFER | SurfaceFlags.SKINNED | surfaceFlags ;
+			var shadowRigid		=	SurfaceFlags.SHADOW  | SurfaceFlags.RIGID	| surfaceFlags ;
+			var shadowSkinned	=	SurfaceFlags.SHADOW  | SurfaceFlags.SKINNED | surfaceFlags ;
 
 			GBufferRigid	=	factory[ (int)gbufferRigid ];
 			GBufferSkinned	=	factory[ (int)gbufferSkinned ];

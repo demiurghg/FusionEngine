@@ -22,8 +22,10 @@ namespace Fusion.Engine.Graphics {
 		public int					VertexCount		{ get { return Vertices.Count; } }
 		public int					IndexCount		{ get { return TriangleCount * 3; } }
 
-		public VertexBuffer			VertexBuffer	{ get { return vertexBuffer; } }
-		public IndexBuffer			IndexBuffer		{ get { return indexBuffer; } }
+		internal VertexBuffer		VertexBuffer	{ get { return vertexBuffer; } }
+		internal IndexBuffer		IndexBuffer		{ get { return indexBuffer; } }
+
+		public bool					IsSkinned		{ get; private set; }
 
 		VertexBuffer vertexBuffer;
 		IndexBuffer	 indexBuffer;
@@ -110,6 +112,9 @@ namespace Fusion.Engine.Graphics {
 					break;
 				}
 			}
+
+			IsSkinned	=	skinned;
+
 
 			if (skinned) {
 				vertexBuffer = VertexBuffer.Create( device, Vertices.Select( v => VertexColorTextureTBNSkinned.Convert(v) ).ToArray() );
