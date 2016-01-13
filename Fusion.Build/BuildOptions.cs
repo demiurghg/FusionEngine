@@ -82,6 +82,9 @@ namespace Fusion.Build {
 		}
 
 
+		/// <summary>
+		/// Returns full path to .content file.
+		/// </summary>
 		[CommandLineParser.Ignore]
 		public string ContentIniFile {
 			get {

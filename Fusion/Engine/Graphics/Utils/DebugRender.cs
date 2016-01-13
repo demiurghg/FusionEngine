@@ -74,7 +74,7 @@ namespace Fusion.Engine.Graphics {
 			var dev		= Game.GraphicsDevice;
 
 			effect		= Game.Content.Load<Ubershader>("debugRender.hlsl");
-			factory		= new StateFactory( effect, typeof(RenderFlags), Primitive.LineList, VertexInputElement.FromStructure( typeof(LineVertex) ), BlendState.AlphaBlend, RasterizerState.CullNone );
+			factory		= effect.CreateFactory( typeof(RenderFlags), Primitive.LineList, VertexInputElement.FromStructure( typeof(LineVertex) ), BlendState.AlphaBlend, RasterizerState.CullNone );
 
 			constData	= new ConstData();
 			constBuffer = new ConstantBuffer(dev, typeof(ConstData));
@@ -93,10 +93,8 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing) {
-				factory.Dispose();
 				vertexBuffer.Dispose();
 				constBuffer.Dispose();
-				effect.Dispose();
 			}
 			base.Dispose( disposing );
 		}

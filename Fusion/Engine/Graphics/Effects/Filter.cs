@@ -43,6 +43,7 @@ namespace Fusion.Engine.Graphics
 			NEGX								= 1 << 17,
 			NEGY								= 1 << 18,
 			NEGZ								= 1 << 19,
+			FILL_ALPHA_ONE						= 1 << 20,
 
 		}
 
@@ -91,9 +92,8 @@ namespace Fusion.Engine.Graphics
 		/// </summary>
 		void LoadContent ()
 		{
-			SafeDispose( ref factory );
 			shaders = Game.Content.Load<Ubershader>( "filter" );
-			factory	= new StateFactory( shaders, typeof(ShaderFlags), (ps,i) => Enum(ps, (ShaderFlags)i) );
+			factory	= shaders.CreateFactory( typeof(ShaderFlags), (ps,i) => Enum(ps, (ShaderFlags)i) );
 		}
 
 
@@ -113,6 +113,10 @@ namespace Fusion.Engine.Graphics
 			if (flags==ShaderFlags.OVERLAY_ADDITIVE) {
 				ps.BlendState = BlendState.Additive;
 			}
+
+			if (flags==ShaderFlags.FILL_ALPHA_ONE) {
+				ps.BlendState = BlendState.AlphaMaskWrite;
+			}
 		}
 
 
@@ -124,7 +128,6 @@ namespace Fusion.Engine.Graphics
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing) {
-				SafeDispose( ref factory );
 				SafeDispose( ref gaussWeightsCB );
 				SafeDispose( ref sourceRectCB );
 				SafeDispose( ref bufLinearizeDepth );
@@ -295,6 +298,33 @@ namespace Fusion.Engine.Graphics
 
 				rs.PipelineState			=	factory[ (int)ShaderFlags.COPY ];
 				rs.PixelShaderResources[0]	= src;
+
+				rs.Draw( 3, 0 );
+			}
+			rs.ResetStates();
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="dst">target to copy to</param>
+		/// <param name="src">target to copy from</param>
+		public void FillAlphaOne( RenderTargetSurface dst )
+		{
+			SetDefaultRenderStates();
+
+			using( new PixEvent("FillAlphaOne") ) {
+
+				if(dst == null) {
+					rs.RestoreBackbuffer();
+				} else {
+					SetViewport(dst);
+					rs.SetTargets( null, dst );
+				}
+
+				rs.PipelineState = factory[ (int)ShaderFlags.FILL_ALPHA_ONE ];
 
 				rs.Draw( 3, 0 );
 			}

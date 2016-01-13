@@ -33,11 +33,11 @@ namespace Fusion.Engine.Graphics {
 		public HdrFilter HdrFilter { get{ return hdrFilter; } }
 		public HdrFilter hdrFilter;
 		
-		[GameModule("LightRenderer", "rs", InitOrder.After)]
+		[GameModule("LightRenderer", "rs", InitOrder.Before)]
 		public LightRenderer	LightRenderer { get { return lightRenderer; } }
 		public LightRenderer	lightRenderer;
 		
-		[GameModule("SceneRendere", "scene", InitOrder.After)]
+		[GameModule("SceneRendere", "scene", InitOrder.Before)]
 		public SceneRenderer	SceneRenderer { get { return sceneRenderer; } }
 		public SceneRenderer	sceneRenderer;
 		
@@ -47,6 +47,11 @@ namespace Fusion.Engine.Graphics {
 		
 		[Config]
 		public  RenderSystemConfig Config { get; private set; }
+
+		/// <summary>
+		/// Gets render counters.
+		/// </summary>
+		internal RenderCounters Counters { get; private set; }
 
 
 		/// <summary>
@@ -74,8 +79,8 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Gets default material.
 		/// </summary>
-		public Material	DefaultMaterial { get { return defaultMaterial; } }
-		Material defaultMaterial;
+		public MaterialInstance	DefaultMaterial { get { return defaultMaterial; } }
+		MaterialInstance defaultMaterial;
 
 
 
@@ -86,6 +91,8 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="engine"></param>
 		public RenderSystem ( Game Game ) : base(Game)
 		{
+			Counters	=	new RenderCounters();
+
 			Config		=	new RenderSystemConfig();
 			this.Device	=	Game.GraphicsDevice;
 
@@ -95,7 +102,7 @@ namespace Fusion.Engine.Graphics {
 			filter			=	new Filter( Game );
 			hdrFilter		=	new HdrFilter( Game );
 			lightRenderer	=	new LightRenderer( Game );
-			sceneRenderer	=	new SceneRenderer( Game );
+			sceneRenderer	=	new SceneRenderer( Game, this );
 			sky				=	new Sky( Game );
 
 			Device.DisplayBoundsChanged += (s,e) => {
@@ -142,8 +149,8 @@ namespace Fusion.Engine.Graphics {
 			flatNormalMap	=	new DynamicTexture( this, 4,4, typeof(Color), false, false );
 			flatNormalMap.SetData( Enumerable.Range(0,16).Select( i => new Color(127,127,255,127) ).ToArray() );
 
-			defaultMaterial	=	new Material();
-			defaultMaterial.LoadGpuResources( Game.Content );
+			var baseIllum = new BaseIllum();
+			defaultMaterial	=	baseIllum.CreateMaterialInstance(this, Game.Content);
 		}
 
 
@@ -176,6 +183,8 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="stereoEye"></param>
 		internal void Draw ( GameTime gameTime, StereoEye stereoEye )
 		{
+			Counters.Reset();
+
 			Gis.Update(gameTime);
 			//GIS.Draw(gameTime, StereoEye.Mono);
 
@@ -190,6 +199,10 @@ namespace Fusion.Engine.Graphics {
 
 			foreach ( var viewLayer in layersToDraw ) {
 				viewLayer.RenderView( gameTime, stereoEye );
+			}
+
+			if (Config.ShowCounters) {
+				Counters.PrintCounters();
 			}
 		}
 

@@ -14,6 +14,61 @@ using System.Runtime.InteropServices;
 namespace Fusion.Core.Content {
 	public static class ContentUtils {
 
+		/// <summary>
+		/// C
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <param name="fourCC"></param>
+		public static void ExpectFourCC ( this BinaryReader reader, string fourCC, string what )
+		{
+			var readFourCC = reader.ReadFourCC();
+
+			if (readFourCC!=fourCC) {
+				throw new IOException(string.Format("Bad {2}: expected {0}, got {1}", fourCC, readFourCC, what)); 
+			}
+		}
+
+
+		public static string ReadFourCC ( this BinaryReader reader )
+		{
+			return MakeFourCC( reader.ReadUInt32() );
+		}
+
+
+		/// <summary>
+		/// Writes FourCC string.
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="fourCC"></param>
+		public static void WriteFourCC ( this BinaryWriter writer, string fourCC )
+		{
+			writer.Write( MakeFourCC(fourCC) );
+		}
+
+
+		/// <summary>
+		/// Makes four bytes from FourCC.
+		/// </summary>
+		/// <param name="fourCC"></param>
+		/// <returns></returns>
+		public static string MakeFourCC ( uint fourCC )
+		{
+			return Encoding.ASCII.GetString( BitConverter.GetBytes(fourCC) );
+		}
+
+
+		/// <summary>
+		/// Makes four bytes from FourCC.
+		/// </summary>
+		/// <param name="fourCC"></param>
+		/// <returns></returns>
+		public static uint MakeFourCC ( string fourCC )
+		{
+			if (fourCC.Length!=4) {
+				throw new ArgumentException("fourCC must contain exactly four characters");
+			}
+			return BitConverter.ToUInt32(Encoding.ASCII.GetBytes( fourCC ).Take(4).ToArray(), 0);
+		}
 
 
 		/// <summary>
@@ -157,9 +212,9 @@ namespace Fusion.Core.Content {
 		/// <param name="assetPath"></param>
 		/// <param name="ext"></param>
 		/// <returns></returns>
-		public static string GetHashedFileName ( string assetPath, string ext )
+		public static string GetHashedFileName ( string keyAssetPath, string ext )
 		{
-			return CalculateMD5Hash( GetPathWithoutExtension( BackslashesToSlashes(assetPath).ToLower()) ) + ext;
+			return CalculateMD5Hash( GetPathWithoutExtension( BackslashesToSlashes(keyAssetPath).ToLower()) ) + ext;
 		}
 
 

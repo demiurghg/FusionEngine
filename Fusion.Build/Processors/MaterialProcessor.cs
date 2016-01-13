@@ -26,13 +26,16 @@ namespace Fusion.Build.Processors {
 		/// </summary>
 		/// <param name="sourceStream"></param>
 		/// <param name="targetStream"></param>
-		public override void Process ( AssetFile assetFile, BuildContext context )
+		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
-			var mtrl	=	Material.FromINI ( File.ReadAllText(assetFile.FullSourcePath) );
+			var mtrl	=	BaseIllum.ImportFromXml ( File.ReadAllText(assetFile.FullSourcePath) );
 
-			var file	=	mtrl.ToINI();
+			//	get dependencies :
+			var deps	=	mtrl.GetDependencies().ToArray();
 
-			using ( var target = assetFile.OpenTargetStream() ) {
+			var file	=	BaseIllum.ExportToXml(mtrl);
+
+			using ( var target = assetFile.OpenTargetStream(deps) ) {
 				using ( var bw = new BinaryWriter(target) ) {
 					bw.Write(file);
 				}

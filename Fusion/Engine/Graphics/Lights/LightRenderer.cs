@@ -56,7 +56,7 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		[StructLayout(LayoutKind.Explicit, Size=560)]
+		[StructLayout(LayoutKind.Explicit, Size=576)]
 		struct LightingParams {
 			[FieldOffset(  0)] public Matrix	View;
 			[FieldOffset( 64)] public Matrix	Projection;
@@ -72,8 +72,9 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(512)] public Vector4	CSMFilterRadius;
 			[FieldOffset(528)] public Color4	AmbientColor;
 			[FieldOffset(544)] public Vector4	Viewport;
-
-
+			[FieldOffset(560)] public float		ShowCSLoadOmni;
+			[FieldOffset(564)] public float		ShowCSLoadEnv;
+			[FieldOffset(568)] public float		ShowCSLoadSpot;
 		}
 
 
@@ -144,9 +145,8 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ()
 		{
-			SafeDispose( ref factory );
 			lightingShader	=	Game.Content.Load<Ubershader>("lighting");
-			factory			=	new StateFactory( lightingShader, typeof(LightingFlags), Primitive.TriangleList, VertexInputElement.Empty );
+			factory			=	lightingShader.CreateFactory( typeof(LightingFlags), Primitive.TriangleList, VertexInputElement.Empty );
 		}
 
 
@@ -178,7 +178,6 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				SafeDispose( ref factory );
 				SafeDispose( ref csmDepth );
 				SafeDispose( ref csmColor );
 				SafeDispose( ref spotDepth );
@@ -187,6 +186,7 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref lightingCB );
 				SafeDispose( ref omniLightBuffer );
 				SafeDispose( ref spotLightBuffer );
+				SafeDispose( ref envLightBuffer );
 			}
 
 			base.Dispose( disposing );
@@ -245,6 +245,9 @@ namespace Fusion.Engine.Graphics {
 
 					cbData.AmbientColor				=	viewLayer.LightSet.AmbientLevel;
 					cbData.Viewport					=	new Vector4( 0, 0, width, height );
+					cbData.ShowCSLoadOmni			=	Config.ShowOmniLightTileLoad ? 1 : 0;
+					cbData.ShowCSLoadEnv			=	Config.ShowEnvLightTileLoad  ? 1 : 0;
+					cbData.ShowCSLoadSpot			=	Config.ShowSpotLightTileLoad ? 1 : 0;
 
 					PrepareOmniLights( view, projection, viewLayer.LightSet );
 					PrepareSpotLights( view, projection, viewLayer.LightSet );
@@ -264,19 +267,21 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderResources[0]	=	frame.DiffuseBuffer;
 					device.ComputeShaderResources[1]	=	frame.SpecularBuffer;
 					device.ComputeShaderResources[2]	=	frame.NormalMapBuffer;
-					device.ComputeShaderResources[3]	=	frame.DepthBuffer;
-					device.ComputeShaderResources[4]	=	csmColor;
-					device.ComputeShaderResources[5]	=	spotColor;
-					device.ComputeShaderResources[6]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
-					device.ComputeShaderResources[7]	=	omniLightBuffer;
-					device.ComputeShaderResources[8]	=	spotLightBuffer;
-					device.ComputeShaderResources[9]	=	envLightBuffer;
-					device.ComputeShaderResources[10]	=	occlusionMap.Srv;
-					device.ComputeShaderResources[11]	=	viewLayer.RadianceCache;
+					device.ComputeShaderResources[3]	=	frame.ScatteringBuffer;
+					device.ComputeShaderResources[4]	=	frame.DepthBuffer;
+					device.ComputeShaderResources[5]	=	csmColor;
+					device.ComputeShaderResources[6]	=	spotColor;
+					device.ComputeShaderResources[7]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
+					device.ComputeShaderResources[8]	=	omniLightBuffer;
+					device.ComputeShaderResources[9]	=	spotLightBuffer;
+					device.ComputeShaderResources[10]	=	envLightBuffer;
+					device.ComputeShaderResources[11]	=	occlusionMap.Srv;
+					device.ComputeShaderResources[12]	=	viewLayer.RadianceCache;
 
 					device.ComputeShaderConstants[0]	=	lightingCB;
 
 					device.SetCSRWTexture( 0, frame.LightAccumulator.Surface );
+					device.SetCSRWTexture( 1, frame.SSSAccumulator.Surface );
 
 					//
 					//	Dispatch :
@@ -292,6 +297,12 @@ namespace Fusion.Engine.Graphics {
 				//	Add accumulated light  :
 				//
 				rs.Filter.OverlayAdditive( frame.HdrBuffer.Surface, frame.LightAccumulator );
+
+				//	Uncomment to enable SSS :
+				#if false
+				rs.Filter.GaussBlur( frame.SSSAccumulator, frame.LightAccumulator, 5, 0 ); 
+				rs.Filter.OverlayAdditive( frame.HdrBuffer.Surface, frame.SSSAccumulator );
+				#endif
 
 				device.ResetStates();
 			}

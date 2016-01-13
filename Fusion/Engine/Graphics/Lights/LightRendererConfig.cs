@@ -142,6 +142,11 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Show omni-light extents
 		/// </summary>
+		public bool ShowEnvLightTileLoad { get; set; }
+
+		/// <summary>
+		/// Show omni-light extents
+		/// </summary>
 		public bool ShowSpotLightTileLoad { get; set; }
 
 		/// <summary>

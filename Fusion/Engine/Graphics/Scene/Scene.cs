@@ -164,6 +164,33 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="destination"></param>
 		public void ComputeAbsoluteTransforms ( Matrix[] destination )
 		{
+			if ( destination.Length < Nodes.Count ) {
+				throw new ArgumentOutOfRangeException("destination.Length must be greater of equal to Nodes.Count");
+			}
+
+				
+			#if false
+			for ( int i=0; i<Nodes.Count; i++) {
+				
+				var node = Nodes[i];
+				var transform = node.Transform;
+				var parentIndex = node.ParentIndex;
+
+				transform.Transpose();
+
+				while ( parentIndex!=-1 ) {
+					var parent	=	Nodes[ parentIndex ].Transform;
+					parent.Transpose();
+
+					transform	=	parent * transform;
+					parentIndex =	Nodes[ parentIndex ].ParentIndex;
+				}
+
+				transform.Transpose();
+
+				destination[i] = transform;
+			} 
+			#else
 			for ( int i=0; i<Nodes.Count; i++) {
 				
 				var node = Nodes[i];
@@ -171,12 +198,15 @@ namespace Fusion.Engine.Graphics {
 				var parentIndex = node.ParentIndex;
 
 				while ( parentIndex!=-1 ) {
-					transform	=	transform * Nodes[ parentIndex ].Transform;
+					var parent	=	Nodes[ parentIndex ].Transform;
+
+					transform	=	transform * parent;
 					parentIndex =	Nodes[ parentIndex ].ParentIndex;
 				}
 
 				destination[i] = transform;
-			}
+			} 
+			#endif
 		}
 
 
@@ -191,14 +221,14 @@ namespace Fusion.Engine.Graphics {
 		public void ComputeAbsoluteTransforms ( Matrix[] source, Matrix[] destination )
 		{
 			if ( source.Length < Nodes.Count ) {
-				throw new ArgumentException("source.Length must be greater of equal to Nodes.Count");
+				throw new ArgumentOutOfRangeException("source.Length must be greater of equal to Nodes.Count");
 			}
 
 			if ( destination.Length < Nodes.Count ) {
-				throw new ArgumentException("destination.Length must be greater of equal to Nodes.Count");
+				throw new ArgumentOutOfRangeException("destination.Length must be greater of equal to Nodes.Count");
 			}
 
-			for ( int i=Nodes.Count-1; i>=0; i--) {
+			for ( int i=0; i<Nodes.Count; i++) {
 				
 				var node		= Nodes[i];
 				var transform	= source[i];
@@ -355,7 +385,7 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			if (destination.Length<Nodes.Count) {
-				throw new ArgumentException("destination.Length must be greater of equal to Nodes.Count");
+				throw new ArgumentOutOfRangeException("destination.Length must be greater of equal to Nodes.Count");
 			}
 
 			if ( firstFrame < FirstFrame || firstFrame > LastFrame ) {
@@ -365,7 +395,7 @@ namespace Fusion.Engine.Graphics {
 				throw new ArgumentOutOfRangeException("firstFrame");
 			}
 			if ( firstFrame > lastFrame ) {
-				throw new ArgumentException("firstFrame > lastFrame");
+				throw new ArgumentOutOfRangeException("firstFrame > lastFrame");
 			}
 
 
@@ -473,9 +503,7 @@ namespace Fusion.Engine.Graphics {
 			
 			using( var reader = new BinaryReader( stream ) ) {
 
-				if (!reader.CheckMagic("SCN1")) {
-					throw new Exception("Bad scene format. SCN1 expected.");
-				}
+				reader.ExpectFourCC("SCN1", "scene");
 
 				//---------------------------------------------
 				scene.StartTime		=	new TimeSpan( reader.ReadInt64() );
@@ -484,9 +512,7 @@ namespace Fusion.Engine.Graphics {
 				scene.lastFrame		=	reader.ReadInt32();
 				scene.trackCount	=	reader.ReadInt32();
 
-				if (!reader.CheckMagic("ANIM")) {
-					throw new Exception("Bad scene format. ANIM expected.");
-				}
+				reader.ExpectFourCC("ANIM", "scene");
 
 				if (scene.trackCount!=0) {
 					scene.CreateAnimation( scene.FirstFrame, scene.LastFrame, scene.trackCount );
@@ -499,9 +525,7 @@ namespace Fusion.Engine.Graphics {
 				}
 
 				//---------------------------------------------
-				if (!reader.CheckMagic("MTRL")) {
-					throw new Exception("Bad scene format. MTRL expected.");
-				}
+				reader.ExpectFourCC("MTRL", "scene");
 
 				var mtrlCount = reader.ReadInt32();
 
@@ -520,9 +544,7 @@ namespace Fusion.Engine.Graphics {
 				}
 
 				//---------------------------------------------
-				if (!reader.CheckMagic("NODE")) {
-					throw new Exception("Bad scene format. NODE expected.");
-				}
+				reader.ExpectFourCC("NODE", "scene");
 				
 				var nodeCount = reader.ReadInt32();
 				
@@ -538,9 +560,7 @@ namespace Fusion.Engine.Graphics {
 				}
 
 				//---------------------------------------------
-				if (!reader.CheckMagic("MESH")) {
-					throw new Exception("Bad scene format. MESH expected.");
-				}
+				reader.ExpectFourCC("MESH", "scene");
 				
 				var meshCount = reader.ReadInt32();
 

@@ -36,7 +36,7 @@ namespace Fusion.Drivers.Graphics {
 		public static  BlendState	Screen			 { get; private set; }
 		public static  BlendState	Multiply		 { get; private set; }
 		public static  BlendState	NegMultiply		 { get; private set; }
-		public static  BlendState	ClearAlpha		 { get; private set; }
+		public static  BlendState	AlphaOnly		 { get; private set; }
 
 
 
@@ -44,14 +44,13 @@ namespace Fusion.Drivers.Graphics {
 		{
 			Opaque				=	Create();
 			NoWrite				=	Create( ColorChannels.None ); 
-			AlphaBlend			=	Create( ColorChannels.All, Blend.SrcAlpha,		Blend.InvSrcAlpha	);
-			AlphaBlendPremul	=	Create( ColorChannels.All, Blend.One,			Blend.InvSrcAlpha	);						
-			AlphaMaskWrite		=	Create( ColorChannels.Alpha);
-			Additive			=	Create( ColorChannels.All, Blend.One,			Blend.One,			Blend.One, Blend.One );	
-			Screen				=	Create( ColorChannels.All, Blend.InvDstColor,	Blend.One			);						
-			Multiply			=	Create( ColorChannels.All, Blend.Zero,			Blend.SrcColor		);						
-			NegMultiply			=	Create( ColorChannels.All, Blend.Zero,			Blend.InvSrcColor	);
-			ClearAlpha			=	Create(ColorChannels.Alpha, Blend.SrcAlpha, Blend.InvSrcAlpha, Blend.One, Blend.Zero);
+			AlphaBlend			=	Create( ColorChannels.All,	Blend.SrcAlpha,		Blend.InvSrcAlpha	);
+			AlphaBlendPremul	=	Create( ColorChannels.All,	Blend.One,			Blend.InvSrcAlpha	);						
+			AlphaMaskWrite		=	Create( ColorChannels.Alpha );
+			Additive			=	Create( ColorChannels.All,	Blend.One,			Blend.One,			Blend.One, Blend.One );	
+			Screen				=	Create( ColorChannels.All,	Blend.InvDstColor,	Blend.One			);						
+			Multiply			=	Create( ColorChannels.All,	Blend.Zero,			Blend.SrcColor		);						
+			NegMultiply			=	Create( ColorChannels.All,	Blend.Zero,			Blend.InvSrcColor	);
 		}
 
 

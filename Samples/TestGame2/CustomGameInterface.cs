@@ -75,6 +75,7 @@ namespace TestGame2 {
 		DiscTexture		debugFont;
 
 		Scene		scene;
+		Scene		animScene;
 
 		Vector3		position = new Vector3(0,10,0);
 		float		yaw = 0, pitch = 0;
@@ -128,20 +129,26 @@ namespace TestGame2 {
 			uiLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
 			texture		=	Game.Content.Load<DiscTexture>( "lena" );
 
-			masterView.SkySettings.SunPosition			=	new Vector3(10,20,30);
+			masterView.SkySettings.SunPosition			=	new Vector3(20,30,40);
+			masterView.SkySettings.SunLightIntensity	=	50;
+			masterView.SkySettings.SkyTurbidity			=	3;
 
 			masterView.LightSet.SpotAtlas				=	Game.Content.Load<TextureAtlas>("spots/spots");
 			masterView.LightSet.DirectLight.Direction	=	masterView.SkySettings.SunLightDirection;
 			masterView.LightSet.DirectLight.Intensity	=	masterView.SkySettings.SunLightColor;
 			masterView.LightSet.DirectLight.Enabled		=	true;
-			masterView.LightSet.AmbientLevel			=	Color4.Zero;//masterView.SkySettings.AmbientLevel;
+			masterView.LightSet.AmbientLevel			=	Color4.Zero;
+			//masterView.LightSet.AmbientLevel			=	masterView.SkySettings.AmbientLevel;
 
-			masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,40,0), 1, 500 ) );
+			masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,-10), 1,  500 ) );
+
+			//masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,-10), 1,  15 ) );
+			//masterView.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4, 10), 1, 15 ) );
 
 
 			var rand = new Random();
 
-			for (int i=0; i<64; i++) {
+			/*for (int i=0; i<64; i++) {
 				var light = new OmniLight();
 				light.Position		=	new Vector3( 8*(i/8-4), 4, 8*(i%8-4) );
 				light.RadiusInner	=	1;
@@ -150,11 +157,11 @@ namespace TestGame2 {
 				masterView.LightSet.OmniLights.Add( light );
 			} //*/
 														 
-			for (int i=0; i<64; i++) {
+			/*for (int i=0; i<256; i++) {
 				var light = new EnvLight();
-				light.Position		=	new Vector3( 9*(i/8-4), 4, 9*(i%8-4) );
-				light.RadiusInner	=	8;
-				light.RadiusOuter	=	16;
+				light.Position		=	new Vector3( 7*(i/16-8), 6, 7*(i%16-8) );
+				light.RadiusInner	=	2;
+				light.RadiusOuter	=	8;
 				masterView.LightSet.EnvLights.Add( light );
 			} //*/
 
@@ -172,10 +179,14 @@ namespace TestGame2 {
 		}
 
 
+		List<Tuple<MeshInstance,int>> animInstances = new List<Tuple<MeshInstance,int>>();
+
 
 		void LoadContent ()
 		{
 			masterView.Instances.Clear();
+
+			//-------------------------------------
 
 			scene		=	Game.Content.Load<Scene>( @"scenes\testScene" );
 
@@ -183,7 +194,7 @@ namespace TestGame2 {
 			scene.ComputeAbsoluteTransforms( transforms );
 
 			var defMtrl		=	Game.RenderSystem.DefaultMaterial;
-			var materials	=	scene.Materials.Select( m => Game.Content.Load<Material>( m.Name, defMtrl ) ).ToArray();
+			var materials	=	scene.Materials.Select( m => Game.Content.Load<MaterialInstance>( m.Name, defMtrl ) ).ToArray();
 			
 			for ( int i=0; i<scene.Nodes.Count; i++ ) {
 			
@@ -200,8 +211,37 @@ namespace TestGame2 {
 			}
 
 
-			masterView.HdrSettings.BloomAmount	=	0.1f;
-			masterView.HdrSettings.DirtAmount	=	0.9f;
+			//-------------------------------------
+
+			animScene =	Game.Content.Load<Scene>(@"scenes\testAnim");
+			animInstances.Clear();
+
+			transforms = new Matrix[ animScene.Nodes.Count ];
+			animScene.ComputeAbsoluteTransforms( transforms );
+
+			materials	=	animScene.Materials.Select( m => Game.Content.Load<MaterialInstance>( m.Name, defMtrl ) ).ToArray();
+			
+			for ( int i=0; i<animScene.Nodes.Count; i++ ) {
+			
+				var meshIndex  = animScene.Nodes[i].MeshIndex;
+			
+				if (meshIndex<0) {
+					continue;
+				}
+				
+				var inst   = new MeshInstance( Game.RenderSystem, animScene, animScene.Meshes[meshIndex], materials );
+				inst.World = transforms[ i ];
+
+				animInstances.Add( new Tuple<MeshInstance,int>( inst, i ) );
+			
+				masterView.Instances.Add( inst );
+			}
+
+
+			//-------------------------------------
+
+			masterView.HdrSettings.BloomAmount	=	0.05f;
+			masterView.HdrSettings.DirtAmount	=	0.95f;
 			masterView.HdrSettings.DirtMask1	=	Game.Content.Load<DiscTexture>("bloomMask|srgb");
 			masterView.HdrSettings.DirtMask2	=	null;//GameEngine.Content.Load<DiscTexture>("bloomMask2");
 		}
@@ -211,8 +251,7 @@ namespace TestGame2 {
 		{
 			if (e.Key==Keys.F5) {
 
-				Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", null, false );
-
+				Builder.SafeBuild();
 				Game.Reload();
 			}
 
@@ -230,16 +269,11 @@ namespace TestGame2 {
 		{
 			if (disposing) {
 
-				//SafeDispose( ref video );
-				//SafeDispose( ref videoPlayer );//*/
-
 				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
 				SafeDispose( ref masterView );
 				SafeDispose( ref masterView2 );
 				SafeDispose( ref targetTexture );
-				/*SafeDispose( ref sceneView );
-				SafeDispose( ref sceneView1 );**/
 			}
 			base.Dispose( disposing );
 		}
@@ -253,6 +287,9 @@ namespace TestGame2 {
 			Game.Exit();
 		}
 
+		static readonly Guid HudFps = Guid.NewGuid();
+
+		float frame = 0;
 
 		/// <summary>
 		/// Updates internal state of interface.
@@ -265,8 +302,11 @@ namespace TestGame2 {
 			testLayer.Color	=	Color.White;
 
 			//sceneView.Camera.SetupCameraFov( new Vector3(20,10,20), Vector3.Zero, Vector3.Up, Vector3.Zero, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1,0, 1 );
-			Hud.Clear("UI");
-			Hud.Add(Color.White, "UI", "FPS = {0}", gameTime.Fps );
+			Hud.Clear(HudFps);
+			Hud.Add(HudFps, Color.Orange, "FPS     : {0,6:0.00}", gameTime.Fps );
+			Hud.Add(HudFps, Color.Orange, "FPS avg : {0,6:0.00}", gameTime.AverageFrameRate );
+			Hud.Add(HudFps, Color.Orange, "FPS max : {0,6:0.00}", gameTime.MaxFrameRate );
+			Hud.Add(HudFps, Color.Orange, "FPS min : {0,6:0.00}", gameTime.MinFrameRate );
 
 
 			testLayer.Clear();
@@ -276,6 +316,20 @@ namespace TestGame2 {
 			foreach ( var debugString in Hud.GetLines() ) {
 				testLayer.DrawDebugString( debugFont, 0+1, line*8+1, debugString.Text, Color.Black );
 				testLayer.DrawDebugString( debugFont, 0+0, line*8+0, debugString.Text, debugString.Color );
+				line++;
+			}
+
+
+			frame += gameTime.ElapsedSec * 24;
+
+			var transformsLocal  = new Matrix[ animScene.Nodes.Count ];
+			var transformsGlobal = new Matrix[ animScene.Nodes.Count ];
+
+			animScene.GetAnimSnapshot( frame, animScene.FirstFrame, animScene.LastFrame, AnimationMode.Repeat, transformsLocal );
+			animScene.ComputeAbsoluteTransforms( transformsLocal, transformsGlobal );
+
+			for (int i=0; i<animInstances.Count; i++) {
+				animInstances[i].Item1.World = transformsGlobal[ animInstances[i].Item2 ];
 			}
 			/*if ( game.Keyboard.IsKeyDown(Keys.R) ) {
 				testLayer.Clear();

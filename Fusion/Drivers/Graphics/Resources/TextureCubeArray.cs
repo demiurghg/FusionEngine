@@ -65,6 +65,16 @@ namespace Fusion.Drivers.Graphics {
 		}
 
 
+		protected override void Dispose ( bool disposing )
+		{
+			if (disposing) {
+				if (texCubeArray!=null) {
+					texCubeArray.Dispose();
+				}
+			}
+			base.Dispose( disposing );
+		}
+
 
 		/// <summary>
 		/// 

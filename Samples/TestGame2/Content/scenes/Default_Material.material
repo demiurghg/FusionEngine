@@ -1,75 +1,18 @@
-[Material]
-Transparent  = False
-CastShadow   = True
-Displacement = False
-
-# Possible values:
-#   SingleLayer
-#   DoubleLayer
-#   TripleLayer
-#   QuadLayer
-#   Terrain
-#   TriplanarWorldSingle
-#   TriplanarWorldDouble
-#   TriplanarWorldTriple
-Options      = SingleLayer
-
-[Layer0]
-ColorLevel       = 1
-AlphaLevel       = 1
-EmissionLevel    = 1
-SpecularLevel    = 1
-BumpLevel        = 1
-Displacement     = 1
-RoughnessRange   = 0, 1
-GlowNarrowness   = 0, 0
-BlendFactor      = 0
-Tiling           = 1, 1, 1
-Offset           = 0, 0, 0
-ColorTexture     = Scenes/textures/redball.tga
-SurfaceTexture   = Scenes/textures/nonmetal_spec.tga
-;ColorTexture     = Scenes/textures/gold.tga
-;SurfaceTexture   = Scenes/textures/gold_spec.tga
-NormalMapTexture = 
-EmissionTexture  = 
-
-
-[Layer1]
-ColorLevel       = 1
-AlphaLevel       = 1
-EmissionLevel    = 1
-SpecularLevel    = 0
-BumpLevel        = 1
-Displacement     = 1
-RoughnessRange   = 0.5, 0.5
-GlowNarrowness   = 0, 0
-BlendFactor      = 0
-Tiling           = 2, 2, 1
-Offset           = 0, 0, 0
-; ColorTexture     = Scenes/textures/gold.tga
-; SurfaceTexture   = Scenes/textures/nonmetal_spec.tga
-ColorTexture     = Scenes/textures/stain.tga
-SurfaceTexture   = Scenes/textures/stain_spec.tga
-NormalMapTexture = 
-EmissionTexture  = 
-
-
-
-[Layer2]
-ColorLevel       = 0.5
-AlphaLevel       = 1
-EmissionLevel    = 1
-SpecularLevel    = 1
-BumpLevel        = 1
-Displacement     = 1
-RoughnessRange   = 1, 0
-GlowNarrowness   = 0, 0
-BlendFactor      = 0
-Tiling           = 2, 2, 1
-Offset           = 0, 0, 0
-; ColorTexture     = Scenes/textures/gold.tga
-; SurfaceTexture   = Scenes/textures/nonmetal_spec.tga
-ColorTexture     = Scenes/textures/gold.tga
-SurfaceTexture   = Scenes/textures/gold_spec.tga
-NormalMapTexture = 
-EmissionTexture  = 
+<?xml version="1.0" encoding="utf-16"?>
+<BaseIllum xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ColorLevel>1</ColorLevel>
+  <SpecularLevel>1</SpecularLevel>
+  <EmissionLevel>100</EmissionLevel>
+  <RoughnessMinimum>0.2</RoughnessMinimum>
+  <RoughnessMaximum>0.2</RoughnessMaximum>
+  <AlphaUsage>EmissionMask</AlphaUsage>
+  <DirtLevel>1</DirtLevel>
+  
+  <!--DirtTexture Path="scenes\Textures\stain.tga" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" /-->
+  <ColorTexture Path="scenes\Textures\redball.tga" SRgb="true" ScaleU="2" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <SurfaceTexture Path="scenes\Textures\nonmetal_spec.tga" SRgb="false" ScaleU="2" ScaleV="4" OffsetU="0" OffsetV="0" />
+  <!--NormalMapTexture Path="scenes\Textures\rock_local.tga" SRgb="false" ScaleU="2" ScaleV="2" OffsetU="0" OffsetV="0" /-->
+<!--   <NormalMapTexture Path="scenes\Textures\rock_local.tga" SRgb="false" ScaleU="2" ScaleV="2" OffsetU="0" OffsetV="0" />
+  <EmissionTexture Path="scenes\Textures\lava.tga" SRgb="true" ScaleU="2" ScaleV="2" OffsetU="0" OffsetV="0" />
+  <DirtTexture Path="scenes\Textures\stain.tga" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+ --></BaseIllum>

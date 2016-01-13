@@ -15,6 +15,7 @@ using Fusion.Core.Mathematics;
 using FX = SharpDX.D3DCompiler;
 using SharpDX.D3DCompiler;
 using Fusion.Core.Shell;
+using Fusion.Core.Content;
 
 
 namespace Fusion.Build.Processors {
@@ -85,28 +86,31 @@ namespace Fusion.Build.Processors {
 			}
 		}
 
-	
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="buildContext"></param>
-		public override void Process ( AssetFile assetFile, BuildContext buildContext )
+		public override void Process ( AssetSource assetFile, BuildContext buildContext )
 		{
 			//
 			//	Get combinations :
 			//
-			var combDecl	=	File.ReadAllLines( assetFile.FullSourcePath )
-									.Where( line0 => line0.Trim().StartsWith("$ubershader") )
+			string shaderSource	=	File.ReadAllText( assetFile.FullSourcePath );
+
+			var ubershaderDecl	=	shaderSource.Split( new[]{Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries )
+									.Select( line0 => line0.Trim() )
+									.Where( line1 => line1.StartsWith("$ubershader") )
 									.ToList();
 
 			var defineList = new List<string>();
 
-			foreach ( var comb in combDecl ) {
-				var ue = new UbershaderEnumerator( comb.Trim(), "$ubershader" );
+			foreach ( var comb in ubershaderDecl ) {
+				var ue = new UbershaderEnumerator( comb, "$ubershader" );
 				defineList.AddRange( ue.DefineList );
 			}
 
+			
 
 			//
 			//	Start listing builder :
@@ -119,15 +123,23 @@ namespace Fusion.Build.Processors {
 			htmlBuilder.AppendLine("");
 			htmlBuilder.AppendLine("<b>Source:</b> <i>" + assetFile.KeyPath + "</i>" );
 			htmlBuilder.AppendLine("");
+
+			//	insert includes here bit later:
+			var includeInsert = htmlBuilder.Length;
+
 			htmlBuilder.AppendLine("<b>Declarations:</b>");
 
-			foreach ( var comb in combDecl ) {
+			foreach ( var comb in ubershaderDecl ) {
 				htmlBuilder.AppendLine("  <i>" + comb + "</i>");
 			}
 			htmlBuilder.AppendLine("");
 
+			
 
 			var usdb = new List<UsdbEntry>();
+
+			var include = new IncludeHandler(buildContext);
+
 
 			//
 			//	Build all :
@@ -136,39 +148,46 @@ namespace Fusion.Build.Processors {
 
 				var id		=	defineList.IndexOf( defines );
 
-				var psbc	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D4") + ".PS.dxbc" );
-				var vsbc	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D4") + ".VS.dxbc" );
-				var gsbc	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D4") + ".GS.dxbc" );
-				var hsbc	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D4") + ".HS.dxbc" );
-				var dsbc	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D4") + ".DS.dxbc" );
-				var csbc	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D4") + ".CS.dxbc" );
+				var psbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".PS.dxbc" );
+				var vsbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".VS.dxbc" );
+				var gsbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".GS.dxbc" );
+				var hsbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".HS.dxbc" );
+				var dsbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".DS.dxbc" );
+				var csbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".CS.dxbc" );
+															  
+				var pshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".PS.html" );
+				var vshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".VS.html" );
+				var gshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".GS.html" );
+				var hshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".HS.html" );
+				var dshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".DS.html" );
+				var cshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".CS.html" );
 
-				var pshtm	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D4") + ".PS.html" );
-				var vshtm	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D4") + ".VS.html" );
-				var gshtm	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D4") + ".GS.html" );
-				var hshtm	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D4") + ".HS.html" );
-				var dshtm	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D4") + ".DS.html" );
-				var cshtm	=	buildContext.GetTempFileName(assetFile.KeyPath, "." + id.ToString("D4") + ".CS.html" );
-
-				var ps = Compile( buildContext, assetFile.FullSourcePath, "ps_5_0", PSEntryPoint, defines, psbc, pshtm );
-				var vs = Compile( buildContext, assetFile.FullSourcePath, "vs_5_0", VSEntryPoint, defines, vsbc, vshtm );
-				var gs = Compile( buildContext, assetFile.FullSourcePath, "gs_5_0", GSEntryPoint, defines, gsbc, gshtm );
-				var hs = Compile( buildContext, assetFile.FullSourcePath, "hs_5_0", HSEntryPoint, defines, hsbc, hshtm );
-				var ds = Compile( buildContext, assetFile.FullSourcePath, "ds_5_0", DSEntryPoint, defines, dsbc, dshtm );
-				var cs = Compile( buildContext, assetFile.FullSourcePath, "cs_5_0", CSEntryPoint, defines, csbc, cshtm );
+				var ps = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "ps_5_0", PSEntryPoint, defines, psbc, pshtm );
+				var vs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "vs_5_0", VSEntryPoint, defines, vsbc, vshtm );
+				var gs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "gs_5_0", GSEntryPoint, defines, gsbc, gshtm );
+				var hs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "hs_5_0", HSEntryPoint, defines, hsbc, hshtm );
+				var ds = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "ds_5_0", DSEntryPoint, defines, dsbc, dshtm );
+				var cs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "cs_5_0", CSEntryPoint, defines, csbc, cshtm );
 				
 
-				htmlBuilder.AppendFormat( (vs.Length==0) ? ".. " : "<a href=\"{0}\">vs</a> ", Path.GetFileName(vshtm) );
-				htmlBuilder.AppendFormat( (ps.Length==0) ? ".. " : "<a href=\"{0}\">ps</a> ", Path.GetFileName(pshtm) );
-				htmlBuilder.AppendFormat( (hs.Length==0) ? ".. " : "<a href=\"{0}\">hs</a> ", Path.GetFileName(hshtm) );
-				htmlBuilder.AppendFormat( (ds.Length==0) ? ".. " : "<a href=\"{0}\">ds</a> ", Path.GetFileName(dshtm) );
-				htmlBuilder.AppendFormat( (gs.Length==0) ? ".. " : "<a href=\"{0}\">gs</a> ", Path.GetFileName(gshtm) );
-				htmlBuilder.AppendFormat( (cs.Length==0) ? ".. " : "<a href=\"{0}\">cs</a> ", Path.GetFileName(cshtm) );
+				htmlBuilder.AppendFormat( (vs.Length==0) ? ".. " : "<a href=\"{0}\">vs</a> ",	Path.GetFileName(vshtm) );
+				htmlBuilder.AppendFormat( (ps.Length==0) ? ".. " : "<a href=\"{0}\">ps</a> ",	Path.GetFileName(pshtm) );
+				htmlBuilder.AppendFormat( (hs.Length==0) ? ".. " : "<a href=\"{0}\">hs</a> ",	Path.GetFileName(hshtm) );
+				htmlBuilder.AppendFormat( (ds.Length==0) ? ".. " : "<a href=\"{0}\">ds</a> ",	Path.GetFileName(dshtm) );
+				htmlBuilder.AppendFormat( (gs.Length==0) ? ".. " : "<a href=\"{0}\">gs</a> ",	Path.GetFileName(gshtm) );
+				htmlBuilder.AppendFormat( (cs.Length==0) ? ".. " : "<a href=\"{0}\">cs</a> ",	Path.GetFileName(cshtm) );
 
 				htmlBuilder.Append( "[" + defines + "]<br>" );
 
 				usdb.Add( new UsdbEntry( defines, ps, vs, gs, hs, ds, cs ) );
 			}
+
+
+			htmlBuilder.Insert( includeInsert, 
+				"<b>Includes:</b>\r\n" 
+				+ string.Join("", include.Includes.Select(s=>"  <i>" + s + "</i>\r\n") )
+				+ "\r\n");
+
 
 			File.WriteAllText( buildContext.GetTempFileName(assetFile.KeyPath, ".html"), htmlBuilder.ToString() );
 
@@ -176,39 +195,42 @@ namespace Fusion.Build.Processors {
 			//
 			//	Write ubershader :
 			//
-			using ( var fs = assetFile.OpenTargetStream() ) {
+			using ( var fs = assetFile.OpenTargetStream(include.Includes) ) {
 
 				using ( var bw = new BinaryWriter( fs ) ) {
 
-					bw.Write( new[]{'U','S','D','B'});
+					bw.WriteFourCC( Ubershader.UbershaderSignature );
 
+					//	params :
+
+					//	bytecodes :
 					bw.Write( usdb.Count );
 
 					foreach ( var entry in usdb ) {
 
 						bw.Write( entry.Defines );
 
-						bw.Write( new[]{'P','S','B','C'});
+						bw.WriteFourCC( Ubershader.PSBytecodeSignature );
 						bw.Write( entry.PSBytecode.Length );
 						bw.Write( entry.PSBytecode );
 
-						bw.Write( new[]{'V','S','B','C'});
+						bw.WriteFourCC( Ubershader.VSBytecodeSignature );
 						bw.Write( entry.VSBytecode.Length );
 						bw.Write( entry.VSBytecode );
 
-						bw.Write( new[]{'G','S','B','C'});
+						bw.WriteFourCC( Ubershader.GSBytecodeSignature );
 						bw.Write( entry.GSBytecode.Length );
 						bw.Write( entry.GSBytecode );
 
-						bw.Write( new[]{'H','S','B','C'});
+						bw.WriteFourCC( Ubershader.HSBytecodeSignature );
 						bw.Write( entry.HSBytecode.Length );
 						bw.Write( entry.HSBytecode );
 
-						bw.Write( new[]{'D','S','B','C'});
+						bw.WriteFourCC( Ubershader.DSBytecodeSignature );
 						bw.Write( entry.DSBytecode.Length );
 						bw.Write( entry.DSBytecode );
 
-						bw.Write( new[]{'C','S','B','C'});
+						bw.WriteFourCC( Ubershader.CSBytecodeSignature );
 						bw.Write( entry.CSBytecode.Length );
 						bw.Write( entry.CSBytecode );
 					}
@@ -218,6 +240,8 @@ namespace Fusion.Build.Processors {
 
 
 		class IncludeHandler : FX.Include {
+
+			public readonly HashSet<string> Includes = new HashSet<string>();
 
 			readonly BuildContext buildContext;
 		
@@ -229,6 +253,10 @@ namespace Fusion.Build.Processors {
 
 			public Stream Open( IncludeType type, string fileName, Stream parentStream )
 			{
+				Log.Debug("...include: {0}", fileName);
+				if (!Includes.Contains(fileName)) {
+					Includes.Add(fileName);
+				}
 				return File.OpenRead( buildContext.ResolveContentPath( fileName ) );
 			}
 
@@ -252,6 +280,75 @@ namespace Fusion.Build.Processors {
 		}
 
 
+
+		/// <summary>
+		/// Extracts pipeline states
+		/// </summary>
+		/// <param name="buildContext"></param>
+		/// <param name="include"></param>
+		/// <param name="shaderSource"></param>
+		/// <param name="defines"></param>
+		/// <returns></returns>
+		KeyValuePair<string,string>[] ExtractPipelineStates ( BuildContext buildContext, Include include, string shaderSource, string sourceFile, string defines, string listing )
+		{
+			defines = defines + " _UBERSHADER";
+
+			var defs = defines.Split(new[]{' ','\t'}, StringSplitOptions.RemoveEmptyEntries)	
+						.Select( entry => new SharpDX.Direct3D.ShaderMacro( entry, "1" ) )
+						.ToArray();
+			
+			string errors		=	null;
+			var preprocessed	=	FX.ShaderBytecode.Preprocess( shaderSource, defs, include, out errors, sourceFile );
+
+			var stateList = new List<KeyValuePair<string,string>>();
+
+			using ( var sr = new StringReader(preprocessed) ) {
+
+				while (true) {
+					var line = sr.ReadLine();
+
+					if (line==null) {
+						break;
+					}
+
+					line = line.Trim();
+
+					if (line.StartsWith("$")) {
+						var words = line.Split(new[]{' ','\t'}, StringSplitOptions.RemoveEmptyEntries );
+
+						if (words.Contains("ubershader")) {
+							continue;
+						}
+
+						if (words.Length==2) {
+							stateList.Add( new KeyValuePair<string,string>( words[1], "" ) );
+						} else
+						if (words.Length==3) {
+							stateList.Add( new KeyValuePair<string,string>( words[1], words[2] ) );
+						} else {
+							Log.Warning("Bad ubershader $-statement: {0}", line);
+						}
+					}
+				}
+			}
+
+			stateList	=	stateList
+							.DistinctBy( s0 => s0.Key )
+							.ToList();
+
+ 
+			var html = "<pre>"
+				+ "<b>Pipeline States:</b>\r\n\r\n"
+				+ string.Join("\r\n", stateList.Select( s => string.Format("{0,-20} = <i>{1}</i>", s.Key, s.Value ) ) )
+				+ "</pre>";
+			
+			File.WriteAllText( listing, html );
+
+			return stateList.ToArray();
+		}
+
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -263,7 +360,7 @@ namespace Fusion.Build.Processors {
 		/// <param name="output"></param>
 		/// <param name="listing"></param>
 		/// <returns></returns>
-		byte[] Compile (  BuildContext buildContext, string sourceFile, string profile, string entryPoint, string defines, string output, string listing )
+		byte[] Compile ( BuildContext buildContext, Include include, string shaderSource, string sourceFile, string profile, string entryPoint, string defines, string output, string listing )
 		{
 			Log.Debug("{0} {1} {2} {3}", sourceFile, profile, entryPoint, defines );
 
@@ -283,7 +380,8 @@ namespace Fusion.Build.Processors {
 
 			try {
 			
-				var result = FX.ShaderBytecode.CompileFromFile( sourceFile, entryPoint, profile, flags, FX.EffectFlags.None, defs, new IncludeHandler(buildContext) );
+				var sourceBytes = Encoding.UTF8.GetBytes(shaderSource);
+				var result = FX.ShaderBytecode.Compile( sourceBytes, entryPoint, profile, flags, FX.EffectFlags.None, defs, include, sourceFile );
 			
 				if ( result.Message!=null ) {
 					Log.Warning( result.Message );

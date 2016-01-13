@@ -11,67 +11,7 @@ static const float PI = 3.141592f;
 	Lighting models :
 -----------------------------------------------------------------------------*/
 
-
-float sqr(float a) {
-	return a * a;
-}
-
-
-float	LinearFalloff( float dist, float max_range )
-{
-	float fade = 0;
-	fade = saturate(1 - (dist / max_range));
-	fade *= fade;
-	return fade;
-}
-
-
-float3	Lambert( float3 normal, float3 light_dir, float3 intensity, float3 diff_color, float bias = 0 )
-{
-	light_dir	=	normalize(light_dir);
-	return intensity * diff_color * max( 0, dot(light_dir, normal) + bias ) / (1+bias);
-}
-
-
-float	Fresnel( float c, float Fn )
-{
-	//	UE4 (5) :
-	return Fn + (1-Fn) * pow(2, (-5.55473 * c - 6.98316)*c );
-	//return Fn + (1-Fn) * pow(1-c, 5);
-}
-
-
-float3	CookTorrance( float3 N, float3 V, float3 L, float3 I, float3 F, float roughness )
-{
-			L	=	normalize(L);
-			V	=	normalize(V);
-	float3	H	=	normalize(V+L);
-	
-	//	increase slightly low roughness value to 
-	//	avoid point light flickering on shiny surfaces.
-	roughness = roughness * 0.9f + 0.1f;
-	
-	float m = roughness * roughness;
-
-	//	to remove harsh edge on glazing angles :
-	float	edgeDecay	=	saturate(dot(L,N)*10);
-
-	float	g1	=	2 * dot(N,H) * dot(N,V) / dot(V,H);
-	float	g2	=	2 * dot(N,H) * dot(N,L) / dot(V,H);
-	float 	G	=	min(1, min(g1, g2));
-	
-	float	cos_a	=	dot(N,H);
-	float	sin_a	=	sqrt(abs(1 - cos_a * cos_a)); // 'abs' to avoid negative values
-	
-	float	D	=	exp( -(sin_a*sin_a) / (cos_a*cos_a) / (m*m) ) / (PI * m*m * cos_a * cos_a * cos_a * cos_a );
-
-	F.r  = Fresnel(dot(V,H), F.r);
-	F.g  = Fresnel(dot(V,H), F.g);
-	F.b  = Fresnel(dot(V,H), F.b);//*/
-						  
-	return max(0, I * F * D * G / (4*abs(dot(N,L))*dot(V,N))) * edgeDecay;
-}
-
+#include "brdf.hlsl"
 
 /*-----------------------------------------------------------------------------
 	Cook-Torrance lighting model
@@ -96,6 +36,9 @@ struct LightingParams {
 	float4		AmbientColor;
 	
 	float4		Viewport;			//	x,y,w,h,
+	float		ShowCSLoadOmni;
+	float		ShowCSLoadEnv;
+	float		ShowCSLoadSpot;
 };
 
 
@@ -137,18 +80,20 @@ struct SPOTLIGHT {
 SamplerState			SamplerNearestClamp : register(s0);
 SamplerState			SamplerLinearClamp : register(s1);
 SamplerComparisonState	ShadowSampler	: register(s2);
+
 Texture2D 			GBufferDiffuse 		: register(t0);
 Texture2D 			GBufferSpecular 	: register(t1);
 Texture2D 			GBufferNormalMap 	: register(t2);
-Texture2D 			GBufferDepth 		: register(t3);
-Texture2D 			CSMTexture	 		: register(t4);
-Texture2D 			SpotShadowMap 		: register(t5);
-Texture2D 			SpotMaskAtlas		: register(t6);
-StructuredBuffer<OMNILIGHT>	OmniLights	: register(t7);
-StructuredBuffer<SPOTLIGHT>	SpotLights	: register(t8);
-StructuredBuffer<ENVLIGHT>	EnvLights	: register(t9);
-Texture2D 			OcclusionMap		: register(t10);
-TextureCubeArray	EnvMap				: register(t11);
+Texture2D 			GBufferScatter 		: register(t3);
+Texture2D 			GBufferDepth 		: register(t4);
+Texture2D 			CSMTexture	 		: register(t5);
+Texture2D 			SpotShadowMap 		: register(t6);
+Texture2D 			SpotMaskAtlas		: register(t7);
+StructuredBuffer<OMNILIGHT>	OmniLights	: register(t8);
+StructuredBuffer<SPOTLIGHT>	SpotLights	: register(t9);
+StructuredBuffer<ENVLIGHT>	EnvLights	: register(t10);
+Texture2D 			OcclusionMap		: register(t11);
+TextureCubeArray	EnvMap				: register(t12);
 
 
 float3	ComputeCSM ( float4 worldPos );
@@ -157,7 +102,8 @@ float3	ComputeSpotShadow ( float4 worldPos, SPOTLIGHT spot );
 /*-----------------------------------------------------------------------------------------------------
 	OMNI light
 -----------------------------------------------------------------------------------------------------*/
-RWTexture2D<float4> hdrTexture : register(u0); 
+RWTexture2D<float4> hdrTexture  : register(u0); 
+RWTexture2D<float4> hdrSSS 		: register(u1); 
 
 //#ifdef __COMPUTE_SHADER__
 
@@ -167,6 +113,7 @@ groupshared uint minDepthInt = 0xFFFFFFFF;
 groupshared uint maxDepthInt = 0;
 groupshared uint visibleLightCount = 0; 
 groupshared uint visibleLightCountSpot = 0; 
+groupshared uint visibleLightCountEnv = 0; 
 groupshared uint visibleLightIndices[1024];
 
 #define BLOCK_SIZE_X 16 
@@ -194,6 +141,9 @@ void CSMain(
 	float4	specular  	=	GBufferSpecular .Load( location );
 	float4	normal	 	=	GBufferNormalMap.Load( location ) * 2 - 1;
 	float	depth 	 	=	GBufferDepth 	.Load( location ).r;
+	float4	scatter 	=	GBufferScatter 	.Load( location );
+	
+	float fresnelDecay	=	(length(normal.xyz) * 2 - 1);// * (1-0.5*specular.a);
 	
 	normal.xyz			=	normalize(normal.xyz);
 
@@ -204,19 +154,21 @@ void CSMain(
 	float3	viewDir		=	Params.ViewPosition.xyz - worldPos.xyz;
 	float3	viewDirN	=	normalize( viewDir );
 	
-	float4	totalLight	=	0;//hdrTexture[dispatchThreadId.xy];
+	float4	totalLight	=	0;
+	float4	totalSSS	=	float4( 0,0,0, scatter.w );
 	
 	//-----------------------------------------------------
 	//	Direct light :
 	//-----------------------------------------------------
 	float3 csmFactor	=	ComputeCSM( worldPos );
 	float3 lightDir		=	-normalize(Params.DirectLightDirection.xyz);
-	totalLight.xyz		+=	csmFactor.rgb * Lambert	( normal.xyz,  lightDir, Params.DirectLightIntensity.rgb, diffuse.rgb );
+	float3 diffuseTerm	=	Lambert	( normal.xyz,  lightDir, Params.DirectLightIntensity.rgb, float3(1,1,1) );
+	float3 diffuseTerm2	=	Lambert	( normal.xyz,  lightDir, Params.DirectLightIntensity.rgb, float3(1,1,1), 1 );
+	totalLight.xyz		+=	csmFactor.rgb * diffuseTerm * diffuse.rgb;
 	totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, Params.DirectLightIntensity.rgb, specular.rgb, specular.a );
 	
-	float Fc = pow( 1 - saturate(dot(viewDirN,normal.xyz)), 5 );
-	float3 F = (1 - Fc) * specular.rgb + Fc;
-	
+	totalSSS.rgb		+=	csmFactor.rgb * diffuseTerm2 * scatter.rgb;
+
 	//-----------------------------------------------------
 	//	Common tile-related stuff :
 	//-----------------------------------------------------
@@ -237,7 +189,7 @@ void CSMain(
 	//	OMNI LIGHTS :
 	//-----------------------------------------------------
 	
-	if (0) {
+	if (1) {
 		uint lightCount = OMNI_LIGHT_COUNT;
 		
 		uint threadCount = BLOCK_SIZE_X * BLOCK_SIZE_Y; 
@@ -264,24 +216,22 @@ void CSMain(
 		
 		GroupMemoryBarrierWithGroupSync();
 				
-		#if SHOW_OMNI_LOAD
-			totalLight.rgb += visibleLightCount * float3(0.5, 0.25, 0.125);
-		#else
-			for (uint i = 0; i < visibleLightCount; i++) {
-			
-				uint lightIndex = visibleLightIndices[i];
-				OMNILIGHT light = OmniLights[lightIndex];
+		totalLight.rgb += visibleLightCount * float3(0.5, 0.0, 0.0) * Params.ShowCSLoadOmni;
+		
+		for (uint i = 0; i < visibleLightCount; i++) {
+		
+			uint lightIndex = visibleLightIndices[i];
+			OMNILIGHT light = OmniLights[lightIndex];
 
-				float3 intensity = light.Intensity.rgb;
-				float3 position	 = light.PositionRadius.rgb;
-				float  radius    = light.PositionRadius.w;
-				float3 lightDir	 = position - worldPos.xyz;
-				float  falloff	 = LinearFalloff( length(lightDir), radius );
-				
-				totalLight.rgb += falloff * Lambert ( normal.xyz,  lightDir, intensity, diffuse.rgb );
-				totalLight.rgb += falloff * CookTorrance( normal.xyz, viewDirN, lightDir, intensity, specular.rgb, specular.a );
-			}
-		#endif
+			float3 intensity = light.Intensity.rgb;
+			float3 position	 = light.PositionRadius.rgb;
+			float  radius    = light.PositionRadius.w;
+			float3 lightDir	 = position - worldPos.xyz;
+			float  falloff	 = LinearFalloff( length(lightDir), radius );
+			
+			totalLight.rgb += falloff * Lambert ( normal.xyz,  lightDir, intensity, diffuse.rgb );
+			totalLight.rgb += falloff * CookTorrance( normal.xyz, viewDirN, lightDir, intensity, specular.rgb, specular.a );
+		}
 	}
 	
 	//-----------------------------------------------------
@@ -310,32 +260,36 @@ void CSMain(
 			  && el.ExtentMax.z > tileMin.z && tileMax.z > el.ExtentMin.z ) 
 			{
 				uint offset; 
-				InterlockedAdd(visibleLightCount, 1, offset); 
+				InterlockedAdd(visibleLightCountEnv, 1, offset); 
 				visibleLightIndices[offset] = lightIndex;
 			}
 		}
 		
 		GroupMemoryBarrierWithGroupSync();
 				
-		#if 0
-			totalLight.rgb += visibleLightCount * float3(0.5, 0.25, 0.125);
-		#else
-			for (uint i = 0; i < visibleLightCount; i++) {
+		totalLight.rgb += visibleLightCountEnv * float3(0.0, 0.5, 0.0) * Params.ShowCSLoadEnv;
+
+		for (uint i = 0; i < visibleLightCountEnv; i++) {
+		
+			uint lightIndex = visibleLightIndices[i];
+			ENVLIGHT light = EnvLights[lightIndex];
+
+			float3 intensity = light.Intensity.rgb;
+			float3 position	 = light.Position.rgb;
+			float  radius    = light.InnerOuterRadius.y;
+			float3 lightDir	 = position - worldPos.xyz;
+			float  falloff	 = LinearFalloff( length(lightDir), radius );
 			
-				uint lightIndex = visibleLightIndices[i];
-				ENVLIGHT light = EnvLights[lightIndex];
+			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 6).rgb * diffuse.rgb * falloff;
 
-				float3 intensity = light.Intensity.rgb;
-				float3 position	 = light.Position.rgb;
-				float  radius    = light.InnerOuterRadius.y;
-				float3 lightDir	 = position - worldPos.xyz;
-				float  falloff	 = LinearFalloff( length(lightDir), radius );
-				
-				totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 7).rgb * diffuse.rgb * falloff;
-				totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * specular.rgb * falloff;//*/
+			float3	F = Fresnel(dot(viewDirN, normal.xyz), specular.rgb) * saturate(fresnelDecay*4-3);
+			float G = GTerm( specular.w, viewDirN, normal.xyz );
 
-			}
-		#endif
+			//F = lerp( F, float3(1,1,1), Fc * pow(fresnelDecay,6) );
+			//F = lerp( F, float3(1,1,1), F * saturate(fresnelDecay*4-3) );
+			
+			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * F * falloff * G;
+		}
 	}
 
 	//-----------------------------------------------------
@@ -344,7 +298,7 @@ void CSMain(
 	
 	GroupMemoryBarrierWithGroupSync();
 	
-	if (0) {
+	if (1) {
 		uint lightCount = SPOT_LIGHT_COUNT;
 		uint lightIndex = groupIndex;
 		
@@ -365,26 +319,24 @@ void CSMain(
 		
 		GroupMemoryBarrierWithGroupSync();
 				
-		#if SHOW_SPOT_LOAD
-			totalLight.rgb += visibleLightCountSpot * float3(0.5, 0.25, 0.125);
-		#else
-			for (uint i = 0; i < visibleLightCountSpot; i++) {
-			
-				uint lightIndex = visibleLightIndices[i];
-				SPOTLIGHT light = SpotLights[lightIndex];
+		totalLight.rgb += visibleLightCountSpot * float3(0, 0.0, 0.5)  * Params.ShowCSLoadSpot;
 
-				float3 intensity = light.IntensityFar.rgb;
-				float3 position	 = light.PositionRadius.rgb;
-				float  radius    = light.PositionRadius.w;
-				float3 lightDir	 = position - worldPos.xyz;
-				float  falloff	 = LinearFalloff( length(lightDir), radius );
-				
-				float3 shadow	 = ComputeSpotShadow( worldPos, light );
-				
-				totalLight.rgb += shadow * falloff * Lambert ( normal.xyz,  lightDir, intensity, diffuse.rgb );
-				totalLight.rgb += shadow * falloff * CookTorrance( normal.xyz, viewDirN, lightDir, intensity, specular.rgb, specular.a );
-			}
-		#endif
+		for (uint i = 0; i < visibleLightCountSpot; i++) {
+		
+			uint lightIndex = visibleLightIndices[i];
+			SPOTLIGHT light = SpotLights[lightIndex];
+
+			float3 intensity = light.IntensityFar.rgb;
+			float3 position	 = light.PositionRadius.rgb;
+			float  radius    = light.PositionRadius.w;
+			float3 lightDir	 = position - worldPos.xyz;
+			float  falloff	 = LinearFalloff( length(lightDir), radius );
+			
+			float3 shadow	 = ComputeSpotShadow( worldPos, light );
+			
+			totalLight.rgb += shadow * falloff * Lambert ( normal.xyz,  lightDir, intensity, diffuse.rgb );
+			totalLight.rgb += shadow * falloff * CookTorrance( normal.xyz, viewDirN, lightDir, intensity, specular.rgb, specular.a );
+		}
 	}
 
 	//-----------------------------------------------------
@@ -392,9 +344,10 @@ void CSMain(
 	//-----------------------------------------------------
 	float4 ssao	=	OcclusionMap.SampleLevel(SamplerLinearClamp, location.xy/float2(width,height), 0 );
 	
-	totalLight	+=	(diffuse + specular) * Params.AmbientColor * ssao;// * pow(normal.y*0.5+0.5, 1);
+	totalLight	+=	(diffuse + specular) * Params.AmbientColor * ssao * fresnelDecay;// * pow(normal.y*0.5+0.5, 1);
 
 	hdrTexture[dispatchThreadId.xy] = totalLight;
+	hdrSSS[dispatchThreadId.xy] = totalSSS;
 }
 
 

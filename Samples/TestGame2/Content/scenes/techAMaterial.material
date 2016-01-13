@@ -1,32 +1,12 @@
-[Material]
-Transparent  = False
-CastShadow   = True
-Displacement = False
-
-# Possible values:
-#   SingleLayer
-#   DoubleLayer
-#   TripleLayer
-#   QuadLayer
-#   Terrain
-#   TriplanarWorldSingle
-#   TriplanarWorldDouble
-#   TriplanarWorldTriple
-Options      = SingleLayer
-
-[Layer0]
-ColorLevel       = 1
-AlphaLevel       = 0
-EmissionLevel    = 1
-SpecularLevel    = 1
-BumpLevel        = 1
-Displacement     = 1
-RoughnessRange   = 0, 1
-GlowNarrowness   = 0, 0
-BlendFactor      = 0
-Tiling           = 1, 1, 1
-Offset           = 0, 0, 0
-ColorTexture     = Scenes\Textures\techA.tga
-SurfaceTexture   = 
-NormalMapTexture = 
-EmissionTexture  = 
+<?xml version="1.0" encoding="utf-16"?>
+<BaseIllum xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ColorLevel>1</ColorLevel>
+  <SpecularLevel>1</SpecularLevel>
+  <EmissionLevel>1</EmissionLevel>
+  <RoughnessMinimum>0.05</RoughnessMinimum>
+  <RoughnessMaximum>1</RoughnessMaximum>
+  <ColorTexture Path="scenes\Textures\techA.tga" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <SurfaceTexture Path="defaultMatte" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <NormalMapTexture Path="scenes\Textures\techA_local.tga" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <EmissionTexture Path="defaultBlack" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+</BaseIllum>

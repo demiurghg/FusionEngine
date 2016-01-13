@@ -61,9 +61,19 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
-		/// 
+		/// Shows G-buffer content.
+		///		0 - show final image
+		///		1 - show diffuse
+		///		2 - show specular
+		///		3 - show normal map
 		/// </summary>
-		public bool TrackObjects { get; set; }
+		public int ShowGBuffer { get; set; }
+
+
+		/// <summary>
+		/// Shows counters
+		/// </summary>
+		public bool ShowCounters { get; set; }
 
 
 		/// <summary>
@@ -77,7 +87,6 @@ namespace Fusion.Engine.Graphics {
 			StereoMode		=	StereoMode.Disabled;
 			InterlacingMode	=	InterlacingMode.HorizontalLR;
 			UseDebugDevice	=	false;
-			TrackObjects	=	true;
 			VSyncInterval	=	1;
 			MsaaEnabled		=	false;
 		}

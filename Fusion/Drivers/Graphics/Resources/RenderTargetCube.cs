@@ -245,7 +245,7 @@ namespace Fusion.Drivers.Graphics {
 			if (disposing) {
 				if (surfaces!=null) {
 					
-					for (int mip=0; mip<surfaces.GetLength(0); mip++) {
+					for (int mip=0; mip<MipCount; mip++) {
 						for (int face=0; face<6; face++) {
 							var surf = surfaces[mip,face];
 							SafeDispose( ref surf );
@@ -253,6 +253,8 @@ namespace Fusion.Drivers.Graphics {
 					}
 					surfaces = null;
 				}
+
+				SafeDispose( ref cubeMipShaderResources );
 
 				SafeDispose( ref SRV );
 				SafeDispose( ref texCube );

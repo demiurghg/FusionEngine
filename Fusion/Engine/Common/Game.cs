@@ -257,14 +257,15 @@ namespace Fusion.Engine.Common {
 		/// <returns></returns>
 		public string GetReleaseInfo ()
 		{
-			return string.Format("{0} {1} {2}", 
+			return string.Format("{0} {1} {2} {3}", 
 				Assembly.GetExecutingAssembly().GetName().Name, 
 				Assembly.GetExecutingAssembly().GetName().Version,
 				#if DEBUG
-					"debug"
+					"debug",
 				#else
-					"release"
+					"release",
 				#endif
+				(IntPtr.Size==4? "x86" : "x64")
 			);
 		}
 
@@ -297,6 +298,10 @@ namespace Fusion.Engine.Common {
 			Thread.CurrentThread.CurrentCulture		=	CultureInfo.InvariantCulture;
 			Thread.CurrentThread.CurrentUICulture	=	CultureInfo.InvariantCulture;
 
+
+			//ForceAssemblies();
+
+
 			Debug.Assert( Instance == null );
 
 			Instance	=	this;
@@ -324,6 +329,26 @@ namespace Fusion.Engine.Common {
 
 			userStorage			=	new UserStorage(this);
 
+		}
+
+
+
+		/// <summary>
+		/// http://stackoverflow.com/questions/2384592/is-there-a-way-to-force-all-referenced-assemblies-to-be-loaded-into-the-app-doma
+		/// TODO : Recursive load.
+		/// </summary>
+		void ForceAssemblies ()
+		{
+			var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+			var loadedPaths = loadedAssemblies.Select(a => a.Location).ToArray();
+
+			var referencedPaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll");
+			var toLoad = referencedPaths.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
+
+			foreach ( var path in toLoad ) {
+				Log.Message("Forcing assembly : {0}", path );
+				loadedAssemblies.Add( AppDomain.CurrentDomain.Load( AssemblyName.GetAssemblyName(path) ) );
+			}
 		}
 
 

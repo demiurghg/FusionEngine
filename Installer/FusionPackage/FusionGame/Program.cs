@@ -27,43 +27,47 @@ namespace $safeprojectname$ {
 
 
 			//
-			//	Build content on startup :
+			//	Build content on startup.
+			//	Remove this line in release code.
 			//
-			Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", null, false );
+			Builder.Options.InputDirectory	=	@"..\..\..\Content";
+			Builder.Options.TempDirectory	=	@"..\..\..\Temp";
+			Builder.Options.OutputDirectory	=	@"Content";
+			Builder.SafeBuild();
 
 
 			//
 			//	Run game :
 			//
-			using ( var engine = new Game("$safeprojectname$") ) {
+			using ( var game = new Game("$safeprojectname$") ) {
 
 				//	create SV, CL and UI instances :
-				engine.GameServer		=	new $safeprojectname$GameServer(engine);
-				engine.GameClient		=	new $safeprojectname$GameClient(engine);
-				engine.GameInterface	=	new $safeprojectname$UserInterface(engine);
+				game.GameServer		=	new $safeprojectname$GameServer(game);
+				game.GameClient		=	new $safeprojectname$GameClient(game);
+				game.GameInterface	=	new $safeprojectname$UserInterface(game);
 
 				//	load configuration.
 				//	first run will cause warning, 
 				//	because configuration file still does not exist.
-				engine.LoadConfiguration("Config.ini");
+				game.LoadConfiguration("Config.ini");
 
 				//	enable and disable debug direct3d device :
-				engine.RenderSystem.Config.UseDebugDevice =	false;
+				game.RenderSystem.Config.UseDebugDevice =	false;
 
 				//	enable and disable object tracking :
-				engine.TrackObjects	= true;
+				game.TrackObjects	= true;
 
 				//	set game title :
-				engine.GameTitle = "$safeprojectname$";
+				game.GameTitle = "$safeprojectname$";
 
 				//	apply command-line options here:
 				//	...
 
 				//	run:
-				engine.Run();
+				game.Run();
 				
 				//	save configuration :
-				engine.SaveConfiguration("Config.ini"); 				
+				game.SaveConfiguration("Config.ini"); 				
 			}
 
 			return 0;

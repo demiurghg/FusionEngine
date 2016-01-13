@@ -57,7 +57,7 @@ namespace Fusion.Build.Processors {
 		/// </summary>
 		/// <param name="sourceStream"></param>
 		/// <param name="targetStream"></param>
-		public override void Process ( AssetFile assetFile, BuildContext context )
+		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
 			var resolvedPath	=	assetFile.FullSourcePath;
 			var destPath		=	context.GetTempFileName( assetFile.KeyPath, ".scene" );
@@ -65,7 +65,7 @@ namespace Fusion.Build.Processors {
 			var cmdLine			=	string.Format("\"{0}\" /out:\"{1}\" /base:\"{2}\" /merge:{3} {4} {5} {6} {7}", 
 				resolvedPath, 
 				destPath, 
-				assetFile.BasePath,
+				assetFile.BaseDirectory,
 				MergeTolerance, 
 				ImportAnimation ? "/anim":"", 
 				ImportGeometry ? "/geom":"", 

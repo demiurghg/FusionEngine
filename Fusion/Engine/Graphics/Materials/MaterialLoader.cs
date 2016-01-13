@@ -12,7 +12,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// 
 	/// </summary>
-	[ContentLoader(typeof(Material))]
+	[ContentLoader(typeof(MaterialInstance))]
 	internal class MaterialLoader : ContentLoader {
 
 		/// <summary>
@@ -27,11 +27,9 @@ namespace Fusion.Engine.Graphics {
 		{
 			using ( var sr = new BinaryReader(stream) ) {
 				var iniText		=	sr.ReadString();
-				var material	=	Material.FromINI( iniText );
+				var material	=	BaseIllum.ImportFromXml( iniText );
 
-				material.LoadGpuResources( content );
-
-				return material;
+				return material.CreateMaterialInstance( content.Game.RenderSystem, content );
 			}
 
 		}

@@ -25,6 +25,11 @@ namespace Fusion.Framework {
 		public Color CmdLineColor	{ get; set; }
 		public Color VersionColor	{ get; set; }
 
+		public Color BackColor		{ get; set; }
+		public Color HelpColor		{ get; set; }
+		public Color HintColor		{ get; set; }
+
+
 		public string CommandHistory0 { get; set; }
 		public string CommandHistory1 { get; set; }
 		public string CommandHistory2 { get; set; }
@@ -46,6 +51,10 @@ namespace Fusion.Framework {
 			WarningColor	=	Color.Yellow;
 			CmdLineColor	=	Color.Orange;
 			VersionColor	=	new Color(255,255,255,64);
+
+			BackColor		=	new Color(0,0,0,224);
+			HelpColor		=	Color.Gray;
+			HintColor		=	new Color(255,255,255,64);
 
 			CommandHistory0	=	"";
 			CommandHistory1	=	"";

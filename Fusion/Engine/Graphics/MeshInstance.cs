@@ -98,7 +98,7 @@ namespace Fusion.Engine.Graphics {
 
 		internal struct ShadingGroup {
 
-			public ShadingGroup( MeshSubset subset, Material material )
+			public ShadingGroup( MeshSubset subset, MaterialInstance material )
 			{
 				StartIndex	=	subset.StartPrimitive * 3;
 				IndicesCount=	subset.PrimitiveCount * 3;
@@ -107,7 +107,7 @@ namespace Fusion.Engine.Graphics {
 			
 			public int StartIndex;
 			public int IndicesCount;
-			public Material Material;
+			public MaterialInstance Material;
 		}
 
 
@@ -119,7 +119,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="rs"></param>
 		/// <param name="mesh"></param>
-		public MeshInstance ( RenderSystem rs, Scene scene, Mesh mesh, Material[] materials )
+		public MeshInstance ( RenderSystem rs, Scene scene, Mesh mesh, MaterialInstance[] materials )
 		{
 			Visible		=	true;
 			World		=	Matrix.Identity;

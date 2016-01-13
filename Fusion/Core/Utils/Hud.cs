@@ -9,11 +9,11 @@ using System.Threading;
 namespace Fusion {
 
 	public class HudString {
-		public readonly Color Color;
-		public readonly string Category;
-		public readonly string Text;
+		public readonly Color	Color;
+		public readonly Guid	Category;
+		public readonly string	Text;
 
-		internal HudString ( string category, Color color, string text )
+		internal HudString ( Guid category, Color color, string text )
 		{
 			this.Color		=	color;
 			this.Category	=	category;
@@ -35,7 +35,7 @@ namespace Fusion {
 		/// <summary>
 		/// Clears all lines added from current thread.
 		/// </summary>
-		static public void Clear (string category)
+		static public void Clear ( Guid category )
 		{
 			lock (lockObj) {
 				lines.RemoveAll( line => line.Category == category );
@@ -48,7 +48,7 @@ namespace Fusion {
 		/// </summary>
 		/// <param name="color"></param>
 		/// <param name="text"></param>
-		static public void Add ( Color color, string category, string text )
+		static public void Add ( Guid category, Color color, string text )
 		{
 			lock (lockObj) {
 				lines.Add( new HudString( category, color, text ) );
@@ -62,9 +62,9 @@ namespace Fusion {
 		/// </summary>
 		/// <param name="color"></param>
 		/// <param name="text"></param>
-		static public void Add ( Color color, string category, string format, params object[] args )
+		static public void Add ( Guid category, Color color, string format, params object[] args )
 		{
-			Add( color, category, string.Format(format, args) );
+			Add( category, color, string.Format(format, args) );
 		}
 
 

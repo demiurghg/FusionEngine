@@ -93,8 +93,8 @@ namespace Fusion.Engine.Graphics.GIS
 		protected void Initialize(Gis.GeoPoint[] points, int[] indeces, bool isDynamic)
 		{
 			shader		= Game.Content.Load<Ubershader>("globe.Poly.hlsl");
-			factory		= new StateFactory(shader, typeof(PolyFlags), EnumFunc);
-			factoryXray = new StateFactory(shader, typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.Additive, RasterizerState.CullCW, DepthStencilState.None);
+			factory		= shader.CreateFactory(typeof(PolyFlags), EnumFunc);
+			factoryXray = shader.CreateFactory(typeof(PolyFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.Additive, RasterizerState.CullCW, DepthStencilState.None);
 
 			var vbOptions = isDynamic ? VertexBufferOptions.Dynamic : VertexBufferOptions.Default;
 

@@ -249,6 +249,7 @@ namespace Fusion.Core {
 		/// </summary>
 		/// <param name="?"></param>
 		/// <param name="magic"></param>
+		[Obsolete]
 		public static void ExpectMagic ( this BinaryReader reader, string magic, string fileType )
 		{
 			if (!reader.CheckMagic(magic)) {
@@ -264,6 +265,7 @@ namespace Fusion.Core {
 		/// <param name="reader"></param>
 		/// <param name="magic"></param>
 		/// <returns></returns>
+		[Obsolete]
 		public static bool CheckMagic ( this BinaryReader reader, string magic )
 		{
 			if (magic.Length!=4) {
@@ -456,13 +458,17 @@ namespace Fusion.Core {
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		public static Type[] GetAllSubclassedOf ( Type type )
+		public static Type[] GetAllSubclassesOf ( Type type, bool includeBaseClass = false )
 		{	
 			List<Type> types = new List<Type>();
 
 			foreach ( var a in AppDomain.CurrentDomain.GetAssemblies() ) {
 
 				foreach ( var t in a.GetTypes() ) {
+					
+					if (includeBaseClass && (t==type)) {
+						types.Add(t);
+					}
 
 					if (t.IsSubclassOf( type )) {
 
@@ -482,72 +488,31 @@ namespace Fusion.Core {
 		/// <param name="obj"></param>
 		/// <param name="type"></param>
 		/// <param name="fileName"></param>
-		static public void SaveObjectToXml ( object obj, Type type, Stream fileStream, Type[] extraTypes = null ) 
+		static public string SaveObjectToXml ( object obj, Type type, Type[] extraTypes = null ) 
 		{
-			XmlSerializer serializer = new XmlSerializer( type, extraTypes ?? new Type[0] );
-			TextWriter textWriter = new StreamWriter( fileStream );
-			serializer.Serialize( textWriter, obj );
-			textWriter.Close();
-		}
-
-
-		/// <summary>
-		/// Saves object to Xml file 
-		/// </summary>
-		/// <param name="obj"></param>
-		/// <param name="type"></param>
-		/// <param name="fileName"></param>
-		static public void SaveObjectToXml ( object obj, Type type, string fileName, Type[] extraTypes = null ) 
-		{
-			XmlSerializer serializer = new XmlSerializer( type, extraTypes ?? new Type[0] );
-			TextWriter textWriter = new StreamWriter( fileName );
-			serializer.Serialize( textWriter, obj );
-			textWriter.Close();
-		}
-
-
-
-		/// <summary>
-		/// Loads object from Xml file
-		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="fileName"></param>
-		/// <returns></returns>
-		static public object LoadObjectFromXml( Type type, Stream fileStream, Type[] extraTypes )
-		{
-			var newTypes = extraTypes.ToList();
-			newTypes.Remove( type );
-
-			XmlSerializer serializer = new XmlSerializer( type, extraTypes ?? newTypes.ToArray() );
-
-			using (TextReader textReader = new StreamReader( fileStream )) {
-				object obj = serializer.Deserialize( textReader );
-				return obj;
-			}
-		}
-
-
-
-		/// <summary>
-		/// Loads object from Xml file
-		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="fileName"></param>
-		/// <returns></returns>
-		static public object LoadObjectFromXml( Type type, string fileName, Type[] extraTypes )
-		{
-			var newTypes = extraTypes.ToList();
-			newTypes.Remove( type );
-
-			XmlSerializer serializer = new XmlSerializer( type, extraTypes ?? newTypes.ToArray() );
-
-			var fi = new FileInfo(fileName);
-
-			if (fi.Length==0) {
-				return Activator.CreateInstance( type );
-			}
+			StringBuilder sb = new StringBuilder();
 			
-			using (TextReader textReader = new StreamReader( fileName )) {
+			XmlSerializer serializer = new XmlSerializer( type, extraTypes ?? new Type[0] );
+			TextWriter textWriter = new StringWriter( sb );
+			serializer.Serialize( textWriter, obj );
+			textWriter.Close();
+
+			return sb.ToString();
+		}
+
+
+
+		/// <summary>
+		/// Loads object from Xml file
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="fileName"></param>
+		/// <returns></returns>
+		static public object LoadObjectFromXml( Type type, string xmlText, Type[] extraTypes = null )
+		{
+			XmlSerializer serializer = new XmlSerializer( type, extraTypes ?? new Type[0] );
+
+			using (TextReader textReader = new StringReader(xmlText) ) {
 				object obj = serializer.Deserialize( textReader );
 				return obj;
 			}

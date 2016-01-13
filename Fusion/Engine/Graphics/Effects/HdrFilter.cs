@@ -79,10 +79,8 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ()
 		{
-			SafeDispose( ref factory );
-
 			shader	=	Game.Content.Load<Ubershader>("hdr");
-			factory	=	new StateFactory( shader, typeof(Flags), Primitive.TriangleList, VertexInputElement.Empty, BlendState.Opaque, RasterizerState.CullNone, DepthStencilState.None );
+			factory	=	shader.CreateFactory( typeof(Flags), Primitive.TriangleList, VertexInputElement.Empty, BlendState.Opaque, RasterizerState.CullNone, DepthStencilState.None );
 		}
 
 
@@ -94,7 +92,6 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				SafeDispose( ref factory );
 				SafeDispose( ref averageLum	 );
 				SafeDispose( ref paramsCB	 );
 				SafeDispose( ref whiteTex );

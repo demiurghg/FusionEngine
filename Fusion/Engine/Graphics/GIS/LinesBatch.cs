@@ -81,17 +81,14 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			if (firstBuffer != null)	firstBuffer.Dispose();
 			if (secondBuffer != null)	secondBuffer.Dispose();
-
-			if(shader != null) shader.Dispose();
-			if(factory!= null) factory.Dispose();
 		}
 
 
 		public LinesGisLayer(Game engine, int linesPointsCount, bool isDynamic = false) : base(engine)
 		{
 			shader		= Game.Content.Load<Ubershader>("globe.Line.hlsl");
-			factory		= new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
-			thinFactory = new StateFactory(shader, typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.Readonly);
+			factory		= shader.CreateFactory( typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
+			thinFactory = shader.CreateFactory( typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.Readonly);
 			
 			TransparencyMultiplayer = 1.0f;
 			OverallColor			= Color4.White;

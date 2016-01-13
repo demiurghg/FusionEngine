@@ -55,6 +55,9 @@ namespace Fusion.Engine.Graphics {
 		public string Name { get; set; }
 
 
+		DynamicTexture defaultTexture;
+
+
 		/// <summary>
 		/// Layer's child layers.
 		/// </summary>
@@ -86,6 +89,9 @@ namespace Fusion.Engine.Graphics {
 			FilterMode	=	SpriteFilterMode.LinearClamp;
 			StereoMode	=	SpriteStereoMode.All;
 
+			defaultTexture	=	new DynamicTexture( rs, 16,16, typeof(Color), false, false );
+			defaultTexture.SetData( Enumerable.Range(0,16*16).Select( i => Color.White ).ToArray() );
+
 			ReallocGpuBuffers( capacity );
 		}
 
@@ -98,6 +104,7 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing) {
+				SafeDispose( ref defaultTexture );
 				SafeDispose( ref vertexBuffer );
 			}
  			base.Dispose(disposing);
@@ -231,6 +238,8 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="v3"></param>
 		void PushQuad ( Texture texture, SpriteVertex v0, SpriteVertex v1, SpriteVertex v2, SpriteVertex v3 )
 		{
+			texture	=	texture ?? defaultTexture;
+
 			if ( groups.Count == 0 || groups[groups.Count-1].Texture != texture ) {
 				groups.Add( new Group { Texture = texture, StartSprite = spriteCount } );
 			}
@@ -375,6 +384,8 @@ namespace Fusion.Engine.Graphics {
 
 		public void Draw ( Texture texture, Rectangle dstRect, Rectangle srcRect, Color color )
 		{
+			texture	=	texture ?? defaultTexture;
+
 			float w = texture.Width;
 			float h = texture.Height;
 
@@ -385,6 +396,8 @@ namespace Fusion.Engine.Graphics {
 
 		public void Draw ( Texture texture, Rectangle dstRect, Rectangle srcRect, int offsetX, int offsetY, Color color )
 		{
+			texture	=	texture ?? defaultTexture;
+
 			float w = texture.Width;
 			float h = texture.Height;
 
@@ -413,6 +426,8 @@ namespace Fusion.Engine.Graphics {
 
 		public void Draw ( Texture texture, RectangleF dstRect, RectangleF srcRect, Color color )
 		{
+			texture	=	texture ?? defaultTexture;
+
 			float w = texture.Width;
 			float h = texture.Height;
 
@@ -423,6 +438,8 @@ namespace Fusion.Engine.Graphics {
 
 		public void Draw ( Texture texture, Rectangle dstRect, Color color )
 		{
+			texture	=	texture ?? defaultTexture;
+
 			float w = texture.Width;
 			float h = texture.Height;
 
@@ -433,6 +450,8 @@ namespace Fusion.Engine.Graphics {
 
 		public void Draw ( Texture texture, RectangleF dstRect, Color color )
 		{
+			texture	=	texture ?? defaultTexture;
+
 			float w = texture.Width;
 			float h = texture.Height;
 

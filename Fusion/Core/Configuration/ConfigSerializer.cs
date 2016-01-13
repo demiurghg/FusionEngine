@@ -43,6 +43,9 @@ namespace Fusion.Core.Configuration {
 					var sectionData	=	iniData.Sections.GetSectionData( sectionName );
 
 					foreach ( var key in config ) { 
+						if (sectionData.Keys.ContainsKey(key.KeyName)) {
+							sectionData.Keys.RemoveKey(key.KeyName);
+						}
 						sectionData.Keys.AddKey( key );
 					}
 				}

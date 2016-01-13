@@ -16,6 +16,8 @@ namespace Fusion.Engine.Graphics {
 
 	public class SceneRenderer : GameModule {
 
+		readonly RenderSystem	rs;
+
 		ConstantBuffer	constBuffer;
 		Ubershader		surfaceShader;
 		StateFactory	factory;
@@ -25,26 +27,8 @@ namespace Fusion.Engine.Graphics {
 		Texture2D		defaultNormalMap;
 		Texture2D		defaultEmission	;
 
-		enum SurfaceFlags {
-			GBUFFER					=	1 << 0,
-			SHADOW					=	1 << 1,
 
-			RIGID					=	1 << 2,
-			SKINNED					=	1 << 3,
-			
-			LAYER0					=	1 << 4,
-			LAYER1					=	1 << 5,
-			LAYER2					=	1 << 6,
-			LAYER3					=	1 << 7,
-
-			TERRAIN					=	1 << 8,
-
-			TRIPLANAR_SINGLE		=	1 << 9,
-			TRIPLANAR_DOUBLE		=	1 << 10,
-			TRIPLANAR_TRIPLE		=	1 << 11,
-		}
-
-		struct CBSurfaceData {
+		struct CBMeshInstanceData {
 			public Matrix	Projection;
 			public Matrix	View;
 			public Matrix	World;
@@ -53,14 +37,23 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		/// <summary>
+		/// Gets pipeline state factory
+		/// </summary>
+		internal StateFactory Factory {
+			get {
+				return factory;
+			}
+		}
 
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="Game"></param>
-		public SceneRenderer ( Game Game ) : base( Game )
+		public SceneRenderer ( Game Game, RenderSystem rs ) : base( Game )
 		{
+			this.rs	=	rs;
 		}
 
 
@@ -71,7 +64,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			LoadContent();
 
-			constBuffer	=	new ConstantBuffer( Game.GraphicsDevice, typeof(CBSurfaceData) );
+			constBuffer	=	new ConstantBuffer( Game.GraphicsDevice, typeof(CBMeshInstanceData) );
 
 
 			defaultDiffuse	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
@@ -86,6 +79,7 @@ namespace Fusion.Engine.Graphics {
 			defaultEmission	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
 			defaultEmission.SetData( Enumerable.Range(0,16).Select( i => Color.Black ).ToArray() );
 			
+			//Ubershader.AddEnumerator( "SceneRenderer", (t
 
 			Game.Reloading += (s,e) => LoadContent();
 		}
@@ -97,10 +91,8 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ()
 		{
-			SafeDispose( ref factory );
-
 			surfaceShader	=	Game.Content.Load<Ubershader>("surface");
-			factory			=	new StateFactory( surfaceShader, typeof(SurfaceFlags), (ps,i) => Enum(ps, (SurfaceFlags)i ) );
+			factory			=	surfaceShader.CreateFactory( typeof(SurfaceFlags), (ps,i) => Enum(ps, (SurfaceFlags)i ) );
 		}
 
 
@@ -112,6 +104,8 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="flags"></param>
 		void Enum ( PipelineState ps, SurfaceFlags flags )
 		{
+			ps.RasterizerState	=	RasterizerState.CullCW;
+
 			if (flags.HasFlag( SurfaceFlags.SKINNED )) {
 				ps.VertexInputElements	=	VertexColorTextureTBNSkinned.Elements;
 			}
@@ -119,11 +113,11 @@ namespace Fusion.Engine.Graphics {
 			if (flags.HasFlag( SurfaceFlags.RIGID )) {
 				ps.VertexInputElements	=	VertexColorTextureTBNRigid.Elements;
 			}
-
-			
-
 		}
 
+
+
+		
 
 
 		/// <summary>
@@ -134,7 +128,6 @@ namespace Fusion.Engine.Graphics {
 		{
 			if (disposing) {
 				SafeDispose( ref constBuffer );
-				SafeDispose( ref factory );
 
 				SafeDispose( ref defaultDiffuse		);
 				SafeDispose( ref defaultSpecular	);
@@ -146,6 +139,7 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		float t = 0;
 
 		/// <summary>
 		/// 
@@ -169,19 +163,19 @@ namespace Fusion.Engine.Graphics {
 				var projection		=	camera.GetProjectionMatrix( stereoEye );
 				var viewPosition	=	camera.GetCameraPosition4( stereoEye );
 
-				var cbData		=	new CBSurfaceData();
+				var cbData		=	new CBMeshInstanceData();
 
 				var hdr			=	frame.HdrBuffer.Surface;
 				var depth		=	frame.DepthBuffer.Surface;
 				var diffuse		=	frame.DiffuseBuffer.Surface;
 				var specular	=	frame.SpecularBuffer.Surface;
 				var normals		=	frame.NormalMapBuffer.Surface;
+				var scattering	=	frame.ScatteringBuffer.Surface;
 
 				device.ResetStates();
 
-				device.SetTargets( depth, hdr, diffuse, specular, normals );
+				device.SetTargets( depth, hdr, diffuse, specular, normals, scattering );
 				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
-
 
 				var instances	=	viewLayer.Instances;
 
@@ -192,7 +186,7 @@ namespace Fusion.Engine.Graphics {
 					cbData.Projection	=	projection;
 					cbData.World		=	instance.World;
 					cbData.ViewPos		=	viewPosition;
-
+					
 					constBuffer.SetData( cbData );
 
 					device.PixelShaderConstants[0]	= constBuffer ;
@@ -204,14 +198,18 @@ namespace Fusion.Engine.Graphics {
 
 						foreach ( var sg in instance.ShadingGroups ) {
 
-							device.PipelineState	=	factory[ (int)ApplyFlags(sg.Material, instance, SurfaceFlags.GBUFFER) ];
+							device.PipelineState	=	instance.IsSkinned ? sg.Material.GBufferSkinned : sg.Material.GBufferRigid;
 
-							device.PixelShaderConstants[1]	= sg.Material.LayerConstBuffer;
-							device.VertexShaderConstants[1]	= sg.Material.LayerConstBuffer;
+							device.PixelShaderConstants[1]	= sg.Material.ConstantBufferParameters;
+							device.PixelShaderConstants[2]	= sg.Material.ConstantBufferUVModifiers;
+							device.VertexShaderConstants[1]	= sg.Material.ConstantBufferParameters;
+							device.VertexShaderConstants[2]	= sg.Material.ConstantBufferUVModifiers;
 
 							sg.Material.SetTextures( device );
 
 							device.DrawIndexed( sg.IndicesCount, sg.StartIndex, 0 );
+
+							rs.Counters.SceneDIPs++;
 						}
 					} catch ( UbershaderException e ) {
 						Log.Warning( e.Message );					
@@ -229,22 +227,22 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="material"></param>
 		/// <param name="flags"></param>
 		/// <returns></returns>
-		SurfaceFlags ApplyFlags ( Material material, MeshInstance instance, SurfaceFlags flags )
+		SurfaceFlags ApplyFlags ( MaterialInstance material, MeshInstance instance, SurfaceFlags flags )
 		{
-			if (material!=null) {
-				switch ( material.Options ) {
-					case MaterialOptions.SingleLayer : flags |= SurfaceFlags.LAYER0; break;	
-					case MaterialOptions.DoubleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1; break;
-					case MaterialOptions.TripleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2; break;
-					case MaterialOptions.QuadLayer	 : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2|SurfaceFlags.LAYER3; break;
+			//if (material!=null) {
+			//	switch ( material.Options ) {
+			//		case MaterialOptions.SingleLayer : flags |= SurfaceFlags.LAYER0; break;	
+			//		case MaterialOptions.DoubleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1; break;
+			//		case MaterialOptions.TripleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2; break;
+			//		case MaterialOptions.QuadLayer	 : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2|SurfaceFlags.LAYER3; break;
 
-					case MaterialOptions.Terrain : flags |= SurfaceFlags.TERRAIN; break;
+			//		case MaterialOptions.Terrain : flags |= SurfaceFlags.TERRAIN; break;
 
-					case MaterialOptions.TriplanarWorldSingle : flags |= SurfaceFlags.TRIPLANAR_SINGLE; break;
-					case MaterialOptions.TriplanarWorldDouble : flags |= SurfaceFlags.TRIPLANAR_DOUBLE; break;
-					case MaterialOptions.TriplanarWorldTriple : flags |= SurfaceFlags.TRIPLANAR_TRIPLE; break;
-				}
-			}
+			//		case MaterialOptions.TriplanarWorldSingle : flags |= SurfaceFlags.TRIPLANAR_SINGLE; break;
+			//		case MaterialOptions.TriplanarWorldDouble : flags |= SurfaceFlags.TRIPLANAR_DOUBLE; break;
+			//		case MaterialOptions.TriplanarWorldTriple : flags |= SurfaceFlags.TRIPLANAR_TRIPLE; break;
+			//	}
+			//}
 
 			if (instance.IsSkinned) {
 				flags |= SurfaceFlags.SKINNED;
@@ -270,7 +268,7 @@ namespace Fusion.Engine.Graphics {
 
 				var device			= Game.GraphicsDevice;
 
-				var cbData			= new CBSurfaceData();
+				var cbData			= new CBMeshInstanceData();
 
 				var viewPosition	= Matrix.Invert( shadowRenderCtxt.ShadowView ).TranslationVector;
 
@@ -297,6 +295,8 @@ namespace Fusion.Engine.Graphics {
 
 					device.SetupVertexInput( instance.vb, instance.ib );
 					device.DrawIndexed( instance.indexCount, 0, 0 );
+
+					rs.Counters.ShadowDIPs++;
 				}
 			}
 		}

@@ -11,6 +11,7 @@ using Fusion.Engine.Common;
 using Fusion.Core.Configuration;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Input;
+using Fusion.Core.Shell;
 
 namespace Fusion.Framework {
 	
@@ -57,6 +58,8 @@ namespace Fusion.Framework {
 		public bool Show { get; set; }
 
 
+		Invoker.Suggestion suggestion = null;
+
 
 
 
@@ -67,7 +70,25 @@ namespace Fusion.Framework {
 		/// <param name="font">Font texture. Must be 128x128.</param>
 		/// <param name="conback">Console background texture</param>
 		/// <param name="speed">Console fall speed</param>
+		[Obsolete("Parameter 'conback' is not used")]
 		public GameConsole ( Game Game, string font, string conback ) : base(Game)
+		{
+			Config			=	new GameConsoleConfig();
+			
+			this.font		=	font;
+			this.conback	=	conback;
+
+			editBox		=	new EditBox(this);
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="Game"></param>
+		/// <param name="font"></param>
+		public GameConsole ( Game Game, string font ) : base(Game)
 		{
 			Config			=	new GameConsoleConfig();
 			
@@ -141,7 +162,12 @@ namespace Fusion.Framework {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
+				Game.GraphicsDevice.DisplayBoundsChanged -= GraphicsDevice_DisplayBoundsChanged;
 				LogRecorder.TraceRecorded -= TraceRecorder_TraceRecorded;
+				Game.Keyboard.KeyDown -= Keyboard_KeyDown;
+				Game.Keyboard.FormKeyPress -= Keyboard_FormKeyPress;
+				Game.Keyboard.FormKeyDown -= Keyboard_FormKeyDown;
+
 				SafeDispose( ref consoleLayer );
 				SafeDispose( ref editLayer );
 			}
@@ -189,6 +215,40 @@ namespace Fusion.Framework {
 
 			var frameRate = string.Format("fps = {0,7:0.00}", gameTime.Fps);
 			editLayer.DrawDebugString( consoleFont, vp.Width - charWidth * frameRate.Length, 0, frameRate, Config.VersionColor);
+
+			
+			//
+			//	Draw suggestions :
+			//	
+			if (suggestion!=null && suggestion.Candidates.Any()) {
+
+				var candidates = suggestion.Candidates;
+
+				var x = 0;
+				var y = charHeight;
+				var w = (candidates.Max( s => s.Length ) + 2) * charWidth;
+				var h = (candidates.Count() + 1) * charHeight;
+
+				w = Math.Max( w, charWidth * 16 );
+
+				editLayer.Draw( null, x, y, w, h, Config.BackColor );
+
+				int line = 0;
+				foreach (var candidate in candidates ) {
+					editLayer.DrawDebugString(consoleFont, x + charWidth, y + charHeight * line, candidate, Config.HelpColor );
+					line ++;
+				}
+			} /*else {
+				string text = "Type beginning of the command and press TAB for suggestions.";
+
+				var x = charWidth * 1;
+				var y = charHeight;
+				var w = text.Length * charWidth;
+				var h = 1 * charHeight;
+
+				editLayer.Draw( consoleBackground, x, y, w, h, Color.White );
+				editLayer.DrawDebugString(consoleFont, x, y, text, Color.Gray);
+			}*/
 		}
 
 
@@ -220,7 +280,7 @@ namespace Fusion.Framework {
 			consoleLayer.Clear();
 
 			//	add small gap below command line...
-			consoleLayer.Draw( consoleBackground, 0,0, vp.Width, vp.Height/2+1, Color.White );
+			consoleLayer.Draw( null, 0,0, vp.Width, vp.Height/2+1, Config.BackColor );
 
 			var lines	=	LogRecorder.GetLines();
 
@@ -278,10 +338,26 @@ namespace Fusion.Framework {
 		}
 
 
+		string AutoComplete ()
+		{
+			var sw = new Stopwatch();
+			sw.Start();
+			suggestion = Game.Invoker.AutoComplete( editBox.Text );
+			sw.Stop();
+
+			if (suggestion.Candidates.Any()) {
+				suggestion.Add("");
+				suggestion.Add(string.Format("({0} ms)", sw.Elapsed.TotalMilliseconds));
+			}
+
+			return suggestion.CommandLine;
+		}
+
+
 
 		void TabCmd ()
 		{
-			editBox.Text = Game.Invoker.AutoComplete( editBox.Text );
+			editBox.Text = AutoComplete();
 		}
 
 
@@ -339,7 +415,8 @@ namespace Fusion.Framework {
 				default			: editBox.TypeChar( e.KeyChar ); break;
 			}
 
-			//Log.Message("{0}", (int)e.KeyChar);
+			// Run AutoComplete twice on TAB for better results :
+			AutoComplete();
 
 			RefreshEdit();
 		}

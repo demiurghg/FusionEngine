@@ -29,7 +29,7 @@ namespace Fusion.Drivers.Graphics {
 		/// <param name="ubershader"></param>
 		/// <param name="enumType"></param>
 		/// <param name="enumAction"></param>
-		public StateFactory ( Ubershader ubershader, Type enumType, Action<PipelineState,int> enumAction ) : base(ubershader.GraphicsDevice)
+		internal StateFactory ( Ubershader ubershader, Type enumType, Action<PipelineState,int> enumAction ) : base(ubershader.GraphicsDevice)
 		{
 			this.ubershader		= ubershader;
 
@@ -47,7 +47,7 @@ namespace Fusion.Drivers.Graphics {
 		/// <param name="vertexInputElements"></param>
 		/// <param name="blendState"></param>
 		/// <param name="rasterizerState"></param>
-		public StateFactory ( Ubershader ubershader, Type enumType, Primitive primitive, VertexInputElement[] vertexInputElements ) 
+		private StateFactory ( Ubershader ubershader, Type enumType, Primitive primitive, VertexInputElement[] vertexInputElements ) 
 		 : base(ubershader.GraphicsDevice)
 		{
 			this.ubershader		= ubershader;
@@ -61,7 +61,7 @@ namespace Fusion.Drivers.Graphics {
 		/// </summary>
 		/// <param name="device"></param>
 		/// <param name="ubershader"></param>
-		public StateFactory ( Ubershader ubershader, Type enumType, Primitive primitive, VertexInputElement[] vertexInputElements, BlendState blendState, RasterizerState rasterizerState )
+		private StateFactory ( Ubershader ubershader, Type enumType, Primitive primitive, VertexInputElement[] vertexInputElements, BlendState blendState, RasterizerState rasterizerState )
 		 : base(ubershader.GraphicsDevice)
 		{
 			this.ubershader		= ubershader;
@@ -80,7 +80,7 @@ namespace Fusion.Drivers.Graphics {
 		/// </summary>
 		/// <param name="device"></param>
 		/// <param name="ubershader"></param>
-		public StateFactory ( Ubershader ubershader, Type enumType, Primitive primitive, VertexInputElement[] vertexInputElements, BlendState blendState, RasterizerState rasterizerState, DepthStencilState depthStencilState )
+		private StateFactory ( Ubershader ubershader, Type enumType, Primitive primitive, VertexInputElement[] vertexInputElements, BlendState blendState, RasterizerState rasterizerState, DepthStencilState depthStencilState )
 		 : base(ubershader.GraphicsDevice)
 		{
 			this.ubershader		= ubershader;

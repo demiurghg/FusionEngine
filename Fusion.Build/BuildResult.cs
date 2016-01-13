@@ -19,11 +19,7 @@ namespace Fusion.Build {
 		public int Failed	;
 		public int UpToDate	;
 
-		public int Skipped {
-			get {
-				return Total /*- Ignored*/ - Succeded - UpToDate - Failed;
-			}
-		}
+		public int Skipped	;
 
 		public BuildResult ()
 		{

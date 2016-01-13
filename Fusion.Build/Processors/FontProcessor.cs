@@ -26,7 +26,7 @@ namespace Fusion.Build.Processors {
 		/// </summary>
 		/// <param name="sourceStream"></param>
 		/// <param name="targetStream"></param>
-		public override void Process ( AssetFile assetFile, BuildContext context )
+		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
 			string tempFileName		= context.GetTempFileName( assetFile.KeyPath, ".fnt" );
 			string resolvedPath		= assetFile.FullSourcePath;	

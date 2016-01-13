@@ -13,6 +13,7 @@ using Fusion.Core.Utils;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 using Fusion.Engine.Graphics;
+using Fusion.Core.Development;
 
 namespace TestGame2 {
 
@@ -31,7 +32,10 @@ namespace TestGame2 {
 			//	Build content on startup.
 			//	Remove this line in release code.
 			//
-			Builder.SafeBuild( @"..\..\..\Content", @"Content", @"..\..\..\Temp", null, false );
+			Builder.Options.InputDirectory	=	@"..\..\..\Content";
+			Builder.Options.TempDirectory	=	@"..\..\..\Temp";
+			Builder.Options.OutputDirectory	=	@"Content";
+			Builder.SafeBuild();
 	
 			//
 			//	Run engine.
@@ -52,10 +56,13 @@ namespace TestGame2 {
 
 				//	apply command-line options here:
 				//	...
+				if (!LaunchBox.Show(engine, "Config.ini")) {
+					return 0;
+				}
 
 				//	run:
 				engine.Run();
-				
+
 				//	save configuration:
 				engine.SaveConfiguration("Config.ini"); 				
 			}

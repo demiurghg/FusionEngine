@@ -5,23 +5,17 @@ struct BATCH {
 	float4x4	World			;
 	float4		ViewPos			;
 	float4		BiasSlopeFar	;
+	float		Time;
 };
 
-struct LAYERDATA {
-	float4	Tiling;
-	float4	Offset;
-	float2	RoughnessRange;
-	float2	GlowNarrowness;
 
-	float	ColorLevel;
-	float	AlphaLevel;
-	float	SpecularLevel;
-	float	EmissionLevel;
-	float	BumpLevel;
-	float	Displacement;
-	float	BlendHardness;
-	
-	float	Dummy;
+struct MATERIAL {
+	float 	ColorLevel;
+	float 	SpecularLevel;
+	float 	EmissionLevel;
+	float 	RoughnessMinimum;
+	float 	RoughnessMaximum;
+	float	DirtLevel;
 };
 
 
@@ -42,25 +36,43 @@ struct PSInput {
 	float3	Binormal	: TEXCOORD2;
 	float3	Normal 		: TEXCOORD3;
 	float4	ProjPos		: TEXCOORD4;
+	float3 	WorldPos	: TEXCOORD5;
 };
 
 struct GBuffer {
-	float4	hdr		 : SV_Target0;
-	float4	diffuse	 : SV_Target1;
-	float4	specular : SV_Target2;
-	float4	normals	 : SV_Target3;
+	float4	hdr		 	: SV_Target0;
+	float4	diffuse	 	: SV_Target1;
+	float4	specular 	: SV_Target2;
+	float4	normals	 	: SV_Target3;
+	float4	scattering	: SV_Target4;
 };
 
-cbuffer 		CBBatch 	: 	register(b0) { BATCH     Batch     : packoffset( c0 ); }	
-cbuffer 		CBLayer 	: 	register(b1) { LAYERDATA Layers[4] : packoffset( c0 ); }	
+cbuffer 		CBBatch 	: 	register(b0) { BATCH    Batch     : packoffset( c0 ); }	
+cbuffer 		CBLayer 	: 	register(b1) { MATERIAL Material  : packoffset( c0 ); }	
+cbuffer 		CBLayer 	: 	register(b2) { float4   UVMods[16]: packoffset( c0 ); }	
 SamplerState	Sampler		: 	register(s0);
-Texture2D		Textures[16]		: 	register(t0);
+Texture2D		Textures[16]: 	register(t0);
 
-//+DISPLACEMENT_MAPPING !!
-#if 0
-$ubershader GBUFFER (LAYER0..LAYER1..LAYER2..LAYER3)|TERRAIN|TRIPLANAR_SINGLE|TRIPLANAR_DOUBLE|TRIPLANAR_TRIPLE RIGID|SKINNED
+#ifdef _UBERSHADER
+$ubershader GBUFFER RIGID|SKINNED BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
+$ubershader SHADOW RIGID|SKINNED  BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
 $ubershader SHADOW RIGID|SKINNED
+
+	#ifdef RIGID
+		$VertexInputFormat	VertexColorTextureTBNRigid
+		$VertexInputFormat	VertexColorTextureTBNRigidOLOLO
+		$DepthStencilState	Default
+		$BlendState			
+	#endif
+	#ifdef SKINNED
+		$VertexInputFormat	VertexColorTextureTBNSkinned			
+		$BlendState 		Additive
+		$RasterizerState	CullNone	
+		$DepthStencilState	ReadOnly
+	#endif
 #endif
+
+
  
 /*-----------------------------------------------------------------------------
 	Vertex shader :
@@ -69,7 +81,6 @@ PSInput VSMain( VSInput input )
 {
 	PSInput output;
 
-	
 	float4 	pos			=	float4( input.Position, 1 );
 	float4	wPos		=	mul( pos,  Batch.World 		);
 	float4	vPos		=	mul( wPos, Batch.View 		);
@@ -85,6 +96,7 @@ PSInput VSMain( VSInput input )
 	output.Normal		= 	normalize(normal.xyz);
 	output.Tangent 		=  	normalize(tangent.xyz);
 	output.Binormal		=  	normalize(binormal.xyz);
+	output.WorldPos		=	wPos.xyz;
 	
 	return output;
 }
@@ -94,71 +106,77 @@ PSInput VSMain( VSInput input )
 	Pixel shader :
 -----------------------------------------------------------------------------*/
 
-struct LAYERPROPS {
-	float3	Diffuse		;
-	float	Alpha		;
-	float3 	Specular	;
-	float 	Roughness	;
-	float3	Normal		;
-	float3	Emission	;
-};	
+struct SURFACE {
+	float3 	Diffuse;
+	float3 	Specular;
+	float	Roughness;
+	float3	Normal;
+	float3	Emission;
+};
 
-LAYERPROPS OverlayLayers ( LAYERPROPS layerA, LAYERPROPS layerB )
+//	https://www.marmoset.co/toolbag/learn/pbr-theory	
+//	This means that in theory conductors will not show any evidence of diffuse light. 
+//	In practice however there are often oxides or other residues on the surface of a 
+//	metal that will scatter some small amounts of light.
+
+//	Blend mode refernce:
+//	http://www.deepskycolors.com/archivo/2010/04/21/formulas-for-Photoshop-blending-modes.html	
+
+float Overlay ( float target, float blend )
 {
-	LAYERPROPS layer;
-	float factor = layerB.Alpha;
-	
-	layer.Diffuse	=	lerp( layerA.Diffuse	, layerB.Diffuse	, factor );
-	layer.Alpha		=	lerp( layerA.Alpha		, layerB.Alpha		, factor );
-	layer.Specular	=	lerp( layerA.Specular	, layerB.Specular	, factor );
-	layer.Roughness	=	lerp( layerA.Roughness	, layerB.Roughness	, factor );
-	layer.Normal	=	lerp( layerA.Normal		, layerB.Normal		, factor );
-	layer.Emission	=	lerp( layerA.Emission	, layerB.Emission	, factor );
-	
-	return layer;
+	return lerp( 
+		(1 - (1-2*(target-0.5)) * (1-blend)),
+		((2*target) * blend),
+		step(target, 0.5));
 }
-	// float4	Tiling;
-	// float4	Offset;
-	// float2	RoughnessRange;
-	// float2	GlowNarrowness;
-
-	// float	ColorLevel;
-	// float	AlphaLevel;
-	// float	SpecularLevel;
-	// float	EmissionLevel;
-	// float	BumpLevel;
-	// float	Displacement;
-	// float	BlendHardness;
-
-LAYERPROPS ReadLayerUV ( int id, float2 uv, float3x3 tbnMatrix )
+	
+	
+SURFACE MaterialCombiner ( float2 uv )
 {
-	LAYERPROPS layer;
+	SURFACE surface;
 	
-	LAYERDATA	layerData =	Layers[id];
+	MATERIAL mtrl =	Material;
 	
-	uv = uv * layerData.Tiling.xy + layerData.Offset.xy;
 	
-	float4	color		=	Textures[id*4+0].Sample( Sampler, uv ).rgba;
-	float4	surface		=	Textures[id*4+1].Sample( Sampler, uv ).rgba;
-	float4	normalMap	=	Textures[id*4+2].Sample( Sampler, uv ).rgba * 2 - 1;
-	float4	emission	=	Textures[id*4+3].Sample( Sampler, uv ).rgba;
+	//uv = uv * layerData.Tiling.xy + layerData.Offset.xy;
 	
-	float3 nonmetal		=	float3(80,80,80)/256.0f;
+	float4 color		=	Textures[0].Sample( Sampler, uv * UVMods[0].xy + UVMods[0].zw ).rgba;
+	float4 surfMap		=	Textures[1].Sample( Sampler, uv * UVMods[1].xy + UVMods[1].zw ).rgba;
+	float4 normalMap	=	Textures[2].Sample( Sampler, uv * UVMods[2].xy + UVMods[2].zw ).rgba * 2 - 1;
+	float4 emission		=	Textures[3].Sample( Sampler, uv * UVMods[3].xy + UVMods[4].zw ).rgba;
+	float4 dirt			=	Textures[4].Sample( Sampler, uv * UVMods[4].xy + UVMods[4].zw ).rgba;
+	
+#ifdef ALPHA_EMISSION_MASK
+	emission *= (1 - color.a); 
+#endif
+	//emission *= emission;
+	
+	//	experimental:
+	/*color.r 	=	Overlay( color.r, dirt.r );
+	color.g 	=	Overlay( color.g, dirt.g );
+	color.b 	=	Overlay( color.b, dirt.b );
+	surfMap.g 	=	Overlay( surfMap.g, dirt.a );*/
+	
+	color.rgb = lerp(color.rgb, color.rgb*dirt.rgb, mtrl.DirtLevel);
+	surfMap.g = 1 - (1-dirt.a*mtrl.DirtLevel) * (1-surfMap.g);
+	
+	float3 metalS		=	color.rgb * (surfMap.r);
+	float3 nonmetalS	=	float3(0.31,0.31,0.31) * surfMap.r;
+	float3 metalD		=	color.rgb * (1-surfMap.r);
+	float3 nonmetalD	=	color.rgb * (1-surfMap.r*0.31);// * 0.31;
 
-	layer.Diffuse		=	color.rgb * (1-surface.r);
-	layer.Alpha			=	color.a;
-	layer.Specular		=	lerp(nonmetal, color.rgb, surface.b) * surface.r;
-	layer.Roughness		=	surface.g;
-	layer.Normal		=	normalMap.xyz;
-	layer.Emission		=	emission.rgb;
+	surface.Diffuse		=	lerp(nonmetalD, metalD, surfMap.b);
+	surface.Specular	=	lerp(nonmetalS, metalS, surfMap.b);
+	surface.Roughness	=	surfMap.g;
+	surface.Normal		=	normalMap.xyz;
+	surface.Emission	=	emission.rgb;
+
+	surface.Diffuse		*=	Material.ColorLevel;
+	surface.Emission 	*=	Material.EmissionLevel;
+	surface.Specular	*=	Material.SpecularLevel;
+	surface.Roughness 	= 	lerp( Material.RoughnessMinimum, Material.RoughnessMaximum, surface.Roughness );
 	
-	layer.Diffuse	 	*=	layerData.ColorLevel;
-	layer.Alpha 	 	*=	layerData.AlphaLevel;
-	layer.Emission   	*=	layerData.EmissionLevel;
-	layer.Specular	 	*=	layerData.SpecularLevel;
-	layer.Roughness 	= 	lerp( layerData.RoughnessRange.x, layerData.RoughnessRange.y, layer.Roughness );
-	
-	return layer;
+	return surface;
 }
 
 
@@ -174,34 +192,27 @@ GBuffer PSMain( PSInput input )
 			input.Normal.x,		input.Normal.y,		input.Normal.z		
 		);
 		
-	LAYERPROPS layer;
-	layer.Diffuse = 0;
-	layer.Alpha = 0;
-	layer.Specular = 0;
-	layer.Roughness = 0;
-	layer.Normal = 0;
-	layer.Emission = 0;
+	SURFACE surface;
 	
-	#ifdef LAYER0
-		layer 	= ReadLayerUV( 0, input.TexCoord, tbnToWorld );
-	#endif
-	#ifdef LAYER1
-		layer 	= OverlayLayers( layer, ReadLayerUV( 1, input.TexCoord, tbnToWorld ) );
-	#endif
-	#ifdef LAYER2
-		layer 	= OverlayLayers( layer, ReadLayerUV( 2, input.TexCoord, tbnToWorld ) );
-	#endif
-	#ifdef LAYER3
-		layer 	= OverlayLayers( layer, ReadLayerUV( 3, input.TexCoord, tbnToWorld ) );
-	#endif
-	
-	float3 worldNormal 	= 	normalize( mul( layer.Normal, tbnToWorld ) );
-	//FitNormalToGBuffer(worldNormal);
+	surface.Diffuse	=	0.5;
+	surface.Specular	=	0.0;
+	surface.Roughness = 0.1f;
+	surface.Normal	= float3(0,0,1);
+	surface.Emission = 0;
 
-	output.hdr		=	float4( layer.Emission, 0 );
-	output.diffuse	=	float4( layer.Diffuse, 1 );
-	output.specular =	float4( layer.Specular, layer.Roughness );
-	output.normals	=	float4( worldNormal * 0.5f + 0.5f, 1 );
+	surface	=	MaterialCombiner( input.TexCoord );
+	
+	//	NB: Multiply normal length by local normal projection on surface normal.
+	//	Shortened normal will be used as Fresnel decay (self occlusion) factor.
+	float3 worldNormal 	= 	normalize( mul( surface.Normal, tbnToWorld ).xyz ) * (0.5+0.5*surface.Normal.z);
+	
+	//	Use sRGB texture for better 
+	//	diffuse/specular intensity distribution
+	output.hdr			=	float4( surface.Emission, 0 );
+	output.diffuse		=	float4( surface.Diffuse, 1 );
+	output.specular 	=	float4( surface.Specular, surface.Roughness );
+	output.normals		=	float4( worldNormal * 0.5f + 0.5f, 1 );
+	output.scattering	=	0;//float4( float3(0.85,0.85,1.00) * 0.3, 0.33f );
 	
 	return output;
 }

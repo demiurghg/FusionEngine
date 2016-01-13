@@ -65,7 +65,7 @@ namespace Fusion.Engine.Storage {
 		/// </summary>
 		/// <param name="relative"></param>
 		/// <returns></returns>
-		string GetFullPath ( string relative )
+		internal string GetFullPath ( string relative )
 		{
 			return Path.Combine(storageDir.FullName, relative);
 		}
