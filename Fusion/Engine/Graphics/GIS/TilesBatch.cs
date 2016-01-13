@@ -44,7 +44,7 @@ namespace Fusion.Engine.Graphics.GIS
 		public override void Update(GameTime gameTime)
 		{
 
-			//Console.Clear();
+			Console.Clear();
 			//Console.WriteLine("Current Zoom Level: " + CurrentLevel);
 			//
 			//for(int i = 0; i < 15; i++)
@@ -54,7 +54,12 @@ namespace Fusion.Engine.Graphics.GIS
 
 			CurrentMapSource.Update(gameTime);			
 
-			DetermineTiles();
+			DetermineTiles(3);
+
+
+			Console.WriteLine();
+			Console.WriteLine("Tiles to render: " + tilesToRender.Count);
+			Console.WriteLine("Free tiles:		" + tilesFree.Count);
 		}
 
 
@@ -63,7 +68,7 @@ namespace Fusion.Engine.Graphics.GIS
 			var dev = Game.GraphicsDevice;
 
 			dev.VertexShaderConstants[0]	= constBuffer;
-			dev.PixelShaderSamplers[0]		= SamplerState.LinearClamp;
+			dev.PixelShaderSamplers[0]		= SamplerState.AnisotropicClamp;
 			dev.PixelShaderResources[1]		= frame;
 
 			dev.PipelineState = factory[(int)(TileFlags.SHOW_FRAMES)];

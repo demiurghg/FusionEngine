@@ -127,13 +127,9 @@ VS_OUTPUT VSMain ( VS_INPUT v )
 	
 	double3 cameraPos =  double3(asdouble(Stage.CameraX[0], Stage.CameraX[1]), asdouble(Stage.CameraY[0], Stage.CameraY[1]), asdouble(Stage.CameraZ[0], Stage.CameraZ[1]));
 
-	float angle = 0;
-
 	double lon		= asdouble(v.lon.x, v.lon.y);
 	double lat		= asdouble(v.lat.x, v.lat.y);
 	double3 cPos	= SphericalToDecart(double2(lon, lat), 6378.137);
-
-	angle = float(lon);
 
 	double3 normPos = cPos*0.000156785594;
 	float3	normal	= normalize(float3(normPos));

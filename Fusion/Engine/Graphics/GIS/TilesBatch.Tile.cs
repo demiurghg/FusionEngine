@@ -244,36 +244,50 @@ namespace Fusion.Engine.Graphics.GIS
 			tilesToRender.Clear();
 			/////////////////////////////////////////////////////
 
-			var cameraPos = camera.FinalCamPosition;
 
+			var cameraPos = DVector3.Transform(new DVector3(0, 0, 6700), DQuaternion.RotationYawPitchRoll(0.52932849788406378, -1.0458657020378879, 0));
+			//var cameraPos = camera.CameraPosition;
+			var cameraNorm = DVector3.Normalize(cameraPos);
+
+			var debug		= Gis.Debug; 
+			debug.Clear();
+			debug.DrawPoint(cameraPos, 200);
+			Console.WriteLine("Camera pos: " + cameraPos);
 
 			Stack<Node> nodes = new Stack<Node>();
 			long numTiles = 1 << startZoomLevel;
 
 
-			//for(int i = 0; i < numTiles; i++)
-			//	for (int j = 0; j < numTiles; j++)
-			//		nodes.Push(new Node {
-			//			X = i,
-			//			Y = j,
-			//			Z = startZoomLevel
-			//		});
+			for(int i = 0; i < numTiles; i++)
+				for (int j = 0; j < numTiles; j++)
+					nodes.Push(new Node {
+						X = i,
+						Y = j,
+						Z = startZoomLevel
+					});
 
-			nodes.Push(new Node {
-				X = 3,
-				Y = 2,
-				Z = startZoomLevel
-			});
+			//nodes.Push(new Node {
+			//	X = 3,
+			//	Y = 2,
+			//	Z = startZoomLevel
+			//});
 
 			while (nodes.Any()) {
 				var node = nodes.Pop();
 
 				var nodePos = GetTileCenterPosition(node.X, node.Y, node.Z);
+
+				//debug.DrawPoint(nodePos, 100);
+
+				var nodeNorm = DVector3.Normalize(nodePos);
+
 				var dist	= (nodePos - cameraPos).Length();
 
-				Console.WriteLine();
-				Console.WriteLine(dist);
-				Console.WriteLine(GetLevelScreenSpaceError(node.Z, dist));
+				//Console.WriteLine();
+				//Console.WriteLine("Node: "		+ node.X + " " + node.Y + " " + node.Z);
+				//Console.WriteLine("Dist: "		+ dist);
+				//Console.WriteLine("Node pos: "	+ nodePos);
+				//Console.WriteLine(GetLevelScreenSpaceError(node.Z, dist));
 
 				if (GetLevelScreenSpaceError(node.Z, dist) < 0.0) // Break this tile to pieces
 				{
@@ -284,7 +298,8 @@ namespace Fusion.Engine.Graphics.GIS
 					}
 				}
 				else {
-					AddTileToRenderList(node.X, node.Y, node.Z);
+					if (DVector3.Dot(cameraNorm, nodeNorm) > 0.0)
+						AddTileToRenderList(node.X, node.Y, node.Z);
 				}
 			}
 
@@ -313,8 +328,9 @@ namespace Fusion.Engine.Graphics.GIS
 			var xHalf = (x0 + x1)/2.0;
 			var yHalf = (y0 + y1)/2.0;
 
-			var lonLat = CurrentMapSource.Projection.TileToWorldPos(xHalf, yHalf);
-			return GeoHelper.SphericalToCartesian(lonLat, GeoHelper.EarthRadius);
+			var lonLat	= CurrentMapSource.Projection.TileToWorldPos(xHalf, yHalf);
+			var ret		= GeoHelper.SphericalToCartesian(DMathUtil.DegreesToRadians(lonLat), GeoHelper.EarthRadius);
+			return ret;
 		}
 
 

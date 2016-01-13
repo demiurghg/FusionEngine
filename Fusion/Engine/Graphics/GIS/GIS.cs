@@ -24,7 +24,7 @@ namespace Fusion.Engine.Graphics.GIS
 		//public void ProjectPoint()		{ }
 		//public void UnProjectPoint()	{ }
 
-
+	    public static DebugGisLayer Debug;
 
 		// Batch stuff
 	    public struct GeoPoint
@@ -33,6 +33,16 @@ namespace Fusion.Engine.Graphics.GIS
 		    [Vertex("TEXCOORD", 1)] public double	Lat;
 		    [Vertex("TEXCOORD", 2)] public Vector4	Tex0;
 		    [Vertex("TEXCOORD", 3)] public Vector4	Tex1;
+		    [Vertex("Color")]		public Color4	Color;
+	    }
+
+
+		public struct CartPoint
+	    {
+		    [Vertex("TEXCOORD", 0)] public double	X;
+		    [Vertex("TEXCOORD", 1)] public double	Y;
+		    [Vertex("TEXCOORD", 2)] public double	Z;
+		    [Vertex("TEXCOORD", 3)] public Vector4	Tex0;
 		    [Vertex("Color")]		public Color4	Color;
 	    }
 
@@ -88,48 +98,48 @@ namespace Fusion.Engine.Graphics.GIS
 	    {
 			constBuffer = new ConstantBuffer(Game.GraphicsDevice, typeof(ConstData));
 
-//			#region Test input region
-//			Camera		= new GlobeCamera(Game);
-//
-//			Camera.Viewport = new Viewport(0, 0, Game.GraphicsDevice.DisplayBounds.Width, Game.GraphicsDevice.DisplayBounds.Height);
-//			Camera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
-//
-//		    Game.GraphicsDevice.DisplayBoundsChanged +=
-//			    (sender, args) =>
-//				    Camera.Viewport =
-//					    new Viewport(0, 0, Game.GraphicsDevice.DisplayBounds.Width,
-//						    Game.GraphicsDevice.DisplayBounds.Height);
-//
-//
-//			// Input bindings
-//		    Game.Mouse.Scroll += (sender, args) => {
-//				if(args.WheelDelta > 0)
-//					Camera.CameraZoom(-0.05f);
-//				else if(args.WheelDelta < 0)
-//					Camera.CameraZoom(0.05f);
-//		    };
-//
-//		    Game.Mouse.Move += (sender, args) =>
-//		    {
-//				if (Game.InputDevice.IsKeyDown(Keys.LeftButton)) {
-//					DVector2 before, after;
-//					var beforeHit	= Camera.ScreenToSpherical(previousMousePosition.X, previousMousePosition.Y, out before, true);
-//					var afterHit	= Camera.ScreenToSpherical(args.Position.X, args.Position.Y, out after, true);
-//
-//					if (beforeHit && afterHit) {
-//						Camera.Yaw		-= after.X - before.X;
-//						Camera.Pitch	+= after.Y - before.Y;
-//					}
-//				}
-//				if(Game.InputDevice.IsKeyDown(Keys.MiddleButton) && Camera.CameraState == GlobeCamera.CameraStates.ViewToPoint) {
-//					Camera.RotateViewToPointCamera(Game.InputDevice.RelativeMouseOffset);
-//			    }
-//				if(Game.InputDevice.IsKeyDown(Keys.RightButton) && Camera.CameraState == GlobeCamera.CameraStates.FreeSurface) {
-//					Camera.RotateFreeSurfaceCamera(Game.InputDevice.RelativeMouseOffset);
-//			    }
-//				previousMousePosition = new Vector2(args.Position.X, args.Position.Y);
-//		    };
-//			#endregion
+			#region Test input region
+			Camera		= new GlobeCamera(Game);
+
+			Camera.Viewport = new Viewport(0, 0, Game.GraphicsDevice.DisplayBounds.Width, Game.GraphicsDevice.DisplayBounds.Height);
+			Camera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
+
+		    Game.GraphicsDevice.DisplayBoundsChanged +=
+			    (sender, args) =>
+				    Camera.Viewport =
+					    new Viewport(0, 0, Game.GraphicsDevice.DisplayBounds.Width,
+						    Game.GraphicsDevice.DisplayBounds.Height);
+
+
+			// Input bindings
+		    Game.Mouse.Scroll += (sender, args) => {
+				if(args.WheelDelta > 0)
+					Camera.CameraZoom(-0.05f);
+				else if(args.WheelDelta < 0)
+					Camera.CameraZoom(0.05f);
+		    };
+
+		    Game.Mouse.Move += (sender, args) =>
+		    {
+				if (Game.InputDevice.IsKeyDown(Keys.LeftButton)) {
+					DVector2 before, after;
+					var beforeHit	= Camera.ScreenToSpherical(previousMousePosition.X, previousMousePosition.Y, out before, true);
+					var afterHit	= Camera.ScreenToSpherical(args.Position.X, args.Position.Y, out after, true);
+
+					if (beforeHit && afterHit) {
+						Camera.Yaw		-= after.X - before.X;
+						Camera.Pitch	+= after.Y - before.Y;
+					}
+				}
+				if(Game.InputDevice.IsKeyDown(Keys.MiddleButton) && Camera.CameraState == GlobeCamera.CameraStates.ViewToPoint) {
+					Camera.RotateViewToPointCamera(Game.InputDevice.RelativeMouseOffset);
+			    }
+				if(Game.InputDevice.IsKeyDown(Keys.RightButton) && Camera.CameraState == GlobeCamera.CameraStates.FreeSurface) {
+					Camera.RotateFreeSurfaceCamera(Game.InputDevice.RelativeMouseOffset);
+			    }
+				previousMousePosition = new Vector2(args.Position.X, args.Position.Y);
+		    };
+			#endregion
 
 			//Points = new PointsGisBatch(Game, 100)
 		    //{
