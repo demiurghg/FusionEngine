@@ -31,6 +31,8 @@ HKEY_CURRENT_USER\Software\FusionEngine@ContentDir
 *.fbx /geom
 scenes/testScene.fbx /geom /report
 scenes/testAnim.fbx /geom /report /anim
+scenes/testSkin.fbx /geom /report /anim
+scenes/rush.fbx /geom /report /anim
 
 [Copy]
 myDir/*.*

@@ -18,12 +18,12 @@ namespace Fusion.Engine.Graphics {
 		[Vertex("COLOR")]			public Color	Color	;
 		[Vertex("TEXCOORD")]		public Vector2	TexCoord;
 		[Vertex("BLENDINDICES")]	public Int4		SkinIndices;
-		[Vertex("BLENDWEIGHT")]		public Vector4	SkinWeights;
+		[Vertex("BLENDWEIGHTS")]	public Vector4	SkinWeights;
 
 
 		static public VertexInputElement[] Elements {
 			get {
-				return VertexInputElement.FromStructure( typeof(VertexColorTextureTBNRigid) );
+				return VertexInputElement.FromStructure( typeof(VertexColorTextureTBNSkinned) );
 			}
 		}
 

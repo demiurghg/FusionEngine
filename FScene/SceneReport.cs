@@ -40,7 +40,7 @@ namespace FScene {
 
 				var index = scene.Materials.IndexOf(mtrl);
 				
-				sb.AppendFormat("{0,4}:  {1,-30} <i>{2}</i>\r\n", index, "\"" + mtrl.Name + "\"", mtrl.Texture );
+				sb.AppendFormat("{0,4}:  {1,-30} texture:<i>{2}</i>\r\n", index, "\"" + mtrl.Name + "\"", mtrl.Texture );
 			}
 
 
@@ -55,8 +55,9 @@ namespace FScene {
 				var tris	=	mesh.TriangleCount;
 				var subsets	=	mesh.Subsets.Count;
 				var refs	=	string.Join(" ", scene.Nodes.Where( n => n.MeshIndex==index ).Select( n1 => n1.Name ) );
+				var skinned	=	mesh.Vertices.Any( v => v.SkinWeights != Vector4.Zero );
 				
-				sb.AppendFormat("{0,4}:  v:{1,4}  t:{2,4}  s:{3,2}  ref:[<i>{4}</i>]\r\n", index, verts, tris, subsets, refs );
+				sb.AppendFormat("{0,4}:  v:{1,4}  t:{2,4}  s:{3,2}  ref:[<i>{4}</i>] {5}\r\n", index, verts, tris, subsets, refs, skinned ? "skinned":"" );
 			}
 
 
