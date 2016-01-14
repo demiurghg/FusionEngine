@@ -403,6 +403,7 @@ namespace Fusion.Framework {
 		{
 			if (e.KeyChar=='`') {
 				Show = !Show;
+				return;
 			}
 			if (!Show) {
 				return;

@@ -260,7 +260,7 @@ namespace TestGame2 {
 				for (int j = 0; j<8; j++) {
 				
 					var inst   = new MeshInstance( Game.RenderSystem, skinScene, skinScene.Meshes[meshIndex], materials );
-					inst.World = transforms[ i ] * Matrix.Translation(0,2,5 * j);
+					inst.World = transforms[ i ] * Matrix.Translation(0,3,10) * Matrix.RotationY(MathUtil.Pi*2/8.0f * j);
 				
 					skinInstances.Add( new Tuple<MeshInstance,int>( inst, i ) );
 
@@ -415,6 +415,8 @@ namespace TestGame2 {
 
 			var vp = Game.RenderSystem.DisplayBounds;
 			var ratio = vp.Width / (float)vp.Height;
+
+			Game.Keyboard.ScanKeyboard = !Console.Show;
 
 			masterView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1, 0, ratio);
 		}

@@ -29,6 +29,7 @@ using Fusion.Engine.Graphics.GIS;
 using Fusion.Engine.Server;
 using Lidgren.Network;
 using Fusion.Engine.Storage;
+using Fusion.Engine.Audio;
 
 
 namespace Fusion.Engine.Common {
@@ -61,8 +62,11 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Gets the current graphics engine
 		/// </summary>
-		[GameModule("Graphics", "rs", InitOrder.After)]
+		[GameModule("Rendering", "rs", InitOrder.After)]
 		public	RenderSystem RenderSystem { get { return renderSystem; } }
+
+		[GameModule("Audio", "snd", InitOrder.After)]
+		public SoundSystem SoundSystem { get { return soundSystem; } }
 
 		[GameModule("Network", "net", InitOrder.After)]
 		public NetworkEngine Network { get { return network; } }
@@ -200,6 +204,7 @@ namespace Fusion.Engine.Common {
 		//AudioEngine			audioEngine		;
 		//InputEngine			inputEngine		;
 		RenderSystem		renderSystem	;
+		SoundSystem			soundSystem		;
 		NetworkEngine		network			;
 		ContentManager		content			;
 		Invoker				invoker			;
@@ -318,6 +323,7 @@ namespace Fusion.Engine.Common {
 			inputDevice			=	new InputDevice( this );
 			graphicsDevice		=	new GraphicsDevice( this );
 			renderSystem		=	new RenderSystem( this );
+			soundSystem			=	new SoundSystem( this );
 			network				=	new NetworkEngine( this );
 			content				=	new ContentManager( this );
 			gameTimeInternal	=	new GameTime();

@@ -159,6 +159,29 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		/*-----------------------------------------------------------------------------------------
+		 * 
+		 *	SFX :
+		 * 
+		-----------------------------------------------------------------------------------------*/
+
+		public void SetParticleAtlas ( TextureAtlas textureAtlas )
+		{
+			throw new NotImplementedException();
+		}
+
+
+		public void InjectHardParticle ( Particle particle )
+		{
+			throw new NotImplementedException();
+		}
+
+
+		public void InjectSoftParticle ( Particle particle )
+		{
+			throw new NotImplementedException();
+		}
+
 
 		/*-----------------------------------------------------------------------------------------
 		 * 
@@ -246,7 +269,8 @@ namespace Fusion.Engine.Graphics {
 			rs.HdrFilter.Render( gameTime, TempFXBuffer.Surface, viewHdrFrame.HdrBuffer, this );
 
 			//	apply FXAA
-			rs.Filter.Fxaa( targetSurface, TempFXBuffer );
+			//rs.Filter.Fxaa( targetSurface, TempFXBuffer );
+			rs.Filter.Copy( targetSurface, TempFXBuffer );
 		}
 
 
@@ -308,15 +332,6 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			Log.Message("{0} light probes - {1} ms", LightSet.EnvLights.Count, sw.ElapsedMilliseconds);
-		}
-
-
-
-		/// <summary>
-		/// Renders lit mesh instances.
-		/// </summary>
-		void RenderLitMeshInstances ()
-		{
 		}
 
 
