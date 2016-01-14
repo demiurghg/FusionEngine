@@ -364,10 +364,10 @@ namespace Fusion.Framework {
 
 		void Keyboard_KeyDown ( object sender, KeyEventArgs e )
 		{
-			if (e.Key==Keys.OemTilde) {
-				Show = !Show;
-				return;
-			}
+			//if (e.Key==Keys.OemTilde) {
+			//	Show = !Show;
+			//	return;
+			//}
 		}
 
 
@@ -401,10 +401,10 @@ namespace Fusion.Framework {
 
 		void Keyboard_FormKeyPress ( object sender, KeyPressArgs e )
 		{
-			if (!Show) {
-				return;
-			}
 			if (e.KeyChar=='`') {
+				Show = !Show;
+			}
+			if (!Show) {
 				return;
 			}
 			switch (e.KeyChar) {

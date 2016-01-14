@@ -69,11 +69,13 @@ namespace Fusion.Engine.Input {
 				return scanKeyboard;
 			}
 			set {
-				if (value) {
-					scanKeyboard = true;
-				} else {
-					scanKeyboard = false;
-					device.RemoveAllPressedKeys();
+				if (value!=scanKeyboard) {
+					if (value) {
+						scanKeyboard = true;
+					} else {
+						scanKeyboard = false;
+						device.RemoveAllPressedKeys();
+					}
 				}
 			}
 		}
@@ -185,7 +187,7 @@ namespace Fusion.Engine.Input {
 		/// <returns></returns>
 		public bool IsKeyDown ( Keys key )
 		{
-			return ( device.IsKeyDown( (Fusion.Drivers.Input.Keys)key ) );
+			return ( scanKeyboard && device.IsKeyDown( (Fusion.Drivers.Input.Keys)key ) );
 		}
 		
 
@@ -196,7 +198,7 @@ namespace Fusion.Engine.Input {
 		/// <returns></returns>
 		public bool IsKeyUp ( Keys key )
 		{
-			return ( device.IsKeyUp( (Fusion.Drivers.Input.Keys)key ) );
+			return ( !scanKeyboard || device.IsKeyUp( (Fusion.Drivers.Input.Keys)key ) );
 		}
 
 
@@ -210,6 +212,11 @@ namespace Fusion.Engine.Input {
 
 		void device_KeyDown ( object sender, InputDevice.KeyEventArgs e )
 		{
+			if (!scanKeyboard) {
+				return;
+			}
+
+
 			KeyBind bind;
 			if (bindings.TryGetValue( (Keys)e.Key, out bind )) {
 				try {
