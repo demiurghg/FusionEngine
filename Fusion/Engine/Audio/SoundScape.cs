@@ -36,7 +36,7 @@ namespace Fusion.Engine.Audio {
 		/// </summary>
 		/// <param name="?"></param>
 		/// <returns></returns>
-		public SoundEffectInstance CreateSoundInstance ( SoundEffect soundEffect )
+		public SoundEmitter CreateEmitter ( SoundEffect soundEffect )
 		{
 			throw new NotImplementedException();
 		}

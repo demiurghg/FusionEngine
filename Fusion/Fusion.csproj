@@ -206,11 +206,24 @@
     <Compile Include="Drivers\Graphics\Resources\TextureCubeArray.cs" />
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
     <Compile Include="Drivers\Graphics\Resources\UnorderedAccess.cs" />
-    <Compile Include="Engine\Audio\SoundSystemConfig.cs" />
-    <Compile Include="Engine\Audio\SoundEffect.cs" />
-    <Compile Include="Engine\Audio\SoundEffectInstance.cs" />
-    <Compile Include="Engine\Audio\SoundScape.cs" />
-    <Compile Include="Engine\Audio\SoundSystem.cs" />
+    <Compile Include="Engine\Audio\Listener.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Engine\Audio\SoundEffect.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Engine\Audio\SoundEmitter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Engine\Audio\SoundScape.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Engine\Audio\SoundSystem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Engine\Audio\SoundSystemConfig.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Engine\Client\ClientState.cs" />
     <Compile Include="Engine\Client\GameClient.Disconnected.cs" />
     <Compile Include="Engine\Client\GameClient.Active.cs" />
@@ -224,6 +237,7 @@
     <Compile Include="Engine\Common\Commands\CrashClient.cs" />
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
     <Compile Include="Engine\Common\GameInterface.Internal.cs" />
+    <Compile Include="Engine\Graphics\ParticleSystem.cs" />
     <Compile Include="Engine\Graphics\Design\TextureLocationEditor.cs" />
     <Compile Include="Engine\Graphics\GIS\DebugGisLayer.cs" />
     <Compile Include="Engine\Graphics\Materials\BaseIllum.cs" />
@@ -555,6 +569,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Engine\Physics\" />
+    <Folder Include="Engine\SFX\" />
     <Folder Include="Engine\Triggers\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

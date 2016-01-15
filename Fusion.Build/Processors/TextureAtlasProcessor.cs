@@ -47,6 +47,18 @@ namespace Fusion.Build.Processors {
 		}
 
 
+
+
+		Image LoadImage ( string fileName )
+		{
+			try {
+				return Image.LoadTga( fileName );
+			} catch ( Exception e ) {
+				throw new BuildException( string.Format("Failed to load atlas fragment {0}: {1}", fileName, e.Message ) );
+			}
+		}
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -63,7 +75,7 @@ namespace Fusion.Build.Processors {
 
 
 			var images		=	fileNames
-								.Select( fn => Image.LoadTga( fn ) )
+								.Select( fn => LoadImage( fn ) )
 								.OrderByDescending( img0 => img0.Width * img0.Height )
 								.ThenByDescending( img1 => img1.Width )
 								.ThenByDescending( img2 => img2.Height )

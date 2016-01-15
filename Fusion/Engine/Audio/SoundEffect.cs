@@ -7,17 +7,18 @@ using System.IO;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
-using Fusion.Drivers.Audio;
-using Fusion.Drivers.Audio;
+using Audio = Fusion.Drivers.Audio;
 
 
 
 namespace Fusion.Engine.Audio {
 
 	/// <summary>
-	/// Represents sound.
+	/// Represents sound buffer loaded from disk.
 	/// </summary>
 	public class SoundEffect {
+
+		Audio.SoundEffect	soundEffect;		
 
 		/// <summary>
 		/// 
@@ -25,6 +26,7 @@ namespace Fusion.Engine.Audio {
 		/// <param name="stream"></param>
 		internal SoundEffect ( Stream stream )
 		{
+			throw new NotImplementedException();
 		}
 
 
@@ -33,11 +35,9 @@ namespace Fusion.Engine.Audio {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		public SoundEffectInstance CreateInstance ()
+		public SoundEmitter CreateInstance ()
 		{
-			return new SoundEffectInstance( this );
+			throw new NotImplementedException();
 		}
-
-
 	}
 }

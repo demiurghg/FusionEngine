@@ -10,13 +10,17 @@ using Fusion.Drivers.Audio;
 
 
 namespace Fusion.Engine.Audio {
-	public class SoundEffectInstance {
+
+	/// <summary>
+	///	Represents 3D sound.
+	/// </summary>
+	public class SoundEmitter {
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="sound"></param>
-		internal SoundEffectInstance ( SoundEffect sound )
+		internal SoundEmitter ( SoundEffect sound )
 		{
 		}
 		

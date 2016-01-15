@@ -87,10 +87,9 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public float TerminalRotation;
 
-		
 		/// <summary>
-		/// Texture coodinates in texture atlas.
+		/// Index of texture in texture atlas
 		/// </summary>
-		public RectangleF AtlasCoordinates;
+		public int TextureAtlasIndex;
 	}
 }

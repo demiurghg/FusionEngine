@@ -27,6 +27,29 @@ namespace Fusion.Core.Mathematics
     /// </summary>
     public static class RandomExt
     {
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="random"></param>
+		/// <param name="mean"></param>
+		/// <param name="stdDev"></param>
+		/// <returns></returns>
+		public static float Gauss ( this Random random, float mean, float stdDev )
+		{
+			//Random rand = new Random(); //reuse this if you are generating many
+			double u1 = random.NextDouble(); //these are uniform(0,1) random doubles
+			double u2 = random.NextDouble();
+			double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
+						 Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
+			double randNormal =
+						 mean + stdDev * randStdNormal; //random normal(mean,stdDev^2)
+
+			return (float)randNormal;
+		}
+
+
+
 		/// <summary>
         /// Gets random <see cref="Vector3"/> on sphere.
 		/// </summary>

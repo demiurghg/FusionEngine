@@ -40,6 +40,15 @@ namespace Fusion.Engine.Graphics {
 			get; private set;
 		}
 
+
+		/// <summary>
+		/// Gets particle system instance.
+		/// </summary>
+		public ParticleSystem ParticleSystem {
+			get; private set;
+		}
+
+
 		/// <summary>
 		/// Gets collection of mesh instances.
 		/// </summary>
@@ -86,6 +95,8 @@ namespace Fusion.Engine.Graphics {
 
 			Instances		=	new List<MeshInstance>();
 			LightSet		=	new LightSet( Game.RenderSystem );
+			
+			ParticleSystem	=	new ParticleSystem( Game.RenderSystem, this );
 
 			MeasuredOld		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
 			MeasuredNew		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
@@ -158,29 +169,6 @@ namespace Fusion.Engine.Graphics {
 			//NormalMapTexture	=	new TargetTexture( NormalMapBuffer );
 		}
 
-
-		/*-----------------------------------------------------------------------------------------
-		 * 
-		 *	SFX :
-		 * 
-		-----------------------------------------------------------------------------------------*/
-
-		public void SetParticleAtlas ( TextureAtlas textureAtlas )
-		{
-			throw new NotImplementedException();
-		}
-
-
-		public void InjectHardParticle ( Particle particle )
-		{
-			throw new NotImplementedException();
-		}
-
-
-		public void InjectSoftParticle ( Particle particle )
-		{
-			throw new NotImplementedException();
-		}
 
 
 		/*-----------------------------------------------------------------------------------------
@@ -264,6 +252,9 @@ namespace Fusion.Engine.Graphics {
 
 			//	render lights :
 			rs.LightRenderer.RenderLighting( stereoEye, Camera, viewHdrFrame, this, Game.RenderSystem.WhiteTexture, Radiance );
+
+			//	render and simulate particles :
+			ParticleSystem.Render( gameTime, Camera, stereoEye, viewHdrFrame );
 
 			//	apply tonemapping and bloom :
 			rs.HdrFilter.Render( gameTime, TempFXBuffer.Surface, viewHdrFrame.HdrBuffer, this );

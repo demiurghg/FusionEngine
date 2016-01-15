@@ -382,6 +382,17 @@ namespace TestGame2 {
 			}
 
 
+			masterView.ParticleSystem.InjectParticle( Vector2.Zero, Vector2.Zero, 100, 100, 2, 1 );
+
+
+			var vp = Game.RenderSystem.DisplayBounds;
+			var rand2 = new Random();
+
+			if (Game.Keyboard.IsKeyDown(Keys.Space)) {
+				for (int i=0; i<100; i++) {
+					masterView.ParticleSystem.InjectParticle( rand2.NextVector2( Vector2.Zero, new Vector2(vp.Width, vp.Height) ), Vector2.Zero, rand2.Gauss(10,3), rand2.Gauss(40,30), rand2.Gauss(40,30), 0.1f );
+				}
+			}
 
 
 			/*if ( game.Keyboard.IsKeyDown(Keys.R) ) {
@@ -413,7 +424,6 @@ namespace TestGame2 {
 
 			var m = UpdateCam( gameTime );
 
-			var vp = Game.RenderSystem.DisplayBounds;
 			var ratio = vp.Width / (float)vp.Height;
 
 			Game.Keyboard.ScanKeyboard = !Console.Show;
