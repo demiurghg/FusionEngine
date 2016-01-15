@@ -220,7 +220,7 @@ namespace Fusion.Framework {
 			//
 			//	Draw suggestions :
 			//	
-			if (suggestion!=null && suggestion.Candidates.Any()) {
+			if (Show && suggestion!=null && suggestion.Candidates.Any()) {
 
 				var candidates = suggestion.Candidates;
 
@@ -238,17 +238,7 @@ namespace Fusion.Framework {
 					editLayer.DrawDebugString(consoleFont, x + charWidth, y + charHeight * line, candidate, Config.HelpColor );
 					line ++;
 				}
-			} /*else {
-				string text = "Type beginning of the command and press TAB for suggestions.";
-
-				var x = charWidth * 1;
-				var y = charHeight;
-				var w = text.Length * charWidth;
-				var h = 1 * charHeight;
-
-				editLayer.Draw( consoleBackground, x, y, w, h, Color.White );
-				editLayer.DrawDebugString(consoleFont, x, y, text, Color.Gray);
-			}*/
+			}
 		}
 
 

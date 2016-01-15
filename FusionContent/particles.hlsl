@@ -127,19 +127,23 @@ void GSMain( point OUT_PARTICLE inputPoint[1], inout TriangleStream<GSOutput> ou
 
 	float2x2	m	=	float2x2( cos(a), sin(a), -sin(a), cos(a) );
 	
-	p0.Position	= mul( float4( position + mul(float2( sz, sz), m), 0, 1 ), Params.Projection );
+	p0.Position	= mul( float4( position + mul(float2( sz, sz), m), 0, 1 ), Params.View );
+	p0.Position = mul( p0.Position, Params.Projection );
 	p0.TexCoord	= float2(1,1);
 	p0.Color 	= color;
 	
-	p1.Position	= mul( float4( position + mul(float2(-sz, sz), m), 0, 1 ), Params.Projection );
+	p1.Position	= mul( float4( position + mul(float2(-sz, sz), m), 0, 1 ), Params.View );
+	p1.Position = mul( p1.Position, Params.Projection );
 	p1.TexCoord	= float2(0,1);
 	p1.Color 	= color;
 	
-	p2.Position	= mul( float4( position + mul(float2(-sz,-sz), m), 0, 1 ), Params.Projection );
+	p2.Position	= mul( float4( position + mul(float2(-sz,-sz), m), 0, 1 ), Params.View );
+	p2.Position = mul( p2.Position, Params.Projection );
 	p2.TexCoord	= float2(0,0);
 	p2.Color 	= color;
 	
-	p3.Position	= mul( float4( position + mul(float2( sz,-sz), m), 0, 1 ), Params.Projection );
+	p3.Position	= mul( float4( position + mul(float2( sz,-sz), m), 0, 1 ), Params.View );
+	p3.Position = mul( p3.Position, Params.Projection );
 	p3.TexCoord	= float2(1,0);
 	p3.Color 	= color;
 
@@ -159,7 +163,7 @@ void GSMain( point OUT_PARTICLE inputPoint[1], inout TriangleStream<GSOutput> ou
 
 float4 PSMain( GSOutput input ) : SV_Target
 {
-	return float4(2,4,8,0) * float4(input.Color.rgb,1);
+	return float4(1,2,8,0) * float4(input.Color.rgb,1) * 1;
 	//return float4(2,4,8,0);//Texture.Sample( Sampler, input.TexCoord ) * float4(input.Color.rgb,1) * 100 ;
 }
 #endif
