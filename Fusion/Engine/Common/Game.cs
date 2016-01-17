@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using System.Xml.Serialization;
 using System.Reflection;
 using System.Threading.Tasks;
-using Fusion.Drivers.Audio;
 using System.Globalization;
 using System.Threading;
 using Fusion.Drivers.Input;
@@ -43,11 +42,6 @@ namespace Fusion.Engine.Common {
 		/// Game instance.
 		/// </summary>
 		public static Game Instance = null;
-
-		/// <summary>
-		/// Gets the current audio device
-		/// </summary>
-		internal AudioDevice	AudioDevice { get { return audioDevice; } }
 
 		/// <summary>
 		/// Gets the current input device
@@ -198,7 +192,6 @@ namespace Fusion.Engine.Common {
 		internal bool ExitRequested { get { return requestExit; } }
 
 
-		AudioDevice			audioDevice		;
 		InputDevice			inputDevice		;
 		GraphicsDevice		graphicsDevice	;
 		//AudioEngine			audioEngine		;
@@ -319,7 +312,6 @@ namespace Fusion.Engine.Common {
 			//	http://msdn.microsoft.com/en-us/library/bb384202.aspx
 			GCSettings.LatencyMode	=	GCLatencyMode.SustainedLowLatency;
 
-			audioDevice			=	new AudioDevice( this );
 			inputDevice			=	new InputDevice( this );
 			graphicsDevice		=	new GraphicsDevice( this );
 			renderSystem		=	new RenderSystem( this );
@@ -408,7 +400,7 @@ namespace Fusion.Engine.Common {
 
 			GraphicsDevice.Initialize( p );
 			InputDevice.Initialize();
-			AudioDevice.Initialize();
+			SoundSystem.Initialize();
 
 			//	init game :
 			Log.Message("");
@@ -459,9 +451,6 @@ namespace Fusion.Engine.Common {
 
 				Log.Message("Disposing : Input Device");
 				SafeDispose( ref inputDevice );
-
-				Log.Message("Disposing : Audio Device");
-				SafeDispose( ref audioDevice );
 
 				Log.Message("Disposing : Graphics Device");
 				SafeDispose( ref graphicsDevice );

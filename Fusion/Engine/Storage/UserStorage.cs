@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using System.Xml.Serialization;
 using System.Reflection;
 using System.Threading.Tasks;
-using Fusion.Drivers.Audio;
 using System.Globalization;
 using System.Threading;
 using System.IO;

@@ -159,18 +159,6 @@
     <Compile Include="Core\Utils\Crc32.cs" />
     <Compile Include="Core\Utils\Hud.cs" />
     <Compile Include="Core\Utils\TimeProbe.cs" />
-    <Compile Include="Drivers\Audio\AudioChannels.cs" />
-    <Compile Include="Drivers\Audio\AudioDevice.cs" />
-    <Compile Include="Drivers\Audio\AudioEmitter.cs" />
-    <Compile Include="Drivers\Audio\AudioListener.cs" />
-    <Compile Include="Drivers\Audio\AudioStopOptions.cs" />
-    <Compile Include="Drivers\Audio\CurvePoint.cs" />
-    <Compile Include="Drivers\Audio\InstancePlayLimitException.cs" />
-    <Compile Include="Drivers\Audio\NoAudioHardwareException.cs" />
-    <Compile Include="Drivers\Audio\SoundEffect.cs" />
-    <Compile Include="Drivers\Audio\SoundEffectInstance.cs" />
-    <Compile Include="Drivers\Audio\SoundEffectLoader.cs" />
-    <Compile Include="Drivers\Audio\SoundState.cs" />
     <Compile Include="Core\Configuration\ConfigAttribute.cs" />
     <Compile Include="Core\Content\ContentException.cs" />
     <Compile Include="Core\Content\ContentLoader.cs" />
@@ -206,21 +194,18 @@
     <Compile Include="Drivers\Graphics\Resources\TextureCubeArray.cs" />
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
     <Compile Include="Drivers\Graphics\Resources\UnorderedAccess.cs" />
-    <Compile Include="Engine\Audio\Listener.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Engine\Audio\AudioChannels.cs" />
+    <Compile Include="Engine\Audio\SoundSystem.cs" />
+    <Compile Include="Engine\Audio\AudioEmitter.cs" />
+    <Compile Include="Engine\Audio\AudioListener.cs" />
+    <Compile Include="Engine\Audio\AudioStopOptions.cs" />
+    <Compile Include="Engine\Audio\CurvePoint.cs" />
     <Compile Include="Engine\Audio\SoundEffect.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Engine\Audio\SoundEmitter.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Engine\Audio\SoundScape.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Engine\Audio\SoundSystem.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Engine\Audio\SoundEffectInstance.cs" />
+    <Compile Include="Engine\Audio\SoundEffectLoader.cs" />
+    <Compile Include="Engine\Audio\SoundState.cs" />
     <Compile Include="Engine\Audio\SoundSystemConfig.cs">
       <SubType>Code</SubType>
     </Compile>

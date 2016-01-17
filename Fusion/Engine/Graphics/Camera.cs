@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
-using Fusion.Drivers.Audio;
 
 namespace Fusion.Engine.Graphics {
 	public class Camera {

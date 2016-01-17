@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
-using Fusion.Drivers.Audio;
+using Fusion.Engine.Audio;
 
 
 namespace Fusion.Engine.Audio {
