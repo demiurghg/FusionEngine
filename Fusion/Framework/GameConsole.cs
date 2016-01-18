@@ -37,7 +37,6 @@ namespace Fusion.Framework {
 
 
 		//SpriteFont	consoleFont;
-		DiscTexture consoleBackground;
 		DiscTexture	consoleFont;
 		SpriteLayer consoleLayer;
 		SpriteLayer editLayer;
@@ -45,7 +44,6 @@ namespace Fusion.Framework {
 
 		float showFactor = 0;
 		string font;
-		string conback;
 
 		EditBox	editBox;
 
@@ -76,7 +74,6 @@ namespace Fusion.Framework {
 			Config			=	new GameConsoleConfig();
 			
 			this.font		=	font;
-			this.conback	=	conback;
 
 			editBox		=	new EditBox(this);
 		}
@@ -93,7 +90,6 @@ namespace Fusion.Framework {
 			Config			=	new GameConsoleConfig();
 			
 			this.font		=	font;
-			this.conback	=	conback;
 
 			editBox		=	new EditBox(this);
 		}
@@ -148,7 +144,6 @@ namespace Fusion.Framework {
 		void LoadContent ()
 		{
 			consoleFont			=	Game.Content.Load<DiscTexture>(font);
-			consoleBackground	=	Game.Content.Load<DiscTexture>(conback);
 
 			RefreshConsole();
 		}

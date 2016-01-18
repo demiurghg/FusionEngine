@@ -1,24 +1,25 @@
 
 #if 0
-$ubershader INJECTION|SIMULATION|RENDER
+$ubershader INITIALIZE|INJECTION|SIMULATION|DRAW
 #endif
 
-struct IN_PARTICLE {
-	float4	Position	 : POSITION;
-	float4	Color0		 : COLOR0;
-	float4	Color1		 : COLOR1;
-	float4	VelAccel	 : TEXCOORD0;
-	float4	SizeAngle	 : TEXCOORD1;
-	float4	Timing		 : TEXCOORD2; // total, lifetime, fade-in, fade-out
-};
+#define BLOCK_SIZE	256
+#define MAX_PARTICLES = (384*1024)
 
-struct OUT_PARTICLE {
-	float4	Position	 : SV_POSITION;
-	float4	Color0		 : COLOR0;
-	float4	Color1		 : COLOR1;
-	float4	VelAccel	 : TEXCOORD0;
-	float4	SizeAngle	 : TEXCOORD1;
-	float4	Timing		 : TEXCOORD2; // total, lifetime, fade-in, fade-out
+struct PARTICLE {
+	float2	Position;
+	float2	Velocity;
+	float2	Acceleration;
+	float4	Color0;
+	float4	Color1;
+	float	Size0;
+	float	Size1;
+	float	Angle0;
+	float	Angle1;
+	float	TotalLifeTime;
+	float	LifeTime;
+	float	FadeIn;
+	float	FadeOut;
 };
 
 struct PARAMS {
@@ -26,41 +27,103 @@ struct PARAMS {
 	float4x4	Projection;
 	int			MaxParticles;
 	float		DeltaTime;
+	uint		DeadListSize;
 };
 
 cbuffer CB1 : register(b0) { 
 	PARAMS Params; 
 };
 
-SamplerState	Sampler				: 	register(s0);
-Texture2D		Texture 			: 	register(t0);
+SamplerState						Sampler				: 	register(s0);
 
+Texture2D							Texture 			: 	register(t0);
+
+StructuredBuffer<PARTICLE>			injectionBuffer		:	register(t1);
+StructuredBuffer<PARTICLE>			particleBufferGS	:	register(t2);
+
+RWStructuredBuffer<PARTICLE>		particleBuffer		: 	register(u0);
+
+#ifdef INJECTION
+ConsumeStructuredBuffer<uint>		deadParticleIndices	: 	register(u1);
+#endif
+#if (defined SIMULATION) || (defined INITIALIZE)
+AppendStructuredBuffer<uint>		deadParticleIndices	: 	register(u1);
+#endif
+
+/*-----------------------------------------------------------------------------
+	Simulation :
+-----------------------------------------------------------------------------*/
+#if (defined INJECTION) || (defined SIMULATION) || (defined INITIALIZE)
+[numthreads( BLOCK_SIZE, 1, 1 )]
+void CSMain( 
+	uint3 groupID			: SV_GroupID,
+	uint3 groupThreadID 	: SV_GroupThreadID, 
+	uint3 dispatchThreadID 	: SV_DispatchThreadID,
+	uint  groupIndex 		: SV_GroupIndex
+)
+{
+	int id = dispatchThreadID.x;
+	
+#ifdef INITIALIZE
+	deadParticleIndices.Append(id);
+#endif	
+
+#ifdef INJECTION
+	if (id < Params.MaxParticles && Params.DeadListSize > 1024 /* MAX INJECTED */ ) {
+		PARTICLE p = injectionBuffer[ id ];
+		
+		uint newIndex = deadParticleIndices.Consume();
+		
+		particleBuffer[ newIndex ] = p;
+	}
+#endif
+
+#ifdef SIMULATION
+	if (id < Params.MaxParticles) {
+		PARTICLE p = particleBuffer[ id ];
+		
+		if (p.TotalLifeTime>0) {
+			if (p.LifeTime < p.TotalLifeTime) {
+				p.LifeTime += Params.DeltaTime;
+			} else {
+				p.TotalLifeTime = -1;
+				deadParticleIndices.Append( id );
+			}
+		}
+		
+		particleBuffer[ id ] = p;
+	}
+#endif
+}
+#endif
 
 
 /*-----------------------------------------------------------------------------
 	Rendering :
 -----------------------------------------------------------------------------*/
 
-struct GSOutput {
-	float4	Position  : SV_Position;
-	float2	TexCoord  : TEXCOORD0;
-	float4	Color     : COLOR0;
+struct VSOutput {
+	int vertexID : TEXCOORD0;
 };
 
-#if (defined SIMULATION) || (defined INJECTION) || (defined RENDER)
-OUT_PARTICLE VSMain( IN_PARTICLE p, uint id : SV_VertexID )
+struct GSOutput {
+	float4	Position : SV_Position;
+	float2	TexCoord : TEXCOORD0;
+	float2	TexCoord1 : TEXCOORD1;
+	float 	TexCoord2 : TEXCOORD2;
+	float3	TexCoord3 : TEXCOORD3;
+	float4	Color    : COLOR0;
+	int4	Color1    : COLOR1;
+};
+
+
+#if DRAW
+VSOutput VSMain( uint vertexID : SV_VertexID )
 {
-	OUT_PARTICLE op;
-	op.Position	 	=	float4(p.Position.xy,0,1);	 
-	op.Color0		=	p.Color0		;  
-	op.Color1		=	p.Color1		;  
-	op.VelAccel	    =	p.VelAccel	    ;
-	op.SizeAngle	=	p.SizeAngle	    ;
-	op.Timing		=	p.Timing		;  
-	
-	return op;
+	VSOutput output;
+	output.vertexID = vertexID;
+	return output;
 }
-#endif
 
 
 float Ramp(float f_in, float f_out, float t) 
@@ -79,71 +142,50 @@ float Ramp(float f_in, float f_out, float t)
 }
 
 
-#ifdef SIMULATION
-[maxvertexcount(1)]
-void GSMain( point OUT_PARTICLE inputPoint[1], inout PointStream<OUT_PARTICLE> outputStream )
-{
-	OUT_PARTICLE p = inputPoint[0];
-	if (p.Timing.y < p.Timing.x) {
-		p.Timing.y += Params.DeltaTime;
-		outputStream.Append( p );
-	}
-}
-#endif
 
-
-#ifdef INJECTION
-[maxvertexcount(1)]
-void GSMain( point OUT_PARTICLE inputPoint[1], inout PointStream<OUT_PARTICLE> outputStream )
-{
-	OUT_PARTICLE p = inputPoint[0];
-	//if (p.Timing.y < p.Timing.x) {
-		outputStream.Append( p );
-	//}
-}
-#endif
-
-
-
-#ifdef RENDER
 [maxvertexcount(6)]
-void GSMain( point OUT_PARTICLE inputPoint[1], inout TriangleStream<GSOutput> outputStream )
+void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> outputStream )
 {
 	GSOutput p0, p1, p2, p3;
 	
-	OUT_PARTICLE prt = inputPoint[0];
+	p0.TexCoord1 = 0; p0.TexCoord2 = 0; p0.TexCoord3 = 0; p0.Color1 = 0;
+	p1.TexCoord1 = 0; p1.TexCoord2 = 0; p1.TexCoord3 = 0; p1.Color1 = 0;
+	p2.TexCoord1 = 0; p2.TexCoord2 = 0; p2.TexCoord3 = 0; p2.Color1 = 0;
+	p3.TexCoord1 = 0; p3.TexCoord2 = 0; p3.TexCoord3 = 0; p3.Color1 = 0;
 	
-	if (prt.Timing.y > prt.Timing.x) {
-		//return;
+	PARTICLE prt = particleBufferGS[ inputPoint[0].vertexID ];
+	
+	if (prt.LifeTime >= prt.TotalLifeTime ) {
+		return;
 	}
 	
-	float factor	=	saturate(prt.Timing.y / prt.Timing.x);
+	float factor	=	saturate(prt.LifeTime / prt.TotalLifeTime);
 	
-	float  sz 		=   lerp( prt.SizeAngle.x, prt.SizeAngle.y, factor )/2;
-	float  time		=	prt.Timing.y;
-	float4 color	=	lerp( prt.Color0, prt.Color1, Ramp( prt.Timing.z, prt.Timing.w, factor ) );
-	float2 position	=	prt.Position.xy + prt.VelAccel.xy * time + prt.VelAccel.zw * time * time / 2;
-	float  a		=	lerp( prt.SizeAngle.z, prt.SizeAngle.w, factor );	
+	float  sz 		=   lerp( prt.Size0, prt.Size1, factor )/2;
+	float  time		=	prt.LifeTime;
+	float4 color	=	lerp( prt.Color0, prt.Color1, Ramp( prt.FadeIn, prt.FadeOut, factor ) );
+	float2 position	=	prt.Position + prt.Velocity * time + prt.Acceleration * time * time / 2;
+	float  a		=	lerp( prt.Angle0, prt.Angle1, factor );	
 
 	float2x2	m	=	float2x2( cos(a), sin(a), -sin(a), cos(a) );
 	
 	p0.Position	= mul( float4( position + mul(float2( sz, sz), m), 0, 1 ), Params.View );
-	p0.Position = mul( p0.Position, Params.Projection );
+	p0.Position	= mul( p0.Position, Params.Projection );
 	p0.TexCoord	= float2(1,1);
 	p0.Color 	= color;
 	
 	p1.Position	= mul( float4( position + mul(float2(-sz, sz), m), 0, 1 ), Params.View );
-	p1.Position = mul( p1.Position, Params.Projection );
+	p1.Position	= mul( p1.Position, Params.Projection );
 	p1.TexCoord	= float2(0,1);
 	p1.Color 	= color;
 	
 	p2.Position	= mul( float4( position + mul(float2(-sz,-sz), m), 0, 1 ), Params.View );
-	p2.Position = mul( p2.Position, Params.Projection );
+	p2.Position	= mul( p2.Position, Params.Projection );
 	p2.TexCoord	= float2(0,0);
 	p2.Color 	= color;
 	
 	p3.Position	= mul( float4( position + mul(float2( sz,-sz), m), 0, 1 ), Params.View );
-	p3.Position = mul( p3.Position, Params.Projection );
+	p3.Position	= mul( p3.Position, Params.Projection );
 	p3.TexCoord	= float2(1,0);
 	p3.Color 	= color;
 
@@ -161,10 +203,10 @@ void GSMain( point OUT_PARTICLE inputPoint[1], inout TriangleStream<GSOutput> ou
 }
 
 
+
 float4 PSMain( GSOutput input ) : SV_Target
 {
-	return float4(1,2,8,0) * float4(input.Color.rgb,1) * 1;
-	//return float4(2,4,8,0);//Texture.Sample( Sampler, input.TexCoord ) * float4(input.Color.rgb,1) * 100 ;
+	return /*Texture.Sample( Sampler, input.TexCoord ) **/ float4(1,0,0,1);
 }
 #endif
 

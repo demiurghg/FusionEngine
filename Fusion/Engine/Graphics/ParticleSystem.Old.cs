@@ -25,7 +25,7 @@ namespace Fusion.Engine.Graphics {
 		readonly ViewLayerHdr viewLayer;
 
 		public const int MaxInjectingParticles	=	1024;
-		public const int MaxSimulatedParticles =	1024 * 1024;
+		public const int MaxSimulatedParticles =	384 * 1024;
 
 		enum Flags {
 			INJECTION	=	0x1,
