@@ -88,7 +88,7 @@ namespace TestGame2 {
 		/// <param name="engine"></param>
 		public CustomGameInterface ( Game game ) : base(game)
 		{
-			console			=	new GameConsole( game, "conchars", "conback");
+			console			=	new GameConsole( game, "conchars");
 			userInterface	=	new FrameProcessor( game, @"Fonts\textFont" );
 		}
 
@@ -386,8 +386,25 @@ namespace TestGame2 {
 			var rand2 = new Random();
 
 			if (Game.Keyboard.IsKeyDown(Keys.P)) {
+
+				var p = new Particle();
+				p.FadeIn		=	0.1f;
+				p.FadeOut		=	0.5f;
+				p.Color0		=	Color4.Zero;
+				p.Color1		=	new Color4(10,2,1,1);
+				p.ImageIndex	=	0;
+				p.TimeLag		=	0;
+
 				for (int i=0; i<100; i++) {
-					masterView.ParticleSystem.InjectParticle( rand2.NextVector2( Vector2.Zero, new Vector2(vp.Width, vp.Height) ), Vector2.Zero, rand2.Gauss(10,3), rand2.Gauss(40,30), rand2.Gauss(40,30), 0.1f );
+					p.Velocity		=	rand2.UniformRadialDistribution(0,5);
+					p.Position		=	Vector3.UnitY * 2 + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
+					p.LifeTime		=	rand2.GaussDistribution(2,1);
+					p.Size0			=	0.5f;
+					p.Size1			=	0.5f;
+					p.Rotation0		=	rand2.NextFloat(0,3.14f);
+					p.Rotation1		=	rand2.NextFloat(0,3.14f);
+					//var 
+					masterView.ParticleSystem.InjectParticle( p );
 				}
 			}
 

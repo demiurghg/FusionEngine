@@ -3,28 +3,37 @@
 $ubershader INITIALIZE|INJECTION|SIMULATION|DRAW
 #endif
 
-#define BLOCK_SIZE	256
-#define MAX_PARTICLES = (384*1024)
+// change ParticleSystem.cs too!
+#define BLOCK_SIZE		256		
+#define MAX_INJECTED 	1024
+#define MAX_PARTICLES 	(384*1024)
 
 struct PARTICLE {
-	float2	Position;
-	float2	Velocity;
-	float2	Acceleration;
+	float3	Position;
+	float3	Velocity;
+	float3	Acceleration;
 	float4	Color0;
 	float4	Color1;
+	float	Gravity;
+	float	Damping;
 	float	Size0;
 	float	Size1;
 	float	Angle0;
 	float	Angle1;
-	float	TotalLifeTime;
 	float	LifeTime;
+	float	Time;
 	float	FadeIn;
 	float	FadeOut;
+	uint	ImageIndex;
 };
 
 struct PARAMS {
 	float4x4	View;
 	float4x4	Projection;
+	float4		CameraForward;
+	float4		CameraRight;
+	float4		CameraUp;
+	float4		Gravity;
 	int			MaxParticles;
 	float		DeltaTime;
 	uint		DeadListSize;
@@ -69,7 +78,7 @@ void CSMain(
 #endif	
 
 #ifdef INJECTION
-	if (id < Params.MaxParticles && Params.DeadListSize > 1024 /* MAX INJECTED */ ) {
+	if (id < Params.MaxParticles && Params.DeadListSize > MAX_INJECTED ) {
 		PARTICLE p = injectionBuffer[ id ];
 		
 		uint newIndex = deadParticleIndices.Consume();
@@ -82,11 +91,11 @@ void CSMain(
 	if (id < Params.MaxParticles) {
 		PARTICLE p = particleBuffer[ id ];
 		
-		if (p.TotalLifeTime>0) {
-			if (p.LifeTime < p.TotalLifeTime) {
-				p.LifeTime += Params.DeltaTime;
+		if (p.LifeTime>0) {
+			if (p.Time < p.LifeTime) {
+				p.Time += Params.DeltaTime;
 			} else {
-				p.TotalLifeTime = -1;
+				p.LifeTime = -1;
 				deadParticleIndices.Append( id );
 			}
 		}
@@ -155,36 +164,39 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	
 	PARTICLE prt = particleBufferGS[ inputPoint[0].vertexID ];
 	
-	if (prt.LifeTime >= prt.TotalLifeTime ) {
+	if (prt.Time >= prt.LifeTime ) {
 		return;
 	}
 	
-	float factor	=	saturate(prt.LifeTime / prt.TotalLifeTime);
+	float factor	=	saturate(prt.Time / prt.LifeTime);
 	
 	float  sz 		=   lerp( prt.Size0, prt.Size1, factor )/2;
-	float  time		=	prt.LifeTime;
+	float  time		=	prt.Time;
 	float4 color	=	lerp( prt.Color0, prt.Color1, Ramp( prt.FadeIn, prt.FadeOut, factor ) );
-	float2 position	=	prt.Position + prt.Velocity * time + prt.Acceleration * time * time / 2;
+	float3 position	=	prt.Position + prt.Velocity * time + prt.Acceleration * time * time / 2;
 	float  a		=	lerp( prt.Angle0, prt.Angle1, factor );	
 
 	float2x2	m	=	float2x2( cos(a), sin(a), -sin(a), cos(a) );
 	
-	p0.Position	= mul( float4( position + mul(float2( sz, sz), m), 0, 1 ), Params.View );
+	float3		rt	=	(Params.CameraRight.xyz * cos(a) + Params.CameraUp.xyz * sin(a)) * sz;
+	float3		up	=	(Params.CameraUp.xyz * cos(a) - Params.CameraRight.xyz * sin(a)) * sz;
+	
+	p0.Position	= mul( float4( position + rt + up, 1 ), Params.View );
 	p0.Position	= mul( p0.Position, Params.Projection );
 	p0.TexCoord	= float2(1,1);
 	p0.Color 	= color;
 	
-	p1.Position	= mul( float4( position + mul(float2(-sz, sz), m), 0, 1 ), Params.View );
+	p1.Position	= mul( float4( position - rt + up, 1 ), Params.View );
 	p1.Position	= mul( p1.Position, Params.Projection );
 	p1.TexCoord	= float2(0,1);
 	p1.Color 	= color;
 	
-	p2.Position	= mul( float4( position + mul(float2(-sz,-sz), m), 0, 1 ), Params.View );
+	p2.Position	= mul( float4( position - rt - up, 1 ), Params.View );
 	p2.Position	= mul( p2.Position, Params.Projection );
 	p2.TexCoord	= float2(0,0);
 	p2.Color 	= color;
 	
-	p3.Position	= mul( float4( position + mul(float2( sz,-sz), m), 0, 1 ), Params.View );
+	p3.Position	= mul( float4( position + rt - up, 1 ), Params.View );
 	p3.Position	= mul( p3.Position, Params.Projection );
 	p3.TexCoord	= float2(1,0);
 	p3.Color 	= color;
@@ -206,7 +218,7 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 
 float4 PSMain( GSOutput input ) : SV_Target
 {
-	return /*Texture.Sample( Sampler, input.TexCoord ) **/ float4(1,0,0,1);
+	return /*Texture.Sample( Sampler, input.TexCoord ) **/ input.Color * 8;
 }
 #endif
 

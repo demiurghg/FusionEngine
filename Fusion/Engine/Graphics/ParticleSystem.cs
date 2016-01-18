@@ -40,41 +40,6 @@ namespace Fusion.Engine.Graphics {
 		StructuredBuffer	deadParticlesIndices;
 		ConstantBuffer		paramsCB;
 
-//       float2 Position;               // Offset:    0
-//       float2 Velocity;               // Offset:    8
-//       float2 Acceleration;           // Offset:   16
-//       float4 Color0;                 // Offset:   24
-//       float4 Color1;                 // Offset:   40
-//       float Size0;                   // Offset:   56
-//       float Size1;                   // Offset:   60
-//       float Angle0;                  // Offset:   64
-//       float Angle1;                  // Offset:   68
-//       float TotalLifeTime;           // Offset:   72
-//       float LifeTime;                // Offset:   76
-//       float FadeIn;                  // Offset:   80
-//       float FadeOut;                 // Offset:   84
-		[StructLayout(LayoutKind.Explicit)]
-		struct Particle {
-			[FieldOffset( 0)] public Vector2	Position;
-			[FieldOffset( 8)] public Vector2	Velocity;
-			[FieldOffset(16)] public Vector2	Acceleration;
-			[FieldOffset(24)] public Vector4	Color0;
-			[FieldOffset(40)] public Vector4	Color1;
-			[FieldOffset(56)] public float	Size0;
-			[FieldOffset(60)] public float	Size1;
-			[FieldOffset(64)] public float	Angle0;
-			[FieldOffset(68)] public float	Angle1;
-			[FieldOffset(72)] public float	TotalLifeTime;
-			[FieldOffset(76)] public float	LifeTime;
-			[FieldOffset(80)] public float	FadeIn;
-			[FieldOffset(84)] public float	FadeOut;
-
-			public override string ToString ()
-			{
-				return string.Format("life time = {0}/{1}", LifeTime, TotalLifeTime );
-			}
-		}
-
 		enum Flags {
 			INJECTION	=	0x1,
 			SIMULATION	=	0x2,
@@ -83,18 +48,21 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-//       row_major float4x4 View;       // Offset:    0
-//       row_major float4x4 Projection; // Offset:   64
-//       int MaxParticles;              // Offset:  128
-//       float DeltaTime;               // Offset:  132
-
-		[StructLayout(LayoutKind.Explicit, Size=144)]
+		//	row_major float4x4 View;       // Offset:    0
+		//	row_major float4x4 Projection; // Offset:   64
+		//	int MaxParticles;              // Offset:  128
+		//	float DeltaTime;               // Offset:  132
+		[StructLayout(LayoutKind.Explicit, Size=256)]
 		struct Params {
 			[FieldOffset(  0)] public Matrix	View;
 			[FieldOffset( 64)] public Matrix	Projection;
-			[FieldOffset(128)] public int		MaxParticles;
-			[FieldOffset(132)] public float		DeltaTime;
-			[FieldOffset(136)] public uint		DeadListSize;
+			[FieldOffset(128)] public Vector4	CameraForward;
+			[FieldOffset(144)] public Vector4	CameraRight;
+			[FieldOffset(160)] public Vector4	CameraUp;
+			[FieldOffset(176)] public Vector4	Gravity;
+			[FieldOffset(192)] public int		MaxParticles;
+			[FieldOffset(196)] public float		DeltaTime;
+			[FieldOffset(200)] public uint		DeadListSize;
 
 		} 
 
@@ -192,30 +160,11 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-
-		/// <summary>
-		/// Returns random radial vector
-		/// </summary>
-		/// <returns></returns>
-		Vector2 RadialRandomVector ()
-		{
-			Vector2 r;
-			do {
-				r	=	rand.NextVector2( -Vector2.One, Vector2.One );
-			} while ( r.Length() > 1 );
-
-			//r.Normalize();
-
-			return r;
-		}
-
-
-
 		/// <summary>
 		/// Injects hard particle.
 		/// </summary>
 		/// <param name="particle"></param>
-		public void InjectParticle ( Vector2 pos, Vector2 vel, float lifeTime, float size0, float size1, float colorBoost = 1 )
+		public void InjectParticle ( Particle particle )
 		{
 			if (injectionCount>=MaxInjectingParticles) {
 				toMuchInjectedParticles = true;
@@ -224,29 +173,7 @@ namespace Fusion.Engine.Graphics {
 
 			toMuchInjectedParticles = false;
 
-			//Log.LogMessage("...particle added");
-			var v = vel + RadialRandomVector() * 5;
-			var a = rand.NextFloat( -MathUtil.Pi, MathUtil.Pi );
-			var s = (rand.NextFloat(0,1)>0.5f) ? -1 : 1;
-
-			var p = new Particle () {
-				Position		=	pos,
-				Velocity		=	vel + RadialRandomVector() * 5,
-				Acceleration	=	Vector2.UnitY * 10 - v * 0.2f,
-				Color0			=	Vector4.Zero,
-				//Color1			=	rand.NextVector4( Vector4.Zero, Vector4.One ) * colorBoost,
-				Color1			=	Vector4.One * colorBoost,//rand.NextVector4( Vector4.Zero, Vector4.One ),
-				Size0			=	size0,
-				Size1			=	size1,
-				Angle0			=	a,
-				Angle1			=	a + 2 * s,
-				TotalLifeTime	=	rand.NextFloat(lifeTime/2, lifeTime),
-				LifeTime		=	0,
-				FadeIn			=	0.01f,
-				FadeOut			=	0.01f,
-			};
-
-			injectionBufferCPU[ injectionCount ] = p;
+			injectionBufferCPU[ injectionCount ] = particle;
 			injectionCount ++;
 		}
 
@@ -296,6 +223,10 @@ namespace Fusion.Engine.Graphics {
 			param.Projection	=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
 			param.MaxParticles	=	0;
 			param.DeltaTime		=	gameTime.ElapsedSec;
+			param.CameraForward	=	new Vector4( viewLayer.Camera.GetCameraMatrix( StereoEye.Mono ).Forward	, 0 );
+			param.CameraRight	=	new Vector4( viewLayer.Camera.GetCameraMatrix( StereoEye.Mono ).Right	, 0 );
+			param.CameraUp		=	new Vector4( viewLayer.Camera.GetCameraMatrix( StereoEye.Mono ).Up		, 0 );
+			param.Gravity		=	new Vector4( this.Gravity, 0 );
 
 
 			device.ComputeShaderConstants[0]	= paramsCB ;
@@ -321,7 +252,7 @@ namespace Fusion.Engine.Graphics {
 			//param.DeadListSize	=	(uint)deadParticlesIndices.GetStructureCount();
 
 			paramsCB.SetData( param );
-			deadParticlesIndices.CopyStructureCount( paramsCB, 136 );
+			deadParticlesIndices.CopyStructureCount( paramsCB, Marshal.OffsetOf( typeof(Params), "DeadListSize").ToInt32() );
 			//device.CSConstantBuffers[0] = paramsCB ;
 
 			device.PipelineState	=	factory[ (int)Flags.INJECTION ];
@@ -334,7 +265,7 @@ namespace Fusion.Engine.Graphics {
 			//
 			//	Simulate :
 			//
-			bool skipSim = Game.InputDevice.IsKeyDown(Fusion.Drivers.Input.Keys.P);
+			bool skipSim = Game.InputDevice.IsKeyDown(Fusion.Drivers.Input.Keys.O);
 
 			if (!skipSim) {
 	

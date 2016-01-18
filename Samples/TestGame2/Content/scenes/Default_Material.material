@@ -3,12 +3,12 @@
   <ColorLevel>1</ColorLevel>
   <SpecularLevel>1</SpecularLevel>
   <EmissionLevel>100</EmissionLevel>
-  <RoughnessMinimum>0.2</RoughnessMinimum>
-  <RoughnessMaximum>0.2</RoughnessMaximum>
+  <RoughnessMinimum>0.1</RoughnessMinimum>
+  <RoughnessMaximum>0.4</RoughnessMaximum>
   <AlphaUsage>EmissionMask</AlphaUsage>
   <DirtLevel>1</DirtLevel>
   
-  <!--DirtTexture Path="scenes\Textures\stain.tga" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" /-->
+  <!--DirtTexture Path="scenes\Textures\stain.tga" SRgb="true" ScaleU="2" ScaleV="2" OffsetU="0" OffsetV="0" /-->
   <ColorTexture Path="scenes\Textures\redball.tga" SRgb="true" ScaleU="2" ScaleV="1" OffsetU="0" OffsetV="0" />
   <SurfaceTexture Path="scenes\Textures\nonmetal_spec.tga" SRgb="false" ScaleU="2" ScaleV="4" OffsetU="0" OffsetV="0" />
   <!--NormalMapTexture Path="scenes\Textures\rock_local.tga" SRgb="false" ScaleU="2" ScaleV="2" OffsetU="0" OffsetV="0" /-->

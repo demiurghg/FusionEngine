@@ -27,6 +27,27 @@ namespace Fusion.Core.Mathematics
     /// </summary>
     public static class RandomExt
     {
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="random"></param>
+		/// <param name="interiorRadius"></param>
+		/// <param name="exteriorRadius"></param>
+		/// <returns></returns>
+		public static Vector3 UniformRadialDistribution ( this Random random, float interiorRadius, float exteriorRadius )
+		{
+			Vector3 r;
+			do {
+				r	=	random.NextVector3( -Vector3.One, Vector3.One );
+			} while ( r.Length() < 0.1f || r.Length() > 1 );
+
+			r.Normalize();
+
+			r = r * random.NextFloat( interiorRadius, exteriorRadius );
+
+			return r;
+		}
+
 
 		/// <summary>
 		/// 
@@ -35,7 +56,7 @@ namespace Fusion.Core.Mathematics
 		/// <param name="mean"></param>
 		/// <param name="stdDev"></param>
 		/// <returns></returns>
-		public static float Gauss ( this Random random, float mean, float stdDev )
+		public static float GaussDistribution ( this Random random, float mean, float stdDev )
 		{
 			//Random rand = new Random(); //reuse this if you are generating many
 			double u1 = random.NextDouble(); //these are uniform(0,1) random doubles

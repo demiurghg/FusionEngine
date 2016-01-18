@@ -5,39 +5,40 @@ using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core.Mathematics;
 using Fusion.Core;
+using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
 
 	/// <summary>
-	/// Glow color?
+	/// Particle structure
 	/// </summary>
-	public class Particle {
+	[StructLayout(LayoutKind.Explicit, Size=112)]
+	public struct Particle {
+		
+		/// <summary>
+		/// Initial position of the particle
+		/// </summary>
+		[FieldOffset(  0)] public Vector3	Position;              
 
 		/// <summary>
-		/// Initial position of the particle.
+		/// Initial velocity of the particle
 		/// </summary>
-		public Vector3 Position;
+		[FieldOffset( 12)] public Vector3	Velocity;              
 
 		/// <summary>
-		///	Initial velocity of the particle
+		/// Acceleration of the particle regardless of gravity.
 		/// </summary>
-		public Vector3 Velocity;
+		[FieldOffset( 24)] public Vector3	Acceleration;          
 
 		/// <summary>
-		/// Acceleation of the particle.
+		/// "Faded-out" color of the particle.
 		/// </summary>
-		public Vector3 Acceleration;
+		[FieldOffset( 36)] public Color4	Color0;                
 
 		/// <summary>
-		/// Total particle life time.
+		/// "Faded-in" color of the particle.
 		/// </summary>
-		public float LifeTime;
-
-		/// <summary>
-		/// Lag between desired particle injection time and actual 
-		/// particle injection time caused by discrete updating.
-		/// </summary>
-		public float TimeLag;
+		[FieldOffset( 52)] public Color4	Color1;                
 
 		/// <summary>
 		/// Gravity influence.
@@ -45,51 +46,58 @@ namespace Fusion.Engine.Graphics {
 		/// Values between 0 and 1 means reduced gravity, like fluffs.
 		/// Negative values means particle that have positive buoyancy.
 		/// </summary>
-		public float Gravity;
+		[FieldOffset( 68)] public float		Gravity;                
+
+		/// <summary>
+		/// NOT USED!
+		/// </summary>
+		[FieldOffset( 72)] public float		Damping;                
+
+		/// <summary>
+		/// Initial size of the particle
+		/// </summary>
+		[FieldOffset( 76)] public float		Size0;                  
+
+		/// <summary>
+		/// Terminal size of the particle
+		/// </summary>
+		[FieldOffset( 80)] public float		Size1;                  
+
+		/// <summary>
+		/// Initial rotation of the particle
+		/// </summary>
+		[FieldOffset( 84)] public float		Rotation0;                 
+
+		/// <summary>
+		/// Terminal rotation of the particle
+		/// </summary>
+		[FieldOffset( 88)] public float		Rotation1;                 
+
+		/// <summary>
+		/// Total particle life-time
+		/// </summary>
+		[FieldOffset( 92)] public float		LifeTime;          
+
+		/// <summary>
+		/// Lag between desired particle injection time and actual 
+		/// particle injection time caused by discrete updating.
+		/// Internally this field used as particle life-time counter.
+		/// </summary>
+		[FieldOffset( 96)] public float		TimeLag;	           
 
 		/// <summary>
 		/// Fade in time fraction
 		/// </summary>
-		public float FadeIn;
+		[FieldOffset(100)] public float		FadeIn;                
 
 		/// <summary>
 		/// Fade out time fraction
 		/// </summary>
-		public float FadeOut;
+		[FieldOffset(104)] public float		FadeOut;               
 
 		/// <summary>
-		/// Initial color and terminal color.
+		/// Index of the image in the texture atlas
 		/// </summary>
-		public Color4 FadedColor;
-
-		/// <summary>
-		/// Color while particle is fully bright.
-		/// </summary>
-		public Color4 BrightColor;
-
-		/// <summary>
-		/// Initial particle size
-		/// </summary>
-		public float InitialSize;
-		
-		/// <summary>
-		///	Terminal particle size
-		/// </summary>
-		public float TerminalSize;
-
-		/// <summary>
-		/// Initial particle rotation
-		/// </summary>
-		public float InitialRotation;
-		
-		/// <summary>
-		/// Terminal particle rotation
-		/// </summary>
-		public float TerminalRotation;
-
-		/// <summary>
-		/// Index of texture in texture atlas
-		/// </summary>
-		public int TextureAtlasIndex;
+		[FieldOffset(108)] public uint		ImageIndex;            
 	}
 }
