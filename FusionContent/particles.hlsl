@@ -7,6 +7,7 @@ $ubershader INITIALIZE|INJECTION|SIMULATION|DRAW
 #define BLOCK_SIZE		256		
 #define MAX_INJECTED 	1024
 #define MAX_PARTICLES 	(384*1024)
+#define MAX_IMAGES		512
 
 struct PARTICLE {
 	float3	Position;
@@ -42,6 +43,11 @@ struct PARAMS {
 cbuffer CB1 : register(b0) { 
 	PARAMS Params; 
 };
+
+cbuffer CB2 : register(b1) { 
+	float4 Images[MAX_IMAGES]; 
+};
+
 
 SamplerState						Sampler				: 	register(s0);
 
@@ -173,7 +179,8 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	float  sz 		=   lerp( prt.Size0, prt.Size1, factor )/2;
 	float  time		=	prt.Time;
 	float4 color	=	lerp( prt.Color0, prt.Color1, Ramp( prt.FadeIn, prt.FadeOut, factor ) );
-	float3 position	=	prt.Position + prt.Velocity * time + prt.Acceleration * time * time / 2;
+	float3 accel	=	prt.Acceleration + Params.Gravity.xyz * prt.Gravity;
+	float3 position	=	prt.Position + prt.Velocity * time + accel * time * time / 2;
 	float  a		=	lerp( prt.Angle0, prt.Angle1, factor );	
 
 	float2x2	m	=	float2x2( cos(a), sin(a), -sin(a), cos(a) );
@@ -181,25 +188,34 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	float3		rt	=	(Params.CameraRight.xyz * cos(a) + Params.CameraUp.xyz * sin(a)) * sz;
 	float3		up	=	(Params.CameraUp.xyz * cos(a) - Params.CameraRight.xyz * sin(a)) * sz;
 	
+	float4		image	=	Images[2];
+	
 	p0.Position	= mul( float4( position + rt + up, 1 ), Params.View );
 	p0.Position	= mul( p0.Position, Params.Projection );
-	p0.TexCoord	= float2(1,1);
+	//p0.TexCoord	= float2(1,1);
+	p0.TexCoord	= float2(image.z, image.w);
 	p0.Color 	= color;
 	
 	p1.Position	= mul( float4( position - rt + up, 1 ), Params.View );
 	p1.Position	= mul( p1.Position, Params.Projection );
-	p1.TexCoord	= float2(0,1);
+	//p1.TexCoord	= float2(0,1);
+	p1.TexCoord	= float2(image.x, image.w);
 	p1.Color 	= color;
 	
 	p2.Position	= mul( float4( position - rt - up, 1 ), Params.View );
 	p2.Position	= mul( p2.Position, Params.Projection );
-	p2.TexCoord	= float2(0,0);
+	//p2.TexCoord	= float2(0,0);
+	p2.TexCoord	= float2(image.x, image.y);
 	p2.Color 	= color;
 	
 	p3.Position	= mul( float4( position + rt - up, 1 ), Params.View );
 	p3.Position	= mul( p3.Position, Params.Projection );
-	p3.TexCoord	= float2(1,0);
+	//p3.TexCoord	= float2(1,0);
+	p3.TexCoord	= float2(image.z, image.y);
 	p3.Color 	= color;
+	
+	
+	
 
 	outputStream.Append(p0);
 	outputStream.Append(p1);
@@ -218,7 +234,7 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 
 float4 PSMain( GSOutput input ) : SV_Target
 {
-	return /*Texture.Sample( Sampler, input.TexCoord ) **/ input.Color * 8;
+	return Texture.Sample( Sampler, input.TexCoord ) * input.Color;
 }
 #endif
 

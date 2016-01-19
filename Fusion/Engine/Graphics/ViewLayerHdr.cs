@@ -260,8 +260,11 @@ namespace Fusion.Engine.Graphics {
 			rs.HdrFilter.Render( gameTime, TempFXBuffer.Surface, viewHdrFrame.HdrBuffer, this );
 
 			//	apply FXAA
-			//rs.Filter.Fxaa( targetSurface, TempFXBuffer );
-			rs.Filter.Copy( targetSurface, TempFXBuffer );
+			if (rs.Config.UseFXAA) {
+				rs.Filter.Fxaa( targetSurface, TempFXBuffer );
+			} else {
+				rs.Filter.Copy( targetSurface, TempFXBuffer );
+			}
 		}
 
 

@@ -22,7 +22,6 @@ namespace Fusion.Engine.Graphics {
 
 		readonly Game Game;
 		readonly RenderSystem rs;
-		Texture2D		texture;
 		Ubershader		shader;
 		StateFactory	factory;
 		ViewLayerHdr	viewLayer;
@@ -30,6 +29,7 @@ namespace Fusion.Engine.Graphics {
 		const int BlockSize				=	256;
 		const int MaxInjectingParticles	=	1024;
 		const int MaxSimulatedParticles =	384 * 1024;
+		const int MaxImages				=	512;
 
 		bool toMuchInjectedParticles = false;
 
@@ -39,6 +39,7 @@ namespace Fusion.Engine.Graphics {
 		StructuredBuffer	simulationBuffer;
 		StructuredBuffer	deadParticlesIndices;
 		ConstantBuffer		paramsCB;
+		ConstantBuffer		imagesCB;
 
 		enum Flags {
 			INJECTION	=	0x1,
@@ -78,6 +79,25 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// Sets and gets images for particles.
+		/// This property must be set before particle injection.
+		/// </summary>
+		public TextureAtlas Images { 
+			get {
+				return images;
+			}
+			set {
+				if (value.Count>MaxImages) {
+					throw new ArgumentOutOfRangeException("Number of subimages in texture atlas is greater than " + MaxImages.ToString() );
+				}
+				images = value;
+			}
+		}
+
+		TextureAtlas images = null;
+
+
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="rs"></param>
@@ -90,6 +110,7 @@ namespace Fusion.Engine.Graphics {
 			Gravity	=	Vector3.Down * 9.80665f;
 
 			paramsCB		=	new ConstantBuffer( Game.GraphicsDevice, typeof(Params) );
+			imagesCB		=	new ConstantBuffer( Game.GraphicsDevice, typeof(Vector4), MaxImages );
 
 			injectionBuffer			=	new StructuredBuffer( Game.GraphicsDevice, typeof(Particle),	MaxInjectingParticles, StructuredBufferFlags.None );
 			simulationBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(Particle),	MaxSimulatedParticles, StructuredBufferFlags.None );
@@ -145,7 +166,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="flag"></param>
 		void EnumAction ( PipelineState ps, Flags flag )
 		{
-			ps.BlendState			=	BlendState.Additive;
+			ps.BlendState			=	BlendState.AlphaBlend;
 			ps.DepthStencilState	=	DepthStencilState.Readonly;
 			ps.Primitive			=	Primitive.PointList;
 		}
@@ -166,6 +187,10 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="particle"></param>
 		public void InjectParticle ( Particle particle )
 		{
+			if (Images==null) {
+				throw new InvalidOperationException("Images must be set");
+			}
+
 			if (injectionCount>=MaxInjectingParticles) {
 				toMuchInjectedParticles = true;
 				return;
@@ -218,6 +243,17 @@ namespace Fusion.Engine.Graphics {
 			int	w	=	device.DisplayBounds.Width;
 			int h	=	device.DisplayBounds.Height;
 
+			//
+			//	Setup images :
+			//
+			if (Images!=null) {
+				imagesCB.SetData( Images.GetNormalizedRectangles( MaxImages ) );
+			}
+			
+
+			//
+			//	Setup parameters :
+			//	
 			Params param = new Params();
 			param.View			=	viewLayer.Camera.GetViewMatrix( stereoEye );
 			param.Projection	=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
@@ -227,12 +263,23 @@ namespace Fusion.Engine.Graphics {
 			param.CameraRight	=	new Vector4( viewLayer.Camera.GetCameraMatrix( StereoEye.Mono ).Right	, 0 );
 			param.CameraUp		=	new Vector4( viewLayer.Camera.GetCameraMatrix( StereoEye.Mono ).Up		, 0 );
 			param.Gravity		=	new Vector4( this.Gravity, 0 );
+			param.MaxParticles	=	injectionCount;
+
+			paramsCB.SetData( param );
+
+			//	set DeadListSize to prevent underflow:
+			deadParticlesIndices.CopyStructureCount( paramsCB, Marshal.OffsetOf( typeof(Params), "DeadListSize").ToInt32() );
 
 
 			device.ComputeShaderConstants[0]	= paramsCB ;
 			device.VertexShaderConstants[0]		= paramsCB ;
 			device.GeometryShaderConstants[0]	= paramsCB ;
 			device.PixelShaderConstants[0]		= paramsCB ;
+			
+			device.ComputeShaderConstants[1]	= imagesCB ;
+			device.VertexShaderConstants[1]		= imagesCB ;
+			device.GeometryShaderConstants[1]	= imagesCB ;
+			device.PixelShaderConstants[1]		= imagesCB ;
 			
 			device.PixelShaderSamplers[0]	= SamplerState.LinearWrap ;
 
@@ -243,17 +290,8 @@ namespace Fusion.Engine.Graphics {
 			injectionBuffer.SetData( injectionBufferCPU );
 
 			device.ComputeShaderResources[1]	= injectionBuffer ;
-
 			device.SetCSRWBuffer( 0, simulationBuffer,		0 );
 			device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
-
-
-			param.MaxParticles	=	injectionCount;
-			//param.DeadListSize	=	(uint)deadParticlesIndices.GetStructureCount();
-
-			paramsCB.SetData( param );
-			deadParticlesIndices.CopyStructureCount( paramsCB, Marshal.OffsetOf( typeof(Params), "DeadListSize").ToInt32() );
-			//device.CSConstantBuffers[0] = paramsCB ;
 
 			device.PipelineState	=	factory[ (int)Flags.INJECTION ];
 			
@@ -288,7 +326,7 @@ namespace Fusion.Engine.Graphics {
 			//
 			device.PipelineState	=	factory[ (int)Flags.DRAW ];
 			device.SetCSRWBuffer( 0, null );	
-			device.PixelShaderResources[0]	=	texture ;
+			device.PixelShaderResources[0]		=	Images==null? null : Images.Texture.Srv;
 			device.GeometryShaderResources[1]	=	simulationBuffer ;
 			device.GeometryShaderResources[2]	=	simulationBuffer ;
 

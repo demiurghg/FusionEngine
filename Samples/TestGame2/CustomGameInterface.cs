@@ -190,6 +190,10 @@ namespace TestGame2 {
 
 			//-------------------------------------
 
+			masterView.ParticleSystem.Images	=	Game.Content.Load<TextureAtlas>(@"sprites\particles|srgb");
+
+			//-------------------------------------
+
 			scene		=	Game.Content.Load<Scene>( @"scenes\testScene" );
 
 			var transforms = new Matrix[ scene.Nodes.Count ];
@@ -388,21 +392,23 @@ namespace TestGame2 {
 			if (Game.Keyboard.IsKeyDown(Keys.P)) {
 
 				var p = new Particle();
-				p.FadeIn		=	0.1f;
-				p.FadeOut		=	0.5f;
-				p.Color0		=	Color4.Zero;
-				p.Color1		=	new Color4(10,2,1,1);
+				p.FadeIn		=	0.0001f;
+				p.FadeOut		=	0.9999f;
+				p.Color0		=	new Color4(5,5,5, 1);
+				p.Color1		=	new Color4(5,5,5, 1);
 				p.ImageIndex	=	0;
 				p.TimeLag		=	0;
 
-				for (int i=0; i<100; i++) {
-					p.Velocity		=	rand2.UniformRadialDistribution(0,5);
-					p.Position		=	Vector3.UnitY * 2 + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
-					p.LifeTime		=	rand2.GaussDistribution(2,1);
+				for (int i=0; i<1000; i++) {
+					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,1) + Vector3.Up * 5 + Vector3.Right*2) * Math.Abs(rand2.GaussDistribution(1, 1));
+					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 2 + Vector3.UnitX * 20;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
+					p.LifeTime		=	rand2.GaussDistribution(0.3f,0.3f);
 					p.Size0			=	0.5f;
-					p.Size1			=	0.5f;
+					p.Size1			=	0.0f;
 					p.Rotation0		=	rand2.NextFloat(0,3.14f);
 					p.Rotation1		=	rand2.NextFloat(0,3.14f);
+					p.Gravity		=	1;
+					p.ImageIndex	=	rand.Next(35);
 					//var 
 					masterView.ParticleSystem.InjectParticle( p );
 				}

@@ -77,6 +77,12 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// 
+		/// </summary>
+		public bool UseFXAA { get; set; }
+
+
+		/// <summary>
 		/// Ctor
 		/// </summary>
 		public RenderSystemConfig ()
@@ -89,6 +95,7 @@ namespace Fusion.Engine.Graphics {
 			UseDebugDevice	=	false;
 			VSyncInterval	=	1;
 			MsaaEnabled		=	false;
+			UseFXAA			=	true;
 		}
 
 	}

@@ -98,6 +98,6 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Index of the image in the texture atlas
 		/// </summary>
-		[FieldOffset(108)] public uint		ImageIndex;            
+		[FieldOffset(108)] public int		ImageIndex;            
 	}
 }

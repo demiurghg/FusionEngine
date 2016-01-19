@@ -28,7 +28,7 @@ namespace Fusion.Engine.Graphics {
 
 
 	/// <summary>
-	/// 
+	/// Represents texture atlas.
 	/// </summary>
 	public class TextureAtlas : DisposableBase {
 
@@ -36,10 +36,21 @@ namespace Fusion.Engine.Graphics {
 
 		struct Element {
 			public string Name;
+			public int Index;
 			public int X;
 			public int Y;
 			public int Width;
 			public int Height;
+
+			public Rectangle GetRect ()
+			{
+				return new Rectangle(X, Y, Width, Height);
+			}
+
+			public RectangleF GetRectF (float width, float height)
+			{
+				return new RectangleF(X/width, Y/height, Width/width, Height/height);
+			}
 		}
 
 		List<Element> elements = new List<Element>();
@@ -73,6 +84,7 @@ namespace Fusion.Engine.Graphics {
 				
 				for ( int i=0; i<count; i++ ) {
 					var element = new Element();
+					element.Index	=	i;
 					element.Name	=	br.ReadString();
 					element.X		=	br.ReadInt32();
 					element.Y		=	br.ReadInt32();
@@ -93,36 +105,118 @@ namespace Fusion.Engine.Graphics {
 			dictionary	=	elements.ToDictionary( e => e.Name );
 		}
 
+
+
+		/// <summary>
+		/// Gets number of images.
+		/// </summary>
+		public int Count {
+			get {
+				return elements.Count;
+			}
+		}
+
+
+		
+		/// <summary>
+		/// Gets subimage rectangle by its index
+		/// </summary>
+		/// <param name="index"></param>
+		/// <returns></returns>
+		public Rectangle this [int index]
+		{	
+			get {					
+				var e = elements[index];
+				return e.GetRect();
+			}
+		}
+
+					
+		
+		/// <summary>
+		/// Gets subimage rectangle by its index
+		/// </summary>
+		/// <param name="index"></param>
+		/// <returns></returns>
+		public Rectangle this [string name]
+		{	
+			get {					
+				Element e;
+
+				var r = dictionary.TryGetValue( name, out e );
+
+				if (!r) {
+					throw new InvalidOperationException(string.Format("Texture atlas does not contain subimage '{0}'", name));
+				}
+
+				return new Rectangle(e.X, e.Y, e.Width, e.Height);
+			}
+		}
+
 					
 
 		/// <summary>
 		/// Gets names of all subimages. 
 		/// </summary>
-		public string[] SubImageNames {
-			get {
-				return elements.Select( e => e.Name ).ToArray();
-			}
+		public string[] GetSubImageNames () 
+		{
+			return elements.Select( e => e.Name ).ToArray();
 		}
-		
+
 
 
 		/// <summary>
-		/// Gets subimage rectangle in this atlas.
+		/// Gets rectangles of all subimages in texels.
 		/// </summary>
-		/// <param name="name">Subimage name. Case sensitive. Without extension.</param>
-		/// <returns>Rectangle</returns>
-		public Rectangle GetSubImageRectangle ( string name )
+		/// <param name="maxCount">Maximum number of recatangles. 
+		/// If maxCount greater than number of images
+		/// the rest of the array will be filled with zeroed rectangles.</param>
+		/// <returns></returns>
+		public Rectangle[] GetRectangles (int maxCount = -1 ) 
 		{
-			Element e;
-			var r = dictionary.TryGetValue( name, out e );
-
-			if (!r) {
-				throw new InvalidOperationException(string.Format("Texture atlas does not contain subimage '{0}'", name));
+			if (maxCount<0) {
+				maxCount = elements.Count;
 			}
-
-			return new Rectangle( e.X, e.Y, e.Width, e.Height );
+			return Enumerable.Range( 0, maxCount )
+				.Select( i => (i<elements.Count)? elements[i].GetRect() : new Rectangle(0,0,0,0) )
+				.ToArray();
 		}
 
+
+
+		/// <summary>
+		/// Gets float rectangles of all subimages in normalized texture coordibates
+		/// </summary>
+		/// <param name="maxCount">Maximum number of recatangles. 
+		/// If maxCount greater than number of images the rest of 
+		/// he array will be filled with zeroed rectangles.</param>
+		/// <returns></returns>
+		public RectangleF[] GetNormalizedRectangles ( int maxCount = -1 ) 
+		{
+			if (maxCount<0) {
+				maxCount = elements.Count;
+			}
+
+			float w = Texture.Width;
+			float h = Texture.Height;
+
+			return Enumerable.Range( 0, maxCount )
+				.Select( i => (i<elements.Count)? elements[i].GetRectF(w,h) : new RectangleF(0,0,0,0) )
+				.ToArray();
+		}
+
+
+
+		/// <summary>
+		/// Gets index if particular subimage.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public int IndexOf( string name )
+		{
+			return dictionary[name].Index;
+		}
+		
 
 
 		/// <summary>
