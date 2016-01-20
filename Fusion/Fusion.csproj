@@ -336,7 +336,7 @@
     <Compile Include="Engine\Graphics\GIS\TilesBatch.Tile.cs" />
     <Compile Include="Engine\Graphics\Lights\LightSet.cs" />
     <Compile Include="Engine\Graphics\Textures\TargetFormat.cs" />
-    <Compile Include="Engine\Graphics\ViewLayerHdr.cs">
+    <Compile Include="Engine\Graphics\RenderWorld.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Engine\Input\Bind.cs" />

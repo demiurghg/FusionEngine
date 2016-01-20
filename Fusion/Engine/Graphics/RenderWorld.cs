@@ -16,7 +16,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// Represents entire visible world.
 	/// </summary>
-	public class ViewLayerHdr : ViewLayer {
+	public class RenderWorld : ViewLayer {
 
 		/// <summary>
 		/// Gets HDR settings.
@@ -79,7 +79,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="Game">Game engine</param>
 		/// <param name="width">Target width.</param>
 		/// <param name="height">Target height.</param>
-		public ViewLayerHdr ( Game game, int width, int height ) : base( game )
+		public RenderWorld ( Game game, int width, int height ) : base( game )
 		{
 			var vp	=	Game.GraphicsDevice.DisplayBounds;
 

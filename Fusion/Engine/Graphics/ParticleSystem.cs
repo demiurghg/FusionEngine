@@ -24,7 +24,7 @@ namespace Fusion.Engine.Graphics {
 		readonly RenderSystem rs;
 		Ubershader		shader;
 		StateFactory	factory;
-		ViewLayerHdr	viewLayer;
+		RenderWorld	viewLayer;
 
 		const int BlockSize				=	256;
 		const int MaxInjectingParticles	=	1024;
@@ -101,7 +101,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="rs"></param>
-		internal ParticleSystem ( RenderSystem rs, ViewLayerHdr viewLayer )
+		internal ParticleSystem ( RenderSystem rs, RenderWorld viewLayer )
 		{
 			this.rs			=	rs;
 			this.Game		=	rs.Game;
@@ -193,6 +193,10 @@ namespace Fusion.Engine.Graphics {
 
 			if (injectionCount>=MaxInjectingParticles) {
 				toMuchInjectedParticles = true;
+				return;
+			}
+
+			if (particle.LifeTime<=0) {
 				return;
 			}
 
@@ -332,6 +336,11 @@ namespace Fusion.Engine.Graphics {
 
 			//	GPU time : 0.81 ms	-> 0.91 ms
 			device.Draw( MaxSimulatedParticles, 0 );
+
+
+			if (rs.Config.ShowParticles) {
+				rs.Counters.DeadParticles	=	deadParticlesIndices.GetStructureCount();
+			}
 		}
 	}
 }

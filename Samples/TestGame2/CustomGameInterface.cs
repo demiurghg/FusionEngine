@@ -69,7 +69,7 @@ namespace TestGame2 {
 		SpriteLayer		testLayer;
 		SpriteLayer		uiLayer;
 		DiscTexture		texture;
-		ViewLayerHdr	masterView;
+		RenderWorld		masterView;
 		ViewLayer		masterView2;
 		TargetTexture	targetTexture;
 		DiscTexture		debugFont;
@@ -111,7 +111,7 @@ namespace TestGame2 {
 			//var mtrl		=	GameEngine.Content.Load<Material>("testMtrl");
 
 			var bounds		=	Game.RenderSystem.DisplayBounds;
-			masterView		=	new ViewLayerHdr(Game, bounds.Width, bounds.Height);
+			masterView		=	new RenderWorld(Game, bounds.Width, bounds.Height);
 
 			masterView2		=	new ViewLayer(Game);
 
@@ -400,9 +400,9 @@ namespace TestGame2 {
 				p.TimeLag		=	0;
 
 				for (int i=0; i<1000; i++) {
-					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,1) + Vector3.Up * 5 + Vector3.Right*2) * Math.Abs(rand2.GaussDistribution(1, 1));
+					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,1) + Vector3.Up * 5 + Vector3.Right*2) * Math.Abs(rand2.GaussDistribution(1, 0.1f));
 					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 2 + Vector3.UnitX * 20;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
-					p.LifeTime		=	rand2.GaussDistribution(0.3f,0.3f);
+					p.LifeTime		=	rand2.GaussDistribution(1,1);
 					p.Size0			=	0.5f;
 					p.Size1			=	0.0f;
 					p.Rotation0		=	rand2.NextFloat(0,3.14f);

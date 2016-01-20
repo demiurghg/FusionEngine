@@ -71,6 +71,12 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// Shows particles statistics.
+		/// </summary>
+		public bool ShowParticles { get; set; }
+
+
+		/// <summary>
 		/// Shows counters
 		/// </summary>
 		public bool ShowCounters { get; set; }

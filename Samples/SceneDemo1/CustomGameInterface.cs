@@ -24,7 +24,7 @@ namespace SceneDemo1 {
 		public GameConsole Console { get { return console; } }
 		public GameConsole console;
 
-		ViewLayerHdr	master;
+		RenderWorld		master;
 		Scene			scene;
 
 
@@ -46,7 +46,7 @@ namespace SceneDemo1 {
 		public override void Initialize ()
 		{
 			//	create view layer :
-			master = new ViewLayerHdr( Game, 0, 0 );
+			master = new RenderWorld( Game, 0, 0 );
 
 			//	add view to layer to scene :
 			Game.RenderSystem.AddLayer( master );

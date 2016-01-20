@@ -154,7 +154,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="diffuse"></param>
 		/// <param name="specular"></param>
 		/// <param name="normals"></param>
-		internal void RenderGBuffer ( StereoEye stereoEye, Camera camera, HdrFrame frame, ViewLayerHdr viewLayer )
+		internal void RenderGBuffer ( StereoEye stereoEye, Camera camera, HdrFrame frame, RenderWorld viewLayer )
 		{		
 			using ( new PixEvent("RenderGBuffer") ) {
 				if (surfaceShader==null) {	

@@ -107,7 +107,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="target">LDR target.</param>
 		/// <param name="hdrImage">HDR source image.</param>
-		public void Render ( GameTime gameTime, RenderTargetSurface target, ShaderResource hdrImage, ViewLayerHdr viewLayer )
+		public void Render ( GameTime gameTime, RenderTargetSurface target, ShaderResource hdrImage, RenderWorld viewLayer )
 		{
 			var device	=	Game.GraphicsDevice;
 			var filter	=	Game.RenderSystem.Filter;

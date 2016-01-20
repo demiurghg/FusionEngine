@@ -200,7 +200,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="view"></param>
 		/// <param name="projection"></param>
-		internal void RenderLighting ( StereoEye stereoEye, Camera camera, HdrFrame frame, ViewLayerHdr viewLayer, Texture occlusionMap, RenderTargetCube envLight )
+		internal void RenderLighting ( StereoEye stereoEye, Camera camera, HdrFrame frame, RenderWorld viewLayer, Texture occlusionMap, RenderTargetCube envLight )
 		{
 			using ( new PixEvent("TiledLighting") ) {
 				var view		=	camera.GetViewMatrix( stereoEye );
@@ -314,7 +314,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="?"></param>
-		internal void RenderShadows ( ViewLayerHdr viewLayer, LightSet lightSet )
+		internal void RenderShadows ( RenderWorld viewLayer, LightSet lightSet )
 		{
 			var camera		=	viewLayer.Camera;
 			var instances	=	viewLayer.Instances;

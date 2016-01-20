@@ -17,9 +17,10 @@ namespace Fusion.Engine.Graphics {
 
 		static readonly Guid HudCategory = Guid.NewGuid();
 
-		public int	SceneDIPs	{ get; set;	}
-		public int	ShadowDIPs	{ get; set;	}
-		public int	TotalDIPs	{ get { return SceneDIPs + ShadowDIPs; } }
+		public int	SceneDIPs		{ get; set;	}
+		public int	ShadowDIPs		{ get; set;	}
+		public int	TotalDIPs		{ get { return SceneDIPs + ShadowDIPs; } }
+		public int	DeadParticles	{ get; set; }
 
 
 		/// <summary>
@@ -47,6 +48,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			Hud.Clear(HudCategory);
 			Hud.Add(HudCategory, Color.White, "DIPs: Scene:{0}  Shadow:{1} Total: {2}", SceneDIPs, ShadowDIPs, TotalDIPs );
+			Hud.Add(HudCategory, Color.White, "Dead particles: {0}", DeadParticles );
 		}
 	}
 }
