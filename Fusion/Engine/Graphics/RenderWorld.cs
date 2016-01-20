@@ -171,6 +171,44 @@ namespace Fusion.Engine.Graphics {
 
 
 
+
+
+		/// <summary>
+		/// Indicates whether world is paused.
+		/// </summary>
+		public bool IsPaused {
+			get {
+				return isPaused;
+			}
+			set {	
+				if (isPaused!=value) {
+					isPaused = value;
+				}
+			}
+		}
+
+
+		bool isPaused;
+
+
+		/// <summary>
+		/// Pauses render world simulation and animation.
+		/// </summary>
+		public void Pause ()
+		{
+			IsPaused	=	true;
+		}
+
+
+
+		/// <summary>
+		/// Resumes render world simulation and animation.
+		/// </summary>
+		public void Resume ()
+		{
+			IsPaused	=	false;
+		}
+
 		/*-----------------------------------------------------------------------------------------
 		 * 
 		 *	Rendering :

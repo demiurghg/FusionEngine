@@ -74,6 +74,12 @@ namespace Fusion.Build.Processors {
 								.ToArray();
 
 
+			var depNames	=	File.ReadAllLines(assetFile.FullSourcePath)
+								.Select( f1 => f1.Trim() )
+								.Where( f2 => !f2.StartsWith("#") )
+								.Select( f3 => Path.Combine( Path.GetDirectoryName(assetFile.KeyPath), f3 ) )
+								.ToArray();
+
 			var images		=	fileNames
 								.Select( fn => LoadImage( fn ) )
 								.OrderByDescending( img0 => img0.Width * img0.Height )
@@ -120,7 +126,7 @@ namespace Fusion.Build.Processors {
 			//
 			//	Write binary blob (text + dds texture):
 			//
-			using ( var fs = assetFile.OpenTargetStream() ) {
+			using ( var fs = assetFile.OpenTargetStream(depNames) ) {
 				var bw = new BinaryWriter( fs );
 
 				bw.Write(new[]{'A','T','L','S'});

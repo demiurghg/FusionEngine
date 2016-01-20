@@ -52,6 +52,8 @@ namespace TestGame2 {
 	}
 
 
+
+
 	class CustomGameInterface : Fusion.Engine.Common.UserInterface {
 
 		[GameModule("Console", "con", InitOrder.Before)]
@@ -166,6 +168,14 @@ namespace TestGame2 {
 				masterView.LightSet.EnvLights.Add( light );
 			} //*/
 
+			fireLight	=	new OmniLight();
+			fireLight.Position	=	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20;
+			fireLight.RadiusOuter	=	7;
+			fireLight.Intensity		=	new Color4(249, 172, 61, 0)/2;
+
+			masterView.LightSet.OmniLights.Add( fireLight );
+			
+
 
 			masterView2.SpriteLayers.Add( console.ConsoleSpriteLayer );
 			masterView2.SpriteLayers.Add( uiLayer );
@@ -183,6 +193,8 @@ namespace TestGame2 {
 		List<Tuple<MeshInstance,int>> animInstances = new List<Tuple<MeshInstance,int>>();
 		List<Tuple<MeshInstance,int>> skinInstances = new List<Tuple<MeshInstance,int>>();
 
+
+		OmniLight	fireLight = null;
 
 		void LoadContent ()
 		{
@@ -330,6 +342,7 @@ namespace TestGame2 {
 		static readonly Guid HudFps = Guid.NewGuid();
 
 		float frame = 0;
+		Random rand2 = new Random();
 
 		/// <summary>
 		/// Updates internal state of interface.
@@ -387,27 +400,30 @@ namespace TestGame2 {
 
 
 			var vp = Game.RenderSystem.DisplayBounds;
-			var rand2 = new Random();
+
+			if (Game.Keyboard.IsKeyDown(Keys.K)) {
+				masterView.ParticleSystem.KillParticles();
+			}
 
 			if (Game.Keyboard.IsKeyDown(Keys.P)) {
 
 				var p = new Particle();
-				p.FadeIn		=	0.0001f;
-				p.FadeOut		=	0.9999f;
-				p.Color0		=	new Color4(5,5,5, 1);
-				p.Color1		=	new Color4(5,5,5, 1);
+				p.FadeIn		=	0.2f;
+				p.FadeOut		=	0.8f;
+				p.Color0		=	new Color4(500,500,500, 0);
+				p.Color1		=	new Color4(500,500,500, 1);
 				p.ImageIndex	=	0;
 				p.TimeLag		=	0;
 
-				for (int i=0; i<1000; i++) {
-					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,1) + Vector3.Up * 5 + Vector3.Right*2) * Math.Abs(rand2.GaussDistribution(1, 0.1f));
-					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 2 + Vector3.UnitX * 20;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
-					p.LifeTime		=	rand2.GaussDistribution(1,1);
-					p.Size0			=	0.5f;
-					p.Size1			=	0.0f;
+				for (int i=0; i<1; i++) {
+					p.Velocity		=	(rand2.UniformRadialDistribution(0.7f,1)) + Vector3.Up * 0.5f * Math.Abs(rand2.GaussDistribution(10, 0.1f));
+					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
+					p.LifeTime		=	rand2.GaussDistribution(0.4f,0.05f);
+					p.Size0			=	5.5f;
+					p.Size1			=	3.0f;
 					p.Rotation0		=	rand2.NextFloat(0,3.14f);
 					p.Rotation1		=	rand2.NextFloat(0,3.14f);
-					p.Gravity		=	1;
+					p.Gravity		=	-0.7f;
 					p.ImageIndex	=	rand.Next(35);
 					//var 
 					masterView.ParticleSystem.InjectParticle( p );
@@ -431,6 +447,8 @@ namespace TestGame2 {
 			//}//*/
 
 			//Log.Message("{0}", videoPlayer.State);
+
+			masterView.IsPaused  = Game.Keyboard.IsKeyDown(Keys.O);
 
 
 			if ( Game.Keyboard.IsKeyDown(Keys.PageDown) ) {

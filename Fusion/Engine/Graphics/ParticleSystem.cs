@@ -24,7 +24,7 @@ namespace Fusion.Engine.Graphics {
 		readonly RenderSystem rs;
 		Ubershader		shader;
 		StateFactory	factory;
-		RenderWorld	viewLayer;
+		RenderWorld	renderWorld;
 
 		const int BlockSize				=	256;
 		const int MaxInjectingParticles	=	1024;
@@ -103,9 +103,9 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="rs"></param>
 		internal ParticleSystem ( RenderSystem rs, RenderWorld viewLayer )
 		{
-			this.rs			=	rs;
-			this.Game		=	rs.Game;
-			this.viewLayer	=	viewLayer;
+			this.rs				=	rs;
+			this.Game			=	rs.Game;
+			this.renderWorld	=	viewLayer;
 
 			Gravity	=	Vector3.Down * 9.80665f;
 
@@ -187,6 +187,10 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="particle"></param>
 		public void InjectParticle ( Particle particle )
 		{
+			if (renderWorld.IsPaused) {
+				return;
+			}
+
 			if (Images==null) {
 				throw new InvalidOperationException("Images must be set");
 			}
@@ -232,6 +236,19 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// Immediatly kills all living particles.
+		/// </summary>
+		/// <returns></returns>
+		public void KillParticles ()
+		{
+			requestKill = true;
+		}
+
+
+		bool requestKill = false;
+
+
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="gameTime"></param>
@@ -255,17 +272,24 @@ namespace Fusion.Engine.Graphics {
 			}
 			
 
+			var deltaTime	=	gameTime.ElapsedSec;
+
+			if (requestKill) {
+				deltaTime	=	float.MaxValue / 2;
+				requestKill	=	false;
+			}
+
 			//
 			//	Setup parameters :
 			//	
 			Params param = new Params();
-			param.View			=	viewLayer.Camera.GetViewMatrix( stereoEye );
-			param.Projection	=	viewLayer.Camera.GetProjectionMatrix( stereoEye );
+			param.View			=	renderWorld.Camera.GetViewMatrix( stereoEye );
+			param.Projection	=	renderWorld.Camera.GetProjectionMatrix( stereoEye );
 			param.MaxParticles	=	0;
-			param.DeltaTime		=	gameTime.ElapsedSec;
-			param.CameraForward	=	new Vector4( viewLayer.Camera.GetCameraMatrix( StereoEye.Mono ).Forward	, 0 );
-			param.CameraRight	=	new Vector4( viewLayer.Camera.GetCameraMatrix( StereoEye.Mono ).Right	, 0 );
-			param.CameraUp		=	new Vector4( viewLayer.Camera.GetCameraMatrix( StereoEye.Mono ).Up		, 0 );
+			param.DeltaTime		=	deltaTime;
+			param.CameraForward	=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Forward	, 0 );
+			param.CameraRight	=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Right	, 0 );
+			param.CameraUp		=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Up		, 0 );
 			param.Gravity		=	new Vector4( this.Gravity, 0 );
 			param.MaxParticles	=	injectionCount;
 
@@ -309,7 +333,7 @@ namespace Fusion.Engine.Graphics {
 			//
 			bool skipSim = Game.InputDevice.IsKeyDown(Fusion.Drivers.Input.Keys.O);
 
-			if (!skipSim) {
+			if (!renderWorld.IsPaused) {
 	
 				device.SetCSRWBuffer( 0, simulationBuffer,		0 );
 				device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );

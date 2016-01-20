@@ -234,7 +234,11 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 
 float4 PSMain( GSOutput input ) : SV_Target
 {
-	return Texture.Sample( Sampler, input.TexCoord ) * input.Color;
+	float4 color	=	Texture.Sample( Sampler, input.TexCoord ) * input.Color;
+	
+	//	saves about 5%-10% of rasterizer time:
+	clip( color.a < 0.001f ? -1:1 );
+	return color;
 }
 #endif
 
