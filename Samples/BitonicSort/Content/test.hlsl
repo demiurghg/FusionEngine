@@ -68,11 +68,10 @@ void CSMain(
 	sharedData[ sharedIndexOdd  ] = buffer[ threadIndexOdd	];
 	GroupMemoryBarrierWithGroupSync();
 	
-	//Kernel2( sharedIndexEven, sharedIndexOdd, 0,0 );
-	
+
+	//	bitonic sort of each 'BLOCK_SIZE'-blocks.
 	for (int p=0; p<BLOCK_LOGSIZE; p++) {
 		for (int q=0; q<=p; q++) {
-			GroupMemoryBarrierWithGroupSync();
 			
 			Kernel( sharedIndexEven, p, q );
 			Kernel( sharedIndexOdd, p, q );
@@ -80,15 +79,17 @@ void CSMain(
 			GroupMemoryBarrierWithGroupSync();
 		}
 	}
-	
-	
+
 	
 	//-------------------
 	//	write data back :
 	GroupMemoryBarrierWithGroupSync();
 	buffer[ threadIndexEven	] = sharedData[ sharedIndexEven ];
 	buffer[ threadIndexOdd	] = sharedData[ sharedIndexOdd  ];
-	GroupMemoryBarrierWithGroupSync();
+
+	
+	//-------------------
+	//	write data back :
 }
 
 
