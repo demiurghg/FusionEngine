@@ -418,7 +418,7 @@ namespace TestGame2 {
 				for (int i=0; i<1000; i++) {
 					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,1) + Vector3.Up * 17.0f) * Math.Abs(rand2.GaussDistribution(1, 0.25f));
 					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
-					p.LifeTime		=	rand2.GaussDistribution(1.4f,0.5f);
+					p.LifeTime		=	rand2.GaussDistribution(4.4f,0.5f);
 					p.Size0			=	0.5f;
 					p.Size1			=	0.0f;
 					p.Rotation0		=	rand2.NextFloat(0,3.14f*2);
