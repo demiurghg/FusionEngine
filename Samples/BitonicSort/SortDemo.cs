@@ -58,8 +58,7 @@ namespace ComputeDemo {
 		const int MatrixHeight			=	NumberOfElements / BitonicBlockSize;
 
 		ConstantBuffer		paramsCB;
-		StructuredBuffer	buffer1;
-		StructuredBuffer	buffer2;
+		StructuredBuffer	tempBuffer;
 		Ubershader			shader;
 		StateFactory		factory;
 
@@ -74,8 +73,7 @@ namespace ComputeDemo {
 			base.Initialize();
 
 			//	create structured buffers and shaders :
-			buffer1		=	new StructuredBuffer( GraphicsDevice, typeof(float), NumberOfElements  , StructuredBufferFlags.None );
-			buffer2		=	new StructuredBuffer( GraphicsDevice, typeof(float), NumberOfElements  , StructuredBufferFlags.None );
+			tempBuffer	=	new StructuredBuffer( GraphicsDevice, typeof(Vector2), NumberOfElements  , StructuredBufferFlags.None );
 			paramsCB	=	new ConstantBuffer( GraphicsDevice, typeof(Params) );
 			shader		=	Content.Load<Ubershader>("test");
 			factory		=	new StateFactory( shader, typeof(ShaderFlags), Primitive.TriangleList, VertexInputElement.Empty );
@@ -84,7 +82,7 @@ namespace ComputeDemo {
 			//	Create and write data :
 			//
 			var	rand	=	new Random();
-			var	input	=	Enumerable.Range(0, NumberOfElements).Select( i => rand.NextFloat(0,100) ).ToArray();
+			var	input	=	Enumerable.Range(0, NumberOfElements).Select( i => new Vector2( rand.NextFloat(0,100), i ) ).ToArray();
 			buffer1.SetData( input );
 			
 			//	add keyboard handler :
@@ -214,7 +212,7 @@ namespace ComputeDemo {
 			//
 			if (InputDevice.IsKeyDown(Keys.S)) {
 
-				var output = new float[NumberOfElements];
+				var output = new Vector2[NumberOfElements];
 
 				buffer1.GetData( output );
 	
@@ -222,12 +220,12 @@ namespace ComputeDemo {
 
 				for (int i=0; i<NumberOfElements; i++) {
 					
-					bool error = (i < NumberOfElements-1) ? output[i]>output[i+1] : false;
+					bool error = (i < NumberOfElements-1) ? output[i].X>output[i+1].X : false;
 					//bool error = (i < BufferSize-1) ? output[i&0xFFFFFFFE]>output[i&0xFFFFFFFE+1] : false;
 
-					if (error) {
-						Log.Message("{0,4} : {1,6:0.00} - {2,6:0.00} {3}", i, 0, output[i], error?"<- Error":"" );
-					}
+					//if (error) {
+						Log.Message("{0,4} : {1,6:0.00} - {2,6:0.00} {3}", i, output[i].X, output[i].Y, error?"<- Error":"" );
+					//}
 				}
 			}
 		}

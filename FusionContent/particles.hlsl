@@ -188,7 +188,7 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	float3		rt	=	(Params.CameraRight.xyz * cos(a) + Params.CameraUp.xyz * sin(a)) * sz;
 	float3		up	=	(Params.CameraUp.xyz * cos(a) - Params.CameraRight.xyz * sin(a)) * sz;
 	
-	float4		image	=	Images[2];
+	float4		image	=	Images[prt.ImageIndex ];
 	
 	p0.Position	= mul( float4( position + rt + up, 1 ), Params.View );
 	p0.Position	= mul( p0.Position, Params.Projection );

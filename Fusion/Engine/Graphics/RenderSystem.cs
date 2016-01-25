@@ -29,6 +29,10 @@ namespace Fusion.Engine.Graphics {
 		public Filter Filter { get{ return filter; } }
 		public Filter filter;
 
+		[GameModule("BitonicSort", "bitonic", InitOrder.After)]
+		public BitonicSort BitonicSort { get{ return bitonicSort; } }
+		public BitonicSort bitonicSort;
+
 		[GameModule("HdrFilter", "hdr", InitOrder.After)]
 		public HdrFilter HdrFilter { get{ return hdrFilter; } }
 		public HdrFilter hdrFilter;
@@ -104,6 +108,7 @@ namespace Fusion.Engine.Graphics {
 			lightRenderer	=	new LightRenderer( Game );
 			sceneRenderer	=	new SceneRenderer( Game, this );
 			sky				=	new Sky( Game );
+			bitonicSort		=	new BitonicSort( Game );
 
 			Device.DisplayBoundsChanged += (s,e) => {
 				var handler = DisplayBoundsChanged;

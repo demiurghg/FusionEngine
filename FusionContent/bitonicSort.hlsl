@@ -1,10 +1,4 @@
-//--------------------------------------------------------------------------------------
-// File: ComputeShaderSort11.hlsl
-//
-// This file contains the compute shaders to perform GPU sorting using DirectX 11.
-// 
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//--------------------------------------------------------------------------------------
+
 #if 0
 $ubershader BITONIC_SORT|TRANSPOSE
 #endif
@@ -49,12 +43,13 @@ void CSMain( uint3 Gid : SV_GroupID,
     GroupMemoryBarrierWithGroupSync();
     
     // Sort the shared data
-    for (unsigned int j = g_iLevel >> 1 ; j > 0 ; j >>= 1)
-    {
+    for (unsigned int j = g_iLevel >> 1 ; j > 0 ; j >>= 1) {
+	
         float2 result = ((shared_data[GI & ~j].x <= shared_data[GI | j].x) == (bool)(g_iLevelMask & DTid.x))? shared_data[GI ^ j] : shared_data[GI];
         GroupMemoryBarrierWithGroupSync();
         shared_data[GI] = result;
         GroupMemoryBarrierWithGroupSync();
+		
     }
     
     // Store shared data

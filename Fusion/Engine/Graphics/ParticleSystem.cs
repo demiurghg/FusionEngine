@@ -28,8 +28,15 @@ namespace Fusion.Engine.Graphics {
 
 		const int BlockSize				=	256;
 		const int MaxInjectingParticles	=	1024;
-		const int MaxSimulatedParticles =	384 * 1024;
+		const int MaxSimulatedParticles =	512 * 512;
 		const int MaxImages				=	512;
+
+		//	particle sorting :
+		const int NumberOfElements		=	MaxSimulatedParticles;
+		const int BitonicBlockSize		=	512;
+		const int TransposeBlockSize	=	16;
+		const int MatrixWidth			=	BitonicBlockSize;
+		const int MatrixHeight			=	NumberOfElements / BitonicBlockSize;
 
 		bool toMuchInjectedParticles = false;
 
@@ -37,15 +44,16 @@ namespace Fusion.Engine.Graphics {
 		Particle[]			injectionBufferCPU = new Particle[MaxInjectingParticles];
 		StructuredBuffer	injectionBuffer;
 		StructuredBuffer	simulationBuffer;
+		StructuredBuffer	tempSortBuffer;
 		StructuredBuffer	deadParticlesIndices;
 		ConstantBuffer		paramsCB;
 		ConstantBuffer		imagesCB;
 
 		enum Flags {
-			INJECTION	=	0x1,
-			SIMULATION	=	0x2,
-			DRAW		=	0x4,
-			INITIALIZE	=	0x8,
+			INJECTION		=	0x01,
+			SIMULATION		=	0x02,
+			DRAW			=	0x04,
+			INITIALIZE		=	0x08,
 		}
 
 
@@ -54,7 +62,7 @@ namespace Fusion.Engine.Graphics {
 		//	int MaxParticles;              // Offset:  128
 		//	float DeltaTime;               // Offset:  132
 		[StructLayout(LayoutKind.Explicit, Size=256)]
-		struct Params {
+		struct PrtParams {
 			[FieldOffset(  0)] public Matrix	View;
 			[FieldOffset( 64)] public Matrix	Projection;
 			[FieldOffset(128)] public Vector4	CameraForward;
@@ -64,7 +72,6 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(192)] public int		MaxParticles;
 			[FieldOffset(196)] public float		DeltaTime;
 			[FieldOffset(200)] public uint		DeadListSize;
-
 		} 
 
 		Random rand = new Random();
@@ -109,11 +116,12 @@ namespace Fusion.Engine.Graphics {
 
 			Gravity	=	Vector3.Down * 9.80665f;
 
-			paramsCB		=	new ConstantBuffer( Game.GraphicsDevice, typeof(Params) );
+			paramsCB		=	new ConstantBuffer( Game.GraphicsDevice, typeof(PrtParams) );
 			imagesCB		=	new ConstantBuffer( Game.GraphicsDevice, typeof(Vector4), MaxImages );
 
 			injectionBuffer			=	new StructuredBuffer( Game.GraphicsDevice, typeof(Particle),	MaxInjectingParticles, StructuredBufferFlags.None );
 			simulationBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(Particle),	MaxSimulatedParticles, StructuredBufferFlags.None );
+			tempSortBuffer			=	new StructuredBuffer( Game.GraphicsDevice, typeof(Particle),	MaxSimulatedParticles, StructuredBufferFlags.None );
 			deadParticlesIndices	=	new StructuredBuffer( Game.GraphicsDevice, typeof(uint),		MaxSimulatedParticles, StructuredBufferFlags.Append );
 
 			rs.Game.Reloading += LoadContent;
@@ -148,11 +156,12 @@ namespace Fusion.Engine.Graphics {
 		{
 			if (disposing) {	
 
-				paramsCB.Dispose();
+				SafeDispose( ref paramsCB );
+				SafeDispose( ref imagesCB );
 
-				injectionBuffer.Dispose();
-				simulationBuffer.Dispose();
-				deadParticlesIndices.Dispose();
+				SafeDispose( ref injectionBuffer );
+				SafeDispose( ref simulationBuffer );
+				SafeDispose( ref deadParticlesIndices );
 			}
 			base.Dispose( disposing );
 		}
@@ -244,8 +253,8 @@ namespace Fusion.Engine.Graphics {
 			requestKill = true;
 		}
 
-
 		bool requestKill = false;
+
 
 
 		/// <summary>
@@ -274,6 +283,7 @@ namespace Fusion.Engine.Graphics {
 
 			var deltaTime	=	gameTime.ElapsedSec;
 
+			//	kill particles by applying very large delta.
 			if (requestKill) {
 				deltaTime	=	float.MaxValue / 2;
 				requestKill	=	false;
@@ -282,7 +292,7 @@ namespace Fusion.Engine.Graphics {
 			//
 			//	Setup parameters :
 			//	
-			Params param = new Params();
+			PrtParams param = new PrtParams();
 			param.View			=	renderWorld.Camera.GetViewMatrix( stereoEye );
 			param.Projection	=	renderWorld.Camera.GetProjectionMatrix( stereoEye );
 			param.MaxParticles	=	0;
@@ -296,7 +306,7 @@ namespace Fusion.Engine.Graphics {
 			paramsCB.SetData( param );
 
 			//	set DeadListSize to prevent underflow:
-			deadParticlesIndices.CopyStructureCount( paramsCB, Marshal.OffsetOf( typeof(Params), "DeadListSize").ToInt32() );
+			deadParticlesIndices.CopyStructureCount( paramsCB, Marshal.OffsetOf( typeof(PrtParams), "DeadListSize").ToInt32() );
 
 
 			device.ComputeShaderConstants[0]	= paramsCB ;

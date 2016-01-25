@@ -69,14 +69,14 @@ namespace Fusion.Build.Processors {
 
 			var fileNames	=	File.ReadAllLines(assetFile.FullSourcePath)
 								.Select( f1 => f1.Trim() )
-								.Where( f2 => !f2.StartsWith("#") )
+								.Where( f2 => !f2.StartsWith("#") && !string.IsNullOrWhiteSpace(f2) )
 								.Select( f3 => Path.Combine( fileDir, f3 ) )
 								.ToArray();
 
 
 			var depNames	=	File.ReadAllLines(assetFile.FullSourcePath)
 								.Select( f1 => f1.Trim() )
-								.Where( f2 => !f2.StartsWith("#") )
+								.Where( f2 => !f2.StartsWith("#") && !string.IsNullOrWhiteSpace(f2) )
 								.Select( f3 => Path.Combine( Path.GetDirectoryName(assetFile.KeyPath), f3 ) )
 								.ToArray();
 

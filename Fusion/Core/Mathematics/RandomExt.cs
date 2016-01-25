@@ -53,6 +53,28 @@ namespace Fusion.Core.Mathematics
 		/// 
 		/// </summary>
 		/// <param name="random"></param>
+		/// <param name="interiorRadius"></param>
+		/// <param name="exteriorRadius"></param>
+		/// <returns></returns>
+		public static Vector3 GaussRadialDistribution ( this Random random, float meanRadius, float stdDev )
+		{
+			Vector3 r;
+			do {
+				r	=	random.NextVector3( -Vector3.One, Vector3.One );
+			} while ( r.Length() < 0.1f || r.Length() > 1 );
+
+			r.Normalize();
+
+			r = r * random.GaussDistribution( meanRadius, stdDev );
+
+			return r;
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="random"></param>
 		/// <param name="mean"></param>
 		/// <param name="stdDev"></param>
 		/// <returns></returns>
