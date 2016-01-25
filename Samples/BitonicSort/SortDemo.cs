@@ -39,22 +39,27 @@ namespace ComputeDemo {
 		#pragma warning disable 649 
 
 		struct Params {
-			public int Size;
-			public int Log2Size;
-			public int Dummy1;
-			public int Dummy2;
+			public uint Level;
+			public uint LevelMask;
+			public uint Width;
+			public uint Height;
 		}
 
 
 		enum ShaderFlags {
-			NONE = 0,
+			BITONIC_SORT = 1,
+			TRANSPOSE = 2,
 		}
 
-		const int BufferSize =	512;
-		const int BlockSize =	64;
+		const int NumberOfElements		=	512*512;
+		const int BitonicBlockSize		=	512;
+		const int TransposeBlockSize	=	16;
+		const int MatrixWidth			=	BitonicBlockSize;
+		const int MatrixHeight			=	NumberOfElements / BitonicBlockSize;
 
 		ConstantBuffer		paramsCB;
-		StructuredBuffer	buffer;
+		StructuredBuffer	buffer1;
+		StructuredBuffer	buffer2;
 		Ubershader			shader;
 		StateFactory		factory;
 
@@ -69,12 +74,18 @@ namespace ComputeDemo {
 			base.Initialize();
 
 			//	create structured buffers and shaders :
-			buffer		=	new StructuredBuffer( GraphicsDevice, typeof(float), BufferSize  , StructuredBufferFlags.None );
+			buffer1		=	new StructuredBuffer( GraphicsDevice, typeof(float), NumberOfElements  , StructuredBufferFlags.None );
+			buffer2		=	new StructuredBuffer( GraphicsDevice, typeof(float), NumberOfElements  , StructuredBufferFlags.None );
 			paramsCB	=	new ConstantBuffer( GraphicsDevice, typeof(Params) );
 			shader		=	Content.Load<Ubershader>("test");
 			factory		=	new StateFactory( shader, typeof(ShaderFlags), Primitive.TriangleList, VertexInputElement.Empty );
 
-			
+			//
+			//	Create and write data :
+			//
+			var	rand	=	new Random();
+			var	input	=	Enumerable.Range(0, NumberOfElements).Select( i => rand.NextFloat(0,100) ).ToArray();
+			buffer1.SetData( input );
 			
 			//	add keyboard handler :
 			InputDevice.KeyDown += InputDevice_KeyDown;
@@ -90,7 +101,8 @@ namespace ComputeDemo {
 		{
 			if (disposing) {
 				SafeDispose( ref factory );
-				SafeDispose( ref buffer );
+				SafeDispose( ref buffer1 );
+				SafeDispose( ref buffer2 );
 				SafeDispose( ref paramsCB );
 			}
 			base.Dispose( disposing );
@@ -111,6 +123,10 @@ namespace ComputeDemo {
 
 			if (e.Key == Keys.F12) {
 				GraphicsDevice.Screenshot();
+			}
+
+			if (e.Key == Keys.F2) {
+				Parameters.ToggleVSync();
 			}
 
 			if (e.Key == Keys.Escape) {
@@ -149,44 +165,88 @@ namespace ComputeDemo {
 			base.Update( gameTime );
 
 
-			//	write data :
-			var	rand	=	new Random();
+		    //	First sort the rows for the levels <= to the block size
+			for( uint level=2; level<=BitonicBlockSize; level = level * 2 ) {
 
-			var	input		=	Enumerable.Range(0, BufferSize).Select( i => rand.NextFloat(0,100) ).ToArray();
-			var output		=	new float[BufferSize];
+				SetConstants( level, level, MatrixWidth, MatrixHeight );
 
-			buffer.SetData( input );
-
-			paramsCB.SetData( new Params(){ Size = BufferSize, Log2Size = MathUtil.LogBase2(BufferSize)-1 } );
-
-			
-			//	bind objects :
-			GraphicsDevice.SetCSRWBuffer( 0, buffer );
-			GraphicsDevice.ComputeShaderConstants[0]	= paramsCB ;
-		
-			//	set compute shader and dispatch threadblocks :
-			GraphicsDevice.PipelineState	=	factory[0];
-
-			//	compute
-			GraphicsDevice.Dispatch( MathUtil.IntDivUp(BufferSize,BlockSize) );
-
-			//	get data :
-			buffer.GetData( output );
+				// Sort the row data
+				GraphicsDevice.SetCSRWBuffer( 0, buffer1 );
+				GraphicsDevice.PipelineState	=	factory[ (int)ShaderFlags.BITONIC_SORT ];
+				GraphicsDevice.Dispatch( NumberOfElements / BitonicBlockSize, 1, 1 );
+			}
 
 
+			for( uint level = (BitonicBlockSize * 2); level <= NumberOfElements; level = level * 2 ){
 
+				SetConstants( (level / BitonicBlockSize), (uint)(level & ~NumberOfElements) / BitonicBlockSize, MatrixWidth, MatrixHeight );
+
+				// Transpose the data from buffer 1 into buffer 2
+				GraphicsDevice.ComputeShaderResources[0]	=	null;
+				GraphicsDevice.SetCSRWBuffer( 0, buffer2 );
+				GraphicsDevice.ComputeShaderResources[0]	=	buffer1;
+				GraphicsDevice.PipelineState				=	factory[ (int)ShaderFlags.TRANSPOSE ];
+				GraphicsDevice.Dispatch( MatrixWidth / TransposeBlockSize, MatrixHeight / TransposeBlockSize, 1 );
+
+				// Sort the transposed column data
+				GraphicsDevice.PipelineState	=	factory[ (int)ShaderFlags.BITONIC_SORT ];
+				GraphicsDevice.Dispatch( NumberOfElements / BitonicBlockSize, 1, 1 );
+
+
+				SetConstants( BitonicBlockSize, level, MatrixWidth, MatrixHeight );
+
+				// Transpose the data from buffer 2 back into buffer 1
+				GraphicsDevice.ComputeShaderResources[0]	=	null;
+				GraphicsDevice.SetCSRWBuffer( 0, buffer1 );
+				GraphicsDevice.ComputeShaderResources[0]	=	buffer2;
+				GraphicsDevice.PipelineState				=	factory[ (int)ShaderFlags.TRANSPOSE ];
+				GraphicsDevice.Dispatch( MatrixHeight / TransposeBlockSize, MatrixHeight / TransposeBlockSize, 1 );
+
+				// Sort the row data
+				GraphicsDevice.PipelineState	=	factory[ (int)ShaderFlags.BITONIC_SORT ];
+				GraphicsDevice.Dispatch( NumberOfElements / BitonicBlockSize, 1, 1 );
+			}
+
+
+
+			//
+			//	Check results 
+			//
 			if (InputDevice.IsKeyDown(Keys.S)) {
-				Log.Message("--------------------");
-				Log.Message("Size / Log Size = {0} / {1}", BufferSize, MathUtil.LogBase2(BufferSize)-1 );
 
-				for (int i=0; i<BufferSize; i++) {
+				var output = new float[NumberOfElements];
+
+				buffer1.GetData( output );
+	
+				Log.Message("--------------------");
+
+				for (int i=0; i<NumberOfElements; i++) {
 					
-					bool error = (i < BufferSize-1) ? output[i]>output[i+1] : false;
+					bool error = (i < NumberOfElements-1) ? output[i]>output[i+1] : false;
 					//bool error = (i < BufferSize-1) ? output[i&0xFFFFFFFE]>output[i&0xFFFFFFFE+1] : false;
 
-					Log.Message("{0,4} : {1,6:0.00} - {2,6:0.00} {3}", i, input[i], output[i], error?"<- Error":"" );
+					if (error) {
+						Log.Message("{0,4} : {1,6:0.00} - {2,6:0.00} {3}", i, 0, output[i], error?"<- Error":"" );
+					}
 				}
 			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="iLevel"></param>
+		/// <param name="iLevelMask"></param>
+		/// <param name="iWidth"></param>
+		/// <param name="iHeight"></param>
+		void SetConstants( uint iLevel, uint iLevelMask, uint iWidth, uint iHeight )
+		{
+			Params p = new Params(){ Level = iLevel, LevelMask = iLevelMask, Width = iWidth, Height = iHeight };
+
+			paramsCB.SetData( p );
+			GraphicsDevice.ComputeShaderConstants[0]	= paramsCB ;
 		}
 
 

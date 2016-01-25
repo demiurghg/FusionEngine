@@ -1,96 +1,84 @@
-
+//--------------------------------------------------------------------------------------
+// File: ComputeShaderSort11.hlsl
+//
+// This file contains the compute shaders to perform GPU sorting using DirectX 11.
+// 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+//--------------------------------------------------------------------------------------
 #if 0
-$ubershader
+$ubershader BITONIC_SORT|TRANSPOSE
 #endif
 
-#define BLOCK_SIZE		64
-#define BLOCK_LOGSIZE	6
+#define BITONIC_BLOCK_SIZE 512
 
-struct PARAMS {
-	int Size;
-	int Log2Size;
+#define TRANSPOSE_BLOCK_SIZE 16
+
+//--------------------------------------------------------------------------------------
+// Constant Buffers
+//--------------------------------------------------------------------------------------
+cbuffer CB : register( b0 )
+{
+    unsigned int g_iLevel;
+    unsigned int g_iLevelMask;
+    unsigned int g_iWidth;
+    unsigned int g_iHeight;
 };
 
-cbuffer CBParams : register(b0) { PARAMS Params : packoffset( c0 ); }	
+//--------------------------------------------------------------------------------------
+// Structured Buffers
+//--------------------------------------------------------------------------------------
 
-RWStructuredBuffer<float>	buffer	: register(u0);
+StructuredBuffer<float> Input : register( t0 );
+RWStructuredBuffer<float> Data : register( u0 );
 
-groupshared float	sharedData[BLOCK_SIZE*2];
+//--------------------------------------------------------------------------------------
+// Bitonic Sort Compute Shader
+//--------------------------------------------------------------------------------------
+#ifdef BITONIC_SORT
 
+groupshared float shared_data[BITONIC_BLOCK_SIZE];
 
-void Kernel ( int index, int p, int q )
+[numthreads(BITONIC_BLOCK_SIZE, 1, 1)]
+void CSMain( uint3 Gid : SV_GroupID, 
+                  uint3 DTid : SV_DispatchThreadID, 
+                  uint3 GTid : SV_GroupThreadID, 
+                  uint GI : SV_GroupIndex )
 {
-	int d = 1 << (p-q);
-	
-	int i = index;
-
-	bool up = ((i >> p) & 2) == 0;
-
-	if ((i & d) == 0 && (sharedData[i] > sharedData[i|d]) == up) {
-		float t = sharedData[i]; 
-		sharedData[i] = sharedData[i|d]; 
-		sharedData[i|d] = t;
-	}
+    // Load shared data
+    shared_data[GI] = Data[DTid.x];
+    GroupMemoryBarrierWithGroupSync();
+    
+    // Sort the shared data
+    for (unsigned int j = g_iLevel >> 1 ; j > 0 ; j >>= 1)
+    {
+        float result = ((shared_data[GI & ~j] <= shared_data[GI | j]) == (bool)(g_iLevelMask & DTid.x))? shared_data[GI ^ j] : shared_data[GI];
+        GroupMemoryBarrierWithGroupSync();
+        shared_data[GI] = result;
+        GroupMemoryBarrierWithGroupSync();
+    }
+    
+    // Store shared data
+    Data[DTid.x] = shared_data[GI];
 }
+#endif
 
+//--------------------------------------------------------------------------------------
+// Matrix Transpose Compute Shader
+//--------------------------------------------------------------------------------------
+#ifdef TRANSPOSE
 
+groupshared float transpose_shared_data[TRANSPOSE_BLOCK_SIZE * TRANSPOSE_BLOCK_SIZE];
 
-
-void Kernel2 ( int even, int odd, int p, int q )
+[numthreads(TRANSPOSE_BLOCK_SIZE, TRANSPOSE_BLOCK_SIZE, 1)]
+void CSMain( uint3 Gid : SV_GroupID, 
+                      uint3 DTid : SV_DispatchThreadID, 
+                      uint3 GTid : SV_GroupThreadID, 
+                      uint GI : SV_GroupIndex )
 {
-	float a = sharedData[even];
-	float b = sharedData[odd];
-	
-	if (a > b) {
-		sharedData[odd]  = a;
-		sharedData[even] = b;
-	}
+    transpose_shared_data[GI] = Input[DTid.y * g_iWidth + DTid.x];
+    GroupMemoryBarrierWithGroupSync();
+    uint2 XY = DTid.yx - GTid.yx + GTid.xy;
+    Data[XY.y * g_iHeight + XY.x] = transpose_shared_data[GTid.x * TRANSPOSE_BLOCK_SIZE + GTid.y];
 }
-
-
-[numthreads( BLOCK_SIZE/2, 1, 1 )]
-void CSMain( 
-	uint3 groupID			: SV_GroupID,
-	uint3 groupThreadID 	: SV_GroupThreadID, 
-	uint3 dispatchThreadID 	: SV_DispatchThreadID,
-	uint  groupIndex 		: SV_GroupIndex
-)
-{	
-	int sharedIndexEven	=	groupThreadID.x * 2 + 0;
-	int sharedIndexOdd	=	groupThreadID.x * 2 + 1;
-	int sharedIndex		=	groupThreadID.x;
-	int threadIndexEven	=	BLOCK_SIZE * groupID.x + sharedIndexEven;
-	int threadIndexOdd	=	BLOCK_SIZE * groupID.x + sharedIndexOdd;
-	
-	//------------------------------------------
-	//	store input data in groupshared memory :
-	sharedData[ sharedIndexEven ] = buffer[ threadIndexEven	];
-	sharedData[ sharedIndexOdd  ] = buffer[ threadIndexOdd	];
-	GroupMemoryBarrierWithGroupSync();
-	
-
-	//	bitonic sort of each 'BLOCK_SIZE'-blocks.
-	for (int p=0; p<BLOCK_LOGSIZE; p++) {
-		for (int q=0; q<=p; q++) {
-			
-			Kernel( sharedIndexEven, p, q );
-			Kernel( sharedIndexOdd, p, q );
-			
-			GroupMemoryBarrierWithGroupSync();
-		}
-	}
-
-	
-	//-------------------
-	//	write data back :
-	GroupMemoryBarrierWithGroupSync();
-	buffer[ threadIndexEven	] = sharedData[ sharedIndexEven ];
-	buffer[ threadIndexOdd	] = sharedData[ sharedIndexOdd  ];
-
-	
-	//-------------------
-	//	write data back :
-}
-
-
+#endif
 
