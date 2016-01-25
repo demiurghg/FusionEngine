@@ -73,7 +73,8 @@ namespace ComputeDemo {
 			base.Initialize();
 
 			//	create structured buffers and shaders :
-			tempBuffer	=	new StructuredBuffer( GraphicsDevice, typeof(Vector2), NumberOfElements  , StructuredBufferFlags.None );
+			buffer1		=	new StructuredBuffer( GraphicsDevice, typeof(Vector2), NumberOfElements  , StructuredBufferFlags.None );
+			buffer2		=	new StructuredBuffer( GraphicsDevice, typeof(Vector2), NumberOfElements  , StructuredBufferFlags.None );
 			paramsCB	=	new ConstantBuffer( GraphicsDevice, typeof(Params) );
 			shader		=	Content.Load<Ubershader>("test");
 			factory		=	new StateFactory( shader, typeof(ShaderFlags), Primitive.TriangleList, VertexInputElement.Empty );
