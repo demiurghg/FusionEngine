@@ -416,7 +416,7 @@ namespace TestGame2 {
 				p.TimeLag		=	0;
 
 				for (int i=0; i<100; i++) {
-					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,1) + Vector3.Up * 5.0f) * Math.Abs(rand2.GaussDistribution(1, 0.25f));
+					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,1) + Vector3.Up * 7.0f) * Math.Abs(rand2.GaussDistribution(1, 0.25f));
 					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
 					p.LifeTime		=	rand2.GaussDistribution(1.0f,0.5f);
 					p.Size0			=	0.4f;
@@ -433,17 +433,17 @@ namespace TestGame2 {
 					p = new Particle();
 
 					p.FadeIn		=	0.2f;
-					p.FadeOut		=	0.2f;
+					p.FadeOut		=	0.8f;
 					p.Color0		=	new Color4(1,1,1, 0);
-					p.Color1		=	new Color4(1,1,1, 0.5f);
+					p.Color1		=	new Color4(1,1,1, 0.6f);
 					p.ImageIndex	=	0;
 					p.TimeLag		=	0;
 
-					p.Velocity		=	rand2.GaussRadialDistribution(0.5f,0.3f) + Vector3.Up * rand2.GaussDistribution(2.5f,0.5f);
+					p.Velocity		=	rand2.GaussRadialDistribution(0.5f,0.1f) + Vector3.Up * rand2.GaussDistribution(2.5f,0.15f);
 					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
-					p.LifeTime		=	rand2.GaussDistribution(4.4f,1.5f);
+					p.LifeTime		=	rand2.GaussDistribution(4.4f,0.25f);
 					p.Size0			=	0.4f;
-					p.Size1			=	4.0f;
+					p.Size1			=	3.5f;
 					p.Rotation0		=	rand2.NextFloat(0,3.14f*2);
 					p.Rotation1		=	p.Rotation0 + rand2.NextFloat(-4,4);
 					p.Gravity		=	0.05f;
@@ -471,7 +471,7 @@ namespace TestGame2 {
 
 			//Log.Message("{0}", videoPlayer.State);
 
-			masterView.IsPaused  = Game.Keyboard.IsKeyDown(Keys.O);
+			//masterView.IsPaused  = Game.Keyboard.IsKeyDown(Keys.O);
 
 
 			if ( Game.Keyboard.IsKeyDown(Keys.PageDown) ) {

@@ -44,8 +44,8 @@ namespace Fusion.Engine.Graphics {
 		Particle[]			injectionBufferCPU = new Particle[MaxInjectingParticles];
 		StructuredBuffer	injectionBuffer;
 		StructuredBuffer	simulationBuffer;
-		StructuredBuffer	tempSortBuffer;
 		StructuredBuffer	deadParticlesIndices;
+		StructuredBuffer	sortParticlesBuffer;
 		ConstantBuffer		paramsCB;
 		ConstantBuffer		imagesCB;
 
@@ -121,7 +121,7 @@ namespace Fusion.Engine.Graphics {
 
 			injectionBuffer			=	new StructuredBuffer( Game.GraphicsDevice, typeof(Particle),	MaxInjectingParticles, StructuredBufferFlags.None );
 			simulationBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(Particle),	MaxSimulatedParticles, StructuredBufferFlags.None );
-			tempSortBuffer			=	new StructuredBuffer( Game.GraphicsDevice, typeof(Particle),	MaxSimulatedParticles, StructuredBufferFlags.None );
+			sortParticlesBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(Vector2),		MaxSimulatedParticles, StructuredBufferFlags.None );
 			deadParticlesIndices	=	new StructuredBuffer( Game.GraphicsDevice, typeof(uint),		MaxSimulatedParticles, StructuredBufferFlags.Append );
 
 			rs.Game.Reloading += LoadContent;
@@ -265,115 +265,141 @@ namespace Fusion.Engine.Graphics {
 		{
 			var device	=	Game.GraphicsDevice;
 
-			device.ResetStates();
+			using ( new PixEvent("Particle Rendering") ) {
 
-			device.SetTargets( viewFrame.DepthBuffer, viewFrame.HdrBuffer );
-			device.SetViewport( 0,0,viewFrame.HdrBuffer.Width, viewFrame.HdrBuffer.Height );
+				device.ResetStates();
 
-			int	w	=	device.DisplayBounds.Width;
-			int h	=	device.DisplayBounds.Height;
+				int	w	=	device.DisplayBounds.Width;
+				int h	=	device.DisplayBounds.Height;
 
-			//
-			//	Setup images :
-			//
-			if (Images!=null) {
-				imagesCB.SetData( Images.GetNormalizedRectangles( MaxImages ) );
-			}
+				//
+				//	Setup images :
+				//
+				if (Images!=null) {
+					imagesCB.SetData( Images.GetNormalizedRectangles( MaxImages ) );
+				}
 			
 
-			var deltaTime	=	gameTime.ElapsedSec;
+				var deltaTime	=	gameTime.ElapsedSec;
 
-			//	kill particles by applying very large delta.
-			if (requestKill) {
-				deltaTime	=	float.MaxValue / 2;
-				requestKill	=	false;
-			}
+				//	kill particles by applying very large delta.
+				if (requestKill) {
+					deltaTime	=	float.MaxValue / 2;
+					requestKill	=	false;
+				}
+				if (rs.Config.FreezeParticles) {
+					deltaTime = 0;
+				}
 
-			//
-			//	Setup parameters :
-			//	
-			PrtParams param = new PrtParams();
-			param.View			=	renderWorld.Camera.GetViewMatrix( stereoEye );
-			param.Projection	=	renderWorld.Camera.GetProjectionMatrix( stereoEye );
-			param.MaxParticles	=	0;
-			param.DeltaTime		=	deltaTime;
-			param.CameraForward	=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Forward	, 0 );
-			param.CameraRight	=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Right	, 0 );
-			param.CameraUp		=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Up		, 0 );
-			param.Gravity		=	new Vector4( this.Gravity, 0 );
-			param.MaxParticles	=	injectionCount;
+				//
+				//	Setup parameters :
+				//	
+				PrtParams param = new PrtParams();
+				param.View			=	renderWorld.Camera.GetViewMatrix( stereoEye );
+				param.Projection	=	renderWorld.Camera.GetProjectionMatrix( stereoEye );
+				param.MaxParticles	=	0;
+				param.DeltaTime		=	deltaTime;
+				param.CameraForward	=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Forward	, 0 );
+				param.CameraRight	=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Right	, 0 );
+				param.CameraUp		=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Up		, 0 );
+				param.Gravity		=	new Vector4( this.Gravity, 0 );
+				param.MaxParticles	=	injectionCount;
 
-			paramsCB.SetData( param );
-
-			//	set DeadListSize to prevent underflow:
-			deadParticlesIndices.CopyStructureCount( paramsCB, Marshal.OffsetOf( typeof(PrtParams), "DeadListSize").ToInt32() );
-
-
-			device.ComputeShaderConstants[0]	= paramsCB ;
-			device.VertexShaderConstants[0]		= paramsCB ;
-			device.GeometryShaderConstants[0]	= paramsCB ;
-			device.PixelShaderConstants[0]		= paramsCB ;
-			
-			device.ComputeShaderConstants[1]	= imagesCB ;
-			device.VertexShaderConstants[1]		= imagesCB ;
-			device.GeometryShaderConstants[1]	= imagesCB ;
-			device.PixelShaderConstants[1]		= imagesCB ;
-			
-			device.PixelShaderSamplers[0]	= SamplerState.LinearWrap ;
-
-
-			//
-			//	Inject :
-			//
-			injectionBuffer.SetData( injectionBufferCPU );
-
-			device.ComputeShaderResources[1]	= injectionBuffer ;
-			device.SetCSRWBuffer( 0, simulationBuffer,		0 );
-			device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
-
-			device.PipelineState	=	factory[ (int)Flags.INJECTION ];
-			
-			//	GPU time ???? -> 0.0046
-			device.Dispatch( MathUtil.IntDivUp( MaxInjectingParticles, BlockSize ) );
-
-			ClearParticleBuffer();
-
-			//
-			//	Simulate :
-			//
-			bool skipSim = Game.InputDevice.IsKeyDown(Fusion.Drivers.Input.Keys.O);
-
-			if (!renderWorld.IsPaused) {
-	
-				device.SetCSRWBuffer( 0, simulationBuffer,		0 );
-				device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
-
-				param.MaxParticles	=	MaxSimulatedParticles;
 				paramsCB.SetData( param );
-				device.ComputeShaderConstants[0] = paramsCB ;
 
-				device.PipelineState	=	factory[ (int)Flags.SIMULATION ];
+				//	set DeadListSize to prevent underflow:
+				deadParticlesIndices.CopyStructureCount( paramsCB, Marshal.OffsetOf( typeof(PrtParams), "DeadListSize").ToInt32() );
+
+				device.ComputeShaderConstants[0]	= paramsCB ;
+
+
+				//
+				//	Inject :
+				//
+				using (new PixEvent("Injection")) {
+					injectionBuffer.SetData( injectionBufferCPU );
+
+					device.ComputeShaderResources[1]	= injectionBuffer ;
+					device.SetCSRWBuffer( 0, simulationBuffer,		0 );
+					device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
+
+					device.PipelineState	=	factory[ (int)Flags.INJECTION ];
+			
+					//	GPU time ???? -> 0.0046
+					device.Dispatch( MathUtil.IntDivUp( MaxInjectingParticles, BlockSize ) );
+
+					ClearParticleBuffer();
+				}
+
+				//
+				//	Simulate :
+				//
+				using (new PixEvent("Simulation")) {
+
+					if (!renderWorld.IsPaused && !rs.Config.SkipParticlesSimulation) {
 	
-				/// GPU time : 1.665 ms	 --> 0.38 ms
-				device.Dispatch( MathUtil.IntDivUp( MaxSimulatedParticles, BlockSize ) );//*/
-			}
+						device.SetCSRWBuffer( 0, simulationBuffer,		0 );
+						device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
+						device.SetCSRWBuffer( 2, sortParticlesBuffer, 0 );
+
+						param.MaxParticles	=	MaxSimulatedParticles;
+						paramsCB.SetData( param );
+						device.ComputeShaderConstants[0] = paramsCB ;
+
+						device.PipelineState	=	factory[ (int)Flags.SIMULATION ];
+	
+						/// GPU time : 1.665 ms	 --> 0.38 ms
+						device.Dispatch( MathUtil.IntDivUp( MaxSimulatedParticles, BlockSize ) );//*/
+					}
+				}
 
 
-			//
-			//	Render
-			//
-			device.PipelineState	=	factory[ (int)Flags.DRAW ];
-			device.SetCSRWBuffer( 0, null );	
-			device.PixelShaderResources[0]		=	Images==null? null : Images.Texture.Srv;
-			device.GeometryShaderResources[1]	=	simulationBuffer ;
-			device.GeometryShaderResources[2]	=	simulationBuffer ;
-
-			//	GPU time : 0.81 ms	-> 0.91 ms
-			device.Draw( MaxSimulatedParticles, 0 );
+				using (new PixEvent("Sort")) {
+					rs.BitonicSort.Sort( sortParticlesBuffer );
+				}
 
 
-			if (rs.Config.ShowParticles) {
-				rs.Counters.DeadParticles	=	deadParticlesIndices.GetStructureCount();
+
+				//
+				//	Render
+				//
+				using (new PixEvent("Drawing")) {
+
+					device.ResetStates();
+	
+					//	target and viewport :
+					device.SetTargets( viewFrame.DepthBuffer, viewFrame.HdrBuffer );
+					device.SetViewport( 0,0,viewFrame.HdrBuffer.Width, viewFrame.HdrBuffer.Height );
+
+					//	params CB :			
+					device.ComputeShaderConstants[0]	= paramsCB ;
+					device.VertexShaderConstants[0]		= paramsCB ;
+					device.GeometryShaderConstants[0]	= paramsCB ;
+
+					//	atlas CB :
+					device.VertexShaderConstants[1]		= imagesCB ;
+					device.GeometryShaderConstants[1]	= imagesCB ;
+					device.PixelShaderConstants[1]		= imagesCB ;
+
+					//	sampler & textures :
+					device.PixelShaderSamplers[0]	= SamplerState.LinearWrap ;
+
+					device.PixelShaderResources[0]		=	Images==null? null : Images.Texture.Srv;
+					device.GeometryShaderResources[1]	=	simulationBuffer ;
+					device.GeometryShaderResources[2]	=	simulationBuffer ;
+					device.GeometryShaderResources[3]	=	sortParticlesBuffer;
+
+					//	setup PS :
+					device.PipelineState	=	factory[ (int)Flags.DRAW ];
+
+					//	GPU time : 0.81 ms	-> 0.91 ms
+					device.Draw( MaxSimulatedParticles, 0 );
+
+
+					if (rs.Config.ShowParticles) {
+						rs.Counters.DeadParticles	=	deadParticlesIndices.GetStructureCount();
+					}
+				}
 			}
 		}
 	}

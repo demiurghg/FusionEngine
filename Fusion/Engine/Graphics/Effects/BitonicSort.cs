@@ -168,6 +168,7 @@ namespace Fusion.Engine.Graphics
 			//
 			//	Check results 
 			//
+			#if false
 			if (Game.Keyboard.IsKeyDown(Keys.S)) {
 
 				Log.Message("-- Bitonic sort check --");
@@ -180,11 +181,12 @@ namespace Fusion.Engine.Graphics
 					
 					bool error = (i < NumberOfElements-1) ? output[i].X>output[i+1].X : false;
 
-					if (error) {
+					//if (error) {
 						Log.Message("{0,4} : {1,6:0.00} - {2,6:0.00} {3}", i, output[i].X, output[i].Y, error?"<- Error":"" );
-					}
+					//}
 				}
 			}
+			#endif
 		}
 	}
 }

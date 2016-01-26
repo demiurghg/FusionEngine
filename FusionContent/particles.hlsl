@@ -49,21 +49,32 @@ cbuffer CB2 : register(b1) {
 };
 
 
-SamplerState						Sampler				: 	register(s0);
+//-----------------------------------------------
+//	States :
+//-----------------------------------------------
+SamplerState	Sampler	 : 	register(s0);
 
-Texture2D							Texture 			: 	register(t0);
+//-----------------------------------------------
+//	SRVs :
+//-----------------------------------------------
+Texture2D						Texture 				: 	register(t0);
+StructuredBuffer<PARTICLE>		injectionBuffer			:	register(t1);
+StructuredBuffer<PARTICLE>		particleBufferGS		:	register(t2);
+StructuredBuffer<float2>		sortParticleBufferGS	:	register(t3);
 
-StructuredBuffer<PARTICLE>			injectionBuffer		:	register(t1);
-StructuredBuffer<PARTICLE>			particleBufferGS	:	register(t2);
-
-RWStructuredBuffer<PARTICLE>		particleBuffer		: 	register(u0);
+//-----------------------------------------------
+//	UAVs :
+//-----------------------------------------------
+RWStructuredBuffer<PARTICLE>	particleBuffer		: 	register(u0);
 
 #ifdef INJECTION
-ConsumeStructuredBuffer<uint>		deadParticleIndices	: 	register(u1);
+ConsumeStructuredBuffer<uint>	deadParticleIndices	: 	register(u1);
 #endif
 #if (defined SIMULATION) || (defined INITIALIZE)
-AppendStructuredBuffer<uint>		deadParticleIndices	: 	register(u1);
+AppendStructuredBuffer<uint>	deadParticleIndices	: 	register(u1);
 #endif
+
+RWStructuredBuffer<float2>		sortParticleBuffer	: 	register(u2);
 
 /*-----------------------------------------------------------------------------
 	Simulation :
@@ -84,6 +95,8 @@ void CSMain(
 #endif	
 
 #ifdef INJECTION
+	//	id must be less than max injected particles.
+	//	dead list must contain at leas MAX_INJECTED indices to prevent underflow.
 	if (id < Params.MaxParticles && Params.DeadListSize > MAX_INJECTED ) {
 		PARTICLE p = injectionBuffer[ id ];
 		
@@ -105,8 +118,17 @@ void CSMain(
 				deadParticleIndices.Append( id );
 			}
 		}
-		
+
 		particleBuffer[ id ] = p;
+
+		//	meausure distance :
+		float  time		=	p.Time;
+		float3 accel	=	p.Acceleration + Params.Gravity.xyz * p.Gravity;
+		float3 position	=	p.Position + p.Velocity * time + accel * time * time / 2;
+		
+		float4 ppPos	=	mul( mul( float4(position,1), Params.View ), Params.Projection );
+
+		sortParticleBuffer[ id ] = float2( -abs(ppPos.z / ppPos.w), id );
 	}
 #endif
 }
@@ -127,7 +149,7 @@ struct GSOutput {
 	float2	TexCoord1 : TEXCOORD1;
 	float 	TexCoord2 : TEXCOORD2;
 	float3	TexCoord3 : TEXCOORD3;
-	float4	Color    : COLOR0;
+	float4	Color     : COLOR0;
 	int4	Color1    : COLOR1;
 };
 
@@ -168,7 +190,10 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	p2.TexCoord1 = 0; p2.TexCoord2 = 0; p2.TexCoord3 = 0; p2.Color1 = 0;
 	p3.TexCoord1 = 0; p3.TexCoord2 = 0; p3.TexCoord3 = 0; p3.Color1 = 0;
 	
-	PARTICLE prt = particleBufferGS[ inputPoint[0].vertexID ];
+	uint prtId = (uint)( sortParticleBufferGS[ inputPoint[0].vertexID ].y );
+	//uint prtId = inputPoint[0].vertexID;
+	
+	PARTICLE prt = particleBufferGS[ prtId ];
 	
 	if (prt.Time >= prt.LifeTime ) {
 		return;

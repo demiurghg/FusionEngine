@@ -77,6 +77,18 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// Shows particles statistics.
+		/// </summary>
+		public bool SkipParticlesSimulation { get; set; }
+
+
+		/// <summary>
+		/// Shows particles statistics.
+		/// </summary>
+		public bool FreezeParticles { get; set; }
+
+
+		/// <summary>
 		/// Shows counters
 		/// </summary>
 		public bool ShowCounters { get; set; }
