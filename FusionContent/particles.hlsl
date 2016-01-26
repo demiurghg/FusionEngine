@@ -218,25 +218,25 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	p0.Position	= mul( float4( position + rt + up, 1 ), Params.View );
 	p0.Position	= mul( p0.Position, Params.Projection );
 	//p0.TexCoord	= float2(1,1);
-	p0.TexCoord	= float2(image.z, image.w);
+	p0.TexCoord	= float2(image.z, image.y);
 	p0.Color 	= color;
 	
 	p1.Position	= mul( float4( position - rt + up, 1 ), Params.View );
 	p1.Position	= mul( p1.Position, Params.Projection );
 	//p1.TexCoord	= float2(0,1);
-	p1.TexCoord	= float2(image.x, image.w);
+	p1.TexCoord	= float2(image.x, image.y);
 	p1.Color 	= color;
 	
 	p2.Position	= mul( float4( position - rt - up, 1 ), Params.View );
 	p2.Position	= mul( p2.Position, Params.Projection );
 	//p2.TexCoord	= float2(0,0);
-	p2.TexCoord	= float2(image.x, image.y);
+	p2.TexCoord	= float2(image.x, image.w);
 	p2.Color 	= color;
 	
 	p3.Position	= mul( float4( position + rt - up, 1 ), Params.View );
 	p3.Position	= mul( p3.Position, Params.Projection );
 	//p3.TexCoord	= float2(1,0);
-	p3.TexCoord	= float2(image.z, image.y);
+	p3.TexCoord	= float2(image.z, image.w);
 	p3.Color 	= color;
 	
 	

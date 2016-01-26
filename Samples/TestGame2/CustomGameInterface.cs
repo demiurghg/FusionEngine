@@ -455,7 +455,7 @@ namespace TestGame2 {
 					p.FadeIn		=	0.2f;
 					p.FadeOut		=	0.2f;
 					p.Color0		=	new Color4(4,4,4, 0);
-					p.Color1		=	new Color4(4,4,4, 0.6f);
+					p.Color1		=	new Color4(4,4,4, 0.5f);
 					p.ImageIndex	=	0;
 					p.TimeLag		=	0;
 
@@ -464,8 +464,8 @@ namespace TestGame2 {
 					p.LifeTime		=	rand2.GaussDistribution(4.4f,0.25f);
 					p.Size0			=	1.2f;
 					p.Size1			=	3.5f;
-					p.Rotation0		=	rand2.NextFloat(0,3.14f*2);
-					p.Rotation1		=	p.Rotation0 + rand2.NextFloat(-4,4);
+					p.Rotation0		=	0;//rand2.NextFloat(0,3.14f*2);
+					p.Rotation1		=	p.Rotation0 + rand2.NextFloat(-0.5f,0.5f);
 					p.Gravity		=	0.05f;
 					p.ImageIndex	=	1;
 					//var 
