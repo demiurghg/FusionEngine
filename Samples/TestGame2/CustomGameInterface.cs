@@ -409,40 +409,60 @@ namespace TestGame2 {
 
 				var p = new Particle();
 				p.FadeIn		=	0.2f;
-				p.FadeOut		=	0.8f;
+				p.FadeOut		=	0.2f;
 				p.Color0		=	new Color4(7000,7000,7000, 0);
 				p.Color1		=	new Color4(7000,7000,7000, 0.2f);
 				p.ImageIndex	=	0;
 				p.TimeLag		=	0;
 
-				for (int i=0; i<100; i++) {
-					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,1) + Vector3.Up * 7.0f) * Math.Abs(rand2.GaussDistribution(1, 0.25f));
-					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
-					p.LifeTime		=	rand2.GaussDistribution(1.0f,0.5f);
-					p.Size0			=	0.4f;
+				for (int i=0; i<50; i++) {
+					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,0.5f) + Vector3.Up * 4.0f) * Math.Abs(rand2.GaussDistribution(1, 0.25f));
+					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20 + rand2.UniformRadialDistribution(0.0f,0.5f);
+					p.LifeTime		=	rand2.GaussDistribution(2.5f,0.25f);
+					p.Size0			=	0.2f;
 					p.Size1			=	0.0f;
 					p.Rotation0		=	rand2.NextFloat(0,3.14f*2);
 					p.Rotation1		=	rand2.NextFloat(0,3.14f*2);
-					p.Gravity		=	1;
+					p.Gravity		=	0.3f;
 					p.ImageIndex	=	0;
 					//var 
 					masterView.ParticleSystem.InjectParticle( p );
-				}
+				}//*/
+
+				for (int i=0; i<5; i++) {
+					p.FadeIn		=	0.2f;
+					p.FadeOut		=	0.2f;
+
+					p.Color0		=	new Color4(700,700,700, 0);
+					p.Color1		=	new Color4(700,700,700, 1.0f);
+
+					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,0.5f) + Vector3.Up * 3.0f) * Math.Abs(rand2.GaussDistribution(1, 0.025f));
+					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
+					p.LifeTime		=	rand2.GaussDistribution(1.0f,0.1f);
+					p.Size0			=	2.4f;
+					p.Size1			=	1.4f;
+					p.Rotation0		=	rand2.NextFloat(0,3.14f*2);
+					p.Rotation1		=	p.Rotation0 + rand2.NextFloat(-1,1);
+					p.Gravity		=	0;
+					p.ImageIndex	=	0;
+					//var 
+					masterView.ParticleSystem.InjectParticle( p );
+				}//*/
 
 				if (rand2.NextFloat(0,1)<0.3f || true) {
 					p = new Particle();
 
 					p.FadeIn		=	0.2f;
-					p.FadeOut		=	0.8f;
-					p.Color0		=	new Color4(1,1,1, 0);
-					p.Color1		=	new Color4(1,1,1, 0.6f);
+					p.FadeOut		=	0.2f;
+					p.Color0		=	new Color4(4,4,4, 0);
+					p.Color1		=	new Color4(4,4,4, 0.6f);
 					p.ImageIndex	=	0;
 					p.TimeLag		=	0;
 
-					p.Velocity		=	rand2.GaussRadialDistribution(0.5f,0.1f) + Vector3.Up * rand2.GaussDistribution(2.5f,0.15f);
+					p.Velocity		=	rand2.GaussRadialDistribution(0.5f,0.1f) + Vector3.Up * rand2.GaussDistribution(3.0f,0.15f);
 					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
 					p.LifeTime		=	rand2.GaussDistribution(4.4f,0.25f);
-					p.Size0			=	0.4f;
+					p.Size0			=	1.2f;
 					p.Size1			=	3.5f;
 					p.Rotation0		=	rand2.NextFloat(0,3.14f*2);
 					p.Rotation1		=	p.Rotation0 + rand2.NextFloat(-4,4);

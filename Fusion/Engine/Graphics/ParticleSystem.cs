@@ -88,6 +88,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Sets and gets images for particles.
 		/// This property must be set before particle injection.
+		/// To prevent interference between textures in atlas all images must be padded with 16 pixels.
 		/// </summary>
 		public TextureAtlas Images { 
 			get {
@@ -382,7 +383,7 @@ namespace Fusion.Engine.Graphics {
 					device.PixelShaderConstants[1]		= imagesCB ;
 
 					//	sampler & textures :
-					device.PixelShaderSamplers[0]	= SamplerState.LinearWrap ;
+					device.PixelShaderSamplers[0]	= SamplerState.LinearClamp4Mips ;
 
 					device.PixelShaderResources[0]		=	Images==null? null : Images.Texture.Srv;
 					device.GeometryShaderResources[1]	=	simulationBuffer ;
