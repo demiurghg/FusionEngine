@@ -407,18 +407,26 @@ namespace TestGame2 {
 
 			if (Game.Keyboard.IsKeyDown(Keys.P)) {
 
+				var t = gameTime.Total.TotalSeconds * 1;
+
+				var position = 	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20;
+				position += new Vector3( 8* (float)Math.Cos(t*1.3f), 0, 8*(float)Math.Sin(t*1.7f) );
+				
+				fireLight.Position = position;
+
+
 				var p = new Particle();
 				p.FadeIn		=	0.2f;
 				p.FadeOut		=	0.2f;
-				p.Color0		=	new Color4(7000,7000,7000, 0);
-				p.Color1		=	new Color4(7000,7000,7000, 0.2f);
+				p.Color0		=	new Color4(700,700,700, 0);
+				p.Color1		=	new Color4(700,700,700, 0.2f);
 				p.ImageIndex	=	0;
 				p.TimeLag		=	0;
 
-				for (int i=0; i<50; i++) {
+				for (int i=0; i<150; i++) {
 					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,0.5f) + Vector3.Up * 4.0f) * Math.Abs(rand2.GaussDistribution(1, 0.25f));
-					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20 + rand2.UniformRadialDistribution(0.0f,0.5f);
-					p.LifeTime		=	rand2.GaussDistribution(2.5f,0.25f);
+					p.Position		=	position + rand2.UniformRadialDistribution(0.0f,0.5f);
+					p.LifeTime		=	rand2.GaussDistribution(1.5f,0.25f);
 					p.Size0			=	0.2f;
 					p.Size1			=	0.0f;
 					p.Rotation0		=	rand2.NextFloat(0,3.14f*2);
@@ -433,12 +441,12 @@ namespace TestGame2 {
 					p.FadeIn		=	0.2f;
 					p.FadeOut		=	0.2f;
 
-					p.Color0		=	new Color4(700,700,700, 0);
-					p.Color1		=	new Color4(700,700,700, 1.0f);
+					p.Color0		=	new Color4(300,300,300, 0);
+					p.Color1		=	new Color4(300,300,300, 1.0f);
 
 					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,0.5f) + Vector3.Up * 3.0f) * Math.Abs(rand2.GaussDistribution(1, 0.025f));
-					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
-					p.LifeTime		=	rand2.GaussDistribution(1.0f,0.1f);
+					p.Position		=	position;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
+					p.LifeTime		=	rand2.GaussDistribution(0.5f,0.1f);
 					p.Size0			=	2.4f;
 					p.Size1			=	1.4f;
 					p.Rotation0		=	rand2.NextFloat(0,3.14f*2);
@@ -449,21 +457,21 @@ namespace TestGame2 {
 					masterView.ParticleSystem.InjectParticle( p );
 				}//*/
 
-				if (rand2.NextFloat(0,1)<0.3f || true) {
+				for (int i=0; i<2; i++) {
 					p = new Particle();
 
 					p.FadeIn		=	0.2f;
 					p.FadeOut		=	0.2f;
 					p.Color0		=	new Color4(4,4,4, 0);
-					p.Color1		=	new Color4(4,4,4, 0.5f);
+					p.Color1		=	new Color4(4,4,4, 1.0f);
 					p.ImageIndex	=	0;
 					p.TimeLag		=	0;
 
-					p.Velocity		=	rand2.GaussRadialDistribution(0.5f,0.1f) + Vector3.Up * rand2.GaussDistribution(3.0f,0.15f);
-					p.Position		=	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
-					p.LifeTime		=	rand2.GaussDistribution(4.4f,0.25f);
+					p.Velocity		=	rand2.GaussRadialDistribution(0.5f,0.1f) + Vector3.Up * rand2.GaussDistribution(3.5f,0.15f);
+					p.Position		=	position;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
+					p.LifeTime		=	rand2.GaussDistribution(2.4f,0.25f);
 					p.Size0			=	1.2f;
-					p.Size1			=	3.5f;
+					p.Size1			=	2.5f;
 					p.Rotation0		=	0;//rand2.NextFloat(0,3.14f*2);
 					p.Rotation1		=	p.Rotation0 + rand2.NextFloat(-0.5f,0.5f);
 					p.Gravity		=	0.05f;
