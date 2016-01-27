@@ -16,7 +16,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// Represents entire visible world.
 	/// </summary>
-	public class RenderWorld : ViewLayer {
+	public class RenderWorld : RenderLayer {
 
 		/// <summary>
 		/// Gets HDR settings.

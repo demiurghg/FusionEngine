@@ -19,6 +19,7 @@ using Fusion;
 using Fusion.Core.Shell;
 using System.IO;
 using Fusion.Engine.Media;
+using Fusion.Engine.Audio;
 
 namespace TestGame2 {
 
@@ -65,14 +66,12 @@ namespace TestGame2 {
 		public FrameProcessor FrameProcessor { get { return userInterface; } }
 		FrameProcessor userInterface;
 
-		//VideoPlayer	videoPlayer;
-		//Video		video;
-
 		SpriteLayer		testLayer;
 		SpriteLayer		uiLayer;
 		DiscTexture		texture;
 		RenderWorld		masterView;
-		ViewLayer		masterView2;
+		RenderLayer		masterView2;
+		SoundWorld		soundWorld;
 		TargetTexture	targetTexture;
 		DiscTexture		debugFont;
 
@@ -115,7 +114,8 @@ namespace TestGame2 {
 			var bounds		=	Game.RenderSystem.DisplayBounds;
 			masterView		=	new RenderWorld(Game, bounds.Width, bounds.Height);
 
-			masterView2		=	new ViewLayer(Game);
+			masterView2		=	new RenderLayer(Game);
+			soundWorld		=	new SoundWorld(Game);
 
 			Game.RenderSystem.DisplayBoundsChanged += (s,e) => {
 				masterView.Resize( Game.RenderSystem.DisplayBounds.Width, Game.RenderSystem.DisplayBounds.Height );
@@ -407,7 +407,7 @@ namespace TestGame2 {
 
 			if (Game.Keyboard.IsKeyDown(Keys.P)) {
 
-				var t = gameTime.Total.TotalSeconds * 1;
+				var t = gameTime.Total.TotalSeconds * 0.8f;
 
 				var position = 	Vector3.UnitZ * (-10) + Vector3.UnitY * 5 + Vector3.UnitX * 20;
 				position += new Vector3( 8* (float)Math.Cos(t*1.3f), 0, 8*(float)Math.Sin(t*1.7f) );
@@ -418,20 +418,20 @@ namespace TestGame2 {
 				var p = new Particle();
 				p.FadeIn		=	0.2f;
 				p.FadeOut		=	0.2f;
-				p.Color0		=	new Color4(700,700,700, 0);
-				p.Color1		=	new Color4(700,700,700, 0.2f);
+				p.Color0		=	new Color4(2000,2000,2000, 0);
+				p.Color1		=	new Color4(2000,2000,2000, 0.2f);
 				p.ImageIndex	=	0;
 				p.TimeLag		=	0;
 
 				for (int i=0; i<150; i++) {
-					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,0.5f) + Vector3.Up * 4.0f) * Math.Abs(rand2.GaussDistribution(1, 0.25f));
+					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,0.5f) + Vector3.Up * 3.0f) * Math.Abs(rand2.GaussDistribution(1, 0.25f));
 					p.Position		=	position + rand2.UniformRadialDistribution(0.0f,0.5f);
 					p.LifeTime		=	rand2.GaussDistribution(1.5f,0.25f);
 					p.Size0			=	0.2f;
 					p.Size1			=	0.0f;
 					p.Rotation0		=	rand2.NextFloat(0,3.14f*2);
 					p.Rotation1		=	rand2.NextFloat(0,3.14f*2);
-					p.Gravity		=	0.3f;
+					p.Gravity		=	0.0f;
 					p.ImageIndex	=	0;
 					//var 
 					masterView.ParticleSystem.InjectParticle( p );
@@ -441,14 +441,14 @@ namespace TestGame2 {
 					p.FadeIn		=	0.2f;
 					p.FadeOut		=	0.2f;
 
-					p.Color0		=	new Color4(300,300,300, 0);
-					p.Color1		=	new Color4(300,300,300, 1.0f);
+					p.Color0		=	new Color4(1000,1000,1000, 0);
+					p.Color1		=	new Color4(1000,1000,1000, 0.3f);
 
 					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,0.5f) + Vector3.Up * 3.0f) * Math.Abs(rand2.GaussDistribution(1, 0.025f));
 					p.Position		=	position;// + rand.NextVector3( -Vector3.One * 2, Vector3.One * 2);
 					p.LifeTime		=	rand2.GaussDistribution(0.5f,0.1f);
-					p.Size0			=	2.4f;
-					p.Size1			=	1.4f;
+					p.Size0			=	1.4f;
+					p.Size1			=	3.4f;
 					p.Rotation0		=	rand2.NextFloat(0,3.14f*2);
 					p.Rotation1		=	p.Rotation0 + rand2.NextFloat(-1,1);
 					p.Gravity		=	0;
@@ -462,7 +462,7 @@ namespace TestGame2 {
 
 					p.FadeIn		=	0.2f;
 					p.FadeOut		=	0.2f;
-					p.Color0		=	new Color4(4,4,4, 0);
+					p.Color0		=	new Color4(1,1,1, 0);
 					p.Color1		=	new Color4(4,4,4, 1.0f);
 					p.ImageIndex	=	0;
 					p.TimeLag		=	0;

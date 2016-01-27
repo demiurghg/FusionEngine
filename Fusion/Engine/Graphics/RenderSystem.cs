@@ -100,7 +100,7 @@ namespace Fusion.Engine.Graphics {
 			Config		=	new RenderSystemConfig();
 			this.Device	=	Game.GraphicsDevice;
 
-			viewLayers	=	new List<ViewLayer>();
+			viewLayers	=	new List<RenderLayer>();
 			spriteEngine	=	new SpriteEngine( this );
 			gis				=	new Gis(Game);
 			filter			=	new Filter( Game );
@@ -193,7 +193,7 @@ namespace Fusion.Engine.Graphics {
 			Gis.Update(gameTime);
 			//GIS.Draw(gameTime, StereoEye.Mono);
 
-			ViewLayer[] layersToDraw;
+			RenderLayer[] layersToDraw;
 
 			lock (viewLayers) {
 				layersToDraw = viewLayers
@@ -217,7 +217,7 @@ namespace Fusion.Engine.Graphics {
 		/// Adds view layer.
 		/// </summary>
 		/// <param name="viewLayer"></param>
-		public void AddLayer ( ViewLayer viewLayer )
+		public void AddLayer ( RenderLayer viewLayer )
 		{
 			lock (viewLayers) {
 				viewLayers.Add( viewLayer );
@@ -231,7 +231,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="viewLayer"></param>
 		/// <returns>True if element was removed. False if layer does not exist.</returns>
-		public bool RemoveLayer ( ViewLayer viewLayer )
+		public bool RemoveLayer ( RenderLayer viewLayer )
 		{
 			lock (viewLayers) {
 				if (viewLayers.Contains(viewLayer)) {
@@ -248,7 +248,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Gets collection of Composition.
 		/// </summary>
-		readonly ICollection<ViewLayer> viewLayers = new List<ViewLayer>();
+		readonly ICollection<RenderLayer> viewLayers = new List<RenderLayer>();
 
 
 

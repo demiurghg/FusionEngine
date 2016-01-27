@@ -195,10 +195,11 @@
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
     <Compile Include="Drivers\Graphics\Resources\UnorderedAccess.cs" />
     <Compile Include="Engine\Audio\AudioChannels.cs" />
+    <Compile Include="Engine\Audio\Enums.cs" />
+    <Compile Include="Engine\Audio\SoundWorld.cs" />
     <Compile Include="Engine\Audio\SoundSystem.cs" />
     <Compile Include="Engine\Audio\AudioEmitter.cs" />
     <Compile Include="Engine\Audio\AudioListener.cs" />
-    <Compile Include="Engine\Audio\AudioStopOptions.cs" />
     <Compile Include="Engine\Audio\CurvePoint.cs" />
     <Compile Include="Engine\Audio\SoundEffect.cs">
       <SubType>Code</SubType>
@@ -302,7 +303,7 @@
     <Compile Include="Engine\Common\Commands\ServerInfo.cs" />
     <Compile Include="Engine\Common\Commands\ServerDrop.cs" />
     <Compile Include="Engine\Common\InitOrder.cs" />
-    <Compile Include="Engine\Graphics\ViewLayer.cs" />
+    <Compile Include="Engine\Graphics\RenderLayer.cs" />
     <Compile Include="Engine\Graphics\RenderSystemConfig.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BaseMapSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\GoogleMaps\BaseGoogleMapSource.cs" />

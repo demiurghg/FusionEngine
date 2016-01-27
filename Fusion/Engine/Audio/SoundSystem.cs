@@ -11,6 +11,7 @@ using SharpDX.X3DAudio;
 using SharpDX.Multimedia;
 using Fusion.Core;
 using Fusion.Engine.Common;
+using Fusion.Core.Configuration;
 
 
 namespace Fusion.Engine.Audio {
@@ -18,6 +19,10 @@ namespace Fusion.Engine.Audio {
 
         internal XAudio2 Device { get; private set; }
         internal MasteringVoice MasterVoice { get; private set; }
+
+
+		[Config]
+		public SoundSystemConfig Config { get; set; }
         
 
 		/// <summary>
@@ -25,6 +30,7 @@ namespace Fusion.Engine.Audio {
 		/// </summary>
 		public SoundSystem ( Game game ) : base(game)
 		{
+			Config = new SoundSystemConfig();
 		}
 
 
@@ -79,6 +85,9 @@ namespace Fusion.Engine.Audio {
 
                 MasterVoice = null;
             }
+
+
+			soundWorld	=	new SoundWorld(Game);
         }
 
 
@@ -90,6 +99,9 @@ namespace Fusion.Engine.Audio {
         protected override void Dispose(bool disposing)
         {
 			if (disposing) {
+
+				soundWorld.Clear();
+
 				if (MasterVoice != null) {
 					MasterVoice.DestroyVoice();
 					MasterVoice.Dispose();
@@ -107,6 +119,32 @@ namespace Fusion.Engine.Audio {
 			}
         }
 
+
+
+		/// <summary>
+		/// Gets default sound world.
+		/// </summary>
+		public SoundWorld SoundWorld {
+			get { return soundWorld; }
+		}
+
+
+		SoundWorld soundWorld;
+
+
+
+
+		/// <summary>
+		/// Updates sound.
+		/// </summary>
+		internal void Update ( GameTime gameTime )
+		{
+			this.DopplerScale	=	Config.DopplerScale;
+			this.MasterVolume	=	Config.MasterVolume;
+			this.SpeedOfSound	=	Config.SpeedOfSound;
+
+			SoundWorld.Update( gameTime );
+		}
 
 
 		/*-----------------------------------------------------------------------------------------

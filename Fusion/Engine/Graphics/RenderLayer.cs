@@ -15,7 +15,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// Represents entire visible world.
 	/// </summary>
-	public class ViewLayer : DisposableBase {
+	public class RenderLayer : DisposableBase {
 		
 		protected readonly Game		Game;
 		protected readonly RenderSystem	rs;
@@ -93,10 +93,7 @@ namespace Fusion.Engine.Graphics {
 		/// Creates ViewLayer instance
 		/// </summary>
 		/// <param name="Game">Game engine</param>
-		/// <param name="width">Target width. Specify zero value for backbuffer.</param>
-		/// <param name="height">Target height. Specify zero value for backbuffer.</param>
-		/// <param name="enableHdr">Indicates that ViewLayer has HDR capabilities.</param>
-		public ViewLayer ( Game game )
+		public RenderLayer ( Game game )
 		{
 			Game		=	game;
 			this.rs		=	Game.RenderSystem;
@@ -109,8 +106,6 @@ namespace Fusion.Engine.Graphics {
 			SpriteLayers	=	new List<SpriteLayer>();
 			GisLayers		=	new List<Gis.GisLayer>();
 			GlobeCamera		=	new GlobeCamera(Game);
-
-			//GlobeCamera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
 		}
 
 
@@ -132,7 +127,7 @@ namespace Fusion.Engine.Graphics {
 		 *	Rendering :
 		 * 
 		-----------------------------------------------------------------------------------------*/
-			Random rand2222 = new Random();
+
 
 		/// <summary>
 		/// Renders view

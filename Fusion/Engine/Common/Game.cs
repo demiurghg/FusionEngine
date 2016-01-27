@@ -547,6 +547,10 @@ namespace Fusion.Engine.Common {
 
 				UpdateClientServerGame( gameTimeInternal );
 
+				//
+				//	Sound :
+				//
+				SoundSystem.Update( gameTimeInternal );
 
 				//
 				//	Render :

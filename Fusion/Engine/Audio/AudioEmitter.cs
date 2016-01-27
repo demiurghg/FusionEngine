@@ -6,27 +6,83 @@ using Fusion;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 
-namespace Fusion.Engine.Audio
-{
-	internal class AudioEmitter
-	{
+namespace Fusion.Engine.Audio {
+
+	/// <summary>
+	/// Represnts audio emitter, the entity that emit sound in physical world.
+	/// </summary>
+	public sealed class AudioEmitter {
+
+		SoundEffectInstance	soundInstance;
+
+
 		/// <summary>
 		/// 
 		/// </summary>
-		public AudioEmitter ()
+		internal AudioEmitter ()
 		{
             dopplerScale = 1.0f;
-			Forward = Vector3.ForwardRH;
 			Position = Vector3.Zero;
-			Up = Vector3.Up;
 			Velocity = Vector3.Zero;
 			DistanceScale  = 1;
 		}
 
-        private float dopplerScale;
-		
+
+
+
 		/// <summary>
-		/// Doppler scale
+		/// Starts playing sound
+		/// </summary>
+		/// <param name="soundEffect"></param>
+		/// <param name="options"></param>
+		/// <param name="volume"></param>
+		/// <param name="pitch"></param>
+		public void PlaySound ( SoundEffect soundEffect, PlayOptions options = PlayOptions.None )
+		{
+			soundInstance	=	soundEffect.CreateInstance();
+
+			soundInstance.IsLooped	=	options.HasFlag(PlayOptions.Looped);
+
+			soundInstance.Play(); 
+		}
+
+
+
+		/// <summary>
+		/// Stops playing sound
+		/// </summary>
+		/// <param name="immediate"></param>
+		public void StopSound ( bool immediate )
+		{
+			if (soundInstance!=null) {
+				soundInstance.Stop( immediate );
+				soundInstance	=	null;
+			}
+		}
+
+
+
+		internal void Pause ()
+		{
+			if (soundInstance!=null) {
+				soundInstance.Pause();
+			}
+		}
+
+
+
+		internal void Resume ()
+		{
+			if (soundInstance!=null) {
+				soundInstance.Resume();
+			}
+		}
+
+
+
+		/// <summary>
+		/// Sets and gets Doppler scale.
+		/// Value must be non-negative.
 		/// </summary>
 		public float DopplerScale {
             get	{
@@ -37,45 +93,33 @@ namespace Fusion.Engine.Audio
                 if (value < 0.0f) {
                     throw new ArgumentOutOfRangeException("AudioEmitter.DopplerScale must be greater than or equal to 0.0f");
 				}
-
                 dopplerScale = value;
             }
 		}
 
-		/// <summary>
-		/// Emitter's forward direction.
-		/// </summary>
-		public Vector3 Forward {
-			get;
-			set;
-		}
+        float dopplerScale;
+		
 
 		/// <summary>
-		/// Emitter's position.
+		/// Gets and sets emitter's position.
 		/// </summary>
 		public Vector3 Position {
 			get;
 			set;
 		}
 
-		/// <summary>
-		/// Emitter's up.
-		/// </summary>
-		public Vector3 Up {
-			get;
-			set;
-		}
 
 		/// <summary>
-		/// Absolute emitter velocity.
+		/// Gets and sets absolute emitter velocity.
 		/// </summary>
 		public Vector3 Velocity {
 			get;
 			set;
 		}
 
+
 		/// <summary>
-		/// Local emitter distance scale
+		/// Sets and gets local emitter distance scale
 		/// </summary>
 		public float DistanceScale {
 			get; set;
@@ -83,7 +127,6 @@ namespace Fusion.Engine.Audio
 
 
 
-		private SharpDX.X3DAudio.CurvePoint[] volumeCurve = null;
 
 		/// <summary>
 		/// Volume falloff curve. Null value means inverse square law.
@@ -97,6 +140,7 @@ namespace Fusion.Engine.Audio
 			}
 		}
 
+		private SharpDX.X3DAudio.CurvePoint[] volumeCurve = null;
 
 
 		/// <summary>
@@ -108,8 +152,8 @@ namespace Fusion.Engine.Audio
             // Pulling out Vector properties for efficiency.
             var pos = this.Position;
             var vel = this.Velocity;
-            var fwd = this.Forward;
-            var up = this.Up;
+            var fwd = Vector3.ForwardRH;
+            var up	= Vector3.Up;
 
             // From MSDN:
             //  X3DAudio uses a left-handed Cartesian coordinate system, 

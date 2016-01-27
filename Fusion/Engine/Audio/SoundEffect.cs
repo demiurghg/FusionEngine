@@ -50,7 +50,7 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Engine.Audio
 {
-    internal sealed class SoundEffect : IDisposable
+    public sealed class SoundEffect : IDisposable
     {
         private bool isDisposed = false;
 		readonly SoundSystem	device;
@@ -156,7 +156,7 @@ namespace Fusion.Engine.Audio
 		/// 
 		/// </summary>
 		/// <returns></returns>
-        public SoundEffectInstance CreateInstance()
+        internal SoundEffectInstance CreateInstance()
         {
             SourceVoice voice = null;
             if (device.Device != null) {

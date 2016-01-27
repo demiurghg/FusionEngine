@@ -47,7 +47,7 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Engine.Audio
 {
-	internal class AudioListener
+	public sealed class AudioListener
 	{
 		public AudioListener ()
 		{
