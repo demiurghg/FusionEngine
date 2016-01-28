@@ -45,9 +45,9 @@ namespace Fusion.Engine.Graphics {
 		/// Gets particle system instance.
 		/// </summary>
 		public ParticleSystem ParticleSystem {
-			get; private set;
+			get { return particleSystem; }
 		}
-
+		ParticleSystem	particleSystem;
 
 		/// <summary>
 		/// Gets collection of mesh instances.
@@ -96,7 +96,7 @@ namespace Fusion.Engine.Graphics {
 			Instances		=	new List<MeshInstance>();
 			LightSet		=	new LightSet( Game.RenderSystem );
 			
-			ParticleSystem	=	new ParticleSystem( Game.RenderSystem, this );
+			particleSystem	=	new ParticleSystem( Game.RenderSystem, this );
 
 			MeasuredOld		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
 			MeasuredNew		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba32F,   1,  1 );
@@ -118,6 +118,9 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
+				
+				SafeDispose( ref particleSystem );
+
 				SafeDispose( ref Radiance );
 				SafeDispose( ref RadianceCache );
 
@@ -218,7 +221,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Renders view
 		/// </summary>
-		internal override void RenderView ( GameTime gameTime, StereoEye stereoEye )
+		internal override void Render ( GameTime gameTime, StereoEye stereoEye )
 		{
 			var targetSurface = (Target == null) ? rs.Device.BackbufferColor.Surface : Target.RenderTarget.Surface;
 

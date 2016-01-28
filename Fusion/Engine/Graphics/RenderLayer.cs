@@ -132,7 +132,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Renders view
 		/// </summary>
-		internal virtual void RenderView ( GameTime gameTime, StereoEye stereoEye )
+		internal virtual void Render ( GameTime gameTime, StereoEye stereoEye )
 		{
 			var targetSurface = (Target == null) ? rs.Device.BackbufferColor.Surface : Target.RenderTarget.Surface;
 

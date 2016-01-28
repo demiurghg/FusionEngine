@@ -162,6 +162,7 @@ namespace Fusion.Engine.Graphics {
 
 				SafeDispose( ref injectionBuffer );
 				SafeDispose( ref simulationBuffer );
+				SafeDispose( ref sortParticlesBuffer );
 				SafeDispose( ref deadParticlesIndices );
 			}
 			base.Dispose( disposing );

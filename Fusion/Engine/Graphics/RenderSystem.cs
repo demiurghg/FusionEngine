@@ -87,6 +87,17 @@ namespace Fusion.Engine.Graphics {
 		MaterialInstance defaultMaterial;
 
 
+		/// <summary>
+		/// Gets default render world.
+		/// </summary>
+		public RenderWorld RenderWorld {
+			get {
+				return renderWorld;
+			}
+		}
+
+
+		RenderWorld renderWorld;
 
 
 		/// <summary>
@@ -156,6 +167,11 @@ namespace Fusion.Engine.Graphics {
 
 			var baseIllum = new BaseIllum();
 			defaultMaterial	=	baseIllum.CreateMaterialInstance(this, Game.Content);
+
+			if (!Config.NoDefaultRenderWorld) {
+				renderWorld	=	new RenderWorld(Game, Config.Width, Config.Height);
+				AddLayer( renderWorld );
+			}
 		}
 
 
@@ -167,6 +183,9 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
+
+				SafeDispose( ref renderWorld );
+
 				SafeDispose( ref spriteEngine );
 
 				SafeDispose( ref grayTexture );
@@ -203,7 +222,7 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			foreach ( var viewLayer in layersToDraw ) {
-				viewLayer.RenderView( gameTime, stereoEye );
+				viewLayer.Render( gameTime, stereoEye );
 			}
 
 			if (Config.ShowCounters) {

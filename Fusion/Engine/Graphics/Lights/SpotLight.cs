@@ -27,9 +27,9 @@ namespace Fusion.Engine.Graphics {
 		public Color4	Intensity;
 
 		/// <summary>
-		/// Spot-light mask atlas name.
+		/// Spot-light mask texture index.
 		/// </summary>
-		public string	MaskName;
+		public int		TextureIndex;
 
 		/// <summary>
 		/// Spot-light inner radius.

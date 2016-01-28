@@ -190,29 +190,36 @@ namespace Fusion.Drivers.Graphics {
 				ApplyChanges();
 			}
 
-			device.DeviceContext.InputAssembler.PrimitiveTopology	=	Converter.Convert( Primitive );
+			if (cs!=null) {
+				
+				//	just set compute shader.
+				device.DeviceContext.ComputeShader	.Set( cs );
 
-			//	set blending :
-			device.DeviceContext.OutputMerger.BlendState		=	blendState;
-			device.DeviceContext.OutputMerger.BlendFactor		=	blendFactor;
-			device.DeviceContext.OutputMerger.BlendSampleMask	=	blendMsaaMask;
+			} else {
+				
+				device.DeviceContext.InputAssembler.PrimitiveTopology	=	Converter.Convert( Primitive );
 
-			//	set rasterizer :
-			device.DeviceContext.Rasterizer.State	=	rasterState;
+				//	set blending :
+				device.DeviceContext.OutputMerger.BlendState		=	blendState;
+				device.DeviceContext.OutputMerger.BlendFactor		=	blendFactor;
+				device.DeviceContext.OutputMerger.BlendSampleMask	=	blendMsaaMask;
 
-			//	shaders :
-			device.DeviceContext.PixelShader	.Set( ps );
-			device.DeviceContext.VertexShader	.Set( vs );
-			device.DeviceContext.GeometryShader	.Set( gs );
-			device.DeviceContext.HullShader		.Set( hs );
-			device.DeviceContext.DomainShader	.Set( ds );
-			device.DeviceContext.ComputeShader	.Set( cs );
+				//	set rasterizer :
+				device.DeviceContext.Rasterizer.State	=	rasterState;
 
-			device.DeviceContext.OutputMerger.DepthStencilState		=	depthStencilState;
-			device.DeviceContext.OutputMerger.DepthStencilReference	=	depthStencilRef;
+				//	shaders :
+				device.DeviceContext.PixelShader	.Set( ps );
+				device.DeviceContext.VertexShader	.Set( vs );
+				device.DeviceContext.GeometryShader	.Set( gs );
+				device.DeviceContext.HullShader		.Set( hs );
+				device.DeviceContext.DomainShader	.Set( ds );
 
-			//	layout :
-			device.DeviceContext.InputAssembler.InputLayout	=	inputLayout;
+				device.DeviceContext.OutputMerger.DepthStencilState		=	depthStencilState;
+				device.DeviceContext.OutputMerger.DepthStencilReference	=	depthStencilRef;
+
+				//	layout :
+				device.DeviceContext.InputAssembler.InputLayout	=	inputLayout;
+			}
 		}
 
 

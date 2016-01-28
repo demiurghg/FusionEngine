@@ -61,6 +61,12 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// Forbids creation of default render world.
+		/// </summary>
+		public bool NoDefaultRenderWorld { get; set; }
+
+
+		/// <summary>
 		/// Shows G-buffer content.
 		///		0 - show final image
 		///		1 - show diffuse

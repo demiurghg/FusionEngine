@@ -559,7 +559,7 @@ namespace Fusion.Engine.Graphics {
 				var shadowSO	=	new Vector4( 0.125f, -0.125f, 0.25f*(spotId % 4)+0.125f, 0.25f*(spotId / 4)+0.125f );
 				spotId ++;
 				
-				var maskRect	=	lightSet.SpotAtlas[ spot.MaskName ];
+				var maskRect	=	lightSet.SpotAtlas==null ? new Rectangle(0,0,0,0) : lightSet.SpotAtlas[ spot.TextureIndex ];
 				var maskX		=	maskRect.Left   / (float)lightSet.SpotAtlas.Texture.Width;
 				var maskY		=	maskRect.Top    / (float)lightSet.SpotAtlas.Texture.Height;
 				var maskW		=	maskRect.Width  / (float)lightSet.SpotAtlas.Texture.Width;

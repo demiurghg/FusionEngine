@@ -425,7 +425,7 @@ namespace TestGame2 {
 
 				for (int i=0; i<150; i++) {
 					p.Velocity		=	(rand2.UniformRadialDistribution(0.0f,0.5f) + Vector3.Up * 3.0f) * Math.Abs(rand2.GaussDistribution(1, 0.25f));
-					p.Position		=	position + rand2.UniformRadialDistribution(0.0f,0.5f);
+					p.Position		=	position + rand2.UniformRadialDistribution(0.0f,0.15f);
 					p.LifeTime		=	rand2.GaussDistribution(1.5f,0.25f);
 					p.Size0			=	0.2f;
 					p.Size1			=	0.0f;
