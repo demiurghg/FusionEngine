@@ -405,7 +405,14 @@ namespace Fusion.Engine.Common {
 			//	init game :
 			Log.Message("");
 
+			//	init game modules :
 			GameModule.InitializeAll( this );
+
+			//	add initialized modules to dictionary :
+			moduleDictionary	=	new Dictionary<Type,object>();
+			foreach ( var bind in GameModule.Enumerate(this) ) {
+				moduleDictionary.Add( bind.Module.GetType(), bind.Module );
+			}
 
 			initialized	=	true;
 
@@ -416,7 +423,31 @@ namespace Fusion.Engine.Common {
 		}
 
 
+		Dictionary<Type,object> moduleDictionary;
 
+
+		/// <summary>
+		/// Gets module by its type.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public T GetModule<T>()
+		{
+			object module;
+
+			if (moduleDictionary.TryGetValue( typeof(T), out module )) {
+				return (T)module;
+			} else {
+
+				module = moduleDictionary.FirstOrDefault( bind => bind.Value is T );
+
+				if (module==null) {
+					throw new InvalidOperationException(string.Format("Game module type of {} not found", typeof(T)));
+				}
+
+				return (T)module;
+			}
+		}
 
 
 		/// <summary>

@@ -32,6 +32,14 @@ namespace Fusion.Engine.Frames {
 		MouseProcessor	mouseProcessor;
 
 
+		public SpriteLayer FramesSpriteLayer {
+			get {
+				return spriteLayer;
+			}
+		}
+
+		SpriteLayer spriteLayer;
+
 
 		/// <summary>
 		/// Creates view
@@ -54,7 +62,23 @@ namespace Fusion.Engine.Frames {
 		{
 			 DefaultFont	=	Game.Content.Load<SpriteFont>(defaultFontPath);
 
+			 spriteLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
+
 			 mouseProcessor.Initialize();
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void Dispose ( bool disposing )
+		{
+			if (disposing) {
+				SafeDispose( ref spriteLayer );
+			}
+			base.Dispose( disposing );
 		}
 
 
@@ -113,6 +137,12 @@ namespace Fusion.Engine.Frames {
 			sw.Stop();
 
 			uiUpdateProfiling	=	sw.Elapsed;
+
+
+			//
+			//	Draw UI :
+			//
+			Draw ( gameTime, spriteLayer );
 		}
 
 
@@ -121,7 +151,7 @@ namespace Fusion.Engine.Frames {
 		/// Draws entire interface
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public void Draw ( GameTime gameTime, SpriteLayer spriteLayer )
+		void Draw ( GameTime gameTime, SpriteLayer spriteLayer )
 		{
 			if (Config.SkipUserInterface) {
 				return;
