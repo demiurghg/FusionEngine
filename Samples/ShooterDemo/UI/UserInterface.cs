@@ -15,10 +15,9 @@ using Fusion.Engine.Client;
 using Fusion.Engine.Common;
 using Fusion.Engine.Server;
 
-namespace ShooterDemo {
+namespace ShooterDemo.UI {
 
-
-	class ShooterDemoUserInterface : UserInterface {
+	class UserInterface : Fusion.Engine.Common.UserInterface {
 
 		[GameModule( "Console", "con", InitOrder.Before )]
 		public GameConsole Console { get { return console; } }
@@ -35,7 +34,7 @@ namespace ShooterDemo {
 		/// Creates instance of ShooterDemoUserInterface
 		/// </summary>
 		/// <param name="engine"></param>
-		public ShooterDemoUserInterface ( Game game )
+		public UserInterface ( Game game )
 			: base( game )
 		{
 			console = new GameConsole( game, "conchars" );
@@ -63,10 +62,10 @@ namespace ShooterDemo {
 
 		void LoadContent ()
 		{
-			background	=	Game.Content.Load<DiscTexture>(@"UserInterface\background");
-			headerFont	=	Game.Content.Load<SpriteFont>(@"Fonts\headerFont");
-			titleFont	=	Game.Content.Load<SpriteFont>(@"Fonts\titleFont");
-			textFont	=	Game.Content.Load<SpriteFont>(@"Fonts\textFont");
+			background	=	Game.Content.Load<DiscTexture>(@"ui\background");
+			headerFont	=	Game.Content.Load<SpriteFont>(@"fonts\headerFont");
+			titleFont	=	Game.Content.Load<SpriteFont>(@"fonts\titleFont");
+			textFont	=	Game.Content.Load<SpriteFont>(@"fonts\textFont");
 		}
 
 

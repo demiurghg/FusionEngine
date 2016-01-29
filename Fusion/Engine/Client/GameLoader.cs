@@ -38,7 +38,7 @@ namespace Fusion.Engine.Client {
 		/// Indicates that loader has completed loading process.
 		/// </summary>
 		/// <returns></returns>
-		abstract public bool IsReady {
+		abstract public bool IsCompleted {
 			get;
 		}
 	}

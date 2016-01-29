@@ -8,21 +8,47 @@ using System.Threading;
 using Fusion.Core.Shell;
 using System.IO;
 using Fusion.Engine.Common;
+using Fusion.Core.Content;
 
 
 namespace Fusion.Engine.Server {
 
 	public abstract partial class GameServer : GameModule {
 
-		public const int SnapshotSize	=	1024 * 128;
-
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="Game"></param>
-		public GameServer ( Game Game ) : base(Game)
+		public GameServer ( Game game ) : base(game)
 		{
+			content = new ContentManager(game);
 		}
+
+
+		/// <summary>
+		/// Gets server's content manager.
+		/// </summary>
+		public ContentManager Content {
+			get {
+				return content;
+			}
+		}
+
+		ContentManager content;
+
+
+		/// <summary>
+		/// Releases all resources used by the GameServer class.
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void Dispose ( bool disposing )
+		{
+			if (disposing) {
+				SafeDispose( ref content );
+			}
+			base.Dispose( disposing );
+		}
+
 
 		/// <summary>
 		/// Method is invoked when server started.

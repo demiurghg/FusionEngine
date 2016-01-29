@@ -12,6 +12,7 @@ using Lidgren.Network;
 using Fusion.Engine.Server;
 using Fusion.Engine.Common.Commands;
 using System.Diagnostics;
+using Fusion.Core.Content;
 
 
 namespace Fusion.Engine.Client {

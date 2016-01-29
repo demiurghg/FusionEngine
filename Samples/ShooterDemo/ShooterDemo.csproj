@@ -52,14 +52,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ShooterDemoGameClient.cs" />
-    <Compile Include="ShooterDemoGameServer.cs" />
-    <Compile Include="ShooterDemoUserInterface.cs" />
+    <Compile Include="Client\GameLoader.cs" />
+    <Compile Include="Common\Map.cs" />
+    <Compile Include="Client\GameClient.cs" />
+    <Compile Include="Server\GameServer.cs" />
+    <Compile Include="UI\UserInterface.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Content\.content" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BuildDir)\FusionProject.targets" />

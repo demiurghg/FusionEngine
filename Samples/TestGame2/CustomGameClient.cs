@@ -68,11 +68,12 @@ namespace TestGame2 {
 		/// Client could start loading models, textures, models etc.
 		/// </summary>
 		/// <param name="map"></param>
-		public override void LoadContent ( string serverInfo )
+		public override GameLoader LoadContent ( string serverInfo )
 		{
 			Log.Message("LOAD LEVEL: {0}", serverInfo);
 			Thread.Sleep(100);
 			Log.Message("LOAD LEVEL COMPLETED!");
+			return null;
 		}
 
 		/// <summary>

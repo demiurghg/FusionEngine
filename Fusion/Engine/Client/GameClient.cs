@@ -8,6 +8,7 @@ using System.Threading;
 using Fusion.Engine.Network;
 using System.IO;
 using Fusion.Engine.Common;
+using Fusion.Core.Content;
 
 
 namespace Fusion.Engine.Client {
@@ -17,29 +18,49 @@ namespace Fusion.Engine.Client {
 		/// 
 		/// </summary>
 		/// <param name="Game"></param>
-		public GameClient ( Game Game ) : base(Game) 
+		public GameClient ( Game game ) : base(game) 
 		{
+			content	=	new ContentManager(game);
 			InitInternal();
 		}
 
+
+		/// <summary>
+		/// Releases all resources used by the GameClient class.
+		/// </summary>
+		/// <param name="disposing"></param>
 		protected override void Dispose ( bool disposing )
 		{
+			if (disposing) {
+				SafeDispose( ref content );
+			}
 			base.Dispose( disposing );
 		}
 
+		
+		/// <summary>
+		/// Gets Client's content manager.
+		/// </summary>
+		public ContentManager Content {
+			get {
+				return content;
+			}
+		}
+
+		ContentManager content;
+
+
 		/// <summary>
 		/// Called when connection request accepted by server.
-		/// Client could start loading models, textures, models etc.
-		/// The method can be invoked in parallel task.
-		/// Thus this method should not setup scene.
-		/// Only resource creation is allowed.
+		/// Method returns GameLoader
 		/// </summary>
 		/// <param name="serverInfo"></param>
-		public abstract void LoadContent ( string serverInfo );
+		public abstract GameLoader LoadContent ( string serverInfo );
 
 		/// <summary>
 		///	Called when client disconnected, dropped, kicked or timeouted.
 		///	Client must purge all level-associated content.
+		///	In most cases you need just to call Content.Unload().
 		/// </summary>
 		public abstract void UnloadContent ();
 

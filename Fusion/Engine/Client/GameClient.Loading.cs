@@ -20,13 +20,16 @@ namespace Fusion.Engine.Client {
 			/// if null - no reason to disconnect.
 			/// </summary>
 			string disconnectReason = null;
-			Task loadingTask;
+			GameLoader loader;
 			
 
 			public Loading ( GameClient gameClient, string serverInfo ) : base(gameClient)
 			{
-				loadingTask = new Task( () => gameClient.LoadContent(serverInfo) );
-				loadingTask.Start();
+				loader	=	gameClient.LoadContent( serverInfo );
+
+				if (loader==null) {
+					throw new InvalidOperationException("Null GameLoader");
+				}
 			}
 
 
@@ -44,14 +47,19 @@ namespace Fusion.Engine.Client {
 
 			public override void Update ( GameTime gameTime )
 			{
-				if (loadingTask.IsCompleted) {
+				loader.Update(gameTime);
+
+				//	sleep a while to get 
+				//	other threads more time.
+				Thread.Sleep(1);
+
+				if (loader.IsCompleted) {
 					if (disconnectReason!=null) {
 						gameClient.SetState( new Disconnected(gameClient, disconnectReason) );
 					} else {
 						gameClient.SetState( new Awaiting(gameClient) );
 					}
 				}
-				//throw new NotImplementedException();
 			}
 
 

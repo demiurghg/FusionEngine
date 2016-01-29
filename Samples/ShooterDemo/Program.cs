@@ -12,6 +12,11 @@ using Fusion.Core.Utils;
 
 namespace ShooterDemo {
 
+	using Server;
+	using Client;
+	using Common;
+	using UI;
+
 	class Program {
 		[STAThread]
 		static int Main ( string[] args )
@@ -42,9 +47,9 @@ namespace ShooterDemo {
 			using (var game = new Game( "ShooterDemo" )) {
 
 				//	create SV, CL and UI instances :
-				game.GameServer = new ShooterDemoGameServer( game );
-				game.GameClient = new ShooterDemoGameClient( game );
-				game.GameInterface = new ShooterDemoUserInterface( game );
+				game.GameServer = new GameServer( game );
+				game.GameClient = new GameClient( game );
+				game.GameInterface = new UserInterface( game );
 
 				//	load configuration.
 				//	first run will cause warning, 

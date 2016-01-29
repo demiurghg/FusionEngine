@@ -10,16 +10,22 @@ using Fusion;
 using Fusion.Engine.Client;
 using Fusion.Engine.Common;
 using Fusion.Engine.Server;
+using Fusion.Core.Content;
+using Fusion.Engine.Graphics;
 
-namespace ShooterDemo {
-	class ShooterDemoGameServer : GameServer {
+namespace ShooterDemo.Server {
+	class GameServer : Fusion.Engine.Server.GameServer {
+
+
+		Scene scene;
+		string mapName;
 
 
 		/// <summary>
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public ShooterDemoGameServer ( Game game )
+		public GameServer ( Game game )
 			: base( game )
 		{
 		}
@@ -34,6 +40,19 @@ namespace ShooterDemo {
 		}
 
 
+		/// <summary>
+		/// Releases all resources used by the GameServer class.
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void Dispose ( bool disposing )
+		{
+			if (disposing) {
+				//	...
+			}
+			base.Dispose( disposing );
+		}
+
+
 
 		/// <summary>
 		/// Method is invoked when server started.
@@ -41,9 +60,10 @@ namespace ShooterDemo {
 		/// <param name="map"></param>
 		public override void LoadContent ( string map )
 		{
-			//	Load content for given map/level here.
-			//	...
+			mapName	=	@"scenes\" + map;
+			scene	=	Content.Load<Scene>( mapName );
 		}
+
 
 
 		/// <summary>
@@ -52,8 +72,8 @@ namespace ShooterDemo {
 		/// </summary>
 		public override void UnloadContent ()
 		{
-			//	Unload content for given map/level here.
-			//	...
+			mapName	=	null;
+			Content.Unload();
 		}
 
 
@@ -106,7 +126,7 @@ namespace ShooterDemo {
 		/// <returns></returns>
 		public override string ServerInfo ()
 		{
-			return "Alice";
+			return mapName;
 		}
 
 

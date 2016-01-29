@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-16"?>
+<BaseIllum xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ColorLevel>1</ColorLevel>
+  <SpecularLevel>1</SpecularLevel>
+  <EmissionLevel>1</EmissionLevel>
+  <RoughnessMinimum>0.1</RoughnessMinimum>
+  <RoughnessMaximum>1.0</RoughnessMaximum>
+  <ColorTexture Path="scenes\Textures\floorHeavyA.tga" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <SurfaceTexture Path="scenes\Textures\floorHeavyA_spec.tga" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <NormalMapTexture Path="scenes\Textures\floorHeavyA_local.tga" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <EmissionTexture Path="defaultBlack" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <DirtTexture Path="scenes\Textures\stain.tga" SRgb="true" ScaleU="0.15" ScaleV="0.15" OffsetU="0" OffsetV="0" />
+</BaseIllum>
