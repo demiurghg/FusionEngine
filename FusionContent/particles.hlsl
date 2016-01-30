@@ -146,11 +146,7 @@ struct VSOutput {
 struct GSOutput {
 	float4	Position : SV_Position;
 	float2	TexCoord : TEXCOORD0;
-	float2	TexCoord1 : TEXCOORD1;
-	float 	TexCoord2 : TEXCOORD2;
-	float3	TexCoord3 : TEXCOORD3;
 	float4	Color     : COLOR0;
-	int4	Color1    : COLOR1;
 };
 
 
@@ -184,11 +180,6 @@ float Ramp(float f_in, float f_out, float t)
 void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> outputStream )
 {
 	GSOutput p0, p1, p2, p3;
-	
-	p0.TexCoord1 = 0; p0.TexCoord2 = 0; p0.TexCoord3 = 0; p0.Color1 = 0;
-	p1.TexCoord1 = 0; p1.TexCoord2 = 0; p1.TexCoord3 = 0; p1.Color1 = 0;
-	p2.TexCoord1 = 0; p2.TexCoord2 = 0; p2.TexCoord3 = 0; p2.Color1 = 0;
-	p3.TexCoord1 = 0; p3.TexCoord2 = 0; p3.TexCoord3 = 0; p3.Color1 = 0;
 	
 	uint prtId = (uint)( sortParticleBufferGS[ inputPoint[0].vertexID ].y );
 	//uint prtId = inputPoint[0].vertexID;

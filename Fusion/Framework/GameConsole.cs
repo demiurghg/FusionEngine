@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define USE_PROFONT
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,8 @@ using Fusion.Core.Configuration;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Input;
 using Fusion.Core.Shell;
+
+
 
 namespace Fusion.Framework {
 	
@@ -35,9 +38,11 @@ namespace Fusion.Framework {
 		
 		List<string> lines = new List<string>();
 
-
-		//SpriteFont	consoleFont;
+		#if USE_PROFONT
+		SpriteFont	consoleFont;
+		#else
 		DiscTexture	consoleFont;
+		#endif
 		SpriteLayer consoleLayer;
 		SpriteLayer editLayer;
 		
@@ -122,10 +127,13 @@ namespace Fusion.Framework {
 		}
 
 
-		int charHeight { get { return 9; } }
-		int charWidth { get { return 8; } }
-		/*int charHeight { get { return consoleFont.LineHeight; } }
-		int charWidth { get { return consoleFont.SpaceWidth; } }*/
+		#if USE_PROFONT
+			int charHeight { get { return consoleFont.LineHeight; } }
+			int charWidth { get { return consoleFont.SpaceWidth; } }
+		#else
+			int charHeight { get { return 9; } }
+			int charWidth { get { return 8; } }
+		#endif
 
 
 		/// <summary>
@@ -143,7 +151,11 @@ namespace Fusion.Framework {
 		/// </summary>
 		void LoadContent ()
 		{
+			#if USE_PROFONT
+			consoleFont			=	Game.Content.Load<SpriteFont>("profont");
+			#else
 			consoleFont			=	Game.Content.Load<DiscTexture>(font);
+			#endif
 
 			RefreshConsole();
 		}
@@ -171,6 +183,15 @@ namespace Fusion.Framework {
 		}
 
 
+		void DrawString ( SpriteLayer layer, int x, int y, string text, Color color )
+		{
+			#if USE_PROFONT
+			consoleFont.DrawString( layer, text, x,y + consoleFont.BaseLine, color );
+			#else
+			layer.DrawDebugString( consoleFont, x, y, text, color );
+			#endif
+		}
+
 
 		/// <summary>
 		/// 
@@ -188,11 +209,13 @@ namespace Fusion.Framework {
 				showFactor = MathUtil.Clamp( showFactor - Config.FallSpeed * gameTime.ElapsedSec, 0,1 );
 			}
 
+			consoleLayer.Visible	=	showFactor > 0;
+
 			//Log.Message("{0} {1}", showFactor, Show);
 			float offset	=	(int)(- (vp.Height / 2+1) * (1 - showFactor));
 
 			consoleLayer.SetTransform( new Vector2(0, offset), Vector2.Zero, 0 );
-			editLayer.SetTransform( 0, vp.Height/2 - 8 );
+			editLayer.SetTransform( 0, vp.Height/2 - charHeight );
 
 			Color cursorColor = Config.CmdLineColor;
 			cursorColor.A = (byte)( cursorColor.A * (0.5 + 0.5 * Math.Cos( 2 * Config.CursorBlinkRate * Math.PI * gameTime.Total.TotalSeconds ) > 0.5 ? 1 : 0 ) );
@@ -201,15 +224,15 @@ namespace Fusion.Framework {
 
 			//consoleFont.DrawString( editLayer, "]" + editBox.Text, 0,0, Config.CmdLineColor );
 			//consoleFont.DrawString( editLayer, "_", charWidth + charWidth * editBox.Cursor, 0, cursorColor );
-			editLayer.DrawDebugString( consoleFont, 0, 0,										"]" + editBox.Text, Config.CmdLineColor );
-			editLayer.DrawDebugString( consoleFont, charWidth + charWidth * editBox.Cursor,	0,  "_", cursorColor );
+			DrawString( editLayer, 0, 0,										"]" + editBox.Text, Config.CmdLineColor );
+			DrawString( editLayer, charWidth + charWidth * editBox.Cursor,	0,  "_", cursorColor );
 
 
 			var version = Game.GetReleaseInfo();
-			editLayer.DrawDebugString( consoleFont, vp.Width - charWidth * version.Length, -charHeight, version, Config.VersionColor);
+			DrawString( editLayer, vp.Width - charWidth * version.Length, -charHeight, version, Config.VersionColor);
 
 			var frameRate = string.Format("fps = {0,7:0.00}", gameTime.Fps);
-			editLayer.DrawDebugString( consoleFont, vp.Width - charWidth * frameRate.Length, 0, frameRate, Config.VersionColor);
+			DrawString( editLayer, vp.Width - charWidth * frameRate.Length, 0, frameRate, Config.VersionColor);
 
 			
 			//
@@ -220,7 +243,7 @@ namespace Fusion.Framework {
 				var candidates = suggestion.Candidates;
 
 				var x = 0;
-				var y = charHeight;
+				var y = charHeight+1;
 				var w = (candidates.Max( s => s.Length ) + 2) * charWidth;
 				var h = (candidates.Count() + 1) * charHeight;
 
@@ -230,7 +253,7 @@ namespace Fusion.Framework {
 
 				int line = 0;
 				foreach (var candidate in candidates ) {
-					editLayer.DrawDebugString(consoleFont, x + charWidth, y + charHeight * line, candidate, Config.HelpColor );
+					DrawString( editLayer, x + charWidth, y + charHeight * line, candidate, Config.HelpColor );
 					line ++;
 				}
 			}
@@ -286,7 +309,7 @@ namespace Fusion.Framework {
 				}
 				
 
-				consoleLayer.DrawDebugString( consoleFont, 0, vp.Height/2 - (count+2) * charHeight, line.MessageText, color );
+				DrawString( consoleLayer, 0, vp.Height/2 - (count+2) * charHeight, line.MessageText, color );
 				//consoleFont.DrawString( consoleLayer, line.Message, , color );
 
 				if (count>rows) {
