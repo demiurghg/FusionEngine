@@ -70,7 +70,6 @@ namespace TestGame2 {
 		SpriteLayer		uiLayer;
 		DiscTexture		texture;
 		RenderWorld		masterView;
-		RenderLayer		masterView2;
 		SoundWorld		soundWorld;
 		TargetTexture	targetTexture;
 		DiscTexture		debugFont;
@@ -112,10 +111,7 @@ namespace TestGame2 {
 			//var mtrl		=	GameEngine.Content.Load<Material>("testMtrl");
 
 			var bounds		=	Game.RenderSystem.DisplayBounds;
-			masterView		=	new RenderWorld(Game, bounds.Width, bounds.Height);
-
-			masterView2		=	new RenderLayer(Game);
-			soundWorld		=	new SoundWorld(Game);
+			masterView		=	Game.RenderSystem.RenderWorld;
 
 			Game.RenderSystem.DisplayBoundsChanged += (s,e) => {
 				masterView.Resize( Game.RenderSystem.DisplayBounds.Width, Game.RenderSystem.DisplayBounds.Height );
@@ -124,9 +120,6 @@ namespace TestGame2 {
 
 			targetTexture		=	new TargetTexture(Game.RenderSystem, bounds.Width, bounds.Height, TargetFormat.LowDynamicRange );
 			//masterView.Target	=	targetTexture;
-
-			Game.RenderSystem.AddLayer( masterView );
-			Game.RenderSystem.AddLayer( masterView2 );
 
 			testLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
 			uiLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
@@ -177,9 +170,9 @@ namespace TestGame2 {
 			
 
 
-			masterView2.SpriteLayers.Add( console.ConsoleSpriteLayer );
-			masterView2.SpriteLayers.Add( uiLayer );
-			masterView2.SpriteLayers.Add( testLayer );
+			masterView.SpriteLayers.Add( console.ConsoleSpriteLayer );
+			masterView.SpriteLayers.Add( uiLayer );
+			masterView.SpriteLayers.Add( testLayer );
 
 
 			Game.Keyboard.KeyDown += Keyboard_KeyDown;
@@ -323,8 +316,6 @@ namespace TestGame2 {
 
 				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
-				SafeDispose( ref masterView );
-				SafeDispose( ref masterView2 );
 				SafeDispose( ref targetTexture );
 			}
 			base.Dispose( disposing );

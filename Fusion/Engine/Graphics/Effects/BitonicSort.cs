@@ -33,8 +33,8 @@ namespace Fusion.Engine.Graphics
 			TRANSPOSE = 2,
 		}
 
-		const int NumberOfElements		=	512*512;
-		const int BitonicBlockSize		=	512;
+		const int NumberOfElements		=	256*256;
+		const int BitonicBlockSize		=	256;
 		const int TransposeBlockSize	=	16;
 		const int MatrixWidth			=	BitonicBlockSize;
 		const int MatrixHeight			=	NumberOfElements / BitonicBlockSize;
@@ -60,8 +60,6 @@ namespace Fusion.Engine.Graphics
 			//	create structured buffers and shaders :
 			buffer2		=	new StructuredBuffer( device, typeof(Vector2), NumberOfElements  , StructuredBufferFlags.None );
 			paramsCB	=	new ConstantBuffer( device, typeof(Params) );
-			shader		=	Game.Content.Load<Ubershader>("bitonicSort");
-			factory		=	shader.CreateFactory( typeof(ShaderFlags), Primitive.TriangleList, VertexInputElement.Empty );
 
 			LoadContent();
 			Game.Reloading += (s,e) => LoadContent();
@@ -74,6 +72,8 @@ namespace Fusion.Engine.Graphics
 		/// </summary>
 		void LoadContent ()
 		{
+			shader		=	Game.Content.Load<Ubershader>("bitonicSort");
+			factory		=	shader.CreateFactory( typeof(ShaderFlags), Primitive.TriangleList, VertexInputElement.Empty );
 		}
 
 
@@ -117,52 +117,58 @@ namespace Fusion.Engine.Graphics
 		/// 
 		/// </summary>
 		/// <param name="buffer"></param>
-		public void Sort ( StructuredBuffer buffer, int numberOfElements = 512*512 )
+		public void Sort ( StructuredBuffer buffer )
 		{
 			device.ResetStates();
 
-		    //	First sort the rows for the levels <= to the block size
-			for( uint level=2; level<=BitonicBlockSize; level = level * 2 ) {
+			using (new PixEvent("Pass#1")) {
 
-				SetConstants( level, level, MatrixWidth, MatrixHeight );
+				//	First sort the rows for the levels <= to the block size
+				for( uint level=2; level<=BitonicBlockSize; level = level * 2 ) {
 
-				// Sort the row data
-				device.SetCSRWBuffer( 0, buffer );
-				device.PipelineState	=	factory[ (int)ShaderFlags.BITONIC_SORT ];
-				device.Dispatch( NumberOfElements / BitonicBlockSize, 1, 1 );
+					SetConstants( level, level, MatrixWidth, MatrixHeight );
+
+					// Sort the row data
+					device.SetCSRWBuffer( 0, buffer );
+					device.PipelineState	=	factory[ (int)ShaderFlags.BITONIC_SORT ];
+					device.Dispatch( NumberOfElements / BitonicBlockSize, 1, 1 );
+				}
 			}
 
+			using (new PixEvent("Pass#2")) {
 
-			for( uint level = (BitonicBlockSize * 2); level <= NumberOfElements; level = level * 2 ){
+				for( uint level = (BitonicBlockSize * 2); level <= NumberOfElements; level = level * 2 ){
 
-				SetConstants( (level / BitonicBlockSize), (uint)(level & ~NumberOfElements) / BitonicBlockSize, MatrixWidth, MatrixHeight );
+					PixEvent.Marker(string.Format("Level = {0}", level));
 
-				// Transpose the data from buffer 1 into buffer 2
-				device.ComputeShaderResources[0]	=	null;
-				device.SetCSRWBuffer( 0, buffer2 );
-				device.ComputeShaderResources[0]	=	buffer;
-				device.PipelineState				=	factory[ (int)ShaderFlags.TRANSPOSE ];
-				device.Dispatch( MatrixWidth / TransposeBlockSize, MatrixHeight / TransposeBlockSize, 1 );
+					SetConstants( (level / BitonicBlockSize), (uint)(level & ~NumberOfElements) / BitonicBlockSize, MatrixWidth, MatrixHeight );
 
-				// Sort the transposed column data
-				device.PipelineState	=	factory[ (int)ShaderFlags.BITONIC_SORT ];
-				device.Dispatch( NumberOfElements / BitonicBlockSize, 1, 1 );
+					// Transpose the data from buffer 1 into buffer 2
+					device.ComputeShaderResources[0]	=	null;
+					device.SetCSRWBuffer( 0, buffer2 );
+					device.ComputeShaderResources[0]	=	buffer;
+					device.PipelineState				=	factory[ (int)ShaderFlags.TRANSPOSE ];
+					device.Dispatch( MatrixWidth / TransposeBlockSize, MatrixHeight / TransposeBlockSize, 1 );
+
+					// Sort the transposed column data
+					device.PipelineState	=	factory[ (int)ShaderFlags.BITONIC_SORT ];
+					device.Dispatch( NumberOfElements / BitonicBlockSize, 1, 1 );
 
 
-				SetConstants( BitonicBlockSize, level, MatrixWidth, MatrixHeight );
+					SetConstants( BitonicBlockSize, level, MatrixWidth, MatrixHeight );
 
-				// Transpose the data from buffer 2 back into buffer 1
-				device.ComputeShaderResources[0]	=	null;
-				device.SetCSRWBuffer( 0, buffer );
-				device.ComputeShaderResources[0]	=	buffer2;
-				device.PipelineState				=	factory[ (int)ShaderFlags.TRANSPOSE ];
-				device.Dispatch( MatrixHeight / TransposeBlockSize, MatrixHeight / TransposeBlockSize, 1 );
+					// Transpose the data from buffer 2 back into buffer 1
+					device.ComputeShaderResources[0]	=	null;
+					device.SetCSRWBuffer( 0, buffer );
+					device.ComputeShaderResources[0]	=	buffer2;
+					device.PipelineState				=	factory[ (int)ShaderFlags.TRANSPOSE ];
+					device.Dispatch( MatrixHeight / TransposeBlockSize, MatrixHeight / TransposeBlockSize, 1 );
 
-				// Sort the row data
-				device.PipelineState	=	factory[ (int)ShaderFlags.BITONIC_SORT ];
-				device.Dispatch( NumberOfElements / BitonicBlockSize, 1, 1 );
+					// Sort the row data
+					device.PipelineState	=	factory[ (int)ShaderFlags.BITONIC_SORT ];
+					device.Dispatch( NumberOfElements / BitonicBlockSize, 1, 1 );
+				}
 			}
-
 
 
 			//

@@ -29,19 +29,27 @@ namespace Fusion {
 	}
 
 	public sealed class PixEvent : IDisposable {
-		public PixEvent (string eventName = "...") {
+		public PixEvent (string eventName) {
 
 			StackTrace	st = new StackTrace();
 
 			StackFrame sf = st.GetFrame(1);
 
-			string clsName = new string( sf.GetMethod().DeclaringType.Name.Where(ch=>char.IsUpper(ch)).ToArray() );
+			//string clsName = new string( sf.GetMethod().DeclaringType.Name.Where(ch=>char.IsUpper(ch)).ToArray() );*/
+			string clsName = sf.GetMethod().DeclaringType.Name;
+
 			SafeNativeMethods._BeginEvent( 0, clsName + "." + sf.GetMethod().Name + " - " + eventName );
 		}
 
 		public void Dispose () {
 			SafeNativeMethods._EndEvent();
 			//GC.SuppressFinalize(this);
+		}
+
+
+		public static void Marker ( string name )
+		{
+			SafeNativeMethods.SetMarker(0, name);
 		}
 	}
 	#else

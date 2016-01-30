@@ -28,15 +28,8 @@ namespace Fusion.Engine.Graphics {
 
 		const int BlockSize				=	256;
 		const int MaxInjectingParticles	=	1024;
-		const int MaxSimulatedParticles =	512 * 512;
+		const int MaxSimulatedParticles =	256 * 256;
 		const int MaxImages				=	512;
-
-		//	particle sorting :
-		const int NumberOfElements		=	MaxSimulatedParticles;
-		const int BitonicBlockSize		=	512;
-		const int TransposeBlockSize	=	16;
-		const int MatrixWidth			=	BitonicBlockSize;
-		const int MatrixHeight			=	NumberOfElements / BitonicBlockSize;
 
 		bool toMuchInjectedParticles = false;
 
@@ -266,6 +259,10 @@ namespace Fusion.Engine.Graphics {
 		internal void Render ( GameTime gameTime, Camera camera, StereoEye stereoEye, HdrFrame viewFrame )
 		{
 			var device	=	Game.GraphicsDevice;
+
+			if (rs.Config.SkipParticles) {
+				return;
+			}
 
 			using ( new PixEvent("Particle Rendering") ) {
 

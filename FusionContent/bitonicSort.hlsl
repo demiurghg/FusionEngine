@@ -3,7 +3,7 @@
 $ubershader BITONIC_SORT|TRANSPOSE
 #endif
 
-#define BITONIC_BLOCK_SIZE 512
+#define BITONIC_BLOCK_SIZE 256
 
 #define TRANSPOSE_BLOCK_SIZE 16
 
@@ -49,7 +49,6 @@ void CSMain( uint3 Gid : SV_GroupID,
         GroupMemoryBarrierWithGroupSync();
         shared_data[GI] = result;
         GroupMemoryBarrierWithGroupSync();
-		
     }
     
     // Store shared data
