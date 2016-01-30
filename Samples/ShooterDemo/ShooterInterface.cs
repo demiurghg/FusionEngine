@@ -17,7 +17,7 @@ using Fusion.Engine.Server;
 
 namespace ShooterDemo.UI {
 
-	class UserInterface : Fusion.Engine.Common.UserInterface {
+	class ShooterInterface : Fusion.Engine.Common.UserInterface {
 
 		[GameModule( "Console", "con", InitOrder.Before )]
 		public GameConsole Console { get { return console; } }
@@ -34,7 +34,7 @@ namespace ShooterDemo.UI {
 		/// Creates instance of ShooterDemoUserInterface
 		/// </summary>
 		/// <param name="engine"></param>
-		public UserInterface ( Game game )
+		public ShooterInterface ( Game game )
 			: base( game )
 		{
 			console = new GameConsole( game, "conchars" );

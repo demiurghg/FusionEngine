@@ -461,8 +461,8 @@ float3	ComputeCSM ( float4 worldPos )
 		shadow = 1;
 	}
 
-	#ifdef SHOW_SPLITS
-		return shadow * shadow * colorizer;
+	#if 0
+		return shadow * colorizer;
 	#else
 		return shadow;
 	#endif

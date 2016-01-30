@@ -47,9 +47,9 @@ namespace ShooterDemo {
 			using (var game = new Game( "ShooterDemo" )) {
 
 				//	create SV, CL and UI instances :
-				game.GameServer = new GameServer( game );
-				game.GameClient = new GameClient( game );
-				game.GameInterface = new UserInterface( game );
+				game.GameServer = new ShooterServer( game );
+				game.GameClient = new ShooterClient( game );
+				game.GameInterface = new ShooterInterface( game );
 
 				//	load configuration.
 				//	first run will cause warning, 

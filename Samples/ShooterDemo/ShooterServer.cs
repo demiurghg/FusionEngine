@@ -14,7 +14,7 @@ using Fusion.Core.Content;
 using Fusion.Engine.Graphics;
 
 namespace ShooterDemo.Server {
-	class GameServer : Fusion.Engine.Server.GameServer {
+	class ShooterServer : Fusion.Engine.Server.GameServer {
 
 
 		Scene scene;
@@ -25,7 +25,7 @@ namespace ShooterDemo.Server {
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public GameServer ( Game game )
+		public ShooterServer ( Game game )
 			: base( game )
 		{
 		}

@@ -14,13 +14,13 @@ using Fusion.Engine.Graphics;
 
 
 namespace ShooterDemo.Client{
-	class GameClient : Fusion.Engine.Client.GameClient {
+	class ShooterClient : Fusion.Engine.Client.GameClient {
 
 		/// <summary>
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public GameClient ( Game game )
+		public ShooterClient ( Game game )
 			: base( game )
 		{
 		}
@@ -41,11 +41,11 @@ namespace ShooterDemo.Client{
 		/// Client could start loading models, textures, models etc.
 		/// </summary>
 		/// <param name="map"></param>
-		public override Fusion.Engine.Client.GameLoader LoadContent ( string serverInfo )
+		public override GameLoader LoadContent ( string serverInfo )
 		{
 			Log.Message( "SERVER INFO : {0}", serverInfo );
 
-			return new GameLoader( this, serverInfo );
+			return new ShooterLoader( this, serverInfo );
 		}
 
 

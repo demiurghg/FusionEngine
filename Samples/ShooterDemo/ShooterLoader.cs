@@ -15,7 +15,7 @@ using Fusion.Engine.Graphics;
 
 
 namespace ShooterDemo.Client {
-	class GameLoader : Fusion.Engine.Client.GameLoader {
+	class ShooterLoader : Fusion.Engine.Client.GameLoader {
 
 		Task loadingTask;
 
@@ -24,7 +24,7 @@ namespace ShooterDemo.Client {
 		/// </summary>
 		/// <param name="client"></param>
 		/// <param name="serverInfo"></param>
-		public GameLoader ( GameClient client, string serverInfo )
+		public ShooterLoader ( ShooterClient client, string serverInfo )
 		{
 			loadingTask	=	new Task( ()=>LoadingTask(client, serverInfo) );
 			loadingTask.Start();
@@ -56,7 +56,7 @@ namespace ShooterDemo.Client {
 		/// <summary>
 		/// 
 		/// </summary>
-		void LoadingTask ( GameClient client, string serverInfo )
+		void LoadingTask ( ShooterClient client, string serverInfo )
 		{
 			string[] messages = new[] {
 				"Locating hamsters"								,

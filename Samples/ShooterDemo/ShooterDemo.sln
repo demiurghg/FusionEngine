@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShooterDemo", "ShooterDemo.csproj", "{0D5119AE-8CDC-488E-AB9E-DCED4C2B0956}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Hybrid|x64 = Hybrid|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0D5119AE-8CDC-488E-AB9E-DCED4C2B0956}.Debug|x64.ActiveCfg = Debug|x64
+		{0D5119AE-8CDC-488E-AB9E-DCED4C2B0956}.Debug|x64.Build.0 = Debug|x64
+		{0D5119AE-8CDC-488E-AB9E-DCED4C2B0956}.Hybrid|x64.ActiveCfg = Hybrid|x64
+		{0D5119AE-8CDC-488E-AB9E-DCED4C2B0956}.Hybrid|x64.Build.0 = Hybrid|x64
+		{0D5119AE-8CDC-488E-AB9E-DCED4C2B0956}.Release|x64.ActiveCfg = Release|x64
+		{0D5119AE-8CDC-488E-AB9E-DCED4C2B0956}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
