@@ -3,10 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Fusion;
+using Fusion.Core;
+using Fusion.Core.Mathematics;
+using Fusion.Engine.Graphics;
 using Fusion.Engine.Common;
+using Fusion.Engine.Server;
+using Fusion.Engine.Client;
 
 namespace ShooterDemo {
-	class GameWorld {
+	partial class GameWorld {
+
+		/// <summary>
+		/// Gets entities.
+		/// </summary>
+		public GameEntityCollection Entities {
+			get { return entities; }
+		}
+		GameEntityCollection entities;
+
+
 
 		/// <summary>
 		/// Creates world
@@ -14,6 +30,7 @@ namespace ShooterDemo {
 		/// <param name="map"></param>
 		public GameWorld ()
 		{
+			entities	=	new GameEntityCollection();
 		}
 
 
@@ -22,8 +39,11 @@ namespace ShooterDemo {
 		/// Initializes world from map. Server side.
 		/// </summary>
 		/// <param name="map"></param>
-		public void InitializeFromMap ( string map )
+		public void InitializeFromMap ( GameServer server, string map )
 		{
+			var scene = server.Content.Load<Scene>( map );
+
+			InitStaticPhysWorld( scene );
 		}
 
 
@@ -43,6 +63,14 @@ namespace ShooterDemo {
 		/// <param name="gameTime"></param>
 		public byte[] UpdateServer ( GameTime gameTime )
 		{
+			var entityArray = new GameEntity[ Entities.Count ];
+			Entities.CopyTo( entityArray, 0 );
+			
+			foreach ( var entity in entityArray ) {
+				entity.Update( gameTime );
+			}
+							
+			return new byte[0];
 		}
 
 
@@ -63,5 +91,8 @@ namespace ShooterDemo {
 		public void FeedSnapshot ( byte[] snapshot )
 		{
 		} 
+
+
+
 	}
 }

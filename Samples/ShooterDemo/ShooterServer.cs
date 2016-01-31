@@ -17,8 +17,9 @@ namespace ShooterDemo.Server {
 	class ShooterServer : Fusion.Engine.Server.GameServer {
 
 
-		Scene scene;
 		string mapName;
+
+		GameWorld	gameWorld;
 
 
 		/// <summary>
@@ -61,7 +62,9 @@ namespace ShooterDemo.Server {
 		public override void LoadContent ( string map )
 		{
 			mapName	=	@"scenes\" + map;
-			scene	=	Content.Load<Scene>( mapName );
+
+			gameWorld	=	new GameWorld();
+			gameWorld.InitializeFromMap( this, mapName );
 		}
 
 
@@ -72,7 +75,8 @@ namespace ShooterDemo.Server {
 		/// </summary>
 		public override void UnloadContent ()
 		{
-			mapName	=	null;
+			mapName		=	null;
+			gameWorld	=	null;
 			Content.Unload();
 		}
 

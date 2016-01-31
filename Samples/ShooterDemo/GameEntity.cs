@@ -23,7 +23,7 @@ namespace ShooterDemo {
 		}
 
 
-		public Update ( GameTime gameTime )
+		public void Update ( GameTime gameTime )
 		{
 		}
 
