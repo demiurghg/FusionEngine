@@ -12,11 +12,6 @@ using Fusion.Core.Utils;
 
 namespace ShooterDemo {
 
-	using Server;
-	using Client;
-	using Common;
-	using UI;
-
 	class Program {
 		[STAThread]
 		static int Main ( string[] args )

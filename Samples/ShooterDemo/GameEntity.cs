@@ -14,20 +14,19 @@ using Fusion.Engine.Server;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Audio;
 using Fusion.Engine.Input;
+using System.IO;
 
 namespace ShooterDemo {
-	class GameEntity {
+	public abstract class GameEntity {
 
-		public GameEntity ( Matrix origin )
+		public GameEntity ()
 		{
 		}
 
 
-		public void Update ( GameTime gameTime )
-		{
-		}
-
-
+		abstract public void Update ( GameTime gameTime );
+		abstract public void Load ( BinaryReader reader );
+		abstract public void Save ( BinaryWriter writer );
 
 	}
 }

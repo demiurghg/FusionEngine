@@ -15,7 +15,7 @@ using Fusion.Engine.Client;
 using Fusion.Engine.Common;
 using Fusion.Engine.Server;
 
-namespace ShooterDemo.UI {
+namespace ShooterDemo {
 
 	class ShooterInterface : Fusion.Engine.Common.UserInterface {
 
@@ -38,6 +38,7 @@ namespace ShooterDemo.UI {
 			: base( game )
 		{
 			console = new GameConsole( game, "conchars" );
+			ShowMenu	=	true;
 		}
 
 
@@ -92,21 +93,31 @@ namespace ShooterDemo.UI {
 			//	update console :
 			console.Update( gameTime );
 
-			var vp = Game.RenderSystem.DisplayBounds;
-
 			uiLayer.Clear();
-			uiLayer.Draw( background, 0,0, vp.Width, vp.Height, Color.White );
 
-			uiLayer.Draw( null, 0,vp.Height/4, vp.Width, vp.Height/2, new Color(0,0,0,192) );
+			if (ShowMenu) {
+				var vp = Game.RenderSystem.DisplayBounds;
 
-			var h = textFont.LineHeight;
-			titleFont.DrawString( uiLayer, "SHOOTER DEMO", 100,vp.Height/2 - h*2, new Color(242,242,242) );
-			textFont.DrawString( uiLayer, "Fusion Engine Test Project", 100,vp.Height/2 - h, new Color(242,0,0) );
+				uiLayer.Draw( background, 0,0, vp.Width, vp.Height, Color.White );
 
-			textFont.DrawString( uiLayer, "Press [~] to open console:", 100,vp.Height/2 + h, new Color(242,242,242) );
-			textFont.DrawString( uiLayer, "   - Enter \"map base1\" to start the game.", 100,vp.Height/2 + h*2, new Color(242,242,242) );
-			textFont.DrawString( uiLayer, "   - Enter \"killserver\" to stop the game.", 100,vp.Height/2 + h*3, new Color(242,242,242) );
-			textFont.DrawString( uiLayer, "   - Enter \"connect <IP:port>\" to connect to the remote game.", 100,vp.Height/2 + h*4, new Color(242,242,242) );
+
+				uiLayer.Draw( null, 0,vp.Height/4, vp.Width, vp.Height/2, new Color(0,0,0,192) );
+
+				var h = textFont.LineHeight;
+				titleFont.DrawString( uiLayer, "SHOOTER DEMO", 100,vp.Height/2 - h*2, new Color(242,242,242) );
+				textFont.DrawString( uiLayer, "Fusion Engine Test Project", 100,vp.Height/2 - h, new Color(242,0,0) );
+
+				textFont.DrawString( uiLayer, "Press [~] to open console:", 100,vp.Height/2 + h, new Color(242,242,242) );
+				textFont.DrawString( uiLayer, "   - Enter \"map base1\" to start the game.", 100,vp.Height/2 + h*2, new Color(242,242,242) );
+				textFont.DrawString( uiLayer, "   - Enter \"killserver\" to stop the game.", 100,vp.Height/2 + h*3, new Color(242,242,242) );
+				textFont.DrawString( uiLayer, "   - Enter \"connect <IP:port>\" to connect to the remote game.", 100,vp.Height/2 + h*4, new Color(242,242,242) );
+			}
+		}
+
+
+
+		public bool ShowMenu {
+			get; set;
 		}
 
 

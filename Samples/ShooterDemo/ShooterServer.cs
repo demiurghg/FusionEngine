@@ -13,13 +13,10 @@ using Fusion.Engine.Server;
 using Fusion.Core.Content;
 using Fusion.Engine.Graphics;
 
-namespace ShooterDemo.Server {
-	class ShooterServer : Fusion.Engine.Server.GameServer {
-
+namespace ShooterDemo {
+	partial class ShooterServer : GameServer {
 
 		string mapName;
-
-		GameWorld	gameWorld;
 
 
 		/// <summary>
@@ -63,8 +60,9 @@ namespace ShooterDemo.Server {
 		{
 			mapName	=	@"scenes\" + map;
 
-			gameWorld	=	new GameWorld();
-			gameWorld.InitializeFromMap( this, mapName );
+			var scene = Content.Load<Scene>( mapName );
+
+			InitializeStaticPhysWorld( scene );
 		}
 
 
@@ -76,7 +74,6 @@ namespace ShooterDemo.Server {
 		public override void UnloadContent ()
 		{
 			mapName		=	null;
-			gameWorld	=	null;
 			Content.Unload();
 		}
 

@@ -13,8 +13,9 @@ using Fusion.Engine.Server;
 using Fusion.Engine.Graphics;
 
 
-namespace ShooterDemo.Client{
+namespace ShooterDemo {
 	class ShooterClient : Fusion.Engine.Client.GameClient {
+
 
 		/// <summary>
 		/// Ctor
@@ -49,6 +50,34 @@ namespace ShooterDemo.Client{
 		}
 
 
+		/// <summary>
+		/// Called when loader finished loading.
+		/// This method lets client to complete loading process in main thread.
+		/// </summary>
+		/// <param name="loader"></param>
+		public override void FinalizeLoad ( GameLoader loader )
+		{
+			var gameLoader = (ShooterLoader)loader;
+
+			var rw	=	Game.RenderSystem.RenderWorld;
+			rw.ClearWorld();
+
+			rw.Instances.Clear();
+
+			foreach ( var inst in gameLoader.StaticInstances ) {
+				rw.Instances.Add( inst );
+			}
+
+			rw.Camera.SetupCameraFov( new Vector3(10,10,10), Vector3.Zero, Vector3.Up, MathUtil.Rad(90), 0.125f, 1024f, 1, 0, 1 );
+			rw.HdrSettings.BloomAmount	= 0.2f;
+			rw.HdrSettings.DirtAmount	= 0.2f;
+			rw.LightSet.EnvLights.Add( new EnvLight( new Vector3(0,4,0), 1, 500 ) );
+
+			rw.RenderRadiance();
+
+			Game.GetModule<ShooterInterface>().ShowMenu = false;
+		}
+
 
 		/// <summary>
 		///	Called when client disconnected, dropped, kicked or timeouted.
@@ -57,7 +86,10 @@ namespace ShooterDemo.Client{
 		/// </summary>
 		public override void UnloadContent ()
 		{
+			var rw	=	Game.RenderSystem.RenderWorld;
+			rw.ClearWorld();
 			Content.Unload();
+			Game.GetModule<ShooterInterface>().ShowMenu = true;
 		}
 
 
@@ -83,8 +115,10 @@ namespace ShooterDemo.Client{
 		/// <param name="snapshot"></param>
 		public override void FeedSnapshot ( byte[] snapshot, bool initial )
 		{
+			
+
 			var str = Encoding.UTF8.GetString( snapshot );
-			Log.Message( "SNAPSHOT : {0}", str );
+			//Log.Message( "SNAPSHOT : {0}", str );
 		}
 
 

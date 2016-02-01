@@ -14,10 +14,21 @@ using Fusion.Engine.Server;
 using Fusion.Engine.Graphics;
 
 
-namespace ShooterDemo.Client {
-	class ShooterLoader : Fusion.Engine.Client.GameLoader {
+namespace ShooterDemo {
+	class ShooterLoader : GameLoader {
 
 		Task loadingTask;
+
+
+		public Scene Scene {
+			get; private set;
+		}
+
+
+		public IEnumerable<MeshInstance> StaticInstances {
+			get; private set;
+		}
+
 
 		/// <summary>
 		/// 
@@ -58,40 +69,34 @@ namespace ShooterDemo.Client {
 		/// </summary>
 		void LoadingTask ( ShooterClient client, string serverInfo )
 		{
-			string[] messages = new[] {
-				"Locating hamsters"								,
-				"Greasing wheels"								,
-				"Filling foodbowls"								,
-				"Spinning up the warp drive"					,
-				"Waiter... there's a pixel in my soup"			,
-				"Don't touch that cable!"						,
-				"What made that noise?"							,
-				"Tomorrow's lottery numbers are..."				,
-				"Searching for marbles"							,
-				"Tightening loose screws"						,
-				"Brushing your hair"							,
-				"Engaging warp drive"							,
-				"Paying your parking tickets"					,
-				"Putting the square peg in a round hole"		,
-				"Pixelating the pixels"							,
-				"Watering the plants"							,
-				"Scanning for schadenfreude"					,
-				"Polishing the servers"							,
-				"Shooing away rain clouds"						,
-				"Tuning up air guitars"							,
-				"Anti gravity zone; remain seated"				,
-				"Waterproofing swimming pools"					,
-				"Weighing pound cakes"							,
-				"Watering sidewalks"							,
-				"Planetary alignment complete"					,
-				"Painting the lawn"								,
-			};
-			
+			var instances	=	new List<MeshInstance>();
 
-			foreach ( var msg in messages ) {
-				Log.Message("...{0}", msg);
-				Thread.Sleep(100);
+			var scene	=	client.Content.Load<Scene>( serverInfo );
+			Scene		=	scene;
+
+			//	load textures and materials :
+			var transforms = new Matrix[ scene.Nodes.Count ];
+			scene.ComputeAbsoluteTransforms( transforms );
+
+			var defMtrl		=	client.Game.RenderSystem.DefaultMaterial;
+			var materials	=	scene.Materials.Select( m => client.Content.Load<MaterialInstance>( m.Name, defMtrl ) ).ToArray();
+			
+			for ( int i=0; i<scene.Nodes.Count; i++ ) {
+			
+				var meshIndex  = scene.Nodes[i].MeshIndex;
+			
+				if (meshIndex<0) {
+					continue;
+				}
+				
+				var inst   = new MeshInstance( client.Game.RenderSystem, scene, scene.Meshes[meshIndex], materials );
+				inst.World = transforms[ i ];
+			
+				instances.Add( inst );
 			}
+
+
+			StaticInstances	=	instances;
 		}
 	}
 }

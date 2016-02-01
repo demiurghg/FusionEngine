@@ -21,7 +21,7 @@ namespace ShooterDemo {
 	/// <summary>
 	/// Represents collection of game entities.
 	/// </summary>
-	class GameEntityCollection : ICollection<GameEntity> {
+	public class GameEntityCollection : ICollection<GameEntity> {
 
 		readonly HashSet<GameEntity> entities;
 		bool clear = false;
@@ -66,7 +66,9 @@ namespace ShooterDemo {
 		/// <param name="entity"></param>
 		public void Add ( GameEntity entity )
 		{
-			entities.Add( entity );
+			if (!entities.Add( entity )) {
+				Log.Warning("Can not add entity, it is alrady added");
+			}
 		}
 
 

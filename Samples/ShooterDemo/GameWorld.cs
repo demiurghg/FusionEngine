@@ -23,7 +23,6 @@ namespace ShooterDemo {
 		GameEntityCollection entities;
 
 
-
 		/// <summary>
 		/// Creates world
 		/// </summary>
@@ -47,14 +46,20 @@ namespace ShooterDemo {
 		}
 
 
+
 		/// <summary>
 		/// Initialized world from server info and snapshot. Client side.
 		/// </summary>
 		/// <param name="serverInfo"></param>
 		/// <param name="snapshot"></param>
-		public void InitializeFromSnapshot ( string serverInfo, byte[] snapshot )
+		public void InitializeFromServerInfo ( GameClient client, string serverInfo )
 		{
+			//	load scene :
+			var scene	=	client.Content.Load<Scene>( serverInfo );
+
+			InitStaticModels( client, scene );
 		}
+
 
 
 		/// <summary>
@@ -88,8 +93,9 @@ namespace ShooterDemo {
 		/// 
 		/// </summary>
 		/// <param name="snapshot"></param>
-		public void FeedSnapshot ( byte[] snapshot )
+		public void FeedSnapshot ( GameClient client, byte[] snapshot, bool initial )
 		{
+			//if (
 		} 
 
 
