@@ -224,7 +224,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="rendCtxt"></param>
 		/// <param name="techName"></param>
-		internal void Render( Camera camera, StereoEye stereoEye, GameTime gameTime, HdrFrame frame, SkySettings settings )
+		internal void Render( Camera camera, StereoEye stereoEye, HdrFrame frame, SkySettings settings )
 		{
 			var scale		=	Matrix.Scaling( settings.SkySphereSize );
 			var rotation	=	Matrix.Identity;

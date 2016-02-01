@@ -142,6 +142,23 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
+		public void ClearWorld ()
+		{
+			LightSet.EnvLights.Clear();
+			LightSet.OmniLights.Clear();
+			LightSet.SpotLights.Clear();
+
+			Instances.Clear();
+
+			//	immediate?
+			ParticleSystem.KillParticles();
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
 		/// <param name="width"></param>
 		/// <param name="height"></param>
 		public void Resize ( int newWidth, int newHeight )
@@ -273,9 +290,6 @@ namespace Fusion.Engine.Graphics {
 
 			//	render shadows :
 			rs.LightRenderer.RenderShadows( this, this.LightSet );
-			
-			//	render reflections :
-			RenderRadiance( gameTime );
 
 			//	render g-buffer :
 			rs.SceneRenderer.RenderGBuffer( stereoEye, Camera, viewHdrFrame, this );
@@ -288,7 +302,7 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			//	render sky :
-			rs.Sky.Render( Camera, stereoEye, gameTime, viewHdrFrame, SkySettings );
+			rs.Sky.Render( Camera, stereoEye, viewHdrFrame, SkySettings );
 			rs.Sky.RenderFogTable( SkySettings );
 
 			//	render lights :
@@ -315,11 +329,11 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="gameTime"></param>
-		void RenderRadiance ( GameTime gameTime )
+		public void RenderRadiance ()
 		{
 			var sw = new Stopwatch();
 
-			if (!Game.Keyboard.IsKeyDown(Input.Keys.F3)) {
+			/*if (!Game.Keyboard.IsKeyDown(Input.Keys.F3)) {
 				return;
 			} //*/
 
@@ -346,7 +360,7 @@ namespace Fusion.Engine.Graphics {
 						rs.SceneRenderer.RenderGBuffer( StereoEye.Mono, camera, radianceFrame, this );
 
 						//	render sky :
-						rs.Sky.Render( camera, StereoEye.Mono, gameTime, radianceFrame, SkySettings );
+						rs.Sky.Render( camera, StereoEye.Mono, radianceFrame, SkySettings );
 
 						//	render lights :
 						rs.LightRenderer.RenderLighting( StereoEye.Mono, camera, radianceFrame, this, Game.RenderSystem.WhiteTexture, rs.Sky.SkyCube );
