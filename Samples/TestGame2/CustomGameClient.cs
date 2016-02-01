@@ -76,6 +76,11 @@ namespace TestGame2 {
 			return null;
 		}
 
+		public override void FinalizeLoad ( GameLoader loader )
+		{
+			
+		}
+
 		/// <summary>
 		///	Called when client disconnected, dropped, kicked or timeouted.
 		///	Client must purge all level-associated content.
