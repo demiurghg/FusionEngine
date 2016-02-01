@@ -58,6 +58,13 @@ namespace Fusion.Engine.Client {
 		public abstract GameLoader LoadContent ( string serverInfo );
 
 		/// <summary>
+		/// Called when loader finished loading.
+		/// This method lets client to complete loading process in main thread.
+		/// </summary>
+		/// <param name="serverInfo"></param>
+		public abstract void FinalizeLoad ( GameLoader loader );
+
+		/// <summary>
 		///	Called when client disconnected, dropped, kicked or timeouted.
 		///	Client must purge all level-associated content.
 		///	In most cases you need just to call Content.Unload().

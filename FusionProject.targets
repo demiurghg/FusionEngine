@@ -50,8 +50,8 @@
 		<Reference Include="BEPUphysics">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)\BEPUphysics.dll</HintPath>
 		</Reference>
-		<Reference Include="BEPUutils">
-		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)\BEPUutils.dll</HintPath>
+		<Reference Include="BEPUutilities">
+		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)\BEPUutilities.dll</HintPath>
 		</Reference>
 		<!--Reference Include="Fusion.Editor">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)\Fusion.Editor.dll</HintPath>

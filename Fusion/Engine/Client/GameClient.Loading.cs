@@ -57,6 +57,7 @@ namespace Fusion.Engine.Client {
 					if (disconnectReason!=null) {
 						gameClient.SetState( new Disconnected(gameClient, disconnectReason) );
 					} else {
+						gameClient.FinalizeLoad( loader );
 						gameClient.SetState( new Awaiting(gameClient) );
 					}
 				}
