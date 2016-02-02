@@ -101,9 +101,13 @@ namespace ShooterDemo {
 		/// <param name="gameTime"></param>
 		public override byte[] Update ( GameTime gameTime )
 		{
-			var mouse = Game.Mouse;
+			var userCmd = new UserCommand();
+			userCmd.CtrlFlags	=	UserCtrlFlags.None;
+			userCmd.Yaw			=	0;
+			userCmd.Pitch		=	0;
+			userCmd.Roll		=	0;
 
-			return Encoding.UTF8.GetBytes( string.Format( "[{0} {1} {2}]", mouse.Position.X, mouse.Position.Y, UserInfo() ) );
+			return UserCommand.GetBytes( userCmd );
 		}
 
 
@@ -118,7 +122,7 @@ namespace ShooterDemo {
 			
 
 			var str = Encoding.UTF8.GetString( snapshot );
-			//Log.Message( "SNAPSHOT : {0}", str );
+			Log.Message( "SNAPSHOT : {0}", str );
 		}
 
 

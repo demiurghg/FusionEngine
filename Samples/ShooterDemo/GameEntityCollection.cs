@@ -24,7 +24,6 @@ namespace ShooterDemo {
 	public class GameEntityCollection : ICollection<GameEntity> {
 
 		readonly HashSet<GameEntity> entities;
-		bool clear = false;
 
 		/// <summary>
 		/// 

@@ -88,11 +88,11 @@ namespace ShooterDemo {
 		{
 			Thread.Sleep( 10 );
 
-			return Encoding.UTF8.GetBytes( "World: [" + string.Join( " | ", state.Select( s1 => s1.Value ) ) + "]" );
+			return Encoding.UTF8.GetBytes( "World: [" + string.Join( " | ", state.Select( s1 => s1.Value.ToString() ) ) + "]" );
 		}
 
 
-		Dictionary<string, string> state = new Dictionary<string, string>();
+		Dictionary<string, object> state = new Dictionary<string, object>();
 
 
 		/// <summary>
@@ -102,7 +102,12 @@ namespace ShooterDemo {
 		/// <param name="clientId"></param>
 		public override void FeedCommand ( string id, byte[] userCommand )
 		{
-			state[id] = Encoding.UTF8.GetString( userCommand );
+			if (!userCommand.Any()) {
+				return;
+			}
+
+			var userCmd = UserCommand.FromBytes( userCommand );
+			state[id] = userCmd;
 		}
 
 
