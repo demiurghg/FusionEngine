@@ -20,15 +20,29 @@ using System.IO;
 namespace ShooterDemo.Entities {
 	class Player : GameEntity {
 
+		public string ClientID {
+			get; private set;
+		}
 
 		
+		/// <summary>
+		/// Default constructor
+		/// </summary>
+		public Player ()
+		{
+		}
+
+
+
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="origin"></param>
-		public Player ( SpawnParameters parameters )
+		public Player ( SpawnParameters parameters, string clientId )
 		{
+			this.ClientID	=	clientId;
 		}
+
 
 
 		/// <summary>
@@ -45,9 +59,9 @@ namespace ShooterDemo.Entities {
 		/// 
 		/// </summary>
 		/// <param name="reader"></param>
-		public override void Load ( BinaryReader reader )
+		public override void Read ( BinaryReader reader )
 		{
-			throw new NotImplementedException();
+			ClientID	=	reader.ReadString();
 		}
 
 
@@ -55,9 +69,9 @@ namespace ShooterDemo.Entities {
 		/// 
 		/// </summary>
 		/// <param name="writer"></param>
-		public override void Save ( BinaryWriter writer )
+		public override void Write ( BinaryWriter writer )
 		{
-			throw new NotImplementedException();
+			writer.Write( ClientID );
 		}
 
 	}

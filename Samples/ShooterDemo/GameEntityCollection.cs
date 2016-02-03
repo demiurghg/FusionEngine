@@ -37,6 +37,31 @@ namespace ShooterDemo {
 
 
 		/// <summary>
+		/// Gets entity by its id.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns>Null if collection does not contain entity with given ID.</returns>
+		public GameEntity this[ int id ] {
+			get {
+				return entities.SingleOrDefault( e => e.ID == id );
+			}
+		}
+
+
+
+		/// <summary>
+		/// Indicates that collection contains entity with given ID.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		public bool ContainsID ( int id ) 
+		{
+			return entities.Any( e => e.ID == id );
+		}
+
+
+
+		/// <summary>
 		/// Gets the number of elements contained in the GameEntityCollection.
 		/// </summary>
 		public int Count {

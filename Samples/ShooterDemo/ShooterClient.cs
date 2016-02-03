@@ -17,6 +17,8 @@ namespace ShooterDemo {
 	class ShooterClient : Fusion.Engine.Client.GameClient {
 
 
+		GameEntityCollection entities;
+
 		/// <summary>
 		/// Ctor
 		/// </summary>
@@ -50,6 +52,7 @@ namespace ShooterDemo {
 		}
 
 
+
 		/// <summary>
 		/// Called when loader finished loading.
 		/// This method lets client to complete loading process in main thread.
@@ -76,7 +79,11 @@ namespace ShooterDemo {
 			rw.RenderRadiance();
 
 			Game.GetModule<ShooterInterface>().ShowMenu = false;
+
+
+			entities	=	new GameEntityCollection();
 		}
+
 
 
 		/// <summary>
@@ -86,6 +93,8 @@ namespace ShooterDemo {
 		/// </summary>
 		public override void UnloadContent ()
 		{
+			entities	=	null;
+
 			var rw	=	Game.RenderSystem.RenderWorld;
 			rw.ClearWorld();
 			Content.Unload();
@@ -119,10 +128,7 @@ namespace ShooterDemo {
 		/// <param name="snapshot"></param>
 		public override void FeedSnapshot ( byte[] snapshot, bool initial )
 		{
-			
-
-			var str = Encoding.UTF8.GetString( snapshot );
-			Log.Message( "SNAPSHOT : {0}", str );
+			Snapshot.ReadSnapshot( snapshot, entities );
 		}
 
 

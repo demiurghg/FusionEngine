@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ShooterServer.Physics.cs" />
+    <Compile Include="Snapshot.cs" />
     <Compile Include="SpawnParameters.cs" />
     <Compile Include="GameEntityCollection.cs" />
     <Compile Include="Entities\Player.cs" />

@@ -18,6 +18,8 @@ namespace ShooterDemo {
 
 		string mapName;
 
+		GameEntityCollection	entities;
+
 
 		/// <summary>
 		/// Ctor
@@ -63,6 +65,9 @@ namespace ShooterDemo {
 			var scene = Content.Load<Scene>( mapName );
 
 			InitializeStaticPhysWorld( scene );
+
+
+			entities	=	new GameEntityCollection();
 		}
 
 
@@ -86,13 +91,21 @@ namespace ShooterDemo {
 		/// <returns>Snapshot bytes</returns>
 		public override byte[] Update ( GameTime gameTime )
 		{
-			Thread.Sleep( 10 );
+			//	get entity array :
+			var ents = new GameEntity[ entities.Count ];
+			entities.CopyTo( ents, 0 );
 
-			return Encoding.UTF8.GetBytes( "World: [" + string.Join( " | ", state.Select( s1 => s1.Value.ToString() ) ) + "]" );
+
+			//	update entities :
+			foreach ( var ent in entities ) {
+				ent.Update( gameTime );
+			}
+
+
+			//	write snapshot :
+			return Snapshot.WriteSnapshot( entities );
 		}
 
-
-		Dictionary<string, object> state = new Dictionary<string, object>();
 
 
 		/// <summary>
@@ -105,9 +118,6 @@ namespace ShooterDemo {
 			if (!userCommand.Any()) {
 				return;
 			}
-
-			var userCmd = UserCommand.FromBytes( userCommand );
-			state[id] = userCmd;
 		}
 
 
@@ -144,7 +154,7 @@ namespace ShooterDemo {
 		{
 			NotifyClients( "CONNECTED: {0} - {1}", id, userInfo );
 			Log.Message( "CONNECTED: {0} - {1}", id, userInfo );
-			state.Add( id, " --- " );
+			//state.Add( id, " --- " );
 		}
 
 
@@ -156,7 +166,7 @@ namespace ShooterDemo {
 		{
 			NotifyClients( "DISCONNECTED: {0} - {1}", id, userInfo );
 			Log.Message( "DISCONNECTED: {0} - {1}", id, userInfo );
-			state.Remove( id );
+			//state.Remove( id );
 		}
 
 
