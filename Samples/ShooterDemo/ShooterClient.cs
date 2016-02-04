@@ -11,6 +11,7 @@ using Fusion.Engine.Common;
 using Fusion.Engine.Client;
 using Fusion.Engine.Server;
 using Fusion.Engine.Graphics;
+using ShooterDemo.Entities;
 
 
 namespace ShooterDemo {
@@ -152,5 +153,16 @@ namespace ShooterDemo {
 		{
 			return "Bob" + System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
 		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		/*Player GetPlayer ()
+		{
+			//entities.SingleOrDefault( ent => ent is Player && ((Player)ent).ClientID== 
+		} */
 	}
 }

@@ -113,7 +113,7 @@ namespace ShooterDemo {
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="clientId"></param>
-		public override void FeedCommand ( string id, byte[] userCommand )
+		public override void FeedCommand ( Guid id, byte[] userCommand )
 		{
 			if (!userCommand.Any()) {
 				return;
@@ -127,7 +127,7 @@ namespace ShooterDemo {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <param name="message"></param>
-		public override void FeedNotification ( string id, string message )
+		public override void FeedNotification ( Guid id, string message )
 		{
 			Log.Message( "NOTIFICATION {0}: {1}", id, message );
 		}
@@ -150,7 +150,7 @@ namespace ShooterDemo {
 		/// <summary>
 		/// Notifies server that client connected.
 		/// </summary>
-		public override void ClientConnected ( string id, string userInfo )
+		public override void ClientConnected ( Guid id, string userInfo )
 		{
 			NotifyClients( "CONNECTED: {0} - {1}", id, userInfo );
 			Log.Message( "CONNECTED: {0} - {1}", id, userInfo );
@@ -162,7 +162,7 @@ namespace ShooterDemo {
 		/// <summary>
 		/// Notifies server that client disconnected.
 		/// </summary>
-		public override void ClientDisconnected ( string id, string userInfo )
+		public override void ClientDisconnected ( Guid id, string userInfo )
 		{
 			NotifyClients( "DISCONNECTED: {0} - {1}", id, userInfo );
 			Log.Message( "DISCONNECTED: {0} - {1}", id, userInfo );
@@ -174,7 +174,7 @@ namespace ShooterDemo {
 		/// <summary>
 		/// Approves client by id and user info.
 		/// </summary>
-		public override bool ApproveClient ( string id, string userInfo, out string reason )
+		public override bool ApproveClient ( Guid id, string userInfo, out string reason )
 		{
 			Log.Message( "APPROVE: {0} {1}", id, userInfo );
 			reason = "";

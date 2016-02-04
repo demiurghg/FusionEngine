@@ -30,13 +30,17 @@ namespace Fusion.Engine.Client {
 				}
 			}
 
+
+			public readonly ClientState ClientState;
+			
 			
 			/// <summary>
 			/// Ctor
 			/// </summary>
 			/// <param name="gameClient"></param>
-			public State ( GameClient gameClient )
+			public State ( GameClient gameClient, ClientState clientState )
 			{
+				this.ClientState	=	clientState;
 				this.gameClient	=	gameClient;
 			}
 

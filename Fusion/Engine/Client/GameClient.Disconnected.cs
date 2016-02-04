@@ -17,7 +17,7 @@ namespace Fusion.Engine.Client {
 
 		class Disconnected : State {
 
-			public Disconnected ( GameClient gameClient, string reason ) : base(gameClient)
+			public Disconnected ( GameClient gameClient, string reason ) : base(gameClient, ClientState.Disconnected)
 			{
 				//	Notify client that game ended?
 				gameClient.UnloadContent();

@@ -21,7 +21,7 @@ namespace Fusion.Engine.Client {
 			uint lastSnapshotFrame;
 
 
-			public Active ( GameClient gameClient, uint snapshotId, byte[] initialSnapshot ) : base(gameClient)
+			public Active ( GameClient gameClient, uint snapshotId, byte[] initialSnapshot ) : base(gameClient, ClientState.Active)
 			{
 				queue	=	new SnapshotQueue(32);
 				queue.Push( new Snapshot(snapshotId, initialSnapshot) );

@@ -23,7 +23,7 @@ namespace Fusion.Engine.Client {
 			GameLoader loader;
 			
 
-			public Loading ( GameClient gameClient, string serverInfo ) : base(gameClient)
+			public Loading ( GameClient gameClient, string serverInfo ) : base(gameClient, ClientState.Loading)
 			{
 				loader	=	gameClient.LoadContent( serverInfo );
 

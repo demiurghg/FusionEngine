@@ -14,15 +14,33 @@ using Fusion.Core.Content;
 namespace Fusion.Engine.Client {
 	public abstract partial class GameClient : GameModule {
 
+		public readonly Guid Guid;
+
+		
+		/// <summary>
+		/// Gets Client's content manager.
+		/// </summary>
+		public ContentManager Content { get { return content; }	}
+		ContentManager content;
+
+
+		/// <summary>
+		/// Gets client state.
+		/// </summary>
+		public ClientState ClientState { get { return state.ClientState; } }
+
+
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="Game"></param>
 		public GameClient ( Game game ) : base(game) 
 		{
+			Guid	=	Guid.NewGuid();
 			content	=	new ContentManager(game);
 			InitInternal();
 		}
+
 
 
 		/// <summary>
@@ -36,18 +54,6 @@ namespace Fusion.Engine.Client {
 			}
 			base.Dispose( disposing );
 		}
-
-		
-		/// <summary>
-		/// Gets Client's content manager.
-		/// </summary>
-		public ContentManager Content {
-			get {
-				return content;
-			}
-		}
-
-		ContentManager content;
 
 
 		/// <summary>

@@ -15,6 +15,20 @@ using Fusion.Core.Content;
 
 
 namespace Fusion.Engine.Server {
+	
+	public static class TagToGuidExt {
+		public static Guid GetHailGuid ( this NetConnection conn )
+		{
+			return new Guid( conn.RemoteHailMessage.PeekBytes(16) );
+		}
+
+		public static string GetHailUserInfo ( this NetConnection conn )
+		{
+			var bytes = conn.RemoteHailMessage.PeekDataBuffer();
+			return Encoding.UTF8.GetString( bytes, 16, bytes.Length-16);
+		}
+	}
+
 
 	public abstract partial class GameServer : GameModule {
 
@@ -245,11 +259,11 @@ namespace Fusion.Engine.Server {
 						break;
 
 					case NetIncomingMessageType.ConnectionApproval:
-
-						var clientID	=	msg.SenderEndPoint.ToString();
-						var userInfo	=	msg.SenderConnection.RemoteHailMessage.PeekString();
+						
+						var userGuid	=	msg.SenderConnection.GetHailGuid();
+						var userInfo	=	msg.SenderConnection.GetHailUserInfo();
 						var reason		=	"";
-						var approve		=	ApproveClient( clientID, userInfo, out reason );
+						var approve		=	ApproveClient( userGuid, userInfo, out reason );
 
 						if (approve) {	
 							msg.SenderConnection.Approve( server.CreateMessage( ServerInfo() ) );
@@ -290,11 +304,11 @@ namespace Fusion.Engine.Server {
 			
 			switch (connStatus) {
 				case NetConnectionStatus.Connected :
-					ClientConnected( senderEP.ToString(), msg.SenderConnection.RemoteHailMessage.PeekString() );
+					ClientConnected( msg.SenderConnection.GetHailGuid(), msg.SenderConnection.RemoteHailMessage.PeekString() );
 					break;
 
 				case NetConnectionStatus.Disconnected :
-					ClientDisconnected( senderEP.ToString(), msg.SenderConnection.RemoteHailMessage.PeekString() );
+					ClientDisconnected( msg.SenderConnection.GetHailGuid(), msg.SenderConnection.RemoteHailMessage.PeekString() );
 					break;
 
 				default:
@@ -395,7 +409,7 @@ namespace Fusion.Engine.Server {
 					break;
 
 				case NetCommand.Notification :
-					FeedNotification( msg.SenderEndPoint.ToString(), msg.ReadString() );
+					FeedNotification( msg.SenderConnection.GetHailGuid(), msg.ReadString() );
 					break;
 			}
 		}
@@ -413,7 +427,7 @@ namespace Fusion.Engine.Server {
 
 			var data		=	msg.ReadBytes( size );
 
-			FeedCommand( msg.SenderEndPoint.ToString(), data );
+			FeedCommand( msg.SenderConnection.GetHailGuid(), data );
 
 			msg.SenderConnection.Tag = snapshotID;
 		}

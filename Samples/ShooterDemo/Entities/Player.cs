@@ -24,12 +24,20 @@ namespace ShooterDemo.Entities {
 			get; private set;
 		}
 
+
+		public Matrix World { get; set; }
+
+
+
 		
 		/// <summary>
 		/// Default constructor
 		/// </summary>
 		public Player ()
 		{
+			var world				=	Matrix.Identity;
+			world.TranslationVector	=	Vector3.Up * 4;
+			World	=	world;
 		}
 
 
@@ -40,6 +48,10 @@ namespace ShooterDemo.Entities {
 		/// <param name="origin"></param>
 		public Player ( SpawnParameters parameters, string clientId )
 		{
+			var world				=	Matrix.Identity;
+			world.TranslationVector	=	Vector3.Up * 4;
+			World	=	world;
+
 			this.ClientID	=	clientId;
 		}
 

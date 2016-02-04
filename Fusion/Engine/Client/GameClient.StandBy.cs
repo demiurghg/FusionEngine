@@ -17,7 +17,7 @@ namespace Fusion.Engine.Client {
 
 		class StandBy : State {
 
-			public StandBy ( GameClient gameClient ) : base(gameClient)
+			public StandBy ( GameClient gameClient ) : base(gameClient, ClientState.StandBy)
 			{
 			}
 

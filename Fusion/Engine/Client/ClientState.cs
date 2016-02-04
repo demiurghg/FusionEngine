@@ -32,5 +32,10 @@ namespace Fusion.Engine.Client {
 		/// Active state.
 		/// </summary>
 		Active,
+
+		/// <summary>
+		/// Client has been disconnected.
+		/// </summary>
+		Disconnected,
 	}
 }

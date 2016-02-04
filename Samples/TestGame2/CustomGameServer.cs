@@ -119,23 +119,23 @@ namespace TestGame2 {
 		}
 
 
-		Dictionary<string, string> state = new Dictionary<string,string>();
+		Dictionary<Guid, string> state = new Dictionary<Guid,string>();
 
 		/// <summary>
 		/// Feed client commands from particular client.
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="clientId"></param>
-		public override void FeedCommand ( string clientIP, byte[] userCommand )
+		public override void FeedCommand ( Guid clientGuid, byte[] userCommand )
 		{
-			state[clientIP] = Encoding.UTF8.GetString( userCommand );
+			state[clientGuid] = Encoding.UTF8.GetString( userCommand );
 		}
 
 
-		public override void FeedNotification ( string id, string message )
+		public override void FeedNotification ( Guid clientGuid, string message )
 		{
-			Log.Message("NOTIFICATION {0}: {1}", id, message );
-			NotifyClients("{0} says: {1}", id, message );
+			Log.Message("NOTIFICATION {0}: {1}", clientGuid, message );
+			NotifyClients("{0} says: {1}", clientGuid, message );
 		}
 
 
@@ -149,24 +149,24 @@ namespace TestGame2 {
 		}
 
 
-		public override void ClientConnected ( string clientIP, string userInfo )
+		public override void ClientConnected ( Guid clientGuid, string userInfo )
 		{
-			NotifyClients("CONNECTED: {0} - {1}", clientIP, userInfo);
-			Log.Message("CONNECTED: {0} - {1}", clientIP, userInfo);
-			state.Add( clientIP, " --- " );
+			NotifyClients("CONNECTED: {0} - {1}", clientGuid, userInfo);
+			Log.Message("CONNECTED: {0} - {1}", clientGuid, userInfo);
+			state.Add( clientGuid, " --- " );
 		}
 
-		public override void ClientDisconnected ( string clientIP, string userInfo )
+		public override void ClientDisconnected ( Guid clientGuid, string userInfo )
 		{
-			NotifyClients("DISCONNECTED: {0} - {1}", clientIP, userInfo );
-			Log.Message("DISCONNECTED: {0} - {1}", clientIP, userInfo );
-			state.Remove( clientIP );
+			NotifyClients("DISCONNECTED: {0} - {1}", clientGuid, userInfo );
+			Log.Message("DISCONNECTED: {0} - {1}", clientGuid, userInfo );
+			state.Remove( clientGuid );
 		}
 
 
-		public override bool ApproveClient( string id, string userInfo, out string reason )
+		public override bool ApproveClient( Guid clientGuid, string userInfo, out string reason )
 		{
-			Log.Message("APPROVE: {0} {1}", id, userInfo );
+			Log.Message("APPROVE: {0} {1}", clientGuid, userInfo );
 			reason = ".";
 			return true;
 		}

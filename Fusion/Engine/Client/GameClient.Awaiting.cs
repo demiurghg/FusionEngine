@@ -16,7 +16,7 @@ namespace Fusion.Engine.Client {
 
 		class Awaiting : State {
 
-			public Awaiting ( GameClient gameClient ) : base(gameClient)
+			public Awaiting ( GameClient gameClient ) : base(gameClient, ClientState.Awaiting)
 			{
 				//	send user command to draw server attention:
 				gameClient.SendUserCommand( client, 0, new byte[0] );

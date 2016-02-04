@@ -17,11 +17,13 @@ namespace Fusion.Engine.Client {
 
 		class Connecting : State {
 
-			public Connecting ( GameClient gameClient, IPEndPoint endPoint ) : base(gameClient)
+			public Connecting ( GameClient gameClient, IPEndPoint endPoint ) : base(gameClient, ClientState.Connecting)
 			{
 				client.Start();
 
-				var hail	=	client.CreateMessage( gameClient.UserInfo() );
+				var hail	=	client.CreateMessage();
+				hail.Write( gameClient.Guid.ToByteArray() );
+				hail.Write( gameClient.UserInfo() );
 
 				client.Connect( endPoint, hail );
 			}

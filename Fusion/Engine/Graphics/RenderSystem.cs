@@ -168,10 +168,9 @@ namespace Fusion.Engine.Graphics {
 			var baseIllum = new BaseIllum();
 			defaultMaterial	=	baseIllum.CreateMaterialInstance(this, Game.Content);
 
-			if (!Config.NoDefaultRenderWorld) {
-				renderWorld	=	new RenderWorld(Game, Config.Width, Config.Height);
-				AddLayer( renderWorld );
-			}
+			//	add default render world
+			renderWorld	=	new RenderWorld(Game, Config.Width, Config.Height);
+			AddLayer( renderWorld );
 		}
 
 

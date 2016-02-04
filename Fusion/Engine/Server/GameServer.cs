@@ -75,14 +75,14 @@ namespace Fusion.Engine.Server {
 		/// </summary>
 		/// <param name="id">Client's ID</param>
 		/// <param name="command">Client's user command stream</param>
-		public abstract void FeedCommand ( string id, byte[] userCommand );
+		public abstract void FeedCommand ( Guid id, byte[] userCommand );
 
 		/// <summary>
 		/// Feed server with commands from particular client.
 		/// </summary>
 		/// <param name="id">Client's ID</param>
 		/// <param name="command">Client's user command stream</param>
-		public abstract void FeedNotification ( string id, string message );
+		public abstract void FeedNotification ( Guid id, string message );
 
 		/// <summary>
 		/// Gets server information that required for client to load the game.
@@ -97,13 +97,13 @@ namespace Fusion.Engine.Server {
 		/// </summary>
 		/// <param name="clientIP">Client IP in format 123.45.67.89:PORT. Could be used as client identifier.</param>
 		/// <param name="userInfo">User information. Cann't be used as client identifier.</param>
-		public abstract void ClientConnected ( string id, string userInfo );
+		public abstract void ClientConnected ( Guid guid, string userInfo );
 
 		/// <summary>
 		/// Called when client disconnected.
 		/// </summary>
 		/// <param name="clientIP">Client IP in format 123.45.67.89:PORT. Could be used as client identifier.</param>
-		public abstract void ClientDisconnected ( string id, string userInfo );
+		public abstract void ClientDisconnected ( Guid guid, string userInfo );
 
 		/// <summary>
 		/// Approves client by id and user information.
@@ -111,7 +111,7 @@ namespace Fusion.Engine.Server {
 		/// <param name="id"></param>
 		/// <param name="userInfo"></param>
 		/// <returns></returns>
-		public abstract bool ApproveClient ( string id, string userInfo, out string reason );
+		public abstract bool ApproveClient ( Guid guid, string userInfo, out string reason );
 
 		/// <summary>
 		/// Sends text message to all clients.
