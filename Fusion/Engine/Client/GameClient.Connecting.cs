@@ -23,7 +23,7 @@ namespace Fusion.Engine.Client {
 
 				var hail	=	client.CreateMessage();
 				hail.Write( gameClient.Guid.ToByteArray() );
-				hail.Write( gameClient.UserInfo() );
+				hail.Write( Encoding.UTF8.GetBytes(gameClient.UserInfo()) );
 
 				client.Connect( endPoint, hail );
 			}

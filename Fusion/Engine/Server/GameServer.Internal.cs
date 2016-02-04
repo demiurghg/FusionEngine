@@ -304,11 +304,11 @@ namespace Fusion.Engine.Server {
 			
 			switch (connStatus) {
 				case NetConnectionStatus.Connected :
-					ClientConnected( msg.SenderConnection.GetHailGuid(), msg.SenderConnection.RemoteHailMessage.PeekString() );
+					ClientConnected( msg.SenderConnection.GetHailGuid(), msg.SenderConnection.GetHailUserInfo() );
 					break;
 
 				case NetConnectionStatus.Disconnected :
-					ClientDisconnected( msg.SenderConnection.GetHailGuid(), msg.SenderConnection.RemoteHailMessage.PeekString() );
+					ClientDisconnected( msg.SenderConnection.GetHailGuid(), msg.SenderConnection.GetHailUserInfo() );
 					break;
 
 				default:
