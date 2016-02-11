@@ -162,10 +162,16 @@ void CSMain(
 	//-----------------------------------------------------
 	float3 csmFactor	=	ComputeCSM( worldPos );
 	float3 lightDir		=	-normalize(Params.DirectLightDirection.xyz);
-	float3 diffuseTerm	=	Lambert	( normal.xyz,  lightDir, Params.DirectLightIntensity.rgb, float3(1,1,1) );
-	float3 diffuseTerm2	=	Lambert	( normal.xyz,  lightDir, Params.DirectLightIntensity.rgb, float3(1,1,1), 1 );
+	float3 lightColor	=	Params.DirectLightIntensity.rgb;
+	
+	// if (worldPos.y<0) {
+		// lightColor = lerp(lightColor, float3(0,0,0), pow(saturate(-worldPos.y/8),0.5) );
+	// }
+
+	float3 diffuseTerm	=	Lambert	( normal.xyz,  lightDir, lightColor, float3(1,1,1) );
+	float3 diffuseTerm2	=	Lambert	( normal.xyz,  lightDir, lightColor, float3(1,1,1), 1 );
 	totalLight.xyz		+=	csmFactor.rgb * diffuseTerm * diffuse.rgb;
-	totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, Params.DirectLightIntensity.rgb, specular.rgb, specular.a );
+	totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, lightColor, specular.rgb, specular.a );
 	
 	totalSSS.rgb		+=	csmFactor.rgb * diffuseTerm2 * scatter.rgb;
 
