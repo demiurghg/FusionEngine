@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace Fusion.Engine.Server {
 	internal enum NetCommand : byte {
-		
 		UserCommand,
 		Snapshot,
 		Notification,
-		ChatMessage,
-		UserInfoUpdate,
-
 	}
 }

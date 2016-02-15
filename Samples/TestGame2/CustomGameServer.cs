@@ -156,10 +156,21 @@ namespace TestGame2 {
 			state.Add( clientGuid, " --- " );
 		}
 
-		public override void ClientDisconnected ( Guid clientGuid, string userInfo )
+		public override void ClientActivated ( Guid guid )
 		{
-			NotifyClients("DISCONNECTED: {0} - {1}", clientGuid, userInfo );
-			Log.Message("DISCONNECTED: {0} - {1}", clientGuid, userInfo );
+			Log.Message( "ACTIVATED: {0}", guid );
+		}
+
+
+		public override void ClientDeactivated ( Guid guid )
+		{
+			Log.Message( "DEACTIVATED: {0}", guid );
+		}
+
+		public override void ClientDisconnected ( Guid clientGuid )
+		{
+			NotifyClients("DISCONNECTED: {0}", clientGuid );
+			Log.Message("DISCONNECTED: {0}", clientGuid );
 			state.Remove( clientGuid );
 		}
 

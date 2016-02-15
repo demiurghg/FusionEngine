@@ -16,19 +16,6 @@ using Fusion.Core.Content;
 
 namespace Fusion.Engine.Server {
 	
-	public static class TagToGuidExt {
-		public static Guid GetHailGuid ( this NetConnection conn )
-		{
-			return new Guid( conn.RemoteHailMessage.PeekBytes(16) );
-		}
-
-		public static string GetHailUserInfo ( this NetConnection conn )
-		{
-			var bytes = conn.RemoteHailMessage.PeekDataBuffer();
-			return Encoding.UTF8.GetString( bytes, 16, bytes.Length-16);
-		}
-	}
-
 
 	public abstract partial class GameServer : GameModule {
 
@@ -136,7 +123,6 @@ namespace Fusion.Engine.Server {
 			Log.Message("SV: Start: {0} {1}", map, postCommand);
 
 			var snapshotQueue	=	new SnapshotQueue(32);
-
 
 			//
 			//	configure & start server :
@@ -304,11 +290,13 @@ namespace Fusion.Engine.Server {
 			
 			switch (connStatus) {
 				case NetConnectionStatus.Connected :
+					msg.SenderConnection.InitClientState(); 
 					ClientConnected( msg.SenderConnection.GetHailGuid(), msg.SenderConnection.GetHailUserInfo() );
 					break;
 
 				case NetConnectionStatus.Disconnected :
-					ClientDisconnected( msg.SenderConnection.GetHailGuid(), msg.SenderConnection.GetHailUserInfo() );
+					ClientDeactivated( msg.SenderConnection.GetHailGuid() );
+					ClientDisconnected( msg.SenderConnection.GetHailGuid() );
 					break;
 
 				default:
@@ -325,7 +313,7 @@ namespace Fusion.Engine.Server {
 		{
 			//	snapshot request is stored in connection's tag.s
 			var debug	=	Game.Network.Config.ShowSnapshots;
-			var conns	=	server.Connections.Where ( c => c.Tag is uint );
+			var conns	=	server.Connections.Where ( c => c.IsSnapshotRequested() );
 
 			var sw		=	new Stopwatch();
 
@@ -335,12 +323,12 @@ namespace Fusion.Engine.Server {
 				sw.Start();
 					
 				var frame		=	queue.LastFrame;
-				var prevFrame	=	(uint)conn.Tag;
+				var prevFrame	=	conn.GetRequestedSnapshotID();
 				int size		=	0;
 				var snapshot	=	queue.Compress( ref prevFrame, out size);
 
 				//	reset snapshot request :
-				conn.Tag = null;
+				conn.ResetRequestSnapshot();
 
 				var msg = server.CreateMessage( snapshot.Length + 4 * 3 + 1 );
 			
@@ -351,8 +339,12 @@ namespace Fusion.Engine.Server {
 				msg.Write( snapshot ); 
 
 				//	Zero snapshot frame index means that we are waiting for first snapshot.
-				//	and command shoud reach the server.
+				//	and command should reach the server.
 				var delivery	=	prevFrame == 0 ? NetDeliveryMethod.ReliableOrdered : NetDeliveryMethod.UnreliableSequenced;
+
+				if (prevFrame==0) {
+					Log.Message("SV: Sending initial snapshot to {0}", conn.GetHailGuid().ToString() );
+				}
 
 				sw.Stop();
 
@@ -427,9 +419,19 @@ namespace Fusion.Engine.Server {
 
 			var data		=	msg.ReadBytes( size );
 
-			FeedCommand( msg.SenderConnection.GetHailGuid(), data );
+			//	we got user command and (command count=1)
+			//	this means that client receives snapshot:
+			if (msg.SenderConnection.GetCommandCount()==1) {
+				ClientActivated( msg.SenderConnection.GetHailGuid() );
+			}
 
-			msg.SenderConnection.Tag = snapshotID;
+			//	do not feed server with empty command.
+			if (data.Length>0) {
+				FeedCommand( msg.SenderConnection.GetHailGuid(), data );
+			}
+
+			//	set snapshot request when command get.
+			msg.SenderConnection.SetRequestSnapshot( snapshotID );
 		}
 
 
