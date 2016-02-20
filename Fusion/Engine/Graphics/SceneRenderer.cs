@@ -186,6 +186,10 @@ namespace Fusion.Engine.Graphics {
 				//#warning INSTANSING!
 				foreach ( var instance in instances ) {
 
+					if (!instance.Visible) {
+						continue;
+					}
+
 					cbData.View			=	view;
 					cbData.Projection	=	projection;
 					cbData.World		=	instance.World;
@@ -295,6 +299,10 @@ namespace Fusion.Engine.Graphics {
 
 				//#warning INSTANSING!
 				foreach ( var instance in instances ) {
+
+					if (!instance.Visible) {
+						continue;
+					}
 
 					device.PipelineState	=	factory[ (int)ApplyFlags( null, instance, SurfaceFlags.SHADOW ) ];
 					cbData.World			=	instance.World;

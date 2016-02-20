@@ -339,6 +339,8 @@ namespace Fusion.Drivers.Input {
 
 					if (IsMouseClipped) {
 						Forms.Cursor.Clip		=	Game.GraphicsDevice.Display.Window.RectangleToScreen( rect );
+					} else {
+				        Forms.Cursor.Clip		=	new Drawing.Rectangle( int.MinValue, int.MinValue, int.MaxValue, int.MaxValue );
 					}
 
 					SetCursorVisibility( !IsMouseHidden );
