@@ -24,7 +24,7 @@ namespace Fusion.Engine.Client {
 			public Active ( GameClient gameClient, uint snapshotId, byte[] initialSnapshot ) : base(gameClient, ClientState.Active)
 			{
 				queue	=	new SnapshotQueue(32);
-				queue.Push( new Snapshot(snapshotId, initialSnapshot) );
+				queue.Push( new Snapshot( new TimeSpan(0), snapshotId, initialSnapshot) );
 
 				lastSnapshotFrame	=	snapshotId;
 
@@ -86,7 +86,7 @@ namespace Fusion.Engine.Client {
 					if (snapshot!=null) {
 
 						gameClient.FeedSnapshot( snapshot, false );
-						queue.Push( new Snapshot(index, snapshot) );
+						queue.Push( new Snapshot(new TimeSpan(0), index, snapshot) );
 
 					} else {
 						lastSnapshotFrame = 0;

@@ -74,8 +74,9 @@ namespace Fusion.Engine.Server {
 		/// Feed server with commands from particular client.
 		/// </summary>
 		/// <param name="id">Client's ID</param>
-		/// <param name="command">Client's user command stream</param>
-		public abstract void FeedCommand ( Guid id, byte[] userCommand );
+		/// <param name="userCommand">Client's user command stream</param>
+		/// <param name="lag">Lag in seconds</param>
+		public abstract void FeedCommand ( Guid id, byte[] userCommand, float lag );
 
 		/// <summary>
 		/// Feed server with commands from particular client.

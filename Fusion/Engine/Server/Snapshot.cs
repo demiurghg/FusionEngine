@@ -13,6 +13,8 @@ namespace Fusion.Engine.Server {
 	//[DebuggerDisplay("Frame={Frame} Data={Data.Length} bytes")]
 	public class Snapshot {
 
+		public TimeSpan Timestamp;
+
 		/// <summary>
 		/// Frame index when snapshot was captured.
 		/// </summary>
@@ -29,8 +31,10 @@ namespace Fusion.Engine.Server {
 		/// </summary>
 		/// <param name="frame"></param>
 		/// <param name="data"></param>
-		public Snapshot( uint frame, byte[] data )
+		public Snapshot( TimeSpan timestamp, uint frame, byte[] data )
 		{
+			this.Timestamp	=	timestamp;
+
 			if (frame==0) {
 				throw new ArgumentOutOfRangeException("Frame must be greater than zero");
 			}

@@ -116,6 +116,7 @@ namespace Fusion.Engine.Server {
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryRequest );
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryResponse );
+			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionLatencyUpdated );
 
 			var server		=	new NetServer( netConfig );
 			notifications	=	new Queue<string>();
@@ -158,13 +159,13 @@ namespace Fusion.Engine.Server {
 					#endif
 
 					//	read input messages :
-					DispatchIM( server );
+					DispatchIM( svTime, snapshotQueue, server );
 
 					//	update frame and get snapshot :
 					var snapshot = Update( svTime );
 
 					//	push snapshot to queue :
-					snapshotQueue.Push( snapshot );
+					snapshotQueue.Push( svTime.Total, snapshot );
 
 					//	send snapshot to clients :
 					SendSnapshot( server, snapshotQueue );
@@ -225,7 +226,7 @@ namespace Fusion.Engine.Server {
 		/// 
 		/// </summary>
 		/// <param name="message"></param>
-		void DispatchIM ( NetServer server )
+		void DispatchIM ( GameTime gameTime, SnapshotQueue queue, NetServer server )
 		{
 			NetIncomingMessage msg;
 			while ((msg = server.ReadMessage()) != null)
@@ -236,6 +237,13 @@ namespace Fusion.Engine.Server {
 					case NetIncomingMessageType.DebugMessage:		Log.Verbose	("SV Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.WarningMessage:		Log.Warning	("SV Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.ErrorMessage:		Log.Error	("SV Net: " + msg.ReadString()); break;
+
+					case NetIncomingMessageType.ConnectionLatencyUpdated:
+
+						float latency = msg.ReadFloat();
+						Log.Verbose("SV ping: {0} - {1} ms", msg.SenderConnection.RemoteEndPoint, latency * 1000 );
+
+						break;
 
 					case NetIncomingMessageType.DiscoveryRequest:
 						Log.Message("Discovery request from {0}", msg.SenderEndPoint.ToString() );
@@ -264,7 +272,7 @@ namespace Fusion.Engine.Server {
 						break;
 					
 					case NetIncomingMessageType.Data:
-						DispatchDataIM( msg );
+						DispatchDataIM( gameTime, queue, msg );
 						break;
 					
 					default:
@@ -391,13 +399,13 @@ namespace Fusion.Engine.Server {
 		/// 
 		/// </summary>
 		/// <param name="msg"></param>
-		void DispatchDataIM ( NetIncomingMessage msg )
+		void DispatchDataIM ( GameTime gameTime, SnapshotQueue queue, NetIncomingMessage msg )
 		{
 			var netCmd = (NetCommand)msg.ReadByte();
 
 			switch (netCmd) {
 				case NetCommand.UserCommand : 
-					DispatchUserCommand( msg );
+					DispatchUserCommand( gameTime, queue, msg );
 					break;
 
 				case NetCommand.Notification :
@@ -412,7 +420,7 @@ namespace Fusion.Engine.Server {
 		/// 
 		/// </summary>
 		/// <param name="msg"></param>
-		void DispatchUserCommand ( NetIncomingMessage msg )
+		void DispatchUserCommand ( GameTime gameTime, SnapshotQueue queue, NetIncomingMessage msg )
 		{	
 			var snapshotID	=	msg.ReadUInt32();
 			var size		=	msg.ReadInt32();
@@ -427,7 +435,7 @@ namespace Fusion.Engine.Server {
 
 			//	do not feed server with empty command.
 			if (data.Length>0) {
-				FeedCommand( msg.SenderConnection.GetHailGuid(), data );
+				FeedCommand( msg.SenderConnection.GetHailGuid(), data, queue.GetLag(snapshotID, gameTime) );
 			}
 
 			//	set snapshot request when command get.

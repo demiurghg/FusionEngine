@@ -36,12 +36,35 @@ namespace Fusion.Engine.Server {
 		/// 
 		/// </summary>
 		/// <param name="snapshot"></param>
-		public void Push ( byte[] snapshot )
+		public void Push ( TimeSpan timestamp, byte[] snapshot )
 		{
 			frameCounter ++;
-			Push( new Snapshot(frameCounter, snapshot) );			
+			Push( new Snapshot(timestamp, frameCounter, snapshot) );			
 		}
 
+
+
+		/// <summary>
+		/// Gets time lag between client and server. Sum???
+		/// </summary>
+		/// <param name="clientSnapshotID"></param>
+		/// <param name="currentGameTime"></param>
+		/// <returns>Lag in seconds. Returned val</returns>
+		public float GetLag ( uint clientSnapshotID, GameTime currentGameTime)
+		{
+			foreach ( var snapshot in queue ) {
+				if (snapshot.Frame==clientSnapshotID) {
+					var lag = currentGameTime.Total - snapshot.Timestamp;
+
+					if (lag.TotalMilliseconds<0) {
+						Log.Message("CRAP1");
+					}
+					return Math.Min(1, (float)lag.TotalSeconds );
+				}
+			}
+
+			return 1;
+		}
 
 		
 		/// <summary>
