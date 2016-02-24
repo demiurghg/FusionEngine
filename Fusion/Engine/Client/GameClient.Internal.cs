@@ -209,12 +209,13 @@ namespace Fusion.Engine.Client {
 		/// </summary>
 		/// <param name="client"></param>
 		/// <param name="userCmd"></param>
-		void SendUserCommand ( NetClient client, uint recvSnapshotFrame, byte[] userCmd )
+		void SendUserCommand ( NetClient client, uint recvSnapshotFrame, uint cmdCounter, byte[] userCmd )
 		{
 			var msg = client.CreateMessage( userCmd.Length + 4 * 3 + 1 );
 
 			msg.Write( (byte)NetCommand.UserCommand );
 			msg.Write( recvSnapshotFrame );
+			msg.Write( cmdCounter );
 			msg.Write( userCmd.Length );
 			msg.Write( userCmd );
 

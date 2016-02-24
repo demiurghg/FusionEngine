@@ -19,7 +19,8 @@ namespace Fusion.Engine.Client {
 			public Awaiting ( GameClient gameClient ) : base(gameClient, ClientState.Awaiting)
 			{
 				//	send user command to draw server attention:
-				gameClient.SendUserCommand( client, 0, new byte[0] );
+				//	snapshotID and commandID are zero, because we dont have valid snapshot yet.
+				gameClient.SendUserCommand( client, 0, 0, new byte[0] );
 			}
 
 
@@ -57,10 +58,15 @@ namespace Fusion.Engine.Client {
 				if (command==NetCommand.Snapshot) {
 					var frame		=	msg.ReadUInt32();
 					var prevFrame	=	msg.ReadUInt32();
+					var ackCmdID	=	msg.ReadUInt32();
 					var size		=	msg.ReadInt32();
 
 					if (prevFrame!=0) {
 						Log.Warning("Bad initial snapshot. Previous frame does not equal zero.");
+						return;
+					}
+					if (ackCmdID!=0) {
+						Log.Warning("Bad command ID {0}. Command ID for initial snapshot must be zero.", ackCmdID);
 						return;
 					}
 

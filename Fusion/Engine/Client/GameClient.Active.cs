@@ -16,6 +16,9 @@ namespace Fusion.Engine.Client {
 
 		class Active : State {
 
+			//	first commandID must not be zero.
+			uint commandCounter = 1;
+
 			SnapshotQueue queue;
 			
 			uint lastSnapshotFrame;
@@ -28,7 +31,7 @@ namespace Fusion.Engine.Client {
 
 				lastSnapshotFrame	=	snapshotId;
 
-				gameClient.FeedSnapshot( initialSnapshot, true );
+				gameClient.FeedSnapshot( initialSnapshot, 0 );
 			}
 
 
@@ -49,7 +52,7 @@ namespace Fusion.Engine.Client {
 
 			public override void Update ( GameTime gameTime )
 			{
-				var userCmd  = gameClient.Update(gameTime);
+				var userCmd  = gameClient.Update(gameTime, commandCounter);
 
 				bool showSnapshot = gameClient.Game.Network.Config.ShowSnapshots;
 
@@ -57,7 +60,10 @@ namespace Fusion.Engine.Client {
 					Log.Message("User cmd: #{0} : {1}", lastSnapshotFrame, userCmd.Length );
 				}
 
-				gameClient.SendUserCommand( client, lastSnapshotFrame, userCmd );
+				gameClient.SendUserCommand( client, lastSnapshotFrame, commandCounter, userCmd );
+
+				//	increase command counter:
+				commandCounter++;
 			}
 
 
@@ -77,6 +83,7 @@ namespace Fusion.Engine.Client {
 				if (command==NetCommand.Snapshot) {
 					var index		=	msg.ReadUInt32();
 					var prevFrame	=	msg.ReadUInt32();
+					var ackCmdID	=	msg.ReadUInt32();
 					var size		=	msg.ReadInt32();
 
 					lastSnapshotFrame	=	index;
@@ -85,7 +92,7 @@ namespace Fusion.Engine.Client {
 					
 					if (snapshot!=null) {
 
-						gameClient.FeedSnapshot( snapshot, false );
+						gameClient.FeedSnapshot( snapshot, ackCmdID );
 						queue.Push( new Snapshot(new TimeSpan(0), index, snapshot) );
 
 					} else {

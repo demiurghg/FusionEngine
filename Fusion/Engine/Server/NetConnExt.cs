@@ -15,6 +15,7 @@ namespace Fusion.Engine.Server {
 			public readonly string UserInfo;
 			public bool RequestSnapshot;
 			public uint SnapshotID;
+			public uint CommandID;
 			public uint CommandCounter;
 
 			public ClientState ( Guid clientGuid, string userInfo ) 
@@ -22,6 +23,7 @@ namespace Fusion.Engine.Server {
 				ClientGuid		=	clientGuid;
 				UserInfo		=	userInfo;
 				SnapshotID		=	0;
+				CommandID		=	0;
 				CommandCounter	=	0;
 			}
 		}
@@ -83,11 +85,18 @@ namespace Fusion.Engine.Server {
 		}
 
 
-		public static void SetRequestSnapshot ( this NetConnection conn, uint snapshotID )
+		public static uint GetLastCommandID ( this NetConnection conn )
+		{
+			return conn.GetState().CommandID;
+		}
+
+
+		public static void SetRequestSnapshot ( this NetConnection conn, uint snapshotID, uint commandID )
 		{
 			var state = conn.GetState();
 			state.RequestSnapshot	=	true;
 			state.SnapshotID		=	snapshotID;
+			state.CommandID			=	commandID;
 			state.CommandCounter++;
 		}
 

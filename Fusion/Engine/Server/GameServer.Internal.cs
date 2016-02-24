@@ -333,6 +333,7 @@ namespace Fusion.Engine.Server {
 				var frame		=	queue.LastFrame;
 				var prevFrame	=	conn.GetRequestedSnapshotID();
 				int size		=	0;
+				var commandID	=	conn.GetLastCommandID();
 				var snapshot	=	queue.Compress( ref prevFrame, out size);
 
 				//	reset snapshot request :
@@ -343,6 +344,7 @@ namespace Fusion.Engine.Server {
 				msg.Write( (byte)NetCommand.Snapshot );
 				msg.Write( frame );
 				msg.Write( prevFrame );
+				msg.Write( commandID );
 				msg.Write( snapshot.Length );
 				msg.Write( snapshot ); 
 
@@ -423,6 +425,7 @@ namespace Fusion.Engine.Server {
 		void DispatchUserCommand ( GameTime gameTime, SnapshotQueue queue, NetIncomingMessage msg )
 		{	
 			var snapshotID	=	msg.ReadUInt32();
+			var commandID	=	msg.ReadUInt32();
 			var size		=	msg.ReadInt32();
 
 			var data		=	msg.ReadBytes( size );
@@ -435,11 +438,11 @@ namespace Fusion.Engine.Server {
 
 			//	do not feed server with empty command.
 			if (data.Length>0) {
-				FeedCommand( msg.SenderConnection.GetHailGuid(), data, queue.GetLag(snapshotID, gameTime) );
+				FeedCommand( msg.SenderConnection.GetHailGuid(), data, commandID, queue.GetLag(snapshotID, gameTime) );
 			}
 
 			//	set snapshot request when command get.
-			msg.SenderConnection.SetRequestSnapshot( snapshotID );
+			msg.SenderConnection.SetRequestSnapshot( snapshotID, commandID );
 		}
 
 

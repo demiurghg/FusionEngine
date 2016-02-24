@@ -80,24 +80,23 @@ namespace Fusion.Engine.Client {
 		/// <summary>
 		/// Called when the game has determined that client-side logic needs to be processed.
 		/// </summary>
-		/// <param name="gameTime"></param>
+		/// <param name="gameTime">Cliemt-side game time.</param>
+		/// <param name="sentCommandID">Command's ID that are going to be sent.</param>
 		/// <returns>User command bytes</returns>
-		public abstract byte[] Update ( GameTime gameTime );
+		public abstract byte[] Update ( GameTime gameTime, uint sentCommandID );
 
 		/// <summary>
 		/// Feed server snapshot to client.
 		/// Called when fresh snapshot arrived.
 		/// </summary>
 		/// <param name="snapshotStream">Snapshot data stream.</param>
-		/// <param name="initial">Indicates that this is first snapshot.
-		/// Client module may setup graphic scene here. 
-		/// </param>
-		public abstract void FeedSnapshot ( byte[] snapshot, bool initial );
+		/// <param name="ackCommandID">Acknoledged (e.g. received and responsed) command ID. Zero value means first snapshot.</param>
+		public abstract void FeedSnapshot ( byte[] snapshot, uint ackCommandID );
 
 		/// <summary>
 		/// Feed notification from server.
 		/// </summary>
-		/// <param name="message"></param>
+		/// <param name="message">Message from server</param>
 		public abstract void FeedNotification ( string message );
 
 		/// <summary>
@@ -109,7 +108,8 @@ namespace Fusion.Engine.Client {
 
 		/// <summary>
 		/// Sends server string message.
-		/// This method may be used for chat.
+		/// This method may be used for chat 
+		/// or remote server control throw Shell.
 		/// </summary>
 		/// <param name="message"></param>
 		public void NotifyServer ( string message )

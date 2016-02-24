@@ -126,7 +126,7 @@ namespace TestGame2 {
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="clientId"></param>
-		public override void FeedCommand ( Guid clientGuid, byte[] userCommand, float lag )
+		public override void FeedCommand ( Guid clientGuid, byte[] userCommand, uint commandID, float lag )
 		{
 			state[clientGuid] = Encoding.UTF8.GetString( userCommand );
 		}
