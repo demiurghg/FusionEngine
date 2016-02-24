@@ -16,9 +16,10 @@
     <Project File="ProjectTemplate.csproj" ReplaceParameters="true">
       <ProjectItem ReplaceParameters="true" TargetFileName="Properties\AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="Program.cs" OpenInEditor="true">Program.cs</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$GameServer.cs" OpenInEditor="true">CustomGameServer.cs</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$GameClient.cs" OpenInEditor="true">CustomGameClient.cs</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$UserInterface.cs" OpenInEditor="true">CustomUserInterface.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$Server.cs" OpenInEditor="true">CustomGameServer.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$Client.cs" OpenInEditor="true">CustomGameClient.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$Loader.cs" OpenInEditor="true">CustomGameLoader.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$Interface.cs" OpenInEditor="true">CustomUserInterface.cs</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="Content\.content">.content</ProjectItem>
     </Project>
   </TemplateContent>

@@ -52,9 +52,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="$safeprojectname$GameClient.cs" />
-    <Compile Include="$safeprojectname$GameServer.cs" />
-    <Compile Include="$safeprojectname$UserInterface.cs" />
+    <Compile Include="$safeprojectname$Client.cs" />
+    <Compile Include="$safeprojectname$Server.cs" />
+    <Compile Include="$safeprojectname$Interface.cs" />
+    <Compile Include="$safeprojectname$Loader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

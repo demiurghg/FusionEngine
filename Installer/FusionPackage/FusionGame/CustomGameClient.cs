@@ -14,13 +14,13 @@ using Fusion.Engine.Graphics;
 
 
 namespace $safeprojectname$ {
-	class $safeprojectname$GameClient : GameClient {
+	class $safeprojectname$Client : GameClient {
 
 		/// <summary>
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public $safeprojectname$GameClient ( Game game )	: base(game)
+		public $safeprojectname$Client ( Game game )	: base(game)
 		{
 		}
 
@@ -40,11 +40,20 @@ namespace $safeprojectname$ {
 		/// Client could start loading models, textures, models etc.
 		/// </summary>
 		/// <param name="map"></param>
-		public override void LoadContent ( string serverInfo )
+		public override GameLoader LoadContent ( string serverInfo )
 		{
-			Log.Message("SERVER INFO : {0}", serverInfo );
+			return new $safeprojectname$Loader( this, serverInfo );
 		}
 
+		
+
+		/// <summary>
+		/// Called when loader completes loading.
+		/// </summary>
+		/// <param name="map"></param>
+		public override void FinalizeLoad ( GameLoader loader )
+		{
+		}
 
 
 		/// <summary>

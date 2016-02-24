@@ -62,6 +62,7 @@
     <None Include="CustomGameClient.cs" />
     <None Include="CustomUserInterface.cs" />
     <None Include="CustomGameServer.cs" />
+    <None Include="CustomGameLoader.cs" />
     <None Include="Program.cs" />
     <None Include="AssemblyInfo.cs" />
     <None Include="ProjectTemplate.csproj" />

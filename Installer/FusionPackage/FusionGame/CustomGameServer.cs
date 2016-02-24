@@ -12,14 +12,14 @@ using Fusion.Engine.Common;
 using Fusion.Engine.Server;
 
 namespace $safeprojectname$ {
-	class $safeprojectname$GameServer : GameServer {
+	class $safeprojectname$Server : GameServer {
 
 		
 		/// <summary>
 		/// Ctor
 		/// </summary>
 		/// <param name="engine"></param>
-		public $safeprojectname$GameServer ( Game game ) : base(game)
+		public $safeprojectname$Server ( Game game ) : base(game)
 		{
 		}
 
@@ -70,7 +70,7 @@ namespace $safeprojectname$ {
 		}
 
 
-		Dictionary<string, string> state = new Dictionary<string,string>();
+		Dictionary<Guid, string> state = new Dictionary<Guid,string>();
 
 
 		/// <summary>
@@ -78,7 +78,7 @@ namespace $safeprojectname$ {
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="clientId"></param>
-		public override void FeedCommand ( string id, byte[] userCommand )
+		public override void FeedCommand ( Guid id, byte[] userCommand, float lag )
 		{
 			state[id] = Encoding.UTF8.GetString( userCommand );
 		}
@@ -90,7 +90,7 @@ namespace $safeprojectname$ {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <param name="message"></param>
-		public override void FeedNotification ( string id, string message )
+		public override void FeedNotification ( Guid id, string message )
 		{
 			Log.Message("NOTIFICATION {0}: {1}", id, message );
 		}
@@ -113,7 +113,7 @@ namespace $safeprojectname$ {
 		/// <summary>
 		/// Notifies server that client connected.
 		/// </summary>
-		public override void ClientConnected ( string id, string userInfo )
+		public override void ClientConnected ( Guid id, string userInfo )
 		{
 			NotifyClients("CONNECTED: {0} - {1}", id, userInfo);
 			Log.Message("CONNECTED: {0} - {1}", id, userInfo);
@@ -121,14 +121,29 @@ namespace $safeprojectname$ {
 		}
 
 
+		public override void ClientActivated ( Guid id )
+		{
+			NotifyClients("ACTIVATED: {0}", id);
+			Log.Message("ACTIVATED: {0}", id);
+		}
+
+
+
+		public override void ClientDeactivated ( Guid id )
+		{
+			NotifyClients("DEACTIVATED: {0}", id);
+			Log.Message("DEACTIVATED: {0}", id);
+		}
+
+
 
 		/// <summary>
 		/// Notifies server that client disconnected.
 		/// </summary>
-		public override void ClientDisconnected ( string id, string userInfo )
+		public override void ClientDisconnected ( Guid id )
 		{
-			NotifyClients("DISCONNECTED: {0} - {1}", id, userInfo );
-			Log.Message("DISCONNECTED: {0} - {1}", id, userInfo );
+			NotifyClients("DISCONNECTED: {0}", id );
+			Log.Message("DISCONNECTED: {0}", id );
 			state.Remove( id );
 		}
 
@@ -137,7 +152,7 @@ namespace $safeprojectname$ {
 		/// <summary>
 		/// Approves client by id and user info.
 		/// </summary>
-		public override bool ApproveClient( string id, string userInfo, out string reason )
+		public override bool ApproveClient( Guid id, string userInfo, out string reason )
 		{
 			Log.Message("APPROVE: {0} {1}", id, userInfo );
 			reason = "";

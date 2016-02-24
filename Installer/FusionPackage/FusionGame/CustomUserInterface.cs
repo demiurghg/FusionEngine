@@ -18,39 +18,31 @@ using Fusion.Engine.Server;
 namespace $safeprojectname$ {
 
 
-	class $safeprojectname$UserInterface : UserInterface {
+	class $safeprojectname$Interface : UserInterface {
 
 		[GameModule("Console", "con", InitOrder.Before)]
 		public GameConsole Console { get { return console; } }
 		public GameConsole console;
 
-		ViewLayer	master;
-
 
 		/// <summary>
-		/// Creates instance of $safeprojectname$UserInterface
+		/// Creates instance of $safeprojectname$Interface
 		/// </summary>
 		/// <param name="engine"></param>
-		public $safeprojectname$UserInterface ( Game game ) : base(game)
+		public $safeprojectname$Interface ( Game game ) : base(game)
 		{
-			console		=	new GameConsole( game, "conchars", "conback");
+			console		=	new GameConsole( game, "conchars");
 		}
 
 
 
 		/// <summary>
-		/// Called after the $safeprojectname$UserInterface is created,
+		/// Called after the $safeprojectname$Interface is created,
 		/// </summary>
 		public override void Initialize ()
 		{
-			//	create view layer :
-			master		=	new ViewLayer(Game);
-
-			//	add view to layer to scene :
-			Game.RenderSystem.AddLayer( master );
-
 			//	add console sprite layer to master view layer :
-			master.SpriteLayers.Add( console.ConsoleSpriteLayer );
+			Game.RenderSystem.RenderWorld.SpriteLayers.Add( console.ConsoleSpriteLayer );
 		}
 
 
@@ -61,7 +53,6 @@ namespace $safeprojectname$ {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				SafeDispose( ref master );
 			}
 			base.Dispose( disposing );
 		}

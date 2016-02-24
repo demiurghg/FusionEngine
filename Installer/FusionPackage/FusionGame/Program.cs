@@ -42,9 +42,9 @@ namespace $safeprojectname$ {
 			using ( var game = new Game("$safeprojectname$") ) {
 
 				//	create SV, CL and UI instances :
-				game.GameServer		=	new $safeprojectname$GameServer(game);
-				game.GameClient		=	new $safeprojectname$GameClient(game);
-				game.GameInterface	=	new $safeprojectname$UserInterface(game);
+				game.GameServer		=	new $safeprojectname$Server(game);
+				game.GameClient		=	new $safeprojectname$Client(game);
+				game.GameInterface	=	new $safeprojectname$Interface(game);
 
 				//	load configuration.
 				//	first run will cause warning, 
