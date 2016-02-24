@@ -11,6 +11,7 @@ using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
 using Fusion.Engine.Graphics.GIS.GlobeMath;
 using TriangleNet;
 using TriangleNet.Geometry;
+using BoundingBox = Fusion.Core.Mathematics.BoundingBox;
 
 namespace Fusion.Engine.Graphics.GIS
 {
@@ -156,6 +157,57 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
+		public class SelectInfo
+		{
+			public BoundingBox	BoundingBox;
+			public string		NodeName;
+			public int			NodeIndex;
+			public int			MeshIndex;
+			public DMatrix		WorldMatrix;
+			public DMatrix		WorldMatrixInvert;
+		}
+
+		public SelectInfo[] objectsInfo;
+
+		public class SelectedItem : Gis.SelectedItem
+		{
+			public int			NodeIndex;
+			public BoundingBox	BoundingBox;
+			public DMatrix		BoundingBoxTransform;
+		}
+
+
+		public override List<Gis.SelectedItem> Select(DVector3 nearPoint, DVector3 farPoint)
+		{
+			var slelectedList = new List<Gis.SelectedItem>();
+
+			foreach (var info in objectsInfo)
+			{
+				var localNearPoint	= DVector3.TransformCoordinate(nearPoint, info.WorldMatrixInvert);
+				var localFarPoint	= DVector3.TransformCoordinate(farPoint, info.WorldMatrixInvert);
+
+				var ray = new Ray(localNearPoint.ToVector3(), DVector3.Normalize(localFarPoint - localNearPoint).ToVector3());
+
+				float distance;
+				if (info.BoundingBox.Intersects(ref ray, out distance)) {
+					Console.WriteLine(info.NodeName);
+
+					slelectedList.Add(new SelectedItem
+					{
+						Distance	= distance,
+						Name		= info.NodeName,
+						NodeIndex	= info.NodeIndex,
+						BoundingBox = info.BoundingBox
+					});
+
+					if(Gis.Debug != null) Gis.Debug.DrawBoundingBox(info.BoundingBox, info.WorldMatrix);
+				}
+			}
+
+			return slelectedList;
+		}
+
+
 		public static PolyGisLayer GenerateRegularGrid(Game engine, double left, double right, double top, double bottom, int density, int dimX, int dimY, MapProjection projection)
 		{
 			int[] indexes;
@@ -218,7 +270,6 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-
 		public static PolyGisLayer CreateFromUtmFbxModel(Game engine, string fileName)
 		{
 			var scene = engine.Content.Load<Scene>(fileName);
@@ -234,6 +285,8 @@ namespace Fusion.Engine.Graphics.GIS
 			List<Gis.GeoPoint>	points = new List<Gis.GeoPoint>();
 			List<int>			indeces = new List<int>();
 
+			var oInfo = new SelectInfo[scene.Meshes.Count];
+
 			for (int i = 0; i < scene.Nodes.Count; i++) {
 
 				var meshIndex = scene.Nodes[i].MeshIndex;
@@ -242,9 +295,28 @@ namespace Fusion.Engine.Graphics.GIS
 					continue;
 				}
 
+
+				oInfo[meshIndex] = new SelectInfo {
+					MeshIndex	= meshIndex,
+					NodeIndex	= i,
+					NodeName	= scene.Nodes[i].Name
+				};
+
+
 				int vertexOffset = points.Count;
 
 				var world = transforms[i];
+
+				double worldLon, worldLat;
+				Gis.UtmToLatLon(easting + world.TranslationVector.X, northing - world.TranslationVector.Z, region, out worldLon, out worldLat);
+
+				var worldBasis			= GeoHelper.CalculateBasisOnSurface(DMathUtil.DegreesToRadians(new DVector2(worldLon, worldLat)));
+				var worldBasisInvert	= DMatrix.Invert(worldBasis);
+
+				oInfo[meshIndex].WorldMatrix		= worldBasis;
+				oInfo[meshIndex].WorldMatrixInvert	= worldBasisInvert;
+
+				List<Vector3> cartPoints = new List<Vector3>();
 				
 				foreach (var vert in scene.Meshes[meshIndex].Vertices) {
 					var pos = vert.Position;
@@ -264,9 +336,14 @@ namespace Fusion.Engine.Graphics.GIS
 
 					norm.Y = -norm.Y;
 
+					lon = DMathUtil.DegreesToRadians(lon) + 0.0000068;
+					lat = DMathUtil.DegreesToRadians(lat) + 0.0000113;
+
+					cartPoints.Add(DVector3.TransformCoordinate(GeoHelper.SphericalToCartesian(new DVector2(lon, lat), GeoHelper.EarthRadius + worldPos.Y / 1000.0f), worldBasisInvert).ToVector3());
+
 					var point = new Gis.GeoPoint {
-						Lon		= DMathUtil.DegreesToRadians(lon) + 0.0000068,
-						Lat		= DMathUtil.DegreesToRadians(lat) + 0.0000113,
+						Lon		= lon,
+						Lat		= lat,
 						Color	= vert.Color0,
 						Tex0	= new Vector4(norm.ToVector3(), 0),
 						Tex1	= new Vector4(0,0,0, worldPos.Y/1000.0f)
@@ -274,6 +351,8 @@ namespace Fusion.Engine.Graphics.GIS
 					point.Color.Alpha = 0.5f;
 					points.Add(point);
 				}
+
+				oInfo[meshIndex].BoundingBox = BoundingBox.FromPoints(cartPoints.ToArray());
 
 				var inds = scene.Meshes[meshIndex].GetIndices();
 
@@ -283,7 +362,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			}
 
-			return new PolyGisLayer(engine, points.ToArray(), indeces.ToArray(), false);
+			return new PolyGisLayer(engine, points.ToArray(), indeces.ToArray(), false) { objectsInfo = oInfo };
 		}
 
 

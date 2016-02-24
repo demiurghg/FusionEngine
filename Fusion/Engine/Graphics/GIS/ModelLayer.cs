@@ -44,11 +44,21 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
+		public class SelectedItem : Gis.SelectedItem
+		{
+			public int			NodeInd;
+			public int			InstanceIndex;
+			public BoundingBox	BoundingBox;
+			public DMatrix		BoundingBoxTransform;
+		}
+
+
 		public string Name { get; protected set; }
 
 		public DVector3 CartesianPos { get; protected set; }
 		public DVector2 LonLatPosition;
 
+		private Matrix			modelRotationMatrix;
 
 		public struct InstancedDataStruct
 		{
@@ -75,6 +85,18 @@ namespace Fusion.Engine.Graphics.GIS
 		public Color4 OverallColor { get { return constData.OverallColor; } set { constData.OverallColor = value; }}
 
 
+		public class SelectInfo
+		{
+			public BoundingBox	BoundingBox;
+			public string		NodeName;
+			public int			NodeIndex;
+			public int			MeshIndex;
+			public int			InstanceIndex;
+		}
+
+		private SelectInfo[] selectInfo;
+
+
 		public ModelLayer(Game engine, DVector2 lonLatPosition, string fileName, int maxInstancedCount = 0) : base(engine)
 		{
 			model = engine.Content.Load<Scene>(fileName);
@@ -99,6 +121,22 @@ namespace Fusion.Engine.Graphics.GIS
 
 				instDataGpu = new StructuredBuffer(engine.GraphicsDevice, typeof(InstancedDataStruct), maxInstancedCount, StructuredBufferFlags.None);
 			}
+
+			selectInfo = new SelectInfo[model.Nodes.Count];
+			for (int i = 0; i < model.Nodes.Count; i++)
+			{
+				var meshindex = model.Nodes[i].MeshIndex;
+				if (meshindex < 0) continue;
+
+				selectInfo[i] = new SelectInfo
+				{
+					BoundingBox = model.Meshes[meshindex].ComputeBoundingBox(),
+					MeshIndex = meshindex,
+					NodeIndex = i,
+					NodeName = model.Nodes[i].Name
+				};
+			}
+
 		}
 
 
@@ -128,7 +166,7 @@ namespace Fusion.Engine.Graphics.GIS
 			var viewPositionFloat = new Vector3((float)viewPosition.X, (float)viewPosition.Y, (float)viewPosition.Z);
 
 
-			var modelRotationMatrix = Matrix.RotationYawPitchRoll(Yaw, Pitch, Roll) * Matrix.Scaling(ScaleFactor) * rotationMat;
+			modelRotationMatrix = Matrix.RotationYawPitchRoll(Yaw, Pitch, Roll) * Matrix.Scaling(ScaleFactor) * rotationMat;
 			constData.ViewPositionTransparency = new Vector4(viewPositionFloat, Transparency);
 
 
@@ -188,6 +226,50 @@ namespace Fusion.Engine.Graphics.GIS
 					dev.DrawIndexed(mesh.IndexBuffer.Capacity, 0, 0);
 				}
 			}
+		}
+
+
+		public override List<Gis.SelectedItem> Select(DVector3 nearPoint, DVector3 farPoint)
+		{
+			if (selectInfo == null) return null;
+
+			var selectedItems = new List<Gis.SelectedItem>();
+
+			for (int i = 0; i < model.Nodes.Count; i++)
+			{
+				var meshIndex = model.Nodes[i].MeshIndex;
+
+				if (meshIndex < 0) {
+					continue;
+				}
+
+				var mesh = model.Meshes[meshIndex];
+				var info = selectInfo[i];
+
+				var translation			= transforms[i] * Matrix.Scaling(0.001f);
+				var modelWorld			= translation * modelRotationMatrix * Matrix.Translation(CartesianPos.ToVector3());
+				var modelWorldinvert	= Matrix.Invert(modelWorld);
+
+				var localNear	= Vector3.TransformCoordinate(nearPoint.ToVector3(),	modelWorldinvert);
+				var localFar	= Vector3.TransformCoordinate(farPoint.ToVector3(),		modelWorldinvert);
+
+				var localRay = new Ray(localNear, Vector3.Normalize(localFar - localNear));
+
+				float distance;
+				if (info.BoundingBox.Intersects(ref localRay, out distance)) {
+					selectedItems.Add(new SelectedItem {
+						BoundingBox				= info.BoundingBox,
+						BoundingBoxTransform	= DMatrix.FromFloatMatrix(modelWorld),
+						Distance				= distance,
+						InstanceIndex			= 0,
+						Name					= info.NodeName,
+						NodeInd					= info.NodeIndex
+					});
+				}
+				
+			}
+
+			return selectedItems;
 		}
 	}
 }

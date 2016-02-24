@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
 using Fusion.Engine.Graphics.GIS.DataSystem.MapSources;
+using Fusion.Engine.Graphics.GIS.GlobeMath;
 
 namespace Fusion.Engine.Graphics.GIS
 {
@@ -13,11 +14,16 @@ namespace Fusion.Engine.Graphics.GIS
 	{
 		Ubershader		shader;
 		StateFactory	factory;
-
-
-		Texture2D frame;
-
+		
+		Texture2D	frame;
 		GlobeCamera camera;
+
+
+		public class SelectedItem : Gis.SelectedItem
+		{
+			public long TileX;
+			public long TileT;
+		}
 
 
 		[Flags]
@@ -44,7 +50,7 @@ namespace Fusion.Engine.Graphics.GIS
 		public override void Update(GameTime gameTime)
 		{
 
-			Console.Clear();
+			//Console.Clear();
 			//Console.WriteLine("Current Zoom Level: " + CurrentLevel);
 			//
 			//for(int i = 0; i < 15; i++)
@@ -54,12 +60,11 @@ namespace Fusion.Engine.Graphics.GIS
 
 			CurrentMapSource.Update(gameTime);			
 
-			DetermineTiles(3);
+			DetermineTiles();
 
-
-			Console.WriteLine();
-			Console.WriteLine("Tiles to render: " + tilesToRender.Count);
-			Console.WriteLine("Free tiles:		" + tilesFree.Count);
+			//Console.WriteLine();
+			//Console.WriteLine("Tiles to render: " + tilesToRender.Count);
+			//Console.WriteLine("Free tiles:		" + tilesFree.Count);
 		}
 
 
@@ -102,6 +107,12 @@ namespace Fusion.Engine.Graphics.GIS
 			foreach (var tile in tilesFree) {
 				tile.Value.Dispose();
 			}
+		}
+
+
+		public override List<Gis.SelectedItem> Select(DVector3 nearPoint, DVector3 farPoint)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

@@ -10,6 +10,7 @@ namespace Fusion.Engine.Graphics.GIS
 	public static class GeoHelper
 	{
 		public static readonly double EarthRadius = 6378.137;
+		public static readonly double EarthOneDegreeLengthOnEquatorMeters = 111152.8928;
 
 		public static bool LineIntersection(DVector3 lineOrigin, DVector3 lineEnd, double radius, out DVector3[] intersectionPoints)
 		{
@@ -156,6 +157,25 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 			return new DVector2((DMathUtil.RadiansToDegrees(λ2) + 540) % 360 - 180, DMathUtil.RadiansToDegrees(φ2)); // normalise to −180…+180°
+		}
+
+
+
+		public static DMatrix CalculateBasisOnSurface(DVector2 lonLatRad)
+		{
+			DVector3 up = SphericalToCartesian(lonLatRad, EarthRadius);
+			up.Normalize();
+
+			var xAxis = DVector3.TransformNormal(DVector3.UnitX, DMatrix.RotationAxis(DVector3.UnitY, lonLatRad.X));
+			xAxis.Normalize();
+
+			var mat = DMatrix.Identity;
+			mat.Up = up;
+			mat.Right = xAxis;
+			mat.Forward = DVector3.Cross(xAxis, up);
+			mat.Forward.Normalize();
+
+			return mat;
 		}
 	}
 }

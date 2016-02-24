@@ -17,6 +17,10 @@ namespace Fusion.Engine.Graphics.GIS
 		Game Game;
 
 
+		
+
+		public GlobeCameraParameters Parameters { set; get; }
+
 		public enum CameraStates
 		{
 			TopDown,
@@ -27,14 +31,11 @@ namespace Fusion.Engine.Graphics.GIS
 		public CameraStates CameraState = CameraStates.TopDown;
 
 		double pitch = 0.0f;
-		readonly double maxPitch = 0;
-		readonly double minPitch = 0;
-
 		public double Yaw { set; get; }
 		public double Pitch
 		{
 			set {
-				pitch = DMathUtil.Clamp(value, minPitch, maxPitch);
+				pitch = DMathUtil.Clamp(value, Parameters.MinPitch, Parameters.MaxPitch);
 			}
 			get { return pitch; }
 		}
@@ -56,21 +57,13 @@ namespace Fusion.Engine.Graphics.GIS
 		public double CameraDistance {
 			get { return cameraDistance; }
 			set {
-				cameraDistance = DMathUtil.Clamp(value, EarthRadius + 0.35, maxCameraDistance);
+				cameraDistance = DMathUtil.Clamp(value, EarthRadius + 0.35, Parameters.MaxCameraDistance);
 			}
 		}
 
 		public DVector3 FinalCamPosition = DVector3.Zero;
 
 		
-		double frustumWidth;
-		double frustumHeight;
-
-		double frustumZNear = 0.0009765625f;
-		double frustumZFar	= 131072;
-
-		public readonly double camFov = 45;
-
 		double ViewToPointYaw	=  Math.PI;
 		double ViewToPointPitch = -Math.PI/2.01;
 
@@ -91,8 +84,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 		public readonly double EarthRadius = 6378.137;
-		double maxCameraDistance	= 100000.0;
-		double cameraDistance		= 90000.0;
+		double cameraDistance	= 90000.0;
 		
 
 
@@ -102,14 +94,42 @@ namespace Fusion.Engine.Graphics.GIS
 			Vladivostok,
 		}
 
-		
+
+
+		public class GlobeCameraParameters
+		{
+			public double MaxPitch			{ set; get; }
+			public double MinPitch			{ set; get; }
+			public double MaxCameraDistance { set; get; }
+			
+			public double CameraFovDegrees	{ set; get; }
+			public double FrustumZNear		{ set; get; }
+			public double FrustumZFar		{ set; get; }
+			public double FrustumWidth		{ internal set; get; }
+			public double FrustumHeight		{ internal set; get; }
+
+			public double MaxDistVelocityThreshold	{ set; get; }
+			public double MinDistVelocityThreshold	{ set; get; }
+			public double MaxVelocityFreeSurfCam	{ set; get; }
+			public double MinVelocityFreeSurfCam	{ set; get; }
+		}
 
 		public GlobeCamera(Game engine)
 		{
 			Game = engine;
 
-			maxPitch = DMathUtil.DegreesToRadians(87.5);
-			minPitch = DMathUtil.DegreesToRadians(-87.5);
+			Parameters = new GlobeCameraParameters {
+				MaxPitch					= DMathUtil.DegreesToRadians(87.5),
+				MinPitch					= DMathUtil.DegreesToRadians(-87.5),
+				MaxCameraDistance			= 100000.0,
+				CameraFovDegrees			= 45,
+				FrustumZNear				= 0.0009765625f,
+				FrustumZFar					= 131072,
+				MaxDistVelocityThreshold	= 10000,
+				MinDistVelocityThreshold	= 0.5,
+				MaxVelocityFreeSurfCam		= 800,
+				MinVelocityFreeSurfCam		= 0.01
+			};
 
 
 			Viewport = new Viewport(0, 0, 1920, 1080);
@@ -165,8 +185,8 @@ namespace Fusion.Engine.Graphics.GIS
 		public void MoveCamera(Vector2 prevMousePos, Vector2 currentMousePos)
 		{
 				DVector2 before, after;
-				var beforeHit	= ScreenToSpherical(prevMousePos.X, prevMousePos.Y, out before, true);
-				var afterHit	= ScreenToSpherical(currentMousePos.X, currentMousePos.Y, out after, true);
+				var beforeHit	= ScreenToSpherical(prevMousePos.X, prevMousePos.Y, out before);
+				var afterHit	= ScreenToSpherical(currentMousePos.X, currentMousePos.Y, out after);
 
 				if (beforeHit && afterHit) {
 					Yaw		-= after.X - before.X;
@@ -219,12 +239,10 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			var input = Game.InputDevice;
 			
-			
 			#region test
 
 			var dir = DVector3.Zero;
-
-
+			
 			if (input.IsKeyDown(Keys.W)) { dir.X += 1.0; }
 			if (input.IsKeyDown(Keys.S)) { dir.X -= 1.0; }
 			if (input.IsKeyDown(Keys.A)) { dir.Z += 1.0; }
@@ -327,12 +345,10 @@ namespace Fusion.Engine.Graphics.GIS
 				
 				#endregion
 
-				double maxDist = 10000;
-				double minDist = 1;
-				double fac = ((CameraDistance - EarthRadius) - minDist) / (maxDist - minDist);
+				double fac = ((CameraDistance - EarthRadius) - Parameters.MinDistVelocityThreshold) / (Parameters.MaxDistVelocityThreshold - Parameters.MinDistVelocityThreshold);
 				fac = DMathUtil.Clamp(fac, 0.0, 1.0);
 
-				FreeSurfaceVelocityMagnitude = DMathUtil.Lerp(0.04, 800.0, fac);
+				FreeSurfaceVelocityMagnitude = DMathUtil.Lerp(Parameters.MinVelocityFreeSurfCam, Parameters.MaxVelocityFreeSurfCam, fac);
 
 				// Update camera position
 				FinalCamPosition	= FreeSurfacePosition = FreeSurfacePosition + velDir * FreeSurfaceVelocityMagnitude * gameTime.ElapsedSec;
@@ -383,13 +399,13 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			double aspect = Viewport.AspectRatio;
 
-			double nearHeight	= frustumZNear * Math.Tan(DMathUtil.DegreesToRadians(camFov / 2));
+			double nearHeight	= Parameters.FrustumZNear * Math.Tan(DMathUtil.DegreesToRadians(Parameters.CameraFovDegrees / 2));
 			double nearWidth	= nearHeight * aspect;
 
-			frustumWidth	= nearWidth;
-			frustumHeight	= nearHeight;
+			Parameters.FrustumWidth		= nearWidth;
+			Parameters.FrustumHeight	= nearHeight;
 
-			ProjMatrix = DMatrix.PerspectiveOffCenterRH(-nearWidth / 2, nearWidth / 2, -nearHeight / 2, nearHeight / 2, frustumZNear, frustumZFar);
+			ProjMatrix = DMatrix.PerspectiveOffCenterRH(-nearWidth / 2, nearWidth / 2, -nearHeight / 2, nearHeight / 2, Parameters.FrustumZNear, Parameters.FrustumZFar);
 		}
 
 
@@ -400,20 +416,10 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public bool ScreenToSpherical(float x, float y, out DVector2 lonLat, bool useGlobalView = false)
+		public bool ScreenToSpherical(float x, float y, out DVector2 lonLat)
 		{
-			var w = Viewport.Width;
-			var h = Viewport.Height;
-
-			var nearPoint	= new DVector3(x, y, frustumZNear);
-			var farPoint	= new DVector3(x, y, frustumZFar);
-
-
-			var vm	= useGlobalView ? ViewMatrixWithTranslation : DMatrix.LookAtRH(CameraPosition, DVector3.Zero, DVector3.UnitY);
-			var mVP = vm * ProjMatrix;
-
-			var near	= DVector3.Unproject(nearPoint, 0, 0, w, h, frustumZNear, frustumZFar, mVP);
-			var far		= DVector3.Unproject(farPoint, 0, 0, w, h, frustumZNear, frustumZFar, mVP);
+			DVector3 near, far;
+			GetRayFromScreenPoint(x, y, out near, out far);
 
 			lonLat = DVector2.Zero;
 
@@ -427,9 +433,25 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
+		public void GetRayFromScreenPoint(float x, float y, out DVector3 near, out DVector3 far)
+		{
+			var w = Viewport.Width;
+			var h = Viewport.Height;
+
+			var nearPoint	= new DVector3(x, y, Parameters.FrustumZNear);
+			var farPoint	= new DVector3(x, y, Parameters.FrustumZFar);
+			
+			var vm	= ViewMatrixWithTranslation;
+			var mVP = vm * ProjMatrix;
+
+			near	= DVector3.Unproject(nearPoint, 0, 0, w, h, Parameters.FrustumZNear, Parameters.FrustumZFar, mVP);
+			far		= DVector3.Unproject(farPoint,	0, 0, w, h, Parameters.FrustumZNear, Parameters.FrustumZFar, mVP);
+		}
+
+
 		public Vector2 CartesianToScreen(DVector3 cartPos)
 		{
-			var p = DVector3.Project(cartPos, Viewport.X, Viewport.Y, Viewport.Width, Viewport.Height, frustumZNear, frustumZFar, ViewMatrixWithTranslation * ProjMatrix);
+			var p = DVector3.Project(cartPos, Viewport.X, Viewport.Y, Viewport.Width, Viewport.Height, Parameters.FrustumZNear, Parameters.FrustumZFar, ViewMatrixWithTranslation * ProjMatrix);
 
 			return new Vector2((float)p.X, (float)p.Y);
 		}
@@ -603,7 +625,7 @@ namespace Fusion.Engine.Graphics.GIS
 		public void StopAnimation()
 		{
 			freezeFreeCamRotation	= false;
-			cameraAnimTrackStates			= null;
+			cameraAnimTrackStates	= null;
 		}
 
 		void SetState(SurfaceCameraState state)
@@ -613,7 +635,6 @@ namespace Fusion.Engine.Graphics.GIS
 
 			FreeSurfaceYaw		= state.FreeSurfaceYaw;
 			FreeSurfacePitch	= state.FreeSurfacePitch;
-
 			freeSurfaceRotation = state.FreeRotation;
 
 			var newLonLat = GetCameraLonLat();
