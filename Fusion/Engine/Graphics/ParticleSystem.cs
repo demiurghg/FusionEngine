@@ -150,6 +150,8 @@ namespace Fusion.Engine.Graphics {
 		{
 			if (disposing) {	
 
+				rs.Game.Reloading -= LoadContent;
+
 				SafeDispose( ref paramsCB );
 				SafeDispose( ref imagesCB );
 

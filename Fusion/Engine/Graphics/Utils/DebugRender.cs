@@ -12,8 +12,10 @@ using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
 
-	public class DebugRender : GameModule
-	{
+	public class DebugRender : DisposableBase {
+
+		readonly Game Game;
+
 		struct LineVertex {
 			[Vertex("POSITION")] public Vector3 Pos;
 			[Vertex("COLOR", 0)] public Vector4 Color;
@@ -39,46 +41,22 @@ namespace Fusion.Engine.Graphics {
 
 		const int vertexBufferSize = 4096;
 
-		/// <summary>
-		/// View matrix
-		/// </summary>
-		public Matrix	View		{ get; set; }
-
-		/// <summary>
-		/// Projection matrix
-		/// </summary>
-		public Matrix	Projection	{ get; set; }
-
 		ConstData	constData;
-
-
-		public RenderTargetSurface RenderTarget { get; set; }
-		public DepthStencilSurface DepthStencil { get; set; }
 
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public DebugRender(Game game) : base(game)
+		public DebugRender(Game game) 
 		{
-			RenderTarget	= null;
-		}
+			this.Game	=	game;
+			var dev		=	Game.GraphicsDevice;
 
+			effect		=	Game.Content.Load<Ubershader>("debugRender.hlsl");
+			factory		=	effect.CreateFactory( typeof(RenderFlags), Primitive.LineList, VertexInputElement.FromStructure( typeof(LineVertex) ), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None );
 
-
-		/// <summary>
-		/// Initialization
-		/// </summary>
-		public override void Initialize ()
-		{
-			var dev		= Game.GraphicsDevice;
-
-			effect		= Game.Content.Load<Ubershader>("debugRender.hlsl");
-			factory		= effect.CreateFactory( typeof(RenderFlags), Primitive.LineList, VertexInputElement.FromStructure( typeof(LineVertex) ), BlendState.AlphaBlend, RasterizerState.CullNone );
-
-			constData	= new ConstData();
-			constBuffer = new ConstantBuffer(dev, typeof(ConstData));
-
+			constData	=	new ConstData();
+			constBuffer =	new ConstantBuffer(dev, typeof(ConstData));
 
 			//	create vertex buffer :
 			vertexBuffer		= new VertexBuffer(dev, typeof(LineVertex), vertexBufferSize, VertexBufferOptions.Dynamic );
@@ -114,6 +92,8 @@ namespace Fusion.Engine.Graphics {
 			//DrawLine( p0, p1, color, Matrix.Identity );
 		}
 
+
+
 		/// <summary>
 		/// Draws line between p0 and p1
 		/// </summary>
@@ -132,29 +112,19 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// 
-		public void Render ( GameTime gameTime, StereoEye stereoEye, bool suppress )
+		public void Render ( RenderTargetSurface colorBuffer, Camera camera )
 		{
 			if (!vertexDataAccum.Any()) {
 				return;
 			}
 
-			if (suppress) {
-				vertexDataAccum.Clear();
-			}
-
 			var dev = Game.GraphicsDevice;
+			dev.ResetStates();
+
+			dev.SetTargets( null, colorBuffer );
 
 
-			if (RenderTarget!=null) {
-				if (DepthStencil==null) {	
-					throw new InvalidOperationException("Both RenderTarget and DepthStencil must be set.");
-				}
-				dev.SetTargets( DepthStencil, RenderTarget );
-			}
-
-
-			constData.Transform = View * Projection;
+			constData.Transform = camera.GetViewMatrix(StereoEye.Mono) * camera.GetProjectionMatrix(StereoEye.Mono);
 			constBuffer.SetData(constData);
 
 			dev.SetupVertexInput( vertexBuffer, null );

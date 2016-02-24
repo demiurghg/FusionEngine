@@ -40,6 +40,13 @@ namespace Fusion.Engine.Graphics {
 			get; private set;
 		}
 
+		/// <summary>
+		/// Gets debug render
+		/// </summary>
+		public DebugRender Debug {
+			get { return debug; }
+		}
+		DebugRender debug;
 
 		/// <summary>
 		/// Gets particle system instance.
@@ -95,6 +102,8 @@ namespace Fusion.Engine.Graphics {
 
 			Instances		=	new List<MeshInstance>();
 			LightSet		=	new LightSet( Game.RenderSystem );
+
+			debug			=	new DebugRender( Game );
 			
 			particleSystem	=	new ParticleSystem( Game.RenderSystem, this );
 
@@ -120,6 +129,8 @@ namespace Fusion.Engine.Graphics {
 			if (disposing) {
 				
 				SafeDispose( ref particleSystem );
+
+				SafeDispose( ref debug );
 
 				SafeDispose( ref Radiance );
 				SafeDispose( ref RadianceCache );
@@ -314,12 +325,16 @@ namespace Fusion.Engine.Graphics {
 			//	apply tonemapping and bloom :
 			rs.HdrFilter.Render( gameTime, TempFXBuffer.Surface, viewHdrFrame.HdrBuffer, this );
 
+
 			//	apply FXAA
 			if (rs.Config.UseFXAA) {
 				rs.Filter.Fxaa( targetSurface, TempFXBuffer );
 			} else {
 				rs.Filter.Copy( targetSurface, TempFXBuffer );
-			}
+			} 
+
+			//	draw debug lines :
+			Debug.Render( targetSurface, Camera );
 		}
 
 
