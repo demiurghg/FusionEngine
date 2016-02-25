@@ -22,6 +22,9 @@ namespace Fusion.Engine.Network {
 
 		public float SimulatePacketsLoss { get; set; }
 
+		public float SimulateMinLatency { get; set; }
+		public float SimulateRandomLatency { get; set; }
+
 		public bool ShowSnapshots { get; set; }
 
 
