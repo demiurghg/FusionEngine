@@ -38,6 +38,22 @@ namespace Fusion.Engine.Server {
 
 
 		/// <summary>
+		/// Gets and sets target server frame rate.
+		/// Value must be within range 1..240.
+		/// </summary>
+		public float TargetFrameRate {
+			get { return targetFrameRate; }
+			set {
+				if (value<1 || value>240) {
+					throw new ArgumentOutOfRangeException("value", "Value must be within range 1..240.");
+				}
+				targetFrameRate	=	value;
+			}
+		}
+		float targetFrameRate = 60;
+
+
+		/// <summary>
 		/// Releases all resources used by the GameServer class.
 		/// </summary>
 		/// <param name="disposing"></param>

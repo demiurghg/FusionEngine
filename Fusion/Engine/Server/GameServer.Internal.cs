@@ -125,6 +125,10 @@ namespace Fusion.Engine.Server {
 
 			var snapshotQueue	=	new SnapshotQueue(32);
 
+			//var accumulatedElapsedTime = TimeSpan.FromTicks(0);
+			//var maxElapsedTime = TimeSpan.FromMilliseconds(1000);
+			//var previousTicks = (long)0;
+
 			//
 			//	configure & start server :
 			//
@@ -145,42 +149,40 @@ namespace Fusion.Engine.Server {
 				}
 
 
-				var svTime = new GameTime();
+				//	Timer and fixed timestep stuff :
+				var accumulator	=	TimeSpan.Zero;
+				var stopwatch	=	new Stopwatch();
+				stopwatch.Start();
+				var currentTime	=	stopwatch.Elapsed;
+				var time		=	stopwatch.Elapsed;
 
 				//
 				//	server loop :
 				//	
 				while ( !killToken.IsCancellationRequested ) {
 
-					svTime.Update();
+				_retryTick:
+					var targetDelta	=	TimeSpan.FromTicks( (long)(10000000 / TargetFrameRate) );
+					var newTime		=	stopwatch.Elapsed;
+					var frameTime	=	newTime - currentTime;
+					currentTime		=	newTime;
 
-					#if DEBUG
-					server.Configuration.SimulatedLoss				=	Game.Network.Config.SimulatePacketsLoss;
-					server.Configuration.SimulatedMinimumLatency	=	Game.Network.Config.SimulateMinLatency;
-					server.Configuration.SimulatedRandomLatency		=	Game.Network.Config.SimulateRandomLatency;
-					#endif
+					accumulator +=	 frameTime;
 
-					//	read input messages :
-					DispatchIM( svTime, snapshotQueue, server );
+					if ( accumulator < targetDelta ) {
+						Thread.Sleep(1);
+						goto _retryTick;
+					}
 
-					//	update frame and get snapshot :
-					var snapshot = Update( svTime );
+					while ( accumulator > targetDelta ) {
 
-					//	push snapshot to queue :
-					snapshotQueue.Push( svTime.Total, snapshot );
+						var svTime = new GameTime( time, targetDelta );
 
-					//	send snapshot to clients :
-					SendSnapshot( server, snapshotQueue );
+						UpdateNetworkAndLogic( svTime, server, snapshotQueue );
 
-					//	send notifications to clients :
-					SendNotifications( server );
-
-					//	execute server's command queue :
-					Game.Invoker.ExecuteQueue( svTime, CommandAffinity.Server );
-
-					//	crash test for server :
-					CrashServer.CrashTest();
-					FreezeServer.FreezeTest();
+						accumulator	-= targetDelta;
+						time		+= targetDelta;
+					}
 				}
 
 				foreach ( var conn in server.Connections ) {
@@ -214,6 +216,42 @@ namespace Fusion.Engine.Server {
 				serverTask	=	null;
 				server		=	null;
 			}
+		}
+
+
+
+		/// <summary>
+		/// Updates everything related to network and game logic.
+		/// </summary>
+		void UpdateNetworkAndLogic ( GameTime svTime, NetServer server, SnapshotQueue snapshotQueue )
+		{
+			#if DEBUG
+			server.Configuration.SimulatedLoss				=	Game.Network.Config.SimulatePacketsLoss;
+			server.Configuration.SimulatedMinimumLatency	=	Game.Network.Config.SimulateMinLatency;
+			server.Configuration.SimulatedRandomLatency		=	Game.Network.Config.SimulateRandomLatency;
+			#endif
+
+			//	read input messages :
+			DispatchIM( svTime, snapshotQueue, server );
+
+			//	update frame and get snapshot :
+			var snapshot = Update( svTime );
+
+			//	push snapshot to queue :
+			snapshotQueue.Push( svTime.Total, snapshot );
+
+			//	send snapshot to clients :
+			SendSnapshot( server, snapshotQueue );
+
+			//	send notifications to clients :
+			SendNotifications( server );
+
+			//	execute server's command queue :
+			Game.Invoker.ExecuteQueue( svTime, CommandAffinity.Server );
+
+			//	crash test for server :
+			CrashServer.CrashTest();
+			FreezeServer.FreezeTest();
 		}
 
 
