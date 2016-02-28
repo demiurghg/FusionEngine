@@ -114,6 +114,8 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public void Render ( RenderTargetSurface colorBuffer, Camera camera )
 		{
+			DrawTracers();
+
 			if (!vertexDataAccum.Any()) {
 				return;
 			}
@@ -153,6 +155,45 @@ namespace Fusion.Engine.Graphics {
 			vertexDataAccum.Clear();
 		}
 
+
+
+
+		/*-----------------------------------------------------------------------------------------
+		 *	Tracers :
+		-----------------------------------------------------------------------------------------*/
+
+		class TraceRecord {
+			public Vector3 Position;
+			public Color Color;
+			public float Size;
+			public int LifeTime;
+		}
+
+
+		List<TraceRecord> tracers = new List<TraceRecord>();
+
+
+		public void Trace ( Vector3 position, float size, Color color, int lifeTimeInFrames = 300 )
+		{
+			tracers.Add( new TraceRecord() {
+					Position	=	position,
+					Size		=	size,
+					Color		=	color,
+					LifeTime	=	lifeTimeInFrames,
+				});
+		}
+
+
+		void DrawTracers ()
+		{
+			foreach ( var t in tracers ) {
+				t.LifeTime --;
+
+				DrawPoint( t.Position, t.Size, t.Color );
+			}
+
+			tracers.RemoveAll( t => t.LifeTime < 0 );
+		}
 
 		/*-----------------------------------------------------------------------------------------
 		 *	Primitives :
