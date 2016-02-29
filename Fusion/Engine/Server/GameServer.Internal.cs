@@ -241,7 +241,7 @@ namespace Fusion.Engine.Server {
 			snapshotQueue.Push( svTime.Total, snapshot );
 
 			//	send snapshot to clients :
-			SendSnapshot( server, snapshotQueue );
+			SendSnapshot( server, snapshotQueue, svTime.Total.Ticks );
 
 			//	send notifications to clients :
 			SendNotifications( server );
@@ -357,7 +357,7 @@ namespace Fusion.Engine.Server {
 		/// 
 		/// </summary>
 		/// <param name="server"></param>
-		void SendSnapshot ( NetServer server, SnapshotQueue queue )
+		void SendSnapshot ( NetServer server, SnapshotQueue queue, long serverTicks )
 		{
 			//	snapshot request is stored in connection's tag.s
 			var debug	=	Game.Network.Config.ShowSnapshots;
@@ -385,6 +385,7 @@ namespace Fusion.Engine.Server {
 				msg.Write( frame );
 				msg.Write( prevFrame );
 				msg.Write( commandID );
+				msg.Write( serverTicks );
 				msg.Write( snapshot.Length );
 				msg.Write( snapshot ); 
 

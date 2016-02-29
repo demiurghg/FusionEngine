@@ -56,9 +56,6 @@ namespace Fusion.Engine.Server {
 				if (snapshot.Frame==clientSnapshotID) {
 					var lag = currentGameTime.Total - snapshot.Timestamp;
 
-					if (lag.TotalMilliseconds<0) {
-						Log.Message("CRAP1");
-					}
 					return Math.Min(1, (float)lag.TotalSeconds );
 				}
 			}

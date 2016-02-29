@@ -59,6 +59,7 @@ namespace Fusion.Engine.Client {
 					var frame		=	msg.ReadUInt32();
 					var prevFrame	=	msg.ReadUInt32();
 					var ackCmdID	=	msg.ReadUInt32();
+					var serverTicks	=	msg.ReadInt64();
 					var size		=	msg.ReadInt32();
 
 					if (prevFrame!=0) {
@@ -72,7 +73,7 @@ namespace Fusion.Engine.Client {
 
 					var snapshot	=	NetworkEngine.Decompress( msg.ReadBytes(size) );
 
-					gameClient.SetState( new Active( gameClient, frame, snapshot ) );
+					gameClient.SetState( new Active( gameClient, frame, snapshot, serverTicks ) );
 				}
 
 				if (command==NetCommand.Notification) {
