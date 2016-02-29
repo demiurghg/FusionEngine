@@ -101,6 +101,15 @@ namespace Fusion.Engine.Client {
 
 
 
+		string SignedLong ( long value )
+		{
+			if (value<0) return "-" + Math.Abs(value).ToString("000");
+			if (value>0) return "+" + Math.Abs(value).ToString("000");
+			if (value==0) return " 000";
+			return "";
+		}
+
+
 		/// <summary>
 		/// Shows incoming message jittering stuff
 		/// </summary>
@@ -111,12 +120,14 @@ namespace Fusion.Engine.Client {
 		/// <param name="pop"></param>
 		void ShowJitter ( int queueSize, long svTicks, long clTicks, bool push, bool pull )
 		{
-			Log.Message("qs:{0} [{1}{2}] sv:{3} cl:{4}", 
+			Log.Message("qs:{0} [{1}{2}] sv:{3} cl:{4} delta:{5} drift:{6}", 
 				queueSize, 
 				push?"enq":"   ",
 				pull?"deq":"   ",
 				svTicks / 10000,
-				clTicks / 10000
+				clTicks / 10000,
+				SignedLong((svTicks-clTicks)/10000),
+				SignedLong(clientServerDelta/10000)
 				);
 		} 
 
@@ -143,7 +154,7 @@ namespace Fusion.Engine.Client {
 
 				var serverTicksBiased	=	bufferedSnapshot.ServerTicks - initialServerTicks;
 
-				if (serverTicksBiased < (clientTicks - playoutDelay * 10000) ) {
+				if (serverTicksBiased < (clientTicks - playoutDelay * 10000 - clientServerDelta) ) {
 
 					snapshots.Dequeue();
 
