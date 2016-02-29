@@ -37,7 +37,7 @@ namespace Fusion.Engine.Client {
 				queue	=	new SnapshotQueue(32);
 				queue.Push( new Snapshot( new TimeSpan(0), snapshotId, initialSnapshot) );
 
-				jitter		=	new JitterBuffer( svTicks );
+				jitter		=	new JitterBuffer( gameClient.Game, svTicks );
 				stopwatch	=	new Stopwatch();
 				stopwatch.Start();
 
@@ -81,7 +81,7 @@ namespace Fusion.Engine.Client {
 				//	Feed snapshot from jitter buffer :
 				//
 				uint ackCmdID;
-				byte[] snapshot = jitter.Pop( stopwatch.Elapsed.Ticks, out ackCmdID );
+				byte[] snapshot = jitter.Pop( stopwatch.Elapsed.Ticks, gameClient.JitterPlayoutDelay, out ackCmdID );
 
 				if (snapshot!=null) {
 
@@ -131,8 +131,7 @@ namespace Fusion.Engine.Client {
 			/// <param name="svTicks"></param>
 			void FeedSnapshot ( byte[] snapshot, uint ackCmdID, long svTicks )
 			{
-				jitter.Push( snapshot, ackCmdID, svTicks );
-				gameClient.FeedSnapshot( snapshot, ackCmdID );
+				jitter.Push( snapshot, ackCmdID, svTicks, stopwatch.Elapsed.Ticks );
 			}
 
 

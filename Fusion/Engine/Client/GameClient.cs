@@ -58,18 +58,18 @@ namespace Fusion.Engine.Client {
 
 
 		/// <summary>
-		/// TimeNudge affect incoming snapshot de-jittering.
+		/// JitterPlayoutDelay affect incoming snapshot de-jittering.
 		/// Higher values lead to more latency and better smoothiness.
 		/// Lower values lead to less latency and better responsiveness.
 		/// </summary>
-		public int TimeNudge {
-			get { return timeNudge; }
+		public int JitterPlayoutDelay {
+			get { return jitterPlayoutDelay; }
 			set { 
-				if (value<-30 || value>30) throw new ArgumentOutOfRangeException("value", "TimeNudge must be within -30..30 range");
-				timeNudge = value; 
+				if (value<0 || value>1000) throw new ArgumentOutOfRangeException("value", "JitterDelay must be within -100..100 range");
+				jitterPlayoutDelay = value; 
 			}
 		}
-		int timeNudge = 0;
+		int jitterPlayoutDelay = 0;
 
 
 		/// <summary>

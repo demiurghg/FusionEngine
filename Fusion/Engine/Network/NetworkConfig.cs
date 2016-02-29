@@ -27,6 +27,8 @@ namespace Fusion.Engine.Network {
 
 		public bool ShowSnapshots { get; set; }
 
+		public bool ShowJitter { get; set; }
+
 
 		public NetworkConfig ()
 		{
@@ -37,6 +39,7 @@ namespace Fusion.Engine.Network {
 			MaxClients			=	8;
 			SimulatePacketsLoss	=	0;
 			ShowPackets			=	false;
+			ShowJitter			=	false;
 		}
 
 	}
