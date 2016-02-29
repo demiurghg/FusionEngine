@@ -176,7 +176,8 @@ namespace Fusion.Engine.Server {
 
 					while ( accumulator > targetDelta ) {
 
-						var svTime = new GameTime( time, targetDelta );
+						//var svTime = new GameTime( time, targetDelta );
+						var svTime = new GameTime( stopwatch.Elapsed, targetDelta );
 
 						UpdateNetworkAndLogic( svTime, server, snapshotQueue );
 

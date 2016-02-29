@@ -27,6 +27,14 @@ namespace Fusion.Engine.Client {
 
 		readonly long initialServerTicks;
 
+		/// <summary>
+		/// due to initialServerTicks clientServerDelta should be set zero.
+		/// </summary>
+		long clientServerDelta	=	0;
+
+		const long MinDelta	=	-500 * 10000;
+		const long MaxDelta	=	 500 * 10000;
+
 
 		/// <summary>
 		/// Creates instance of jitter buffer.
@@ -52,6 +60,25 @@ namespace Fusion.Engine.Client {
 
 
 
+		long Drift ( long current, long target, long velocity )
+		{
+			if ( Math.Abs(current - target) < velocity ) {
+				return target;
+			}
+
+			if (current>target) {
+				return current - velocity;
+			}
+
+			if (current<target) {
+				return current + velocity;
+			}
+
+			return current;
+		}
+
+
+
 		/// <summary>
 		/// Pops snapshot from the queue.
 		/// </summary>
@@ -68,7 +95,11 @@ namespace Fusion.Engine.Client {
 
 				var svTick	=	bs.ServerTicks - initialServerTicks;
 
-				//Log.Verbose("snaps:{0} sv:{1:0.00} svb:{2:0.00} cl:{3:0.00} delta:{4:0.00}", snapshots.Count+1, bs.ServerTicks/10000.0f, svTick/10000.0f, clientTicks/10000.0f, (svTick - clientTicks)/10000.0f );
+				var currentDelta	=	svTick - clientTicks;
+
+				clientServerDelta	=	Drift( clientServerDelta, currentDelta, 10000 /* 1ms */ );
+				
+				Log.Verbose("snaps:{0} sv:{1:0.00} svb:{2:0.00} cl:{3:0.00} delta:{4:0.00} drift:{5:0.00}", snapshots.Count+1, bs.ServerTicks/10000.0f, svTick/10000.0f, clientTicks/10000.0f, (svTick - clientTicks)/10000.0f, clientServerDelta/10000.0f );
 				
 				return bs.SnapshotData;
 
