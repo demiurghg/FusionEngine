@@ -50,7 +50,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.OpenStreetMaps
 
 		public override string GenerateUrl(int x, int y, int zoom)
 		{
-			return String.Format(UrlFormat, ServerLetters[0], zoom, x, y);
+			return String.Format(UrlFormat, ServerLetters[(x + y) % ServerLetters.Length], zoom, x, y);
 		}
 
 	}

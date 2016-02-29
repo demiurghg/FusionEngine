@@ -1,0 +1,44 @@
+[Ignore]
+*.ma
+*.psd
+spots/*.tga
+sprites/*.tga
+
+[BinaryDirectories]
+HKEY_CURRENT_USER\Software\FusionEngine@ToolsDir
+
+[ContentDirectories]
+..\..\..\..\..\FusionContent
+HKEY_CURRENT_USER\Software\FusionEngine@ContentDir
+
+[Download]
+#lenaWeb.tiff = http://www.cs.cmu.edu/~chuck/lennapg/lena_std.tiff
+
+[TextureAtlas]
+*spots.atlas /width:512 /height:512
+*particles.atlas  /width:1024 /height:1024 /fill:"0, 0, 0, 0" /pad:16
+
+[Textures]
+*.tga /alpha
+*.png
+*.jpg
+
+[Fonts]
+*.bmfc
+
+[Shaders]
+*.hlsl
+
+[Scenes]
+*.fbx /geom
+scenes/testScene.fbx /geom /report
+scenes/testAnim.fbx /geom /report /anim
+scenes/testSkin.fbx /geom /report /anim
+scenes/rush.fbx /geom /report /anim
+
+[Copy]
+myDir/*.*
+*.wmv
+
+[Materials]
+*.material
