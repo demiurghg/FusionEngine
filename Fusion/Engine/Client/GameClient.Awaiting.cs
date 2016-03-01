@@ -56,11 +56,16 @@ namespace Fusion.Engine.Client {
 			public override void DataReceived ( NetCommand command, NetIncomingMessage msg )
 			{
 				if (command==NetCommand.Snapshot) {
+					
+					var latencyTicks	=	(long)(msg.SenderConnection.AverageRoundtripTime * 10L*1000L*1000L);
+
 					var frame		=	msg.ReadUInt32();
 					var prevFrame	=	msg.ReadUInt32();
 					var ackCmdID	=	msg.ReadUInt32();
 					var serverTicks	=	msg.ReadInt64();
 					var size		=	msg.ReadInt32();
+
+					//Log.Warning("{0}", offsetTicks );
 
 					if (prevFrame!=0) {
 						Log.Warning("Bad initial snapshot. Previous frame does not equal zero.");
@@ -73,7 +78,7 @@ namespace Fusion.Engine.Client {
 
 					var snapshot	=	NetworkEngine.Decompress( msg.ReadBytes(size) );
 
-					gameClient.SetState( new Active( gameClient, frame, snapshot, serverTicks ) );
+					gameClient.SetState( new Active( gameClient, frame, snapshot, serverTicks + latencyTicks ) );
 				}
 
 				if (command==NetCommand.Notification) {

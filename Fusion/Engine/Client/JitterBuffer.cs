@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Client {
@@ -34,9 +35,6 @@ namespace Fusion.Engine.Client {
 		/// </summary>
 		long clientServerDelta	=	0;
 
-		const long MinDelta	=	-500 * 10000;
-		const long MaxDelta	=	 500 * 10000;
-
 
 		/// <summary>
 		/// Creates instance of jitter buffer.
@@ -67,7 +65,7 @@ namespace Fusion.Engine.Client {
 
 			var serverTicksBiased	=	serverTicks - initialServerTicks;
 			var currentDelta		=	serverTicksBiased - clientTicks;
-			clientServerDelta		=	Drift( clientServerDelta, currentDelta, 20000 /* 1ms */ );
+			clientServerDelta		=	Drift( clientServerDelta, currentDelta, 20000 );
 
 			pushed			= true;
 			lastServerTicks	= serverTicks - initialServerTicks;
@@ -101,11 +99,16 @@ namespace Fusion.Engine.Client {
 
 
 
-		string SignedLong ( long value )
+		string SignedDelta ( long sv, long cl )
 		{
-			if (value<0) return "-" + Math.Abs(value).ToString("000");
-			if (value>0) return "+" + Math.Abs(value).ToString("000");
-			if (value==0) return " 000";
+			if (sv==0) {
+				return "--";
+			}
+
+			var value = sv - cl;
+			if (value<0) return "-" + Math.Abs(value/10000);
+			if (value>0) return "+" + Math.Abs(value/10000);
+			if (value==0) return "0";
 			return "";
 		}
 
@@ -118,17 +121,29 @@ namespace Fusion.Engine.Client {
 		/// <param name="clTicks"></param>
 		/// <param name="push"></param>
 		/// <param name="pop"></param>
-		void ShowJitter ( int queueSize, long svTicks, long clTicks, bool push, bool pull )
-		{
-			Log.Message("qs:{0} [{1}{2}] sv:{3} cl:{4} delta:{5} drift:{6}", 
-				queueSize, 
-				push?"enq":"   ",
-				pull?"deq":"   ",
+		void ShowJitter ( int queueSize, long svTicks, long clTicks, bool push, bool pull, long offset )
+		{											
+			var queue = (new string('*', queueSize)).PadLeft(5,' ');
+
+			Log.Message("{1}[{0}]{2} {3,8} {4,8} | {5,5} {6,5}", 
+				queue, 
+				push?">>":"  ",
+				pull?">>":"  ",
 				svTicks / 10000,
 				clTicks / 10000,
-				SignedLong((svTicks-clTicks)/10000),
-				SignedLong(clientServerDelta/10000)
-				);
+				SignedDelta(svTicks, clTicks),
+				offset / 10000
+			);
+
+			//Log.Message("qs:{0} [{1}{2}] sv:{3} cl:{4} delta:{5} drift:{6}", 
+			//	queue, 
+			//	push?"enq":"   ",
+			//	pull?"deq":"   ",
+			//	svTicks / 10000,
+			//	clTicks / 10000,
+			//	SignedLong((svTicks-clTicks)/10000),
+			//	SignedLong(clientServerDelta/10000)
+			//	);
 		} 
 
 
@@ -138,23 +153,24 @@ namespace Fusion.Engine.Client {
 		/// </summary>
 		/// <param name="clientTicks"></param>
 		/// <returns></returns>
-		public byte[] Pop ( long clientTicks, int playoutDelay, out uint ackCmdID )
+		public byte[] Pop ( long clientTicks, int playoutDelay, long latencyTicks, out uint ackCmdID )
 		{
 			ackCmdID		=	0;
 			byte[] result	=	null;
 
 			#if true
 
-			int queueSize	=	snapshots.Count;
-			bool pulled		=	false;
+			int queueSize			=	snapshots.Count;
+			var pulled				=	false;
+			var bufferedSnapshot	=	(BufferedSnapshot)null;
+			var	serverTicksBiased	=	0L;
 
 			if (snapshots.Any()) {
 
-				var bufferedSnapshot	=	snapshots.Peek();
+				bufferedSnapshot	=	snapshots.Peek();
+				serverTicksBiased	=	bufferedSnapshot.ServerTicks - initialServerTicks + latencyTicks;
 
-				var serverTicksBiased	=	bufferedSnapshot.ServerTicks - initialServerTicks;
-
-				if (serverTicksBiased < (clientTicks - playoutDelay * 10000 - clientServerDelta) ) {
+				if (serverTicksBiased < (clientTicks - playoutDelay * 10000 + clientServerDelta*0) ) {
 
 					snapshots.Dequeue();
 
@@ -172,7 +188,7 @@ namespace Fusion.Engine.Client {
 			}
 
 			if (game.Network.Config.ShowJitter) {
-				ShowJitter( queueSize, lastServerTicks, clientTicks, pushed, pulled	);
+				ShowJitter( queueSize, serverTicksBiased, clientTicks, pushed, pulled, latencyTicks );
 			}
 
 			pushed	=	false;

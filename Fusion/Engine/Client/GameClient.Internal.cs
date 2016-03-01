@@ -45,6 +45,7 @@ namespace Fusion.Engine.Client {
 
 			netConfig.AutoFlushSendQueue	=	true;
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
+			//netConfig.EnableMessageType( NetIncomingMessageType.ConnectionLatencyUpdated );
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryRequest );
 			netConfig.UnreliableSizeBehaviour = NetUnreliableSizeBehaviour.NormalFragmentation;
 
@@ -150,6 +151,11 @@ namespace Fusion.Engine.Client {
 					case NetIncomingMessageType.DebugMessage:		Log.Verbose	("CL Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.WarningMessage:		Log.Warning	("CL Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.ErrorMessage:		Log.Error	("CL Net: " + msg.ReadString()); break;
+
+					case NetIncomingMessageType.ConnectionLatencyUpdated:
+						float latency = msg.ReadFloat();
+						Log.Verbose("CL ping: {0} - {1} ms", msg.SenderConnection.RemoteEndPoint, latency * 1000 );
+						break;
 
 					case NetIncomingMessageType.StatusChanged:		
 

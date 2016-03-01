@@ -24,6 +24,7 @@ namespace Fusion.Engine.Client {
 			SnapshotQueue	queue;
 			JitterBuffer	jitter;
 			Stopwatch		stopwatch;
+			long			clientTicks;
 
 
 			/// <summary>
@@ -40,6 +41,7 @@ namespace Fusion.Engine.Client {
 				jitter		=	new JitterBuffer( gameClient.Game, svTicks );
 				stopwatch	=	new Stopwatch();
 				stopwatch.Start();
+				clientTicks	=	0;
 
 				lastSnapshotFrame	=	snapshotId;
 
@@ -77,11 +79,18 @@ namespace Fusion.Engine.Client {
 			/// <param name="gameTime"></param>
 			public override void Update ( GameTime gameTime )
 			{
+				int playoutDelay	=	gameClient.Game.Network.Config.PlayoutDelay;
+
+				clientTicks	+=	gameTime.Elapsed.Ticks;
+
+				var latencyTicks =	(long)(client.ServerConnection.AverageRoundtripTime * 10L*1000L*1000L);
+				
+
 				//
 				//	Feed snapshot from jitter buffer :
 				//
 				uint ackCmdID;
-				byte[] snapshot = jitter.Pop( stopwatch.Elapsed.Ticks, gameClient.JitterPlayoutDelay, out ackCmdID );
+				byte[] snapshot = jitter.Pop( clientTicks, playoutDelay, latencyTicks, out ackCmdID );
 
 				if (snapshot!=null) {
 
@@ -147,6 +156,9 @@ namespace Fusion.Engine.Client {
 				bool showSnapshot = gameClient.Game.Network.Config.ShowSnapshots;
 
 				if (command==NetCommand.Snapshot) {
+
+					//Log.Message("ping:{0} - offset:{1}", msg.SenderConnection.AverageRoundtripTime, msg.SenderConnection.RemoteTimeOffset);
+
 					var index		=	msg.ReadUInt32();
 					var prevFrame	=	msg.ReadUInt32();
 					var ackCmdID	=	msg.ReadUInt32();

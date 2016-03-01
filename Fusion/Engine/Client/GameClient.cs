@@ -56,22 +56,6 @@ namespace Fusion.Engine.Client {
 		}
 
 
-
-		/// <summary>
-		/// JitterPlayoutDelay affect incoming snapshot de-jittering.
-		/// Higher values lead to more latency and better smoothiness.
-		/// Lower values lead to less latency and better responsiveness.
-		/// </summary>
-		public int JitterPlayoutDelay {
-			get { return jitterPlayoutDelay; }
-			set { 
-				if (value<0 || value>1000) throw new ArgumentOutOfRangeException("value", "JitterDelay must be within -100..100 range");
-				jitterPlayoutDelay = value; 
-			}
-		}
-		int jitterPlayoutDelay = 0;
-
-
 		/// <summary>
 		/// Called when connection request accepted by server.
 		/// Method returns GameLoader

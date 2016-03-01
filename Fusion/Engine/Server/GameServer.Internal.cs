@@ -116,7 +116,7 @@ namespace Fusion.Engine.Server {
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryRequest );
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryResponse );
-			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionLatencyUpdated );
+			//netConfig.EnableMessageType( NetIncomingMessageType.ConnectionLatencyUpdated );
 
 			var server		=	new NetServer( netConfig );
 			notifications	=	new Queue<string>();
@@ -177,7 +177,7 @@ namespace Fusion.Engine.Server {
 					while ( accumulator > targetDelta ) {
 
 						//var svTime = new GameTime( time, targetDelta );
-						var svTime = new GameTime( stopwatch.Elapsed, targetDelta );
+						var svTime = new GameTime( time, targetDelta );
 
 						UpdateNetworkAndLogic( svTime, server, snapshotQueue );
 
