@@ -51,6 +51,8 @@ namespace Fusion.Engine.Client {
 		bool pushed = false;
 		long lastServerTicks = 0;
 
+		long playoutDelay	=	50 * 10000L;
+
 
 		/// <summary>
 		/// Pushes snapshot to the queue. 
@@ -64,8 +66,12 @@ namespace Fusion.Engine.Client {
 			snapshots.Enqueue( new BufferedSnapshot(snapshotData, ackCmdID, serverTicks) );
 
 			var serverTicksBiased	=	serverTicks - initialServerTicks;
-			var currentDelta		=	serverTicksBiased - clientTicks;
-			clientServerDelta		=	Drift( clientServerDelta, currentDelta, 20000 );
+			var currentDelta		=	clientTicks - serverTicksBiased;
+
+			//clientServerDelta		=	Drift( clientServerDelta, currentDelta, 50000, 500 );
+			//clientServerDelta		=	Math.( clientServerDelta, currentDelta, 50000, 500 );
+
+			clientServerDelta		=	SlowDecay( clientServerDelta, currentDelta, 5000 );
 
 			pushed			= true;
 			lastServerTicks	= serverTicks - initialServerTicks;
@@ -73,25 +79,51 @@ namespace Fusion.Engine.Client {
 
 
 
+		long SlowDecay ( long current, long target, long decayRate )
+		{
+			if (current<target) {
+				return target;
+			} else {
+				
+				if (current>target+decayRate) {
+					return current - decayRate;
+				} else {
+					return target;
+				}
+			}
+		}
+
+
 		/// <summary>
 		/// Drifts value to target with constant velocity.
 		/// </summary>
 		/// <param name="current"></param>
 		/// <param name="target"></param>
-		/// <param name="velocity"></param>
+		/// <param name="up"></param>
+		/// <param name="down"></param>
 		/// <returns></returns>
-		long Drift ( long current, long target, long velocity )
+		long Drift ( long current, long target, long up, long down )
 		{
-			if ( Math.Abs(current - target) < velocity ) {
+			if (current==target) {
 				return target;
 			}
 
+			//	go down :
 			if (current>target) {
-				return current - velocity;
+				if (current>target+down) {
+					return current - down;
+				} else {
+					return target;
+				}
 			}
 
+			// go up:
 			if (current<target) {
-				return current + velocity;
+				if (current<target-up) {
+					return current + up;
+				} else {
+					return target;
+				}
 			}
 
 			return current;
@@ -105,11 +137,9 @@ namespace Fusion.Engine.Client {
 				return "--";
 			}
 
-			var value = sv - cl;
-			if (value<0) return "-" + Math.Abs(value/10000);
-			if (value>0) return "+" + Math.Abs(value/10000);
-			if (value==0) return "0";
-			return "";
+			var value = (cl - sv)/10000;
+
+			return value.ToString();
 		}
 
 
@@ -121,33 +151,77 @@ namespace Fusion.Engine.Client {
 		/// <param name="clTicks"></param>
 		/// <param name="push"></param>
 		/// <param name="pop"></param>
-		void ShowJitter ( int queueSize, long svTicks, long clTicks, bool push, bool pull, long offset )
+		void ShowJitter ( int queueSize, long svTicks, long clTicks, bool push, bool pull, long delay )
 		{											
 			var queue = (new string('*', queueSize)).PadLeft(5,' ');
 
-			Log.Message("{1}[{0}]{2} {3,8} {4,8} | {5,5} {6,5}", 
+			Log.Message("{1}[{0}]{2} {3,8} {4,8} | {5,5}  {6,5} {7,5} {8,5}", 
 				queue, 
 				push?">>":"  ",
 				pull?">>":"  ",
 				svTicks / 10000,
 				clTicks / 10000,
-				SignedDelta(svTicks, clTicks),
-				offset / 10000
+				SignedDelta( svTicks, clTicks ),
+				clientServerDelta/10000,
+				delay/10000,
+				clientServerDelta/10000 + delay/10000
 			);
-
-			//Log.Message("qs:{0} [{1}{2}] sv:{3} cl:{4} delta:{5} drift:{6}", 
-			//	queue, 
-			//	push?"enq":"   ",
-			//	pull?"deq":"   ",
-			//	svTicks / 10000,
-			//	clTicks / 10000,
-			//	SignedLong((svTicks-clTicks)/10000),
-			//	SignedLong(clientServerDelta/10000)
-			//	);
 		} 
 
 
+		int errorCounter	=	0;
 
+
+		/// <summary>
+		/// Pops snapshot from the queue.
+		/// </summary>
+		/// <param name="clientTicks"></param>
+		/// <returns></returns>
+		public byte[] Pop ( long clientTicks, int playoutDelay, out uint ackCmdID )
+		{
+			ackCmdID		=	0;
+			byte[] result	=	null;
+
+			int queueSize			=	snapshots.Count;
+			var pulled				=	false;
+			var bufferedSnapshot	=	(BufferedSnapshot)null;
+			var	serverTicksBiased	=	0L;
+
+			if (snapshots.Any()) {
+
+				bufferedSnapshot	=	snapshots.Peek();
+				serverTicksBiased	=	bufferedSnapshot.ServerTicks - initialServerTicks;
+
+				if (serverTicksBiased < (clientTicks - clientServerDelta - playoutDelay*10000) ) {
+
+					snapshots.Dequeue();
+
+					pulled		=	true;
+
+					ackCmdID	=	bufferedSnapshot.AckCmdID;
+					result		=	bufferedSnapshot.SnapshotData;
+
+				} else {
+					result	=	null;
+				}
+
+			} else {
+				result	=	null;
+			}
+
+			if (game.Network.Config.ShowJitter) {
+				ShowJitter( queueSize, serverTicksBiased, clientTicks, pushed, pulled, playoutDelay*10000 );
+			}
+
+			pushed	=	false;
+
+			return result;
+		}
+
+
+
+
+		#if false
 		/// <summary>
 		/// Pops snapshot from the queue.
 		/// </summary>
@@ -157,8 +231,6 @@ namespace Fusion.Engine.Client {
 		{
 			ackCmdID		=	0;
 			byte[] result	=	null;
-
-			#if true
 
 			int queueSize			=	snapshots.Count;
 			var pulled				=	false;
@@ -194,29 +266,8 @@ namespace Fusion.Engine.Client {
 			pushed	=	false;
 
 			return result;
-
-			#else
-
-			if (snapshots.Any()) {
-
-				var bs		=	snapshots.Dequeue();
-				ackCmdID	=	bs.AckCmdID;
-
-				var svTick	=	bs.ServerTicks - initialServerTicks;
-
-				var currentDelta	=	svTick - clientTicks;
-
-				clientServerDelta	=	Drift( clientServerDelta, currentDelta, 20000 /* 1ms */ );
-			
-				Log.Verbose("snaps:{0} sv:{1:0.00} svb:{2:0.00} cl:{3:0.00} delta:{4:0.00} drift:{5:0.00}", snapshots.Count+1, bs.ServerTicks/10000.0f, svTick/10000.0f, clientTicks/10000.0f, (svTick - clientTicks)/10000.0f, clientServerDelta/10000.0f );
-			
-				return bs.SnapshotData;
-
-			} else {
-				return null;
-			}
-			#endif
 		}
+		#endif
 
 		
 	}

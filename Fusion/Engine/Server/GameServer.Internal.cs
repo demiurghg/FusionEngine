@@ -116,7 +116,7 @@ namespace Fusion.Engine.Server {
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryRequest );
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryResponse );
-			//netConfig.EnableMessageType( NetIncomingMessageType.ConnectionLatencyUpdated );
+			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionLatencyUpdated );
 
 			var server		=	new NetServer( netConfig );
 			notifications	=	new Queue<string>();

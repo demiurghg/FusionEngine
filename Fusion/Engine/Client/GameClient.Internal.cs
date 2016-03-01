@@ -45,7 +45,7 @@ namespace Fusion.Engine.Client {
 
 			netConfig.AutoFlushSendQueue	=	true;
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
-			//netConfig.EnableMessageType( NetIncomingMessageType.ConnectionLatencyUpdated );
+			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionLatencyUpdated );
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryRequest );
 			netConfig.UnreliableSizeBehaviour = NetUnreliableSizeBehaviour.NormalFragmentation;
 

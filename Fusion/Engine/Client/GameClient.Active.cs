@@ -83,14 +83,12 @@ namespace Fusion.Engine.Client {
 
 				clientTicks	+=	gameTime.Elapsed.Ticks;
 
-				var latencyTicks =	(long)(client.ServerConnection.AverageRoundtripTime * 10L*1000L*1000L);
-				
 
 				//
 				//	Feed snapshot from jitter buffer :
 				//
 				uint ackCmdID;
-				byte[] snapshot = jitter.Pop( clientTicks, playoutDelay, latencyTicks, out ackCmdID );
+				byte[] snapshot = jitter.Pop( clientTicks, playoutDelay, out ackCmdID );
 
 				if (snapshot!=null) {
 

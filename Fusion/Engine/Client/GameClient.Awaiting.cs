@@ -78,7 +78,7 @@ namespace Fusion.Engine.Client {
 
 					var snapshot	=	NetworkEngine.Decompress( msg.ReadBytes(size) );
 
-					gameClient.SetState( new Active( gameClient, frame, snapshot, serverTicks + latencyTicks ) );
+					gameClient.SetState( new Active( gameClient, frame, snapshot, serverTicks ) );
 				}
 
 				if (command==NetCommand.Notification) {
