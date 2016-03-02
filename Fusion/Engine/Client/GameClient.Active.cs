@@ -27,6 +27,9 @@ namespace Fusion.Engine.Client {
 			Stopwatch		stopwatch;
 			long			clientTicks;
 
+			long			lastServerTicks;
+			uint			lastSnapshotID;
+
 
 			/// <summary>
 			/// Creates instance of Active client state.
@@ -39,6 +42,9 @@ namespace Fusion.Engine.Client {
 				queue	=	new SnapshotQueue(32);
 				queue.Push( new Snapshot( new TimeSpan(0), snapshotId, initialSnapshot) );
 
+				lastServerTicks	=	svTicks;
+				lastSnapshotID	=	snapshotId;
+
 				#if USE_DEJITTER
 				jitter		=	new JitterBuffer( gameClient.Game, svTicks );
 				#endif
@@ -48,7 +54,7 @@ namespace Fusion.Engine.Client {
 
 				lastSnapshotFrame	=	snapshotId;
 
-				gameClient.FeedSnapshot( initialSnapshot, 0 );
+				gameClient.FeedSnapshot( new GameTime(svTicks,0L), initialSnapshot, 0 );
 			}
 
 
@@ -139,12 +145,24 @@ namespace Fusion.Engine.Client {
 			/// <param name="snapshot"></param>
 			/// <param name="ackCmdID"></param>
 			/// <param name="svTicks"></param>
-			void FeedSnapshot ( byte[] snapshot, uint ackCmdID, long svTicks )
+			void FeedSnapshot ( byte[] snapshot, uint ackCmdID, uint snapshotId, long svTicks )
 			{
+				uint indexDelta	=	snapshotId - lastSnapshotID;
+				lastSnapshotID	=	snapshotId;
+
+				long timeDelta	=	lastServerTicks - svTicks;
+				lastServerTicks	=	svTicks;
+
+				if (indexDelta==0) {
+					Log.Error("Duplicate snapshot #{0}", snapshotId);
+				} else {
+					timeDelta	/= indexDelta;
+				}
+
 				#if USE_DEJITTER
 				jitter.Push( snapshot, ackCmdID, svTicks, stopwatch.Elapsed.Ticks );
 				#else
-				gameClient.FeedSnapshot( snapshot, ackCmdID );
+				gameClient.FeedSnapshot( new GameTime(svTicks,timeDelta), snapshot, ackCmdID );
 				#endif
 			}
 
@@ -175,7 +193,7 @@ namespace Fusion.Engine.Client {
 					
 					if (snapshot!=null) {
 
-						FeedSnapshot( snapshot, ackCmdID, serverTicks );
+						FeedSnapshot( snapshot, ackCmdID, index, serverTicks );
 						queue.Push( new Snapshot(new TimeSpan(0), index, snapshot) );
 
 					} else {

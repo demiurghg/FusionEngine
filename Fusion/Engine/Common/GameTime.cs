@@ -63,6 +63,18 @@ namespace Fusion.Engine.Common {
 
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="total"></param>
+		/// <param name="elapsed"></param>
+		internal GameTime ( long totalTicks, long elapsedTicks )
+		{
+			this.total		=	new TimeSpan(totalTicks);
+			this.elapsed	=	new TimeSpan(elapsedTicks);
+		}
+
+
+		/// <summary>
 		/// Updates timer
 		/// </summary>
 		public void Update()

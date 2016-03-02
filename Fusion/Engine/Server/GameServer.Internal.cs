@@ -253,6 +253,7 @@ namespace Fusion.Engine.Server {
 			//	crash test for server :
 			CrashServer.CrashTest();
 			FreezeServer.FreezeTest();
+			SlowdownServer.SlowTest();
 		}
 
 

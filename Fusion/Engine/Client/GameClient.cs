@@ -91,7 +91,7 @@ namespace Fusion.Engine.Client {
 		/// </summary>
 		/// <param name="snapshotStream">Snapshot data stream.</param>
 		/// <param name="ackCommandID">Acknoledged (e.g. received and responsed) command ID. Zero value means first snapshot.</param>
-		public abstract void FeedSnapshot ( byte[] snapshot, uint ackCommandID );
+		public abstract void FeedSnapshot ( GameTime serverTime, byte[] snapshot, uint ackCommandID );
 
 		/// <summary>
 		/// Feed notification from server.
