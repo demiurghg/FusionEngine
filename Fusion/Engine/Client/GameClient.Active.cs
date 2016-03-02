@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define USE_DEJITTER
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -38,7 +39,9 @@ namespace Fusion.Engine.Client {
 				queue	=	new SnapshotQueue(32);
 				queue.Push( new Snapshot( new TimeSpan(0), snapshotId, initialSnapshot) );
 
+				#if USE_DEJITTER
 				jitter		=	new JitterBuffer( gameClient.Game, svTicks );
+				#endif
 				stopwatch	=	new Stopwatch();
 				stopwatch.Start();
 				clientTicks	=	0;
@@ -83,18 +86,18 @@ namespace Fusion.Engine.Client {
 
 				clientTicks	+=	gameTime.Elapsed.Ticks;
 
-
 				//
 				//	Feed snapshot from jitter buffer :
 				//
+				#if USE_DEJITTER
 				uint ackCmdID;
 				byte[] snapshot = jitter.Pop( clientTicks, playoutDelay, out ackCmdID );
 
 				if (snapshot!=null) {
-
 					gameClient.FeedSnapshot( snapshot, ackCmdID );
-
 				}
+				#endif
+
 
 				//
 				//	Update client state and get user command:
@@ -138,7 +141,11 @@ namespace Fusion.Engine.Client {
 			/// <param name="svTicks"></param>
 			void FeedSnapshot ( byte[] snapshot, uint ackCmdID, long svTicks )
 			{
+				#if USE_DEJITTER
 				jitter.Push( snapshot, ackCmdID, svTicks, stopwatch.Elapsed.Ticks );
+				#else
+				gameClient.FeedSnapshot( snapshot, ackCmdID );
+				#endif
 			}
 
 
