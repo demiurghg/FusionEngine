@@ -17,6 +17,12 @@ namespace Fusion.Engine.Common {
 		Stopwatch		stopWatch;
 		TimeSpan		total;
 		TimeSpan		elapsed;
+		long			frame;
+
+		/// <summary>
+		/// Gets total number of frames since game had been started.
+		/// </summary>
+		public long Frames { get { return frame; } }
 
 		/// <summary>
 		/// Total game time since game had been started.
@@ -55,8 +61,9 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		/// <param name="total"></param>
 		/// <param name="elapsed"></param>
-		internal GameTime ( TimeSpan total, TimeSpan elapsed )
+		internal GameTime ( long frames, TimeSpan total, TimeSpan elapsed )
 		{
+			this.frame		=	frames;
 			this.total		=	total;
 			this.elapsed	=	elapsed;
 		}
@@ -67,8 +74,9 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		/// <param name="total"></param>
 		/// <param name="elapsed"></param>
-		internal GameTime ( long totalTicks, long elapsedTicks )
+		internal GameTime ( long frames, long totalTicks, long elapsedTicks )
 		{
+			this.frame		=	frames;
 			this.total		=	new TimeSpan(totalTicks);
 			this.elapsed	=	new TimeSpan(elapsedTicks);
 		}

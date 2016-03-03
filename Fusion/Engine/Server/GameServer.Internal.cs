@@ -124,6 +124,7 @@ namespace Fusion.Engine.Server {
 			Log.Message("SV: Start: {0} {1}", map, postCommand);
 
 			var snapshotQueue	=	new SnapshotQueue(32);
+			var serverFrames	=	0L;
 
 			//var accumulatedElapsedTime = TimeSpan.FromTicks(0);
 			//var maxElapsedTime = TimeSpan.FromMilliseconds(1000);
@@ -177,7 +178,8 @@ namespace Fusion.Engine.Server {
 					while ( accumulator > targetDelta ) {
 
 						//var svTime = new GameTime( time, targetDelta );
-						var svTime = new GameTime( time, targetDelta );
+						var svTime = new GameTime( serverFrames, time, targetDelta );
+						serverFrames++;
 
 						UpdateNetworkAndLogic( svTime, server, snapshotQueue );
 

@@ -25,6 +25,7 @@ namespace Fusion.Engine.Client {
 			SnapshotQueue	queue;
 			JitterBuffer	jitter;
 			Stopwatch		stopwatch;
+			long			clientFrames = 0;
 			long			clientTicks;
 
 			long			lastServerTicks;
@@ -42,19 +43,22 @@ namespace Fusion.Engine.Client {
 				queue	=	new SnapshotQueue(32);
 				queue.Push( new Snapshot( new TimeSpan(0), snapshotId, initialSnapshot) );
 
-				lastServerTicks	=	svTicks;
-				lastSnapshotID	=	snapshotId;
+				lastServerTicks		=	svTicks;
+				lastSnapshotID		=	snapshotId;
+				lastSnapshotFrame	=	snapshotId;
+
 
 				#if USE_DEJITTER
 				jitter		=	new JitterBuffer( gameClient.Game, svTicks );
 				#endif
+
+
 				stopwatch	=	new Stopwatch();
 				stopwatch.Start();
-				clientTicks	=	0;
+				clientTicks	=	stopwatch.Elapsed.Ticks;
 
-				lastSnapshotFrame	=	snapshotId;
 
-				gameClient.FeedSnapshot( new GameTime(svTicks,0L), initialSnapshot, 0 );
+				gameClient.FeedSnapshot( new GameTime(0,svTicks,0L), initialSnapshot, 0 );
 			}
 
 
@@ -88,9 +92,15 @@ namespace Fusion.Engine.Client {
 			/// <param name="gameTime"></param>
 			public override void Update ( GameTime gameTime )
 			{
-				int playoutDelay	=	gameClient.Game.Network.Config.PlayoutDelay;
+				//
+				//	Update timing and frame counting :
+				//
+				long currentTime	=	stopwatch.Elapsed.Ticks;
+				long deltaTime		=	currentTime - clientTicks;
+				clientTicks			=	currentTime;
+				var  clientTime		=	new GameTime(clientFrames, currentTime, deltaTime);
 
-				clientTicks	+=	gameTime.Elapsed.Ticks;
+				clientFrames++;
 
 				//
 				//	Feed snapshot from jitter buffer :
@@ -108,14 +118,19 @@ namespace Fusion.Engine.Client {
 				//
 				//	Update client state and get user command:
 				//
-				var userCmd  = gameClient.Update(gameTime, commandCounter);
+				var userCmd  = gameClient.Update( clientTime, commandCounter);
 
+
+				//	show user commands :
 				bool showSnapshot = gameClient.Game.Network.Config.ShowSnapshots;
-
 				if (showSnapshot) {
 					Log.Message("User cmd: #{0} : {1}", lastSnapshotFrame, userCmd.Length );
 				}
 
+
+				//
+				//	Send user command :
+				//
 				gameClient.SendUserCommand( client, lastSnapshotFrame, commandCounter, userCmd );
 
 				//	increase command counter:
@@ -145,12 +160,12 @@ namespace Fusion.Engine.Client {
 			/// <param name="snapshot"></param>
 			/// <param name="ackCmdID"></param>
 			/// <param name="svTicks"></param>
-			void FeedSnapshot ( byte[] snapshot, uint ackCmdID, uint snapshotId, long svTicks )
+			void FeedSnapshot ( byte[] snapshot, uint ackCmdID, uint snapshotId, long svTicks, long svFrame )
 			{
 				uint indexDelta	=	snapshotId - lastSnapshotID;
 				lastSnapshotID	=	snapshotId;
 
-				long timeDelta	=	lastServerTicks - svTicks;
+				long timeDelta	=	svTicks - lastServerTicks;
 				lastServerTicks	=	svTicks;
 
 				if (indexDelta==0) {
@@ -162,7 +177,7 @@ namespace Fusion.Engine.Client {
 				#if USE_DEJITTER
 				jitter.Push( snapshot, ackCmdID, svTicks, stopwatch.Elapsed.Ticks );
 				#else
-				gameClient.FeedSnapshot( new GameTime(svTicks,timeDelta), snapshot, ackCmdID );
+				gameClient.FeedSnapshot( new GameTime(svFrame, svTicks,timeDelta), snapshot, ackCmdID );
 				#endif
 			}
 
@@ -193,7 +208,7 @@ namespace Fusion.Engine.Client {
 					
 					if (snapshot!=null) {
 
-						FeedSnapshot( snapshot, ackCmdID, index, serverTicks );
+						FeedSnapshot( snapshot, ackCmdID, index, serverTicks, index );
 						queue.Push( new Snapshot(new TimeSpan(0), index, snapshot) );
 
 					} else {
