@@ -61,8 +61,6 @@ namespace Fusion.Engine.Graphics.GIS
 				Scale = (float) DMathUtil.Clamp(Scale, 0.0, 1.5);
 			}
 
-			Console.WriteLine(GlobeCamera.CameraDistance);
-
 			TextSpriteLayer.Clear();
 			TextSpriteLayer.BlendMode = SpriteBlendMode.AlphaBlend;
 
