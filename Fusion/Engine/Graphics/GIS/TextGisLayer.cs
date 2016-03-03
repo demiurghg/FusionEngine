@@ -32,7 +32,10 @@ namespace Fusion.Engine.Graphics.GIS
 		public DiscTexture	Font			{ set; get; }
 		//public SpriteFont	spriteFont;
 		public float		Scale			{ set; get; }
+		public float		MaxScale		{ set; get; }
 
+		private int linesCountToDraw;
+		public	int LinesCountToDraw { get {return linesCountToDraw;} set { linesCountToDraw = Math.Min(GeoTextArray.Length, value); }  }
 
 
 		public TextGisLayer(Game game, int capacity, GlobeCamera camera) : base(game)
@@ -40,14 +43,16 @@ namespace Fusion.Engine.Graphics.GIS
 			GlobeCamera		= camera;
 			TextSpriteLayer = new SpriteLayer(Game.RenderSystem, 2048);
 
-			GeoTextArray	= new GeoText[capacity];
-			Font			= Game.Content.Load<DiscTexture>("conchars");
+			GeoTextArray		= new GeoText[capacity];
+			LinesCountToDraw	= capacity;
+			Font				= Game.Content.Load<DiscTexture>("conchars");
 			//spriteFont		= Game.Content.Load<SpriteFont>(@"Fonts\textFont");
 
 			MinZoom = 6380;
 			MaxZoom = 6500;
 
-			Scale = 1.0f;
+			Scale		= 1.0f;
+			MaxScale	= 1.5f;
 		}
 
 
@@ -57,14 +62,15 @@ namespace Fusion.Engine.Graphics.GIS
 
 			if (MaxZoom != MinZoom) {
 				double amount = (GlobeCamera.CameraDistance - MinZoom)/(MaxZoom - MinZoom);
-				Scale = (float) DMathUtil.Lerp(1.5, 0.0, amount);
-				Scale = (float) DMathUtil.Clamp(Scale, 0.0, 1.5);
+				Scale = (float)DMathUtil.Lerp(MaxScale, 0.0, amount);
+				Scale = (float)DMathUtil.Clamp(Scale, 0.0, MaxScale);
 			}
 
 			TextSpriteLayer.Clear();
 			TextSpriteLayer.BlendMode = SpriteBlendMode.AlphaBlend;
 
-			foreach (var text in GeoTextArray) {
+			for (int i = 0; i < LinesCountToDraw; i++) {
+				var text = GeoTextArray[i];
 				if(text == null || text.Text.Length == 0) continue;
 
 				var cartPos		= GeoHelper.SphericalToCartesian(text.LonLat, GeoHelper.EarthRadius);
