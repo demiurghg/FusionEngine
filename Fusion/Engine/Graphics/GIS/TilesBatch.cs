@@ -37,7 +37,7 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			RegisterMapSources();
 
-			CurrentMapSource = MapSources[2];
+			CurrentMapSource = MapSources[9];
 
 			this.camera = camera;
 
@@ -76,7 +76,8 @@ namespace Fusion.Engine.Graphics.GIS
 			dev.PixelShaderSamplers[0]		= SamplerState.AnisotropicClamp;
 			dev.PixelShaderResources[1]		= frame;
 
-			dev.PipelineState = factory[(int)(TileFlags.SHOW_FRAMES)];
+			//dev.PipelineState = factory[(int)(TileFlags.SHOW_FRAMES)];
+			dev.PipelineState = factory[0];
 
 
 			foreach (var globeTile in tilesToRender) {

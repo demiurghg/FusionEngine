@@ -16,10 +16,7 @@ namespace Fusion.Engine.Graphics.GIS
 	{
 		Game Game;
 
-
-		
-
-		public GlobeCameraParameters Parameters { set; get; }
+		public GlobeCameraParameters Parameters { protected set; get; }
 
 		public enum CameraStates
 		{
@@ -57,7 +54,7 @@ namespace Fusion.Engine.Graphics.GIS
 		public double CameraDistance {
 			get { return cameraDistance; }
 			set {
-				cameraDistance = DMathUtil.Clamp(value, EarthRadius + 0.35, Parameters.MaxCameraDistance);
+				cameraDistance = DMathUtil.Clamp(value, EarthRadius + Parameters.ClosestDistanceToSurface, Parameters.MaxCameraDistance);
 			}
 		}
 
@@ -112,6 +109,9 @@ namespace Fusion.Engine.Graphics.GIS
 			public double MinDistVelocityThreshold	{ set; get; }
 			public double MaxVelocityFreeSurfCam	{ set; get; }
 			public double MinVelocityFreeSurfCam	{ set; get; }
+
+			public double ClosestDistanceToSurface { set; get; }
+
 		}
 
 		public GlobeCamera(Game engine)
@@ -128,7 +128,8 @@ namespace Fusion.Engine.Graphics.GIS
 				MaxDistVelocityThreshold	= 10000,
 				MinDistVelocityThreshold	= 0.5,
 				MaxVelocityFreeSurfCam		= 800,
-				MinVelocityFreeSurfCam		= 0.01
+				MinVelocityFreeSurfCam		= 0.01,
+				ClosestDistanceToSurface	= 0.01
 			};
 
 

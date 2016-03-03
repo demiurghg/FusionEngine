@@ -406,7 +406,7 @@ namespace Fusion.Engine.Graphics {
 
 
 
-		public void DrawDebugString ( Texture fontTexture, int x, int y, string text, Color color )
+		public void DrawDebugString(Texture fontTexture, float x, float y, string text, Color color, float scale = 1.0f)
 		{
 			int len = text.Length;
 			var duv = 1.0f / 16.0f;
@@ -417,8 +417,8 @@ namespace Fusion.Engine.Graphics {
 				var u  = (ch%16)/16.0f;
 				var v  = (ch/16)/16.0f;
 
-				Draw( fontTexture, x, y, 8, 8, color, u, v, duv, duv );
-				x += 8;
+				Draw(fontTexture, x, y, 8 * scale, 8 * scale, color, u, v, duv, duv);
+				x += 8 * scale;
 			}
 		}
 

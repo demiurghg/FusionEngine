@@ -117,11 +117,11 @@ namespace Fusion.Engine.Graphics.GIS
 			Camera.Viewport = new Viewport(0, 0, Game.GraphicsDevice.DisplayBounds.Width, Game.GraphicsDevice.DisplayBounds.Height);
 			Camera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
 
-		    Game.GraphicsDevice.DisplayBoundsChanged +=
-			    (sender, args) =>
-				    Camera.Viewport =
-					    new Viewport(0, 0, Game.GraphicsDevice.DisplayBounds.Width,
-						    Game.GraphicsDevice.DisplayBounds.Height);
+		    //Game.GraphicsDevice.DisplayBoundsChanged +=
+			//    (sender, args) =>
+			//	    Camera.Viewport =
+			//		    new Viewport(0, 0, Game.GraphicsDevice.DisplayBounds.Width,
+			//			    Game.GraphicsDevice.DisplayBounds.Height);
 
 
 			// Input bindings

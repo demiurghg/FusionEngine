@@ -55,9 +55,13 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.BingMaps
 		// http://ak.dynamic.t2.tiles.virtualearth.net/comp/ch/120030?mkt=ru-RU&it=G,BX,RL&shading=hill&n=z&og=117&c4w=1
 		// http://ecn.t0.tiles.virtualearth.net/tiles/r120030?g=875&mkt=en-us&lbl=l1&stl=h&shading=hill&n=z
 
-		static readonly string UrlFormat = "http://ecn.t{0}.tiles.virtualearth.net/tiles/r{1}?g={2}&mkt={3}&lbl=l1&stl=h&shading=hill&n=z{4}";
 
-		private string serverLetters = "01234567";
+		protected string	UrlFormat = "http://ecn.t{0}.tiles.virtualearth.net/tiles/r{1}?g={2}&mkt={3}&lbl=l1&stl=h&shading=hill&n=z{4}";
+
+		protected string	serverLetters	= "01234567";
+		protected string	Version			= "1173";
+		protected string	language		= "ru-RU";
+
 
 		char GetServerNum(int x, int y)
 		{
@@ -66,8 +70,9 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.BingMaps
 
 		public override string GenerateUrl(int x, int y, int zoom)
 		{
-			var serverN =  GetServerNum(x, y);
+			string key	= TileXYToQuadKey(x, y, zoom);
 
+			return string.Format(UrlFormat, GetServerNum(x, y), key, Version, language, string.Empty);
 
 			return "";
 		}
