@@ -1,4 +1,22 @@
-# Fusion Engine Version 0.2 Release Notes
+# Fusion Engine Version 0.03 Release Notes
+
+## New features
+ 1. Double click in Frames.
+ 2. Server side lag calculation
+ 3. GameClient now receives server GameTime
+ 4. GameClient 
+ 5. Fixed timestep on server side with TargetFrameRate
+ 6. Debug render with traces.
+ 
+## Fixes
+ 1. Console would not open if non-english keybaord layout is active.
+ 2. FrameProcessor.TargetFrame was never assigned.
+
+## Notes
+Changes are breaking.
+ 1. Set server TargetFrameRate
+
+# Fusion Engine Version 0.02 Release Notes
 
 ## New features
  1. GPU particles.
