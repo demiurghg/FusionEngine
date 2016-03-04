@@ -77,6 +77,9 @@ namespace Fusion.Engine.Graphics.GIS
 		public Gis.GeoPoint[] PointsCpu { get; protected set; }
 
 
+		public class SelectedItem : Gis.SelectedItem {}
+
+
 		public override void Dispose()
 		{
 			if (firstBuffer != null)	firstBuffer.Dispose();
@@ -287,5 +290,10 @@ namespace Fusion.Engine.Graphics.GIS
 			return linesLayer;
 		}
 
+
+		public override List<Gis.SelectedItem> Select(DVector3 nearPoint, DVector3 farPoint)
+		{
+			return null;
+		}
 	}
 }

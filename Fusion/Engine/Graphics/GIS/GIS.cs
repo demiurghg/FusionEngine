@@ -75,15 +75,28 @@ namespace Fusion.Engine.Graphics.GIS
 
 		    public uint ZOrder;
 
-			public virtual void Draw	(GameTime gameTime, ConstantBuffer constBuffer) {}//, Settings config)	{ }
-			public virtual void Update	(GameTime gameTime) {}//, Settings config)	{ }
-			public virtual void Dispose	() {}
+			public virtual void Draw	(GameTime gameTime, ConstantBuffer constBuffer) {}
+			public virtual void Update	(GameTime gameTime) {}
+
+			public virtual List<SelectedItem> Select(DVector3 nearPoint, DVector3 farPoint)
+		    {
+			    return null;
+		    }
+
+		    public virtual void Dispose	() {}
 
 
 		    public GisLayer(Game engine)
 		    {
 			    Game = engine;
 		    }
+	    }
+
+	    public class SelectedItem
+	    {
+		    public string Name;
+		    public double Distance;
+
 	    }
 
 		Vector2 previousMousePosition;
@@ -104,11 +117,11 @@ namespace Fusion.Engine.Graphics.GIS
 			Camera.Viewport = new Viewport(0, 0, Game.GraphicsDevice.DisplayBounds.Width, Game.GraphicsDevice.DisplayBounds.Height);
 			Camera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
 
-		    Game.GraphicsDevice.DisplayBoundsChanged +=
-			    (sender, args) =>
-				    Camera.Viewport =
-					    new Viewport(0, 0, Game.GraphicsDevice.DisplayBounds.Width,
-						    Game.GraphicsDevice.DisplayBounds.Height);
+		    //Game.GraphicsDevice.DisplayBoundsChanged +=
+			//    (sender, args) =>
+			//	    Camera.Viewport =
+			//		    new Viewport(0, 0, Game.GraphicsDevice.DisplayBounds.Width,
+			//			    Game.GraphicsDevice.DisplayBounds.Height);
 
 
 			// Input bindings
@@ -123,8 +136,8 @@ namespace Fusion.Engine.Graphics.GIS
 		    {
 				if (Game.InputDevice.IsKeyDown(Keys.LeftButton)) {
 					DVector2 before, after;
-					var beforeHit	= Camera.ScreenToSpherical(previousMousePosition.X, previousMousePosition.Y, out before, true);
-					var afterHit	= Camera.ScreenToSpherical(args.Position.X, args.Position.Y, out after, true);
+					var beforeHit	= Camera.ScreenToSpherical(previousMousePosition.X, previousMousePosition.Y, out before);
+					var afterHit	= Camera.ScreenToSpherical(args.Position.X, args.Position.Y, out after);
 
 					if (beforeHit && afterHit) {
 						Camera.Yaw		-= after.X - before.X;

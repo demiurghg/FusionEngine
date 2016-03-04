@@ -67,14 +67,13 @@ namespace Fusion.Engine.Graphics.GIS
 			var ms = CurrentMapSource;
 
 			//var d = Math.Log((camera.CameraDistance - camera.EarthRadius) * 1000.0, 2.0);
-			double lod = 3;
+			double lod = lowestLod;
 			
 			if (camera.Viewport.Width != 0) {
-				int closestZoom = 3;
-				double closestRadius = 100;
+				int closestZoom = lowestLod;
+				double	closestRadius	= 100;
 
-				for (int zoom = 3; zoom < ms.MaxZoom; zoom++)
-				{
+				for (int zoom = 3; zoom <= ms.MaxZoom; zoom++) {
 					var dis = GetLevelScreenSpaceError(zoom, camera.CameraDistance - camera.EarthRadius);
 
 					if (dis < closestRadius && dis >= 0.0f) {
@@ -170,7 +169,7 @@ namespace Fusion.Engine.Graphics.GIS
 			double eps	= 256.0/(1 << zoom);
 			double xx	= camera.Viewport.Height;
 			double dd	= distance;
-			double eta	= DMathUtil.DegreesToRadians(camera.camFov);
+			double eta	= DMathUtil.DegreesToRadians(camera.Parameters.CameraFovDegrees);
 
 			double p = (eps*xx)/(2*dd*Math.Tan(eta));
 

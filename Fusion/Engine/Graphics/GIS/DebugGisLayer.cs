@@ -15,6 +15,8 @@ namespace Fusion.Engine.Graphics.GIS
 		List<Gis.CartPoint> boxes;
 		List<Gis.CartPoint> lines;
 
+		public class SelectedItem : Gis.SelectedItem { }
+
 		Ubershader		shader;
 		StateFactory	factory;
 
@@ -61,6 +63,68 @@ namespace Fusion.Engine.Graphics.GIS
 		public void Clear()
 		{
 			lines.Clear();
+		}
+
+
+		public void DrawBoundingBox(BoundingBox box)
+		{
+			DrawLine(new DVector3(box.Minimum.X, box.Minimum.Y, box.Minimum.Z), new DVector3(box.Maximum.X, box.Minimum.Y, box.Minimum.Z), Color.Green);
+			DrawLine(new DVector3(box.Minimum.X, box.Minimum.Y, box.Minimum.Z), new DVector3(box.Minimum.X, box.Maximum.Y, box.Minimum.Z), Color.Green);
+			DrawLine(new DVector3(box.Minimum.X, box.Minimum.Y, box.Minimum.Z), new DVector3(box.Minimum.X, box.Minimum.Y, box.Maximum.Z), Color.Green);
+
+			DrawLine(new DVector3(box.Maximum.X, box.Maximum.Y, box.Maximum.Z), new DVector3(box.Minimum.X, box.Maximum.Y, box.Maximum.Z), Color.Red);
+			DrawLine(new DVector3(box.Maximum.X, box.Maximum.Y, box.Maximum.Z), new DVector3(box.Maximum.X, box.Minimum.Y, box.Maximum.Z), Color.Red);
+			DrawLine(new DVector3(box.Maximum.X, box.Maximum.Y, box.Maximum.Z), new DVector3(box.Maximum.X, box.Maximum.Y, box.Minimum.Z), Color.Red);
+		}
+
+
+		public void DrawBoundingBox(BoundingBox box, DMatrix transform)
+		{
+			var corners			= box.GetCorners();
+			var worldCorners	= corners.Select(x => DVector3.TransformCoordinate(new DVector3(x.X, x.Y, x.Z), transform)).ToArray();
+
+			//foreach (var corner in worldCorners)
+			//{
+			//	DrawPoint(corner, 0.1f);
+			//}
+			
+
+			DrawLine(worldCorners[0], worldCorners[1], Color.Green);
+			DrawLine(worldCorners[0], worldCorners[4], Color.Green);
+			DrawLine(worldCorners[0], worldCorners[3], Color.Green);
+
+			DrawLine(worldCorners[7], worldCorners[6], Color.Red);
+			DrawLine(worldCorners[7], worldCorners[3], Color.Red);
+			DrawLine(worldCorners[7], worldCorners[4], Color.Red);
+
+			DrawLine(worldCorners[5], worldCorners[1], Color.Yellow);
+			DrawLine(worldCorners[5], worldCorners[4], Color.Yellow);
+			DrawLine(worldCorners[5], worldCorners[6], Color.Yellow);
+
+			DrawLine(worldCorners[2], worldCorners[1], Color.WhiteSmoke);
+			DrawLine(worldCorners[2], worldCorners[3], Color.WhiteSmoke);
+			DrawLine(worldCorners[2], worldCorners[6], Color.WhiteSmoke);
+		}
+
+
+		public void DrawLine(DVector3 pos0, DVector3 pos1, Color color)
+		{
+			lines.Add(new Gis.CartPoint {
+				X = pos0.X,
+				Y = pos0.Y,
+				Z = pos0.Z,
+				Tex0	= Vector4.Zero,
+				Color	= color.ToColor4()
+			});
+			lines.Add(new Gis.CartPoint {
+				X = pos1.X,
+				Y = pos1.Y,
+				Z = pos1.Z,
+				Tex0	= Vector4.Zero,
+				Color	= color.ToColor4()
+			});
+
+			isDirty = true;
 		}
 
 
@@ -112,5 +176,10 @@ namespace Fusion.Engine.Graphics.GIS
 			isDirty = true;
 		}
 
+
+		public override List<Gis.SelectedItem> Select(DVector3 nearPoint, DVector3 farPoint)
+		{
+			return null;
+		}
 	}
 }

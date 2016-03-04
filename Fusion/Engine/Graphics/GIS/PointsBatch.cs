@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
+using Fusion.Engine.Graphics.GIS.GlobeMath;
 
 namespace Fusion.Engine.Graphics.GIS
 {
@@ -24,6 +25,11 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 		public int Flags;
+
+		public class SelectedItem : Gis.SelectedItem
+		{
+			public int PointIndex;
+		}
 
 
 		 [StructLayout(LayoutKind.Explicit)]
@@ -159,9 +165,35 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		void SwapBuffers()
+		public override List<Gis.SelectedItem> Select(DVector3 nearPoint, DVector3 farPoint)
 		{
+			DVector3[] rayHitPoints;
+			var ret = new List<Gis.SelectedItem>();
 
+			if (!GeoHelper.LineIntersection(nearPoint, farPoint, GeoHelper.EarthRadius, out rayHitPoints)) return ret;
+
+			var rayLonLatRad			= GeoHelper.CartesianToSpherical(rayHitPoints[0]);
+			var OneGradusLengthKmInv	= 1.0 / (Math.Cos(rayLonLatRad.Y)*GeoHelper.EarthOneDegreeLengthOnEquatorMeters/1000.0);
+
+			for (int i = 0; i < PointsCountToDraw; i++) {
+				int ind		= PointsDrawOffset + i;
+				var point	= PointsCpu[ind];
+
+				var size		= point.Tex0.Z * 0.5;
+				var pointLonLat = new DVector2(point.Lon, point.Lat);
+
+
+				var dist = GeoHelper.DistanceBetweenTwoPoints(pointLonLat, rayLonLatRad);
+
+				if (dist <= size) {
+					ret.Add(new SelectedItem {
+						Distance	= dist,
+						PointIndex	= ind
+					});
+				}
+			}
+
+			return ret;
 		}
 	}
 }
