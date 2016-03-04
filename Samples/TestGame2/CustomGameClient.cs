@@ -108,7 +108,7 @@ namespace TestGame2 {
 		/// Called when fresh snapshot arrived.
 		/// </summary>
 		/// <param name="snapshot"></param>
-		public override void FeedSnapshot ( byte[] snapshot, uint ackCommandID ) 
+		public override void FeedSnapshot ( GameTime svTime, byte[] snapshot, uint ackCommandID ) 
 		{
 			var str = Encoding.UTF8.GetString( snapshot );
 			if (Config.Show) {
