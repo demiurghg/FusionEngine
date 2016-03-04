@@ -203,9 +203,6 @@ namespace GISTest {
 
 			Hud.Clear(HudFps);
 			Hud.Add(HudFps, Color.Orange, "FPS     : {0,6:0.00}", gameTime.Fps );
-			Hud.Add(HudFps, Color.Orange, "FPS avg : {0,6:0.00}", gameTime.AverageFrameRate );
-			Hud.Add(HudFps, Color.Orange, "FPS max : {0,6:0.00}", gameTime.MaxFrameRate );
-			Hud.Add(HudFps, Color.Orange, "FPS min : {0,6:0.00}", gameTime.MinFrameRate );
 
 
 			testLayer.Clear();

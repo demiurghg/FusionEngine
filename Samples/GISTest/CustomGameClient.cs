@@ -95,7 +95,8 @@ namespace GISTest {
 		/// Do not close the stream.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		public override byte[] Update ( GameTime gameTime )
+		/// 
+		public override byte[] Update ( GameTime gameTime, uint sentCommandID )
 		{
 			var mouse = Game.Mouse;
 			
@@ -108,7 +109,7 @@ namespace GISTest {
 		/// Called when fresh snapshot arrived.
 		/// </summary>
 		/// <param name="snapshot"></param>
-		public override void FeedSnapshot ( byte[] snapshot, bool initial ) 
+		public override void FeedSnapshot ( GameTime serverTime, byte[] snapshot, uint ackCommandID )
 		{
 			var str = Encoding.UTF8.GetString( snapshot );
 			if (Config.Show) {
