@@ -78,7 +78,7 @@ namespace $safeprojectname$ {
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="clientId"></param>
-		public override void FeedCommand ( Guid id, byte[] userCommand, float lag )
+		public override void FeedCommand ( Guid id, byte[] userCommand, uint commandID, float lag )
 		{
 			state[id] = Encoding.UTF8.GetString( userCommand );
 		}
