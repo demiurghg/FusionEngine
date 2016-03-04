@@ -381,6 +381,10 @@ namespace Fusion.Framework {
 
 		void Keyboard_FormKeyDown ( object sender, KeyEventArgs e )
 		{
+			if (e.Key==Keys.OemTilde) {
+				Show = !Show;
+				return;
+			}
 			if (!Show) {
 				return;
 			}
@@ -400,7 +404,7 @@ namespace Fusion.Framework {
 		}
 
 		
-
+		const char Tilde = (char)'`';
 		const char Backspace = (char)8;
 		const char Enter = (char)13;
 		const char Escape = (char)27;
@@ -409,14 +413,11 @@ namespace Fusion.Framework {
 
 		void Keyboard_FormKeyPress ( object sender, KeyPressArgs e )
 		{
-			if (e.KeyChar=='`') {
-				Show = !Show;
-				return;
-			}
 			if (!Show) {
 				return;
 			}
 			switch (e.KeyChar) {
+				case Tilde		: break;
 				case Backspace	: editBox.Backspace(); break;
 				case Enter		: ExecCmd(); editBox.Enter(); break;
 				case Escape		: break;
