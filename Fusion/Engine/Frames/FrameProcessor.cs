@@ -23,15 +23,44 @@ namespace Fusion.Engine.Frames {
 		[Config]
 		public Config	Config	{ get; set; }
 
-		public	Frame			RootFrame		{ get; set; }
-		public	Frame			TargetFrame		{ get; private set; }
-		public	Frame			TopHoveredFrame	{ get; private set; }
-		public	SpriteFont		DefaultFont		{ get; set; }
+		/// <summary>
+		/// Sets and gets current root frame.
+		/// </summary>
+		public	Frame RootFrame { get; set; }
+
+		/// <summary>
+		/// Gets and sets current target frame.
+		/// </summary>
+		public	Frame TargetFrame { 
+			get { 
+				return targetFrame;
+			}
+			internal set {
+				if (targetFrame!=value) {
+					if (targetFrame!=null) {
+						targetFrame.OnDeactivate();
+					}
+					if (value!=null) {
+						value.OnActivate();
+					}
+					targetFrame = value;
+				}
+			}
+		}
+		Frame targetFrame = null;
+
+		/// <summary>
+		/// Gets default font.
+		/// </summary>
+		public	SpriteFont DefaultFont { get; private set; }
 		string	defaultFontPath	;
 
 		MouseProcessor	mouseProcessor;
 
 
+		/// <summary>
+		/// Gets FrameProcessor's sprite layer, that could be attached to RenderWorld and RenderView.
+		/// </summary>
 		public SpriteLayer FramesSpriteLayer {
 			get {
 				return spriteLayer;

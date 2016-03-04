@@ -259,6 +259,8 @@ namespace Fusion.Engine.Frames {
 
 		public event EventHandler	Tick;
 		public event EventHandler	LayoutChanged;
+		public event EventHandler	Activated;
+		public event EventHandler	Deactivated;
 		public event EventHandler<MouseEventArgs>	MouseIn;
 		public event EventHandler<MouseEventArgs>	MouseMove;
 		public event EventHandler<MouseEventArgs>	MouseOut;
@@ -589,6 +591,19 @@ namespace Fusion.Engine.Frames {
 			}
 		}
 
+		internal void OnActivate ()
+		{
+			if (Activated!=null) {
+				Activated( this, EventArgs.Empty );
+			}
+		}
+
+		internal void OnDeactivate ()
+		{
+			if (Deactivated!=null) {
+				Deactivated( this, EventArgs.Empty );
+			}
+		}
 
 		/*-----------------------------------------------------------------------------------------
 		 * 

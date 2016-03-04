@@ -114,6 +114,8 @@ namespace Fusion.Engine.Frames {
 		/// <param name="key"></param>
 		void PushFrame ( Frame currentHovered, Keys key )
 		{
+			ui.TargetFrame = currentHovered;
+
 			//	frame pushed:
 			if (currentHovered!=null) {
 
