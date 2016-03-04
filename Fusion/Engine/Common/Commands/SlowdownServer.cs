@@ -16,8 +16,8 @@ namespace Fusion.Engine.Common.Commands {
 
 
 		[CommandLineParser.Required()]
-		[CommandLineParser.Name("delay")]
-		public int Delay { get; set; }
+		[CommandLineParser.Name("loadDelay")]
+		public int LoadDelay { get; set; }
 
 
 		[CommandLineParser.Required()]
@@ -53,7 +53,7 @@ namespace Fusion.Engine.Common.Commands {
 		public override void Execute ()
 		{
 			slowFrames	=	Frames;
-			delay		=	Delay;
+			delay		=	LoadDelay;
 		}
 	}
 }

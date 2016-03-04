@@ -8,6 +8,7 @@ using Fusion;
 using Fusion.Core.Mathematics;
 using Fusion.Engine.Input;
 using Fusion.Engine.Common;
+using System.Diagnostics;
 
 
 namespace Fusion.Engine.Frames {
@@ -24,6 +25,13 @@ namespace Fusion.Engine.Frames {
 		bool	heldFrameLBM	=	false;
 		bool	heldFrameRBM	=	false;
 		Point	heldPoint;
+
+
+		int SysInfoDoubleClickTime {
+			get {
+				return System.Windows.Forms.SystemInformation.DoubleClickTime;
+			}
+		}
 
 
 		/// <summary>
@@ -105,6 +113,9 @@ namespace Fusion.Engine.Frames {
 		 * 
 		-----------------------------------------------------------------------------------------*/
 
+		Stopwatch	doubleClickStopwatch	=	new Stopwatch();
+		Frame		doubleClickPushedFrame;
+		Keys		doubleClickButton;
 
 
 		/// <summary>
@@ -114,7 +125,6 @@ namespace Fusion.Engine.Frames {
 		/// <param name="key"></param>
 		void PushFrame ( Frame currentHovered, Keys key )
 		{
-			ui.TargetFrame = currentHovered;
 
 			//	frame pushed:
 			if (currentHovered!=null) {
@@ -182,8 +192,28 @@ namespace Fusion.Engine.Frames {
 
 			} else {
 
+				//	track activation/deactivation on click :
+				ui.TargetFrame = currentHovered;
+
+				//	track double clicks :
+				bool doubleClick = false;
+
+				Log.Verbose("DC: {0} {1}", doubleClickStopwatch.Elapsed, SysInfoDoubleClickTime );
+
+				if ( (currentHovered==doubleClickPushedFrame) && (doubleClickButton==key) && (doubleClickStopwatch.ElapsedMilliseconds < SysInfoDoubleClickTime) ) {
+					doubleClick				=	true;
+					doubleClickStopwatch.Restart();
+					doubleClickPushedFrame	=	null;
+					doubleClickButton		=	Keys.None;
+				} else {
+					doubleClickStopwatch.Restart();
+					doubleClickPushedFrame	=	currentHovered;
+					doubleClickButton		=	key;
+				}
+
+				//	handle click :
 				CallStatusChanged	( heldFrame, FrameStatus.Hovered );
-				CallClick			( heldFrame );
+				CallClick			( heldFrame, doubleClick );
 			}
 
 			heldFrame	=	null;
@@ -231,10 +261,10 @@ namespace Fusion.Engine.Frames {
 		 * 
 		-----------------------------------------------------------------------------------------*/
 
-		void CallClick ( Frame frame )
+		void CallClick ( Frame frame, bool doubleClick )
 		{
 			if (frame!=null && frame.CanAcceptControl) {
-				frame.OnClick();
+				frame.OnClick(doubleClick);
 			}
 		}
 
