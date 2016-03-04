@@ -13,10 +13,13 @@ using Fusion.Core.Content;
 
 namespace Fusion.Engine.Server {
 
+	/// <summary>
+	/// Provides basic client-server interaction and server-side game logic.
+	/// </summary>
 	public abstract partial class GameServer : GameModule {
 
 		/// <summary>
-		/// 
+		/// Initializes a new instance of this class.
 		/// </summary>
 		/// <param name="Game"></param>
 		public GameServer ( Game game ) : base(game)
@@ -26,7 +29,7 @@ namespace Fusion.Engine.Server {
 
 
 		/// <summary>
-		/// Gets server's content manager.
+		/// Gets server's instance of content manager.
 		/// </summary>
 		public ContentManager Content {
 			get {
@@ -81,6 +84,8 @@ namespace Fusion.Engine.Server {
 
 		/// <summary>
 		/// Runs one step of server-side world simulation.
+		/// <remarks>Due to delta compression of snapshot keep data aligned. 
+		/// Even small layout change will cause significiant increase of sending data</remarks>
 		/// </summary>
 		/// <param name="gameTime"></param>
 		/// <returns>Snapshot bytes</returns>
@@ -89,8 +94,9 @@ namespace Fusion.Engine.Server {
 		/// <summary>
 		/// Feed server with commands from particular client.
 		/// </summary>
-		/// <param name="id">Client's ID</param>
-		/// <param name="userCommand">Client's user command stream</param>
+		/// <param name="id">Client's GUID</param>
+		/// <param name="userCommand">Client's user command bytes</param>
+		/// <param name="commandID">Client's user command index</param>
 		/// <param name="lag">Lag in seconds</param>
 		public abstract void FeedCommand ( Guid id, byte[] userCommand, uint commandID, float lag );
 
@@ -141,6 +147,7 @@ namespace Fusion.Engine.Server {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <param name="userInfo"></param>
+		/// <param name="reason">If method returns false this output parameters contains the reason of denial</param>
 		/// <returns></returns>
 		public abstract bool ApproveClient ( Guid guid, string userInfo, out string reason );
 

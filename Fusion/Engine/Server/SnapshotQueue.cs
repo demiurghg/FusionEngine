@@ -27,7 +27,7 @@ namespace Fusion.Engine.Server {
 		public SnapshotQueue ( int capacity )
 		{
 			this.capacity	=	capacity;
-			queue			=	new List<Snapshot>( capacity + 4 );
+			queue			=	new List<Snapshot>( capacity + 4 );	 //	why +4 ???
 		}
 
 

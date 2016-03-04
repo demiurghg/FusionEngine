@@ -12,26 +12,30 @@ using Fusion.Core.Content;
 
 
 namespace Fusion.Engine.Client {
+
+	/// <summary>
+	/// Provides basic client-server interaction and client-side game logic.
+	/// </summary>
 	public abstract partial class GameClient : GameModule {
 
 		public readonly Guid Guid;
 
 		
 		/// <summary>
-		/// Gets Client's content manager.
+		/// Gets Client's instance of content manager.
 		/// </summary>
 		public ContentManager Content { get { return content; }	}
 		ContentManager content;
 
 
 		/// <summary>
-		/// Gets client state.
+		/// Gets current client state.
 		/// </summary>
 		public ClientState ClientState { get { return state.ClientState; } }
 
 
 		/// <summary>
-		/// 
+		/// Initializes a new instance of this class.
 		/// </summary>
 		/// <param name="Game"></param>
 		public GameClient ( Game game ) : base(game) 
@@ -58,14 +62,15 @@ namespace Fusion.Engine.Client {
 
 		/// <summary>
 		/// Called when connection request accepted by server.
-		/// Method returns GameLoader
+		/// Method returns GameLoader that could load all content according server info.
 		/// </summary>
 		/// <param name="serverInfo"></param>
 		public abstract GameLoader LoadContent ( string serverInfo );
 
 		/// <summary>
-		/// Called when loader finished loading.
+		/// Called when GameLoader finished loading.
 		/// This method lets client to complete loading process in main thread.
+		/// Add mesh instances, sounds, setup sky, hdr etc in this method.
 		/// </summary>
 		/// <param name="serverInfo"></param>
 		public abstract void FinalizeLoad ( GameLoader loader );
@@ -88,7 +93,9 @@ namespace Fusion.Engine.Client {
 		/// <summary>
 		/// Feed server snapshot to client.
 		/// Called when fresh snapshot arrived.
+		/// <remarks>Not all snapshot could reach client.</remarks>
 		/// </summary>
+		/// <param name="serverTime">Server time includes number of server frames, total server time and elapsed time since last server frame. 
 		/// <param name="snapshotStream">Snapshot data stream.</param>
 		/// <param name="ackCommandID">Acknoledged (e.g. received and responsed) command ID. Zero value means first snapshot.</param>
 		public abstract void FeedSnapshot ( GameTime serverTime, byte[] snapshot, uint ackCommandID );
