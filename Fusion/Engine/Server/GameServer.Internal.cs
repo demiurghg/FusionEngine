@@ -151,6 +151,7 @@ namespace Fusion.Engine.Server {
 
 
 				//	Timer and fixed timestep stuff :
+				//	http://gafferongames.com/game-physics/fix-your-timestep/
 				var accumulator	=	TimeSpan.Zero;
 				var stopwatch	=	new Stopwatch();
 				stopwatch.Start();
@@ -181,6 +182,9 @@ namespace Fusion.Engine.Server {
 						var svTime = new GameTime( serverFrames, time, targetDelta );
 						serverFrames++;
 
+						//
+						//	Do actual server stuff :
+						//	
 						UpdateNetworkAndLogic( svTime, server, snapshotQueue );
 
 						accumulator	-= targetDelta;
