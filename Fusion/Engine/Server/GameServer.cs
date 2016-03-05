@@ -94,18 +94,18 @@ namespace Fusion.Engine.Server {
 		/// <summary>
 		/// Feed server with commands from particular client.
 		/// </summary>
-		/// <param name="id">Client's GUID</param>
+		/// <param name="clientGuid">Client's GUID</param>
 		/// <param name="userCommand">Client's user command bytes</param>
 		/// <param name="commandID">Client's user command index</param>
 		/// <param name="lag">Lag in seconds</param>
-		public abstract void FeedCommand ( Guid id, byte[] userCommand, uint commandID, float lag );
+		public abstract void FeedCommand ( Guid clientGuid, byte[] userCommand, uint commandID, float lag );
 
 		/// <summary>
 		/// Feed server with commands from particular client.
 		/// </summary>
-		/// <param name="guid">Client's GUID</param>
+		/// <param name="clientGuid">Client's GUID</param>
 		/// <param name="command">Client's user command stream</param>
-		public abstract void FeedNotification ( Guid guid, string message );
+		public abstract void FeedNotification ( Guid clientGuid, string message );
 
 		/// <summary>
 		/// Gets server information that required for client to load the game.
@@ -118,29 +118,29 @@ namespace Fusion.Engine.Server {
 		/// <summary>
 		/// Called when client connected.
 		/// </summary>
-		/// <param name="guid">Client GUID.</param>
+		/// <param name="clientGuid">Client GUID.</param>
 		/// <param name="userInfo">User information. Cann't be used as client identifier.</param>
-		public abstract void ClientConnected ( Guid guid, string userInfo );
+		public abstract void ClientConnected ( Guid clientGuid, string userInfo );
 
 		/// <summary>
 		/// Called when client received snapshot and ready to play.
 		/// </summary>
-		/// <param name="guid">Client GUID.</param>
+		/// <param name="clientGuid">Client GUID.</param>
 		/// <param name="userInfo">User information. Cann't be used as client identifier.</param>
-		public abstract void ClientActivated ( Guid guid );
+		public abstract void ClientActivated ( Guid clientGuid );
 
 		/// <summary>
 		/// Called when before disconnect.
 		/// </summary>
-		/// <param name="guid">Client GUID.</param>
+		/// <param name="clientGuid">Client GUID.</param>
 		/// <param name="userInfo">User information. Cann't be used as client identifier.</param>
-		public abstract void ClientDeactivated ( Guid guid );
+		public abstract void ClientDeactivated ( Guid clientGuid );
 
 		/// <summary>
 		/// Called when client disconnected.
 		/// </summary>
-		/// <param name="clientIP">Client IP in format 123.45.67.89:PORT. Could be used as client identifier.</param>
-		public abstract void ClientDisconnected ( Guid guid );
+		/// <param name="clientGuid">Client IP in format 123.45.67.89:PORT. Could be used as client identifier.</param>
+		public abstract void ClientDisconnected ( Guid clientGuid );
 
 		/// <summary>
 		/// Approves client by id and user information.
@@ -158,6 +158,28 @@ namespace Fusion.Engine.Server {
 		public void NotifyClients ( string format, params object[] args )
 		{
 			NotifyClientsInternal( string.Format(format, args) );
+		}
+
+
+		/// <summary>
+		/// Gets ping time to particular client.
+		/// </summary>
+		/// <param name="clientGuid"></param>
+		/// <returns></returns>
+		public float GetPing ( Guid clientGuid )
+		{
+			return GetPingInternal( clientGuid );
+		}
+
+
+		/// <summary>
+		/// Gets ping time to particular client.
+		/// </summary>
+		/// <param name="clientGuid"></param>
+		/// <returns></returns>
+		public float GetIP ( Guid clientGuid )
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

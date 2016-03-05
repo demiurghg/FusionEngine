@@ -222,6 +222,7 @@ namespace Fusion.Engine.Server {
 				killToken	=	null;
 				serverTask	=	null;
 				server		=	null;
+				pings		=	null;
 			}
 		}
 
@@ -240,6 +241,9 @@ namespace Fusion.Engine.Server {
 
 			//	read input messages :
 			DispatchIM( svTime, snapshotQueue, server );
+
+			//	update pings :
+			UpdatePings( server );
 
 			//	update frame and get snapshot :
 			var snapshot = Update( svTime );
@@ -263,12 +267,19 @@ namespace Fusion.Engine.Server {
 		}
 
 
-
 		/*-----------------------------------------------------------------------------------------
 		 * 
 		 *	Client-server stuff :
 		 * 
 		-----------------------------------------------------------------------------------------*/
+
+		Dictionary<Guid,float> pings = null;
+
+		void UpdatePings ( NetServer server )
+		{
+			pings	=	server.Connections.ToDictionary( conn => conn.GetHailGuid(), conn => conn.AverageRoundtripTime );
+		}
+		
 
 		/// <summary>
 		/// 
@@ -287,9 +298,10 @@ namespace Fusion.Engine.Server {
 					case NetIncomingMessageType.ErrorMessage:		Log.Error	("SV Net: " + msg.ReadString()); break;
 
 					case NetIncomingMessageType.ConnectionLatencyUpdated:
-
-						float latency = msg.ReadFloat();
-						Log.Verbose("SV ping: {0} - {1} ms", msg.SenderConnection.RemoteEndPoint, latency * 1000 );
+						if (Game.Network.Config.ShowLatency) {
+							float latency = msg.ReadFloat();
+							Log.Verbose("...SV ping - {0} {1,6:0.00} ms", msg.SenderEndPoint, (latency*1000) );
+						}
 
 						break;
 
@@ -506,6 +518,27 @@ namespace Fusion.Engine.Server {
 				lock (notifications) {
 					notifications.Enqueue(message);
 				}
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		float GetPingInternal ( Guid clientGuid )
+		{
+			if (pings==null) {
+				return float.MaxValue;
+			}
+
+			float ping;
+
+			if (pings.TryGetValue( clientGuid, out ping )) {
+				return ping;
+			} else {
+				return float.MaxValue;
 			}
 		}
 	}

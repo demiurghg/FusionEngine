@@ -21,6 +21,8 @@ namespace Fusion.Engine.Client {
 		NetClient	client;
 		State		state;
 
+		float ping;
+
 
 		/// <summary>
 		/// Sets state
@@ -84,6 +86,7 @@ namespace Fusion.Engine.Client {
 		/// <param name="port"></param>
 		internal void ConnectInternal ( string host, int port )
 		{
+			ping	=	float.MaxValue;
 			state.UserConnect( host, port );
 		}
 
@@ -153,8 +156,10 @@ namespace Fusion.Engine.Client {
 					case NetIncomingMessageType.ErrorMessage:		Log.Error	("CL Net: " + msg.ReadString()); break;
 
 					case NetIncomingMessageType.ConnectionLatencyUpdated:
-						float latency = msg.ReadFloat();
-						Log.Verbose("CL ping: {0} - {1} ms", msg.SenderConnection.RemoteEndPoint, latency * 1000 );
+						ping = msg.ReadFloat();
+						if (Game.Network.Config.ShowLatency) {
+							Log.Verbose("...CL ping - {0} {1,6:0.00} ms", msg.SenderEndPoint, (ping*1000) );
+						}
 						break;
 
 					case NetIncomingMessageType.StatusChanged:		

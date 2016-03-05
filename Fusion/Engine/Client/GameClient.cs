@@ -123,5 +123,15 @@ namespace Fusion.Engine.Client {
 		{
 			NotifyInternal(message);
 		}
+
+		/// <summary>
+		/// Gets ping between client and server in seconds.
+		/// If not connected return is undefined.
+		/// </summary>
+		public float Ping {
+			get {
+				return ping;
+			}
+		}
 	}
 }

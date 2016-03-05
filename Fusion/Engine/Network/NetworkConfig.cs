@@ -27,6 +27,8 @@ namespace Fusion.Engine.Network {
 
 		public bool ShowSnapshots { get; set; }
 
+		public bool ShowLatency { get; set; }
+
 		public bool ShowJitter { get; set; }
 
 		/// <summary>
@@ -45,6 +47,7 @@ namespace Fusion.Engine.Network {
 			ShowPackets			=	false;
 			ShowJitter			=	false;
 			PlayoutDelay		=	30;
+			ShowLatency			=	false;
 		}
 
 	}
