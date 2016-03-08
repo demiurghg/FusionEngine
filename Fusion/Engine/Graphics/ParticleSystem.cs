@@ -88,7 +88,7 @@ namespace Fusion.Engine.Graphics {
 				return images;
 			}
 			set {
-				if (value.Count>MaxImages) {
+				if (value!=null && value.Count>MaxImages) {
 					throw new ArgumentOutOfRangeException("Number of subimages in texture atlas is greater than " + MaxImages.ToString() );
 				}
 				images = value;
@@ -248,6 +248,7 @@ namespace Fusion.Engine.Graphics {
 		public void KillParticles ()
 		{
 			requestKill = true;
+			ClearParticleBuffer();
 		}
 
 		bool requestKill = false;
@@ -276,7 +277,7 @@ namespace Fusion.Engine.Graphics {
 				//
 				//	Setup images :
 				//
-				if (Images!=null) {
+				if (Images!=null && !Images.IsDisposed) {
 					imagesCB.SetData( Images.GetNormalizedRectangles( MaxImages ) );
 				}
 			

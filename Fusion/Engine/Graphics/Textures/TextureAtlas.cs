@@ -174,6 +174,8 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		public Rectangle[] GetRectangles (int maxCount = -1 ) 
 		{
+			ThrowIfDisposed();
+
 			if (maxCount<0) {
 				maxCount = elements.Count;
 			}
@@ -193,6 +195,8 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		public RectangleF[] GetNormalizedRectangles ( int maxCount = -1 ) 
 		{
+			ThrowIfDisposed();
+
 			if (maxCount<0) {
 				maxCount = elements.Count;
 			}
