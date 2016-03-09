@@ -27,9 +27,22 @@ namespace Fusion.Engine.Frames {
 		Point	heldPoint;
 
 
-		int SysInfoDoubleClickTime {
+		static int SysInfoDoubleClickTime {
 			get {
 				return System.Windows.Forms.SystemInformation.DoubleClickTime;
+			}
+		}
+
+
+		static int SysInfoDoubleClickWidth {
+			get {
+				return System.Windows.Forms.SystemInformation.DoubleClickSize.Width;
+			}
+		}
+
+		static int SysInfoDoubleClickHeight {
+			get {
+				return System.Windows.Forms.SystemInformation.DoubleClickSize.Height;
 			}
 		}
 
@@ -156,12 +169,9 @@ namespace Fusion.Engine.Frames {
 
 		static bool IsPointWithinDoubleClickArea ( Point a, Point b )
 		{
-			//	HKEY_CURRENT_USER\Control Panel\Mouse			
-			const int areaSize	=	4;
-
 			var dx = Math.Abs(a.X - b.X);
 			var dy = Math.Abs(a.Y - b.Y);
-			return (dx<areaSize && dy<areaSize);
+			return (dx<SysInfoDoubleClickWidth && dy<SysInfoDoubleClickHeight);
 		}
 
 
