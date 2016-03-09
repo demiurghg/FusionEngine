@@ -22,6 +22,11 @@ struct LightingParams {
 	float4x4	Projection;
 	float4x4	InverseViewProjection;
 
+	float4		FrustumVectorTR;
+	float4		FrustumVectorBR;
+	float4		FrustumVectorBL;
+	float4		FrustumVectorTL;
+	
 	float4x4	CSMViewProjection0;
 	float4x4	CSMViewProjection1;
 	float4x4	CSMViewProjection2;
@@ -99,6 +104,10 @@ TextureCubeArray	EnvMap				: register(t12);
 float3	ComputeCSM ( float4 worldPos );
 float3	ComputeSpotShadow ( float4 worldPos, SPOTLIGHT spot );
 
+float DepthToViewZ(float depthValue) {
+	return Params.Projection[3][2] / (depthValue + Params.Projection[2][2]);
+}
+
 /*-----------------------------------------------------------------------------------------------------
 	OMNI light
 -----------------------------------------------------------------------------------------------------*/
@@ -148,14 +157,23 @@ void CSMain(
 	normal.xyz			=	normalize(normal.xyz);
 
 	float4	projPos		=	float4( location.x/(float)width*2-1, location.y/(float)height*(-2)+1, depth, 1 );
+	float	viewZ		=	DepthToViewZ( depth );
+	
+	//return;
+
 	//float4	projPos		=	float4( input.projPos.xy / input.projPos.w, depth, 1 );
 	float4	worldPos	=	mul( projPos, Params.InverseViewProjection );
 			worldPos	/=	worldPos.w;
+			
+			//worldPos.z	=	viewZ;
 	float3	viewDir		=	Params.ViewPosition.xyz - worldPos.xyz;
 	float3	viewDirN	=	normalize( viewDir );
 	
 	float4	totalLight	=	0;
 	float4	totalSSS	=	float4( 0,0,0, scatter.w );
+	
+	hdrTexture[dispatchThreadId.xy] = float4( frac(worldPos.xyz*10), 1 );
+	return;
 	
 	//-----------------------------------------------------
 	//	Direct light :

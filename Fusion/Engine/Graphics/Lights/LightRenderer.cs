@@ -55,26 +55,56 @@ namespace Fusion.Engine.Graphics {
 			NONE			=	0x0000,
 		}
 
+		//   struct LightingParams
+		//   {
+		//       
+		//       row_major float4x4 View;       // Offset:    0
+		//       row_major float4x4 Projection; // Offset:   64
+		//rm     float4x4 InverseViewProjection;// Offset:  128
+		//       float4 FrustumVectorTR;        // Offset:  192
+		//       float4 FrustumVectorBR;        // Offset:  208
+		//       float4 FrustumVectorBL;        // Offset:  224
+		//       float4 FrustumVectorTL;        // Offset:  240
+		//row_major float4x4 CSMViewProjection0;// Offset:  256
+		//row_major float4x4 CSMViewProjection1;// Offset:  320
+		//row_major float4x4 CSMViewProjection2;// Offset:  384
+		//row_major float4x4 CSMViewProjection3;// Offset:  448
+		//       float4 ViewPosition;           // Offset:  512
+		//       float4 DirectLightDirection;   // Offset:  528
+		//       float4 DirectLightIntensity;   // Offset:  544
+		//       float4 ViewportSize;           // Offset:  560
+		//       float4 CSMFilterRadius;        // Offset:  576
+		//       float4 AmbientColor;           // Offset:  592
+		//       float4 Viewport;               // Offset:  608
+		//       float ShowCSLoadOmni;          // Offset:  624
+		//       float ShowCSLoadEnv;           // Offset:  628
+		//       float ShowCSLoadSpot;          // Offset:  632
+		//
+		//   } Params;                          // Offset:    0 Size:   636
 
-		[StructLayout(LayoutKind.Explicit, Size=576)]
+		[StructLayout(LayoutKind.Explicit, Size=640)]
 		struct LightingParams {
 			[FieldOffset(  0)] public Matrix	View;
 			[FieldOffset( 64)] public Matrix	Projection;
 			[FieldOffset(128)] public Matrix	InverseViewProjection;
-			[FieldOffset(192)] public Matrix	CSMViewProjection0;
-			[FieldOffset(256)] public Matrix	CSMViewProjection1;
-			[FieldOffset(320)] public Matrix	CSMViewProjection2;
-			[FieldOffset(384)] public Matrix	CSMViewProjection3;
-			[FieldOffset(448)] public Vector4	ViewPosition;
-			[FieldOffset(464)] public Vector4	DirectLightDirection;
-			[FieldOffset(480)] public Vector4	DirectLightIntensity;
-			[FieldOffset(496)] public Vector4	ViewportSize;
-			[FieldOffset(512)] public Vector4	CSMFilterRadius;
-			[FieldOffset(528)] public Color4	AmbientColor;
-			[FieldOffset(544)] public Vector4	Viewport;
-			[FieldOffset(560)] public float		ShowCSLoadOmni;
-			[FieldOffset(564)] public float		ShowCSLoadEnv;
-			[FieldOffset(568)] public float		ShowCSLoadSpot;
+			[FieldOffset(192)] public Vector4	FrustumVectorTR;
+			[FieldOffset(208)] public Vector4	FrustumVectorBR;
+			[FieldOffset(224)] public Vector4	FrustumVectorBL;
+			[FieldOffset(240)] public Vector4	FrustumVectorTL;
+			[FieldOffset(256)] public Matrix	CSMViewProjection0;
+			[FieldOffset(320)] public Matrix	CSMViewProjection1;
+			[FieldOffset(384)] public Matrix	CSMViewProjection2;
+			[FieldOffset(448)] public Matrix	CSMViewProjection3;
+			[FieldOffset(512)] public Vector4	ViewPosition;
+			[FieldOffset(528)] public Vector4	DirectLightDirection;
+			[FieldOffset(544)] public Vector4	DirectLightIntensity;
+			[FieldOffset(560)] public Vector4	ViewportSize;
+			[FieldOffset(576)] public Vector4	CSMFilterRadius;
+			[FieldOffset(592)] public Color4	AmbientColor;
+			[FieldOffset(608)] public Vector4	Viewport;
+			[FieldOffset(624)] public float		ShowCSLoadOmni;
+			[FieldOffset(628)] public float		ShowCSLoadEnv;
+			[FieldOffset(632)] public float		ShowCSLoadSpot;
 		}
 
 

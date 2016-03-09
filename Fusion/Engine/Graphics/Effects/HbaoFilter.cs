@@ -127,7 +127,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="src"></param>
 		/// <param name="filter"></param>
 		/// <param name="rect"></param>
-		public void RenderHbao ( RenderTargetSurface hbaoDst, DepthStencil2D depthSource )
+		public void RenderHbao ( RenderTargetSurface hbaoDst, DepthStencil2D depthSource, RenderTarget2D normalsSource )
 		{
 			SetDefaultRenderStates();
 
