@@ -306,7 +306,7 @@ namespace Fusion.Engine.Graphics {
 			rs.SceneRenderer.RenderGBuffer( stereoEye, Camera, viewHdrFrame, this );
 
 			//	render ssao :
-			rs.HbaoFilter.RenderHbao( viewHdrFrame.SSAOBuffer.Surface, viewHdrFrame.DepthBuffer, viewHdrFrame.NormalMapBuffer );
+			rs.SsaoFilter.RenderSsao( viewHdrFrame.SSAOBuffer.Surface, stereoEye, Camera, viewHdrFrame.DepthBuffer, viewHdrFrame.NormalMapBuffer );
 
 			switch (rs.Config.ShowGBuffer) {
 				case 1 : rs.Filter.Copy( targetSurface, viewHdrFrame.DiffuseBuffer ); return;

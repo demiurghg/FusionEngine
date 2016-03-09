@@ -12,21 +12,26 @@ using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
 
-	public class HbaoFilter : GameModule {
+	public class SsaoFilter : GameModule {
 
-		readonly GraphicsDevice rs;
+		readonly GraphicsDevice device;
+		readonly Random			rand	=	new Random();
 
 		[Flags]
 		enum ShaderFlags : int {
-			HBAO								= 1 << 0,
+			SSAO								= 1 << 0,
 		}
 
 		[StructLayout( LayoutKind.Explicit )]
-		struct LinearDepth
-		{
-			[FieldOffset(0)]	public	float	linearizeDepthA;        
-			[FieldOffset(4)]	public	float	linearizeDepthB;        
+		struct SsaoParams {
+			[FieldOffset(  0)]	public	Matrix	View;        
+			[FieldOffset( 64)]	public	Matrix	Projection;        
+			[FieldOffset(128)]	public	Matrix	InverseViewProjection;        
 		}
+
+
+		ConstantBuffer	paramsCB;
+		ConstantBuffer	randomDirsCB;
 
 
 		Ubershader		shaders;
@@ -37,9 +42,9 @@ namespace Fusion.Engine.Graphics {
 		/// Creates instance of HbaoFilter
 		/// </summary>
 		/// <param name="Game"></param>
-		public HbaoFilter( Game Game ) : base( Game )
+		public SsaoFilter( Game Game ) : base( Game )
 		{
-			rs = Game.GraphicsDevice;
+			device = Game.GraphicsDevice;
 		}
 
 
@@ -49,6 +54,12 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize() 
 		{
+			paramsCB		=	new ConstantBuffer( device, typeof(SsaoParams) );
+			randomDirsCB	=	new ConstantBuffer( device, typeof(Vector4), 32 );
+
+			randomDirsCB.SetData( Enumerable.Range(0,32).Select( i => new Vector4(rand.UniformRadialDistribution(0,1), 0) ).ToArray() );
+
+
 			LoadContent();
 			Game.Reloading += (s,e) => LoadContent();
 		}
@@ -60,7 +71,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ()
 		{
-			shaders = Game.Content.Load<Ubershader>( "hbao" );
+			shaders = Game.Content.Load<Ubershader>( "ssao" );
 			factory	= shaders.CreateFactory( typeof(ShaderFlags), (ps,i) => Enum(ps, (ShaderFlags)i) );
 		}
 
@@ -78,7 +89,7 @@ namespace Fusion.Engine.Graphics {
 			ps.RasterizerState		=	RasterizerState.CullNone;
 			ps.DepthStencilState	=	DepthStencilState.None;
 
-			if (flags==ShaderFlags.HBAO) {
+			if (flags==ShaderFlags.SSAO) {
 				ps.BlendState = BlendState.Opaque;
 			}
 		}
@@ -104,18 +115,18 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void SetDefaultRenderStates()
 		{
-			rs.ResetStates();
+			device.ResetStates();
 		}
 
 		/*-----------------------------------------------------------------------------------------------
 		 * 
-		 *	HBAO filter :
+		 *	SSAO filter :
 		 * 
 		-----------------------------------------------------------------------------------------------*/
 
 		void SetViewport ( RenderTargetSurface dst )
 		{
-			rs.SetViewport( 0,0, dst.Width, dst.Height );
+			device.SetViewport( 0,0, dst.Width, dst.Height );
 		}
 
 
@@ -127,24 +138,35 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="src"></param>
 		/// <param name="filter"></param>
 		/// <param name="rect"></param>
-		public void RenderHbao ( RenderTargetSurface hbaoDst, DepthStencil2D depthSource, RenderTarget2D normalsSource )
+		public void RenderSsao ( RenderTargetSurface ssaoDst, StereoEye stereoEye, Camera camera, DepthStencil2D depthSource, RenderTarget2D normalsSource )
 		{
 			SetDefaultRenderStates();
 
-			using( new PixEvent("HBAO") ) {
+			using( new PixEvent("SSAO") ) {
 
-				SetViewport( hbaoDst );
-				rs.SetTargets( null, hbaoDst );
+				var ssaoParams = new SsaoParams();
 
-				rs.PipelineState			=	factory[ (int)(ShaderFlags.HBAO) ];
+				ssaoParams.View						=	camera.GetViewMatrix( stereoEye );	
+				ssaoParams.Projection				=	camera.GetProjectionMatrix( stereoEye );	
+				ssaoParams.InverseViewProjection	=	Matrix.Invert( ssaoParams.View * ssaoParams.Projection );	
+				paramsCB.SetData( ssaoParams );
 
-				rs.VertexShaderResources[0] =	depthSource;
-				rs.PixelShaderResources[0]	=	depthSource;
-				rs.PixelShaderSamplers[0]	=	SamplerState.PointClamp;
 
-				rs.Draw( 3, 0 );
+				SetViewport( ssaoDst );
+				device.SetTargets( null, ssaoDst );
+
+				device.PipelineState			=	factory[ (int)(ShaderFlags.SSAO) ];
+
+				device.VertexShaderResources[0] =	depthSource;
+				device.PixelShaderResources[0]	=	depthSource;
+				device.PixelShaderSamplers[0]	=	SamplerState.PointClamp;
+
+				device.PixelShaderConstants[0]	=	paramsCB;
+				device.PixelShaderConstants[1]	=	randomDirsCB;
+
+				device.Draw( 3, 0 );
 			}
-			rs.ResetStates();
+			device.ResetStates();
 		}
 
 	}

@@ -228,7 +228,7 @@
     <Compile Include="Engine\Common\GameInterface.Internal.cs" />
     <Compile Include="Engine\Graphics\Design\TextureLocationEditor.cs" />
     <Compile Include="Engine\Graphics\Effects\BitonicSort.cs" />
-    <Compile Include="Engine\Graphics\Effects\HbaoFilter.cs" />
+    <Compile Include="Engine\Graphics\Effects\SsaoFilter.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BaseBingMapsSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BingMapSatellite.cs" />
     <Compile Include="Engine\Graphics\GIS\DebugGisLayer.cs" />
