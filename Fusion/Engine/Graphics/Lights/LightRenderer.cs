@@ -200,7 +200,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="view"></param>
 		/// <param name="projection"></param>
-		internal void RenderLighting ( StereoEye stereoEye, Camera camera, HdrFrame frame, RenderWorld viewLayer, Texture occlusionMap, RenderTargetCube envLight )
+		internal void RenderLighting ( StereoEye stereoEye, Camera camera, HdrFrame hdrFrame, RenderWorld viewLayer, RenderTargetCube envLight )
 		{
 			using ( new PixEvent("TiledLighting") ) {
 				var view		=	camera.GetViewMatrix( stereoEye );
@@ -211,8 +211,8 @@ namespace Fusion.Engine.Graphics {
 
 				LightingFlags	flags = LightingFlags.NONE;
 
-				var width	=	frame.HdrBuffer.Width;
-				var height	=	frame.HdrBuffer.Height;
+				var width	=	hdrFrame.HdrBuffer.Width;
+				var height	=	hdrFrame.HdrBuffer.Height;
 
 
 				//
@@ -256,7 +256,7 @@ namespace Fusion.Engine.Graphics {
 					//
 					//	set states :
 					//
-					device.SetTargets( null, frame.HdrBuffer.Surface );
+					device.SetTargets( null, hdrFrame.HdrBuffer.Surface );
 
 					lightingCB.SetData( cbData );
 
@@ -264,24 +264,24 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderSamplers[1]	=	SamplerState.LinearClamp;
 					device.ComputeShaderSamplers[2]	=	SamplerState.ShadowSampler;
 
-					device.ComputeShaderResources[0]	=	frame.DiffuseBuffer;
-					device.ComputeShaderResources[1]	=	frame.SpecularBuffer;
-					device.ComputeShaderResources[2]	=	frame.NormalMapBuffer;
-					device.ComputeShaderResources[3]	=	frame.ScatteringBuffer;
-					device.ComputeShaderResources[4]	=	frame.DepthBuffer;
+					device.ComputeShaderResources[0]	=	hdrFrame.DiffuseBuffer;
+					device.ComputeShaderResources[1]	=	hdrFrame.SpecularBuffer;
+					device.ComputeShaderResources[2]	=	hdrFrame.NormalMapBuffer;
+					device.ComputeShaderResources[3]	=	hdrFrame.ScatteringBuffer;
+					device.ComputeShaderResources[4]	=	hdrFrame.DepthBuffer;
 					device.ComputeShaderResources[5]	=	csmColor;
 					device.ComputeShaderResources[6]	=	spotColor;
 					device.ComputeShaderResources[7]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
 					device.ComputeShaderResources[8]	=	omniLightBuffer;
 					device.ComputeShaderResources[9]	=	spotLightBuffer;
 					device.ComputeShaderResources[10]	=	envLightBuffer;
-					device.ComputeShaderResources[11]	=	occlusionMap.Srv;
+					device.ComputeShaderResources[11]	=	hdrFrame.SSAOBuffer;
 					device.ComputeShaderResources[12]	=	viewLayer.RadianceCache;
 
 					device.ComputeShaderConstants[0]	=	lightingCB;
 
-					device.SetCSRWTexture( 0, frame.LightAccumulator.Surface );
-					device.SetCSRWTexture( 1, frame.SSSAccumulator.Surface );
+					device.SetCSRWTexture( 0, hdrFrame.LightAccumulator.Surface );
+					device.SetCSRWTexture( 1, hdrFrame.SSSAccumulator.Surface );
 
 					//
 					//	Dispatch :
@@ -296,12 +296,12 @@ namespace Fusion.Engine.Graphics {
 				//
 				//	Add accumulated light  :
 				//
-				rs.Filter.OverlayAdditive( frame.HdrBuffer.Surface, frame.LightAccumulator );
+				rs.Filter.OverlayAdditive( hdrFrame.HdrBuffer.Surface, hdrFrame.LightAccumulator );
 
 				//	Uncomment to enable SSS :
 				#if false
-				rs.Filter.GaussBlur( frame.SSSAccumulator, frame.LightAccumulator, 5, 0 ); 
-				rs.Filter.OverlayAdditive( frame.HdrBuffer.Surface, frame.SSSAccumulator );
+				rs.Filter.GaussBlur( hdrFrame.SSSAccumulator, hdrFrame.LightAccumulator, 5, 0 ); 
+				rs.Filter.OverlayAdditive( hdrFrame.HdrBuffer.Surface, hdrFrame.SSSAccumulator );
 				#endif
 
 				device.ResetStates();

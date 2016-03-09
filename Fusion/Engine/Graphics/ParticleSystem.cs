@@ -172,7 +172,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="flag"></param>
 		void EnumAction ( PipelineState ps, Flags flag )
 		{
-			ps.BlendState			=	BlendState.AlphaBlend;
+			ps.BlendState			=	BlendState.AlphaBlendPremul;
 			ps.DepthStencilState	=	DepthStencilState.Readonly;
 			ps.Primitive			=	Primitive.PointList;
 		}

@@ -305,11 +305,15 @@ namespace Fusion.Engine.Graphics {
 			//	render g-buffer :
 			rs.SceneRenderer.RenderGBuffer( stereoEye, Camera, viewHdrFrame, this );
 
+			//	render ssao :
+			rs.HbaoFilter.RenderHbao( viewHdrFrame.SSAOBuffer.Surface, viewHdrFrame.DepthBuffer );
+
 			switch (rs.Config.ShowGBuffer) {
 				case 1 : rs.Filter.Copy( targetSurface, viewHdrFrame.DiffuseBuffer ); return;
 				case 2 : rs.Filter.Copy( targetSurface, viewHdrFrame.SpecularBuffer ); return;
 				case 3 : rs.Filter.Copy( targetSurface, viewHdrFrame.NormalMapBuffer ); return;
 				case 4 : rs.Filter.Copy( targetSurface, viewHdrFrame.ScatteringBuffer ); return;
+				case 5 : rs.Filter.Copy( targetSurface, viewHdrFrame.SSAOBuffer ); return;
 			}
 
 			//	render sky :
@@ -317,7 +321,7 @@ namespace Fusion.Engine.Graphics {
 			rs.Sky.RenderFogTable( SkySettings );
 
 			//	render lights :
-			rs.LightRenderer.RenderLighting( stereoEye, Camera, viewHdrFrame, this, Game.RenderSystem.WhiteTexture, Radiance );
+			rs.LightRenderer.RenderLighting( stereoEye, Camera, viewHdrFrame, this, Radiance );
 
 			//	render and simulate particles :
 			ParticleSystem.Render( gameTime, Camera, stereoEye, viewHdrFrame );
@@ -378,7 +382,7 @@ namespace Fusion.Engine.Graphics {
 						rs.Sky.Render( camera, StereoEye.Mono, radianceFrame, SkySettings );
 
 						//	render lights :
-						rs.LightRenderer.RenderLighting( StereoEye.Mono, camera, radianceFrame, this, Game.RenderSystem.WhiteTexture, rs.Sky.SkyCube );
+						rs.LightRenderer.RenderLighting( StereoEye.Mono, camera, radianceFrame, this, rs.Sky.SkyCube );
 
 						//	downsample captured frame to cube face.
 						rs.Filter.StretchRect4x4( Radiance.GetSurface( 0, (CubeFace)i ), radianceFrame.HdrBuffer, SamplerState.LinearClamp, true );

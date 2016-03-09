@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-16"?>
+<BaseIllum xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ColorLevel>1</ColorLevel>
+  <SpecularLevel>1</SpecularLevel>
+  <EmissionLevel>1</EmissionLevel>
+  <RoughnessMinimum>0.05</RoughnessMinimum>
+  <RoughnessMaximum>1</RoughnessMaximum>
+  <DirtLevel>0</DirtLevel>
+  <AlphaUsage>None</AlphaUsage>
+  <ColorTexture Path="" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <SurfaceTexture Path="" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <NormalMapTexture Path="" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <EmissionTexture Path="" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <DirtTexture Path="defaultDirt" SRgb="true" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+  <DetailTexture Path="defaultDetail" SRgb="false" ScaleU="1" ScaleV="1" OffsetU="0" OffsetV="0" />
+</BaseIllum>

@@ -29,6 +29,10 @@ namespace Fusion.Engine.Graphics {
 		public Filter Filter { get{ return filter; } }
 		public Filter filter;
 
+		[GameModule("HbaoFilter", "hbao", InitOrder.After)]
+		public HbaoFilter HbaoFilter { get{ return hbaoFilter; } }
+		public HbaoFilter hbaoFilter;
+
 		[GameModule("BitonicSort", "bitonic", InitOrder.After)]
 		public BitonicSort BitonicSort { get{ return bitonicSort; } }
 		public BitonicSort bitonicSort;
@@ -115,6 +119,7 @@ namespace Fusion.Engine.Graphics {
 			spriteEngine	=	new SpriteEngine( this );
 			gis				=	new Gis(Game);
 			filter			=	new Filter( Game );
+			hbaoFilter		=	new HbaoFilter( Game );
 			hdrFilter		=	new HdrFilter( Game );
 			lightRenderer	=	new LightRenderer( Game );
 			sceneRenderer	=	new SceneRenderer( Game, this );

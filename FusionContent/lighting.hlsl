@@ -352,7 +352,7 @@ void CSMain(
 	
 	totalLight	+=	(diffuse + specular) * Params.AmbientColor * ssao * fresnelDecay;// * pow(normal.y*0.5+0.5, 1);
 
-	hdrTexture[dispatchThreadId.xy] = totalLight;
+	hdrTexture[dispatchThreadId.xy] = totalLight * ssao;
 	hdrSSS[dispatchThreadId.xy] = totalSSS;
 }
 
