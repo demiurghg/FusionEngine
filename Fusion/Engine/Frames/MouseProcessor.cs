@@ -116,6 +116,7 @@ namespace Fusion.Engine.Frames {
 		Stopwatch	doubleClickStopwatch	=	new Stopwatch();
 		Frame		doubleClickPushedFrame;
 		Keys		doubleClickButton;
+		Point		doubleClickPosition;
 
 
 		/// <summary>
@@ -150,6 +151,19 @@ namespace Fusion.Engine.Frames {
 				CallStatusChanged	( heldFrame, FrameStatus.Pushed );
 			}
 		}
+
+
+
+		static bool IsPointWithinDoubleClickArea ( Point a, Point b )
+		{
+			//	HKEY_CURRENT_USER\Control Panel\Mouse			
+			const int areaSize	=	4;
+
+			var dx = Math.Abs(a.X - b.X);
+			var dy = Math.Abs(a.Y - b.Y);
+			return (dx<areaSize && dy<areaSize);
+		}
+
 
 
 		/// <summary>
@@ -196,19 +210,26 @@ namespace Fusion.Engine.Frames {
 				ui.TargetFrame = currentHovered;
 
 				//	track double clicks :
-				bool doubleClick = false;
+				bool doubleClick	=	false;
+				var mousePosition	=	Game.InputDevice.MousePosition;
 
 				Log.Verbose("DC: {0} {1}", doubleClickStopwatch.Elapsed, SysInfoDoubleClickTime );
 
-				if ( (currentHovered==doubleClickPushedFrame) && (doubleClickButton==key) && (doubleClickStopwatch.ElapsedMilliseconds < SysInfoDoubleClickTime) ) {
+				if ( (currentHovered==doubleClickPushedFrame) 
+					&& (doubleClickButton==key) 
+					&& (doubleClickStopwatch.ElapsedMilliseconds < SysInfoDoubleClickTime) 
+					&& IsPointWithinDoubleClickArea( doubleClickPosition, mousePosition ) 
+				) {
 					doubleClick				=	true;
 					doubleClickStopwatch.Restart();
 					doubleClickPushedFrame	=	null;
 					doubleClickButton		=	Keys.None;
+					doubleClickPosition		=	mousePosition;
 				} else {
 					doubleClickStopwatch.Restart();
 					doubleClickPushedFrame	=	currentHovered;
 					doubleClickButton		=	key;
+					doubleClickPosition		=	mousePosition;
 				}
 
 				//	handle click :
