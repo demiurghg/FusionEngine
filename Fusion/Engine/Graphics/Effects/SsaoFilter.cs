@@ -14,6 +14,8 @@ namespace Fusion.Engine.Graphics {
 
 	public class SsaoFilter : GameModule {
 
+		const int MaxSamples = 128;
+
 		readonly GraphicsDevice device;
 		readonly Random			rand	=	new Random();
 
@@ -26,7 +28,7 @@ namespace Fusion.Engine.Graphics {
 		struct SsaoParams {
 			[FieldOffset(  0)]	public	Matrix	View;        
 			[FieldOffset( 64)]	public	Matrix	Projection;        
-			[FieldOffset(128)]	public	Matrix	InverseViewProjection;        
+			[FieldOffset(128)]	public	Matrix	InverseProjection;        
 		}
 
 
@@ -55,9 +57,9 @@ namespace Fusion.Engine.Graphics {
 		public override void Initialize() 
 		{
 			paramsCB		=	new ConstantBuffer( device, typeof(SsaoParams) );
-			randomDirsCB	=	new ConstantBuffer( device, typeof(Vector4), 32 );
+			randomDirsCB	=	new ConstantBuffer( device, typeof(Vector4), MaxSamples );
 
-			randomDirsCB.SetData( Enumerable.Range(0,32).Select( i => new Vector4(rand.UniformRadialDistribution(0,1), 0) ).ToArray() );
+			randomDirsCB.SetData( Enumerable.Range(0,MaxSamples).Select( i => new Vector4(rand.UniformRadialDistribution(0,1), 0) ).ToArray() );
 
 
 			LoadContent();
@@ -146,9 +148,9 @@ namespace Fusion.Engine.Graphics {
 
 				var ssaoParams = new SsaoParams();
 
-				ssaoParams.View						=	camera.GetViewMatrix( stereoEye );	
-				ssaoParams.Projection				=	camera.GetProjectionMatrix( stereoEye );	
-				ssaoParams.InverseViewProjection	=	Matrix.Invert( ssaoParams.View * ssaoParams.Projection );	
+				ssaoParams.View					=	camera.GetViewMatrix( stereoEye );	
+				ssaoParams.Projection			=	camera.GetProjectionMatrix( stereoEye );	
+				ssaoParams.InverseProjection	=	Matrix.Invert( ssaoParams.Projection );	
 				paramsCB.SetData( ssaoParams );
 
 
