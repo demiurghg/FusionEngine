@@ -12,6 +12,20 @@ using System.Runtime.InteropServices;
 using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Graphics {
+
+	/// <summary>
+	/// 
+	/// TODO:
+	///		1. Variable depth-dependent sampling radius.
+	///		2. Bleeding edge due to upsampling.
+	///		3. Sharpenss as parameter (now its hardcoded in shader).
+	///		4. Performance measurement.
+	///		5. Normals reconstruction from depth (optional?).
+	///		6. Sample count/quality configuration.
+	///		7. Rid-off HBAO.
+	///		8. Far-plane flickering.
+	/// 
+	/// </summary>
 	public class SsaoFilter : GameModule {
 
 		[Config]

@@ -336,6 +336,12 @@ namespace Fusion.Engine.Graphics {
 				#endif
 
 				device.ResetStates();
+
+
+				if (rs.Config.ShowLightCounters) {
+					var ls = viewLayer.LightSet;
+					Log.Message("lights: {0,5} omni {1,5} spot {2,5} env", ls.OmniLights.Count, ls.SpotLights.Count, ls.EnvLights.Count );
+				}
 			}
 		}
 
