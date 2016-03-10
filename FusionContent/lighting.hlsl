@@ -151,6 +151,7 @@ void CSMain(
 	float4	normal	 	=	GBufferNormalMap.Load( location ) * 2 - 1;
 	float	depth 	 	=	GBufferDepth 	.Load( location ).r;
 	float4	scatter 	=	GBufferScatter 	.Load( location );
+	float4 	ssao		=	OcclusionMap	.SampleLevel(SamplerLinearClamp, location.xy/float2(width,height), 0 );
 	
 	float fresnelDecay	=	(length(normal.xyz) * 2 - 1);// * (1-0.5*specular.a);
 	
@@ -297,7 +298,7 @@ void CSMain(
 			float3 lightDir	 = position - worldPos.xyz;
 			float  falloff	 = LinearFalloff( length(lightDir), radius );
 			
-			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 6).rgb * diffuse.rgb * falloff;
+			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 6).rgb * diffuse.rgb * falloff * ssao;
 
 			float3	F = Fresnel(dot(viewDirN, normal.xyz), specular.rgb) * saturate(fresnelDecay*4-3);
 			float G = GTerm( specular.w, viewDirN, normal.xyz );
@@ -305,7 +306,7 @@ void CSMain(
 			//F = lerp( F, float3(1,1,1), Fc * pow(fresnelDecay,6) );
 			//F = lerp( F, float3(1,1,1), F * saturate(fresnelDecay*4-3) );
 			
-			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * F * falloff * G;
+			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * F * falloff * G * ssao;
 		}
 	}
 
@@ -359,11 +360,10 @@ void CSMain(
 	//-----------------------------------------------------
 	//	Ambient :
 	//-----------------------------------------------------
-	float4 ssao	=	OcclusionMap.SampleLevel(SamplerLinearClamp, location.xy/float2(width,height), 0 );
 	
-	totalLight	+=	(diffuse + specular) * Params.AmbientColor * ssao * fresnelDecay;// * pow(normal.y*0.5+0.5, 1);
+	//totalLight	+=	(diffuse + specular) * Params.AmbientColor * ssao * fresnelDecay;// * pow(normal.y*0.5+0.5, 1);
 
-	hdrTexture[dispatchThreadId.xy] = totalLight * ssao;
+	hdrTexture[dispatchThreadId.xy] = totalLight;
 	hdrSSS[dispatchThreadId.xy] = totalSSS;
 }
 

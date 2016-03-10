@@ -305,7 +305,8 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderResources[8]	=	omniLightBuffer;
 					device.ComputeShaderResources[9]	=	spotLightBuffer;
 					device.ComputeShaderResources[10]	=	envLightBuffer;
-					device.ComputeShaderResources[11]	=	hdrFrame.SSAOBuffer;
+					//device.ComputeShaderResources[11]	=	hdrFrame.SSAOBuffer;
+					device.ComputeShaderResources[11]	=	rs.SsaoFilter.OcclusionMap;
 					device.ComputeShaderResources[12]	=	viewLayer.RadianceCache;
 
 					device.ComputeShaderConstants[0]	=	lightingCB;

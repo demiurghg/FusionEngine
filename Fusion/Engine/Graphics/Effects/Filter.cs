@@ -44,6 +44,7 @@ namespace Fusion.Engine.Graphics
 			NEGY								= 1 << 18,
 			NEGZ								= 1 << 19,
 			FILL_ALPHA_ONE						= 1 << 20,
+			BILATERAL							= 1 << 21,
 
 		}
 
@@ -480,6 +481,37 @@ namespace Fusion.Engine.Graphics
 			rs.ResetStates();
 		}	*/
 
+		
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="srcDst"></param>
+		/// <param name="temporary"></param>
+		/// <param name="sigma"></param>
+		/// <param name="mipLevel"></param>
+		public void GaussBlur ( RenderTarget2D srcDst, RenderTarget2D temporary, float sigma, int mipLevel )
+		{
+			GaussBlurInternal( srcDst, temporary, sigma, 0f, mipLevel, null, null );
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="srcDst"></param>
+		/// <param name="temporary"></param>
+		/// <param name="?"></param>
+		/// <param name="depthData"></param>
+		/// <param name="normalData"></param>
+		/// <param name="sigma"></param>
+		/// <param name="mipLevel"></param>
+		public void GaussBlurBilateral ( RenderTarget2D srcDst, RenderTarget2D temporary, ShaderResource depthData, ShaderResource normalData, float sigma, float sharpness, int mipLevel )
+		{
+			GaussBlurInternal( srcDst, temporary, sigma, sharpness, mipLevel, depthData, normalData );
+		}
+
 
 
 		/// <summary>
@@ -489,7 +521,7 @@ namespace Fusion.Engine.Graphics
 		/// <param name="temporary"></param>
 		/// <param name="sigma"></param>
 		/// <param name="kernelSize"></param>
-		public void GaussBlur( RenderTarget2D srcDst, RenderTarget2D temporary, float sigma, int mipLevel )
+		void GaussBlurInternal ( RenderTarget2D srcDst, RenderTarget2D temporary, float sigma, float sharpness, int mipLevel, ShaderResource depthData, ShaderResource normalData )
 		{
 			var taps = GetGaussWeightsBuffer( sigma, mipLevel );
 
@@ -497,20 +529,33 @@ namespace Fusion.Engine.Graphics
 
 			gaussWeightsCB.SetData( taps );
 
-			using( new PixEvent("GaussBlur") ) {
 
+			int combination	=	(int)ShaderFlags.GAUSS_BLUR;
+
+			if (depthData!=null && normalData!=null) {
+				combination |=	(int)ShaderFlags.BILATERAL;
+			}
+
+
+
+			using( new PixEvent("GaussBlur") ) {
 
 				SetViewport(temporary.GetSurface(mipLevel));
 				rs.SetTargets( null, temporary.GetSurface(mipLevel) );
 
-				rs.PipelineState			=	factory[ (int)(ShaderFlags.GAUSS_BLUR | ShaderFlags.PASS1) ];
+				rs.PipelineState			=	factory[ combination|(int)ShaderFlags.PASS1 ];
 				rs.VertexShaderResources[0]	=	srcDst;
 				rs.PixelShaderResources[0]	=	srcDst;
+				rs.PixelShaderResources[1]	=	depthData;
+				rs.PixelShaderResources[2]	=	normalData;
+
 				rs.PixelShaderConstants[0]	=	gaussWeightsCB;
 				
 				rs.PixelShaderSamplers[0]	=	SamplerState.LinearPointClamp;
+				rs.PixelShaderSamplers[1]	=	SamplerState.PointClamp;
 
 				rs.Draw( 3, 0 );
+
 
 
 				rs.VertexShaderResources[0] =	null;
@@ -519,12 +564,16 @@ namespace Fusion.Engine.Graphics
 				SetViewport(srcDst.GetSurface(mipLevel));
 				rs.SetTargets( null, srcDst.GetSurface(mipLevel) );
 
-				rs.PipelineState			=	factory[ (int)(ShaderFlags.GAUSS_BLUR | ShaderFlags.PASS2) ];
+				rs.PipelineState			=	factory[ combination|(int)ShaderFlags.PASS2 ];
 				rs.VertexShaderResources[0] =	temporary;
 				rs.PixelShaderResources[0]	=	temporary;
+				rs.PixelShaderResources[1]	=	depthData;
+				rs.PixelShaderResources[2]	=	normalData;
+
 				rs.PixelShaderConstants[0]	=	gaussWeightsCB;
 
 				rs.PixelShaderSamplers[0]	=	SamplerState.LinearPointClamp;
+				rs.PixelShaderSamplers[1]	=	SamplerState.PointClamp;
 
 				rs.Draw( 3, 0 );
 			}
