@@ -108,20 +108,29 @@ namespace Fusion.Engine.Graphics {
 
 			randomDir	=	new Texture2D( Game.GraphicsDevice, 64,64, ColorFormat.Rgba8, false );
 
-	//		Color[] randVectors = Enumerable.Range(0, 4096).Select(i => rand.NextColor()).ToArray();
 
-	//		randomDir.SetData( Enumerable.Range(0,4096).Select( i => rand.NextColor() ).ToArray() );
-	//		randomDir.SetData(randVectors);
 			Color [] randVectors = new Color[4096];
-			for ( int i = 0; i < 4096; ++i )
-			{
+
+			for ( int i = 0; i < 4096; ++i ) {
+
+				#if false
+				var dir = rand.UniformRadialDistribution(1,1);
+				var color = new Color();
+				color.R = (byte)(dir.X * 127 + 128);
+				color.G = (byte)(dir.Y * 127 + 128);
+				color.B = (byte)(dir.Z * 127 + 128);
+				color.A = 128;
+				
+				randVectors[i] = color;
+				#else
 				Color c = rand.NextColor();
-				while ((c.R * c.R + c.G * c.G + c.B * c.B) > 256*256)
-				{
+				while ((c.R * c.R + c.G * c.G + c.B * c.B) > 256*256) {
 					c = rand.NextColor();
 				}
 				randVectors[i] = c;
+				#endif
 			}
+
 			randomDir.SetData(randVectors);
 			Game.GraphicsDevice.DisplayBoundsChanged += (s,e) => CreateTargets();
 			Game.Reloading += (s,e) => LoadContent();
@@ -140,10 +149,10 @@ namespace Fusion.Engine.Graphics {
 			SafeDispose( ref occlusionMap0 );
 			SafeDispose( ref occlusionMap1 );
 
-			downsampledDepth	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  disp.Width/2, disp.Height/2, false, false );
-			downsampledNormals	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width/2, disp.Height/2, false, false );
-			occlusionMap0		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width/2, disp.Height/2, false, false );
-			occlusionMap1		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width/2, disp.Height/2, false, false );
+			downsampledDepth	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  disp.Width, disp.Height, false, false );
+			downsampledNormals	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width, disp.Height, false, false );
+			occlusionMap0		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width, disp.Height, false, false );
+			occlusionMap1		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width, disp.Height, false, false );
 		}
 
 

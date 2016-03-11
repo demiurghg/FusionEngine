@@ -1,6 +1,6 @@
 ﻿#if 0
 $ubershader 	HEMISPHERE S_4|S_8|S_16|S_32|S_64
-$ubershader 	HBAO S_4|S_8|S_16|S_32|S_64
+////$ubershader 	HBAO S_4|S_8|S_16|S_32|S_64
 $ubershader 	BLANK
 #endif
 
@@ -110,12 +110,12 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 		pixelWorldPos /= pixelWorldPos.w;
 
 	float3	normalWorld = normalize(NormalsTexture.Load( int3(xpos,ypos,0) )*2 - 1 ).xyz;
-	float3	randDirWorld = normalize(RandomTexture.Load( int3(xpos % 64, ypos % 64, 0) )*2 - 1 ).xyz;
+	float3	randDirWorld = (RandomTexture.Load( int3(xpos % 64, ypos % 64, 0) )*2 - 1 ).xyz;
 
 	float	occlusion	=	0;
 	for ( uint i = 0; i < NUM_SAMPLES; ++i )
 	{
-		float3 sampleDirWorld	=	( RandomTexture.Load( int3((i*117)%64, (i*113)%64, 0) )*2 - 1 ).xyz;
+		float3 sampleDirWorld	=	( RandomTexture.Load( int3((i*17)%64, (i*13)%64, 0) )*2 - 1 ).xyz;
 
 		sampleDirWorld =	reflect( sampleDirWorld, randDirWorld );
 		sampleDirWorld	=	faceforward( sampleDirWorld, sampleDirWorld, -normalWorld );
@@ -136,7 +136,7 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 		occlusion += deltaDepth < -Params.MaxDepthJump ? 1 : 0;
 	}
 	occlusion /= NUM_SAMPLES;
-	return occlusion * occlusion;
+	return occlusion;
 //	return mul ( float4(normalWorld, 0), Params.View );
 }
 
