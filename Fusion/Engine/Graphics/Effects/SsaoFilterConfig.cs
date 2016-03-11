@@ -37,6 +37,8 @@ namespace Fusion.Engine.Graphics {
 			HBAO,
 		}
 
+
+		public bool Enabled { get; set; }
 		//[Category("HBAO")]
 		//public float TraceStep { get; set; }
 		

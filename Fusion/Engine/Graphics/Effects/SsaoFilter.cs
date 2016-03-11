@@ -3,26 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Fusion;
+using System.Runtime.InteropServices;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Content;
 using Fusion.Core.Configuration;
 using Fusion.Drivers.Graphics;
-using System.Runtime.InteropServices;
 using Fusion.Engine.Common;
 
-namespace Fusion.Engine.Graphics {
 
+namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// 
 	/// TODO:
-	///		1. Variable depth-dependent sampling radius.
-	///		2. Bleeding edge due to upsampling.
+	///		1. [DONE] Variable depth-dependent sampling radius.
+	///		2. [DONE] Bleeding edge due to upsampling. Solved via half-pixel offset.
 	///		3. Sharpenss as parameter (now its hardcoded in shader).
 	///		4. Performance measurement.
 	///		5. Normals reconstruction from depth (optional?).
 	///		6. Sample count/quality configuration.
-	///		7. Rid-off HBAO.
 	///		8. Far-plane flickering.
 	/// 
 	/// </summary>
@@ -41,13 +39,22 @@ namespace Fusion.Engine.Graphics {
 
 		Ubershader		shader;
 		StateFactory	factory;
+
 		ConstantBuffer	paramsCB;
+        ConstantBuffer  sampleDirectionsCB;
+
 		RenderTarget2D	downsampledDepth;
 		RenderTarget2D	downsampledNormals;
 		RenderTarget2D	occlusionMap0;
 		RenderTarget2D	occlusionMap1;
+
 		Texture2D		randomDir;
+
         Random rand = new Random();
+        Vector2 []      sampleDirectionData;
+
+        const int maxNumberOfSamples = 64;
+//        const int minNumberOfSamples = 4;
 
 		#pragma warning disable 649
 		struct Params {
@@ -93,6 +100,8 @@ namespace Fusion.Engine.Graphics {
 		public override void Initialize ()
 		{
 			paramsCB	=	new ConstantBuffer( Game.GraphicsDevice, typeof(Params) );
+            sampleDirectionsCB = new ConstantBuffer( Game.GraphicsDevice, typeof(Vector2), maxNumberOfSamples );
+            sampleDirectionData = getSampleDirections();
 
 			CreateTargets();
 			LoadContent();
@@ -131,10 +140,10 @@ namespace Fusion.Engine.Graphics {
 			SafeDispose( ref occlusionMap0 );
 			SafeDispose( ref occlusionMap1 );
 
-			downsampledDepth	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  disp.Width/1, disp.Height/1, false, false );
-			downsampledNormals	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width/1, disp.Height/1, false, false );
-			occlusionMap0		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width/1, disp.Height/1, false, false );
-			occlusionMap1		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width/1, disp.Height/1, false, false );
+			downsampledDepth	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  disp.Width/2, disp.Height/2, false, false );
+			downsampledNormals	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width/2, disp.Height/2, false, false );
+			occlusionMap0		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width/2, disp.Height/2, false, false );
+			occlusionMap1		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width/2, disp.Height/2, false, false );
 		}
 
 
@@ -223,11 +232,36 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		public void RenderBlank(Matrix view, Matrix projection, ShaderResource depthBuffer, ShaderResource wsNormals)
+        Vector2[] getSampleDirections()
+        {
+            float twoPi = 6.283185307f;
+            Vector2[] directions = new Vector2[maxNumberOfSamples];
+
+			for (int i = 0; i < 2; ++i)
+			{
+				float angle = i * twoPi / 2.0f;
+				directions[i].X = (float)Math.Sin(angle);
+				directions[i].Y = (float)Math.Cos(angle);
+			}
+
+            for (int step = 2; step < maxNumberOfSamples; step *= 2)
+            {
+                for (int i = 0; i < step; ++i)
+                {
+                    float angle = twoPi / (float)(step * 2) + i * twoPi / (float)(step);
+                    directions[step + i].X = (float)Math.Sin(angle);
+                    directions[step + i].Y = (float)Math.Cos(angle);
+                }
+            }
+            return directions;
+        }
+
+
+
+        public void RenderBlank(Matrix view, Matrix projection, ShaderResource depthBuffer, ShaderResource wsNormals)
 		{
 			var device = Game.GraphicsDevice;
-
-			var filter	=	Game.RenderSystem.Filter;
+			var filter = Game.RenderSystem.Filter;
 
 			filter.StretchRect(downsampledDepth.Surface, depthBuffer);
 			filter.StretchRect(downsampledNormals.Surface, wsNormals);
@@ -248,8 +282,10 @@ namespace Fusion.Engine.Graphics {
 			paramsData.MaxDepthJump		= Config.MaxDepthJump;
 
 			paramsCB.SetData(paramsData);
-			device.PixelShaderConstants[0] = paramsCB;
+            sampleDirectionsCB.SetData(sampleDirectionData);
 
+			device.PixelShaderConstants[0] = paramsCB;
+            device.PixelShaderConstants[1] = sampleDirectionsCB;
 			//
 			//	Measure and adapt :
 			//
@@ -278,31 +314,40 @@ namespace Fusion.Engine.Graphics {
 			var view		=	camera.GetViewMatrix( stereoEye );
 			var projection	=	camera.GetProjectionMatrix( stereoEye );
 
+			
 			var device	=	Game.GraphicsDevice;
 			var filter	=	Game.RenderSystem.Filter;
 
+			if (!Config.Enabled) {
+				device.Clear( occlusionMap0.Surface, Color4.White );
+				return;
+			}
+
 			using (new PixEvent("SSAO Render")) {
-				filter.StretchRect(downsampledDepth.Surface, depthBuffer);
-				filter.StretchRect(downsampledNormals.Surface, wsNormals);
+				filter.StretchRect( downsampledDepth.Surface, depthBuffer );
+				filter.StretchRect( downsampledNormals.Surface, wsNormals );
 
+				using (new PixEvent("SSAO Pass")) {
 
-				//
-				//	Setup parameters :
-				//
-				using (new PixEvent("SSAO/HBAO Pass")) {
+					//
+					//	Setup parameters :
+					//
 					var paramsData	=	new Params();
 					paramsData.ProjMatrix	=	projection;
 					paramsData.View			=	view;
 					paramsData.ViewProj		=	view * projection;
 					paramsData.InvViewProj	=	Matrix.Invert( view * projection );
-					paramsData.InvProj		=	Matrix.Invert(projection);
+					paramsData.InvProj = Matrix.Invert(projection);
 					//paramsData.TraceStep	=	Config.TraceStep;
 					//paramsData.DecayRate	=	Config.DecayRate;
 					paramsData.MaxSampleRadius	= Config.MaxSamplingRadius;
 					paramsData.MaxDepthJump		= Config.MaxDepthJump;
 
 					paramsCB.SetData( paramsData );
+					sampleDirectionsCB.SetData(sampleDirectionData);
+
 					device.PixelShaderConstants[0]	=	paramsCB;
+					device.PixelShaderConstants[1]  =   sampleDirectionsCB;
 
 					//
 					//	Measure and adapt :
@@ -316,15 +361,8 @@ namespace Fusion.Engine.Graphics {
 
 					Flags sampleNumFlag = getSampleNumFlag();
 
-					// Hemisphere ssao:
-		//			device.PipelineState = factory[(int)Flags.SPHERE | (int)sampleNumFlag];
-
-					// Horizon-based ao:
-		//			device.PipelineState = factory[(int)Flags.HBAO];
-
 					device.PipelineState = factory[getFlags()];
-
-				
+			
 					device.Draw( 3, 0 );
 			
 					device.ResetStates();

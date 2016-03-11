@@ -151,7 +151,10 @@ void CSMain(
 	float4	normal	 	=	GBufferNormalMap.Load( location ) * 2 - 1;
 	float	depth 	 	=	GBufferDepth 	.Load( location ).r;
 	float4	scatter 	=	GBufferScatter 	.Load( location );
-	float4 	ssao		=	OcclusionMap	.SampleLevel(SamplerLinearClamp, location.xy/float2(width,height), 0 );
+	
+	//	add half pixel to prevent visual detachment of ssao effect:
+	float4 	ssao		=	OcclusionMap	.SampleLevel(SamplerLinearClamp, (location.xy + float2(0.5,0.5))/float2(width,height), 0 );
+	
 	
 	float fresnelDecay	=	(length(normal.xyz) * 2 - 1);// * (1-0.5*specular.a);
 	
@@ -295,7 +298,7 @@ void CSMain(
 			float3 intensity = light.Intensity.rgb;
 			float3 position	 = light.Position.rgb;
 			float  radius    = light.InnerOuterRadius.y;
-			float3 lightDir	 = position - worldPos.xyz;
+			float3 lightDir	 = position.xyz - worldPos.xyz;
 			float  falloff	 = LinearFalloff( length(lightDir), radius );
 			
 			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 6).rgb * diffuse.rgb * falloff * ssao;
