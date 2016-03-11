@@ -599,8 +599,6 @@ namespace Fusion.Engine.Common {
 					GraphicsDevice.ClearBackbuffer(Color.Zero);
 
 					this.Draw( gameTimeInternal, eye );
-
-					gameTimeInternal.AddSubframe();
 				}
 
 				GraphicsDevice.Present(RenderSystem.Config.VSyncInterval);

@@ -22,18 +22,32 @@ namespace Fusion.Engine.Network {
 
 		public float SimulatePacketsLoss { get; set; }
 
+		public float SimulateMinLatency { get; set; }
+		public float SimulateRandomLatency { get; set; }
+
 		public bool ShowSnapshots { get; set; }
+
+		public bool ShowLatency { get; set; }
+
+		public bool ShowJitter { get; set; }
+
+		/// <summary>
+		/// PlayoutDelay affect incoming snapshot de-jittering.
+		/// Higher values lead to more latency and better smoothiness.
+		/// Lower values lead to less latency and better responsiveness.
+		/// </summary>
+		public int PlayoutDelay { get; set; }
 
 
 		public NetworkConfig ()
 		{
-			/*var cfg = new NetPeerConfiguration("");
-			cfg.*/
-
 			Port				=	28100;
 			MaxClients			=	8;
 			SimulatePacketsLoss	=	0;
 			ShowPackets			=	false;
+			ShowJitter			=	false;
+			PlayoutDelay		=	30;
+			ShowLatency			=	false;
 		}
 
 	}

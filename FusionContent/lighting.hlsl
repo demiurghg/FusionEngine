@@ -22,6 +22,11 @@ struct LightingParams {
 	float4x4	Projection;
 	float4x4	InverseViewProjection;
 
+	float4		FrustumVectorTR;
+	float4		FrustumVectorBR;
+	float4		FrustumVectorBL;
+	float4		FrustumVectorTL;
+	
 	float4x4	CSMViewProjection0;
 	float4x4	CSMViewProjection1;
 	float4x4	CSMViewProjection2;
@@ -99,6 +104,10 @@ TextureCubeArray	EnvMap				: register(t12);
 float3	ComputeCSM ( float4 worldPos );
 float3	ComputeSpotShadow ( float4 worldPos, SPOTLIGHT spot );
 
+float DepthToViewZ(float depthValue) {
+	return Params.Projection[3][2] / (depthValue + Params.Projection[2][2]);
+}
+
 /*-----------------------------------------------------------------------------------------------------
 	OMNI light
 -----------------------------------------------------------------------------------------------------*/
@@ -142,15 +151,18 @@ void CSMain(
 	float4	normal	 	=	GBufferNormalMap.Load( location ) * 2 - 1;
 	float	depth 	 	=	GBufferDepth 	.Load( location ).r;
 	float4	scatter 	=	GBufferScatter 	.Load( location );
+	float4 	ssao		=	OcclusionMap	.SampleLevel(SamplerLinearClamp, location.xy/float2(width,height), 0 );
 	
 	float fresnelDecay	=	(length(normal.xyz) * 2 - 1);// * (1-0.5*specular.a);
 	
 	normal.xyz			=	normalize(normal.xyz);
 
 	float4	projPos		=	float4( location.x/(float)width*2-1, location.y/(float)height*(-2)+1, depth, 1 );
+
 	//float4	projPos		=	float4( input.projPos.xy / input.projPos.w, depth, 1 );
 	float4	worldPos	=	mul( projPos, Params.InverseViewProjection );
 			worldPos	/=	worldPos.w;
+			
 	float3	viewDir		=	Params.ViewPosition.xyz - worldPos.xyz;
 	float3	viewDirN	=	normalize( viewDir );
 	
@@ -286,7 +298,7 @@ void CSMain(
 			float3 lightDir	 = position - worldPos.xyz;
 			float  falloff	 = LinearFalloff( length(lightDir), radius );
 			
-			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 6).rgb * diffuse.rgb * falloff;
+			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(normal.xyz, lightIndex), 6).rgb * diffuse.rgb * falloff * ssao;
 
 			float3	F = Fresnel(dot(viewDirN, normal.xyz), specular.rgb) * saturate(fresnelDecay*4-3);
 			float G = GTerm( specular.w, viewDirN, normal.xyz );
@@ -294,7 +306,7 @@ void CSMain(
 			//F = lerp( F, float3(1,1,1), Fc * pow(fresnelDecay,6) );
 			//F = lerp( F, float3(1,1,1), F * saturate(fresnelDecay*4-3) );
 			
-			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * F * falloff * G;
+			totalLight.xyz	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(reflect(-viewDir, normal.xyz), lightIndex), specular.w*6 ).rgb * F * falloff * G * ssao;
 		}
 	}
 
@@ -348,9 +360,8 @@ void CSMain(
 	//-----------------------------------------------------
 	//	Ambient :
 	//-----------------------------------------------------
-	float4 ssao	=	OcclusionMap.SampleLevel(SamplerLinearClamp, location.xy/float2(width,height), 0 );
 	
-	totalLight	+=	(diffuse + specular) * Params.AmbientColor * ssao * fresnelDecay;// * pow(normal.y*0.5+0.5, 1);
+	//totalLight	+=	(diffuse + specular) * Params.AmbientColor * ssao * fresnelDecay;// * pow(normal.y*0.5+0.5, 1);
 
 	hdrTexture[dispatchThreadId.xy] = totalLight;
 	hdrSSS[dispatchThreadId.xy] = totalSSS;

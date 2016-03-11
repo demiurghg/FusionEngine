@@ -12,26 +12,30 @@ using Fusion.Core.Content;
 
 
 namespace Fusion.Engine.Client {
+
+	/// <summary>
+	/// Provides basic client-server interaction and client-side game logic.
+	/// </summary>
 	public abstract partial class GameClient : GameModule {
 
 		public readonly Guid Guid;
 
 		
 		/// <summary>
-		/// Gets Client's content manager.
+		/// Gets Client's instance of content manager.
 		/// </summary>
 		public ContentManager Content { get { return content; }	}
 		ContentManager content;
 
 
 		/// <summary>
-		/// Gets client state.
+		/// Gets current client state.
 		/// </summary>
 		public ClientState ClientState { get { return state.ClientState; } }
 
 
 		/// <summary>
-		/// 
+		/// Initializes a new instance of this class.
 		/// </summary>
 		/// <param name="Game"></param>
 		public GameClient ( Game game ) : base(game) 
@@ -58,14 +62,15 @@ namespace Fusion.Engine.Client {
 
 		/// <summary>
 		/// Called when connection request accepted by server.
-		/// Method returns GameLoader
+		/// Method returns GameLoader that could load all content according server info.
 		/// </summary>
 		/// <param name="serverInfo"></param>
 		public abstract GameLoader LoadContent ( string serverInfo );
 
 		/// <summary>
-		/// Called when loader finished loading.
+		/// Called when GameLoader finished loading.
 		/// This method lets client to complete loading process in main thread.
+		/// Add mesh instances, sounds, setup sky, hdr etc in this method.
 		/// </summary>
 		/// <param name="serverInfo"></param>
 		public abstract void FinalizeLoad ( GameLoader loader );
@@ -80,24 +85,25 @@ namespace Fusion.Engine.Client {
 		/// <summary>
 		/// Called when the game has determined that client-side logic needs to be processed.
 		/// </summary>
-		/// <param name="gameTime"></param>
+		/// <param name="gameTime">Cliemt-side game time.</param>
+		/// <param name="sentCommandID">Command's ID that are going to be sent.</param>
 		/// <returns>User command bytes</returns>
-		public abstract byte[] Update ( GameTime gameTime );
+		public abstract byte[] Update ( GameTime gameTime, uint sentCommandID );
 
 		/// <summary>
 		/// Feed server snapshot to client.
 		/// Called when fresh snapshot arrived.
+		/// <remarks>Not all snapshot could reach client.</remarks>
 		/// </summary>
+		/// <param name="serverTime">Server time includes number of server frames, total server time and elapsed time since last server frame. 
 		/// <param name="snapshotStream">Snapshot data stream.</param>
-		/// <param name="initial">Indicates that this is first snapshot.
-		/// Client module may setup graphic scene here. 
-		/// </param>
-		public abstract void FeedSnapshot ( byte[] snapshot, bool initial );
+		/// <param name="ackCommandID">Acknoledged (e.g. received and responsed) command ID. Zero value means first snapshot.</param>
+		public abstract void FeedSnapshot ( GameTime serverTime, byte[] snapshot, uint ackCommandID );
 
 		/// <summary>
 		/// Feed notification from server.
 		/// </summary>
-		/// <param name="message"></param>
+		/// <param name="message">Message from server</param>
 		public abstract void FeedNotification ( string message );
 
 		/// <summary>
@@ -109,12 +115,23 @@ namespace Fusion.Engine.Client {
 
 		/// <summary>
 		/// Sends server string message.
-		/// This method may be used for chat.
+		/// This method may be used for chat 
+		/// or remote server control throw Shell.
 		/// </summary>
 		/// <param name="message"></param>
 		public void NotifyServer ( string message )
 		{
 			NotifyInternal(message);
+		}
+
+		/// <summary>
+		/// Gets ping between client and server in seconds.
+		/// If not connected return is undefined.
+		/// </summary>
+		public float Ping {
+			get {
+				return ping;
+			}
 		}
 	}
 }

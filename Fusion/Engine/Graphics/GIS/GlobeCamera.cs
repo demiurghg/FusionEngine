@@ -238,33 +238,6 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public void Update(GameTime gameTime)
 		{
-			var input = Game.InputDevice;
-			
-			#region test
-
-			var dir = DVector3.Zero;
-			
-			if (input.IsKeyDown(Keys.W)) { dir.X += 1.0; }
-			if (input.IsKeyDown(Keys.S)) { dir.X -= 1.0; }
-			if (input.IsKeyDown(Keys.A)) { dir.Z += 1.0; }
-			if (input.IsKeyDown(Keys.D)) { dir.Z -= 1.0; }
-			if (input.IsKeyDown(Keys.Space)) { dir.Y += 1.0; }
-			if (input.IsKeyDown(Keys.C)) { dir.Y -= 1.0; }
-			if (dir.Length() != 0.0)
-				dir.Normalize();
-			MoveFreeSurfaceCamera(dir);
-
-			double fy = 0;
-			double fp = 0;
-
-			if (input.IsKeyDown(Keys.Left))		fy -= gameTime.ElapsedSec * 0.7;
-			if (input.IsKeyDown(Keys.Right))	fy += gameTime.ElapsedSec * 0.7;
-			if (input.IsKeyDown(Keys.Up))		fp -= gameTime.ElapsedSec * 0.7;
-			if (input.IsKeyDown(Keys.Down))		fp += gameTime.ElapsedSec * 0.7;
-
-			RotateFreeSurfaceCamera(fy, fp);
-			#endregion
-
 			UpdateProjectionMatrix();
 
 			CameraPosition	= DVector3.Transform(new DVector3(0, 0, CameraDistance), Rotation);
@@ -273,13 +246,6 @@ namespace Fusion.Engine.Graphics.GIS
 			ViewMatrixWithTranslation		= ViewMatrix;
 			ViewMatrix.TranslationVector	= DVector3.Zero;
 			FinalCamPosition				= CameraPosition;
-
-			
-			if (input.IsKeyDown(Keys.LeftShift))	{ CameraState = CameraStates.ViewToPoint; }
-			if (input.IsKeyDown(Keys.RightShift))	{ CameraState = CameraStates.TopDown; }
-			if (input.IsKeyDown(Keys.LeftControl))	{
-				ToggleFreeSurfaceCamera();
-			}
 
 
 			if (CameraState == CameraStates.ViewToPoint) {

@@ -13,14 +13,16 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Averaging frame count.
 		/// </summary>
-		public static int	AveragingFrameCount	=	60;
 
 		Stopwatch		stopWatch;
 		TimeSpan		total;
 		TimeSpan		elapsed;
-		float			lastElapsedSec;
+		long			frame;
 
-		List<TimeSpan>	timeRecord = new List<TimeSpan>();
+		/// <summary>
+		/// Gets total number of frames since game had been started.
+		/// </summary>
+		public long Frames { get { return frame; } }
 
 		/// <summary>
 		/// Total game time since game had been started.
@@ -42,76 +44,41 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		public float Fps { get { return 1 / ElapsedSec; } }
 
-		/// <summary>
-		/// Average frame time (milliseconds) within AveragingFrameCount frames.
-		/// </summary>
-		public float AverageFrameTime { 
-			get { 
-				return (float)timeRecord.Average( t => t.TotalMilliseconds ); 
-			} 
-		}
-
-		/// <summary>
-		/// Average frame rate (FPS) within AveragingFrameCount frames.
-		/// </summary>
-		public float AverageFrameRate { 
-			get { 
-				return (float)(1000/timeRecord.Average( t => t.TotalMilliseconds )); 
-			}
-		}
-
-		/// <summary>
-		/// Average frame rate (FPS) within AveragingFrameCount frames.
-		/// </summary>
-		public float MaxFrameRate { 
-			get { 
-				return (float)(1000/timeRecord.Min( t => t.TotalMilliseconds )); 
-			}
-		}
-
-		/// <summary>
-		/// Average frame rate (FPS) within AveragingFrameCount frames.
-		/// </summary>
-		public float MinFrameRate { 
-			get { 
-				return (float)(1000/timeRecord.Max( t => t.TotalMilliseconds )); 
-			}
-		}
-
-		/// <summary>
-		/// Frame count since game had been started.
-		/// </summary>
-		public long FrameID { 
-			get; 
-			private set; 
-		}
-
-		/// <summary>
-		/// Subframe index. For stereo rendering Game.Draw and GameService.Draw are called twice for each eye.
-		/// </summary>
-		public int	SubframeID { 
-			get; 
-			private set; 
-		}
-
-
 		
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		public GameTime ()
 		{
-			FrameID		= -1;
 			stopWatch	= new Stopwatch();
 			stopWatch.Start();
 			total		= stopWatch.Elapsed;
 		}
 
 
-
-		internal void AddSubframe ()
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="total"></param>
+		/// <param name="elapsed"></param>
+		internal GameTime ( long frames, TimeSpan total, TimeSpan elapsed )
 		{
-			SubframeID ++;
+			this.frame		=	frames;
+			this.total		=	total;
+			this.elapsed	=	elapsed;
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="total"></param>
+		/// <param name="elapsed"></param>
+		internal GameTime ( long frames, long totalTicks, long elapsedTicks )
+		{
+			this.frame		=	frames;
+			this.total		=	new TimeSpan(totalTicks);
+			this.elapsed	=	new TimeSpan(elapsedTicks);
 		}
 
 
@@ -120,26 +87,12 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		public void Update()
 		{
-			FrameID ++;
-			SubframeID = 0;
-			lastElapsedSec	= (float)elapsed.TotalSeconds;	
+			if (stopWatch==null) {
+				throw new InvalidOperationException("Do not update GameTime created with explicit values.");
+			}
 
 			var newTotal	=	stopWatch.Elapsed;
 			elapsed			=	newTotal - total;
-
-			timeRecord.Add( elapsed );
-
-			#if true
-
-				while ( timeRecord.Count>=AveragingFrameCount ) {
-					timeRecord.RemoveAt(0);
-				}
-
-			#else
-
-				average	=	elapsed.TotalSeconds;
-
-			#endif
 
 			total			=	newTotal;
 		}

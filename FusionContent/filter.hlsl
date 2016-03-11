@@ -2,7 +2,7 @@
 $ubershader FXAA|COPY|DOWNSAMPLE_4|OVERLAY_ADDITIVE
 $ubershader (STRETCH_RECT..TO_CUBE_FACE)|(DOWNSAMPLE_2_4x4..TO_CUBE_FACE)
 $ubershader GAUSS_BLUR_3x3 PASS1|PASS2
-$ubershader GAUSS_BLUR PASS1|PASS2
+$ubershader GAUSS_BLUR PASS1|PASS2 +BILATERAL
 $ubershader LINEARIZE_DEPTH|RESOLVE_AND_LINEARIZE_DEPTH_MSAA
 $ubershader PREFILTER_ENVMAP POSX|POSY|POSZ|NEGX|NEGY|NEGZ
 $ubershader FILL_ALPHA_ONE
@@ -424,6 +424,8 @@ cbuffer GaussWeightsCB : register(b0) {
 
 SamplerState	SamplerLinearClamp : register(s0);
 Texture2D Source : register(t0);
+Texture2D DepthSource 	: register(t1);
+Texture2D NormalsSource : register(t2);
 
 struct PS_IN {
     float4 position : SV_POSITION;
@@ -454,16 +456,51 @@ PS_IN VSMain(uint VertexID : SV_VertexID)
 	return output;
 }
 
+
+float diffWeight( float3 color1, float3 color2 )
+{
+	float diff = length( color1 - color2 );
+	return exp( - diff * diff * 8 );
+}
+
+
+
 float4 PSMain(PS_IN input) : SV_Target
 {
-	float4 color = Source.SampleLevel(SamplerLinearClamp, input.uv, 0) * Weights[0].x;
+	#ifdef BILATERAL
+	
+		float4 color = Source.SampleLevel(SamplerLinearClamp, input.uv, 0) * Weights[0].x;
+		float4 addColor = float4(0, 0, 0, 0);
+		float normalizationTerm = 0;
+		float weight = 0;
+		float3	normalW = normalize( (NormalsSource.Sample( SamplerLinearClamp, input.uv ).xyz)*2 - 1 );
 
-	[unroll]
-	for (int i = 1; i <33; ++i) {
-		color += Source.SampleLevel(SamplerLinearClamp, input.uv + input.texelSize * Weights[i].w, Weights[i].y) * Weights[i].x;
-	}
+		[unroll]
+		for (int i = 1; i < 33; ++i) {
 
-	return color;
+			float2 locationTexCoord = input.uv + input.texelSize * Weights[i].w;
+			float4 otherColor = Source.SampleLevel(SamplerLinearClamp, locationTexCoord, Weights[i].y);
+			float3 otherNormalW = normalize( (NormalsSource.Sample( SamplerLinearClamp, locationTexCoord ).xyz)*2 - 1 );
+
+			weight = Weights[i].x * diffWeight( normalW, otherNormalW );
+
+			addColor += otherColor * weight;
+			normalizationTerm += weight;
+		}
+		normalizationTerm += Weights[0].x;
+		return (color + addColor)/normalizationTerm;
+		
+	#else
+		float4 color = Source.SampleLevel(SamplerLinearClamp, input.uv, 0) * Weights[0].x;
+
+		[unroll]
+		for (int i = 1; i <33; ++i) {
+			color += Source.SampleLevel(SamplerLinearClamp, input.uv + input.texelSize * Weights[i].w, Weights[i].y) * Weights[i].x;
+		}
+
+		return color;
+	#endif
+
 }
 
 #endif

@@ -872,5 +872,81 @@ namespace Fusion.Core.Mathematics
 		{
 			return Matrix.PerspectiveFovLH( MathUtil.PiOverTwo, 1, near, far );
 		}
+
+
+		
+
+		/// <summary>
+		/// Drifts value to target with constant velocity.
+		/// </summary>
+		/// <param name="current"></param>
+		/// <param name="target"></param>
+		/// <param name="up"></param>
+		/// <param name="down"></param>
+		/// <returns></returns>
+		public static long Drift ( long current, long target, long up, long down )
+		{
+			if (current==target) {
+				return target;
+			}
+
+			//	go down :
+			if (current>target) {
+				if (current>target+down) {
+					return current - down;
+				} else {
+					return target;
+				}
+			}
+
+			// go up:
+			if (current<target) {
+				if (current<target-up) {
+					return current + up;
+				} else {
+					return target;
+				}
+			}
+
+			return current;
+		}
+
+		
+
+		/// <summary>
+		/// Drifts value to target with constant velocity.
+		/// </summary>
+		/// <param name="current"></param>
+		/// <param name="target"></param>
+		/// <param name="up"></param>
+		/// <param name="down"></param>
+		/// <returns></returns>
+		public static float Drift ( float current, float target, float up, float down )
+		{
+			if (current==target) {
+				return target;
+			}
+
+			//	go down :
+			if (current>target) {
+				if (current>target+down) {
+					return current - down;
+				} else {
+					return target;
+				}
+			}
+
+			// go up:
+			if (current<target) {
+				if (current<target-up) {
+					return current + up;
+				} else {
+					return target;
+				}
+			}
+
+			return current;
+		}
+
     }
 }

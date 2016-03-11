@@ -219,6 +219,8 @@
     <Compile Include="Engine\Client\GameClient.Connecting.cs" />
     <Compile Include="Engine\Client\GameClient.State.cs" />
     <Compile Include="Engine\Client\GameLoader.cs" />
+    <Compile Include="Engine\Client\JitterBuffer.cs" />
+    <Compile Include="Engine\Common\Commands\SlowdownServer.cs" />
     <Compile Include="Engine\Common\Commands\FreezeClient.cs" />
     <Compile Include="Engine\Common\Commands\FreezeServer.cs" />
     <Compile Include="Engine\Common\Commands\CrashClient.cs" />
@@ -226,6 +228,8 @@
     <Compile Include="Engine\Common\GameInterface.Internal.cs" />
     <Compile Include="Engine\Graphics\Design\TextureLocationEditor.cs" />
     <Compile Include="Engine\Graphics\Effects\BitonicSort.cs" />
+    <Compile Include="Engine\Graphics\Effects\SsaoFilter.cs" />
+    <Compile Include="Engine\Graphics\Effects\SsaoFilterConfig.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BaseBingMapsSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BingMapSatellite.cs" />
     <Compile Include="Engine\Graphics\GIS\DebugGisLayer.cs" />

@@ -73,8 +73,6 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.BingMaps
 			string key	= TileXYToQuadKey(x, y, zoom);
 
 			return string.Format(UrlFormat, GetServerNum(x, y), key, Version, language, string.Empty);
-
-			return "";
 		}
 
 	}

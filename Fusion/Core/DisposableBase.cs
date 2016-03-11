@@ -5,10 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Fusion.Core {
+
+	/// <summary>
+	/// For better implementation: http://codereview.stackexchange.com/questions/32380/dispose-pattern-disposableobject
+	/// </summary>
 	public class DisposableBase : IDisposable {
 		
 		/// <summary>
-		/// Flag: Has Dispose already been called?
+		/// Flag: Has object was completly disposed?
 		/// </summary>
 		public bool IsDisposed { get; private set; }
 
@@ -65,6 +69,17 @@ namespace Fusion.Core {
 			}
 		}
 
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		protected void ThrowIfDisposed()
+		{
+			if (IsDisposed) {
+				throw new ObjectDisposedException("Object is already disposed.");
+			}
+		}
 
 
 		/// <summary>

@@ -88,7 +88,7 @@ namespace Fusion.Engine.Graphics {
 				return images;
 			}
 			set {
-				if (value.Count>MaxImages) {
+				if (value!=null && value.Count>MaxImages) {
 					throw new ArgumentOutOfRangeException("Number of subimages in texture atlas is greater than " + MaxImages.ToString() );
 				}
 				images = value;
@@ -150,6 +150,8 @@ namespace Fusion.Engine.Graphics {
 		{
 			if (disposing) {	
 
+				rs.Game.Reloading -= LoadContent;
+
 				SafeDispose( ref paramsCB );
 				SafeDispose( ref imagesCB );
 
@@ -170,7 +172,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="flag"></param>
 		void EnumAction ( PipelineState ps, Flags flag )
 		{
-			ps.BlendState			=	BlendState.AlphaBlend;
+			ps.BlendState			=	BlendState.AlphaBlendPremul;
 			ps.DepthStencilState	=	DepthStencilState.Readonly;
 			ps.Primitive			=	Primitive.PointList;
 		}
@@ -246,6 +248,7 @@ namespace Fusion.Engine.Graphics {
 		public void KillParticles ()
 		{
 			requestKill = true;
+			ClearParticleBuffer();
 		}
 
 		bool requestKill = false;
@@ -274,7 +277,7 @@ namespace Fusion.Engine.Graphics {
 				//
 				//	Setup images :
 				//
-				if (Images!=null) {
+				if (Images!=null && !Images.IsDisposed) {
 					imagesCB.SetData( Images.GetNormalizedRectangles( MaxImages ) );
 				}
 			

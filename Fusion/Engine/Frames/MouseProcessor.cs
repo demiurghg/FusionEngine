@@ -8,6 +8,7 @@ using Fusion;
 using Fusion.Core.Mathematics;
 using Fusion.Engine.Input;
 using Fusion.Engine.Common;
+using System.Diagnostics;
 
 
 namespace Fusion.Engine.Frames {
@@ -24,6 +25,26 @@ namespace Fusion.Engine.Frames {
 		bool	heldFrameLBM	=	false;
 		bool	heldFrameRBM	=	false;
 		Point	heldPoint;
+
+
+		static int SysInfoDoubleClickTime {
+			get {
+				return System.Windows.Forms.SystemInformation.DoubleClickTime;
+			}
+		}
+
+
+		static int SysInfoDoubleClickWidth {
+			get {
+				return System.Windows.Forms.SystemInformation.DoubleClickSize.Width;
+			}
+		}
+
+		static int SysInfoDoubleClickHeight {
+			get {
+				return System.Windows.Forms.SystemInformation.DoubleClickSize.Height;
+			}
+		}
 
 
 		/// <summary>
@@ -105,6 +126,10 @@ namespace Fusion.Engine.Frames {
 		 * 
 		-----------------------------------------------------------------------------------------*/
 
+		Stopwatch	doubleClickStopwatch	=	new Stopwatch();
+		Frame		doubleClickPushedFrame;
+		Keys		doubleClickButton;
+		Point		doubleClickPosition;
 
 
 		/// <summary>
@@ -114,6 +139,7 @@ namespace Fusion.Engine.Frames {
 		/// <param name="key"></param>
 		void PushFrame ( Frame currentHovered, Keys key )
 		{
+
 			//	frame pushed:
 			if (currentHovered!=null) {
 
@@ -138,6 +164,16 @@ namespace Fusion.Engine.Frames {
 				CallStatusChanged	( heldFrame, FrameStatus.Pushed );
 			}
 		}
+
+
+
+		static bool IsPointWithinDoubleClickArea ( Point a, Point b )
+		{
+			var dx = Math.Abs(a.X - b.X);
+			var dy = Math.Abs(a.Y - b.Y);
+			return (dx<SysInfoDoubleClickWidth && dy<SysInfoDoubleClickHeight);
+		}
+
 
 
 		/// <summary>
@@ -180,8 +216,35 @@ namespace Fusion.Engine.Frames {
 
 			} else {
 
+				//	track activation/deactivation on click :
+				ui.TargetFrame = currentHovered;
+
+				//	track double clicks :
+				bool doubleClick	=	false;
+				var mousePosition	=	Game.InputDevice.MousePosition;
+
+				Log.Verbose("DC: {0} {1}", doubleClickStopwatch.Elapsed, SysInfoDoubleClickTime );
+
+				if ( (currentHovered==doubleClickPushedFrame) 
+					&& (doubleClickButton==key) 
+					&& (doubleClickStopwatch.ElapsedMilliseconds < SysInfoDoubleClickTime) 
+					&& IsPointWithinDoubleClickArea( doubleClickPosition, mousePosition ) 
+				) {
+					doubleClick				=	true;
+					doubleClickStopwatch.Restart();
+					doubleClickPushedFrame	=	null;
+					doubleClickButton		=	Keys.None;
+					doubleClickPosition		=	mousePosition;
+				} else {
+					doubleClickStopwatch.Restart();
+					doubleClickPushedFrame	=	currentHovered;
+					doubleClickButton		=	key;
+					doubleClickPosition		=	mousePosition;
+				}
+
+				//	handle click :
 				CallStatusChanged	( heldFrame, FrameStatus.Hovered );
-				CallClick			( heldFrame );
+				CallClick			( heldFrame, doubleClick );
 			}
 
 			heldFrame	=	null;
@@ -229,10 +292,10 @@ namespace Fusion.Engine.Frames {
 		 * 
 		-----------------------------------------------------------------------------------------*/
 
-		void CallClick ( Frame frame )
+		void CallClick ( Frame frame, bool doubleClick )
 		{
 			if (frame!=null && frame.CanAcceptControl) {
-				frame.OnClick();
+				frame.OnClick(doubleClick);
 			}
 		}
 

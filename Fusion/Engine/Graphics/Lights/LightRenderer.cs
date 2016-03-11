@@ -55,26 +55,56 @@ namespace Fusion.Engine.Graphics {
 			NONE			=	0x0000,
 		}
 
+		//   struct LightingParams
+		//   {
+		//       
+		//       row_major float4x4 View;       // Offset:    0
+		//       row_major float4x4 Projection; // Offset:   64
+		//rm     float4x4 InverseViewProjection;// Offset:  128
+		//       float4 FrustumVectorTR;        // Offset:  192
+		//       float4 FrustumVectorBR;        // Offset:  208
+		//       float4 FrustumVectorBL;        // Offset:  224
+		//       float4 FrustumVectorTL;        // Offset:  240
+		//row_major float4x4 CSMViewProjection0;// Offset:  256
+		//row_major float4x4 CSMViewProjection1;// Offset:  320
+		//row_major float4x4 CSMViewProjection2;// Offset:  384
+		//row_major float4x4 CSMViewProjection3;// Offset:  448
+		//       float4 ViewPosition;           // Offset:  512
+		//       float4 DirectLightDirection;   // Offset:  528
+		//       float4 DirectLightIntensity;   // Offset:  544
+		//       float4 ViewportSize;           // Offset:  560
+		//       float4 CSMFilterRadius;        // Offset:  576
+		//       float4 AmbientColor;           // Offset:  592
+		//       float4 Viewport;               // Offset:  608
+		//       float ShowCSLoadOmni;          // Offset:  624
+		//       float ShowCSLoadEnv;           // Offset:  628
+		//       float ShowCSLoadSpot;          // Offset:  632
+		//
+		//   } Params;                          // Offset:    0 Size:   636
 
-		[StructLayout(LayoutKind.Explicit, Size=576)]
+		[StructLayout(LayoutKind.Explicit, Size=640)]
 		struct LightingParams {
 			[FieldOffset(  0)] public Matrix	View;
 			[FieldOffset( 64)] public Matrix	Projection;
 			[FieldOffset(128)] public Matrix	InverseViewProjection;
-			[FieldOffset(192)] public Matrix	CSMViewProjection0;
-			[FieldOffset(256)] public Matrix	CSMViewProjection1;
-			[FieldOffset(320)] public Matrix	CSMViewProjection2;
-			[FieldOffset(384)] public Matrix	CSMViewProjection3;
-			[FieldOffset(448)] public Vector4	ViewPosition;
-			[FieldOffset(464)] public Vector4	DirectLightDirection;
-			[FieldOffset(480)] public Vector4	DirectLightIntensity;
-			[FieldOffset(496)] public Vector4	ViewportSize;
-			[FieldOffset(512)] public Vector4	CSMFilterRadius;
-			[FieldOffset(528)] public Color4	AmbientColor;
-			[FieldOffset(544)] public Vector4	Viewport;
-			[FieldOffset(560)] public float		ShowCSLoadOmni;
-			[FieldOffset(564)] public float		ShowCSLoadEnv;
-			[FieldOffset(568)] public float		ShowCSLoadSpot;
+			[FieldOffset(192)] public Vector4	FrustumVectorTR;
+			[FieldOffset(208)] public Vector4	FrustumVectorBR;
+			[FieldOffset(224)] public Vector4	FrustumVectorBL;
+			[FieldOffset(240)] public Vector4	FrustumVectorTL;
+			[FieldOffset(256)] public Matrix	CSMViewProjection0;
+			[FieldOffset(320)] public Matrix	CSMViewProjection1;
+			[FieldOffset(384)] public Matrix	CSMViewProjection2;
+			[FieldOffset(448)] public Matrix	CSMViewProjection3;
+			[FieldOffset(512)] public Vector4	ViewPosition;
+			[FieldOffset(528)] public Vector4	DirectLightDirection;
+			[FieldOffset(544)] public Vector4	DirectLightIntensity;
+			[FieldOffset(560)] public Vector4	ViewportSize;
+			[FieldOffset(576)] public Vector4	CSMFilterRadius;
+			[FieldOffset(592)] public Color4	AmbientColor;
+			[FieldOffset(608)] public Vector4	Viewport;
+			[FieldOffset(624)] public float		ShowCSLoadOmni;
+			[FieldOffset(628)] public float		ShowCSLoadEnv;
+			[FieldOffset(632)] public float		ShowCSLoadSpot;
 		}
 
 
@@ -200,7 +230,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="view"></param>
 		/// <param name="projection"></param>
-		internal void RenderLighting ( StereoEye stereoEye, Camera camera, HdrFrame frame, RenderWorld viewLayer, Texture occlusionMap, RenderTargetCube envLight )
+		internal void RenderLighting ( StereoEye stereoEye, Camera camera, HdrFrame hdrFrame, RenderWorld viewLayer, RenderTargetCube envLight )
 		{
 			using ( new PixEvent("TiledLighting") ) {
 				var view		=	camera.GetViewMatrix( stereoEye );
@@ -211,8 +241,8 @@ namespace Fusion.Engine.Graphics {
 
 				LightingFlags	flags = LightingFlags.NONE;
 
-				var width	=	frame.HdrBuffer.Width;
-				var height	=	frame.HdrBuffer.Height;
+				var width	=	hdrFrame.HdrBuffer.Width;
+				var height	=	hdrFrame.HdrBuffer.Height;
 
 
 				//
@@ -256,7 +286,7 @@ namespace Fusion.Engine.Graphics {
 					//
 					//	set states :
 					//
-					device.SetTargets( null, frame.HdrBuffer.Surface );
+					device.SetTargets( null, hdrFrame.HdrBuffer.Surface );
 
 					lightingCB.SetData( cbData );
 
@@ -264,24 +294,25 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderSamplers[1]	=	SamplerState.LinearClamp;
 					device.ComputeShaderSamplers[2]	=	SamplerState.ShadowSampler;
 
-					device.ComputeShaderResources[0]	=	frame.DiffuseBuffer;
-					device.ComputeShaderResources[1]	=	frame.SpecularBuffer;
-					device.ComputeShaderResources[2]	=	frame.NormalMapBuffer;
-					device.ComputeShaderResources[3]	=	frame.ScatteringBuffer;
-					device.ComputeShaderResources[4]	=	frame.DepthBuffer;
+					device.ComputeShaderResources[0]	=	hdrFrame.DiffuseBuffer;
+					device.ComputeShaderResources[1]	=	hdrFrame.SpecularBuffer;
+					device.ComputeShaderResources[2]	=	hdrFrame.NormalMapBuffer;
+					device.ComputeShaderResources[3]	=	hdrFrame.ScatteringBuffer;
+					device.ComputeShaderResources[4]	=	hdrFrame.DepthBuffer;
 					device.ComputeShaderResources[5]	=	csmColor;
 					device.ComputeShaderResources[6]	=	spotColor;
 					device.ComputeShaderResources[7]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
 					device.ComputeShaderResources[8]	=	omniLightBuffer;
 					device.ComputeShaderResources[9]	=	spotLightBuffer;
 					device.ComputeShaderResources[10]	=	envLightBuffer;
-					device.ComputeShaderResources[11]	=	occlusionMap.Srv;
+					//device.ComputeShaderResources[11]	=	hdrFrame.SSAOBuffer;
+					device.ComputeShaderResources[11]	=	rs.SsaoFilter.OcclusionMap;
 					device.ComputeShaderResources[12]	=	viewLayer.RadianceCache;
 
 					device.ComputeShaderConstants[0]	=	lightingCB;
 
-					device.SetCSRWTexture( 0, frame.LightAccumulator.Surface );
-					device.SetCSRWTexture( 1, frame.SSSAccumulator.Surface );
+					device.SetCSRWTexture( 0, hdrFrame.LightAccumulator.Surface );
+					device.SetCSRWTexture( 1, hdrFrame.SSSAccumulator.Surface );
 
 					//
 					//	Dispatch :
@@ -296,15 +327,21 @@ namespace Fusion.Engine.Graphics {
 				//
 				//	Add accumulated light  :
 				//
-				rs.Filter.OverlayAdditive( frame.HdrBuffer.Surface, frame.LightAccumulator );
+				rs.Filter.OverlayAdditive( hdrFrame.HdrBuffer.Surface, hdrFrame.LightAccumulator );
 
 				//	Uncomment to enable SSS :
 				#if false
-				rs.Filter.GaussBlur( frame.SSSAccumulator, frame.LightAccumulator, 5, 0 ); 
-				rs.Filter.OverlayAdditive( frame.HdrBuffer.Surface, frame.SSSAccumulator );
+				rs.Filter.GaussBlur( hdrFrame.SSSAccumulator, hdrFrame.LightAccumulator, 5, 0 ); 
+				rs.Filter.OverlayAdditive( hdrFrame.HdrBuffer.Surface, hdrFrame.SSSAccumulator );
 				#endif
 
 				device.ResetStates();
+
+
+				if (rs.Config.ShowLightCounters) {
+					var ls = viewLayer.LightSet;
+					Log.Message("lights: {0,5} omni {1,5} spot {2,5} env", ls.OmniLights.Count, ls.SpotLights.Count, ls.EnvLights.Count );
+				}
 			}
 		}
 

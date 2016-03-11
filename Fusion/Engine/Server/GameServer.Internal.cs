@@ -124,6 +124,11 @@ namespace Fusion.Engine.Server {
 			Log.Message("SV: Start: {0} {1}", map, postCommand);
 
 			var snapshotQueue	=	new SnapshotQueue(32);
+			var serverFrames	=	0L;
+
+			//var accumulatedElapsedTime = TimeSpan.FromTicks(0);
+			//var maxElapsedTime = TimeSpan.FromMilliseconds(1000);
+			//var previousTicks = (long)0;
 
 			//
 			//	configure & start server :
@@ -145,40 +150,46 @@ namespace Fusion.Engine.Server {
 				}
 
 
-				var svTime = new GameTime();
+				//	Timer and fixed timestep stuff :
+				//	http://gafferongames.com/game-physics/fix-your-timestep/
+				var accumulator	=	TimeSpan.Zero;
+				var stopwatch	=	new Stopwatch();
+				stopwatch.Start();
+				var currentTime	=	stopwatch.Elapsed;
+				var time		=	stopwatch.Elapsed;
 
 				//
 				//	server loop :
 				//	
 				while ( !killToken.IsCancellationRequested ) {
 
-					svTime.Update();
+				_retryTick:
+					var targetDelta	=	TimeSpan.FromTicks( (long)(10000000 / TargetFrameRate) );
+					var newTime		=	stopwatch.Elapsed;
+					var frameTime	=	newTime - currentTime;
+					currentTime		=	newTime;
 
-					#if DEBUG
-					server.Configuration.SimulatedLoss	=	Game.Network.Config.SimulatePacketsLoss;
-					#endif
+					accumulator +=	 frameTime;
 
-					//	read input messages :
-					DispatchIM( svTime, snapshotQueue, server );
+					if ( accumulator < targetDelta ) {
+						Thread.Sleep(1);
+						goto _retryTick;
+					}
 
-					//	update frame and get snapshot :
-					var snapshot = Update( svTime );
+					while ( accumulator > targetDelta ) {
 
-					//	push snapshot to queue :
-					snapshotQueue.Push( svTime.Total, snapshot );
+						//var svTime = new GameTime( time, targetDelta );
+						var svTime = new GameTime( serverFrames, time, targetDelta );
+						serverFrames++;
 
-					//	send snapshot to clients :
-					SendSnapshot( server, snapshotQueue );
+						//
+						//	Do actual server stuff :
+						//	
+						UpdateNetworkAndLogic( svTime, server, snapshotQueue );
 
-					//	send notifications to clients :
-					SendNotifications( server );
-
-					//	execute server's command queue :
-					Game.Invoker.ExecuteQueue( svTime, CommandAffinity.Server );
-
-					//	crash test for server :
-					CrashServer.CrashTest();
-					FreezeServer.FreezeTest();
+						accumulator	-= targetDelta;
+						time		+= targetDelta;
+					}
 				}
 
 				foreach ( var conn in server.Connections ) {
@@ -211,9 +222,49 @@ namespace Fusion.Engine.Server {
 				killToken	=	null;
 				serverTask	=	null;
 				server		=	null;
+				pings		=	null;
 			}
 		}
 
+
+
+		/// <summary>
+		/// Updates everything related to network and game logic.
+		/// </summary>
+		void UpdateNetworkAndLogic ( GameTime svTime, NetServer server, SnapshotQueue snapshotQueue )
+		{
+			#if DEBUG
+			server.Configuration.SimulatedLoss				=	Game.Network.Config.SimulatePacketsLoss;
+			server.Configuration.SimulatedMinimumLatency	=	Game.Network.Config.SimulateMinLatency;
+			server.Configuration.SimulatedRandomLatency		=	Game.Network.Config.SimulateRandomLatency;
+			#endif
+
+			//	read input messages :
+			DispatchIM( svTime, snapshotQueue, server );
+
+			//	update pings :
+			UpdatePings( server );
+
+			//	update frame and get snapshot :
+			var snapshot = Update( svTime );
+
+			//	push snapshot to queue :
+			snapshotQueue.Push( svTime.Total, snapshot );
+
+			//	send snapshot to clients :
+			SendSnapshot( server, snapshotQueue, svTime.Total.Ticks );
+
+			//	send notifications to clients :
+			SendNotifications( server );
+
+			//	execute server's command queue :
+			Game.Invoker.ExecuteQueue( svTime, CommandAffinity.Server );
+
+			//	crash test for server :
+			CrashServer.CrashTest();
+			FreezeServer.FreezeTest();
+			SlowdownServer.SlowTest();
+		}
 
 
 		/*-----------------------------------------------------------------------------------------
@@ -221,6 +272,14 @@ namespace Fusion.Engine.Server {
 		 *	Client-server stuff :
 		 * 
 		-----------------------------------------------------------------------------------------*/
+
+		Dictionary<Guid,float> pings = null;
+
+		void UpdatePings ( NetServer server )
+		{
+			pings	=	server.Connections.ToDictionary( conn => conn.GetHailGuid(), conn => conn.AverageRoundtripTime );
+		}
+		
 
 		/// <summary>
 		/// 
@@ -239,9 +298,10 @@ namespace Fusion.Engine.Server {
 					case NetIncomingMessageType.ErrorMessage:		Log.Error	("SV Net: " + msg.ReadString()); break;
 
 					case NetIncomingMessageType.ConnectionLatencyUpdated:
-
-						float latency = msg.ReadFloat();
-						Log.Verbose("SV ping: {0} - {1} ms", msg.SenderConnection.RemoteEndPoint, latency * 1000 );
+						if (Game.Network.Config.ShowLatency) {
+							float latency = msg.ReadFloat();
+							Log.Verbose("...SV ping - {0} {1,6:0.00} ms", msg.SenderEndPoint, (latency*1000) );
+						}
 
 						break;
 
@@ -317,7 +377,7 @@ namespace Fusion.Engine.Server {
 		/// 
 		/// </summary>
 		/// <param name="server"></param>
-		void SendSnapshot ( NetServer server, SnapshotQueue queue )
+		void SendSnapshot ( NetServer server, SnapshotQueue queue, long serverTicks )
 		{
 			//	snapshot request is stored in connection's tag.s
 			var debug	=	Game.Network.Config.ShowSnapshots;
@@ -333,6 +393,7 @@ namespace Fusion.Engine.Server {
 				var frame		=	queue.LastFrame;
 				var prevFrame	=	conn.GetRequestedSnapshotID();
 				int size		=	0;
+				var commandID	=	conn.GetLastCommandID();
 				var snapshot	=	queue.Compress( ref prevFrame, out size);
 
 				//	reset snapshot request :
@@ -343,6 +404,8 @@ namespace Fusion.Engine.Server {
 				msg.Write( (byte)NetCommand.Snapshot );
 				msg.Write( frame );
 				msg.Write( prevFrame );
+				msg.Write( commandID );
+				msg.Write( serverTicks );
 				msg.Write( snapshot.Length );
 				msg.Write( snapshot ); 
 
@@ -423,6 +486,7 @@ namespace Fusion.Engine.Server {
 		void DispatchUserCommand ( GameTime gameTime, SnapshotQueue queue, NetIncomingMessage msg )
 		{	
 			var snapshotID	=	msg.ReadUInt32();
+			var commandID	=	msg.ReadUInt32();
 			var size		=	msg.ReadInt32();
 
 			var data		=	msg.ReadBytes( size );
@@ -435,11 +499,11 @@ namespace Fusion.Engine.Server {
 
 			//	do not feed server with empty command.
 			if (data.Length>0) {
-				FeedCommand( msg.SenderConnection.GetHailGuid(), data, queue.GetLag(snapshotID, gameTime) );
+				FeedCommand( msg.SenderConnection.GetHailGuid(), data, commandID, queue.GetLag(snapshotID, gameTime) );
 			}
 
 			//	set snapshot request when command get.
-			msg.SenderConnection.SetRequestSnapshot( snapshotID );
+			msg.SenderConnection.SetRequestSnapshot( snapshotID, commandID );
 		}
 
 
@@ -454,6 +518,27 @@ namespace Fusion.Engine.Server {
 				lock (notifications) {
 					notifications.Enqueue(message);
 				}
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		float GetPingInternal ( Guid clientGuid )
+		{
+			if (pings==null) {
+				return float.MaxValue;
+			}
+
+			float ping;
+
+			if (pings.TryGetValue( clientGuid, out ping )) {
+				return ping;
+			} else {
+				return float.MaxValue;
 			}
 		}
 	}

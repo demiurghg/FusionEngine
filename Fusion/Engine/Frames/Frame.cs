@@ -259,11 +259,14 @@ namespace Fusion.Engine.Frames {
 
 		public event EventHandler	Tick;
 		public event EventHandler	LayoutChanged;
+		public event EventHandler	Activated;
+		public event EventHandler	Deactivated;
 		public event EventHandler<MouseEventArgs>	MouseIn;
 		public event EventHandler<MouseEventArgs>	MouseMove;
 		public event EventHandler<MouseEventArgs>	MouseOut;
 		public event EventHandler<MouseEventArgs>	MouseWheel;
 		public event EventHandler<MouseEventArgs>	Click;
+		public event EventHandler<MouseEventArgs>	DoubleClick;
 		public event EventHandler<MouseEventArgs>	MouseDown;
 		public event EventHandler<MouseEventArgs>	MouseUp;
 		public event EventHandler<StatusEventArgs>	StatusChanged;
@@ -506,13 +509,19 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnClick ()
+		internal void OnClick (bool doubleClick)
 		{
 			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
 			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
 
-			if (Click!=null) {
-				Click( this, new MouseEventArgs(){ Key = Keys.None, X = x, Y = y } );
+			if (doubleClick) {
+				if (DoubleClick!=null) {
+					DoubleClick( this, new MouseEventArgs(){ Key = Keys.None, X = x, Y = y } );
+				}
+			} else {
+				if (Click!=null) {
+					Click( this, new MouseEventArgs(){ Key = Keys.None, X = x, Y = y } );
+				}
 			}
 		}
 
@@ -589,6 +598,19 @@ namespace Fusion.Engine.Frames {
 			}
 		}
 
+		internal void OnActivate ()
+		{
+			if (Activated!=null) {
+				Activated( this, EventArgs.Empty );
+			}
+		}
+
+		internal void OnDeactivate ()
+		{
+			if (Deactivated!=null) {
+				Deactivated( this, EventArgs.Empty );
+			}
+		}
 
 		/*-----------------------------------------------------------------------------------------
 		 * 

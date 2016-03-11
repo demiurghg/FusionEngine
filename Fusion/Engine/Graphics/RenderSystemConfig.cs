@@ -104,6 +104,11 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public bool ShowCounters { get; set; }
 
+		/// <summary>
+		/// Shows counters
+		/// </summary>
+		public bool ShowLightCounters { get; set; }
+
 
 		/// <summary>
 		/// 

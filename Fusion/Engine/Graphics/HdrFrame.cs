@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Fusion.Core;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
+using Fusion.Core.Mathematics;
 
 namespace Fusion.Engine.Graphics {
 	
@@ -22,6 +23,7 @@ namespace Fusion.Engine.Graphics {
 		public RenderTarget2D	SpecularBuffer	;
 		public RenderTarget2D	NormalMapBuffer	;
 		public RenderTarget2D	ScatteringBuffer;
+		public RenderTarget2D	SSAOBuffer;
 
 
 		public HdrFrame ( Game game, int width, int height )
@@ -34,6 +36,16 @@ namespace Fusion.Engine.Graphics {
 			SpecularBuffer 		=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba8_sRGB,	width,	height,	false, false );
 			NormalMapBuffer		=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgb10A2,		width,	height,	false, false );
 			ScatteringBuffer	=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba8_sRGB,	width,	height,	false, false );
+			SSAOBuffer			=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba8,			width,	height, false, false );
+
+			Clear();
+		}
+
+
+		public void Clear ()
+		{
+			var device = HdrBuffer.GraphicsDevice;
+			device.Clear( SSAOBuffer.Surface, Color4.White );
 		}
 
 
@@ -48,6 +60,7 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref SpecularBuffer 	);
 				SafeDispose( ref NormalMapBuffer	);
 				SafeDispose( ref ScatteringBuffer	);
+				SafeDispose( ref SSAOBuffer			);
 			} 
 
 			base.Dispose(disposing);

@@ -8,14 +8,14 @@
 RequestExecutionLevel user
   
 # The name of the installer
-Name "Fusion Engine (v0.2)"
+Name "Fusion Engine (v0.03)"
 XPStyle on
 
 # The file to write
 !ifdef PATCH
-OutFile "FusionEnginePatch-0.2.exe"
+OutFile "FusionEnginePatch-0.03.exe"
 !else
-OutFile "FusionEngineSetup-0.2.exe"
+OutFile "FusionEngineSetup-0.03.exe"
 !endif
 
 # The default installation directory
@@ -32,7 +32,7 @@ InstallDirRegKey HKCU "Software\FusionEngine" "Install_Dir"
 Function .onInit
 	# the plugins dir is automatically deleted when the installer exits
 	InitPluginsDir
-	File /oname=$PLUGINSDIR\splash.bmp "splash2.bmp"
+	File /oname=$PLUGINSDIR\splash.bmp "splash3.bmp"
 	#optional
 	#File /oname=$PLUGINSDIR\splash.wav "C:\myprog\sound.wav"
 

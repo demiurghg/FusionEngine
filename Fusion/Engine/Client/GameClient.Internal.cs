@@ -21,6 +21,8 @@ namespace Fusion.Engine.Client {
 		NetClient	client;
 		State		state;
 
+		float ping;
+
 
 		/// <summary>
 		/// Sets state
@@ -45,6 +47,7 @@ namespace Fusion.Engine.Client {
 
 			netConfig.AutoFlushSendQueue	=	true;
 			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionApproval );
+			netConfig.EnableMessageType( NetIncomingMessageType.ConnectionLatencyUpdated );
 			netConfig.EnableMessageType( NetIncomingMessageType.DiscoveryRequest );
 			netConfig.UnreliableSizeBehaviour = NetUnreliableSizeBehaviour.NormalFragmentation;
 
@@ -83,6 +86,7 @@ namespace Fusion.Engine.Client {
 		/// <param name="port"></param>
 		internal void ConnectInternal ( string host, int port )
 		{
+			ping	=	float.MaxValue;
 			state.UserConnect( host, port );
 		}
 
@@ -151,6 +155,13 @@ namespace Fusion.Engine.Client {
 					case NetIncomingMessageType.WarningMessage:		Log.Warning	("CL Net: " + msg.ReadString()); break;
 					case NetIncomingMessageType.ErrorMessage:		Log.Error	("CL Net: " + msg.ReadString()); break;
 
+					case NetIncomingMessageType.ConnectionLatencyUpdated:
+						ping = msg.ReadFloat();
+						if (Game.Network.Config.ShowLatency) {
+							Log.Verbose("...CL ping - {0} {1,6:0.00} ms", msg.SenderEndPoint, (ping*1000) );
+						}
+						break;
+
 					case NetIncomingMessageType.StatusChanged:		
 
 						var status	=	(NetConnectionStatus)msg.ReadByte();
@@ -209,12 +220,13 @@ namespace Fusion.Engine.Client {
 		/// </summary>
 		/// <param name="client"></param>
 		/// <param name="userCmd"></param>
-		void SendUserCommand ( NetClient client, uint recvSnapshotFrame, byte[] userCmd )
+		void SendUserCommand ( NetClient client, uint recvSnapshotFrame, uint cmdCounter, byte[] userCmd )
 		{
 			var msg = client.CreateMessage( userCmd.Length + 4 * 3 + 1 );
 
 			msg.Write( (byte)NetCommand.UserCommand );
 			msg.Write( recvSnapshotFrame );
+			msg.Write( cmdCounter );
 			msg.Write( userCmd.Length );
 			msg.Write( userCmd );
 

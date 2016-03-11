@@ -367,6 +367,7 @@ namespace Fusion.Drivers.Graphics {
 			rsd.IsMultisampleEnabled	=	RasterizerState.MsaaEnabled;
 			rsd.IsScissorEnabled		=	RasterizerState.ScissorEnabled;
 			rsd.SlopeScaledDepthBias	=	RasterizerState.SlopeDepthBias;
+			rsd.IsDepthClipEnabled		=	RasterizerState.DepthClipEnabled;
 
 			rasterState	=	new D3DRasterizerState( device.Device, rsd );
 		}

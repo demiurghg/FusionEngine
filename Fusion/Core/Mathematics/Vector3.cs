@@ -128,6 +128,11 @@ namespace Fusion.Core.Mathematics
         /// </summary>
         public static readonly Vector3 BackwardLH = new Vector3(0.0f, 0.0f, -1.0f);
 
+		/// <summary>
+		/// A NaN <see cref="Vector3"/>.
+		/// </summary>
+		public static readonly Vector3 NaN = new Vector3( float.NaN, float.NaN, float.NaN );
+
         /// <summary>
         /// The X component of the vector.
         /// </summary>
@@ -211,6 +216,14 @@ namespace Fusion.Core.Mathematics
         public bool IsZero
         {
             get { return X == 0 && Y == 0 && Z == 0; }
+        }
+
+        /// <summary>
+        /// Gets a value indicting whether this vector is zero
+        /// </summary>
+        public bool IsNaN
+        {
+            get { return float.IsNaN(X) || float.IsNaN(Y) || float.IsNaN(Z); }
         }
 
         /// <summary>
