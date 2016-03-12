@@ -8,7 +8,7 @@ using Fusion.Engine.Common;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
 using Driver = Fusion.Engine.Audio;
-
+using SharpDX.X3DAudio;
 
 namespace Fusion.Engine.Audio {
 	public class SoundWorld {
@@ -130,7 +130,9 @@ namespace Fusion.Engine.Audio {
 		/// <param name="gameTime"></param>
 		internal void Update ( GameTime gameTime )
 		{
-			
+			foreach ( var e in emitters ) {
+				e.Apply3D( Listener );
+			}
 		}
 
 

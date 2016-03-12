@@ -81,6 +81,17 @@ namespace Fusion.Engine.Audio {
 
 
 		/// <summary>
+		/// Gets sound state.
+		/// </summary>
+		public SoundState SoundState {
+			get {
+				return soundInstance.State;
+			}
+		}
+
+
+
+		/// <summary>
 		/// Sets and gets Doppler scale.
 		/// Value must be non-negative.
 		/// </summary>
@@ -141,6 +152,19 @@ namespace Fusion.Engine.Audio {
 		}
 
 		private SharpDX.X3DAudio.CurvePoint[] volumeCurve = null;
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="listener"></param>
+		internal void Apply3D ( AudioListener listener )
+		{
+			if (soundInstance!=null) {
+				soundInstance.Apply3D( listener, this );
+			}
+		}
 
 
 		/// <summary>

@@ -7,6 +7,13 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Engine.Audio {
 	public struct CurvePoint {
+		
+		public CurvePoint ( float distance, float dspSetting )
+		{
+			Distance	=	distance;
+			DspSetting	=	dspSetting;
+		}
+
 		public float	Distance;
 		public float	DspSetting;
 	}

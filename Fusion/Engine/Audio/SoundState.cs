@@ -44,7 +44,7 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Engine.Audio
 {
-    internal enum SoundState
+    public enum SoundState
     {
         Playing,
         Paused,
