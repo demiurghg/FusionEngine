@@ -132,7 +132,7 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			randomDir.SetData(randVectors);
-			Game.GraphicsDevice.DisplayBoundsChanged += (s,e) => CreateTargets();
+			Game.RenderSystem.DisplayBoundsChanged += (s,e) => CreateTargets();
 			Game.Reloading += (s,e) => LoadContent();
 		}
 
@@ -144,15 +144,18 @@ namespace Fusion.Engine.Graphics {
 		{
 			var disp	=	Game.GraphicsDevice.DisplayBounds;
 
+			var newWidth	=	Math.Max(64, disp.Width);
+			var newHeight	=	Math.Max(64, disp.Height);
+
 			SafeDispose( ref downsampledDepth );
 			SafeDispose( ref downsampledNormals );
 			SafeDispose( ref occlusionMap0 );
 			SafeDispose( ref occlusionMap1 );
 
-			downsampledDepth	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  disp.Width, disp.Height, false, false );
-			downsampledNormals	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width, disp.Height, false, false );
-			occlusionMap0		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width, disp.Height, false, false );
-			occlusionMap1		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width, disp.Height, false, false );
+			downsampledDepth	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  newWidth, newHeight, false, false );
+			downsampledNormals	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidth, newHeight, false, false );
+			occlusionMap0		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidth, newHeight, false, false );
+			occlusionMap1		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidth, newHeight, false, false );
 		}
 
 
