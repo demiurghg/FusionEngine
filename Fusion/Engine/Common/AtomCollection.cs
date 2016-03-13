@@ -83,6 +83,10 @@ namespace Fusion.Engine.Common {
 					throw new InvalidOperationException("Too much atoms");
 				}
 
+				if (dictionary.ContainsKey(atom)) {
+					return dictionary[atom];
+				}
+
 				short id = (short)index.Count;
 				index.Add( atom );
 				dictionary.Add( atom, id );
@@ -104,7 +108,6 @@ namespace Fusion.Engine.Common {
 				if (locked) {
 					throw new InvalidOperationException("Atom collection is locked");
 				}
-
 			}
 		}
 
@@ -117,6 +120,9 @@ namespace Fusion.Engine.Common {
 		/// <returns></returns>
 		public string this[ short id ] {
 			get {
+				if (id<0 || id>=index.Count) {
+					throw new ArgumentOutOfRangeException("id");
+				}
 				return index[id];
 			}
 		}
@@ -130,7 +136,12 @@ namespace Fusion.Engine.Common {
 		/// <returns></returns>
 		public short this[ string atom ] {
 			get {
-				return dictionary[atom];
+				short id;
+				if (dictionary.TryGetValue(atom, out id)) {
+					return id;
+				} else {
+					throw new ArgumentException("atom", "Atom table does not contain ID for '" + atom + "'" );
+				}
 			}
 		} 
 

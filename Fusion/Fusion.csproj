@@ -226,6 +226,7 @@
     <Compile Include="Engine\Common\Commands\FreezeServer.cs" />
     <Compile Include="Engine\Common\Commands\CrashClient.cs" />
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
+    <Compile Include="Engine\Common\AtomAttribute.cs" />
     <Compile Include="Engine\Common\GameInterface.Internal.cs" />
     <Compile Include="Engine\Graphics\Design\TextureLocationEditor.cs" />
     <Compile Include="Engine\Graphics\Effects\BitonicSort.cs" />
