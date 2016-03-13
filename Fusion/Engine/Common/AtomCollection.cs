@@ -117,30 +117,29 @@ namespace Fusion.Engine.Common {
 		/// 
 		/// </summary>
 		/// <param name="key"></param>
-		/// <returns></returns>
+		/// <returns>Null if index is bad.</returns>
 		public string this[ short id ] {
 			get {
 				if (id<0 || id>=index.Count) {
-					throw new ArgumentOutOfRangeException("id");
+					return null;
 				}
 				return index[id];
 			}
 		}
 
 
-
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="atom"></param>
-		/// <returns></returns>
+		/// <returns>Negative value, if atom does not exist.</returns>
 		public short this[ string atom ] {
 			get {
 				short id;
 				if (dictionary.TryGetValue(atom, out id)) {
 					return id;
 				} else {
-					throw new ArgumentException("atom", "Atom table does not contain ID for '" + atom + "'" );
+					return -1;
 				}
 			}
 		} 
