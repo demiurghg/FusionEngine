@@ -27,6 +27,21 @@ namespace Fusion.Engine.Client {
 		public ContentManager Content { get { return content; }	}
 		ContentManager content;
 
+		/// <summary>
+		/// Gets atoms collection.
+		/// </summary>
+		public AtomCollection Atoms { 
+			get { 
+				if (atoms==null) {
+					throw new NullReferenceException("Atoms are ready to use at LoadContent");
+				}
+				return atoms; 
+			} 
+			internal set { 
+				atoms = value; 
+			}	
+		}
+		AtomCollection atoms = null;
 
 		/// <summary>
 		/// Gets current client state.

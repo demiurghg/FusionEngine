@@ -1,3 +1,20 @@
+# Fusion Engine Version 0.04 Release Notes
+
+## New features
+ 1. net.ShowLatency now enables and disables printing if latency update.
+ 2. SSAO and HBAO
+ 3. Network Atoms
+ 
+## Fixes
+ 1. Fixed odd crash in TextureAtlas (#24).
+ 2. Frames now check double click width and height
+ 3. SoundWorld now updates world state.
+
+## Notes
+There are no breaking changes.
+
+ 
+ 
 # Fusion Engine Version 0.03 Release Notes
 
 ## New features
@@ -16,6 +33,8 @@
 Changes are breaking.
  1. Set server TargetFrameRate
 
+ 
+ 
 # Fusion Engine Version 0.02 Release Notes
 
 ## New features

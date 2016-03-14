@@ -57,8 +57,6 @@ namespace Fusion.Engine.Client {
 			{
 				if (command==NetCommand.Snapshot) {
 					
-					var latencyTicks	=	(long)(msg.SenderConnection.AverageRoundtripTime * 10L*1000L*1000L);
-
 					var frame		=	msg.ReadUInt32();
 					var prevFrame	=	msg.ReadUInt32();
 					var ackCmdID	=	msg.ReadUInt32();
@@ -76,7 +74,12 @@ namespace Fusion.Engine.Client {
 						return;
 					}
 
+					//	read snapshot :
 					var snapshot	=	NetworkEngine.Decompress( msg.ReadBytes(size) );
+
+					//	initial snapshot contains atom table :
+					gameClient.Atoms	=	new AtomCollection( msg );
+
 
 					gameClient.SetState( new Active( gameClient, frame, snapshot, serverTicks ) );
 				}

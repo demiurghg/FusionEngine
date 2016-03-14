@@ -140,7 +140,9 @@ namespace Fusion.Engine.Server {
 				//
 				//	start game specific stuff :
 				//
+				atoms	=	new AtomCollection();
 				LoadContent( map );
+				atoms.Lock();
 
 				//
 				//	invoke post-start command :
@@ -344,6 +346,7 @@ namespace Fusion.Engine.Server {
 		}
 
 
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -399,7 +402,7 @@ namespace Fusion.Engine.Server {
 				//	reset snapshot request :
 				conn.ResetRequestSnapshot();
 
-				var msg = server.CreateMessage( snapshot.Length + 4 * 3 + 1 );
+				var msg = server.CreateMessage( snapshot.Length + 4 * 4 + 8 + 1 );
 			
 				msg.Write( (byte)NetCommand.Snapshot );
 				msg.Write( frame );
@@ -409,8 +412,13 @@ namespace Fusion.Engine.Server {
 				msg.Write( snapshot.Length );
 				msg.Write( snapshot ); 
 
-				//	Zero snapshot frame index means that we are waiting for first snapshot.
-				//	and command should reach the server.
+				//	append atom table to first snapshot :
+				if (commandID==0) {
+					atoms.Write( msg );
+				}
+
+				//	Zero snapshot frame index means that client is waiting for first snapshot.
+				//	and snapshot should reach the client.
 				var delivery	=	prevFrame == 0 ? NetDeliveryMethod.ReliableOrdered : NetDeliveryMethod.UnreliableSequenced;
 
 				if (prevFrame==0) {

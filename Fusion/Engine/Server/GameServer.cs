@@ -25,6 +25,7 @@ namespace Fusion.Engine.Server {
 		public GameServer ( Game game ) : base(game)
 		{
 			content = new ContentManager(game);
+			atoms	= new AtomCollection();
 		}
 
 
@@ -38,6 +39,21 @@ namespace Fusion.Engine.Server {
 		}
 
 		ContentManager content;
+
+
+		/// <summary>
+		/// Gets atom collections.
+		/// </summary>
+		public AtomCollection Atoms {
+			get {
+				if (atoms==null) {
+					throw new NullReferenceException("Atoms are ready to use at LoadContent");
+				}
+				return atoms;
+			}
+		}
+
+		AtomCollection atoms;
 
 
 		/// <summary>

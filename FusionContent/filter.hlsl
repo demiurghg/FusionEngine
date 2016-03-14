@@ -460,7 +460,7 @@ PS_IN VSMain(uint VertexID : SV_VertexID)
 float diffWeight( float3 color1, float3 color2 )
 {
 	float diff = length( color1 - color2 );
-	return exp( - diff * diff * 8 );
+	return exp( - diff * diff * 20 );
 }
 
 
@@ -476,7 +476,7 @@ float4 PSMain(PS_IN input) : SV_Target
 		float3	normalW = normalize( (NormalsSource.Sample( SamplerLinearClamp, input.uv ).xyz)*2 - 1 );
 
 		[unroll]
-		for (int i = 1; i < 33; ++i) {
+		for (int i = 1; i < 33; i++) {
 
 			float2 locationTexCoord = input.uv + input.texelSize * Weights[i].w;
 			float4 otherColor = Source.SampleLevel(SamplerLinearClamp, locationTexCoord, Weights[i].y);
@@ -494,7 +494,7 @@ float4 PSMain(PS_IN input) : SV_Target
 		float4 color = Source.SampleLevel(SamplerLinearClamp, input.uv, 0) * Weights[0].x;
 
 		[unroll]
-		for (int i = 1; i <33; ++i) {
+		for (int i = 1; i < 33; i++) {
 			color += Source.SampleLevel(SamplerLinearClamp, input.uv + input.texelSize * Weights[i].w, Weights[i].y) * Weights[i].x;
 		}
 

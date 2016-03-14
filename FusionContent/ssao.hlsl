@@ -1,9 +1,10 @@
-﻿
-#if 0
+﻿#if 0
 $ubershader 	HEMISPHERE S_4|S_8|S_16|S_32|S_64
-$ubershader 	HBAO S_4|S_8|S_16|S_32|S_64
+////$ubershader 	HBAO S_4|S_8|S_16|S_32|S_64
 $ubershader 	BLANK
 #endif
+
+#define MAX_NUM_SAMPLES 64
 
 #ifdef S_4
 #define NUM_SAMPLES 4
@@ -43,9 +44,14 @@ Texture2D		RandomTexture 		: register(t2);
 SamplerState	LinearSampler		: register(s0);
 	
 cbuffer PARAMS 		: register(b0) { 
-	PARAMS Params 	: packoffset(c0); 
+	PARAMS Params 	: packoffset(c0);
 };
 
+
+// constant buffer containing sample vectors:
+cbuffer SampleDirectionsCB : register(b1) {
+	float2 SampleDirections[MAX_NUM_SAMPLES];
+};
 
 float4 FSQuad( uint VertexID ) 
 {
@@ -96,21 +102,20 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 		1
 	);
 
-  // choose sampling radius depending on distance from camera:
-  float samplingRadius = LinearZ( pixelDepth, Params.ProjMatrix ) * Params.MaxSampleRadius * 0.1f;
-  samplingRadius = samplingRadius > Params.MaxSampleRadius ? Params.MaxSampleRadius : samplingRadius;
-
+	// choose sampling radius depending on distance from camera:
+	float samplingRadius = LinearZ( pixelDepth, Params.ProjMatrix ) * Params.MaxSampleRadius * 0.1f;
+	samplingRadius = samplingRadius > Params.MaxSampleRadius ? Params.MaxSampleRadius : samplingRadius;
 
 	float4 pixelWorldPos = mul( pixelProjPos, Params.InvViewProjection );
 		pixelWorldPos /= pixelWorldPos.w;
 
 	float3	normalWorld = normalize(NormalsTexture.Load( int3(xpos,ypos,0) )*2 - 1 ).xyz;
-	float3	randDirWorld = normalize(RandomTexture.Load( int3(xpos % 64, ypos % 64, 0) )*2 - 1 ).xyz;
+	float3	randDirWorld = (RandomTexture.Load( int3(xpos % 64, ypos % 64, 0) )*2 - 1 ).xyz;
 
 	float	occlusion	=	0;
 	for ( uint i = 0; i < NUM_SAMPLES; ++i )
 	{
-		float3 sampleDirWorld	=	( RandomTexture.Load( int3((i*117)%64, (i*113)%64, 0) )*2 - 1 ).xyz;
+		float3 sampleDirWorld	=	( RandomTexture.Load( int3((i*17)%64, (i*13)%64, 0) )*2 - 1 ).xyz;
 
 		sampleDirWorld =	reflect( sampleDirWorld, randDirWorld );
 		sampleDirWorld	=	faceforward( sampleDirWorld, sampleDirWorld, -normalWorld );
@@ -142,7 +147,7 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 #ifdef HBAO
 
 
-#define NUM_STEPS 6				// number of steps along a direction
+#define NUM_STEPS 5				// number of steps along a direction
 #define TOTAL_SAMPLES ( NUM_STEPS*NUM_SAMPLES )
 
 
@@ -163,14 +168,14 @@ float tanToSin( float tan )
 
 float2 ProjToTex( float2 projCoord )
 {
-	float2 texCoord = float2( (projCoord.x + 1.0f)*0.5f, (1.0f - projCoord.y)*0.5f );
-	return texCoord;
+	return float2( (projCoord.x + 1.0f)*0.5f, (1.0f - projCoord.y)*0.5f );
 }
+
+
 
 float2 TexToProj( float2 texCoord )
 {
-	float2 projCoord = float2( 2.0f*texCoord.x - 1.0f, -2.0f*texCoord.y + 1.0f );
-	return projCoord;
+	return float2( 2.0f*texCoord.x - 1.0f, -2.0f*texCoord.y + 1.0f );
 }
 
 
@@ -194,7 +199,7 @@ float project( float2 what, float2 toWhat )
 
 
 
-float3 getTangentVector( float2 sampleDirView, float3 normalView )
+float4 getTangentVector( float2 sampleDirView, float3 normalView )
 {
 	//// incorrect:
 	//float sinT = project( sampleDirView, normalView.xy );
@@ -202,20 +207,21 @@ float3 getTangentVector( float2 sampleDirView, float3 normalView )
 	//float sign = absSinT < 0.0000001f ? 1.0f : sinT / absSinT;
 	//float sinTSq = sinT * sinT;
 	//float ellRad = sqrt( 1 + (normalView.z*normalView.z - 1)*sinTSq );
-	//return float3( sampleDirView * ellRad, -sign * sqrt( 1 - ellRad*ellRad ) );
+	//return float4( sampleDirView * ellRad, -sign * sqrt( 1 - ellRad*ellRad ), 0 );
 
 	// correct:
 	float SDotNXY = dot( sampleDirView, normalView.xy );
 	float normFactor = 1.0f / sqrt( normalView.z*normalView.z + SDotNXY*SDotNXY );
-	return float3(	sampleDirView.x * normalView.z * normFactor,
+	return float4(	sampleDirView.x * normalView.z * normFactor,
 					sampleDirView.y * normalView.z * normFactor,
-					-SDotNXY * normFactor );
+					-SDotNXY * normFactor,
+					0 );
 }
 
 
 
 // -World suffix	: in world coordinates
-// -View suffix		: in view coordinates (world coords rotated by View matrix)
+// -View suffix		: in view coordinates (world coords transformed by View matrix)
 // -Proj suffix		: in proj coordinates (from -1 to 1) (view coordinates transformad by Proj matrix, then divided by .w) 
 // -Tex suffix		: in texture coordinates (from 0 to 1)
 
@@ -257,31 +263,37 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 
 
 	/// choose sampling radius depending on distance from camera: ////////////////////////////////////
-	float samplingRadius = LinearZ( currentPixelDepthProj, Params.ProjMatrix ) * Params.MaxSampleRadius * 0.1f;
+	float samplingRadius = currentPixelDepthView * Params.MaxSampleRadius * 0.2f;
 	samplingRadius = samplingRadius > Params.MaxSampleRadius ? Params.MaxSampleRadius : samplingRadius;
 	float samplingRadiusSq = samplingRadius * samplingRadius;
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+
+	/// get random angle to rotate samples: //////////////////////////////////////////////////////////
+	float randomAngle = RandomTexture.Load( int3(13*ypos%64, 17*xpos%64, 0) ).z;
+	float rSin = sin(randomAngle);
+	float rCos = cos(randomAngle);
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+
 	float occlusion = 0;
 
 	for ( uint i = 0; i < NUM_SAMPLES; ++i )
 	{
-		float angle = i * 2 * 3.14159265 / (float)NUM_SAMPLES;
-		float3 sampleStepView	= float3( sin(angle), cos(angle), 0 );
-//		float3 sampleStepView = float3(normalize( ( RandomTexture.Load( int3(i%64, 3*i%64, 0) )*2 - 1 ).xy ), 0);
+		float4 sampleStepView = float4( SampleDirections[i], 0, 0 );
 
+		//float angle = 6.283185307 * i / (float)NUM_SAMPLES;
+		//float4 sampleStepView	= float4( sin(angle), cos(angle), 0, 0 );
 
 		// rotate randomly: ///////////////////////////////////////////////////////////////////////////////
-		float randomAngle = RandomTexture.Load( int3(13*ypos%64, 17*xpos%64, 0) ).z*0;
-		float tempX = cos(randomAngle)*sampleStepView.x + sin(randomAngle)*sampleStepView.y;
-		sampleStepView.y = -sin(randomAngle)*sampleStepView.x + cos(randomAngle)*sampleStepView.y;
+		float tempX = rCos*sampleStepView.x + rSin*sampleStepView.y;
+		sampleStepView.y = -rSin*sampleStepView.x + rCos*sampleStepView.y;
 		sampleStepView.x = tempX;
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 		/// restore tangent vector from normal vector and sample direction: ///////////////////////////////
-		float3 tangentVectorView = getTangentVector( sampleStepView.xy, normalView );
+		float4 tangentVectorView = getTangentVector( sampleStepView.xy, normalView );
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -289,18 +301,17 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 		sampleStepView = tangentVectorView * samplingRadius;
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 
-		float4 lastSamplePositionView = currentPixelPosView + float4( sampleStepView, 0 );
 
+		/// calculate the step vector in texture coordinates: /////////////////////////////////////////////
+		float4 lastSamplePositionView = currentPixelPosView + sampleStepView;
 		float4 lastSamplePositionProj = mul(lastSamplePositionView, Params.ProjMatrix);
 		lastSamplePositionProj /= lastSamplePositionProj.w;
-
 		float2 lastSamplePositionTex = ProjToTex( lastSamplePositionProj.xy );
 		float2 sampleStepTex = lastSamplePositionTex - currentPixelPosTex;
-
+		///////////////////////////////////////////////////////////////////////////////////////////////////
 
 		sampleStepView /= (float)NUM_STEPS;
 		sampleStepTex /= (float)NUM_STEPS;
-
 
 		float tanFlatHoriz = tangentVectorView.z / length(tangentVectorView.xy);
 		float sinFlatHoriz = tanToSin( tanFlatHoriz );
@@ -309,29 +320,15 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 		float sinTrueHoriz = sinFlatHoriz;
 
 
-		for (float step = 1.0f; step <= NUM_STEPS; step += 1.0f)
+		[unroll]for (float step = 1.0f; step <= NUM_STEPS; step += 1.0f)
 		{
-			float4 samplePositionView = currentPixelPosView + float4(sampleStepView*step, 0);
-			//float4 samplePositionProj = mul(samplePositionView, Params.ProjMatrix);
-			//samplePositionProj /= samplePositionProj.w;
-
-	//		float2 samplePositionTex = float2((samplePositionProj.x + 1.0f) * 0.5f,
-	//												(1.0f - samplePositionProj.y) * 0.5f);
-
+			float4 samplePositionView = currentPixelPosView + sampleStepView*step;
 			float2 samplePositionTex = currentPixelPosTex + sampleStepTex*step;
+			float sampleTrueDepthProj = DepthTexture.Sample( LinearSampler, samplePositionTex ).r;
+			float4 sampleTruePositionView = samplePositionView * ( -LinearZ( sampleTrueDepthProj, Params.ProjMatrix ) / samplePositionView.z );
 
-			float sampleDepthProj = DepthTexture.Sample( LinearSampler, samplePositionTex ).r;
-
-	//		float4 sampleTruePositionProj = samplePositionProj;
-	//		sampleTruePositionProj.z = sampleDepthProj;
-
-
-	//		float4 sampleTruePositionView = mul(sampleTruePositionProj, Params.InvProj);
-	//		sampleTruePositionView /= sampleTruePositionView.w;
-
-			float4 sampleTruePositionView = samplePositionView;
-			sampleTruePositionView.z = LinearZ( sampleDepthProj, Params.ProjMatrix );
-
+	//		float sampleDepthProj = ( ( -samplePositionView.z * Params.ProjMatrix._33 - Params.ProjMatrix._43 ) / samplePositionView.z );
+	//		float4 sampleTruePositionView = samplePositionView * ( sampleTrueDepthProj / sampleDepthProj );
 
 			float4 horizVectorView = sampleTruePositionView - currentPixelPosView;
 			tanTrueHoriz = horizVectorView.z / length(horizVectorView.xy);
@@ -342,16 +339,16 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 				sinTrueHoriz = tanToSin( tanTrueHoriz );
 				float weight = 1.0f - horizVectorSq / samplingRadiusSq;
 
-			//	occlusion += 1.0f;
 				occlusion += ( sinTrueHoriz - sinFlatHoriz ) * weight * 1.5f;
 				tanFlatHoriz = tanTrueHoriz;
 				sinFlatHoriz = sinTrueHoriz;
 			}
-	//		normalizationTerm += 1.0f;
 		}
 
 	}
 	float reverseOcclusion = 1.0f - (occlusion / (float)TOTAL_SAMPLES);
+	reverseOcclusion *= reverseOcclusion;
+	reverseOcclusion =  reverseOcclusion * 2 - 1;
 	return reverseOcclusion * reverseOcclusion;
 }
 
