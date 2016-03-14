@@ -130,7 +130,7 @@ namespace Fusion.Engine.Graphics {
 
 			var projection = Matrix.OrthoOffCenterRH(ofs, w + ofs, h + ofs, ofs, -9999, 9999);
 
-			var orderedLayers	=	layers.OrderBy( layer => layer.Order );
+			var orderedLayers	=	layers.Where( layer0 => layer0!=null ).OrderBy( layer1 => layer1.Order );
 
 			foreach ( var layer in orderedLayers ) {
 				

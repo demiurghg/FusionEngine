@@ -103,7 +103,7 @@ namespace Fusion.Engine.Graphics {
 
 			Camera		=	new Camera();
 
-			SpriteLayers	=	new List<SpriteLayer>();
+			SpriteLayers	=	new SpriteLayerCollection();
 			GisLayers		=	new List<Gis.GisLayer>();
 			GlobeCamera		=	new GlobeCamera(Game);
 		}
