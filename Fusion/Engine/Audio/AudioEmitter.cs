@@ -159,10 +159,10 @@ namespace Fusion.Engine.Audio {
 		/// 
 		/// </summary>
 		/// <param name="listener"></param>
-		internal void Apply3D ( AudioListener listener )
+		internal void Apply3D ( AudioListener listener, int operationSet )
 		{
 			if (soundInstance!=null) {
-				soundInstance.Apply3D( listener, this );
+				soundInstance.Apply3D( listener, this, operationSet );
 			}
 		}
 

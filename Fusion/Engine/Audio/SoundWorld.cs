@@ -128,11 +128,13 @@ namespace Fusion.Engine.Audio {
 		/// Updates sound world.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		internal void Update ( GameTime gameTime )
+		internal void Update ( GameTime gameTime, int operationSet )
 		{
 			foreach ( var e in emitters ) {
-				e.Apply3D( Listener );
+				e.Apply3D( Listener, operationSet );
 			}
+
+
 		}
 
 
