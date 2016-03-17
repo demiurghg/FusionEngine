@@ -35,15 +35,17 @@ namespace Fusion.Engine.Graphics {
 			this.Height	=	height;
 			this.Format	=	format;
 
-			var clrFrmt	=	 ColorFormat.Unknown;
+			var clrFrmt	=	ColorFormat.Unknown;
+			var samples	=	1;
 
 			switch (format) {
-				case TargetFormat.LowDynamicRange  : clrFrmt = ColorFormat.Rgba8;	break;
-				case TargetFormat.HighDynamicRange : clrFrmt = ColorFormat.Rgba16F;	break;
+				case TargetFormat.LowDynamicRange		: clrFrmt = ColorFormat.Rgba8;	break;
+				case TargetFormat.LowDynamicRangeMSAA	: clrFrmt = ColorFormat.Rgba8;	samples = 4; break;
+				case TargetFormat.HighDynamicRange		: clrFrmt = ColorFormat.Rgba16F;	break;
 				default: throw new ArgumentException("format");
 			}
 
-			RenderTarget	=	new RenderTarget2D( rs.Device, clrFrmt, width, height ); 
+			RenderTarget	=	new RenderTarget2D( rs.Device, clrFrmt, width, height, samples ); 
 			Srv	=	RenderTarget;
 		}	
 		
