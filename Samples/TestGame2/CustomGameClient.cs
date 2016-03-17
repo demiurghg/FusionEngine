@@ -123,6 +123,11 @@ namespace TestGame2 {
 		}
 
 
+
+		public override void FeedBroadcast ( byte[] data )
+		{
+		}
+
 		/// <summary>
 		/// 
 		/// </summary>

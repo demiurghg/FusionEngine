@@ -124,6 +124,12 @@ namespace GISTest {
 		}
 
 
+		public override void FeedBroadcast ( byte[] data )
+		{
+			//throw new NotImplementedException();
+		}
+
+
 		/// <summary>
 		/// 
 		/// </summary>

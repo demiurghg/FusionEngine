@@ -219,6 +219,11 @@ namespace Fusion.Engine.Client {
 				if (command==NetCommand.Notification) {
 					gameClient.FeedNotification( msg.ReadString() );
 				}
+
+				if (command==NetCommand.Broadcast) {
+					int length = msg.ReadInt32();
+					gameClient.FeedBroadcast( msg.ReadBytes( length ) );
+				}
 			}
 		}
 	}

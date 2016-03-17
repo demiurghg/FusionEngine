@@ -168,12 +168,22 @@ namespace Fusion.Engine.Server {
 		public abstract bool ApproveClient ( Guid guid, string userInfo, out string reason );
 
 		/// <summary>
-		/// Sends text message to all clients.
+		/// Sends reliable text message to all clients.
 		/// </summary>
 		/// <param name="message"></param>
 		public void NotifyClients ( string format, params object[] args )
 		{
 			NotifyClientsInternal( string.Format(format, args) );
+		}
+
+
+		/// <summary>
+		/// Sends reliable data to every connected client.
+		/// </summary>
+		/// <param name="data"></param>
+		public void Broadcast ( byte[] data )
+		{
+			BroadcastEventInternal(data);
 		}
 
 

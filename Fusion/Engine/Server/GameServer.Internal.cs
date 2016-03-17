@@ -25,6 +25,7 @@ namespace Fusion.Engine.Server {
 		object lockObj = new object();
 
 		Queue<string> notifications = null;
+		Queue<byte[]> broadcast		= null;
 
 
 		/// <summary>
@@ -120,6 +121,7 @@ namespace Fusion.Engine.Server {
 
 			var server		=	new NetServer( netConfig );
 			notifications	=	new Queue<string>();
+			broadcast		=	new Queue<byte[]>();
 
 			Log.Message("SV: Start: {0} {1}", map, postCommand);
 
@@ -255,6 +257,9 @@ namespace Fusion.Engine.Server {
 
 			//	send snapshot to clients :
 			SendSnapshot( server, snapshotQueue, svTime.Total.Ticks );
+
+			//	broadcast events
+			SendBroadcastEvent( server );
 
 			//	send notifications to clients :
 			SendNotifications( server );
@@ -460,7 +465,36 @@ namespace Fusion.Engine.Server {
 				var msg = server.CreateMessage( message.Length + 1 );
 				msg.Write( (byte)NetCommand.Notification );
 				msg.Write( message );
-				server.SendMessage( msg, conns, NetDeliveryMethod.ReliableSequenced, 0 );
+				server.SendMessage( msg, conns, NetDeliveryMethod.ReliableOrdered, 0 );
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="server"></param>
+		void SendBroadcastEvent ( NetServer server )
+		{
+			List<byte[]> messages;
+			lock (broadcast) {
+				messages = broadcast.ToList();
+				broadcast.Clear();
+			}
+
+			var conns = server.Connections;
+
+			if (!conns.Any()) {
+				return;
+			}
+
+			foreach ( var message in messages ) {
+				var msg = server.CreateMessage( message.Length + 4 + 1 );
+				msg.Write( (byte)NetCommand.Broadcast );
+				msg.Write( message.Length );
+				msg.Write( message );
+				server.SendMessage( msg, conns, NetDeliveryMethod.ReliableOrdered, 0 );
 			}
 		}
 
@@ -525,6 +559,17 @@ namespace Fusion.Engine.Server {
 			if (notifications!=null) {
 				lock (notifications) {
 					notifications.Enqueue(message);
+				}
+			}
+		}
+
+
+
+		void BroadcastEventInternal ( byte[] data )
+		{
+			if (broadcast!=null) {
+				lock (broadcast) {
+					broadcast.Enqueue( data );
 				}
 			}
 		}

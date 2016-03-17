@@ -122,6 +122,12 @@ namespace Fusion.Engine.Client {
 		public abstract void FeedNotification ( string message );
 
 		/// <summary>
+		/// Feed broadcasted data from server.
+		/// </summary>
+		/// <param name="data"></param>
+		public abstract void FeedBroadcast ( byte[] data );
+
+		/// <summary>
 		/// Gets user information. 
 		/// Called when client-server game logic has determined that server needs user information.
 		/// </summary>
@@ -138,6 +144,7 @@ namespace Fusion.Engine.Client {
 		{
 			NotifyInternal(message);
 		}
+
 
 		/// <summary>
 		/// Gets ping between client and server in seconds.

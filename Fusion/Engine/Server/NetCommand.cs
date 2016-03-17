@@ -9,5 +9,6 @@ namespace Fusion.Engine.Server {
 		UserCommand,
 		Snapshot,
 		Notification,
+		Broadcast,
 	}
 }
