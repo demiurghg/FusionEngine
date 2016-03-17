@@ -20,6 +20,12 @@ namespace Fusion.Engine.Audio {
         internal XAudio2 Device { get; private set; }
         internal MasteringVoice MasterVoice { get; private set; }
 
+		internal static int OperationSetCounter {
+			get { return operationSetCounter; }
+		}
+		static int operationSetCounter = 1;
+
+
 
 		[Config]
 		public SoundSystemConfig Config { get; set; }
@@ -143,7 +149,10 @@ namespace Fusion.Engine.Audio {
 			this.MasterVolume	=	Config.MasterVolume;
 			this.SpeedOfSound	=	Config.SpeedOfSound;
 
-			SoundWorld.Update( gameTime );
+			SoundWorld.Update( gameTime, OperationSetCounter );
+
+			Device.CommitChanges( OperationSetCounter );
+			Interlocked.Increment( ref operationSetCounter );
 		}
 
 
@@ -211,7 +220,7 @@ namespace Fusion.Engine.Audio {
                 if (_masterVolume != value) {
                     _masterVolume = value;
                 }
-                MasterVoice.SetVolume(_masterVolume, 0);
+                MasterVoice.SetVolume(_masterVolume, SoundSystem.OperationSetCounter);
             }
         }
 

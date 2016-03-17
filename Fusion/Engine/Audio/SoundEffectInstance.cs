@@ -97,7 +97,7 @@ namespace Fusion.Engine.Audio
 		/// </summary>
 		/// <param name="listener"></param>
 		/// <param name="emitter"></param>
-		public void Apply3D (AudioListener listener, AudioEmitter emitter)
+		public void Apply3D (AudioListener listener, AudioEmitter emitter, int operationSet)
         {
             // If we have no voice then nothing to do.
             if (_voice == null)
@@ -126,13 +126,13 @@ namespace Fusion.Engine.Audio
             var dspSettings = device.Device3D.Calculate(l, e, flags, srcChannelCount, dstChannelCount);
 
             // Apply Volume settings (from distance attenuation) ...
-            _voice.SetOutputMatrix(device.MasterVoice, srcChannelCount, dstChannelCount, dspSettings.MatrixCoefficients, 0);
+            _voice.SetOutputMatrix(device.MasterVoice, srcChannelCount, dstChannelCount, dspSettings.MatrixCoefficients, operationSet);
 
 			//	USE: VoiceFlags.UseFilter !!!
 			//	_voice.SetFilterParameters( ... );
 
             // Apply Pitch settings (from doppler) ...
-            _voice.SetFrequencyRatio(dspSettings.DopplerFactor);
+            _voice.SetFrequencyRatio(dspSettings.DopplerFactor, operationSet);
         }
 
 
@@ -142,10 +142,10 @@ namespace Fusion.Engine.Audio
 		/// </summary>
 		/// <param name="listeners"></param>
 		/// <param name="emitter"></param>
-		public void Apply3D (AudioListener[] listeners,AudioEmitter emitter)
+		public void Apply3D (AudioListener[] listeners,AudioEmitter emitter, int operationSet)
 		{
             foreach ( var l in listeners )
-                Apply3D(l, emitter);            
+                Apply3D(l, emitter, operationSet);            
 		}		
 
 
@@ -156,7 +156,7 @@ namespace Fusion.Engine.Audio
 		public void Pause ()
         {
             if (_voice != null)
-                _voice.Stop();
+                _voice.Stop(SoundSystem.OperationSetCounter);
             _paused = true;
 		}
 		
@@ -178,12 +178,12 @@ namespace Fusion.Engine.Audio
 
                 if (_voice.State.BuffersQueued > 0)
                 {
-                    _voice.Stop();
+                    _voice.Stop(SoundSystem.OperationSetCounter);
                     _voice.FlushSourceBuffers();
                 }
 
                 _voice.SubmitSourceBuffer(buffer, null);
-                _voice.Start();
+                _voice.Start(SoundSystem.OperationSetCounter);
             }
 
 		    _paused = false;
@@ -212,12 +212,12 @@ namespace Fusion.Engine.Audio
                 // Restart the sound if (and only if) it stopped playing
                 if (!_loop) {
                     if (_voice.State.BuffersQueued == 0) {
-                        _voice.Stop();
+                        _voice.Stop(SoundSystem.OperationSetCounter);
                         _voice.FlushSourceBuffers();
                         _voice.SubmitSourceBuffer(_effect._buffer, null);
                     }
                 }
-                _voice.Start();
+                _voice.Start(SoundSystem.OperationSetCounter);
             }
             _paused = false;
 		}
@@ -232,12 +232,12 @@ namespace Fusion.Engine.Audio
         {
             if (_voice != null) {   
                 if (immediate) {
-                    _voice.Stop(0);
+                    _voice.Stop(SoundSystem.OperationSetCounter);
                     _voice.FlushSourceBuffers();
                 }
                 else {
-					_voice.ExitLoop();
-                    _voice.Stop((int)PlayFlags.Tails);
+					_voice.ExitLoop(SoundSystem.OperationSetCounter);
+                    _voice.Stop(PlayFlags.Tails, SoundSystem.OperationSetCounter);
 				}
             }
 
@@ -369,7 +369,7 @@ namespace Fusion.Engine.Audio
                         break;
                 }
 
-                _voice.SetOutputMatrix(srcChannelCount, dstChannelCount, _panMatrix);
+                _voice.SetOutputMatrix(srcChannelCount, dstChannelCount, _panMatrix, SoundSystem.OperationSetCounter);
             }
 		}
 		
@@ -401,7 +401,7 @@ namespace Fusion.Engine.Audio
                 // NOTE: This is copy of what XAudio2.SemitonesToFrequencyRatio() does
                 // which avoids the native call and is actually more accurate.
                 var ratio = Math.Pow(2.0, value);
-                _voice.SetFrequencyRatio((float)ratio);                  
+                _voice.SetFrequencyRatio((float)ratio, SoundSystem.OperationSetCounter);                  
             }        
 		}				
 		
@@ -442,7 +442,7 @@ namespace Fusion.Engine.Audio
 			
 			set {
                 if (_voice != null) {
-                    _voice.SetVolume(value, XAudio2.CommitNow);
+                    _voice.SetVolume(value, SoundSystem.OperationSetCounter);
 				}
 			}
 		}	

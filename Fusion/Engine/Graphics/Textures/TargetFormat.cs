@@ -11,6 +11,7 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	public enum TargetFormat {
 		LowDynamicRange,
+		LowDynamicRangeMSAA,
 		HighDynamicRange,
 	}
 }
