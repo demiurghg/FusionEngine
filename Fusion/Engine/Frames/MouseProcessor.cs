@@ -244,7 +244,7 @@ namespace Fusion.Engine.Frames {
 
 				//	handle click :
 				CallStatusChanged	( heldFrame, FrameStatus.Hovered );
-				CallClick			( heldFrame, doubleClick );
+				CallClick			( heldFrame, key, doubleClick );
 			}
 
 			heldFrame	=	null;
@@ -292,10 +292,10 @@ namespace Fusion.Engine.Frames {
 		 * 
 		-----------------------------------------------------------------------------------------*/
 
-		void CallClick ( Frame frame, bool doubleClick )
+		void CallClick ( Frame frame, Keys key, bool doubleClick )
 		{
 			if (frame!=null && frame.CanAcceptControl) {
-				frame.OnClick(doubleClick);
+				frame.OnClick(key, doubleClick);
 			}
 		}
 

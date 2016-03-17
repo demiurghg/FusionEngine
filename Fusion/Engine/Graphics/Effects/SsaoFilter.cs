@@ -151,6 +151,8 @@ namespace Fusion.Engine.Graphics {
 			SafeDispose( ref downsampledNormals );
 			SafeDispose( ref occlusionMap0 );
 			SafeDispose( ref occlusionMap1 );
+			SafeDispose( ref paramsCB );
+			SafeDispose( ref sampleDirectionsCB );
 
 			downsampledDepth	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  newWidth, newHeight, false, false );
 			downsampledNormals	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidth, newHeight, false, false );

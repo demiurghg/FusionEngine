@@ -509,18 +509,18 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnClick (bool doubleClick)
+		internal void OnClick (Keys key, bool doubleClick)
 		{
 			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
 			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
 
 			if (doubleClick) {
 				if (DoubleClick!=null) {
-					DoubleClick( this, new MouseEventArgs(){ Key = Keys.None, X = x, Y = y } );
+					DoubleClick( this, new MouseEventArgs(){ Key = key, X = x, Y = y } );
 				}
 			} else {
 				if (Click!=null) {
-					Click( this, new MouseEventArgs(){ Key = Keys.None, X = x, Y = y } );
+					Click( this, new MouseEventArgs(){ Key = key, X = x, Y = y } );
 				}
 			}
 		}
