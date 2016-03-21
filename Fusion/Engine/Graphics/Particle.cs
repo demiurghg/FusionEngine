@@ -11,6 +11,7 @@ namespace Fusion.Engine.Graphics {
 
 	[Flags]
 	public enum ParticleFX : uint {
+		None	=	0x0000,
 		Beam	=	0x0001,
 		Lit		=	0x0002,
 		Shadow	=	0x0004,

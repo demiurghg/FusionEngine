@@ -27,7 +27,7 @@ namespace Fusion.Engine.Graphics {
 		RenderWorld	renderWorld;
 
 		const int BlockSize				=	256;
-		const int MaxInjectingParticles	=	1024;
+		const int MaxInjectingParticles	=	4096;
 		const int MaxSimulatedParticles =	256 * 256;
 		const int MaxImages				=	512;
 

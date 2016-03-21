@@ -5,7 +5,7 @@ $ubershader INITIALIZE|INJECTION|SIMULATION|DRAW
 
 // change ParticleSystem.cs too!
 #define BLOCK_SIZE		256		
-#define MAX_INJECTED 	1024
+#define MAX_INJECTED 	4096
 #define MAX_PARTICLES 	(256*256)
 #define MAX_IMAGES		512
 
