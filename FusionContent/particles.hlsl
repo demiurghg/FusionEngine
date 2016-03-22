@@ -193,6 +193,10 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	
 	PARTICLE prt = particleBufferGS[ prtId ];
 	
+	if (prt.Time<0) {
+		return;
+	}
+	
 	if (prt.Time >= prt.LifeTime ) {
 		return;
 	}
