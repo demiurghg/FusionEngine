@@ -19,6 +19,7 @@ namespace Fusion.Engine.Client {
 
 			public StandBy ( GameClient gameClient ) : base(gameClient, ClientState.StandBy)
 			{
+				Message	=	"";
 			}
 
 

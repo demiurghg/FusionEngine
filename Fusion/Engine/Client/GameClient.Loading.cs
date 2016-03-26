@@ -25,6 +25,8 @@ namespace Fusion.Engine.Client {
 
 			public Loading ( GameClient gameClient, string serverInfo ) : base(gameClient, ClientState.Loading)
 			{
+				Message	=	serverInfo;
+
 				loader	=	gameClient.LoadContent( serverInfo );
 
 				if (loader==null) {

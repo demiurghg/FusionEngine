@@ -47,6 +47,8 @@ namespace Fusion.Engine.Client {
 				lastSnapshotID		=	snapshotId;
 				lastSnapshotFrame	=	snapshotId;
 
+				Message				=	"";
+
 
 				#if USE_DEJITTER
 				jitter		=	new JitterBuffer( gameClient.Game, svTicks );

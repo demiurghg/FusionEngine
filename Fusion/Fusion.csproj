@@ -211,6 +211,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Engine\Client\ClientState.cs" />
+    <Compile Include="Engine\Client\GameClient.Events.cs" />
     <Compile Include="Engine\Client\GameClient.Disconnected.cs" />
     <Compile Include="Engine\Client\GameClient.Active.cs" />
     <Compile Include="Engine\Client\GameClient.StandBy.cs" />

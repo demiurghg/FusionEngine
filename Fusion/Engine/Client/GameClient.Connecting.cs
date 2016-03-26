@@ -21,6 +21,8 @@ namespace Fusion.Engine.Client {
 			{
 				client.Start();
 
+				Message		=	endPoint.ToString();
+
 				var hail	=	client.CreateMessage();
 				hail.Write( gameClient.Guid.ToByteArray() );
 				hail.Write( Encoding.UTF8.GetBytes(gameClient.UserInfo()) );
@@ -53,6 +55,7 @@ namespace Fusion.Engine.Client {
 			public override void StatusChanged(NetConnectionStatus status, string message, NetConnection connection)
 			{
  				if (status==NetConnectionStatus.Connected) {
+					string serverInfo = connection.RemoteHailMessage.PeekString();
 					gameClient.SetState( new Loading( gameClient, connection.RemoteHailMessage.PeekString() ) );
 				}
  				if (status==NetConnectionStatus.Disconnected) {

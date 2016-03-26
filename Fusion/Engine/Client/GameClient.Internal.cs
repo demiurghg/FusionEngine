@@ -32,6 +32,8 @@ namespace Fusion.Engine.Client {
 		{						
 			this.state = newState;
 			Log.Message("CL: State: {0}", newState.GetType().Name );
+
+			ClientStateChanged( this, new ClientEventArgs(){ ClientState = newState.ClientState, Message = newState.Message } );
 		}
 							
 
