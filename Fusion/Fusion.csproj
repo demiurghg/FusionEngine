@@ -245,6 +245,7 @@
     <Compile Include="Engine\Graphics\Particle.cs" />
     <Compile Include="Engine\Graphics\ParticleSystem.cs" />
     <Compile Include="Engine\Graphics\RenderCounters.cs" />
+    <Compile Include="Engine\Graphics\Sprites\SpriteFrame.cs" />
     <Compile Include="Engine\Graphics\Sprites\SpriteLayerCollection.cs" />
     <Compile Include="Engine\Graphics\SurfaceFlags.cs" />
     <Compile Include="Engine\Graphics\Utils\DebugLayer.cs" />

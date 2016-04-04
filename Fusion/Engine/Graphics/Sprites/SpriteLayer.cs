@@ -11,6 +11,11 @@ using Fusion.Engine.Common;
 namespace Fusion.Engine.Graphics {
 	public class SpriteLayer : DisposableBase {
 
+		/// <summary>
+		/// The number of sprite frames, that clips sprites against rectangle area and colorize them.
+		/// </summary>
+		public const int MaxSpriteFrames = 1024;
+
 		readonly RenderSystem rs;
 
 		/// <summary>
@@ -68,6 +73,9 @@ namespace Fusion.Engine.Graphics {
 		VertexBuffer	vertexBuffer;
 		int				capacity	=	0;
 
+		ConstantBuffer			framesBuffer;
+		readonly SpriteFrame[]	framesData	=	new SpriteFrame[ MaxSpriteFrames ];
+
 		const int		VertexPerSprite = 6;
 
 
@@ -93,6 +101,8 @@ namespace Fusion.Engine.Graphics {
 			defaultTexture.SetData( Enumerable.Range(0,16*16).Select( i => Color.White ).ToArray() );
 
 			ReallocGpuBuffers( capacity );
+
+			framesBuffer	=	new ConstantBuffer( rs.Device, typeof(SpriteFrame), MaxSpriteFrames );
 		}
 
 
@@ -106,6 +116,7 @@ namespace Fusion.Engine.Graphics {
 			if (disposing) {
 				SafeDispose( ref defaultTexture );
 				SafeDispose( ref vertexBuffer );
+				SafeDispose( ref framesBuffer );
 			}
  			base.Dispose(disposing);
 		}
@@ -154,10 +165,13 @@ namespace Fusion.Engine.Graphics {
 
 				vertexBuffer.SetData( vertices.ToArray() );
 
+				framesBuffer.SetData( framesData );
+
 				dirty	=	false;
 			}
 
 
+			rs.Device.PixelShaderConstants[1] = framesBuffer;
 			rs.Device.SetupVertexInput( vertexBuffer, null );
 
 
@@ -225,6 +239,33 @@ namespace Fusion.Engine.Graphics {
 			spriteCount	=	0;
 			vertices.Clear();
 			groups.Clear();
+
+			//	should be enough
+			int min = -49999;
+			int max = 99999;
+
+			SetSpriteFrame( 0, new Rectangle(min, min, max, max), Color.White );
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="index"></param>
+		/// <param name="rectangle"></param>
+		public void SetSpriteFrame ( int index, Rectangle rectangle, Color color )
+		{
+			if (index<0 || index>=MaxSpriteFrames) {
+				throw new ArgumentOutOfRangeException("index", "must be greater or equal to zero and less than MaxClipRectangles (" + MaxSpriteFrames.ToString() + ")");
+			}
+
+			var rect	=	new RectangleF( rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height );
+			var color4	=	color.ToColor4();
+			
+			framesData[ index ] = new SpriteFrame( rect, color4 );
+
+			dirty	=	true;
 		}
 
 
@@ -274,15 +315,30 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		public void Draw ( Texture srv, float x, float y, float w, float h, Color color, float u=0, float v=0, float tw=1, float th=1 )
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="srv"></param>
+		/// <param name="x"></param>
+		/// <param name="y"></param>
+		/// <param name="w"></param>
+		/// <param name="h"></param>
+		/// <param name="color"></param>
+		/// <param name="u"></param>
+		/// <param name="v"></param>
+		/// <param name="tw"></param>
+		/// <param name="th"></param>
+		public void Draw ( Texture srv, float x, float y, float w, float h, Color color, float u=0, float v=0, float tw=1, float th=1, int frameIndex=0 )
 		{
 			var c = color;
 			PushQuad( srv,
-					 new SpriteVertex( x + 0, y + 0, 0, c, u + 0 ,  v + 0  ),
-					 new SpriteVertex( x + w, y + 0, 0, c, u + tw,  v + 0  ),
-					 new SpriteVertex( x + w, y + h, 0, c, u + tw,  v + th ),
-					 new SpriteVertex( x + 0, y + h, 0, c, u + 0 ,  v + th ) );
+					 new SpriteVertex( x + 0, y + 0, 0, c, u + 0 ,  v + 0 , frameIndex ),
+					 new SpriteVertex( x + w, y + 0, 0, c, u + tw,  v + 0 , frameIndex ),
+					 new SpriteVertex( x + w, y + h, 0, c, u + tw,  v + th, frameIndex ),
+					 new SpriteVertex( x + 0, y + h, 0, c, u + 0 ,  v + th, frameIndex ) );
 		}
+
 
 
 		/// <summary>
@@ -295,7 +351,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="height"></param>
 		/// <param name="angle"></param>
 		/// <param name="color"></param>
-        public void DrawSprite(Texture srv, float x, float y, float width, float height, float angle, Color color)
+        public void DrawSprite(Texture srv, float x, float y, float width, float height, float angle, Color color, int frameIndex=0 )
 		{
 			float c		=	(float)Math.Cos( angle );
 			float s		=	(float)Math.Sin( angle );
@@ -312,10 +368,10 @@ namespace Fusion.Engine.Graphics {
             var p3 = new Vector3( nszx * c + pszy * s + x, - nszx * s + pszy * c + y, 0 );
             
             PushQuad(srv,
-                new SpriteVertex(p0, color, new Vector2(1, 1)),
-                new SpriteVertex(p1, color, new Vector2(1, 0)),
-                new SpriteVertex(p2, color, new Vector2(0, 0)),
-                new SpriteVertex(p3, color, new Vector2(0, 1)));
+                new SpriteVertex(p0, color, new Vector2(1, 1), frameIndex),
+                new SpriteVertex(p1, color, new Vector2(1, 0), frameIndex),
+                new SpriteVertex(p2, color, new Vector2(0, 0), frameIndex),
+                new SpriteVertex(p3, color, new Vector2(0, 1), frameIndex));
 		}
 		
 		/// <summary>
@@ -327,9 +383,9 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="size"></param>
 		/// <param name="angle"></param>
 		/// <param name="color"></param>
-        public void DrawSprite( Texture srv, float x, float y, float size, float angle, Color color )
+        public void DrawSprite( Texture srv, float x, float y, float size, float angle, Color color, int frameIndex=0 )
         {
-			DrawSprite( srv, x, y, size, size, angle, color );
+			DrawSprite( srv, x, y, size, size, angle, color, frameIndex );
         }
 
 
@@ -342,7 +398,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="p1"></param>
 		/// <param name="color"></param>
 		/// <param name="width"></param>
-		public void DrawBeam ( Texture srv, Vector2 p0, Vector2 p1, Color color0, Color color1, float width, float scale=1, float offset=0 )
+		public void DrawBeam ( Texture srv, Vector2 p0, Vector2 p1, Color color0, Color color1, float width, float scale=1, float offset=0, int frameIndex=0 )
 		{
 			if (p1 == p0) {
 				return;
@@ -371,42 +427,42 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Draw( Texture srv, Vector3 leftTopCorner, Vector3 rightBottomCorner, Color color, float u = 0, float v = 0, float tw = 1, float th = 1)
+		public void Draw( Texture srv, Vector3 leftTopCorner, Vector3 rightBottomCorner, Color color, float u = 0, float v = 0, float tw = 1, float th = 1, int frameIndex=0 )
 		{
 			PushQuad(srv,
-					 new SpriteVertex(leftTopCorner.X,		leftTopCorner.Y,	leftTopCorner.Z, color, u + 0, v + 0),
-					 new SpriteVertex(rightBottomCorner.X,	leftTopCorner.Y,	leftTopCorner.Z, color, u + tw, v + 0),
-					 new SpriteVertex(rightBottomCorner.X,	leftTopCorner.Y,	rightBottomCorner.Z, color, u + tw, v + th),
-					 new SpriteVertex(leftTopCorner.X,		leftTopCorner.Y,	rightBottomCorner.Z, color, u + 0, v + th));
+					 new SpriteVertex(leftTopCorner.X,		leftTopCorner.Y,	leftTopCorner.Z,	 color, u + 0,  v + 0 , frameIndex ),
+					 new SpriteVertex(rightBottomCorner.X,	leftTopCorner.Y,	leftTopCorner.Z,	 color, u + tw, v + 0 , frameIndex ),
+					 new SpriteVertex(rightBottomCorner.X,	leftTopCorner.Y,	rightBottomCorner.Z, color, u + tw, v + th, frameIndex ),
+					 new SpriteVertex(leftTopCorner.X,		leftTopCorner.Y,	rightBottomCorner.Z, color, u + 0,  v + th, frameIndex ));
 		}
 		
 
 
-		public void Draw ( Texture texture, Rectangle dstRect, Rectangle srcRect, Color color )
+		public void Draw ( Texture texture, Rectangle dstRect, Rectangle srcRect, Color color, int frameIndex=0 )
 		{
 			texture	=	texture ?? defaultTexture;
 
 			float w = texture.Width;
 			float h = texture.Height;
 
-			Draw( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h );
+			Draw( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, frameIndex );
 		}
 
 
 
-		public void Draw ( Texture texture, Rectangle dstRect, Rectangle srcRect, int offsetX, int offsetY, Color color )
+		public void Draw ( Texture texture, Rectangle dstRect, Rectangle srcRect, int offsetX, int offsetY, Color color, int frameIndex=0 )
 		{
 			texture	=	texture ?? defaultTexture;
 
 			float w = texture.Width;
 			float h = texture.Height;
 
-			Draw( texture, dstRect.X + offsetY, dstRect.Y + offsetY, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h );
+			Draw( texture, dstRect.X + offsetY, dstRect.Y + offsetY, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, frameIndex );
 		}
 
 
 
-		public void DrawDebugString(Texture fontTexture, float x, float y, string text, Color color, float scale = 1.0f)
+		public void DrawDebugString(Texture fontTexture, float x, float y, string text, Color color, float scale = 1.0f, int frameIndex=0 )
 		{
 			int len = text.Length;
 			var duv = 1.0f / 16.0f;
@@ -417,45 +473,45 @@ namespace Fusion.Engine.Graphics {
 				var u  = (ch%16)/16.0f;
 				var v  = (ch/16)/16.0f;
 
-				Draw(fontTexture, x, y, 8 * scale, 8 * scale, color, u, v, duv, duv);
+				Draw(fontTexture, x, y, 8 * scale, 8 * scale, color, u, v, duv, duv, frameIndex);
 				x += 8 * scale;
 			}
 		}
 
 
 
-		public void Draw ( Texture texture, RectangleF dstRect, RectangleF srcRect, Color color )
+		public void Draw ( Texture texture, RectangleF dstRect, RectangleF srcRect, Color color, int frameIndex=0 )
 		{
 			texture	=	texture ?? defaultTexture;
 
 			float w = texture.Width;
 			float h = texture.Height;
 
-			Draw( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h );
+			Draw( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, frameIndex );
 		}
 
 
 
-		public void Draw ( Texture texture, Rectangle dstRect, Color color )
+		public void Draw ( Texture texture, Rectangle dstRect, Color color, int frameIndex=0 )
 		{
 			texture	=	texture ?? defaultTexture;
 
 			float w = texture.Width;
 			float h = texture.Height;
 
-			Draw( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color );
+			Draw( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, frameIndex );
 		}
 
 
 
-		public void Draw ( Texture texture, RectangleF dstRect, Color color )
+		public void Draw ( Texture texture, RectangleF dstRect, Color color, int frameIndex=0 )
 		{
 			texture	=	texture ?? defaultTexture;
 
 			float w = texture.Width;
 			float h = texture.Height;
 
-			Draw( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color );
+			Draw( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, frameIndex );
 		}
 
 	}

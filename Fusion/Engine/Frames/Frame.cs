@@ -989,10 +989,10 @@ namespace Fusion.Engine.Frames {
 			} */
 
 			if (ShadowColor.A!=0) {
-				Font.DrawString( sb, Text, x + TextOffsetX+ShadowOffset.X, y + TextOffsetY+ShadowOffset.Y, ShadowColor * colorMultiplier, 0, false );
+				Font.DrawString( sb, Text, x + TextOffsetX+ShadowOffset.X, y + TextOffsetY+ShadowOffset.Y, ShadowColor * colorMultiplier, 0, 0, false );
 			}
 
-			Font.DrawString( sb, Text, x + TextOffsetX, y + TextOffsetY, ForeColor * colorMultiplier, 0, false );
+			Font.DrawString( sb, Text, x + TextOffsetX, y + TextOffsetY, ForeColor * colorMultiplier, 0, 0, false );
 		}
 
 

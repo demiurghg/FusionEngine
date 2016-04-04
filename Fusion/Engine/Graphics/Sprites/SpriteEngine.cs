@@ -53,10 +53,19 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize()
 		{
-			shader		=	device.Game.Content.Load<Ubershader>("sprite");
-			factory		=	shader.CreateFactory( typeof(Flags), (ps,i) => StateEnum( ps, (Flags)i) );
+			LoadContent();
+
+			Game.Reloading	+= (s,e) => LoadContent();
+
 			constBuffer	=	new ConstantBuffer( device, typeof(ConstData) );
 			constData	=	new ConstData();
+		}
+
+
+		void LoadContent ()
+		{
+			shader		=	device.Game.Content.Load<Ubershader>("sprite");
+			factory		=	shader.CreateFactory( typeof(Flags), (ps,i) => StateEnum( ps, (Flags)i) );
 		}
 
 
