@@ -139,7 +139,7 @@ namespace Fusion.Engine.Frames {
 			ForceLayout		=	forceLayout;
 
 			if (RootFrame!=null) {
-				RootFrame.UpdateInternal( gameTime, 0, 0 );
+				RootFrame.UpdateInternal( gameTime );
 			}
 		}
 
@@ -186,14 +186,9 @@ namespace Fusion.Engine.Frames {
 				return;
 			}
 
-			var sb	=	spriteLayer;
-			var vp  =	Game.RenderSystem.DisplayBounds;
+			spriteLayer.Clear();
 
-			sb.Clear();
-		
-			if (RootFrame!=null) {
-				RootFrame.DrawInternal( gameTime, sb, Color.White );
-			}
+			Frame.DrawNonRecursive( RootFrame, gameTime, spriteLayer );
 		}
 
 

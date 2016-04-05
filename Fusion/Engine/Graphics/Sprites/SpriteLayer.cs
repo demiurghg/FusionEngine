@@ -329,7 +329,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="v"></param>
 		/// <param name="tw"></param>
 		/// <param name="th"></param>
-		public void Draw ( Texture srv, float x, float y, float w, float h, Color color, float u=0, float v=0, float tw=1, float th=1, int frameIndex=0 )
+		public void DrawUV ( Texture srv, float x, float y, float w, float h, Color color, float u, float v, float tw, float th, int frameIndex=0 )
 		{
 			var c = color;
 			PushQuad( srv,
@@ -337,6 +337,18 @@ namespace Fusion.Engine.Graphics {
 					 new SpriteVertex( x + w, y + 0, 0, c, u + tw,  v + 0 , frameIndex ),
 					 new SpriteVertex( x + w, y + h, 0, c, u + tw,  v + th, frameIndex ),
 					 new SpriteVertex( x + 0, y + h, 0, c, u + 0 ,  v + th, frameIndex ) );
+		}
+
+
+
+		public void Draw ( Texture srv, float x, float y, float w, float h, Color color, int frameIndex=0 )
+		{
+			var c = color;
+			PushQuad( srv,
+					 new SpriteVertex( x + 0, y + 0, 0, c, 0, 0, frameIndex ),
+					 new SpriteVertex( x + w, y + 0, 0, c, 1, 0, frameIndex ),
+					 new SpriteVertex( x + w, y + h, 0, c, 1, 1, frameIndex ),
+					 new SpriteVertex( x + 0, y + h, 0, c, 0, 1, frameIndex ) );
 		}
 
 
@@ -427,7 +439,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Draw( Texture srv, Vector3 leftTopCorner, Vector3 rightBottomCorner, Color color, float u = 0, float v = 0, float tw = 1, float th = 1, int frameIndex=0 )
+		public void DrawUV( Texture srv, Vector3 leftTopCorner, Vector3 rightBottomCorner, Color color, float u, float v, float tw, float th, int frameIndex=0 )
 		{
 			PushQuad(srv,
 					 new SpriteVertex(leftTopCorner.X,		leftTopCorner.Y,	leftTopCorner.Z,	 color, u + 0,  v + 0 , frameIndex ),
@@ -445,7 +457,7 @@ namespace Fusion.Engine.Graphics {
 			float w = texture.Width;
 			float h = texture.Height;
 
-			Draw( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, frameIndex );
+			DrawUV( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, frameIndex );
 		}
 
 
@@ -457,7 +469,7 @@ namespace Fusion.Engine.Graphics {
 			float w = texture.Width;
 			float h = texture.Height;
 
-			Draw( texture, dstRect.X + offsetY, dstRect.Y + offsetY, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, frameIndex );
+			DrawUV( texture, dstRect.X + offsetY, dstRect.Y + offsetY, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, frameIndex );
 		}
 
 
@@ -473,7 +485,7 @@ namespace Fusion.Engine.Graphics {
 				var u  = (ch%16)/16.0f;
 				var v  = (ch/16)/16.0f;
 
-				Draw(fontTexture, x, y, 8 * scale, 8 * scale, color, u, v, duv, duv, frameIndex);
+				DrawUV(fontTexture, x, y, 8 * scale, 8 * scale, color, u, v, duv, duv, frameIndex);
 				x += 8 * scale;
 			}
 		}
@@ -487,7 +499,7 @@ namespace Fusion.Engine.Graphics {
 			float w = texture.Width;
 			float h = texture.Height;
 
-			Draw( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, frameIndex );
+			DrawUV( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, frameIndex );
 		}
 
 
@@ -499,7 +511,7 @@ namespace Fusion.Engine.Graphics {
 			float w = texture.Width;
 			float h = texture.Height;
 
-			Draw( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, frameIndex );
+			DrawUV( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, 0,0,1,1, frameIndex );
 		}
 
 
@@ -511,7 +523,7 @@ namespace Fusion.Engine.Graphics {
 			float w = texture.Width;
 			float h = texture.Height;
 
-			Draw( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, frameIndex );
+			DrawUV( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, 0,0,1,1, frameIndex );
 		}
 
 	}
