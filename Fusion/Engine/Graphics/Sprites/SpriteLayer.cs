@@ -211,6 +211,28 @@ namespace Fusion.Engine.Graphics {
 			Transform	=	Matrix.Translation( x, y, 0 );
 		}
 
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="index"></param>
+		/// <param name="rectangle"></param>
+		public void SetClipRectangle ( int index, Rectangle rectangle, Color color )
+		{
+			if (index<0 || index>=MaxSpriteFrames) {
+				throw new ArgumentOutOfRangeException("index", "must be greater or equal to zero and less than MaxClipRectangles (" + MaxSpriteFrames.ToString() + ")");
+			}
+
+			var rect	=	new RectangleF( rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height );
+			var color4	=	color.ToColor4();
+			
+			framesData[ index ] = new SpriteFrame( rect, color4 );
+
+			dirty	=	true;
+		}
+
+
 		/*-----------------------------------------------------------------------------------------
 		 * 
 		 *	Drawing functions :
@@ -244,28 +266,7 @@ namespace Fusion.Engine.Graphics {
 			int min = -49999;
 			int max = 99999;
 
-			SetSpriteFrame( 0, new Rectangle(min, min, max, max), Color.White );
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="index"></param>
-		/// <param name="rectangle"></param>
-		public void SetSpriteFrame ( int index, Rectangle rectangle, Color color )
-		{
-			if (index<0 || index>=MaxSpriteFrames) {
-				throw new ArgumentOutOfRangeException("index", "must be greater or equal to zero and less than MaxClipRectangles (" + MaxSpriteFrames.ToString() + ")");
-			}
-
-			var rect	=	new RectangleF( rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height );
-			var color4	=	color.ToColor4();
-			
-			framesData[ index ] = new SpriteFrame( rect, color4 );
-
-			dirty	=	true;
+			SetClipRectangle( 0, new Rectangle(min, min, max, max), Color.White );
 		}
 
 
@@ -302,7 +303,7 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
-		/// 
+		/// Draws arbitrary quad with specified vertices.
 		/// </summary>
 		/// <param name="texture"></param>
 		/// <param name="v0"></param>
@@ -317,7 +318,7 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
-		/// 
+		/// Draw axis-aligned quad with specified UV coordinates.
 		/// </summary>
 		/// <param name="srv"></param>
 		/// <param name="x"></param>
@@ -329,32 +330,42 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="v"></param>
 		/// <param name="tw"></param>
 		/// <param name="th"></param>
-		public void DrawUV ( Texture srv, float x, float y, float w, float h, Color color, float u, float v, float tw, float th, int frameIndex=0 )
+		public void DrawUV ( Texture srv, float x, float y, float w, float h, Color color, float u, float v, float tw, float th, int clipRectIndex=0 )
 		{
 			var c = color;
 			PushQuad( srv,
-					 new SpriteVertex( x + 0, y + 0, 0, c, u + 0 ,  v + 0 , frameIndex ),
-					 new SpriteVertex( x + w, y + 0, 0, c, u + tw,  v + 0 , frameIndex ),
-					 new SpriteVertex( x + w, y + h, 0, c, u + tw,  v + th, frameIndex ),
-					 new SpriteVertex( x + 0, y + h, 0, c, u + 0 ,  v + th, frameIndex ) );
-		}
-
-
-
-		public void Draw ( Texture srv, float x, float y, float w, float h, Color color, int frameIndex=0 )
-		{
-			var c = color;
-			PushQuad( srv,
-					 new SpriteVertex( x + 0, y + 0, 0, c, 0, 0, frameIndex ),
-					 new SpriteVertex( x + w, y + 0, 0, c, 1, 0, frameIndex ),
-					 new SpriteVertex( x + w, y + h, 0, c, 1, 1, frameIndex ),
-					 new SpriteVertex( x + 0, y + h, 0, c, 0, 1, frameIndex ) );
+					 new SpriteVertex( x + 0, y + 0, 0, c, u + 0 ,  v + 0 , clipRectIndex ),
+					 new SpriteVertex( x + w, y + 0, 0, c, u + tw,  v + 0 , clipRectIndex ),
+					 new SpriteVertex( x + w, y + h, 0, c, u + tw,  v + th, clipRectIndex ),
+					 new SpriteVertex( x + 0, y + h, 0, c, u + 0 ,  v + th, clipRectIndex ) );
 		}
 
 
 
 		/// <summary>
-		/// 
+		/// Draw axis-aligned quad with stretched texture.
+		/// </summary>
+		/// <param name="srv"></param>
+		/// <param name="x"></param>
+		/// <param name="y"></param>
+		/// <param name="w"></param>
+		/// <param name="h"></param>
+		/// <param name="color"></param>
+		/// <param name="clipRectIndex"></param>
+		public void Draw ( Texture srv, float x, float y, float w, float h, Color color, int clipRectIndex=0 )
+		{
+			var c = color;
+			PushQuad( srv,
+					 new SpriteVertex( x + 0, y + 0, 0, c, 0, 0, clipRectIndex ),
+					 new SpriteVertex( x + w, y + 0, 0, c, 1, 0, clipRectIndex ),
+					 new SpriteVertex( x + w, y + h, 0, c, 1, 1, clipRectIndex ),
+					 new SpriteVertex( x + 0, y + h, 0, c, 0, 1, clipRectIndex ) );
+		}
+
+
+
+		/// <summary>
+		/// Draw rotated rectangle with specified position, width, height and rotation angle.
 		/// </summary>
 		/// <param name="srv"></param>
 		/// <param name="x"></param>
@@ -363,7 +374,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="height"></param>
 		/// <param name="angle"></param>
 		/// <param name="color"></param>
-        public void DrawSprite(Texture srv, float x, float y, float width, float height, float angle, Color color, int frameIndex=0 )
+        public void DrawSprite(Texture srv, float x, float y, float width, float height, float angle, Color color, int clipRectIndex=0 )
 		{
 			float c		=	(float)Math.Cos( angle );
 			float s		=	(float)Math.Sin( angle );
@@ -380,14 +391,15 @@ namespace Fusion.Engine.Graphics {
             var p3 = new Vector3( nszx * c + pszy * s + x, - nszx * s + pszy * c + y, 0 );
             
             PushQuad(srv,
-                new SpriteVertex(p0, color, new Vector2(1, 1), frameIndex),
-                new SpriteVertex(p1, color, new Vector2(1, 0), frameIndex),
-                new SpriteVertex(p2, color, new Vector2(0, 0), frameIndex),
-                new SpriteVertex(p3, color, new Vector2(0, 1), frameIndex));
+                new SpriteVertex(p0, color, new Vector2(1, 1), clipRectIndex),
+                new SpriteVertex(p1, color, new Vector2(1, 0), clipRectIndex),
+                new SpriteVertex(p2, color, new Vector2(0, 0), clipRectIndex),
+                new SpriteVertex(p3, color, new Vector2(0, 1), clipRectIndex));
 		}
+
 		
 		/// <summary>
-		/// 
+		/// Draw rotated square with specified position, width, height and rotation angle.
 		/// </summary>
 		/// <param name="srv"></param>
 		/// <param name="x"></param>
@@ -395,22 +407,22 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="size"></param>
 		/// <param name="angle"></param>
 		/// <param name="color"></param>
-        public void DrawSprite( Texture srv, float x, float y, float size, float angle, Color color, int frameIndex=0 )
+        public void DrawSprite( Texture srv, float x, float y, float size, float angle, Color color, int clipRectIndex=0 )
         {
-			DrawSprite( srv, x, y, size, size, angle, color, frameIndex );
+			DrawSprite( srv, x, y, size, size, angle, color, clipRectIndex );
         }
 
 
 
 		/// <summary>
-		/// 
+		/// Draws beam.
 		/// </summary>
 		/// <param name="srv"></param>
 		/// <param name="p0"></param>
 		/// <param name="p1"></param>
 		/// <param name="color"></param>
 		/// <param name="width"></param>
-		public void DrawBeam ( Texture srv, Vector2 p0, Vector2 p1, Color color0, Color color1, float width, float scale=1, float offset=0, int frameIndex=0 )
+		public void DrawBeam ( Texture srv, Vector2 p0, Vector2 p1, Color color0, Color color1, float width, float scale=1, float offset=0, int clipRectIndex=0 )
 		{
 			if (p1 == p0) {
 				return;
@@ -439,42 +451,103 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void DrawUV( Texture srv, Vector3 leftTopCorner, Vector3 rightBottomCorner, Color color, float u, float v, float tw, float th, int frameIndex=0 )
+		public void DrawUV( Texture srv, Vector3 leftTopCorner, Vector3 rightBottomCorner, Color color, float u, float v, float tw, float th, int clipRectIndex=0 )
 		{
 			PushQuad(srv,
-					 new SpriteVertex(leftTopCorner.X,		leftTopCorner.Y,	leftTopCorner.Z,	 color, u + 0,  v + 0 , frameIndex ),
-					 new SpriteVertex(rightBottomCorner.X,	leftTopCorner.Y,	leftTopCorner.Z,	 color, u + tw, v + 0 , frameIndex ),
-					 new SpriteVertex(rightBottomCorner.X,	leftTopCorner.Y,	rightBottomCorner.Z, color, u + tw, v + th, frameIndex ),
-					 new SpriteVertex(leftTopCorner.X,		leftTopCorner.Y,	rightBottomCorner.Z, color, u + 0,  v + th, frameIndex ));
+					 new SpriteVertex(leftTopCorner.X,		leftTopCorner.Y,	leftTopCorner.Z,	 color, u + 0,  v + 0 , clipRectIndex ),
+					 new SpriteVertex(rightBottomCorner.X,	leftTopCorner.Y,	leftTopCorner.Z,	 color, u + tw, v + 0 , clipRectIndex ),
+					 new SpriteVertex(rightBottomCorner.X,	leftTopCorner.Y,	rightBottomCorner.Z, color, u + tw, v + th, clipRectIndex ),
+					 new SpriteVertex(leftTopCorner.X,		leftTopCorner.Y,	rightBottomCorner.Z, color, u + 0,  v + th, clipRectIndex ));
 		}
 		
 
 
-		public void Draw ( Texture texture, Rectangle dstRect, Rectangle srcRect, Color color, int frameIndex=0 )
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="texture"></param>
+		/// <param name="dstRect"></param>
+		/// <param name="srcRect"></param>
+		/// <param name="color"></param>
+		/// <param name="clipRectIndex"></param>
+		public void Draw ( Texture texture, Rectangle dstRect, Rectangle srcRect, Color color, int clipRectIndex=0 )
 		{
 			texture	=	texture ?? defaultTexture;
 
 			float w = texture.Width;
 			float h = texture.Height;
 
-			DrawUV( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, frameIndex );
+			DrawUV( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, clipRectIndex );
 		}
 
 
 
-		public void Draw ( Texture texture, Rectangle dstRect, Rectangle srcRect, int offsetX, int offsetY, Color color, int frameIndex=0 )
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="texture"></param>
+		/// <param name="dstRect"></param>
+		/// <param name="srcRect"></param>
+		/// <param name="offsetX"></param>
+		/// <param name="offsetY"></param>
+		/// <param name="color"></param>
+		/// <param name="clipRectIndex"></param>
+		public void Draw ( Texture texture, Rectangle dstRect, Rectangle srcRect, int offsetX, int offsetY, Color color, int clipRectIndex=0 )
 		{
 			texture	=	texture ?? defaultTexture;
 
 			float w = texture.Width;
 			float h = texture.Height;
 
-			DrawUV( texture, dstRect.X + offsetY, dstRect.Y + offsetY, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, frameIndex );
+			DrawUV( texture, dstRect.X + offsetY, dstRect.Y + offsetY, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, clipRectIndex );
 		}
 
 
 
-		public void DrawDebugString(Texture fontTexture, float x, float y, string text, Color color, float scale = 1.0f, int frameIndex=0 )
+		/// <summary>
+		/// Draw string using specified font texture, position, text and color.
+		/// Font texture should contain character glyphs arranged in grid 16x16.
+		/// Only ASCII is supported.
+		/// </summary>
+		/// <param name="fontTexture"></param>
+		/// <param name="x"></param>
+		/// <param name="y"></param>
+		/// <param name="text"></param>
+		/// <param name="color"></param>
+		/// <param name="scale"></param>
+		/// <param name="clipRectIndex"></param>
+		public void DrawDebugString(Texture fontTexture, float x, float y, string text, Color color, int clipRectIndex=0 )
+		{
+			int len = text.Length;
+			var duv = 1.0f / 16.0f;
+			var scale = 1;
+
+			for (int i=0; i<len; i++) {
+				int ch = text[i];
+
+				var u  = (ch%16)/16.0f;
+				var v  = (ch/16)/16.0f;
+
+				DrawUV(fontTexture, x, y, 8 * scale, 8 * scale, color, u, v, duv, duv, clipRectIndex);
+				x += 8 * scale;
+			}
+		}
+
+
+
+		/// <summary>
+		/// Draw string using specified font texture, position, text and color.
+		/// Font texture should contain character glyphs arranged in grid 16x16.
+		/// Only ASCII is supported.
+		/// </summary>
+		/// <param name="fontTexture"></param>
+		/// <param name="x"></param>
+		/// <param name="y"></param>
+		/// <param name="text"></param>
+		/// <param name="color"></param>
+		/// <param name="scale"></param>
+		/// <param name="clipRectIndex"></param>
+		public void DrawDebugString(Texture fontTexture, float x, float y, string text, Color color, float scale, int clipRectIndex )
 		{
 			int len = text.Length;
 			var duv = 1.0f / 16.0f;
@@ -485,45 +558,67 @@ namespace Fusion.Engine.Graphics {
 				var u  = (ch%16)/16.0f;
 				var v  = (ch/16)/16.0f;
 
-				DrawUV(fontTexture, x, y, 8 * scale, 8 * scale, color, u, v, duv, duv, frameIndex);
+				DrawUV(fontTexture, x, y, 8 * scale, 8 * scale, color, u, v, duv, duv, clipRectIndex);
 				x += 8 * scale;
 			}
 		}
 
 
 
-		public void Draw ( Texture texture, RectangleF dstRect, RectangleF srcRect, Color color, int frameIndex=0 )
+		/// <summary>
+		/// Adds a sprite to a batch of sprites for rendering using the specified texture, destination rectangle, source rectangle, and color.
+		/// </summary>
+		/// <param name="texture"></param>
+		/// <param name="dstRect"></param>
+		/// <param name="srcRect"></param>
+		/// <param name="color"></param>
+		/// <param name="clipRectIndex"></param>
+		public void Draw ( Texture texture, RectangleF dstRect, RectangleF srcRect, Color color, int clipRectIndex=0 )
 		{
 			texture	=	texture ?? defaultTexture;
 
 			float w = texture.Width;
 			float h = texture.Height;
 
-			DrawUV( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, frameIndex );
+			DrawUV( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, srcRect.X/w, srcRect.Y/h, srcRect.Width/w, srcRect.Height/h, clipRectIndex );
 		}
 
 
 
-		public void Draw ( Texture texture, Rectangle dstRect, Color color, int frameIndex=0 )
+		/// <summary>
+		/// Adds a sprite to a batch of sprites for rendering using the specified texture, destination rectangle, and color.
+		/// </summary>
+		/// <param name="texture"></param>
+		/// <param name="dstRect"></param>
+		/// <param name="color"></param>
+		/// <param name="clipRectIndex"></param>
+		public void Draw ( Texture texture, Rectangle dstRect, Color color, int clipRectIndex=0 )
 		{
 			texture	=	texture ?? defaultTexture;
 
 			float w = texture.Width;
 			float h = texture.Height;
 
-			DrawUV( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, 0,0,1,1, frameIndex );
+			DrawUV( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, 0,0,1,1, clipRectIndex );
 		}
 
 
 
-		public void Draw ( Texture texture, RectangleF dstRect, Color color, int frameIndex=0 )
+		/// <summary>
+		/// Adds a sprite to a batch of sprites for rendering using the specified texture, destination rectangle, and color.
+		/// </summary>
+		/// <param name="texture"></param>
+		/// <param name="dstRect"></param>
+		/// <param name="color"></param>
+		/// <param name="clipRectIndex"></param>
+		public void Draw ( Texture texture, RectangleF dstRect, Color color, int clipRectIndex=0 )
 		{
 			texture	=	texture ?? defaultTexture;
 
 			float w = texture.Width;
 			float h = texture.Height;
 
-			DrawUV( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, 0,0,1,1, frameIndex );
+			DrawUV( texture, dstRect.X, dstRect.Y, dstRect.Width, dstRect.Height, color, 0,0,1,1, clipRectIndex );
 		}
 
 	}

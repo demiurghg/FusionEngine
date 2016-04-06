@@ -681,8 +681,9 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		class DrawFrame {
-			public DrawFrame ( Frame frame, Color color, Rectangle outerClip, Rectangle innerClip, string text )
+
+		class DrawFrameItem {
+			public DrawFrameItem ( Frame frame, Color color, Rectangle outerClip, Rectangle innerClip, string text )
 			{
 				this.Frame		=	frame;
 				this.OuterClip	=	outerClip;
@@ -710,10 +711,10 @@ namespace Fusion.Engine.Frames {
 				return;
 			}
 
-			var stack = new Stack<DrawFrame>();
-			var list  = new List<DrawFrame>();
+			var stack = new Stack<DrawFrameItem>();
+			var list  = new List<DrawFrameItem>();
 
-			stack.Push( new DrawFrame(rootFrame, Color.White, rootFrame.GlobalRectangle, rootFrame.GetBorderedRectangle(), rootFrame.Text ) );
+			stack.Push( new DrawFrameItem(rootFrame, Color.White, rootFrame.GlobalRectangle, rootFrame.GetBorderedRectangle(), rootFrame.Text ) );
 
 
 			while (stack.Any()) {
@@ -726,13 +727,15 @@ namespace Fusion.Engine.Frames {
 
 				list.Add( currentDrawFrame );
 
-				foreach ( var child in currentDrawFrame.Frame.Children ) {
+				foreach ( var child in currentDrawFrame.Frame.Children.Reverse() ) {
 
 					var color = currentDrawFrame.Color * child.OverallColor;
 					var inner = Clip( child.GetBorderedRectangle(), currentDrawFrame.InnerClip );
 					var outer = Clip( child.GlobalRectangle,		currentDrawFrame.InnerClip );
 
-					stack.Push( new DrawFrame(child, color, outer, inner, currentDrawFrame.Text + "-" + child.Text ) );
+					if ( MathUtil.IsRectInsideRect( child.GlobalRectangle, currentDrawFrame.InnerClip ) ) {
+						stack.Push( new DrawFrameItem(child, color, outer, inner, currentDrawFrame.Text + "-" + child.Text ) );
+					}
 				}
 			}
 
@@ -741,11 +744,11 @@ namespace Fusion.Engine.Frames {
 			for (int i=0; i<list.Count; i++) {
 				var drawFrame = list[i];
 
-				spriteLayer.SetSpriteFrame( i*2+0, drawFrame.OuterClip, drawFrame.Color );
-				spriteLayer.SetSpriteFrame( i*2+1, drawFrame.InnerClip, drawFrame.Color );
+				spriteLayer.SetClipRectangle( i*2+0, drawFrame.OuterClip, drawFrame.Color );
+				spriteLayer.SetClipRectangle( i*2+1, drawFrame.InnerClip, drawFrame.Color );
 
-				drawFrame.Frame.DrawFrameBorders( spriteLayer, Color.White, i*2+0 );
-				drawFrame.Frame.Draw( gameTime, spriteLayer, Color.White,   i*2+1 );
+				drawFrame.Frame.DrawFrameBorders( spriteLayer, i*2+0 );
+				drawFrame.Frame.DrawFrame( gameTime, spriteLayer,   i*2+1 );
 			}
 		}
 
@@ -784,7 +787,7 @@ namespace Fusion.Engine.Frames {
 		/// <summary>
 		/// Draws frame stuff
 		/// </summary>
-		void DrawFrameBorders ( SpriteLayer sb, Color colorMultiplier, int frameIndex )
+		void DrawFrameBorders ( SpriteLayer spriteLayer, int clipRectIndex )
 		{
 			int gx	=	GlobalRectangle.X;
 			int gy	=	GlobalRectangle.Y;
@@ -797,14 +800,14 @@ namespace Fusion.Engine.Frames {
 
 			var whiteTex = Game.RenderSystem.WhiteTexture;
 
-			var clr	=	BorderColor * colorMultiplier;
+			var clr	=	BorderColor;
 
-			sb.Draw( whiteTex,	gx,				gy,				w,		bt,				clr, frameIndex ); 
-			sb.Draw( whiteTex,	gx,				gy + h - bb,	w,		bb,				clr, frameIndex ); 
-			sb.Draw( whiteTex,	gx,				gy + bt,		bl,		h - bt - bb,	clr, frameIndex ); 
-			sb.Draw( whiteTex,	gx + w - br,	gy + bt,		br,		h - bt - bb,	clr, frameIndex ); 
+			spriteLayer.Draw( whiteTex,	gx,				gy,				w,		bt,				clr, clipRectIndex ); 
+			spriteLayer.Draw( whiteTex,	gx,				gy + h - bb,	w,		bb,				clr, clipRectIndex ); 
+			spriteLayer.Draw( whiteTex,	gx,				gy + bt,		bl,		h - bt - bb,	clr, clipRectIndex ); 
+			spriteLayer.Draw( whiteTex,	gx + w - br,	gy + bt,		br,		h - bt - bb,	clr, clipRectIndex ); 
 
-			sb.Draw( whiteTex,	GetBorderedRectangle(), BackColor * colorMultiplier, frameIndex );
+			spriteLayer.Draw( whiteTex,	GetBorderedRectangle(), BackColor, clipRectIndex );
 		}
 
 
@@ -813,10 +816,10 @@ namespace Fusion.Engine.Frames {
 		/// Draws frame stuff.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		protected virtual void Draw ( GameTime gameTime, SpriteLayer sb, Color colorMultiplier, int frameIndex )
+		protected virtual void DrawFrame ( GameTime gameTime, SpriteLayer spriteLayer, int clipRectIndex )
 		{
-			DrawFrameImage( sb, colorMultiplier, frameIndex );
-			DrawFrameText( sb, colorMultiplier, frameIndex );
+			DrawFrameImage( spriteLayer, clipRectIndex );
+			DrawFrameText ( spriteLayer, clipRectIndex );
 		}
 
 
@@ -935,7 +938,7 @@ namespace Fusion.Engine.Frames {
 		/// <summary>
 		/// 
 		/// </summary>
-		protected void DrawFrameImage (SpriteLayer sb, Color colorMultiplier, int frameIndex )
+		protected virtual void DrawFrameImage (SpriteLayer spriteLayer, int clipRectIndex )
 		{
 			if (Image==null) {
 				return;
@@ -945,24 +948,24 @@ namespace Fusion.Engine.Frames {
 			var bp = GetBorderedRectangle();
 
 			if (ImageMode==FrameImageMode.Stretched) {
-				sb.Draw( Image, bp, ImageColor * colorMultiplier, frameIndex );
+				spriteLayer.Draw( Image, bp, ImageColor, clipRectIndex );
 				return;
 			}
 
 			if (ImageMode==FrameImageMode.Centered) {
 				int x = bp.X + gp.Width/2  - Image.Width/2;
 				int y = bp.Y + gp.Height/2 - Image.Height/2;
-				sb.Draw( Image, x, y, Image.Width, Image.Height, ImageColor * colorMultiplier, frameIndex );
+				spriteLayer.Draw( Image, x, y, Image.Width, Image.Height, ImageColor, clipRectIndex );
 				return;
 			}
 
 			if (ImageMode==FrameImageMode.Tiled) {
-				sb.Draw( Image, bp, new Rectangle(0,0,bp.Width,bp.Height), ImageColor * colorMultiplier, frameIndex );
+				spriteLayer.Draw( Image, bp, new Rectangle(0,0,bp.Width,bp.Height), ImageColor, clipRectIndex );
 				return;
 			}
 
 			if (ImageMode == FrameImageMode.DirectMapped) {
-				sb.Draw(Image, bp, bp, ImageColor * colorMultiplier, frameIndex );
+				spriteLayer.Draw(Image, bp, bp, ImageColor, clipRectIndex );
 				return;
 			}
 
@@ -975,7 +978,7 @@ namespace Fusion.Engine.Frames {
 		/// Draws string
 		/// </summary>
 		/// <param name="text"></param>
-		protected void DrawFrameText ( SpriteLayer sb, Color colorMultiplier, int frameIndex )
+		protected virtual void DrawFrameText ( SpriteLayer spriteLayer, int clipRectIndex )
 		{											
 			if (string.IsNullOrEmpty(Text)) {
 				return;
@@ -1034,10 +1037,10 @@ namespace Fusion.Engine.Frames {
 			} */
 
 			if (ShadowColor.A!=0) {
-				Font.DrawString( sb, Text, x + TextOffsetX+ShadowOffset.X, y + TextOffsetY+ShadowOffset.Y, ShadowColor * colorMultiplier, frameIndex, 0, false );
+				Font.DrawString( spriteLayer, Text, x + TextOffsetX+ShadowOffset.X, y + TextOffsetY+ShadowOffset.Y, ShadowColor, clipRectIndex, 0, false );
 			}
 
-			Font.DrawString( sb, Text, x + TextOffsetX, y + TextOffsetY, ForeColor * colorMultiplier, frameIndex, 0, false );
+			Font.DrawString( spriteLayer, Text, x + TextOffsetX, y + TextOffsetY, ForeColor, clipRectIndex, 0, false );
 		}
 
 
