@@ -8,14 +8,14 @@
 RequestExecutionLevel user
   
 # The name of the installer
-Name "Fusion Engine (v0.04)"
+Name "Fusion Engine (v0.05)"
 XPStyle on
 
 # The file to write
 !ifdef PATCH
-OutFile "FusionEnginePatch-0.04.exe"
+OutFile "FusionEnginePatch-0.05.exe"
 !else
-OutFile "FusionEngineSetup-0.04.exe"
+OutFile "FusionEngineSetup-0.05.exe"
 !endif
 
 # The default installation directory
