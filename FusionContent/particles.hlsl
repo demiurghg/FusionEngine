@@ -27,6 +27,7 @@ Texture2D						Texture 				: 	register(t0);
 StructuredBuffer<PARTICLE>		injectionBuffer			:	register(t1);
 StructuredBuffer<PARTICLE>		particleBufferGS		:	register(t2);
 StructuredBuffer<float2>		sortParticleBufferGS	:	register(t3);
+StructuredBuffer<float4>		particleLighting		:	register(t4);
 
 //-----------------------------------------------
 //	UAVs :
@@ -209,6 +210,10 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	p3.Color 	= color;
 	
 	
+	p0.Color.rgb	*= particleLighting[ prtId ].rgb;
+	p1.Color.rgb	*= particleLighting[ prtId ].rgb;
+	p2.Color.rgb	*= particleLighting[ prtId ].rgb;
+	p3.Color.rgb	*= particleLighting[ prtId ].rgb;
 	
 
 	outputStream.Append(p0);

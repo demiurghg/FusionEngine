@@ -20,7 +20,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// Particle structure
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit, Size=124)]
+	[StructLayout(LayoutKind.Explicit, Size=144)]
 	public struct Particle {
 		
 		/// <summary>
@@ -39,7 +39,7 @@ namespace Fusion.Engine.Graphics {
 		[FieldOffset( 24)] public Vector3	Acceleration;          
 
 		/// <summary>
-		/// Acceleration of the particle regardless of gravity.
+		/// Particle tail position
 		/// </summary>
 		[FieldOffset( 36)] public Vector3	TailPosition;
 
@@ -54,68 +54,73 @@ namespace Fusion.Engine.Graphics {
 		[FieldOffset( 64)] public Color4	Color1;                
 
 		/// <summary>
+		/// "Faded-in" color of the particle.
+		/// </summary>
+		[FieldOffset( 80)] public Color4	LightLevel;                
+
+		/// <summary>
 		/// Gravity influence.
 		/// Zero means no gravity influence.
 		/// Values between 0 and 1 means reduced gravity, like fluffs.
 		/// Negative values means particle that have positive buoyancy.
 		/// </summary>
-		[FieldOffset( 80)] public float		Gravity;                
+		[FieldOffset( 96)] public float		Gravity;                
 
 		/// <summary>
 		/// NOT USED!
 		/// </summary>
-		[FieldOffset( 84)] public float		Damping;                
+		[FieldOffset(100)] public float		Damping;                
 
 		/// <summary>
 		/// Initial size of the particle
 		/// </summary>
-		[FieldOffset( 88)] public float		Size0;                  
+		[FieldOffset(104)] public float		Size0;                  
 
 		/// <summary>
 		/// Terminal size of the particle
 		/// </summary>
-		[FieldOffset( 92)] public float		Size1;                  
+		[FieldOffset(108)] public float		Size1;                  
 
 		/// <summary>
 		/// Initial rotation of the particle
 		/// </summary>
-		[FieldOffset( 96)] public float		Rotation0;                 
+		[FieldOffset(112)] public float		Rotation0;                 
 
 		/// <summary>
 		/// Terminal rotation of the particle
 		/// </summary>
-		[FieldOffset(100)] public float		Rotation1;                 
+		[FieldOffset(116)] public float		Rotation1;                 
 
 		/// <summary>
 		/// Total particle life-time
 		/// </summary>
-		[FieldOffset(104)] public float		LifeTime;          
+		[FieldOffset(120)] public float		LifeTime;          
 
 		/// <summary>
 		/// Lag between desired particle injection time and actual 
 		/// particle injection time caused by discrete updating.
 		/// Internally this field used as particle life-time counter.
 		/// </summary>
-		[FieldOffset(108)] public float		TimeLag;	           
+		[FieldOffset(124)] public float		TimeLag;	           
 
 		/// <summary>
 		/// Fade in time fraction
 		/// </summary>
-		[FieldOffset(112)] public float		FadeIn;                
+		[FieldOffset(128)] public float		FadeIn;                
 
 		/// <summary>
 		/// Fade out time fraction
 		/// </summary>
-		[FieldOffset(116)] public float		FadeOut;               
+		[FieldOffset(132)] public float		FadeOut;               
 
 		/// <summary>
 		/// Index of the image in the texture atlas
 		/// </summary>
-		[FieldOffset(120)] public int		ImageIndex;            
+		[FieldOffset(136)] public int		ImageIndex;            
 
 		/// <summary>
 		/// Index of the image in the texture atlas
 		/// </summary>
-		[FieldOffset(124)] public ParticleFX	Effects;            
+		[FieldOffset(140)] public ParticleFX	Effects;            
 	}
 }

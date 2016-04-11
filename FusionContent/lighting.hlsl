@@ -1,6 +1,6 @@
 
 #if 0
-$ubershader
+$ubershader SOLIDLIGHTING|PARTICLES
 #endif
 
 static const float PI = 3.141592f;
@@ -14,6 +14,7 @@ static const float PI = 3.141592f;
 #include "brdf.fxi"
 #include "lighting.fxi"
 #include "shadows.fxi"
+#include "particles.fxi"
 
 /*-----------------------------------------------------------------------------
 	Cook-Torrance lighting model
@@ -41,6 +42,7 @@ StructuredBuffer<SPOTLIGHT>	SpotLights	: register(t9);
 StructuredBuffer<ENVLIGHT>	EnvLights	: register(t10);
 Texture2D 			OcclusionMap		: register(t11);
 TextureCubeArray	EnvMap				: register(t12);
+StructuredBuffer<PARTICLE> Particles	: register(t13);
 
 
 float DepthToViewZ(float depthValue) {
@@ -52,6 +54,7 @@ float DepthToViewZ(float depthValue) {
 -----------------------------------------------------------------------------------------------------*/
 RWTexture2D<float4> hdrTexture  : register(u0); 
 RWTexture2D<float4> hdrSSS 		: register(u1); 
+RWStructuredBuffer<float4> ParticleLighting : register(u2);
 
 //#ifdef __COMPUTE_SHADER__
 
@@ -64,11 +67,15 @@ groupshared uint visibleLightCountSpot = 0;
 groupshared uint visibleLightCountEnv = 0; 
 groupshared uint visibleLightIndices[1024];
 
-#define BLOCK_SIZE_X 16 
-#define BLOCK_SIZE_Y 16 
+
 #define OMNI_LIGHT_COUNT 1024
 #define SPOT_LIGHT_COUNT 256
 #define ENV_LIGHT_COUNT 256
+
+
+#ifdef SOLIDLIGHTING
+#define BLOCK_SIZE_X 16 
+#define BLOCK_SIZE_Y 16 
 [numthreads(BLOCK_SIZE_X,BLOCK_SIZE_Y,1)] 
 void CSMain( 
 	uint3 groupId : SV_GroupID, 
@@ -308,12 +315,62 @@ void CSMain(
 	hdrTexture[dispatchThreadId.xy] = totalLight;
 	hdrSSS[dispatchThreadId.xy] = totalSSS;
 }
-
+#endif
 
 /*-----------------------------------------------------------------------------------------------------
 	Direct Light
 -----------------------------------------------------------------------------------------------------*/
 
+#ifdef PARTICLES
+#define BLOCK_SIZE 256
+[numthreads(BLOCK_SIZE,1,1)] 
+void CSMain( 
+	uint3 groupId : SV_GroupID, 
+	uint3 groupThreadId : SV_GroupThreadID, 
+	uint  groupIndex: SV_GroupIndex, 
+	uint3 dispatchThreadId : SV_DispatchThreadID) 
+{
+		int id = dispatchThreadId.x;
+
+	#if 0
+		float4	worldPos	=	float4(Particles[id].Position, 1);
+		
+		float3 csmFactor	=	ComputeCSM( worldPos, Params, ShadowSampler, CSMTexture, false );
+		float3 lightDir		=	-normalize(Params.DirectLightDirection.xyz);
+		float3 lightColor	=	Params.DirectLightIntensity.rgb;
+		
+		float3 totalPrtLight	=	lightColor * csmFactor;
+
+		
+		for (int i=0; i<ENV_LIGHT_COUNT; i++) {
+			ENVLIGHT light = EnvLights[i];
+
+			float3 intensity = light.Intensity.rgb;
+			float3 position	 = light.Position.rgb;
+			float  radius    = light.InnerOuterRadius.y;
+			float3 lightDir	 = position.xyz - worldPos.xyz;
+			float  falloff	 = LinearFalloff( length(lightDir), radius );
+			
+			float3 	envFactor	=	0;
+					envFactor	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(float3(1,0,0), i), 6).rgb;
+					envFactor	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(float3(0,1,0), i), 6).rgb;
+					envFactor	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(float3(0,0,1), i), 6).rgb;
+					envFactor	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(float3(-1,0,0), i), 6).rgb;
+					envFactor	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(float3(0,-1,0), i), 6).rgb;
+					envFactor	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(float3(0,0,-1), i), 6).rgb;
+							  
+			totalPrtLight.xyz	+=	envFactor * falloff / 6;
+		}
+		
+		ParticleLighting[id] = 	float4( totalPrtLight / 4 / 3.14f, 1 );
+
+	#else
+		ParticleLighting[id]	=	float4(1,1,1,1);
+	#endif
+	
+}
+
+#endif
 
 
 

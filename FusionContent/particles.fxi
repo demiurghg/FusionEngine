@@ -16,6 +16,7 @@ struct PARTICLE {
 	float3	TailPosition;
 	float4	Color0;
 	float4	Color1;
+	float4	LightLevel;
 	float	Gravity;
 	float	Damping;
 	float	Size0;
@@ -29,6 +30,7 @@ struct PARTICLE {
 	uint	ImageIndex;
 	uint 	Effects;
 };
+
 
 struct PARAMS {
 	float4x4	View;

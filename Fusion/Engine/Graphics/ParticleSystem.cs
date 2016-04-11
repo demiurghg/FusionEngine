@@ -26,10 +26,10 @@ namespace Fusion.Engine.Graphics {
 		StateFactory	factory;
 		RenderWorld	renderWorld;
 
-		const int BlockSize				=	256;
-		const int MaxInjectingParticles	=	4096;
-		const int MaxSimulatedParticles =	256 * 256;
-		const int MaxImages				=	512;
+		public const int BlockSize				=	256;
+		public const int MaxInjectingParticles	=	4096;
+		public const int MaxSimulatedParticles =	256 * 256;
+		public const int MaxImages				=	512;
 
 		bool toMuchInjectedParticles = false;
 
@@ -39,8 +39,29 @@ namespace Fusion.Engine.Graphics {
 		StructuredBuffer	simulationBuffer;
 		StructuredBuffer	deadParticlesIndices;
 		StructuredBuffer	sortParticlesBuffer;
+		StructuredBuffer	particleLighting;
 		ConstantBuffer		paramsCB;
 		ConstantBuffer		imagesCB;
+
+
+		/// <summary>
+		/// Gets structured buffer of simulated particles.
+		/// </summary>
+		internal StructuredBuffer SimulatedParticles {
+			get {
+				return simulationBuffer;
+			}
+		}
+
+
+		/// <summary>
+		/// Gets structured buffer of simulated particles.
+		/// </summary>
+		internal StructuredBuffer ParticleLighting {
+			get {
+				return particleLighting;
+			}
+		}
 
 		enum Flags {
 			INJECTION		=	0x01,
@@ -122,6 +143,7 @@ namespace Fusion.Engine.Graphics {
 
 			injectionBuffer			=	new StructuredBuffer( Game.GraphicsDevice, typeof(Particle),	MaxInjectingParticles, StructuredBufferFlags.None );
 			simulationBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(Particle),	MaxSimulatedParticles, StructuredBufferFlags.None );
+			particleLighting		=	new StructuredBuffer( Game.GraphicsDevice, typeof(Vector4),		MaxSimulatedParticles, StructuredBufferFlags.None );
 			sortParticlesBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(Vector2),		MaxSimulatedParticles, StructuredBufferFlags.None );
 			deadParticlesIndices	=	new StructuredBuffer( Game.GraphicsDevice, typeof(uint),		MaxSimulatedParticles, StructuredBufferFlags.Append );
 
@@ -164,6 +186,7 @@ namespace Fusion.Engine.Graphics {
 
 				SafeDispose( ref injectionBuffer );
 				SafeDispose( ref simulationBuffer );
+				SafeDispose( ref particleLighting );
 				SafeDispose( ref sortParticlesBuffer );
 				SafeDispose( ref deadParticlesIndices );
 			}
@@ -398,6 +421,7 @@ namespace Fusion.Engine.Graphics {
 					device.GeometryShaderResources[1]	=	simulationBuffer ;
 					device.GeometryShaderResources[2]	=	simulationBuffer ;
 					device.GeometryShaderResources[3]	=	sortParticlesBuffer;
+					device.GeometryShaderResources[4]	=	particleLighting;
 
 					//	setup PS :
 					device.PipelineState	=	factory[ (int)Flags.DRAW ];

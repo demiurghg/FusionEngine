@@ -52,7 +52,8 @@ namespace Fusion.Engine.Graphics {
 
 
 		enum LightingFlags {
-			NONE			=	0x0000,
+			SOLIDLIGHTING	=	0x0001,
+			PARTICLES		=	0x0002,
 		}
 
 		//   struct LightingParams
@@ -239,8 +240,6 @@ namespace Fusion.Engine.Graphics {
 				var device = Game.GraphicsDevice;
 				device.ResetStates();
 
-				LightingFlags	flags = LightingFlags.NONE;
-
 				var width	=	hdrFrame.HdrBuffer.Width;
 				var height	=	hdrFrame.HdrBuffer.Height;
 
@@ -249,9 +248,6 @@ namespace Fusion.Engine.Graphics {
 				//	Setup compute shader parameters and states :
 				//
 				try {
-					device.PipelineState	=	factory[ (int)flags ];
-
-					//lightingShader.SetComputeShader((int)flags);
 
 					var cbData	=	new LightingParams();
 					var invView	=	Matrix.Invert( view );
@@ -305,19 +301,31 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderResources[8]	=	omniLightBuffer;
 					device.ComputeShaderResources[9]	=	spotLightBuffer;
 					device.ComputeShaderResources[10]	=	envLightBuffer;
-					//device.ComputeShaderResources[11]	=	hdrFrame.SSAOBuffer;
 					device.ComputeShaderResources[11]	=	rs.SsaoFilter.OcclusionMap;
 					device.ComputeShaderResources[12]	=	viewLayer.RadianceCache;
+					device.ComputeShaderResources[13]	=	viewLayer.ParticleSystem.SimulatedParticles;
 
 					device.ComputeShaderConstants[0]	=	lightingCB;
 
 					device.SetCSRWTexture( 0, hdrFrame.LightAccumulator.Surface );
 					device.SetCSRWTexture( 1, hdrFrame.SSSAccumulator.Surface );
+					device.SetCSRWBuffer(  2, viewLayer.ParticleSystem.ParticleLighting );
 
 					//
-					//	Dispatch :
+					//	Dispatch solids :
 					//
+					device.PipelineState	=	factory[ (int)LightingFlags.SOLIDLIGHTING ];
 					device.Dispatch( MathUtil.IntDivUp( width, BlockSizeX ), MathUtil.IntDivUp( height, BlockSizeY ), 1 );
+
+					//
+					//	Dispatch particles :
+					//
+					int threadGroupCount	=	MathUtil.IntDivUp( ParticleSystem.MaxSimulatedParticles, ParticleSystem.BlockSize );
+					device.PipelineState	=	factory[ (int)LightingFlags.PARTICLES ];
+					device.Dispatch( threadGroupCount, 1, 1 );
+
+
+					//viewLayer.ParticleSystem.SimulatedParticles
 
 				} catch ( UbershaderException e ) {
 					Log.Warning("{0}", e.Message );
