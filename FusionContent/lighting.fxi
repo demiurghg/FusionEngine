@@ -1,0 +1,60 @@
+
+struct LightingParams {
+	float4x4	View;
+	float4x4	Projection;
+	float4x4	InverseViewProjection;
+
+	float4		FrustumVectorTR;
+	float4		FrustumVectorBR;
+	float4		FrustumVectorBL;
+	float4		FrustumVectorTL;
+	
+	float4x4	CSMViewProjection0;
+	float4x4	CSMViewProjection1;
+	float4x4	CSMViewProjection2;
+	float4x4	CSMViewProjection3;
+
+	float4		ViewPosition;
+	float4		DirectLightDirection;
+	float4		DirectLightIntensity;
+	float4		ViewportSize;
+	
+	float4		CSMFilterRadius;	//	for each cascade
+	float4		AmbientColor;
+	
+	float4		Viewport;			//	x,y,w,h,
+	float		ShowCSLoadOmni;
+	float		ShowCSLoadEnv;
+	float		ShowCSLoadSpot;
+};
+
+struct PS_IN {
+    float4 position : SV_POSITION;
+	float4 projPos  : TEXCOORD0;
+};
+
+struct OMNILIGHT {
+	float4	PositionRadius;
+	float4	Intensity;
+	float4	ExtentMin;
+	float4	ExtentMax;
+};
+
+struct ENVLIGHT {
+	float4	Position;
+	float4	Intensity;
+	float4	ExtentMin;
+	float4	ExtentMax;
+	float4  InnerOuterRadius;
+};
+
+struct SPOTLIGHT {
+	float4x4	ViewProjection;
+	float4		PositionRadius;
+	float4		IntensityFar;
+	float4		ExtentMin;	// x,y, depth
+	float4		ExtentMax;	// x,y, depth
+	float4		MaskScaleOffset;
+	float4		ShadowScaleOffset;
+};
+

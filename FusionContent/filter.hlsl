@@ -201,7 +201,7 @@ VSOutput VSMain(uint VertexID : SV_VertexID)
 #define FXAA_CONSOLE__EDGE_SHARPNESS 2.0
 //#define FXAA_CONSOLE__EDGE_SHARPNESS 8.0
 #define FXAA_QUALITY__EDGE_THRESHOLD 1/16.0f
-#include "fxaa39.fx"
+#include "fxaa39.fxi"
 
 float4 PSMain( VSOutput input) : SV_Target
 {

@@ -1,0 +1,44 @@
+// change ParticleSystem.cs too!
+#define BLOCK_SIZE		256		
+#define MAX_INJECTED 	4096
+#define MAX_PARTICLES 	(256*256)
+#define MAX_IMAGES		512
+
+#define BEAM			0x0001
+#define LIT				0x0002
+#define SHADOW			0x0004
+#define LIT2			0x0008
+
+struct PARTICLE {
+	float3	Position;
+	float3	Velocity;
+	float3	Acceleration;
+	float3	TailPosition;
+	float4	Color0;
+	float4	Color1;
+	float	Gravity;
+	float	Damping;
+	float	Size0;
+	float	Size1;
+	float	Angle0;
+	float	Angle1;
+	float	LifeTime;
+	float	Time;
+	float	FadeIn;
+	float	FadeOut;
+	uint	ImageIndex;
+	uint 	Effects;
+};
+
+struct PARAMS {
+	float4x4	View;
+	float4x4	Projection;
+	float4		CameraForward;
+	float4		CameraRight;
+	float4		CameraUp;
+	float4		CameraPosition;
+	float4		Gravity;
+	int			MaxParticles;
+	float		DeltaTime;
+	uint		DeadListSize;
+};
