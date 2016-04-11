@@ -300,7 +300,9 @@ namespace Fusion.Engine.Graphics {
 			ClearBuffers( viewHdrFrame );
 
 			//	render shadows :
-			rs.LightRenderer.RenderShadows( this, this.LightSet );
+			if (stereoEye!=StereoEye.Right) {
+				rs.LightRenderer.RenderShadows( this, this.LightSet );
+			}
 
 			//	render g-buffer :
 			rs.SceneRenderer.RenderGBuffer( stereoEye, Camera, viewHdrFrame, this );

@@ -297,6 +297,7 @@ namespace Fusion.Engine.Graphics {
 				return;
 			}
 
+
 			using ( new PixEvent("Particle Rendering") ) {
 
 				device.ResetStates();
@@ -349,7 +350,9 @@ namespace Fusion.Engine.Graphics {
 				//
 				//	Inject :
 				//
+
 				using (new PixEvent("Injection")) {
+
 					injectionBuffer.SetData( injectionBufferCPU );
 
 					device.ComputeShaderResources[1]	= injectionBuffer ;
@@ -369,7 +372,7 @@ namespace Fusion.Engine.Graphics {
 				//
 				using (new PixEvent("Simulation")) {
 
-					if (!renderWorld.IsPaused && !rs.Config.SkipParticlesSimulation) {
+					if (!renderWorld.IsPaused && !rs.Config.SkipParticlesSimulation && !(stereoEye == StereoEye.Right)) {
 	
 						device.SetCSRWBuffer( 0, simulationBuffer,		0 );
 						device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
