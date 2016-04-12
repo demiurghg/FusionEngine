@@ -24,6 +24,10 @@ cbuffer CBLightingParams : register(b0) {
 	LightingParams Params : packoffset( c0 ); 
 };
 
+cbuffer CBSkyOcclusionMatricies : register(b1) { 
+	float4x4 SkyOcclusionMatricies[64] : packoffset( c0 ); 
+};
+
 
 SamplerState			SamplerNearestClamp : register(s0);
 SamplerState			SamplerLinearClamp : register(s1);
@@ -43,6 +47,7 @@ StructuredBuffer<ENVLIGHT>	EnvLights	: register(t10);
 Texture2D 			OcclusionMap		: register(t11);
 TextureCubeArray	EnvMap				: register(t12);
 StructuredBuffer<PARTICLE> Particles	: register(t13);
+Texture2D 			SkyOcclusionTexture	: register(t14);
 
 
 float DepthToViewZ(float depthValue) {
@@ -117,6 +122,17 @@ void CSMain(
 	
 	float4	totalLight	=	0;
 	float4	totalSSS	=	float4( 0,0,0, scatter.w );
+
+	#if 0
+	totallight	=	float4( 
+		computeskyocclusion( worldpos, normal.xyz, shadowsampler, skyocclusiontexture, skyocclusionmatricies ) 
+		* ssao.rgb 
+		* (diffuse.rgb + specular.rgb)
+		* params.ambientcolor.rgb, 
+	1 );
+	/*hdrTexture[dispatchThreadId.xy] = totalLight;
+	return;*/
+	#endif
 	
 	//-----------------------------------------------------
 	//	Direct light :

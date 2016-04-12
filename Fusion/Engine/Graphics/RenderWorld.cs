@@ -302,6 +302,7 @@ namespace Fusion.Engine.Graphics {
 			//	render shadows :
 			if (stereoEye!=StereoEye.Right) {
 				rs.LightRenderer.RenderShadows( this, this.LightSet );
+				//rs.LightRenderer.RenderSkyOcclusionMap( this );
 			}
 
 			//	render g-buffer :
@@ -353,10 +354,6 @@ namespace Fusion.Engine.Graphics {
 		public void RenderRadiance ()
 		{
 			var sw = new Stopwatch();
-
-			/*if (!Game.Keyboard.IsKeyDown(Input.Keys.F3)) {
-				return;
-			} //*/
 
 			Log.Message("Radiance capture...");
 

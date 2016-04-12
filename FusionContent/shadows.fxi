@@ -1,5 +1,4 @@
 
-
 /*
 **	ComputeSpotShadow
 **	Computes spot shadows
@@ -126,3 +125,44 @@ float3	ComputeCSM ( float4 worldPos, LightingParams params, SamplerComparisonSta
 		return shadow;
 	#endif
 }
+
+
+
+float3 ComputeSkyOcclusion ( float4 worldPos, float3 normal, SamplerComparisonState shadowSampler, Texture2D skyOcclusionTexture, float4x4 skyOccMatricies[64] )
+{
+	float shadow = 0;
+
+	float2	csmSize;
+	skyOcclusionTexture.GetDimensions( csmSize.x, csmSize.y );
+	
+	for (int i=0; i<64; i++) {
+		
+		float3 randDirection;
+				randDirection.x	=	(i/8)-3.5f;
+				randDirection.z	=	(i%8)-3.5f;
+				randDirection.y =	4;
+				
+		randDirection = normalize(randDirection);
+		float nDotL = saturate(dot( normalize(normal), randDirection ));
+
+		float4x4	viewProj	=	skyOccMatricies[i];
+		float4		smProj		=	mul( worldPos, viewProj );
+		
+		float dx	=	i % 8;
+		float dy	=	i / 8;
+
+		smProj.xy /=  smProj.w;	
+		smProj.w   =  1;
+
+		float	z		=	smProj.z;
+		float2	smUV	=	0.5 * (float2(1, -1) * smProj.xy + float2(1, 1));
+				smUV	=	smUV * float2(0.125,0.128) + float2( dx/8.0f, dy/8.0f );
+		
+		float  sh  = nDotL * skyOcclusionTexture.SampleCmpLevelZero( shadowSampler, smUV, z );
+		shadow += sh / 64;
+	}
+
+	return shadow;
+}
+
+
