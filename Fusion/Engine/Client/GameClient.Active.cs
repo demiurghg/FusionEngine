@@ -170,6 +170,10 @@ namespace Fusion.Engine.Client {
 				long timeDelta	=	svTicks - lastServerTicks;
 				lastServerTicks	=	svTicks;
 
+				if (indexDelta>1) {
+					Log.Warning("Snapshot(s) dropped: {2} - [{0}-{1}]", lastSnapshotID - indexDelta, lastSnapshotID, indexDelta-1);
+				}
+
 				if (indexDelta==0) {
 					Log.Error("Duplicate snapshot #{0}", snapshotId);
 				} else {
