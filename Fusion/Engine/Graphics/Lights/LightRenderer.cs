@@ -28,6 +28,8 @@ namespace Fusion.Engine.Graphics {
 		DepthStencil2D		skyMapDepth		;
 		RenderTarget2D		skyMapColor		;
 
+		VolumeRWTexture		lightVoxelGrid	;
+
 
 		OmniLightGPU[]		omniLightData;
 		SpotLightGPU[]		spotLightData;
@@ -44,6 +46,8 @@ namespace Fusion.Engine.Graphics {
 
 		public RenderTarget2D	SpotColor { get { return spotColor; } }
 		public DepthStencil2D	SpotDepth { get { return spotDepth; } }
+
+		public VolumeRWTexture	LightVoxelGrid { get { return lightVoxelGrid; } }
 
 
 
@@ -134,6 +138,8 @@ namespace Fusion.Engine.Graphics {
 			spotLightBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(SpotLightGPU), RenderSystemConfig.MaxSpotLights, StructuredBufferFlags.None );
 			envLightBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(EnvLightGPU),  RenderSystemConfig.MaxEnvLights, StructuredBufferFlags.None );
 
+			lightVoxelGrid	=	new VolumeRWTexture( Game.GraphicsDevice, 128,128,128, ColorFormat.Rgba16F, false );
+
 			CreateShadowMaps();
 
 			LoadContent();
@@ -192,6 +198,8 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref spotColor );
 				SafeDispose( ref skyMapColor );
 				SafeDispose( ref skyMapDepth );
+
+				SafeDispose( ref lightVoxelGrid );
 
 				SafeDispose( ref lightingCB );
 				SafeDispose( ref skyOcclusionCB );

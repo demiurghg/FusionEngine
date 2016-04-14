@@ -969,5 +969,41 @@ namespace Fusion.Drivers.Graphics {
 				DeviceContext.OutputMerger.SetUnorderedAccessView ( register, surface==null?null:surface.UAV, -1 ); 
 			}
 		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="register"></param>
+		/// <param name="volumeTexture"></param>
+		public void SetPSRWTexture ( int register, VolumeRWTexture volumeTexture )
+		{
+			if (register>8) {
+				throw new GraphicsException("Could not bind RW texture at register " + register.ToString() + " (max 8)");
+			}
+
+			lock (deviceContext) {
+				DeviceContext.OutputMerger.SetUnorderedAccessView ( register, volumeTexture==null?null:volumeTexture.UAV, -1 ); 
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="register"></param>
+		/// <param name="volumeTexture"></param>
+		public void SetCSRWTexture ( int register, VolumeRWTexture volumeTexture )
+		{
+			if (register>8) {
+				throw new GraphicsException("Could not bind RW texture at register " + register.ToString() + " (max 8)");
+			}
+
+			lock (deviceContext) {
+				DeviceContext.ComputeShader.SetUnorderedAccessView ( register, volumeTexture==null?null:volumeTexture.UAV, -1 ); 
+			}
+		}
 	}
 }

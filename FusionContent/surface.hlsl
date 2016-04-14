@@ -62,6 +62,7 @@ Texture2D		Textures[16]: 	register(t0);
 $ubershader GBUFFER RIGID|SKINNED BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
 $ubershader SHADOW RIGID|SKINNED  BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
 $ubershader SHADOW RIGID|SKINNED
+$ubershader VOXELIZE RIGID|SKINNED
 #endif
 
 
@@ -156,6 +157,19 @@ PSInput VSMain( VSInput input )
 	
 	return output;
 }
+
+
+#ifdef VOXELIZE
+[maxvertexcount(3)]
+void GSMain( triangle PSInput inputTriangle[3], inout TriangleStream<PSInput> outputStream )
+{
+ 	outputStream.Append(inputTriangle[0]);
+	outputStream.Append(inputTriangle[1]);
+	outputStream.Append(inputTriangle[2]);
+	
+	outputStream.RestartStrip();
+}
+#endif
 
  
 /*-----------------------------------------------------------------------------
@@ -290,6 +304,12 @@ float4 PSMain( PSInput input ) : SV_TARGET0
 
 
 
-
+#ifdef VOXELIZE 
+float4 PSMain( PSInput input ) : SV_TARGET0
+{
+	
+	return 0;
+}
+#endif
 
 

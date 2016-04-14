@@ -271,6 +271,69 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
+		/// <param name="instances"></param>
+		/// <param name="target"></param>
+		/// <param name="lightSet"></param>
+		internal void VoxelizeScene ( IEnumerable<MeshInstance> instances, VolumeRWTexture target, LightSet lightSet )
+		{
+			#if true
+			using ( new PixEvent("Voxelize") ) {
+				if (surfaceShader==null) {
+					return;
+				}
+
+				var device			= Game.GraphicsDevice;
+
+				var cbData			= new CBMeshInstanceData();
+
+				var viewPosition	= Matrix.Invert( shadowRenderCtxt.ShadowView ).TranslationVector;
+
+				#error Set Volume RW Texture
+				device.SetTargets( shadowRenderCtxt.DepthBuffer, shadowRenderCtxt.ColorBuffer );
+				#error Set VP = Volume texture Width x Height
+				device.SetViewport( shadowRenderCtxt.ShadowViewport );
+
+				device.PixelShaderConstants[0]	= constBuffer ;
+				device.VertexShaderConstants[0]	= constBuffer ;
+				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
+
+				#error Set top-down??? projection?
+				cbData.Projection	=	shadowRenderCtxt.ShadowProjection;
+				cbData.View			=	shadowRenderCtxt.ShadowView;
+				cbData.ViewPos		=	new Vector4( viewPosition, 1 );
+				cbData.BiasSlopeFar	=	new Vector4( shadowRenderCtxt.DepthBias, shadowRenderCtxt.SlopeBias, shadowRenderCtxt.FarDistance, 0 );
+
+				//#warning INSTANSING!
+				foreach ( var instance in instances ) {
+
+					if (!instance.Visible) {
+						continue;
+					}
+
+					device.PipelineState	=	factory[ (int)ApplyFlags( null, instance, SurfaceFlags.SHADOW ) ];
+					cbData.World			=	instance.World;
+
+					constBuffer.SetData( cbData );
+
+					if (instance.IsSkinned) {
+						constBufferBones.SetData( instance.BoneTransforms );
+						device.VertexShaderConstants[3]	= constBufferBones ;
+					}
+
+					device.SetupVertexInput( instance.vb, instance.ib );
+					device.DrawIndexed( instance.indexCount, 0, 0 );
+
+					rs.Counters.ShadowDIPs++;
+				}
+			}
+			#endif
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
 		/// <param name="context"></param>
 		internal void RenderShadowMapCascade ( ShadowContext shadowRenderCtxt, IEnumerable<MeshInstance> instances )
 		{
