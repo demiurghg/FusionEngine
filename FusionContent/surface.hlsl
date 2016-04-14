@@ -59,10 +59,10 @@ SamplerState	Sampler		: 	register(s0);
 Texture2D		Textures[16]: 	register(t0);
 
 #ifdef _UBERSHADER
+$ubershader VOXELIZE RIGID|SKINNED
 $ubershader GBUFFER RIGID|SKINNED BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
 $ubershader SHADOW RIGID|SKINNED  BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
 $ubershader SHADOW RIGID|SKINNED
-$ubershader VOXELIZE RIGID|SKINNED
 #endif
 
 
@@ -305,9 +305,11 @@ float4 PSMain( PSInput input ) : SV_TARGET0
 
 
 #ifdef VOXELIZE 
+RWTexture3D<float4> lightGrid : register(u0);
+
 void PSMain( PSInput input )
 {
-	
+	lightGrid[ int3(3,3,3) ] = float4(1,1,1,3);
 }
 #endif
 

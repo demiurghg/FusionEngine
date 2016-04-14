@@ -289,6 +289,9 @@ namespace Fusion.Engine.Graphics {
 
 				var cbData			= new CBMeshInstanceData();
 
+				#warning Set MSAA render target.
+				//	https://developer.nvidia.com/content/basics-gpu-voxelization
+
 				device.SetViewport( 0,0, target.Width, target.Height );
 
 				device.PixelShaderConstants[0]	= constBuffer ;
