@@ -116,6 +116,10 @@ namespace Fusion.Engine.Graphics {
 			if (flags.HasFlag( SurfaceFlags.RIGID )) {
 				ps.VertexInputElements	=	VertexColorTextureTBNRigid.Elements;
 			}
+
+			if (flags.HasFlag( SurfaceFlags.VOXELIZE )) {
+				ps.DepthStencilState	=	DepthStencilState.None;
+			}
 		}
 
 
@@ -276,7 +280,6 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="lightSet"></param>
 		internal void VoxelizeScene ( IEnumerable<MeshInstance> instances, VolumeRWTexture target, LightSet lightSet )
 		{
-			#if true
 			using ( new PixEvent("Voxelize") ) {
 				if (surfaceShader==null) {
 					return;
@@ -286,22 +289,16 @@ namespace Fusion.Engine.Graphics {
 
 				var cbData			= new CBMeshInstanceData();
 
-				var viewPosition	= Matrix.Invert( shadowRenderCtxt.ShadowView ).TranslationVector;
-
-				#error Set Volume RW Texture
-				device.SetTargets( shadowRenderCtxt.DepthBuffer, shadowRenderCtxt.ColorBuffer );
-				#error Set VP = Volume texture Width x Height
-				device.SetViewport( shadowRenderCtxt.ShadowViewport );
+				device.SetViewport( 0,0, target.Width, target.Height );
 
 				device.PixelShaderConstants[0]	= constBuffer ;
 				device.VertexShaderConstants[0]	= constBuffer ;
 				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
 
-				#error Set top-down??? projection?
-				cbData.Projection	=	shadowRenderCtxt.ShadowProjection;
-				cbData.View			=	shadowRenderCtxt.ShadowView;
-				cbData.ViewPos		=	new Vector4( viewPosition, 1 );
-				cbData.BiasSlopeFar	=	new Vector4( shadowRenderCtxt.DepthBias, shadowRenderCtxt.SlopeBias, shadowRenderCtxt.FarDistance, 0 );
+				cbData.Projection	=	Matrix.OrthoRH( 64,64, -1024, 1024 );
+				cbData.View			=	Matrix.Identity;
+				cbData.ViewPos		=	Vector4.Zero;
+				cbData.BiasSlopeFar	=	Vector4.Zero;
 
 				//#warning INSTANSING!
 				foreach ( var instance in instances ) {
@@ -310,7 +307,7 @@ namespace Fusion.Engine.Graphics {
 						continue;
 					}
 
-					device.PipelineState	=	factory[ (int)ApplyFlags( null, instance, SurfaceFlags.SHADOW ) ];
+					device.PipelineState	=	factory[ (int)ApplyFlags( null, instance, SurfaceFlags.VOXELIZE ) ];
 					cbData.World			=	instance.World;
 
 					constBuffer.SetData( cbData );
@@ -326,7 +323,6 @@ namespace Fusion.Engine.Graphics {
 					rs.Counters.ShadowDIPs++;
 				}
 			}
-			#endif
 		}
 
 

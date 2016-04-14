@@ -20,7 +20,16 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="lightSet"></param>
 		internal void RenderLightVoxelGrid ( RenderWorld viewLayer, LightSet lightSet )
 		{
-			#error RENDER!
+			using (new PixEvent("RenderLightVoxelGrid")) {
+
+				var instances	=	viewLayer.Instances;
+
+				var device = Game.GraphicsDevice;
+
+				device.ResetStates();
+
+				Game.RenderSystem.SceneRenderer.VoxelizeScene( instances, lightVoxelGrid, lightSet );
+			}
 		}
 
 	}

@@ -305,10 +305,9 @@ float4 PSMain( PSInput input ) : SV_TARGET0
 
 
 #ifdef VOXELIZE 
-float4 PSMain( PSInput input ) : SV_TARGET0
+void PSMain( PSInput input )
 {
 	
-	return 0;
 }
 #endif
 
