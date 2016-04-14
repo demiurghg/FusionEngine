@@ -298,7 +298,7 @@ namespace Fusion.Engine.Graphics {
 				device.VertexShaderConstants[0]	= constBuffer ;
 				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
 
-				cbData.Projection	=	Matrix.OrthoRH( 64,64, -1024, 1024 );
+				cbData.Projection	=	Matrix.OrthoRH( 64,64, -32, 32 );
 				cbData.View			=	Matrix.Identity;
 				cbData.ViewPos		=	Vector4.Zero;
 				cbData.BiasSlopeFar	=	Vector4.Zero;
