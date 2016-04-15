@@ -109,6 +109,14 @@ namespace Fusion.Engine.Audio {
 		}
 
         float dopplerScale;
+
+
+		/// <summary>
+		/// Gets and sets whether sound should be played locally on applying 3D effects.
+		/// </summary>
+		public bool LocalSound {
+			get; set;
+		}
 		
 
 		/// <summary>

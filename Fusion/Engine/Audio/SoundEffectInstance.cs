@@ -137,6 +137,13 @@ namespace Fusion.Engine.Audio
 
 
 
+		//public void Apply2D ( int operationSet )
+		//{
+		//	_voice.SetFrequencyRatio(dspSettings.DopplerFactor, operationSet);
+		//}
+
+
+
 		/// <summary>
 		/// 
 		/// </summary>

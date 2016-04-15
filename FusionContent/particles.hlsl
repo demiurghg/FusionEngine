@@ -5,14 +5,19 @@ $ubershader INITIALIZE|INJECTION|SIMULATION|DRAW
 
 // change ParticleSystem.cs too!
 #define BLOCK_SIZE		256		
-#define MAX_INJECTED 	1024
+#define MAX_INJECTED 	4096
 #define MAX_PARTICLES 	(256*256)
 #define MAX_IMAGES		512
+
+#define BEAM			0x0001
+#define LIT				0x0002
+#define SHADOW			0x0004
 
 struct PARTICLE {
 	float3	Position;
 	float3	Velocity;
 	float3	Acceleration;
+	float3	TailPosition;
 	float4	Color0;
 	float4	Color1;
 	float	Gravity;
@@ -26,6 +31,7 @@ struct PARTICLE {
 	float	FadeIn;
 	float	FadeOut;
 	uint	ImageIndex;
+	uint 	Effects;
 };
 
 struct PARAMS {
@@ -34,6 +40,7 @@ struct PARAMS {
 	float4		CameraForward;
 	float4		CameraRight;
 	float4		CameraUp;
+	float4		CameraPosition;
 	float4		Gravity;
 	int			MaxParticles;
 	float		DeltaTime;
@@ -186,6 +193,10 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	
 	PARTICLE prt = particleBufferGS[ prtId ];
 	
+	if (prt.Time<0) {
+		return;
+	}
+	
 	if (prt.Time >= prt.LifeTime ) {
 		return;
 	}
@@ -196,7 +207,8 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	float  time		=	prt.Time;
 	float4 color	=	lerp( prt.Color0, prt.Color1, Ramp( prt.FadeIn, prt.FadeOut, factor ) );
 	float3 accel	=	prt.Acceleration + Params.Gravity.xyz * prt.Gravity;
-	float3 position	=	prt.Position + prt.Velocity * time + accel * time * time / 2;
+	float3 position	=	prt.Position     + prt.Velocity * time + accel * time * time / 2;
+	float3 tailpos	=	prt.TailPosition + prt.Velocity * time + accel * time * time / 2;
 	float  a		=	lerp( prt.Angle0, prt.Angle1, factor );	
 
 	float2x2	m	=	float2x2( cos(a), sin(a), -sin(a), cos(a) );
@@ -206,27 +218,34 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	
 	float4		image	=	Images[prt.ImageIndex ];
 	
-	p0.Position	= mul( float4( position + rt + up, 1 ), Params.View );
-	p0.Position	= mul( p0.Position, Params.Projection );
-	//p0.TexCoord	= float2(1,1);
+	float4 pos0	=	mul( float4( position + rt + up, 1 ), Params.View );
+	float4 pos1	=	mul( float4( position - rt + up, 1 ), Params.View );
+	float4 pos2	=	mul( float4( position - rt - up, 1 ), Params.View );
+	float4 pos3	=	mul( float4( position + rt - up, 1 ), Params.View );
+	
+	if (prt.Effects && BEAM == BEAM) {
+		float3 dir	=	normalize(position - tailpos);
+		float3 eye	=	normalize(Params.CameraPosition.xyz - tailpos);
+		float3 side	=	normalize(cross( eye, dir ));
+		pos0		=	mul( float4( tailpos  + side * sz, 1 ), Params.View );
+        pos1		=	mul( float4( position + side * sz, 1 ), Params.View );
+        pos2		=	mul( float4( position - side * sz, 1 ), Params.View );
+	    pos3		=	mul( float4( tailpos  - side * sz, 1 ), Params.View );
+	}
+	
+	p0.Position	= mul( pos0, Params.Projection );
 	p0.TexCoord	= float2(image.z, image.y);
 	p0.Color 	= color;
 	
-	p1.Position	= mul( float4( position - rt + up, 1 ), Params.View );
-	p1.Position	= mul( p1.Position, Params.Projection );
-	//p1.TexCoord	= float2(0,1);
+	p1.Position	= mul( pos1, Params.Projection );
 	p1.TexCoord	= float2(image.x, image.y);
 	p1.Color 	= color;
 	
-	p2.Position	= mul( float4( position - rt - up, 1 ), Params.View );
-	p2.Position	= mul( p2.Position, Params.Projection );
-	//p2.TexCoord	= float2(0,0);
+	p2.Position	= mul( pos2, Params.Projection );
 	p2.TexCoord	= float2(image.x, image.w);
 	p2.Color 	= color;
 	
-	p3.Position	= mul( float4( position + rt - up, 1 ), Params.View );
-	p3.Position	= mul( p3.Position, Params.Projection );
-	//p3.TexCoord	= float2(1,0);
+	p3.Position	= mul( pos3, Params.Projection );
 	p3.TexCoord	= float2(image.z, image.w);
 	p3.Color 	= color;
 	

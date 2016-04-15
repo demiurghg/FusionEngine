@@ -27,7 +27,7 @@ namespace Fusion.Engine.Graphics {
 		RenderWorld	renderWorld;
 
 		const int BlockSize				=	256;
-		const int MaxInjectingParticles	=	1024;
+		const int MaxInjectingParticles	=	4096;
 		const int MaxSimulatedParticles =	256 * 256;
 		const int MaxImages				=	512;
 
@@ -50,10 +50,16 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		//	row_major float4x4 View;       // Offset:    0
-		//	row_major float4x4 Projection; // Offset:   64
-		//	int MaxParticles;              // Offset:  128
-		//	float DeltaTime;               // Offset:  132
+//       row_major float4x4 View;       // Offset:    0
+//       row_major float4x4 Projection; // Offset:   64
+//       float4 CameraForward;          // Offset:  128
+//       float4 CameraRight;            // Offset:  144
+//       float4 CameraUp;               // Offset:  160
+//       float4 CameraPosition;         // Offset:  176
+//       float4 Gravity;                // Offset:  192
+//       int MaxParticles;              // Offset:  208
+//       float DeltaTime;               // Offset:  212
+//       uint DeadListSize;             // Offset:  216		
 		[StructLayout(LayoutKind.Explicit, Size=256)]
 		struct PrtParams {
 			[FieldOffset(  0)] public Matrix	View;
@@ -61,10 +67,11 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(128)] public Vector4	CameraForward;
 			[FieldOffset(144)] public Vector4	CameraRight;
 			[FieldOffset(160)] public Vector4	CameraUp;
-			[FieldOffset(176)] public Vector4	Gravity;
-			[FieldOffset(192)] public int		MaxParticles;
-			[FieldOffset(196)] public float		DeltaTime;
-			[FieldOffset(200)] public uint		DeadListSize;
+			[FieldOffset(176)] public Vector4	CameraPosition;
+			[FieldOffset(192)] public Vector4	Gravity;
+			[FieldOffset(208)] public int		MaxParticles;
+			[FieldOffset(212)] public float		DeltaTime;
+			[FieldOffset(216)] public uint		DeadListSize;
 		} 
 
 		Random rand = new Random();
@@ -172,7 +179,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="flag"></param>
 		void EnumAction ( PipelineState ps, Flags flag )
 		{
-			ps.BlendState			=	BlendState.AlphaBlend;
+			ps.BlendState			=	BlendState.AlphaBlendPremul;
 			ps.DepthStencilState	=	DepthStencilState.Readonly;
 			ps.Primitive			=	Primitive.PointList;
 		}
@@ -304,6 +311,7 @@ namespace Fusion.Engine.Graphics {
 				param.CameraForward	=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Forward	, 0 );
 				param.CameraRight	=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Right	, 0 );
 				param.CameraUp		=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Up		, 0 );
+				param.CameraPosition=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).TranslationVector	, 0 );
 				param.Gravity		=	new Vector4( this.Gravity, 0 );
 				param.MaxParticles	=	injectionCount;
 

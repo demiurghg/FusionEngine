@@ -185,6 +185,7 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref occlusionMap0 );
 				SafeDispose( ref occlusionMap1 );
 				SafeDispose( ref paramsCB	 );
+				SafeDispose( ref sampleDirectionsCB );
 				SafeDispose( ref randomDir );
 			}
 

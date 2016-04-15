@@ -131,7 +131,9 @@ namespace Fusion.Engine.Audio {
 		internal void Update ( GameTime gameTime, int operationSet )
 		{
 			foreach ( var e in emitters ) {
-				e.Apply3D( Listener, operationSet );
+				if (!e.LocalSound) {
+					e.Apply3D( Listener, operationSet );
+				}
 			}
 
 
