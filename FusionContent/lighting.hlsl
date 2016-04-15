@@ -32,6 +32,7 @@ cbuffer CBSkyOcclusionMatricies : register(b1) {
 SamplerState			SamplerNearestClamp : register(s0);
 SamplerState			SamplerLinearClamp : register(s1);
 SamplerComparisonState	ShadowSampler	: register(s2);
+SamplerState			SamplerLinearWrap : register(s3);
 
 Texture2D 			GBufferDiffuse 		: register(t0);
 Texture2D 			GBufferSpecular 	: register(t1);
@@ -48,6 +49,7 @@ Texture2D 			OcclusionMap		: register(t11);
 TextureCubeArray	EnvMap				: register(t12);
 StructuredBuffer<PARTICLE> Particles	: register(t13);
 Texture2D 			SkyOcclusionTexture	: register(t14);
+Texture3D			LightVoxelGrid      : register(t15);
 
 
 float DepthToViewZ(float depthValue) {
@@ -123,8 +125,12 @@ void CSMain(
 	float4	totalLight	=	0;
 	float4	totalSSS	=	float4( 0,0,0, scatter.w );
 
+	totalLight	=	LightVoxelGrid.SampleLevel( SamplerLinearWrap, worldPos.xyz,0 );
+	hdrTexture[dispatchThreadId.xy] = totalLight;
+	return;
+	
 	#if 0
-	totallight	=	float4( 
+	totalLight	=	float4( 
 		computeskyocclusion( worldpos, normal.xyz, shadowsampler, skyocclusiontexture, skyocclusionmatricies ) 
 		* ssao.rgb 
 		* (diffuse.rgb + specular.rgb)

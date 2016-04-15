@@ -29,6 +29,7 @@ namespace Fusion.Engine.Graphics {
 		RenderTarget2D		skyMapColor		;
 
 		VolumeRWTexture		lightVoxelGrid	;
+		StructuredBuffer	lightVoxelBuffer	;
 
 
 		OmniLightGPU[]		omniLightData;
@@ -48,12 +49,19 @@ namespace Fusion.Engine.Graphics {
 		public DepthStencil2D	SpotDepth { get { return spotDepth; } }
 
 		public VolumeRWTexture	LightVoxelGrid { get { return lightVoxelGrid; } }
+		public StructuredBuffer LightVoxelBuffer { get { return lightVoxelBuffer; } }
 
 
 
 		enum LightingFlags {
 			SOLIDLIGHTING	=	0x0001,
 			PARTICLES		=	0x0002,
+		}
+
+
+		enum VoxelFlags {
+			DEBUG_DRAW_VOXEL		=	0x0001,
+			COPY_BUFFER_TO_VOXEL	=	0x0002,
 		}
 
 		[StructLayout(LayoutKind.Explicit, Size=640)]
@@ -111,6 +119,8 @@ namespace Fusion.Engine.Graphics {
 
 
 		Ubershader		lightingShader;
+		Ubershader		voxelShader;
+		StateFactory	voxelFactory;
 		StateFactory	factory;
 		ConstantBuffer	lightingCB;
 		ConstantBuffer	skyOcclusionCB;
@@ -132,13 +142,14 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize ()
 		{
-			lightingCB		=	new ConstantBuffer( Game.GraphicsDevice, typeof(LightingParams) );
-			skyOcclusionCB	=	new ConstantBuffer( Game.GraphicsDevice, typeof(Matrix), 64 );
-			omniLightBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(OmniLightGPU), RenderSystemConfig.MaxOmniLights, StructuredBufferFlags.None );
-			spotLightBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(SpotLightGPU), RenderSystemConfig.MaxSpotLights, StructuredBufferFlags.None );
-			envLightBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(EnvLightGPU),  RenderSystemConfig.MaxEnvLights, StructuredBufferFlags.None );
+			lightingCB			=	new ConstantBuffer( Game.GraphicsDevice, typeof(LightingParams) );
+			skyOcclusionCB		=	new ConstantBuffer( Game.GraphicsDevice, typeof(Matrix), 64 );
+			omniLightBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(OmniLightGPU), RenderSystemConfig.MaxOmniLights, StructuredBufferFlags.None );
+			spotLightBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(SpotLightGPU), RenderSystemConfig.MaxSpotLights, StructuredBufferFlags.None );
+			envLightBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(EnvLightGPU),  RenderSystemConfig.MaxEnvLights, StructuredBufferFlags.None );
 
-			lightVoxelGrid	=	new VolumeRWTexture( Game.GraphicsDevice, 128,128,128, ColorFormat.Rgba16F, false );
+			lightVoxelGrid		=	new VolumeRWTexture( Game.GraphicsDevice, 64,64,64, ColorFormat.Rgba16F, false );
+			lightVoxelBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(Vector4), 64*64*64, StructuredBufferFlags.None );	
 
 			CreateShadowMaps();
 
@@ -155,6 +166,9 @@ namespace Fusion.Engine.Graphics {
 		{
 			lightingShader	=	Game.Content.Load<Ubershader>("lighting");
 			factory			=	lightingShader.CreateFactory( typeof(LightingFlags), Primitive.TriangleList, VertexInputElement.Empty );
+
+			voxelShader		=	Game.Content.Load<Ubershader>("voxel");
+			voxelFactory	=	voxelShader.CreateFactory( typeof(VoxelFlags), Primitive.TriangleList, VertexInputElement.Empty, BlendState.Opaque, RasterizerState.CullNone, DepthStencilState.None );
 		}
 
 
@@ -200,6 +214,7 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref skyMapDepth );
 
 				SafeDispose( ref lightVoxelGrid );
+				SafeDispose( ref lightVoxelBuffer );
 
 				SafeDispose( ref lightingCB );
 				SafeDispose( ref skyOcclusionCB );
@@ -279,6 +294,7 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderSamplers[0]	=	SamplerState.PointClamp;
 					device.ComputeShaderSamplers[1]	=	SamplerState.LinearClamp;
 					device.ComputeShaderSamplers[2]	=	SamplerState.ShadowSampler;
+					device.ComputeShaderSamplers[3]	=	SamplerState.LinearPointWrap;
 
 					device.ComputeShaderResources[0]	=	hdrFrame.DiffuseBuffer;
 					device.ComputeShaderResources[1]	=	hdrFrame.SpecularBuffer;
@@ -295,6 +311,7 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderResources[12]	=	viewLayer.RadianceCache;
 					device.ComputeShaderResources[13]	=	viewLayer.ParticleSystem.SimulatedParticles;
 					device.ComputeShaderResources[14]	=	skyMapColor;
+					device.ComputeShaderResources[15]	=	lightVoxelGrid;
 
 					device.ComputeShaderConstants[0]	=	lightingCB;
 					device.ComputeShaderConstants[1]	=	skyOcclusionCB;
