@@ -15,6 +15,7 @@ namespace Fusion.Drivers.Graphics {
 
 		readonly SamplerState[]		states;	
 		readonly CommonShaderStage	stage;
+		readonly DeviceContext	deviceContext;
 
 
 		/// <summary>
@@ -25,6 +26,7 @@ namespace Fusion.Drivers.Graphics {
 		{
 			states		=	new SamplerState[ Count ];
 			this.stage	=	stage;
+			deviceContext	=	device.DeviceContext;
 		}
 
 
@@ -59,8 +61,10 @@ namespace Fusion.Drivers.Graphics {
 		/// <returns></returns>
 		public SamplerState this[int index] {
 			set {
-				states[ index ] = value;
-				stage.SetSampler( index, (value==null) ? null : value.Apply(device) );
+				lock (deviceContext) {
+					states[ index ] = value;
+					stage.SetSampler( index, (value==null) ? null : value.Apply(device) );
+				}
 			}
 			get {
 				return states[ index ];

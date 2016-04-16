@@ -47,8 +47,8 @@ namespace Fusion.Drivers.Graphics.Display {
 				Log.Debug(nvex.Message);
 			}
 
-			//var deviceFlags			=	DeviceCreationFlags.SingleThreaded;
-			var deviceFlags			=	DeviceCreationFlags.BgraSupport /*| (DeviceCreationFlags)2048*/;
+			var deviceFlags			=	DeviceCreationFlags.BgraSupport;
+				//deviceFlags			|=	DeviceCreationFlags.SingleThreaded;
 				deviceFlags			|=	parameters.UseDebugDevice ? DeviceCreationFlags.Debug : DeviceCreationFlags.None;
 
 			var driverType			=	DriverType.Hardware;

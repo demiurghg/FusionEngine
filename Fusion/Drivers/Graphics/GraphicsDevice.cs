@@ -667,7 +667,9 @@ namespace Fusion.Drivers.Graphics {
 		{
 			SetTargets( BackbufferDepth, BackbufferColor );
 
-			deviceContext.Rasterizer.SetViewport( SharpDXHelper.Convert( new ViewportF( 0,0, BackbufferColor.Width, BackbufferColor.Height ) ) );
+			lock (deviceContext) {
+				deviceContext.Rasterizer.SetViewport( SharpDXHelper.Convert( new ViewportF( 0,0, BackbufferColor.Width, BackbufferColor.Height ) ) );
+			}
 		}
 
 
