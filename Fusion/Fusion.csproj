@@ -52,6 +52,9 @@
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="OculusWrap">
+      <HintPath>..\SDKs\OculusWrap\OculusWrap.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\SDKs\SharpDX\SharpDX.dll</HintPath>

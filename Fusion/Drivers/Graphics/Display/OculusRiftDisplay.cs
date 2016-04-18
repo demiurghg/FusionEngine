@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Fusion.Drivers.Input;
 using Fusion.Core.Mathematics;
+using Fusion.Engine.Common;
 using SharpDX.DXGI;
 using OculusWrap;
 using SharpDX.Direct3D;
@@ -23,22 +24,18 @@ namespace Fusion.Drivers.Graphics.Display {
 		
 		Form window;
 
-		RenderTarget2D backbufferColor1;
-		RenderTarget2D backbufferColor2;
-		DepthStencil2D backbufferDepth1;
-		DepthStencil2D backbufferDepth2;
 		RenderTarget2D backbufferColor1Resolved;
 		RenderTarget2D backbufferColor2Resolved;
 		RenderTarget2D backbufferColor;
-		int clientWidth;
-		int clientHeight;
+
 
 		Wrap	oculus;		// Oculus Wraper
 		Hmd		hmd;		// Head mounted display
-		OVR.D3D11.D3D11TextureData[]	eyeTexture;
-		OVR.Posef[]						eyeRenderPose  = new OVR.Posef[2];
-		OVR.EyeRenderDesc[]				eyeRenderDesc;
+		EyeTexture[]		eyeTextures;
+		OVR.Posef[]			eyeRenderPose  = new OVR.Posef[2];
+		OVR.EyeRenderDesc[]	eyeRenderDesc;
 
+		OculusTextureSwapChain[] oculusSwapChains;
 
 		/// <summary>
 		/// 
@@ -53,12 +50,12 @@ namespace Fusion.Drivers.Graphics.Display {
 			// Initialize the Oculus runtime.
 			oculus.Initialize();
 
+			OVR.GraphicsLuid graphicsLuid;
+
 			// Use the head mounted display, if it's available, otherwise use the debug HMD.
-			int numberOfHeadMountedDisplays = oculus.Hmd_Detect();
-			if (numberOfHeadMountedDisplays > 0)
-				hmd = oculus.Hmd_Create(0);
-			else
-				hmd = oculus.Hmd_CreateDebug(OculusWrap.OVR.HmdType.DK2);
+			
+			hmd = oculus.Hmd_Create(out graphicsLuid);
+
 
 			if (hmd == null) {
 				MessageBox.Show("Oculus Rift not detected.", "Uh oh", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -68,10 +65,6 @@ namespace Fusion.Drivers.Graphics.Display {
 			if (hmd.ProductName == string.Empty)
 				MessageBox.Show("The HMD is not enabled.", "There's a tear in the Rift", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-
-			OVR.Recti destMirrorRect;
-			OVR.Recti sourceRenderTargetRect;
-			hmd.AttachToWindow(window.Handle, out destMirrorRect, out sourceRenderTargetRect);
 
 			// Create a backbuffer that's the same size as the HMD's resolution.
 			OVR.Sizei backBufferSize;
@@ -106,9 +99,6 @@ namespace Fusion.Drivers.Graphics.Display {
 			var factory = swapChain.GetParent<Factory>();
 			factory.MakeWindowAssociation(window.Handle, WindowAssociationFlags.IgnoreAll);
 
-
-			clientWidth		= window.ClientSize.Width;
-			clientHeight	= window.ClientSize.Height;
 		}
 
 
@@ -257,26 +247,7 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// </summary>
 		public override void Update()
 		{
-			//if ( clientWidth!=window.ClientSize.Width || clientHeight!=window.ClientSize.Height ) {
-			//
-			//	clientWidth		=	window.ClientSize.Width;
-			//	clientHeight	=	window.ClientSize.Height;
-			//
-			//	SafeDispose( ref backbufferColor );
-			//	SafeDispose( ref backbufferColor1 );
-			//	SafeDispose( ref backbufferDepth1 );
-			//	SafeDispose( ref backbufferColor2 );
-			//	SafeDispose( ref backbufferDepth2 );
-			//
-			//	SafeDispose( ref backbufferColor1Resolved );
-			//	SafeDispose( ref backbufferColor2Resolved );
-			//
-			//	swapChain.ResizeBuffers( swapChainDesc.BufferCount, Bounds.Width, Bounds.Height, Format.R8G8B8A8_UNorm, swapChainDesc.Flags );
-			//
-			//	CreateDisplayResources();
-			//
-			//	device.NotifyViewportChanges();
-			//}
+
 		}
 
 
@@ -292,14 +263,8 @@ namespace Fusion.Drivers.Graphics.Display {
 				device.Resolve(backbufferColor2, backbufferColor2Resolved);
 			}
 
-			OVR.HSWDisplayState hasWarningState;
-			hmd.GetHSWDisplayState(out hasWarningState);
-			
-			// Remove the health and safety warning.
-			if (hasWarningState.Displayed == 1)
-				hmd.DismissHSWDisplay();
 
-			hmd.EndFrame(eyeRenderPose, eyeTexture);
+			hmd.SubmitFrame();
 		}
 
 
@@ -426,6 +391,82 @@ namespace Fusion.Drivers.Graphics.Display {
 					}
 				}
 			}
+		}
+
+
+
+		/// <summary>
+		/// Contains all the fields used by each eye.
+		/// </summary>
+		public class EyeTexture : IDisposable
+		{
+			public EyeTexture(D3D.Device device, OculusTextureSwapChain swapTexture)
+			{
+				GraphicDevice	= device;
+				SwapTexture		= swapTexture;
+
+				Textures = new SharpDX.Direct3D11.Texture2D[SwapTexture.TextureCount];
+				RenderTargetViews = new RenderTargetView[Textures.Length];
+
+				for (int i = 0; i < SwapTexture.TextureCount; i++) {
+					Textures[i] = new SharpDX.Direct3D11.Texture2D(SwapTexture.Texture2DResources[i]);
+					RenderTargetViews[i] = new RenderTargetView(device, Textures[i],
+						new RenderTargetViewDescription {Format = Format.R8G8B8A8_UNorm, Dimension = RenderTargetViewDimension.Texture2D});
+				}
+
+			}
+
+			#region IDisposable Members
+
+			/// <summary>
+			/// Dispose contained fields.
+			/// </summary>
+			public void Dispose()
+			{
+				if (SwapTexture != null) {
+					SwapTexture.Dispose();
+					SwapTexture = null;
+				}
+
+				if (Textures != null) {
+					foreach (var texture in Textures)
+						texture.Dispose();
+
+					Textures = null;
+				}
+
+				if (RenderTargetViews != null) {
+					foreach (RenderTargetView renderTargetView in RenderTargetViews)
+						renderTargetView.Dispose();
+
+					RenderTargetViews = null;
+				}
+
+				if (DepthBuffer != null) {
+					DepthBuffer.Dispose();
+					DepthBuffer = null;
+				}
+
+				if (DepthStencilView != null) {
+					DepthStencilView.Dispose();
+					DepthStencilView = null;
+				}
+			}
+
+			#endregion
+
+			public D3D.Device						GraphicDevice;
+			public OculusTextureSwapChain			SwapTexture;
+			public SharpDX.Direct3D11.Texture2D[]	Textures;
+			public RenderTargetView[]				RenderTargetViews;
+			public Texture2DDescription				DepthBufferDescription;
+			public SharpDX.Direct3D11.Texture2D		DepthBuffer;
+			public DepthStencilView					DepthStencilView;
+			public Viewport							Viewport;
+			public OVR.FovPort						FieldOfView;
+			public OVR.Recti						ViewportSize;
+			public OVR.EyeRenderDesc				RenderDescription;
+			public OVR.Vector3f						HmdToEyeViewOffset;
 		}
 
 	}
