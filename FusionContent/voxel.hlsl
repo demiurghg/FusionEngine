@@ -15,7 +15,7 @@ cbuffer WorldViewProjectionCB : register(b0) {
 };
 
 struct VertexOutput {
-	float4 Position : SV_POSITION;
+	float4 Position : SV_Position;
 	float4 Color    : COLOR0;
 };
 
@@ -34,7 +34,7 @@ VertexOutput VSMain ( uint VertexID : SV_VertexID )
 	
 	float3 uvw = worldPos / float3(w,h,d);
 	
-	output.Position = float4( worldPos.xyz, 1 );
+	output.Position = float4( worldPos.xyz*0.25, 1 );
 	output.Color	= VolumeTexture.SampleLevel( NearestSampler, uvw, 0 );
 	
 	return output;
@@ -44,16 +44,92 @@ VertexOutput VSMain ( uint VertexID : SV_VertexID )
 [maxvertexcount(24)]
 void GSMain( point VertexOutput inputPoint[1], inout TriangleStream<VertexOutput> outputStream )
 {
-	outputStream.Append( inputPoint[0] );
-	outputStream.Append( inputPoint[0] );
-	outputStream.Append( inputPoint[0] );
+	float sz = 0.125;
+	
+	if (inputPoint[0].Color.a<0.75f) {
+		return;
+	}
+	
+	VertexOutput	v0;
+	v0.Position	=	mul( inputPoint[0].Position + float4(-sz,-sz,-sz,0), WorldViewProjection );
+	v0.Color	=	inputPoint[0].Color;
+	
+	VertexOutput	v1;
+	v1.Position	=	mul( inputPoint[0].Position + float4(-sz,-sz,+sz,0), WorldViewProjection );
+	v1.Color	=	inputPoint[0].Color;
+	
+	VertexOutput	v2;
+	v2.Position	=	mul( inputPoint[0].Position + float4(+sz,-sz,+sz,0), WorldViewProjection );
+	v2.Color	=	inputPoint[0].Color;
+	
+	VertexOutput	v3;
+	v3.Position	=	mul( inputPoint[0].Position + float4(+sz,-sz,-sz,0), WorldViewProjection );
+	v3.Color	=	inputPoint[0].Color;
+	
+	
+	VertexOutput	v4;
+	v4.Position	=	mul( inputPoint[0].Position + float4(-sz,+sz,-sz,0), WorldViewProjection );
+	v4.Color	=	inputPoint[0].Color;
+	
+	VertexOutput	v5;
+	v5.Position	=	mul( inputPoint[0].Position + float4(-sz,+sz,+sz,0), WorldViewProjection );
+	v5.Color	=	inputPoint[0].Color;
+	
+	VertexOutput	v6;
+	v6.Position	=	mul( inputPoint[0].Position + float4(+sz,+sz,+sz,0), WorldViewProjection );
+	v6.Color	=	inputPoint[0].Color;
+	
+	VertexOutput	v7;
+	v7.Position	=	mul( inputPoint[0].Position + float4(+sz,+sz,-sz,0), WorldViewProjection );
+	v7.Color	=	inputPoint[0].Color;
+
+	//	bottom :
+	outputStream.Append( v1 );
+	outputStream.Append( v0 );
+	outputStream.Append( v2 );
+	outputStream.Append( v3 );
+	outputStream.RestartStrip();
+
+	//	top :
+	outputStream.Append( v6 );
+	outputStream.Append( v7 );
+	outputStream.Append( v5 );
+	outputStream.Append( v4 );
+	outputStream.RestartStrip();
+
+	//	back :
+	outputStream.Append( v3 );
+	outputStream.Append( v0 );
+	outputStream.Append( v7 );
+	outputStream.Append( v4 );
+	outputStream.RestartStrip();
+
+	//	front :
+	outputStream.Append( v6 );
+	outputStream.Append( v5 );
+	outputStream.Append( v2 );
+	outputStream.Append( v1 );
+	outputStream.RestartStrip();
+
+	//	right :
+	outputStream.Append( v2 );
+	outputStream.Append( v3 );
+	outputStream.Append( v6 );
+	outputStream.Append( v7 );
+	outputStream.RestartStrip();
+
+	//	left :
+	outputStream.Append( v0 );
+	outputStream.Append( v1 );
+	outputStream.Append( v4 );
+	outputStream.Append( v5 );
 	outputStream.RestartStrip();
 }
 
 
 float4 PSMain ( VertexOutput input ) : SV_TARGET0
 {
-	return input.Color;
+	return input.Color * 30;
 }
 
 #endif
@@ -83,4 +159,5 @@ void CSMain (
 }
 
 #endif
+
 

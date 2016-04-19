@@ -15,7 +15,10 @@ namespace Fusion.Engine.Graphics {
 
 		
 		static Random rand = new Random(458);
-		Vector4[] data = Enumerable.Range(0,64*64*64).Select( i => new Vector4(rand.NextFloat(0,8),rand.NextFloat(0,1),1,rand.NextFloat(0,1)) ).ToArray();
+		Vector4[] data = Enumerable.Range(0,VoxelCount).Select( i => new Vector4(rand.NextFloat(0,1),rand.NextFloat(0,1),rand.NextFloat(0,1),rand.GaussDistribution(0,0.5f)) ).ToArray();
+
+
+
 
 		/// <summary>
 		/// 
@@ -45,6 +48,50 @@ namespace Fusion.Engine.Graphics {
 				var instances	=	viewLayer.Instances;
 
 				//Game.RenderSystem.SceneRenderer.VoxelizeScene( instances, lightVoxelGrid, lightSet );
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="viewLayer"></param>
+		/// <param name="lightSet"></param>
+		void DebugDrawVoxelGrid ( RenderWorld viewLayer, LightSet lightSet, HdrFrame hdrFrame )
+		{
+			using ( new PixEvent("DebugDrawVoxelGrid") ) {
+
+				var device = Game.GraphicsDevice;
+				device.ResetStates();
+	
+				//	target and viewport :
+				device.SetTargets( hdrFrame.DepthBuffer, hdrFrame.HdrBuffer );
+				device.SetViewport( 0,0, hdrFrame.DepthBuffer.Width, hdrFrame.DepthBuffer.Height );
+
+				//	get matricies  and params :
+				var wvp = viewLayer.Camera.GetViewMatrix( StereoEye.Mono ) * viewLayer.Camera.GetProjectionMatrix( StereoEye.Mono );
+				voxelCB.SetData( wvp );
+
+				//	voxel params CB :			
+				device.ComputeShaderConstants[0]	= voxelCB ;
+				device.VertexShaderConstants[0]		= voxelCB ;
+				device.GeometryShaderConstants[0]	= voxelCB ;
+
+				//	sampler & textures :
+				device.PixelShaderSamplers[0]		= SamplerState.LinearClamp4Mips ;
+				device.GeometryShaderSamplers[0]	= SamplerState.LinearClamp4Mips ;
+				device.PixelShaderSamplers[0]		= SamplerState.LinearClamp4Mips ;
+
+				device.VertexShaderResources[0]		=	lightVoxelGrid ;
+				device.GeometryShaderResources[0]	=	lightVoxelGrid ;
+				device.PixelShaderResources[0]		=	lightVoxelGrid;
+
+				//	setup PS :
+				device.PipelineState	=	voxelFactory[ (int)VoxelFlags.DEBUG_DRAW_VOXEL ];
+
+				//	GPU time : 0.81 ms	-> 0.91 ms
+				device.Draw( VoxelCount, 0 );
 			}
 		}
 

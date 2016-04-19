@@ -125,9 +125,9 @@ void CSMain(
 	float4	totalLight	=	0;
 	float4	totalSSS	=	float4( 0,0,0, scatter.w );
 
-	totalLight	=	LightVoxelGrid.SampleLevel( SamplerLinearWrap, worldPos.xyz,0 );
-	hdrTexture[dispatchThreadId.xy] = totalLight;
-	return;
+	// totalLight	=	LightVoxelGrid.SampleLevel( SamplerLinearWrap, worldPos.xyz/8,0 );
+	// hdrTexture[dispatchThreadId.xy] = totalLight;
+	// return;
 	
 	#if 0
 	totalLight	=	float4( 
