@@ -16,7 +16,7 @@ namespace Fusion.Engine.Graphics {
 		const int	BlockSizeX		=	16;
 		const int	BlockSizeY		=	16;
 
-		const int	VoxelSize		=	32;
+		const int	VoxelSize		=	64;
 		const int	VoxelCount		=	VoxelSize * VoxelSize * VoxelSize;
 
 		RenderSystem rs { get { return Game.RenderSystem; } }
@@ -59,6 +59,7 @@ namespace Fusion.Engine.Graphics {
 		enum VoxelFlags {
 			DEBUG_DRAW_VOXEL		=	0x0001,
 			COPY_BUFFER_TO_VOXEL	=	0x0002,
+			CLEAR_VOXEL				=	0x0004,
 		}
 
 		[StructLayout(LayoutKind.Explicit, Size=640)]
@@ -186,6 +187,7 @@ namespace Fusion.Engine.Graphics {
 			if (flags==VoxelFlags.DEBUG_DRAW_VOXEL) {
 				ps.RasterizerState		=	RasterizerState.CullCW;
 				ps.DepthStencilState	=	DepthStencilState.Default;
+				ps.BlendState			=	BlendState.Additive;
 				ps.Primitive			=	Primitive.PointList;
 			}
 		}

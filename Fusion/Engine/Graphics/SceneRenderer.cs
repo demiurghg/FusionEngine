@@ -29,6 +29,8 @@ namespace Fusion.Engine.Graphics {
 		Texture2D		defaultNormalMap;
 		Texture2D		defaultEmission	;
 
+		RenderTarget2D	voxelBuffer;
+
 
 		struct CBMeshInstanceData {
 			public Matrix	Projection;
@@ -81,6 +83,8 @@ namespace Fusion.Engine.Graphics {
 
 			defaultEmission	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
 			defaultEmission.SetData( Enumerable.Range(0,16).Select( i => Color.Black ).ToArray() );
+
+			voxelBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 64,64, 8 );
 			
 			//Ubershader.AddEnumerator( "SceneRenderer", (t
 
@@ -118,6 +122,7 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			if (flags.HasFlag( SurfaceFlags.VOXELIZE )) {
+				ps.RasterizerState		=	RasterizerState.CullNone;
 				ps.DepthStencilState	=	DepthStencilState.None;
 			}
 		}
@@ -292,13 +297,16 @@ namespace Fusion.Engine.Graphics {
 				#warning Set MSAA render target.
 				//	https://developer.nvidia.com/content/basics-gpu-voxelization
 
+				device.SetTargets( null, voxelBuffer );
 				device.SetViewport( 0,0, target.Width, target.Height );
+
+				device.SetPSRWTexture( 1, target );
 
 				device.PixelShaderConstants[0]	= constBuffer ;
 				device.VertexShaderConstants[0]	= constBuffer ;
 				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
 
-				cbData.Projection	=	Matrix.OrthoRH( 64,64, -32, 32 );
+				cbData.Projection	=	Matrix.OrthoRH( 64,-64, 32, -32 );
 				cbData.View			=	Matrix.Identity;
 				cbData.ViewPos		=	Vector4.Zero;
 				cbData.BiasSlopeFar	=	Vector4.Zero;

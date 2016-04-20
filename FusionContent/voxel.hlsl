@@ -2,6 +2,7 @@
 #if 0
 $ubershader DEBUG_DRAW_VOXEL
 $ubershader COPY_BUFFER_TO_VOXEL
+$ubershader CLEAR_VOXEL
 #endif
 
 
@@ -34,7 +35,7 @@ VertexOutput VSMain ( uint VertexID : SV_VertexID )
 	
 	float3 uvw = worldPos / float3(w,h,d);
 	
-	output.Position = float4( worldPos.xyz*0.25, 1 );
+	output.Position = float4( worldPos.xyz - 32, 1 );
 	output.Color	= VolumeTexture.SampleLevel( NearestSampler, uvw, 0 );
 	
 	return output;
@@ -44,7 +45,7 @@ VertexOutput VSMain ( uint VertexID : SV_VertexID )
 [maxvertexcount(24)]
 void GSMain( point VertexOutput inputPoint[1], inout TriangleStream<VertexOutput> outputStream )
 {
-	float sz = 0.125;
+	float sz = 0.5;
 	
 	if (inputPoint[0].Color.a<0.75f) {
 		return;
@@ -156,6 +157,24 @@ void CSMain (
 	int addr	=	dispatchThreadID.x + dispatchThreadID.y * w + dispatchThreadID.z * w * h;
 	
 	destination[dispatchThreadID] = source[ addr ];
+}
+
+#endif
+
+
+#ifdef CLEAR_VOXEL
+
+RWTexture3D<float4> destination;
+
+[numthreads( 8, 8, 8 )]
+void CSMain (
+	uint3 groupID			: SV_GroupID,
+	uint3 groupThreadID 	: SV_GroupThreadID, 
+	uint3 dispatchThreadID 	: SV_DispatchThreadID,
+	uint  groupIndex 		: SV_GroupIndex
+)
+{
+	destination[dispatchThreadID] = float4(0,0,0,0);
 }
 
 #endif

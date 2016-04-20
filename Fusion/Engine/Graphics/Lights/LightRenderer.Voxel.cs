@@ -15,7 +15,7 @@ namespace Fusion.Engine.Graphics {
 
 		
 		static Random rand = new Random(458);
-		Vector4[] data = Enumerable.Range(0,VoxelCount).Select( i => new Vector4(rand.NextFloat(0,1),rand.NextFloat(0,1),rand.NextFloat(0,1),rand.GaussDistribution(0,0.5f)) ).ToArray();
+		Vector4[] data = Enumerable.Range(0,VoxelCount).Select( i => Vector4.Zero ).ToArray();
 
 
 
@@ -32,7 +32,32 @@ namespace Fusion.Engine.Graphics {
 				var device = Game.GraphicsDevice;
 				device.ResetStates();
 
-				using (new PixEvent("CopyBufferToVoxel")) {
+				lightVoxelBuffer.SetData( data );
+
+				//
+				//	Clear voxel 
+				//
+				using (new PixEvent("ClearVoxel")) {
+					
+					lightVoxelBuffer.SetData( data );
+
+					device.PipelineState				=	voxelFactory[ (int)VoxelFlags.CLEAR_VOXEL ];
+					device.SetCSRWTexture( 0, lightVoxelGrid );
+
+					device.Dispatch( 8, 8, 8 );
+				}
+
+				//
+				//	Render scene to buffer
+				//
+				var instances	=	viewLayer.Instances;
+				Game.RenderSystem.SceneRenderer.VoxelizeScene( instances, lightVoxelGrid, lightSet );
+
+
+				//
+				//	Copy buffer to voxel :
+				//
+				/*using (new PixEvent("CopyBufferToVoxel")) {
 					
 					lightVoxelBuffer.SetData( data );
 
@@ -41,13 +66,8 @@ namespace Fusion.Engine.Graphics {
 					device.SetCSRWTexture( 0, lightVoxelGrid );
 
 					device.Dispatch( 8, 8, 8 );
-				}
+				} */
 
-
-
-				var instances	=	viewLayer.Instances;
-
-				//Game.RenderSystem.SceneRenderer.VoxelizeScene( instances, lightVoxelGrid, lightSet );
 			}
 		}
 

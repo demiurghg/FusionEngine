@@ -305,11 +305,25 @@ float4 PSMain( PSInput input ) : SV_TARGET0
 
 
 #ifdef VOXELIZE 
-RWTexture3D<float4> lightGrid : register(u0);
+RWTexture3D<float4> lightGrid : register(u1);
 
-void PSMain( PSInput input )
-{
-	lightGrid[ int3(3,3,3) ] = float4(1,1,1,3);
+float4 PSMain( PSInput input ) : SV_TARGET0
+{	
+	int3 index;
+	index.xy  = int2(input.Position.xy);
+
+	SURFACE surface;
+	surface	=	MaterialCombiner( input.TexCoord );
+	
+	index.z   = int( abs(input.ProjPos.z / input.ProjPos.w)*64 );
+	lightGrid[ index ] = float4(1,1,1, 1);
+
+	/*for (int i=0; i<64; i++) {
+		index.z = i;
+		lightGrid[ index ] = float4(1,1,1,1);
+	}*/
+	
+	return float4(1,1,1,1);
 }
 #endif
 
