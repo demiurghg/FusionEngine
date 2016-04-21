@@ -1,4 +1,3 @@
-
 struct BATCH {
 	float4x4	Projection		;
 	float4x4	View			;
@@ -169,24 +168,33 @@ PSInput VSMain( VSInput input )
 #ifdef VOXELIZE
 PSInput FlipXAxis ( PSInput input )
 {
-	PSInput output  = input;
-	output.Position = input.ProjPos.zyxw;
-	output.Axis     = 0;
+	PSInput output  	= input;
+	output.Position.x 	= input.Position.z * 2 - 1;
+	output.Position.y 	= input.Position.y;
+	output.Position.z 	= input.Position.x * 0.5 + 0.5;
+	output.Position.w 	= input.Position.w;
+	output.ProjPos		= output.Position;
+	output.Axis     	= 0;
 	return output;
 }
 
 PSInput FlipYAxis ( PSInput input )
 {
-	PSInput output  = input;
-	output.Position = input.ProjPos.xzyw;
-	output.Axis		= 1;
+	PSInput output  	= input;
+	output.Position.x 	= input.Position.x;
+	output.Position.y 	= input.Position.z * -2 + 1;
+	output.Position.z 	= input.Position.y * -0.5 + 0.5;
+	output.Position.w 	= input.Position.w;
+	output.ProjPos		= output.Position;
+	output.Axis			= 1;
 	return output;
 }
 
 PSInput FlipZAxis ( PSInput input )
 {
 	PSInput output  = input;
-	output.Position = input.ProjPos.xyzw;
+	output.Position = input.Position.xyzw;
+	output.ProjPos 	= input.Position.xyzw;
 	output.Axis		= 2;
 	return output;
 }
@@ -197,10 +205,13 @@ PSInput FlipZAxis ( PSInput input )
 [maxvertexcount(3)]
 void GSMain( triangle PSInput inputTriangle[3], inout TriangleStream<PSInput> outputStream )
 {
-	float3 v01	=	inputTriangle[0].ProjPos.xyz - inputTriangle[0].ProjPos.xyz;
+	float3 v01	=	inputTriangle[0].ProjPos.xyz - inputTriangle[1].ProjPos.xyz;
 	float3 v02	=	inputTriangle[0].ProjPos.xyz - inputTriangle[2].ProjPos.xyz;
-	float3 n	=	abs(cross( v01, v02 ));
-	n = float3(0,0,1);
+	float3 n	=	cross( v01, v02 );
+	n.x = abs(n.x);
+	n.y = abs(n.y);
+	n.z = abs(n.z);
+	//n = float3(0,0,1);
 
 	PSInput v0	=	inputTriangle[0];
 	PSInput v1	=	inputTriangle[1];
@@ -210,19 +221,24 @@ void GSMain( triangle PSInput inputTriangle[3], inout TriangleStream<PSInput> ou
 		outputStream.Append(FlipZAxis(v0));
 		outputStream.Append(FlipZAxis(v1));
 		outputStream.Append(FlipZAxis(v2));
+		outputStream.RestartStrip();
+		return;
 	} 
 	else if (n.y >= n.z && n.y >= n.x) {
 		outputStream.Append(FlipYAxis(v0));
 		outputStream.Append(FlipYAxis(v1));
 		outputStream.Append(FlipYAxis(v2));
+		outputStream.RestartStrip();
+		return;
 	} 
 	else if (n.x >= n.y && n.x >= n.z) {
 		outputStream.Append(FlipXAxis(v0));
 		outputStream.Append(FlipXAxis(v1));
 		outputStream.Append(FlipXAxis(v2));
+		outputStream.RestartStrip();
+		return;
 	}
-	
-	outputStream.RestartStrip();
+	return;
 }
 #endif
 
@@ -365,28 +381,30 @@ RWTexture3D<float4> lightGrid : register(u1);
 float4 PSMain( PSInput input ) : SV_TARGET0
 {	
 	int3 index;
-	index.xy  = int2(input.Position.xy);
+	index.xy  	= int2(input.Position.xy);
+	index.z 	= int( abs(input.ProjPos.z / input.ProjPos.w)*64 );
 
 	SURFACE surface;
 	surface	=	MaterialCombiner( input.TexCoord );
+	float4 color = float4(surface.Diffuse,1);
 	
-	if (input.Axis==2) {
-		index.z   = int( abs(input.ProjPos.z / input.ProjPos.w)*64 );
+	if (input.Axis==2) { // xyzw <- xyzw
+		index		= index.xyz;
+		//color		= float4(0,0,1,1);
+		lightGrid[ index ] = color;
 	}
-	if (input.Axis==1) {
-		index.z   = int( abs(input.ProjPos.y / input.ProjPos.w)*64 );
+	if (input.Axis==1) { //	xyzw <- xzyw
+		index.xzy	= index.xyz;
+		//color		= float4(0,1,0,1);
+		lightGrid[ index ] = color;
 	}
-	if (input.Axis==0) {
-		index.z   = int( abs(input.ProjPos.x / input.ProjPos.w)*64 );
+	if (input.Axis==0) { // xyzw <- zyxw
+		index.zyx	=	index.xyz;
+		//color		= 	float4(4,0,0,1);
+		lightGrid[ index ] = color;
 	}
-	lightGrid[ index ] = float4(1,1,1, 1);
-
-	/*for (int i=0; i<64; i++) {
-		index.z = i;
-		lightGrid[ index ] = float4(1,1,1,1);
-	}*/
 	
-	return float4(1,1,1,1);
+	return color;
 }
 #endif
 

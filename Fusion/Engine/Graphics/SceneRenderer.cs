@@ -297,6 +297,8 @@ namespace Fusion.Engine.Graphics {
 				#warning Set MSAA render target.
 				//	https://developer.nvidia.com/content/basics-gpu-voxelization
 
+				device.ResetStates();
+
 				device.SetTargets( null, voxelBuffer );
 				device.SetViewport( 0,0, target.Width, target.Height );
 
@@ -306,7 +308,7 @@ namespace Fusion.Engine.Graphics {
 				device.VertexShaderConstants[0]	= constBuffer ;
 				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
 
-				cbData.Projection	=	Matrix.OrthoRH( 32,-32, 16, -16 );
+				cbData.Projection	=	Matrix.OrthoRH( 16,-16, 8, -8 );
 				cbData.View			=	Matrix.Identity;
 				cbData.ViewPos		=	Vector4.Zero;
 				cbData.BiasSlopeFar	=	Vector4.Zero;
@@ -329,7 +331,23 @@ namespace Fusion.Engine.Graphics {
 					}
 
 					device.SetupVertexInput( instance.vb, instance.ib );
-					device.DrawIndexed( instance.indexCount, 0, 0 );
+					//device.DrawIndexed( instance.indexCount, 0, 0 );
+
+					foreach ( var sg in instance.ShadingGroups ) {
+
+						//device.PipelineState	=	instance.IsSkinned ? sg.Material.GBufferSkinned : sg.Material.GBufferRigid;
+
+						device.PixelShaderConstants[1]	= sg.Material.ConstantBufferParameters;
+						device.PixelShaderConstants[2]	= sg.Material.ConstantBufferUVModifiers;
+						device.VertexShaderConstants[1]	= sg.Material.ConstantBufferParameters;
+						device.VertexShaderConstants[2]	= sg.Material.ConstantBufferUVModifiers;
+
+						sg.Material.SetTextures( device );
+
+						device.DrawIndexed( sg.IndicesCount, sg.StartIndex, 0 );
+
+						rs.Counters.SceneDIPs++;
+					}
 
 					rs.Counters.ShadowDIPs++;
 				}

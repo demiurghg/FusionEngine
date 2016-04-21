@@ -187,7 +187,7 @@ namespace Fusion.Engine.Graphics {
 			if (flags==VoxelFlags.DEBUG_DRAW_VOXEL) {
 				ps.RasterizerState		=	RasterizerState.CullCW;
 				ps.DepthStencilState	=	DepthStencilState.Default;
-				ps.BlendState			=	BlendState.Additive;
+				ps.BlendState			=	BlendState.Opaque;
 				ps.Primitive			=	Primitive.PointList;
 			}
 		}
