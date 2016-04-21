@@ -41,6 +41,9 @@ struct PSInput {
 	float3	Normal 		: TEXCOORD3;
 	float4	ProjPos		: TEXCOORD4;
 	float3 	WorldPos	: TEXCOORD5;
+	#ifdef VOXELIZE
+	int		Axis		: TEXCOORD6;
+	#endif
 };
 
 struct GBuffer {
@@ -155,17 +158,69 @@ PSInput VSMain( VSInput input )
 	output.Binormal		=  	normalize(binormal.xyz);
 	output.WorldPos		=	wPos.xyz;
 	
+	#ifdef VOXELIZE
+	output.Axis			=	0;
+	#endif
+	
 	return output;
 }
+
+
+#ifdef VOXELIZE
+PSInput FlipXAxis ( PSInput input )
+{
+	PSInput output  = input;
+	output.Position = input.ProjPos.zyxw;
+	output.Axis     = 0;
+	return output;
+}
+
+PSInput FlipYAxis ( PSInput input )
+{
+	PSInput output  = input;
+	output.Position = input.ProjPos.xzyw;
+	output.Axis		= 1;
+	return output;
+}
+
+PSInput FlipZAxis ( PSInput input )
+{
+	PSInput output  = input;
+	output.Position = input.ProjPos.xyzw;
+	output.Axis		= 2;
+	return output;
+}
+#endif
 
 
 #ifdef VOXELIZE
 [maxvertexcount(3)]
 void GSMain( triangle PSInput inputTriangle[3], inout TriangleStream<PSInput> outputStream )
 {
- 	outputStream.Append(inputTriangle[0]);
-	outputStream.Append(inputTriangle[1]);
-	outputStream.Append(inputTriangle[2]);
+	float3 v01	=	inputTriangle[0].ProjPos.xyz - inputTriangle[0].ProjPos.xyz;
+	float3 v02	=	inputTriangle[0].ProjPos.xyz - inputTriangle[2].ProjPos.xyz;
+	float3 n	=	abs(cross( v01, v02 ));
+	n = float3(0,0,1);
+
+	PSInput v0	=	inputTriangle[0];
+	PSInput v1	=	inputTriangle[1];
+	PSInput v2	=	inputTriangle[2];
+
+	if (n.z >= n.x && n.z >= n.y) {
+		outputStream.Append(FlipZAxis(v0));
+		outputStream.Append(FlipZAxis(v1));
+		outputStream.Append(FlipZAxis(v2));
+	} 
+	else if (n.y >= n.z && n.y >= n.x) {
+		outputStream.Append(FlipYAxis(v0));
+		outputStream.Append(FlipYAxis(v1));
+		outputStream.Append(FlipYAxis(v2));
+	} 
+	else if (n.x >= n.y && n.x >= n.z) {
+		outputStream.Append(FlipXAxis(v0));
+		outputStream.Append(FlipXAxis(v1));
+		outputStream.Append(FlipXAxis(v2));
+	}
 	
 	outputStream.RestartStrip();
 }
@@ -315,7 +370,15 @@ float4 PSMain( PSInput input ) : SV_TARGET0
 	SURFACE surface;
 	surface	=	MaterialCombiner( input.TexCoord );
 	
-	index.z   = int( abs(input.ProjPos.z / input.ProjPos.w)*64 );
+	if (input.Axis==2) {
+		index.z   = int( abs(input.ProjPos.z / input.ProjPos.w)*64 );
+	}
+	if (input.Axis==1) {
+		index.z   = int( abs(input.ProjPos.y / input.ProjPos.w)*64 );
+	}
+	if (input.Axis==0) {
+		index.z   = int( abs(input.ProjPos.x / input.ProjPos.w)*64 );
+	}
 	lightGrid[ index ] = float4(1,1,1, 1);
 
 	/*for (int i=0; i<64; i++) {

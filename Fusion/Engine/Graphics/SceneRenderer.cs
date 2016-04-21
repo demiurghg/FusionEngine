@@ -84,7 +84,7 @@ namespace Fusion.Engine.Graphics {
 			defaultEmission	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
 			defaultEmission.SetData( Enumerable.Range(0,16).Select( i => Color.Black ).ToArray() );
 
-			voxelBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 64,64, 8 );
+			voxelBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 64,64, 1 );
 			
 			//Ubershader.AddEnumerator( "SceneRenderer", (t
 
@@ -306,7 +306,7 @@ namespace Fusion.Engine.Graphics {
 				device.VertexShaderConstants[0]	= constBuffer ;
 				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
 
-				cbData.Projection	=	Matrix.OrthoRH( 64,-64, 32, -32 );
+				cbData.Projection	=	Matrix.OrthoRH( 32,-32, 16, -16 );
 				cbData.View			=	Matrix.Identity;
 				cbData.ViewPos		=	Vector4.Zero;
 				cbData.BiasSlopeFar	=	Vector4.Zero;
