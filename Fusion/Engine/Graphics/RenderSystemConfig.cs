@@ -92,6 +92,11 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public bool SkipParticlesSimulation { get; set; }
 
+		/// <summary>
+		/// Shows particles statistics.
+		/// </summary>
+		public bool SkipSceneRendering { get; set; }
+
 
 		/// <summary>
 		/// Shows particles statistics.

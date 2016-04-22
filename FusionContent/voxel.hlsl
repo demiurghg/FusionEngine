@@ -35,7 +35,8 @@ VertexOutput VSMain ( uint VertexID : SV_VertexID )
 	
 	float3 uvw = worldPos / float3(w,h,d);
 	
-	output.Position = float4( (worldPos.xyz - 32)*0.25f, 1 ) + float4(0,0,0,0);// + float4(0.25f,0.25f,0.25f,0.00f);
+	float sz = 0.125f;
+	output.Position = float4( (worldPos.xyz - 32)*0.25f, 1 ) + float4(sz,sz,sz,0);// + float4(0.25f,0.25f,0.25f,0.00f);
 	output.Color	= VolumeTexture.SampleLevel( NearestSampler, uvw, 0 );
 	
 	return output;
@@ -45,7 +46,7 @@ VertexOutput VSMain ( uint VertexID : SV_VertexID )
 [maxvertexcount(24)]
 void GSMain( point VertexOutput inputPoint[1], inout TriangleStream<VertexOutput> outputStream )
 {
-	float sz = 0.125;
+	float sz = 0.120;
 	
 	if (inputPoint[0].Color.a<0.75f) {
 		return;

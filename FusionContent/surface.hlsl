@@ -376,32 +376,43 @@ float4 PSMain( PSInput input ) : SV_TARGET0
 
 
 #ifdef VOXELIZE 
+
+//	check CheEngine
+//	http://pastebin.com/0QD3qydP
+
 RWTexture3D<float4> lightGrid : register(u1);
 
 float4 PSMain( PSInput input ) : SV_TARGET0
 {	
 	int3 index;
+	float depth	= (input.ProjPos.z / input.ProjPos.w)*64;	
 	index.xy  	= int2(input.Position.xy);
-	index.z 	= int( abs(input.ProjPos.z / input.ProjPos.w)*64 );
+	index.z 	= int( depth );
+	float grad	= 0;//ddx(depth)/2 + ddy(depth)/2;
+
+	int3 offsetPos	=	int3(0,0, int(depth+grad)-index.z);
+	int3 offsetNeg	=	int3(0,0, int(depth-grad)-index.z);
+	
 
 	SURFACE surface;
 	surface	=	MaterialCombiner( input.TexCoord );
 	float4 color = float4(surface.Diffuse,1);
 	
-	if (input.Axis==2) { // xyzw <- xyzw
-		index		= index.xyz;
-		//color		= float4(0,0,1,1);
-		lightGrid[ index ] = color;
-	}
-	if (input.Axis==1) { //	xyzw <- xzyw
-		index.xzy	= index.xyz;
-		//color		= float4(0,1,0,1);
-		lightGrid[ index ] = color;
-	}
-	if (input.Axis==0) { // xyzw <- zyxw
-		index.zyx	=	index.xyz;
-		//color		= 	float4(4,0,0,1);
-		lightGrid[ index ] = color;
+	
+	if (input.Axis==2) {
+		lightGrid[ index.xyz			 ] = color;
+		lightGrid[ index.xyz + offsetPos ] = color;
+		lightGrid[ index.xyz + offsetNeg ] = color;
+	}                          
+	if (input.Axis==1) {       
+		lightGrid[ index.xzy		 	 ] = color;
+		lightGrid[ index.xzy + offsetPos ] = color;
+		lightGrid[ index.xzy + offsetNeg ] = color;
+	}                          
+	if (input.Axis==0) {       
+		lightGrid[ index.zyx			 ] = color;
+		lightGrid[ index.zyx + offsetPos ] = color;
+		lightGrid[ index.zyx + offsetNeg ] = color;
 	}
 	
 	return color;
