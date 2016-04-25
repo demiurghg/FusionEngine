@@ -208,6 +208,7 @@ void GSMain( triangle PSInput inputTriangle[3], inout TriangleStream<PSInput> ou
 	float3 v01	=	inputTriangle[0].ProjPos.xyz - inputTriangle[1].ProjPos.xyz;
 	float3 v02	=	inputTriangle[0].ProjPos.xyz - inputTriangle[2].ProjPos.xyz;
 	float3 n	=	cross( v01, v02 );
+	float3 N	=	normalize(n);
 	n.x = abs(n.x);
 	n.y = abs(n.y);
 	n.z = abs(n.z);
@@ -217,6 +218,10 @@ void GSMain( triangle PSInput inputTriangle[3], inout TriangleStream<PSInput> ou
 	PSInput v1	=	inputTriangle[1];
 	PSInput v2	=	inputTriangle[2];
 
+	v0.Normal	=	N;
+	v1.Normal	=	N;
+	v2.Normal	=	N;
+	
 	if (n.z >= n.x && n.z >= n.y) {
 		outputStream.Append(FlipZAxis(v0));
 		outputStream.Append(FlipZAxis(v1));
@@ -382,38 +387,39 @@ float4 PSMain( PSInput input ) : SV_TARGET0
 
 RWTexture3D<float4> lightGrid : register(u1);
 
+void write( float3 location, int axis, float4 value, float3 normal, float grad )
+{
+	if (axis==2) {
+		lightGrid[ int3(location.xyz-normal + float3(0,0,    0)) ] = value;
+		lightGrid[ int3(location.xyz-normal + float3(0,0,+grad)) ] = value;
+		lightGrid[ int3(location.xyz-normal + float3(0,0,-grad)) ] = value;
+	} else if (axis==1) {
+		lightGrid[ int3(location.xzy-normal + float3(0,0,    0)) ] = value;
+		lightGrid[ int3(location.xzy-normal + float3(0,0,+grad)) ] = value;
+		lightGrid[ int3(location.xzy-normal + float3(0,0,-grad)) ] = value;
+	} else if (axis==0) {
+		lightGrid[ int3(location.zyx-normal + float3(0,0,    0)) ] = value;
+		lightGrid[ int3(location.zyx-normal + float3(0,0,+grad)) ] = value;
+		lightGrid[ int3(location.zyx-normal + float3(0,0,-grad)) ] = value;
+	}
+}
+
 float4 PSMain( PSInput input ) : SV_TARGET0
 {	
-	int3 index;
+	float3 location;
 	float depth	= (input.ProjPos.z / input.ProjPos.w)*64;	
-	index.xy  	= int2(input.Position.xy);
-	index.z 	= int( depth );
-	float grad	= 0;//ddx(depth)/2 + ddy(depth)/2;
+	location.xy = input.Position.xy;
+	location.z 	= depth;
+	float grad	= ddx(depth) + ddy(depth);
 
-	int3 offsetPos	=	int3(0,0, int(depth+grad)-index.z);
-	int3 offsetNeg	=	int3(0,0, int(depth-grad)-index.z);
-	
+	int3 offsetPos	=	int3(0,0, int(depth+grad)-location.z);
+	int3 offsetNeg	=	int3(0,0, int(depth-grad)-location.z);
 
 	SURFACE surface;
 	surface	=	MaterialCombiner( input.TexCoord );
 	float4 color = float4(surface.Diffuse,1);
 	
-	
-	if (input.Axis==2) {
-		lightGrid[ index.xyz			 ] = color;
-		lightGrid[ index.xyz + offsetPos ] = color;
-		lightGrid[ index.xyz + offsetNeg ] = color;
-	}                          
-	if (input.Axis==1) {       
-		lightGrid[ index.xzy		 	 ] = color;
-		lightGrid[ index.xzy + offsetPos ] = color;
-		lightGrid[ index.xzy + offsetNeg ] = color;
-	}                          
-	if (input.Axis==0) {       
-		lightGrid[ index.zyx			 ] = color;
-		lightGrid[ index.zyx + offsetPos ] = color;
-		lightGrid[ index.zyx + offsetNeg ] = color;
-	}
+	write( location, input.Axis, float4(surface.Diffuse.rgb,1), input.Normal * float3(-1,1,-1), grad );
 	
 	return color;
 }
