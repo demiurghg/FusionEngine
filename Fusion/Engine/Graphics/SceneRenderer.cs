@@ -303,7 +303,7 @@ namespace Fusion.Engine.Graphics {
 
 				device.ResetStates();
 
-				//device.SetTargets( null, voxelBuffer );
+				device.SetTargets( null, voxelBuffer );
 				device.SetViewport( 0,0, target.Width, target.Height );
 
 				device.SetPSRWTexture( 1, target );

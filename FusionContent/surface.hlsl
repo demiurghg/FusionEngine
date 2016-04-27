@@ -389,28 +389,34 @@ RWTexture3D<float4> lightGrid : register(u1);
 
 void write( float3 location, int axis, float4 value, float3 normal, float grad )
 {
+	value = 1;
 	if (axis==2) {
-		lightGrid[ int3(location.xyz-normal + float3(0,0,    0)) ] = value;
-		lightGrid[ int3(location.xyz-normal + float3(0,0,+grad)) ] = value;
-		lightGrid[ int3(location.xyz-normal + float3(0,0,-grad)) ] = value;
+		lightGrid[ int3(location.xyz-normal + float3(0,0,    0)) ] = value * float4(0,0,1,1);
+		lightGrid[ int3(location.xyz-normal + float3(+grad,0,0)) ] = value * float4(0,0,1,1)*0.8f;
+		lightGrid[ int3(location.xyz-normal + float3(-grad,0,0)) ] = value * float4(0,0,1,1)*0.8f;
 	} else if (axis==1) {
-		lightGrid[ int3(location.xzy-normal + float3(0,0,    0)) ] = value;
-		lightGrid[ int3(location.xzy-normal + float3(0,0,+grad)) ] = value;
-		lightGrid[ int3(location.xzy-normal + float3(0,0,-grad)) ] = value;
+		lightGrid[ int3(location.xzy-normal + float3(0,0,    0)) ] = value * float4(0,1,0,1);
+		lightGrid[ int3(location.xzy-normal + float3(0,0,+grad)) ] = value * float4(0,1,0,1)*0.8f;
+		lightGrid[ int3(location.xzy-normal + float3(0,0,-grad)) ] = value * float4(0,1,0,1)*0.8f;
 	} else if (axis==0) {
-		lightGrid[ int3(location.zyx-normal + float3(0,0,    0)) ] = value;
-		lightGrid[ int3(location.zyx-normal + float3(0,0,+grad)) ] = value;
-		lightGrid[ int3(location.zyx-normal + float3(0,0,-grad)) ] = value;
+		lightGrid[ int3(location.zyx-normal + float3(0,0,    0)) ] = value * float4(1,0,0,1);
+		lightGrid[ int3(location.zyx-normal + float3(0,0,+grad)) ] = value * float4(1,0,0,1)*0.8f;
+		lightGrid[ int3(location.zyx-normal + float3(0,0,-grad)) ] = value * float4(1,0,0,1)*0.8f;
 	}
 }
 
 float4 PSMain( PSInput input ) : SV_TARGET0
 {	
+	lightGrid[ int3(63,63,63) ] = float4(10,10,10,1);
+	lightGrid[ int3(60,63,63) ] = float4(20, 0, 0,1);
+	lightGrid[ int3(63,60,63) ] = float4( 0,20, 0,1);
+	lightGrid[ int3(63,63,60) ] = float4( 0, 0,20,1);
+
 	float3 location;
 	float depth	= (input.ProjPos.z / input.ProjPos.w)*64;	
 	location.xy = input.Position.xy;
 	location.z 	= depth;
-	float grad	= ddx(depth) + ddy(depth);
+	float grad	= (ddx(depth) + ddy(depth))*0.5f;
 
 	int3 offsetPos	=	int3(0,0, int(depth+grad)-location.z);
 	int3 offsetNeg	=	int3(0,0, int(depth-grad)-location.z);

@@ -80,6 +80,10 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="lightSet"></param>
 		void DebugDrawVoxelGrid ( RenderWorld viewLayer, LightSet lightSet, HdrFrame hdrFrame )
 		{
+			viewLayer.Debug.DrawBox( new BoundingBox( Vector3.One*(-8), Vector3.One*8 ), Color.Cyan );
+			viewLayer.Debug.DrawGrid( 8 );
+			viewLayer.Debug.DrawBasis( Matrix.Identity, 1 );
+
 			using ( new PixEvent("DebugDrawVoxelGrid") ) {
 
 				var device = Game.GraphicsDevice;
