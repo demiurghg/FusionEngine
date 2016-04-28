@@ -48,7 +48,7 @@ void GSMain( point VertexOutput inputPoint[1], inout TriangleStream<VertexOutput
 {
 	float sz = 0.120;
 	
-	if (inputPoint[0].Color.a<0.75f) {
+	if (inputPoint[0].Color.a<1.75f) {
 		return;
 	}
 	

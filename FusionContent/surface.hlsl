@@ -411,7 +411,7 @@ float4 PSMain( PSInput input ) : SV_TARGET0
 	surface	=	MaterialCombiner( input.TexCoord );
 	float4 color = float4(surface.Diffuse,1);
 	
-	write( location, input.Axis, float4(surface.Diffuse.rgb,1), 0*input.Normal * float3(-1,1,-1) );
+	write( location, input.Axis, float4(surface.Diffuse.rgb,1), 1*input.Normal * float3(-1,1,-1) );
 	
 	return color;
 }

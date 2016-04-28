@@ -125,20 +125,20 @@ void CSMain(
 	float4	totalLight	=	0;
 	float4	totalSSS	=	float4( 0,0,0, scatter.w );
 
-	// totalLight	=	LightVoxelGrid.SampleLevel( SamplerLinearWrap, worldPos.xyz/8,0 );
-	// hdrTexture[dispatchThreadId.xy] = totalLight;
-	// return;
+	//	VCT :
+	float4 refl = 0;
+	float3 traceDir = normalize(reflect(-viewDirN, normal));
 	
-	#if 0
-	totalLight	=	float4( 
-		computeskyocclusion( worldpos, normal.xyz, shadowsampler, skyocclusiontexture, skyocclusionmatricies ) 
-		* ssao.rgb 
-		* (diffuse.rgb + specular.rgb)
-		* params.ambientcolor.rgb, 
-	1 );
-	/*hdrTexture[dispatchThreadId.xy] = totalLight;
-	return;*/
-	#endif
+	for (float t=0; t<32; t++) {
+		float tt = 32-t;
+		float3 reflPos = worldPos + traceDir*tt*0.1f + normal*0.25f;
+		float4 sampledRefl = LightVoxelGrid.SampleLevel( SamplerLinearWrap, reflPos/16-0.5f,0 );;
+		refl = lerp( refl, sampledRefl, sampledRefl.a);
+	}
+	
+	totalLight.xyz	+=	refl.xyz * specular.rgb * 300;
+	//hdrTexture[dispatchThreadId.xy] = totalLight;
+	//return;
 	
 	//-----------------------------------------------------
 	//	Direct light :
