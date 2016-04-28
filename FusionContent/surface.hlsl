@@ -202,12 +202,13 @@ PSInput FlipZAxis ( PSInput input )
 
 
 #ifdef VOXELIZE
+
 [maxvertexcount(3)]
 void GSMain( triangle PSInput inputTriangle[3], inout TriangleStream<PSInput> outputStream )
 {
-	float3 v01	=	inputTriangle[0].ProjPos.xyz - inputTriangle[1].ProjPos.xyz;
-	float3 v02	=	inputTriangle[0].ProjPos.xyz - inputTriangle[2].ProjPos.xyz;
-	float3 n	=	cross( v01, v02 );
+	float3 v01	=	(inputTriangle[0].ProjPos.xyz - inputTriangle[1].ProjPos.xyz) * float3(1,1,2);
+	float3 v02	=	(inputTriangle[0].ProjPos.xyz - inputTriangle[2].ProjPos.xyz) * float3(1,1,2);
+	float3 n	=	normalize(cross( v01, v02 ));
 	float3 N	=	normalize(n);
 	n.x = abs(n.x);
 	n.y = abs(n.y);
@@ -389,19 +390,18 @@ RWTexture3D<float4> lightGrid : register(u1);
 
 void write( float3 location, int axis, float4 value, float3 normal, float grad )
 {
-	value = 1;
 	if (axis==2) {
-		lightGrid[ int3(location.xyz-normal + float3(0,0,    0)) ] = value * float4(0,0,1,1);
-		lightGrid[ int3(location.xyz-normal + float3(+grad,0,0)) ] = value * float4(0,0,1,1)*0.8f;
-		lightGrid[ int3(location.xyz-normal + float3(-grad,0,0)) ] = value * float4(0,0,1,1)*0.8f;
+		lightGrid[ int3(location.xyz-normal + float3(0,0,    0)) ] = value;
+		// lightGrid[ int3(location.xyz-normal + float3(+grad,0,0)) ] = value * float4(0,0,1,1)*0.8f;
+		// lightGrid[ int3(location.xyz-normal + float3(-grad,0,0)) ] = value * float4(0,0,1,1)*0.8f;
 	} else if (axis==1) {
-		lightGrid[ int3(location.xzy-normal + float3(0,0,    0)) ] = value * float4(0,1,0,1);
-		lightGrid[ int3(location.xzy-normal + float3(0,0,+grad)) ] = value * float4(0,1,0,1)*0.8f;
-		lightGrid[ int3(location.xzy-normal + float3(0,0,-grad)) ] = value * float4(0,1,0,1)*0.8f;
+		lightGrid[ int3(location.xzy-normal + float3(0,0,    0)) ] = value;
+		// lightGrid[ int3(location.xzy-normal + float3(0,0,+grad)) ] = value * float4(0,1,0,1)*0.8f;
+		// lightGrid[ int3(location.xzy-normal + float3(0,0,-grad)) ] = value * float4(0,1,0,1)*0.8f;
 	} else if (axis==0) {
-		lightGrid[ int3(location.zyx-normal + float3(0,0,    0)) ] = value * float4(1,0,0,1);
-		lightGrid[ int3(location.zyx-normal + float3(0,0,+grad)) ] = value * float4(1,0,0,1)*0.8f;
-		lightGrid[ int3(location.zyx-normal + float3(0,0,-grad)) ] = value * float4(1,0,0,1)*0.8f;
+		lightGrid[ int3(location.zyx-normal + float3(0,0,    0)) ] = value;
+		// lightGrid[ int3(location.zyx-normal + float3(0,0,+grad)) ] = value * float4(1,0,0,1)*0.8f;
+		// lightGrid[ int3(location.zyx-normal + float3(0,0,-grad)) ] = value * float4(1,0,0,1)*0.8f;
 	}
 }
 
@@ -425,7 +425,7 @@ float4 PSMain( PSInput input ) : SV_TARGET0
 	surface	=	MaterialCombiner( input.TexCoord );
 	float4 color = float4(surface.Diffuse,1);
 	
-	write( location, input.Axis, float4(surface.Diffuse.rgb,1), input.Normal * float3(-1,1,-1), grad );
+	write( location, input.Axis, float4(surface.Diffuse.rgb,1), 0*input.Normal * float3(-1,1,-1), grad );
 	
 	return color;
 }
