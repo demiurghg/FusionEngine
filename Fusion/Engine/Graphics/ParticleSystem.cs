@@ -420,7 +420,7 @@ namespace Fusion.Engine.Graphics {
 					//	sampler & textures :
 					device.PixelShaderSamplers[0]	= SamplerState.LinearClamp4Mips ;
 
-					device.PixelShaderResources[0]		=	Images==null? null : Images.Texture.Srv;
+					device.PixelShaderResources[0]		=	Images==null? rs.WhiteTexture.Srv : Images.Texture.Srv;
 					device.GeometryShaderResources[1]	=	simulationBuffer ;
 					device.GeometryShaderResources[2]	=	simulationBuffer ;
 					device.GeometryShaderResources[3]	=	sortParticlesBuffer;

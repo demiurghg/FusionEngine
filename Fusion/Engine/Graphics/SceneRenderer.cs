@@ -29,6 +29,8 @@ namespace Fusion.Engine.Graphics {
 		Texture2D		defaultNormalMap;
 		Texture2D		defaultEmission	;
 
+		RenderTarget2D	voxelBuffer;
+
 
 		struct CBMeshInstanceData {
 			public Matrix	Projection;
@@ -81,6 +83,8 @@ namespace Fusion.Engine.Graphics {
 
 			defaultEmission	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
 			defaultEmission.SetData( Enumerable.Range(0,16).Select( i => Color.Black ).ToArray() );
+
+			voxelBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 64,64, 8 );
 			
 			//Ubershader.AddEnumerator( "SceneRenderer", (t
 
@@ -115,6 +119,11 @@ namespace Fusion.Engine.Graphics {
 			
 			if (flags.HasFlag( SurfaceFlags.RIGID )) {
 				ps.VertexInputElements	=	VertexColorTextureTBNRigid.Elements;
+			}
+
+			if (flags.HasFlag( SurfaceFlags.VOXELIZE )) {
+				ps.RasterizerState		=	RasterizerState.CullNone;
+				ps.DepthStencilState	=	DepthStencilState.None;
 			}
 		}
 
@@ -158,6 +167,10 @@ namespace Fusion.Engine.Graphics {
 		{		
 			using ( new PixEvent("RenderGBuffer") ) {
 				if (surfaceShader==null) {	
+					return;
+				}
+
+				if (rs.Config.SkipSceneRendering) {
 					return;
 				}
 
@@ -264,6 +277,85 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			return flags;
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="instances"></param>
+		/// <param name="target"></param>
+		/// <param name="lightSet"></param>
+		internal void VoxelizeScene ( IEnumerable<MeshInstance> instances, VolumeRWTexture target, LightSet lightSet )
+		{
+			using ( new PixEvent("Voxelize") ) {
+				if (surfaceShader==null) {
+					return;
+				}
+
+				var device			= Game.GraphicsDevice;
+
+				var cbData			= new CBMeshInstanceData();
+
+				#warning Set MSAA render target.
+				//	https://developer.nvidia.com/content/basics-gpu-voxelization
+
+				device.ResetStates();
+
+				device.SetTargets( null, voxelBuffer );
+				device.SetViewport( 0,0, target.Width, target.Height );
+
+				device.SetPSRWTexture( 1, target );
+
+				device.PixelShaderConstants[0]	= constBuffer ;
+				device.VertexShaderConstants[0]	= constBuffer ;
+				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
+
+				cbData.Projection	=	Matrix.OrthoRH( 16,-16, 8, -8 );
+				cbData.View			=	Matrix.Identity;
+				cbData.ViewPos		=	Vector4.Zero;
+				cbData.BiasSlopeFar	=	Vector4.Zero;
+
+				//#warning INSTANSING!
+				foreach ( var instance in instances ) {
+
+					if (!instance.Visible) {
+						continue;
+					}
+
+					device.PipelineState	=	factory[ (int)ApplyFlags( null, instance, SurfaceFlags.VOXELIZE ) ];
+					cbData.World			=	instance.World;
+
+					constBuffer.SetData( cbData );
+
+					if (instance.IsSkinned) {
+						constBufferBones.SetData( instance.BoneTransforms );
+						device.VertexShaderConstants[3]	= constBufferBones ;
+					}
+
+					device.SetupVertexInput( instance.vb, instance.ib );
+					//device.DrawIndexed( instance.indexCount, 0, 0 );
+
+					foreach ( var sg in instance.ShadingGroups ) {
+
+						//device.PipelineState	=	instance.IsSkinned ? sg.Material.GBufferSkinned : sg.Material.GBufferRigid;
+
+						device.PixelShaderConstants[1]	= sg.Material.ConstantBufferParameters;
+						device.PixelShaderConstants[2]	= sg.Material.ConstantBufferUVModifiers;
+						device.VertexShaderConstants[1]	= sg.Material.ConstantBufferParameters;
+						device.VertexShaderConstants[2]	= sg.Material.ConstantBufferUVModifiers;
+
+						sg.Material.SetTextures( device );
+
+						device.DrawIndexed( sg.IndicesCount, sg.StartIndex, 0 );
+
+						rs.Counters.SceneDIPs++;
+					}
+
+					rs.Counters.ShadowDIPs++;
+				}
+			}
 		}
 
 

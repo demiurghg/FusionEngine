@@ -32,6 +32,7 @@ cbuffer CBSkyOcclusionMatricies : register(b1) {
 SamplerState			SamplerNearestClamp : register(s0);
 SamplerState			SamplerLinearClamp : register(s1);
 SamplerComparisonState	ShadowSampler	: register(s2);
+SamplerState			SamplerLinearWrap : register(s3);
 
 Texture2D 			GBufferDiffuse 		: register(t0);
 Texture2D 			GBufferSpecular 	: register(t1);
@@ -48,6 +49,7 @@ Texture2D 			OcclusionMap		: register(t11);
 TextureCubeArray	EnvMap				: register(t12);
 StructuredBuffer<PARTICLE> Particles	: register(t13);
 Texture2D 			SkyOcclusionTexture	: register(t14);
+Texture3D			LightVoxelGrid      : register(t15);
 
 
 float DepthToViewZ(float depthValue) {
@@ -123,16 +125,20 @@ void CSMain(
 	float4	totalLight	=	0;
 	float4	totalSSS	=	float4( 0,0,0, scatter.w );
 
-	#if 0
-	totallight	=	float4( 
-		computeskyocclusion( worldpos, normal.xyz, shadowsampler, skyocclusiontexture, skyocclusionmatricies ) 
-		* ssao.rgb 
-		* (diffuse.rgb + specular.rgb)
-		* params.ambientcolor.rgb, 
-	1 );
-	/*hdrTexture[dispatchThreadId.xy] = totalLight;
-	return;*/
-	#endif
+	//	VCT :
+	float4 refl = 0;
+	float3 traceDir = normalize(reflect(-viewDirN, normal));
+	
+	for (float t=0; t<32; t++) {
+		float tt = 32-t;
+		float3 reflPos = worldPos + traceDir*tt*0.1f + normal*0.25f;
+		float4 sampledRefl = LightVoxelGrid.SampleLevel( SamplerLinearWrap, reflPos/16-0.5f,0 );;
+		refl = lerp( refl, sampledRefl, sampledRefl.a);
+	}
+	
+	totalLight.xyz	+=	refl.xyz * specular.rgb * 300;
+	//hdrTexture[dispatchThreadId.xy] = totalLight;
+	//return;
 	
 	//-----------------------------------------------------
 	//	Direct light :

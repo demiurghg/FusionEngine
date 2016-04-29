@@ -15,6 +15,7 @@ namespace Fusion.Drivers.Graphics {
 
 		readonly ShaderResource[]	resources;	
 		readonly CommonShaderStage	stage;
+		readonly DeviceContext	deviceContext;
 
 		/// <summary>
 		/// 
@@ -24,6 +25,7 @@ namespace Fusion.Drivers.Graphics {
 		{
 			resources	=	new ShaderResource[ Count ];
 			this.stage	=	stage;
+			deviceContext	=	device.DeviceContext;
 		}
 
 
@@ -58,8 +60,10 @@ namespace Fusion.Drivers.Graphics {
 		/// <returns></returns>
 		public ShaderResource this[int index] {
 			set {
-				resources[ index ] = value;
-				stage.SetShaderResource( index, (value==null) ? null : value.SRV );
+				lock (deviceContext) {
+					resources[ index ] = value;
+					stage.SetShaderResource( index, (value==null) ? null : value.SRV );
+				}
 			}
 			get {
 				return resources[ index ];
