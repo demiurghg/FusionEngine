@@ -223,6 +223,7 @@
     <Compile Include="Engine\Client\GameLoader.cs" />
     <Compile Include="Engine\Client\JitterBuffer.cs" />
     <Compile Include="Engine\Common\AtomCollection.cs" />
+    <Compile Include="Engine\Common\Commands\ShowModules.cs" />
     <Compile Include="Engine\Common\Commands\SlowdownServer.cs" />
     <Compile Include="Engine\Common\Commands\FreezeClient.cs" />
     <Compile Include="Engine\Common\Commands\FreezeServer.cs" />

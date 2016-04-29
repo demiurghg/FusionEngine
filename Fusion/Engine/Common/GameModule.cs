@@ -269,6 +269,18 @@ namespace Fusion.Engine.Common {
 
 
 
+		static internal void PrintModuleNames ()
+		{
+			Log.Message("");
+			foreach ( var bind in disposeList ) {
+				int cfgVarCount = bind.Module.GetConfigurationProperties().Count();
+				Log.Message( "  {0,-18} {1,-7} {2,7} {3,4} vars", bind.NiceName, bind.ShortName, bind.InitOrder, cfgVarCount );
+			}
+			Log.Message("{0} modules", disposeList.Count);
+		}
+
+
+
 		/// <summary>
 		/// Calls 'Initialize' method on all modules starting from top one tree.
 		/// </summary>
