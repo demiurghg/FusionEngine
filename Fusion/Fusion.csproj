@@ -238,7 +238,6 @@
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BingMapSatellite.cs" />
     <Compile Include="Engine\Graphics\GIS\DebugGisLayer.cs" />
     <Compile Include="Engine\Graphics\GIS\TextGisLayer.cs" />
-    <Compile Include="Engine\Graphics\Lights\LightRenderer.Voxel.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.Extents.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.Tiles.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.Shadows.cs" />

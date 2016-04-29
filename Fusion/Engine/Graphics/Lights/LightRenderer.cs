@@ -28,8 +28,6 @@ namespace Fusion.Engine.Graphics {
 		RenderTarget2D		csmColor		;
 		DepthStencil2D		spotDepth		;
 		RenderTarget2D		spotColor		;
-		VolumeRWTexture		lightVoxelGrid	;
-		StructuredBuffer	lightVoxelBuffer	;
 
 
 		OmniLightGPU[]		omniLightData;
@@ -44,9 +42,6 @@ namespace Fusion.Engine.Graphics {
 
 		public RenderTarget2D	SpotColor { get { return spotColor; } }
 		public DepthStencil2D	SpotDepth { get { return spotDepth; } }
-
-		public VolumeRWTexture	LightVoxelGrid { get { return lightVoxelGrid; } }
-		public StructuredBuffer LightVoxelBuffer { get { return lightVoxelBuffer; } }
 
 
 
@@ -88,10 +83,6 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		struct VoxelParams {
-			public Matrix WorldViewProjection;
-		}
-
 		struct OmniLightGPU {
 			public Vector4	PositionRadius;
 			public Vector4	Intensity;
@@ -125,7 +116,6 @@ namespace Fusion.Engine.Graphics {
 		StateFactory	voxelFactory;
 		StateFactory	factory;
 		ConstantBuffer	lightingCB;
-		ConstantBuffer	voxelCB;
 
 		
 		/// <summary>
@@ -145,13 +135,9 @@ namespace Fusion.Engine.Graphics {
 		public override void Initialize ()
 		{
 			lightingCB			=	new ConstantBuffer( Game.GraphicsDevice, typeof(LightingParams) );
-			voxelCB				=	new ConstantBuffer( Game.GraphicsDevice, typeof(VoxelParams), 1 );
 			omniLightBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(OmniLightGPU), RenderSystemConfig.MaxOmniLights, StructuredBufferFlags.None );
 			spotLightBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(SpotLightGPU), RenderSystemConfig.MaxSpotLights, StructuredBufferFlags.None );
 			envLightBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(EnvLightGPU),  RenderSystemConfig.MaxEnvLights, StructuredBufferFlags.None );
-
-			lightVoxelGrid		=	new VolumeRWTexture( Game.GraphicsDevice, VoxelSize,VoxelSize,VoxelSize, ColorFormat.Rgba16F, false );
-			lightVoxelBuffer	=	new StructuredBuffer( Game.GraphicsDevice, typeof(Vector4), VoxelCount, StructuredBufferFlags.None );	
 
 			CreateShadowMaps();
 
@@ -168,9 +154,6 @@ namespace Fusion.Engine.Graphics {
 		{
 			lightingShader	=	Game.Content.Load<Ubershader>("lighting");
 			factory			=	lightingShader.CreateFactory( typeof(LightingFlags), Primitive.TriangleList, VertexInputElement.Empty );
-
-			voxelShader		=	Game.Content.Load<Ubershader>("voxel");
-			voxelFactory	=	voxelShader.CreateFactory( typeof(VoxelFlags), (ps,i) => EnumVoxel( ps, (VoxelFlags)i ) );
 		}
 
 
@@ -226,11 +209,7 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref spotDepth );
 				SafeDispose( ref spotColor );
 
-				SafeDispose( ref lightVoxelGrid );
-				SafeDispose( ref lightVoxelBuffer );
-
 				SafeDispose( ref lightingCB );
-				SafeDispose( ref voxelCB );
 
 				SafeDispose( ref omniLightBuffer );
 				SafeDispose( ref spotLightBuffer );
@@ -321,7 +300,6 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderResources[11]	=	rs.SsaoFilter.OcclusionMap;
 					device.ComputeShaderResources[12]	=	viewLayer.RadianceCache;
 					device.ComputeShaderResources[13]	=	viewLayer.ParticleSystem.SimulatedParticles;
-					device.ComputeShaderResources[15]	=	lightVoxelGrid;
 
 					device.ComputeShaderConstants[0]	=	lightingCB;
 
@@ -361,16 +339,6 @@ namespace Fusion.Engine.Graphics {
 				#endif
 
 				device.ResetStates();
-
-
-				//
-				//	Debug voxel :
-				//
-				if (true) {
-					DebugDrawVoxelGrid( viewLayer, viewLayer.LightSet, hdrFrame );
-				}
-
-
 
 
 				if (rs.Config.ShowLightCounters) {

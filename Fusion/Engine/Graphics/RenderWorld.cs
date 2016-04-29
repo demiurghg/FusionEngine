@@ -302,8 +302,6 @@ namespace Fusion.Engine.Graphics {
 			//	render shadows :
 			if (stereoEye!=StereoEye.Right) {
 				rs.LightRenderer.RenderShadows( this, this.LightSet );
-				rs.LightRenderer.RenderLightVoxelGrid( this, this.LightSet );
-				//rs.LightRenderer.RenderSkyOcclusionMap( this );
 			}
 
 			//	render g-buffer :

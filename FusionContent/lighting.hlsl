@@ -48,8 +48,6 @@ StructuredBuffer<ENVLIGHT>	EnvLights	: register(t10);
 Texture2D 			OcclusionMap		: register(t11);
 TextureCubeArray	EnvMap				: register(t12);
 StructuredBuffer<PARTICLE> Particles	: register(t13);
-Texture2D 			SkyOcclusionTexture	: register(t14);
-Texture3D			LightVoxelGrid      : register(t15);
 
 
 float DepthToViewZ(float depthValue) {
@@ -124,21 +122,6 @@ void CSMain(
 	
 	float4	totalLight	=	0;
 	float4	totalSSS	=	float4( 0,0,0, scatter.w );
-
-	//	VCT :
-	float4 refl = 0;
-	float3 traceDir = normalize(reflect(-viewDirN, normal));
-	
-	for (float t=0; t<32; t++) {
-		float tt = 32-t;
-		float3 reflPos = worldPos + traceDir*tt*0.1f + normal*0.25f;
-		float4 sampledRefl = LightVoxelGrid.SampleLevel( SamplerLinearWrap, reflPos/16-0.5f,0 );;
-		refl = lerp( refl, sampledRefl, sampledRefl.a);
-	}
-	
-	totalLight.xyz	+=	refl.xyz * specular.rgb * 300;
-	//hdrTexture[dispatchThreadId.xy] = totalLight;
-	//return;
 	
 	//-----------------------------------------------------
 	//	Direct light :
