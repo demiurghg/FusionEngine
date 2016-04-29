@@ -15,7 +15,7 @@ using Fusion.Core.Configuration;
 
 
 namespace Fusion.Engine.Audio {
-	public class SoundSystem : GameModule {
+	public partial class SoundSystem : GameModule {
 
         internal XAudio2 Device { get; private set; }
         internal MasteringVoice MasterVoice { get; private set; }
@@ -26,17 +26,11 @@ namespace Fusion.Engine.Audio {
 		static int operationSetCounter = 1;
 
 
-
-		[Config]
-		public SoundSystemConfig Config { get; set; }
-        
-
 		/// <summary>
 		/// 
 		/// </summary>
 		public SoundSystem ( Game game ) : base(game)
 		{
-			Config = new SoundSystemConfig();
 		}
 
 
@@ -145,10 +139,6 @@ namespace Fusion.Engine.Audio {
 		/// </summary>
 		internal void Update ( GameTime gameTime )
 		{
-			this.DopplerScale	=	Config.DopplerScale;
-			this.MasterVolume	=	Config.MasterVolume;
-			this.SpeedOfSound	=	Config.SpeedOfSound;
-
 			SoundWorld.Update( gameTime, OperationSetCounter );
 
 			Device.CommitChanges( OperationSetCounter );
@@ -206,75 +196,6 @@ namespace Fusion.Engine.Audio {
         }
 
 
-
-
-		/// <summary>
-		/// Mastering voice value.
-		/// </summary>
-        public float MasterVolume 
-        { 
-            get {
-                return _masterVolume;
-            }
-            set {
-                if (_masterVolume != value) {
-                    _masterVolume = value;
-                }
-                MasterVoice.SetVolume(_masterVolume, SoundSystem.OperationSetCounter);
-            }
-        }
-
-
-
-		/// <summary>
-		/// Overall distance scale. Default = 1.
-		/// </summary>
-        public float DistanceScale {
-            get {
-                return _distanceScale;
-            }
-            set	{
-                if (value <= 0f){
-					throw new ArgumentOutOfRangeException ("value of DistanceScale");
-                }
-                _distanceScale = value;
-            }
-        }
-
-
-
-		/// <summary>
-		/// Overall doppler scale. Default = 1;
-		/// </summary>
-        public float DopplerScale {
-            get {
-                return _dopplerScale;
-            }
-            set	 {
-                // As per documenation it does not look like the value can be less than 0
-                //   although the documentation does not say it throws an error we will anyway
-                //   just so it is like the DistanceScale
-                if (value < 0f) {
-                    throw new ArgumentOutOfRangeException ("value of DopplerScale");
-                }
-                _dopplerScale = value;
-            }
-        }
-
-
-
-		/// <summary>
-		/// Global speed of sound. Default = 343.5f;
-		/// </summary>
-        public float SpeedOfSound {
-            get {
-                return speedOfSound;
-            }
-            set {
-                speedOfSound = value;
-		        _device3DDirty = true;
-            }
-        }
 	}
 
 }

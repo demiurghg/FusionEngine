@@ -13,7 +13,7 @@ using Fusion.Engine.Graphics.GIS;
 
 namespace Fusion.Engine.Graphics {
 
-	public class RenderSystem : GameModule {
+	public partial class RenderSystem : GameModule {
 
 		internal readonly GraphicsDevice Device;
 
@@ -52,9 +52,6 @@ namespace Fusion.Engine.Graphics {
 		[GameModule("Sky", "sky", InitOrder.After)]
 		public Sky	Sky { get { return sky; } }
 		public Sky	sky;
-		
-		[Config]
-		public  RenderSystemConfig Config { get; private set; }
 
 		/// <summary>
 		/// Gets render counters.
@@ -65,10 +62,21 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Fullscreen
 		/// </summary>
+		[Config]
 		public bool Fullscreen { 
-			get { return Device.FullScreen; }
-			set { Device.FullScreen = value; }
+			get { 
+				return isFullscreen;
+			}
+			set { 
+				if (isFullscreen!=value) {
+					isFullscreen = value;
+					if (Device!=null) {
+						Device.FullScreen = value;
+					}
+				}
+			}
 		}
+		bool isFullscreen = false;
 
 
 
@@ -112,7 +120,16 @@ namespace Fusion.Engine.Graphics {
 		{
 			Counters	=	new RenderCounters();
 
-			Config		=	new RenderSystemConfig();
+			Width			=	1024;
+			Height			=	768;
+			Fullscreen		=	false;
+			StereoMode		=	StereoMode.Disabled;
+			InterlacingMode	=	InterlacingMode.HorizontalLR;
+			UseDebugDevice	=	false;
+			VSyncInterval	=	1;
+			MsaaEnabled		=	false;
+			UseFXAA			=	true;
+
 			this.Device	=	Game.GraphicsDevice;
 
 			viewLayers	=	new List<RenderLayer>();
@@ -142,13 +159,13 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="p"></param>
 		internal void ApplyParameters ( ref GraphicsParameters p )
 		{
-			p.Width				=	Config.Width;
-			p.Height			=	Config.Height;
-			p.FullScreen		=	Config.Fullscreen;
-			p.StereoMode		=	(Fusion.Drivers.Graphics.StereoMode)Config.StereoMode;
-			p.InterlacingMode	=	(Fusion.Drivers.Graphics.InterlacingMode)Config.InterlacingMode;
-			p.UseDebugDevice	=	Config.UseDebugDevice;
-			p.MsaaLevel			=	Config.MsaaEnabled ? 4 : 1;
+			p.Width				=	Width;
+			p.Height			=	Height;
+			p.FullScreen		=	Fullscreen;
+			p.StereoMode		=	(Fusion.Drivers.Graphics.StereoMode)StereoMode;
+			p.InterlacingMode	=	(Fusion.Drivers.Graphics.InterlacingMode)InterlacingMode;
+			p.UseDebugDevice	=	UseDebugDevice;
+			p.MsaaLevel			=	MsaaEnabled ? 4 : 1;
 		}
 
 
@@ -174,7 +191,7 @@ namespace Fusion.Engine.Graphics {
 			defaultMaterial	=	baseIllum.CreateMaterialInstance(this, Game.Content);
 
 			//	add default render world
-			renderWorld	=	new RenderWorld(Game, Config.Width, Config.Height);
+			renderWorld	=	new RenderWorld(Game, Width, Height);
 			AddLayer( renderWorld );
 		}
 
@@ -229,7 +246,7 @@ namespace Fusion.Engine.Graphics {
 				viewLayer.Render( gameTime, stereoEye );
 			}
 
-			if (Config.ShowCounters) {
+			if (ShowCounters) {
 				Counters.PrintCounters();
 			}
 		}

@@ -24,10 +24,7 @@ namespace Fusion.Engine.Graphics {
 	///		8. Far-plane flickering.
 	/// 
 	/// </summary>
-	public class SsaoFilter : GameModule {
-
-		[Config]
-		public SsaoFilterConfig	Config { get; set; }
+	public partial class SsaoFilter : GameModule {
 
 
 		public ShaderResource	OcclusionMap { 
@@ -90,7 +87,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="game"></param>
 		public SsaoFilter ( Game game ) : base(game)
 		{
-			Config	=	new SsaoFilterConfig();
+			SetDefaults();
 		}
 
 
@@ -195,7 +192,7 @@ namespace Fusion.Engine.Graphics {
 
 		Flags getSampleNumFlag()
 		{
-			int sn = (int)Config.SampleNumber;
+			int sn = (int)SampleNumber;
 			Flags retFlag = Flags.S_4;
 			switch (sn)
 			{
@@ -225,13 +222,13 @@ namespace Fusion.Engine.Graphics {
 		int getFlags()
 		{
 			int combin = 0;
-			switch (Config.AOMethod)
+			switch (Method)
 			{
-				case SsaoFilterConfig.Method.HEMISPHERE:
+				case SsaoFilter.SsaoMethod.HEMISPHERE:
 					combin = (int)Flags.HEMISPHERE;
 					combin |= (int)getSampleNumFlag();
 					break;
-				case SsaoFilterConfig.Method.HBAO:
+				case SsaoFilter.SsaoMethod.HBAO:
 					combin = (int)Flags.HBAO;
                     combin |= (int)getSampleNumFlag();
 					break;
@@ -291,8 +288,8 @@ namespace Fusion.Engine.Graphics {
 			paramsData.InvProj = Matrix.Invert( projection );
 			//paramsData.TraceStep = Config.TraceStep;
 			//paramsData.DecayRate = Config.DecayRate;
-			paramsData.MaxSampleRadius	= Config.MaxSamplingRadius;
-			paramsData.MaxDepthJump		= Config.MaxDepthJump;
+			paramsData.MaxSampleRadius	= MaxSamplingRadius;
+			paramsData.MaxDepthJump		= MaxDepthJump;
 
 			paramsCB.SetData(paramsData);
             sampleDirectionsCB.SetData(sampleDirectionData);
@@ -331,7 +328,7 @@ namespace Fusion.Engine.Graphics {
 			var device	=	Game.GraphicsDevice;
 			var filter	=	Game.RenderSystem.Filter;
 
-			if (!Config.Enabled) {
+			if (!Enabled) {
 				device.Clear( occlusionMap0.Surface, Color4.White );
 				return;
 			}
@@ -353,8 +350,8 @@ namespace Fusion.Engine.Graphics {
 					paramsData.InvProj = Matrix.Invert(projection);
 					//paramsData.TraceStep	=	Config.TraceStep;
 					//paramsData.DecayRate	=	Config.DecayRate;
-					paramsData.MaxSampleRadius	= Config.MaxSamplingRadius;
-					paramsData.MaxDepthJump		= Config.MaxDepthJump;
+					paramsData.MaxSampleRadius	= MaxSamplingRadius;
+					paramsData.MaxDepthJump		= MaxDepthJump;
 
 					paramsCB.SetData( paramsData );
 					sampleDirectionsCB.SetData(sampleDirectionData);
@@ -382,8 +379,8 @@ namespace Fusion.Engine.Graphics {
 				}
 
 				using (new PixEvent("Bilateral Filter")) {
-					if (Config.BlurSigma!=0) {
-						filter.GaussBlurBilateral( occlusionMap0, occlusionMap1, downsampledDepth, downsampledNormals, Config.BlurSigma, Config.Sharpness, 0 );
+					if (BlurSigma!=0) {
+						filter.GaussBlurBilateral( occlusionMap0, occlusionMap1, downsampledDepth, downsampledNormals, BlurSigma, Sharpness, 0 );
 					}
 				}
 			}

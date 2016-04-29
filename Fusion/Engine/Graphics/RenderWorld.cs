@@ -112,8 +112,8 @@ namespace Fusion.Engine.Graphics {
 
 			radianceFrame	=	new HdrFrame( Game, 512,512 );
 
-			Radiance		=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, RenderSystemConfig.EnvMapSize, true );
-			RadianceCache	=	new TextureCubeArray( Game.GraphicsDevice, 128, RenderSystemConfig.MaxEnvLights, ColorFormat.Rgba16F, true );
+			Radiance		=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, RenderSystem.EnvMapSize, true );
+			RadianceCache	=	new TextureCubeArray( Game.GraphicsDevice, 128, RenderSystem.MaxEnvLights, ColorFormat.Rgba16F, true );
 
 			Resize( width, height );
 		}
@@ -310,7 +310,7 @@ namespace Fusion.Engine.Graphics {
 			//	render ssao :
 			rs.SsaoFilter.Render( stereoEye, Camera, viewHdrFrame.DepthBuffer, viewHdrFrame.NormalMapBuffer );
 
-			switch (rs.Config.ShowGBuffer) {
+			switch (rs.ShowGBuffer) {
 				case 1 : rs.Filter.Copy( targetSurface, viewHdrFrame.DiffuseBuffer ); return;
 				case 2 : rs.Filter.Copy( targetSurface, viewHdrFrame.SpecularBuffer ); return;
 				case 3 : rs.Filter.Copy( targetSurface, viewHdrFrame.NormalMapBuffer ); return;
@@ -333,7 +333,7 @@ namespace Fusion.Engine.Graphics {
 
 
 			//	apply FXAA
-			if (rs.Config.UseFXAA) {
+			if (rs.UseFXAA) {
 				rs.Filter.Fxaa( targetSurface, TempFXBuffer );
 			} else {
 				rs.Filter.Copy( targetSurface, TempFXBuffer );

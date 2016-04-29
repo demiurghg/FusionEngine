@@ -23,7 +23,7 @@ namespace Fusion.Engine.Graphics {
 			var camera		=	viewLayer.Camera;
 			var instances	=	viewLayer.Instances;
 
-			if (Config.SkipShadows) {
+			if (SkipShadows) {
 				return;
 			}
 
@@ -31,7 +31,7 @@ namespace Fusion.Engine.Graphics {
 
 				Game.GraphicsDevice.ResetStates();
 			
-				if ( csmDepth.Height!=Config.CSMSize || spotDepth.Height!=Config.SpotShadowSize * 4) {
+				if ( csmDepth.Height!=CSMSize || spotDepth.Height!=SpotShadowSize * 4) {
 					CreateShadowMaps();
 				}
 
@@ -47,14 +47,14 @@ namespace Fusion.Engine.Graphics {
 
 				for (int i=0; i<4; i++) {
 
-					var smSize = Config.CSMSize;
+					var smSize = CSMSize;
 					var context = new ShadowContext();
 					context.ShadowView			=	shadowViews[i];
 					context.ShadowProjection	=	shadowProjections[i];
 					context.ShadowViewport		=	new Viewport( smSize * i, 0, smSize, smSize );
 					context.FarDistance			=	1;
-					context.SlopeBias			=	Config.CSMSlopeBias;
-					context.DepthBias			=	Config.CSMDepthBias;
+					context.SlopeBias			=	CSMSlopeBias;
+					context.DepthBias			=	CSMDepthBias;
 					context.ColorBuffer			=	csmColor.Surface;
 					context.DepthBuffer			=	csmDepth.Surface;
 
@@ -71,7 +71,7 @@ namespace Fusion.Engine.Graphics {
 
 				foreach ( var spot in lightSet.SpotLights ) {
 
-					var smSize	= Config.SpotShadowSize;
+					var smSize	= SpotShadowSize;
 					var context = new ShadowContext();
 					var dx      = index % 4;
 					var dy		= index / 4;
@@ -83,8 +83,8 @@ namespace Fusion.Engine.Graphics {
 					context.ShadowProjection	=	spot.Projection;
 					context.ShadowViewport		=	new Viewport( smSize * dx, smSize * dy, smSize, smSize );
 					context.FarDistance			=	far;
-					context.SlopeBias			=	Config.SpotSlopeBias;
-					context.DepthBias			=	Config.SpotDepthBias;
+					context.SlopeBias			=	SpotSlopeBias;
+					context.DepthBias			=	SpotDepthBias;
 					context.ColorBuffer			=	spotColor.Surface;
 					context.DepthBuffer			=	spotDepth.Surface;
 
@@ -106,15 +106,15 @@ namespace Fusion.Engine.Graphics {
 			shadowProjections		=	new Matrix[4];
 			shadowViewProjections	=	new Matrix[4];
 
-			var	smSize		=	Config.CSMSize;
+			var	smSize		=	CSMSize;
 			var camMatrix	=	Matrix.Invert( view );
 			var viewPos		=	camMatrix.TranslationVector;
 
 
 			for ( int i = 0; i<4; i++ ) {
 
-				float	offset		=	Config.SplitOffset * (float)Math.Pow( Config.SplitFactor, i );
-				float	radius		=	Config.SplitSize   * (float)Math.Pow( Config.SplitFactor, i );
+				float	offset		=	SplitOffset * (float)Math.Pow( SplitFactor, i );
+				float	radius		=	SplitSize   * (float)Math.Pow( SplitFactor, i );
 
 				Vector3 viewDir		=	camMatrix.Forward.Normalized();
 				Vector3	lightDir	=	lightDir2.Normalized();
@@ -130,7 +130,7 @@ namespace Fusion.Engine.Graphics {
 				origin				=	Vector3.TransformCoordinate( lsOrigin, lightRotI );//*/
 
 				shadowViews[i]				=	Matrix.LookAtRH( origin, origin + lightDir, Vector3.UnitY );
-				shadowProjections[i]		=	Matrix.OrthoRH( radius*2, radius*2, -Config.CSMDepth/2, Config.CSMDepth/2);
+				shadowProjections[i]		=	Matrix.OrthoRH( radius*2, radius*2, -CSMProjectionDepth/2, CSMProjectionDepth/2);
 
 				shadowViewProjections[i]	=	shadowViews[i] * shadowProjections[i];
 			}

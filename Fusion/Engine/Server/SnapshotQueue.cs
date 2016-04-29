@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Fusion.Engine.Network;
 using Fusion.Engine.Common;
 
 
@@ -110,7 +109,7 @@ namespace Fusion.Engine.Server {
 
 			if (prevSnapshot==null) {
 				prevFrame = 0;
-				return NetworkEngine.Compress( lastSnapshot.Data );
+				return NetDeflate.Compress( lastSnapshot.Data );
 			}
 
 
@@ -127,7 +126,7 @@ namespace Fusion.Engine.Server {
 				}
 			}
 
-			return NetworkEngine.Compress( delta );
+			return NetDeflate.Compress( delta );
 		}
 
 
@@ -147,7 +146,7 @@ namespace Fusion.Engine.Server {
 			
 
 			if (prevFrameId==0) {
-				return NetworkEngine.Decompress( snapshot );
+				return NetDeflate.Decompress( snapshot );
 			}
 
 			var prevSnapshot	=	queue.SingleOrDefault( s => s.Frame == prevFrameId );
@@ -158,7 +157,7 @@ namespace Fusion.Engine.Server {
 			}
 
 
-			var delta	=	NetworkEngine.Decompress( snapshot );
+			var delta	=	NetDeflate.Decompress( snapshot );
 			var minSize	=	Math.Min( delta.Length, prevSnapshot.Data.Length );
 
 			var newSnapshot	=	new byte[ delta.Length ];

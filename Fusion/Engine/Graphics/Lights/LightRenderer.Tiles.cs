@@ -22,7 +22,7 @@ namespace Fusion.Engine.Graphics {
 			var vp = Game.GraphicsDevice.DisplayBounds;
 
 			omniLightData = Enumerable
-					.Range(0,RenderSystemConfig.MaxOmniLights)
+					.Range(0,RenderSystem.MaxOmniLights)
 					.Select( i => new OmniLightGPU(){ PositionRadius = Vector4.Zero, Intensity = Vector4.Zero })
 					.ToArray();
 
@@ -71,7 +71,7 @@ namespace Fusion.Engine.Graphics {
 			var vp = Game.GraphicsDevice.DisplayBounds;
 
 			envLightData = Enumerable
-					.Range(0,RenderSystemConfig.MaxEnvLights)
+					.Range(0,RenderSystem.MaxEnvLights)
 					.Select( i => new EnvLightGPU(){ Position = Vector4.Zero, Intensity = Vector4.Zero })
 					.ToArray();
 
@@ -110,7 +110,7 @@ namespace Fusion.Engine.Graphics {
 			var vp		=	Game.GraphicsDevice.DisplayBounds;
 
 			spotLightData	=	Enumerable
-							.Range(0, RenderSystemConfig.MaxSpotLights)
+							.Range(0, RenderSystem.MaxSpotLights)
 							.Select( i => new SpotLightGPU() )
 							.ToArray();
 

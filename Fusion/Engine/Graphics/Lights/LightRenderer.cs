@@ -21,9 +21,6 @@ namespace Fusion.Engine.Graphics {
 
 		RenderSystem rs { get { return Game.RenderSystem; } }
 
-		[Config]
-		public LightRendererConfig	Config { get; set; }
-
 		DepthStencil2D		csmDepth		;
 		RenderTarget2D		csmColor		;
 		DepthStencil2D		spotDepth		;
@@ -124,7 +121,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="game"></param>
 		public LightRenderer( Game game ) : base(game)
 		{
-			Config	=	new LightRendererConfig();
+			SetDefaults();
 		}
 
 
@@ -135,9 +132,9 @@ namespace Fusion.Engine.Graphics {
 		public override void Initialize ()
 		{
 			lightingCB			=	new ConstantBuffer( Game.GraphicsDevice, typeof(LightingParams) );
-			omniLightBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(OmniLightGPU), RenderSystemConfig.MaxOmniLights, StructuredBufferFlags.None );
-			spotLightBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(SpotLightGPU), RenderSystemConfig.MaxSpotLights, StructuredBufferFlags.None );
-			envLightBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(EnvLightGPU),  RenderSystemConfig.MaxEnvLights, StructuredBufferFlags.None );
+			omniLightBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(OmniLightGPU), RenderSystem.MaxOmniLights, StructuredBufferFlags.None );
+			spotLightBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(SpotLightGPU), RenderSystem.MaxSpotLights, StructuredBufferFlags.None );
+			envLightBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(EnvLightGPU),  RenderSystem.MaxEnvLights, StructuredBufferFlags.None );
 
 			CreateShadowMaps();
 
@@ -188,11 +185,11 @@ namespace Fusion.Engine.Graphics {
 			SafeDispose( ref spotColor );
 			SafeDispose( ref spotDepth );
 
-			csmColor	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  Config.CSMSize * 4, Config.CSMSize );
-			csmDepth	=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, Config.CSMSize * 4, Config.CSMSize );
+			csmColor	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  CSMSize * 4, CSMSize );
+			csmDepth	=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, CSMSize * 4, CSMSize );
 
-			spotColor	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  Config.SpotShadowSize * 4, Config.SpotShadowSize * 4 );
-			spotDepth	=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, Config.SpotShadowSize * 4, Config.SpotShadowSize * 4 );
+			spotColor	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  SpotShadowSize * 4, SpotShadowSize * 4 );
+			spotDepth	=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, SpotShadowSize * 4, SpotShadowSize * 4 );
 		}
 
 
@@ -262,13 +259,13 @@ namespace Fusion.Engine.Graphics {
 					cbData.View						=	view;
 					cbData.ViewPosition				=	new Vector4(viewPos,1);
 					cbData.InverseViewProjection	=	invVP;
-					cbData.CSMFilterRadius			=	new Vector4( Config.CSMFilterSize );
+					cbData.CSMFilterRadius			=	new Vector4( CSMFilterSize );
 
 					cbData.AmbientColor				=	viewLayer.LightSet.AmbientLevel;
 					cbData.Viewport					=	new Vector4( 0, 0, width, height );
-					cbData.ShowCSLoadOmni			=	Config.ShowOmniLightTileLoad ? 1 : 0;
-					cbData.ShowCSLoadEnv			=	Config.ShowEnvLightTileLoad  ? 1 : 0;
-					cbData.ShowCSLoadSpot			=	Config.ShowSpotLightTileLoad ? 1 : 0;
+					cbData.ShowCSLoadOmni			=	ShowOmniLightTileLoad ? 1 : 0;
+					cbData.ShowCSLoadEnv			=	ShowEnvLightTileLoad  ? 1 : 0;
+					cbData.ShowCSLoadSpot			=	ShowSpotLightTileLoad ? 1 : 0;
 
 					ComputeOmniLightsTiles( view, projection, viewLayer.LightSet );
 					ComputeSpotLightsTiles( view, projection, viewLayer.LightSet );
@@ -341,7 +338,7 @@ namespace Fusion.Engine.Graphics {
 				device.ResetStates();
 
 
-				if (rs.Config.ShowLightCounters) {
+				if (rs.ShowLightCounters) {
 					var ls = viewLayer.LightSet;
 					Log.Message("lights: {0,5} omni {1,5} spot {2,5} env", ls.OmniLights.Count, ls.SpotLights.Count, ls.EnvLights.Count );
 				}

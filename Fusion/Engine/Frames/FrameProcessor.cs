@@ -20,8 +20,9 @@ namespace Fusion.Engine.Frames {
 
 	public class FrameProcessor : GameModule {
 
-		[Config]
-		public Config	Config	{ get; set; }
+		[Config]	public bool		ShowFrames			{ get; set; }
+		[Config]	public bool		SkipUserInterface	{ get; set; }
+		[Config]	public bool		ShowProfilingInfo	{ get; set; }
 
 		/// <summary>
 		/// Sets and gets current root frame.
@@ -77,7 +78,6 @@ namespace Fusion.Engine.Frames {
 		/// <param name="height"></param>
 		public FrameProcessor ( Game game, string defaultFont ) : base(game)
 		{
-			Config				=	new Fusion.Engine.Frames.Config();
 			defaultFontPath		=	defaultFont;
 			mouseProcessor		=	new MouseProcessor( Game, this );
 		}
@@ -182,7 +182,7 @@ namespace Fusion.Engine.Frames {
 		/// <param name="gameTime"></param>
 		void Draw ( GameTime gameTime, SpriteLayer spriteLayer )
 		{
-			if (Config.SkipUserInterface) {
+			if (SkipUserInterface) {
 				return;
 			}
 

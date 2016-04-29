@@ -14,43 +14,10 @@ using Lidgren.Network;
 using System.IO.Compression;
 using System.IO;
 
-namespace Fusion.Engine.Network {
+namespace Fusion.Engine.Common {
 
-	public class NetworkEngine : GameModule {
+	public static class NetDeflate {
 
-		[Config]
-		public NetworkConfig Config { get; set; }
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="Game"></param>
-		internal NetworkEngine ( Game Game ) : base( Game )
-		{
-			Config	=	new NetworkConfig();
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public override void Initialize ()
-		{
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="disposing"></param>
-		protected override void Dispose ( bool disposing )
-		{
-		}
-
-	
 		
 		/// <summary>
 		/// Compresses byte array.

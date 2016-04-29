@@ -44,7 +44,7 @@ namespace Fusion.Framework {
 			text			=	new StringBuilder();
 			cursor			=	0;
 
-			history	=	new List<string>( console.Config.GetHistory() );
+			history	=	new List<string>( console.GetHistory() );
 		}
 
 
@@ -80,7 +80,7 @@ namespace Fusion.Framework {
 		{
 			if (Text!="" /*&& history.FirstOrDefault()!=Text*/) {
 				history.Insert( 0, Text );
-				console.Config.UpdateHistory( history );
+				console.UpdateHistory( history );
 				historyCursor = -1;
 				Text = "";
 			}

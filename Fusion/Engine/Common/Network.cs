@@ -8,47 +8,53 @@ using Fusion.Core.Shell;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
+using System.Net;
+using System.Net.Sockets;
 using Lidgren.Network;
+using System.IO.Compression;
+using System.IO;
 
+namespace Fusion.Engine.Common {
 
-namespace Fusion.Engine.Network {
+	public class Network : GameModule {
 
-	public class NetworkConfig {
-
+		[Config]
 		public int Port { get; set; }
+
+		[Config]
 		public int MaxClients { get; set; }
 
+		[Config]
 		public bool ShowPackets { get; set; }
 
+		[Config]
 		public float SimulatePacketsLoss { get; set; }
 
+		[Config]
 		public float SimulateMinLatency { get; set; }
+		
+		[Config]
 		public float SimulateRandomLatency { get; set; }
 
+		[Config]
 		public bool ShowSnapshots { get; set; }
 
+		[Config]
+		public bool ShowUserCommands { get; set; }
+
+		[Config]
 		public bool ShowLatency { get; set; }
 
-		public bool ShowJitter { get; set; }
 
-		/// <summary>
-		/// PlayoutDelay affect incoming snapshot de-jittering.
-		/// Higher values lead to more latency and better smoothiness.
-		/// Lower values lead to less latency and better responsiveness.
-		/// </summary>
-		public int PlayoutDelay { get; set; }
-
-
-		public NetworkConfig ()
+		public Network(Game game) : base(game)
 		{
-			Port				=	28100;
-			MaxClients			=	8;
-			SimulatePacketsLoss	=	0;
-			ShowPackets			=	false;
-			ShowJitter			=	false;
-			PlayoutDelay		=	30;
-			ShowLatency			=	false;
 		}
 
+
+		public override void Initialize ()
+		{
+			//	do nothing
+		}
 	}
+
 }

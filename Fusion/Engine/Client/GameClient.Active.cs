@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Threading;
-using Fusion.Engine.Network;
 using System.IO;
 using Fusion.Engine.Common;
 using Fusion.Engine.Server;
@@ -124,7 +123,7 @@ namespace Fusion.Engine.Client {
 
 
 				//	show user commands :
-				bool showSnapshot = gameClient.Game.Network.Config.ShowSnapshots;
+				bool showSnapshot = gameClient.Game.Network.ShowUserCommands;
 				if (showSnapshot) {
 					Log.Message("User cmd: #{0} : {1}", lastSnapshotFrame, userCmd.Length );
 				}
@@ -197,8 +196,6 @@ namespace Fusion.Engine.Client {
 			/// <param name="msg"></param>
 			public override void DataReceived ( NetCommand command, NetIncomingMessage msg )
 			{
-				bool showSnapshot = gameClient.Game.Network.Config.ShowSnapshots;
-
 				if (command==NetCommand.Snapshot) {
 
 					//Log.Message("ping:{0} - offset:{1}", msg.SenderConnection.AverageRoundtripTime, msg.SenderConnection.RemoteTimeOffset);

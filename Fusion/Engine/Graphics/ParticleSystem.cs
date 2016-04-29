@@ -293,7 +293,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			var device	=	Game.GraphicsDevice;
 
-			if (rs.Config.SkipParticles) {
+			if (rs.SkipParticles) {
 				return;
 			}
 
@@ -320,7 +320,7 @@ namespace Fusion.Engine.Graphics {
 					deltaTime	=	float.MaxValue / 2;
 					requestKill	=	false;
 				}
-				if (rs.Config.FreezeParticles) {
+				if (rs.FreezeParticles) {
 					deltaTime = 0;
 				}
 
@@ -372,7 +372,7 @@ namespace Fusion.Engine.Graphics {
 				//
 				using (new PixEvent("Simulation")) {
 
-					if (!renderWorld.IsPaused && !rs.Config.SkipParticlesSimulation && !(stereoEye == StereoEye.Right)) {
+					if (!renderWorld.IsPaused && !rs.SkipParticlesSimulation && !(stereoEye == StereoEye.Right)) {
 	
 						device.SetCSRWBuffer( 0, simulationBuffer,		0 );
 						device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
@@ -433,7 +433,7 @@ namespace Fusion.Engine.Graphics {
 					device.Draw( MaxSimulatedParticles, 0 );
 
 
-					if (rs.Config.ShowParticles) {
+					if (rs.ShowParticles) {
 						rs.Counters.DeadParticles	=	deadParticlesIndices.GetStructureCount();
 					}
 				}

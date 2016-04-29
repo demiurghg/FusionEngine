@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
-using Fusion.Engine.Network;
 using System.Net;
 using Fusion.Core.Shell;
 using Fusion.Engine.Common;
@@ -159,7 +158,7 @@ namespace Fusion.Engine.Client {
 
 					case NetIncomingMessageType.ConnectionLatencyUpdated:
 						ping = msg.ReadFloat();
-						if (Game.Network.Config.ShowLatency) {
+						if (Game.Network.ShowLatency) {
 							Log.Verbose("...CL ping - {0} {1,6:0.00} ms", msg.SenderEndPoint, (ping*1000) );
 						}
 						break;
@@ -196,7 +195,7 @@ namespace Fusion.Engine.Client {
 		/// </summary>
 		internal void SendDiscoveryRequest ()
 		{
-			client.DiscoverLocalPeers( Game.Network.Config.Port );
+			client.DiscoverLocalPeers( Game.Network.Port );
 		}
 
 

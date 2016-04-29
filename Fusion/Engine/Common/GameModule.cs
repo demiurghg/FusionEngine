@@ -79,13 +79,13 @@ namespace Fusion.Engine.Common {
 		public virtual IEnumerable<KeyData> GetConfiguration ()
 		{
 			var sectionData		=	new List<KeyData>();
-			var configObject	=	ConfigSerializer.GetConfigObject( this );
+			var configObject	=	this;
 
 			if (configObject==null) {
 				return sectionData;
 			}
 
-			foreach ( var prop in configObject.GetType().GetProperties() ) {
+			foreach ( var prop in GetConfigurationProperties() ) {
 
 				var name	=	prop.Name;
 				var value	=	prop.GetValue( configObject );
@@ -109,7 +109,7 @@ namespace Fusion.Engine.Common {
 		/// <param name="configuration"></param>
 		public virtual void SetConfiguration ( IEnumerable<KeyData> configuration )
 		{
-			var configObject	=	ConfigSerializer.GetConfigObject( this );
+			var configObject	=	this;
 
 			if (configObject==null) {
 				return;
@@ -117,7 +117,7 @@ namespace Fusion.Engine.Common {
 
 			foreach ( var keyData in configuration ) {
 						
-				var prop =	configObject.GetType().GetProperty( keyData.KeyName );
+				var prop =	GetConfigurationProperty( keyData.KeyName );
 
 				if (prop==null) {
 					Log.Warning("Config property {0} does not exist. Key ignored.", keyData.KeyName );
@@ -128,6 +128,36 @@ namespace Fusion.Engine.Common {
 						
 				prop.SetValue( configObject, conv.ConvertFromInvariantString( keyData.Value ));
 			}
+		}
+
+
+
+		/// <summary>
+		/// Gets all properties marked with ConfigAttribute.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<PropertyInfo> GetConfigurationProperties ()
+		{
+			return GetType().GetProperties().Where( p=>p.GetCustomAttribute(typeof(ConfigAttribute))!=null).ToArray();
+		}
+
+		/// <summary>
+		/// Gets all properties marked with ConfigAttribute.
+		/// </summary>
+		/// <returns></returns>
+		public PropertyInfo GetConfigurationProperty ( string name )
+		{
+			var prop = GetType().GetProperty( name );
+
+			if (prop==null) {
+				return null;
+			}
+
+			if (prop.GetCustomAttribute(typeof(ConfigAttribute))==null) {
+				return null;
+			}
+
+			return prop;
 		}
 
 

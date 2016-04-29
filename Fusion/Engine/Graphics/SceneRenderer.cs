@@ -84,8 +84,6 @@ namespace Fusion.Engine.Graphics {
 			defaultEmission	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
 			defaultEmission.SetData( Enumerable.Range(0,16).Select( i => Color.Black ).ToArray() );
 
-			voxelBuffer		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba16F, 64,64, 8 );
-			
 			//Ubershader.AddEnumerator( "SceneRenderer", (t
 
 			Game.Reloading += (s,e) => LoadContent();
@@ -170,7 +168,7 @@ namespace Fusion.Engine.Graphics {
 					return;
 				}
 
-				if (rs.Config.SkipSceneRendering) {
+				if (rs.SkipSceneRendering) {
 					return;
 				}
 
