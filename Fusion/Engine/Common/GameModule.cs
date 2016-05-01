@@ -141,6 +141,8 @@ namespace Fusion.Engine.Common {
 			return GetType().GetProperties().Where( p=>p.GetCustomAttribute(typeof(ConfigAttribute))!=null).ToArray();
 		}
 
+
+
 		/// <summary>
 		/// Gets all properties marked with ConfigAttribute.
 		/// </summary>
@@ -187,6 +189,7 @@ namespace Fusion.Engine.Common {
 				InitOrder	=	initOrder;
 			}
 		}
+
 
 
 		/// <summary>
@@ -239,8 +242,6 @@ namespace Fusion.Engine.Common {
 
 
 
-
-
 		/// <summary>
 		/// Perform recursive module initialization.
 		/// </summary>
@@ -269,6 +270,9 @@ namespace Fusion.Engine.Common {
 
 
 
+		/// <summary>
+		/// Prints module names.
+		/// </summary>
 		static internal void PrintModuleNames ()
 		{
 			Log.Message("");
