@@ -307,18 +307,22 @@ namespace Fusion.Engine.Graphics {
 					//
 					//	Dispatch solids :
 					//
-					device.PipelineState	=	factory[ (int)LightingFlags.SOLIDLIGHTING ];
-					device.Dispatch( MathUtil.IntDivUp( width, BlockSizeX ), MathUtil.IntDivUp( height, BlockSizeY ), 1 );
+					using (new PixEvent("Solid Lighting")) {
+						device.PipelineState	=	factory[ (int)LightingFlags.SOLIDLIGHTING ];
+						device.Dispatch( MathUtil.IntDivUp( width, BlockSizeX ), MathUtil.IntDivUp( height, BlockSizeY ), 1 );
+					}
 
 					//
 					//	Dispatch particles :
 					//
-					if (stereoEye!=StereoEye.Right) {
-						int threadGroupCount	=	MathUtil.IntDivUp( ParticleSystem.MaxSimulatedParticles, ParticleSystem.BlockSize );
-						device.PipelineState	=	factory[ (int)LightingFlags.PARTICLES ];
-						device.Dispatch( threadGroupCount, 1, 1 );
+					using (new PixEvent("Particle Lighting")) {
+						if (stereoEye!=StereoEye.Right) {
+							int threadGroupCount	=	MathUtil.IntDivUp( ParticleSystem.MaxSimulatedParticles, ParticleSystem.BlockSize );
+							device.PipelineState	=	factory[ (int)LightingFlags.PARTICLES ];
+							device.Dispatch( threadGroupCount, 1, 1 );
+						}
 					}
-
+	
 				} catch ( UbershaderException e ) {
 					Log.Warning("{0}", e.Message );
 				}

@@ -9,11 +9,29 @@ using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
 
+	/// <summary>
+	/// Defines particle behavior.
+	/// </summary>
 	[Flags]
 	public enum ParticleFX : uint {
+		/// <summary>
+		/// Default value, no special effects.
+		/// </summary>
 		None	=	0x0000,
+
+		/// <summary>
+		/// Particle is aimed billboard with defined tail position
+		/// </summary>
 		Beam	=	0x0001,
+
+		/// <summary>
+		/// Particles is lit. By default all particles are emissive.
+		/// </summary>
 		Lit		=	0x0002,
+
+		/// <summary>
+		/// Particles should cast a shadow
+		/// </summary>
 		Shadow	=	0x0004,
 	}
 
@@ -61,8 +79,8 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Gravity influence.
 		/// Zero means no gravity influence.
-		/// Values between 0 and 1 means reduced gravity, like fluffs.
-		/// Negative values means particle that have positive buoyancy.
+		/// Values between 0 and 1 means reduced gravity, like snowflakes or dust.
+		/// Negative values means particle that has positive buoyancy.
 		/// </summary>
 		[FieldOffset( 96)] public float		Gravity;                
 

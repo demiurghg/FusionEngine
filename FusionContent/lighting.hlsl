@@ -337,7 +337,7 @@ void CSMain(
 {
 		int id = dispatchThreadId.x;
 
-	#if 0
+	#if 1
 		float4	worldPos	=	float4(Particles[id].Position, 1);
 		
 		float3 csmFactor	=	ComputeCSM( worldPos, Params, ShadowSampler, CSMTexture, false );
@@ -362,12 +362,12 @@ void CSMain(
 					envFactor	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(float3(0,0,1), i), 6).rgb;
 					envFactor	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(float3(-1,0,0), i), 6).rgb;
 					envFactor	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(float3(0,-1,0), i), 6).rgb;
-					envFactor	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(float3(0,0,-1), i), 6).rgb;
+					envFactor	+=	EnvMap.SampleLevel( SamplerLinearClamp, float4(float3(0,0,-1), i), 6).rgb;//*/
 							  
 			totalPrtLight.xyz	+=	envFactor * falloff / 6;
 		}
 		
-		ParticleLighting[id] = 	float4( totalPrtLight / 4 / 3.14f, 1 );
+		ParticleLighting[id] = 	float4( totalPrtLight, 1 );
 
 	#else
 		ParticleLighting[id]	=	float4(1,1,1,1);
