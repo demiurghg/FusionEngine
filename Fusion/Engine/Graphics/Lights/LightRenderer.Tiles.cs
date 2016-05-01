@@ -122,13 +122,17 @@ namespace Fusion.Engine.Graphics {
 
 				var shadowSO	=	new Vector4( 0.125f, -0.125f, 0.25f*(spotId % 4)+0.125f, 0.25f*(spotId / 4)+0.125f );
 				spotId ++;
+
+				var maskSO		=	Vector4.Zero;
 				
-				var maskRect	=	lightSet.SpotAtlas==null ? new Rectangle(0,0,0,0) : lightSet.SpotAtlas[ spot.TextureIndex ];
-				var maskX		=	maskRect.Left   / (float)lightSet.SpotAtlas.Texture.Width;
-				var maskY		=	maskRect.Top    / (float)lightSet.SpotAtlas.Texture.Height;
-				var maskW		=	maskRect.Width  / (float)lightSet.SpotAtlas.Texture.Width;
-				var maskH		=	maskRect.Height / (float)lightSet.SpotAtlas.Texture.Height;
-				var maskSO		=	new Vector4( maskW*0.5f, -maskH*0.5f, maskX + maskW/2f, maskY + maskH/2f );
+				if (lightSet.SpotAtlas!=null) {
+					var maskRect	=	lightSet.SpotAtlas[ spot.TextureIndex ];
+					var maskX		=	maskRect.Left   / (float)lightSet.SpotAtlas.Texture.Width;
+					var maskY		=	maskRect.Top    / (float)lightSet.SpotAtlas.Texture.Height;
+					var maskW		=	maskRect.Width  / (float)lightSet.SpotAtlas.Texture.Width;
+					var maskH		=	maskRect.Height / (float)lightSet.SpotAtlas.Texture.Height;
+					maskSO			=	new Vector4( maskW*0.5f, -maskH*0.5f, maskX + maskW/2f, maskY + maskH/2f );
+				}
 
 				var bf = new BoundingFrustum( spot.SpotView * spot.Projection );
 				var pos = Matrix.Invert(spot.SpotView).TranslationVector;

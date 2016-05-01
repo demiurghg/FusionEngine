@@ -74,7 +74,7 @@ groupshared uint visibleLightIndices[1024];
 
 
 #define OMNI_LIGHT_COUNT 1024
-#define SPOT_LIGHT_COUNT 256
+#define SPOT_LIGHT_COUNT 16
 #define ENV_LIGHT_COUNT 256
 
 
@@ -346,8 +346,23 @@ void CSMain(
 		
 		float3 totalPrtLight	=	lightColor * csmFactor;
 
+		int i;
+		for (i=0; i<SPOT_LIGHT_COUNT; i++) {
+			SPOTLIGHT light = SpotLights[i];
+
+			float3 intensity = light.IntensityFar.rgb;
+			float3 position	 = light.PositionRadius.rgb;
+			float  radius    = light.PositionRadius.w;
+			float3 lightDir	 = position - worldPos.xyz;
+			float  falloff	 = LinearFalloff( length(lightDir), radius );
+			
+			float3 shadow	 = ComputeSpotShadow( worldPos, light, ShadowSampler, SamplerLinearClamp, SpotShadowMap, SpotMaskAtlas, Params.CSMFilterRadius.x );
+			
+			totalPrtLight	+= shadow * falloff * intensity;
+		}
 		
-		for (int i=0; i<ENV_LIGHT_COUNT; i++) {
+		
+		for (i=0; i<ENV_LIGHT_COUNT; i++) {
 			ENVLIGHT light = EnvLights[i];
 
 			float3 intensity = light.Intensity.rgb;
