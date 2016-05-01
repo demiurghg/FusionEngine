@@ -383,6 +383,13 @@ void CSMain(
 		}
 		
 		ParticleLighting[id] = 	float4( totalPrtLight, 1 );
+		
+		//
+		//	No lighting:
+		//
+		if ((Particles[id].Effects & LIT) != LIT) {
+			ParticleLighting[id]	=	float4(1,1,1,1);
+		}
 
 	#else
 		ParticleLighting[id]	=	float4(1,1,1,1);

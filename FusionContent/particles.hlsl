@@ -183,7 +183,7 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	float4 pos2	=	mul( float4( position - rt - up, 1 ), Params.View );
 	float4 pos3	=	mul( float4( position + rt - up, 1 ), Params.View );
 	
-	if (prt.Effects && BEAM == BEAM) {
+	if ((prt.Effects & BEAM) == BEAM) {
 		float3 dir	=	normalize(position - tailpos);
 		float3 eye	=	normalize(Params.CameraPosition.xyz - tailpos);
 		float3 side	=	normalize(cross( eye, dir ));

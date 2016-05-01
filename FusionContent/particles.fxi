@@ -7,7 +7,6 @@
 #define BEAM			0x0001
 #define LIT				0x0002
 #define SHADOW			0x0004
-#define LIT2			0x0008
 
 struct PARTICLE {
 	float3	Position;
