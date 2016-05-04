@@ -4,9 +4,9 @@
 #define MAX_PARTICLES 	(256*256)
 #define MAX_IMAGES		512
 
-#define BEAM			0x0001
-#define LIT				0x0002
-#define SHADOW			0x0004
+#define ParticleFX_Beam			1
+#define ParticleFX_Lit			2
+#define ParticleFX_LitShadow	3
 
 struct PARTICLE {
 	float3	Position;

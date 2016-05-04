@@ -17,22 +17,22 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Default value, no special effects.
 		/// </summary>
-		None	=	0x0000,
+		None	=	0,
 
 		/// <summary>
 		/// Particle is aimed billboard with defined tail position
 		/// </summary>
-		Beam	=	0x0001,
+		Beam	=	1,
 
 		/// <summary>
 		/// Particles is lit. By default all particles are emissive.
 		/// </summary>
-		Lit		=	0x0002,
+		Lit		=	2,
 
 		/// <summary>
 		/// Particles should cast a shadow
 		/// </summary>
-		Shadow	=	0x0004,
+		LitShadow	=	3,
 	}
 
 	/// <summary>

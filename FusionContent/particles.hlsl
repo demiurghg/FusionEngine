@@ -183,7 +183,7 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	float4 pos2	=	mul( float4( position - rt - up, 1 ), Params.View );
 	float4 pos3	=	mul( float4( position + rt - up, 1 ), Params.View );
 	
-	if ((prt.Effects & BEAM) == BEAM) {
+	if (prt.Effects==ParticleFX_Beam) {
 		float3 dir	=	normalize(position - tailpos);
 		float3 eye	=	normalize(Params.CameraPosition.xyz - tailpos);
 		float3 side	=	normalize(cross( eye, dir ));
@@ -209,13 +209,13 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	p3.TexCoord	= float2(image.z, image.w);
 	p3.Color 	= color;
 	
+	if (prt.Effects==ParticleFX_Lit || prt.Effects==ParticleFX_LitShadow) {
+		p0.Color.rgb	*= particleLighting[ prtId ].rgb;
+		p1.Color.rgb	*= particleLighting[ prtId ].rgb;
+		p2.Color.rgb	*= particleLighting[ prtId ].rgb;
+		p3.Color.rgb	*= particleLighting[ prtId ].rgb;
+	}
 	
-	p0.Color.rgb	*= particleLighting[ prtId ].rgb;
-	p1.Color.rgb	*= particleLighting[ prtId ].rgb;
-	p2.Color.rgb	*= particleLighting[ prtId ].rgb;
-	p3.Color.rgb	*= particleLighting[ prtId ].rgb;
-	
-
 	outputStream.Append(p0);
 	outputStream.Append(p1);
 	outputStream.Append(p2);

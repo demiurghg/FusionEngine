@@ -340,12 +340,18 @@ void CSMain(
 	#if 1
 		float4	worldPos	=	float4(Particles[id].Position, 1);
 		
+		//
+		//	Direct light :
+		//
 		float3 csmFactor	=	ComputeCSM( worldPos, Params, ShadowSampler, CSMTexture, false );
 		float3 lightDir		=	-normalize(Params.DirectLightDirection.xyz);
 		float3 lightColor	=	Params.DirectLightIntensity.rgb;
 		
 		float3 totalPrtLight	=	lightColor * csmFactor;
 
+		//
+		//	Spot lights :
+		//
 		int i;
 		for (i=0; i<SPOT_LIGHT_COUNT; i++) {
 			SPOTLIGHT light = SpotLights[i];
@@ -361,7 +367,9 @@ void CSMain(
 			totalPrtLight	+= shadow * falloff * intensity;
 		}
 		
-		
+		//
+		//	Ambient light :
+		//
 		for (i=0; i<ENV_LIGHT_COUNT; i++) {
 			ENVLIGHT light = EnvLights[i];
 
@@ -383,13 +391,6 @@ void CSMain(
 		}
 		
 		ParticleLighting[id] = 	float4( totalPrtLight, 1 );
-		
-		//
-		//	No lighting:
-		//
-		if ((Particles[id].Effects & LIT) != LIT) {
-			ParticleLighting[id]	=	float4(1,1,1,1);
-		}
 
 	#else
 		ParticleLighting[id]	=	float4(1,1,1,1);
