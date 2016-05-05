@@ -299,8 +299,15 @@ namespace Fusion.Engine.Graphics {
 			//	clear g-buffer and hdr-buffers:
 			ClearBuffers( viewHdrFrame );
 
-			//	render shadows :
+			//	single pass for stereo rendering :
 			if (stereoEye!=StereoEye.Right) {
+
+				//	simulate particles BEFORE lighting
+				//	to make particle lit (position is required) and 
+				//	get simulated particles for shadows.
+				ParticleSystem.Simulate( gameTime, Camera );
+
+				//	render shadows :
 				rs.LightRenderer.RenderShadows( this, this.LightSet );
 			}
 
@@ -316,6 +323,7 @@ namespace Fusion.Engine.Graphics {
 				case 3 : rs.Filter.Copy( targetSurface, viewHdrFrame.NormalMapBuffer ); return;
 				case 4 : rs.Filter.Copy( targetSurface, viewHdrFrame.ScatteringBuffer ); return;
 				case 5 : rs.Filter.Copy( targetSurface, rs.SsaoFilter.OcclusionMap ); return;
+				case 6 : rs.Filter.StretchRect( targetSurface, rs.LightRenderer.ParticleShadow ); return;
 			}
 
 			//	render sky :

@@ -17,15 +17,22 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="?"></param>
-		internal void RenderShadows ( RenderWorld viewLayer, LightSet lightSet )
+		internal void RenderShadows ( RenderWorld renderWorld, LightSet lightSet )
 		{
 			var device = Game.GraphicsDevice;
-			var camera		=	viewLayer.Camera;
-			var instances	=	viewLayer.Instances;
+			var camera		=	renderWorld.Camera;
+			var instances	=	renderWorld.Instances;
 
 			if (SkipShadows) {
 				return;
 			}
+
+			
+			Matrix[] shadowViews, shadowProjections;
+			//	shadow is computed for both eyes :
+			var view = camera.GetViewMatrix( StereoEye.Mono );
+			ComputeCSMMatricies( view, renderWorld.LightSet.DirectLight.Direction, out shadowViews, out shadowProjections, out csmViewProjections );
+
 
 			using (new PixEvent("Cascaded Shadow Maps")) {
 
@@ -37,13 +44,6 @@ namespace Fusion.Engine.Graphics {
 
 				device.Clear( csmDepth.Surface, 1, 0 );
 				device.Clear( csmColor.Surface, Color4.White );
-
-				Matrix[] shadowViews, shadowProjections;
-
-				//	shadow is computed for both eyes :
-				var view = camera.GetViewMatrix( StereoEye.Mono );
-
-				ComputeCSMMatricies( view, viewLayer.LightSet.DirectLight.Direction, out shadowViews, out shadowProjections, out csmViewProjections );
 
 				for (int i=0; i<4; i++) {
 
@@ -61,6 +61,19 @@ namespace Fusion.Engine.Graphics {
 					Game.RenderSystem.SceneRenderer.RenderShadowMapCascade( context, instances );
 				}
 			}
+
+
+
+			using (new PixEvent("Particle Shadows")) {
+				
+				device.Clear( particleShadow.Surface, new Color4(1,1,1,1) );
+
+				var smSize = CSMSize;
+				var viewport = new Viewport( smSize * 1, 0, smSize, smSize );
+
+				renderWorld.ParticleSystem.RenderShadow( new GameTime(), viewport, shadowViews[1], shadowProjections[1], particleShadow.Surface, csmDepth.Surface );
+			}
+
 
 
 			using (new PixEvent("Spotlight Shadow Maps")) {

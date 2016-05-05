@@ -101,6 +101,7 @@ float3	ComputeCSM ( float4 worldPos, LightingParams params, SamplerComparisonSta
 	
 	float2	offset	=	1 / csmSize;
 	float2	smUV	=	0.5 * (float2(1, -1) * smProj2.xy + float2(1, 1));
+	float2	smUVprt	=	0.5 * (float2(1, -1) * smProj2.xy + float2(1, 1));
 			smUV	=	smUV * float2(0.25,1) + float2( shadowId/4, 0 );
 	
 	float  z  		= 	smProj2.z;
@@ -115,6 +116,7 @@ float3	ComputeCSM ( float4 worldPos, LightingParams params, SamplerComparisonSta
 			float  sh  = csmTexture.SampleCmpLevelZero( shadowSampler, smUV + offset * radius * float2(x,y), z );
 			shadow += sh / 16;
 		}
+		
 	} else {
 		shadow = csmTexture.SampleCmpLevelZero( shadowSampler, smUV, z );
 	}
@@ -122,12 +124,38 @@ float3	ComputeCSM ( float4 worldPos, LightingParams params, SamplerComparisonSta
 	if ( shadowId==-1 ) {
 		shadow = 1;
 	}
+	
+	
 
 	#if 0
 		return shadow * colorizer;
 	#else
 		return shadow;
 	#endif
+}
+
+
+
+float3 ComputeParticleShadow ( float4 worldPos, LightingParams params, SamplerState shadowSampler, Texture2D particleShadow )
+{
+	float4	smProj;
+
+	//	select cascade :
+	smProj	   =  mul( worldPos, params.CSMViewProjection1 );
+
+	//	compute UVs :
+	float2	csmSize;
+	particleShadow.GetDimensions( csmSize.x, csmSize.y );
+	
+	float2	offset	=	1 / csmSize;
+	float2	smUV	=	0.5f * (float2(1, -1) * smProj.xy + float2(1, 1));
+			smUV	=	smUV * float2(0.25,1) + float2( 1.0f/4, 0 );
+	
+	float3  shadow	=	1;
+	
+	shadow	*=	particleShadow.SampleLevel( shadowSampler, smUV, 0 ).rgb;
+
+	return shadow;
 }
 
 

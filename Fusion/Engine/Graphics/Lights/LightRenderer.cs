@@ -26,6 +26,8 @@ namespace Fusion.Engine.Graphics {
 		DepthStencil2D		spotDepth		;
 		RenderTarget2D		spotColor		;
 
+		RenderTarget2D		particleShadow	;
+
 
 		OmniLightGPU[]		omniLightData;
 		SpotLightGPU[]		spotLightData;
@@ -39,6 +41,8 @@ namespace Fusion.Engine.Graphics {
 
 		public RenderTarget2D	SpotColor { get { return spotColor; } }
 		public DepthStencil2D	SpotDepth { get { return spotDepth; } }
+
+		public RenderTarget2D	ParticleShadow { get { return particleShadow; } }
 
 
 
@@ -185,11 +189,16 @@ namespace Fusion.Engine.Graphics {
 			SafeDispose( ref spotColor );
 			SafeDispose( ref spotDepth );
 
-			csmColor	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  CSMSize * 4, CSMSize );
-			csmDepth	=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, CSMSize * 4, CSMSize );
+			SafeDispose( ref particleShadow );
 
-			spotColor	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  SpotShadowSize * 4, SpotShadowSize * 4 );
-			spotDepth	=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, SpotShadowSize * 4, SpotShadowSize * 4 );
+			csmColor		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  CSMSize * 4, CSMSize );
+			csmDepth		=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, CSMSize * 4, CSMSize );
+
+			particleShadow	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8_sRGB, CSMSize * 4, CSMSize );
+
+			spotColor		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  SpotShadowSize * 4, SpotShadowSize * 4 );
+			spotDepth		=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, SpotShadowSize * 4, SpotShadowSize * 4 );
+
 		}
 
 
@@ -205,6 +214,8 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref csmColor );
 				SafeDispose( ref spotDepth );
 				SafeDispose( ref spotColor );
+
+				SafeDispose( ref particleShadow );
 
 				SafeDispose( ref lightingCB );
 
@@ -297,6 +308,7 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderResources[11]	=	rs.SsaoFilter.OcclusionMap;
 					device.ComputeShaderResources[12]	=	viewLayer.RadianceCache;
 					device.ComputeShaderResources[13]	=	viewLayer.ParticleSystem.SimulatedParticles;
+					device.ComputeShaderResources[14]	=	particleShadow;
 
 					device.ComputeShaderConstants[0]	=	lightingCB;
 

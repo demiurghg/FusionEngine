@@ -48,6 +48,7 @@ StructuredBuffer<ENVLIGHT>	EnvLights	: register(t10);
 Texture2D 			OcclusionMap		: register(t11);
 TextureCubeArray	EnvMap				: register(t12);
 StructuredBuffer<PARTICLE> Particles	: register(t13);
+Texture2D 			ParticleShadow		: register(t14);
 
 
 float DepthToViewZ(float depthValue) {
@@ -127,6 +128,7 @@ void CSMain(
 	//	Direct light :
 	//-----------------------------------------------------
 	float3 csmFactor	=	ComputeCSM( worldPos, Params, ShadowSampler, CSMTexture, true );
+	float3 prtFactor	=	ComputeParticleShadow( worldPos, Params, SamplerLinearClamp, ParticleShadow );
 	float3 lightDir		=	-normalize(Params.DirectLightDirection.xyz);
 	float3 lightColor	=	Params.DirectLightIntensity.rgb;
 	
@@ -136,8 +138,8 @@ void CSMain(
 
 	float3 diffuseTerm	=	Lambert	( normal.xyz,  lightDir, lightColor, float3(1,1,1) );
 	float3 diffuseTerm2	=	Lambert	( normal.xyz,  lightDir, lightColor, float3(1,1,1), 1 );
-	totalLight.xyz		+=	csmFactor.rgb * diffuseTerm * diffuse.rgb;
-	totalLight.xyz		+=	csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, lightColor, specular.rgb, specular.a );
+	totalLight.xyz		+=	prtFactor.rgb * csmFactor.rgb * diffuseTerm * diffuse.rgb;
+	totalLight.xyz		+=	prtFactor.rgb * csmFactor.rgb * CookTorrance( normal.xyz,  viewDirN, lightDir, lightColor, specular.rgb, specular.a );
 	
 	totalSSS.rgb		+=	csmFactor.rgb * diffuseTerm2 * scatter.rgb;
 

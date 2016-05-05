@@ -22,7 +22,7 @@ namespace Fusion.Engine.Client {
 			uint lastSnapshotFrame;
 
 			SnapshotQueue	queue;
-			JitterBuffer	jitter;
+			//JitterBuffer	jitter;
 			Stopwatch		stopwatch;
 			long			clientFrames = 0;
 			long			clientTicks;

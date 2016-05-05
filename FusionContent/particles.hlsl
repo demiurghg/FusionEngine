@@ -1,6 +1,6 @@
 
 #if 0
-$ubershader INITIALIZE|INJECTION|SIMULATION|DRAW
+$ubershader INITIALIZE|INJECTION|SIMULATION|DRAW|DRAW_SHADOW
 #endif
 
 #include "particles.fxi"
@@ -117,7 +117,7 @@ struct GSOutput {
 };
 
 
-#if DRAW
+#if (defined DRAW) || (defined DRAW_SHADOW)
 VSOutput VSMain( uint vertexID : SV_VertexID )
 {
 	VSOutput output;
@@ -209,12 +209,20 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	p3.TexCoord	= float2(image.z, image.w);
 	p3.Color 	= color;
 	
+	#ifdef DRAW
 	if (prt.Effects==ParticleFX_Lit || prt.Effects==ParticleFX_LitShadow) {
 		p0.Color.rgb	*= particleLighting[ prtId ].rgb;
 		p1.Color.rgb	*= particleLighting[ prtId ].rgb;
 		p2.Color.rgb	*= particleLighting[ prtId ].rgb;
 		p3.Color.rgb	*= particleLighting[ prtId ].rgb;
 	}
+	#endif
+	
+	#ifdef DRAW_SHADOW
+	if (prt.Effects!=ParticleFX_LitShadow) {
+		return;
+	}
+	#endif
 	
 	outputStream.Append(p0);
 	outputStream.Append(p1);
@@ -233,10 +241,18 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 
 float4 PSMain( GSOutput input ) : SV_Target
 {
-	float4 color	=	Texture.Sample( Sampler, input.TexCoord ) * input.Color;
+	#ifdef DRAW
+		float4 color	=	Texture.Sample( Sampler, input.TexCoord ) * input.Color;
+		//	saves about 5%-10% of rasterizer time:
+		clip( color.a < 0.001f ? -1:1 );
+	#endif
 	
-	//	saves about 5%-10% of rasterizer time:
-	clip( color.a < 0.001f ? -1:1 );
+	#ifdef DRAW_SHADOW
+		float4 textureColor	=	Texture.Sample( Sampler, input.TexCoord );
+		float4 vertexColor  =  	input.Color;
+		float4 color		=	1 - vertexColor.a * textureColor.a;
+	#endif
+	
 	return color;
 }
 #endif
