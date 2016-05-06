@@ -79,9 +79,11 @@ namespace Fusion.Engine.Graphics {
 //       float4 CameraUp;               // Offset:  160
 //       float4 CameraPosition;         // Offset:  176
 //       float4 Gravity;                // Offset:  192
-//       int MaxParticles;              // Offset:  208
-//       float DeltaTime;               // Offset:  212
-//       uint DeadListSize;             // Offset:  216		
+//       float LinearizeDepthA;         // Offset:  208
+//       float LinearizeDepthB;         // Offset:  212
+//       int MaxParticles;              // Offset:  216
+//       float DeltaTime;               // Offset:  220
+//       uint DeadListSize;             // Offset:  224
 		[StructLayout(LayoutKind.Explicit, Size=256)]
 		struct PrtParams {
 			[FieldOffset(  0)] public Matrix	View;
@@ -91,9 +93,11 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(160)] public Vector4	CameraUp;
 			[FieldOffset(176)] public Vector4	CameraPosition;
 			[FieldOffset(192)] public Vector4	Gravity;
-			[FieldOffset(208)] public int		MaxParticles;
-			[FieldOffset(212)] public float		DeltaTime;
-			[FieldOffset(216)] public uint		DeadListSize;
+			[FieldOffset(208)] public float		LinearizeDepthA;
+			[FieldOffset(212)] public float		LinearizeDepthB;
+			[FieldOffset(216)] public int		MaxParticles;
+			[FieldOffset(220)] public float		DeltaTime;
+			[FieldOffset(224)] public uint		DeadListSize;
 		} 
 
 		Random rand = new Random();
@@ -289,10 +293,10 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		void SetupGPUParameters ( GameTime gameTime, Matrix view, Matrix projection, Flags flags )
+		void SetupGPUParameters ( GameTime gameTime, Camera camera, Matrix view, Matrix projection, Flags flags )
 		{
 			var deltaTime		=	gameTime.ElapsedSec;
-			var camera			=	Matrix.Invert( view );
+			var cameraMatrix	=	Matrix.Invert( view );
 
 			//	kill particles by applying very large delta.
 			if (requestKill) {
@@ -306,16 +310,18 @@ namespace Fusion.Engine.Graphics {
 			//	fill constant data :
 			PrtParams param		=	new PrtParams();
 
-			param.View			=	view;
-			param.Projection	=	projection;
-			param.MaxParticles	=	0;
-			param.DeltaTime		=	deltaTime;
-			param.CameraForward	=	new Vector4( camera.Forward	, 0 );
-			param.CameraRight	=	new Vector4( camera.Right	, 0 );
-			param.CameraUp		=	new Vector4( camera.Up		, 0 );
-			param.CameraPosition=	new Vector4( camera.TranslationVector	, 1 );
-			param.Gravity		=	new Vector4( this.Gravity, 0 );
-			param.MaxParticles	=	MaxSimulatedParticles;
+			param.View				=	view;
+			param.Projection		=	projection;
+			param.MaxParticles		=	0;
+			param.DeltaTime			=	deltaTime;
+			param.CameraForward		=	new Vector4( cameraMatrix.Forward	, 0 );
+			param.CameraRight		=	new Vector4( cameraMatrix.Right	, 0 );
+			param.CameraUp			=	new Vector4( cameraMatrix.Up		, 0 );
+			param.CameraPosition	=	new Vector4( cameraMatrix.TranslationVector	, 1 );
+			param.Gravity			=	new Vector4( this.Gravity, 0 );
+			param.MaxParticles		=	MaxSimulatedParticles;
+			param.LinearizeDepthA	=	(camera==null) ? 1 : camera.LinearizeDepthA;
+			param.LinearizeDepthB	=	(camera==null) ? 1 : camera.LinearizeDepthB;
 
 			if (flags==Flags.INJECTION) {
 				param.MaxParticles	=	injectionCount;
@@ -359,7 +365,7 @@ namespace Fusion.Engine.Graphics {
 					device.SetCSRWBuffer( 0, simulationBuffer,		0 );
 					device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
 
-					SetupGPUParameters( gameTime, view, projection, Flags.INJECTION );
+					SetupGPUParameters( gameTime, camera, view, projection, Flags.INJECTION );
 					device.ComputeShaderConstants[0]	= paramsCB ;
 
 					device.PipelineState	=	factory[ (int)Flags.INJECTION ];
@@ -381,7 +387,7 @@ namespace Fusion.Engine.Graphics {
 						device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
 						device.SetCSRWBuffer( 2, sortParticlesBuffer, 0 );
 
-						SetupGPUParameters( gameTime, view, projection, Flags.SIMULATION);
+						SetupGPUParameters( gameTime, camera, view, projection, Flags.SIMULATION);
 						device.ComputeShaderConstants[0] = paramsCB ;
 
 						device.PipelineState	=	factory[ (int)Flags.SIMULATION ];
@@ -410,7 +416,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		void RenderGeneric ( string passName, GameTime gameTime, Viewport viewport, Matrix view, Matrix projection, RenderTargetSurface colorTarget, DepthStencilSurface depthTarget, Flags flags )
+		void RenderGeneric ( string passName, GameTime gameTime, Camera camera, Viewport viewport, Matrix view, Matrix projection, RenderTargetSurface colorTarget, DepthStencilSurface depthTarget, ShaderResource depthValues, Flags flags )
 		{
 			var device	=	Game.GraphicsDevice;
 
@@ -430,7 +436,7 @@ namespace Fusion.Engine.Graphics {
 					imagesCB.SetData( Images.GetNormalizedRectangles( MaxImages ) );
 				}
 
-				SetupGPUParameters( gameTime, view, projection, flags );
+				SetupGPUParameters( gameTime, camera, view, projection, flags );
 				device.ComputeShaderConstants[0] = paramsCB ;
 
 				//
@@ -448,6 +454,7 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderConstants[0]	= paramsCB ;
 					device.VertexShaderConstants[0]		= paramsCB ;
 					device.GeometryShaderConstants[0]	= paramsCB ;
+					device.PixelShaderConstants[0]		= paramsCB ;
 
 					//	atlas CB :
 					device.VertexShaderConstants[1]		= imagesCB ;
@@ -458,6 +465,7 @@ namespace Fusion.Engine.Graphics {
 					device.PixelShaderSamplers[0]		=	SamplerState.LinearClamp4Mips ;
 
 					device.PixelShaderResources[0]		=	Images==null? rs.WhiteTexture.Srv : Images.Texture.Srv;
+					device.PixelShaderResources[5]		=	depthValues;
 					device.GeometryShaderResources[1]	=	simulationBuffer ;
 					device.GeometryShaderResources[2]	=	simulationBuffer ;
 					device.GeometryShaderResources[3]	=	sortParticlesBuffer;
@@ -489,7 +497,7 @@ namespace Fusion.Engine.Graphics {
 
 			var viewport	=	new Viewport( 0, 0, colorTarget.Width, colorTarget.Height );
 
-			RenderGeneric( "Particles", gameTime, viewport, view, projection, colorTarget, depthTarget, Flags.DRAW );
+			RenderGeneric( "Particles", gameTime, camera, viewport, view, projection, colorTarget, null, viewFrame.DepthBuffer, Flags.DRAW );
 		}
 
 
@@ -504,7 +512,7 @@ namespace Fusion.Engine.Graphics {
 			var colorTarget	=	particleShadow;
 			var depthTarget	=	depthBuffer;
 
-			RenderGeneric( "Particles Shadow", gameTime, viewport, view, projection, colorTarget, depthTarget, Flags.DRAW_SHADOW );
+			RenderGeneric( "Particles Shadow", gameTime, null, viewport, view, projection, colorTarget, depthTarget, null, Flags.DRAW_SHADOW );
 		}
 	}
 }

@@ -28,6 +28,7 @@ StructuredBuffer<PARTICLE>		injectionBuffer			:	register(t1);
 StructuredBuffer<PARTICLE>		particleBufferGS		:	register(t2);
 StructuredBuffer<float2>		sortParticleBufferGS	:	register(t3);
 StructuredBuffer<float4>		particleLighting		:	register(t4);
+Texture2D						DepthValues				: 	register(t5);
 
 //-----------------------------------------------
 //	UAVs :
@@ -111,8 +112,9 @@ struct VSOutput {
 };
 
 struct GSOutput {
-	float4	Position : SV_Position;
-	float2	TexCoord : TEXCOORD0;
+	float4	Position  : SV_Position;
+	float2	TexCoord  : TEXCOORD0;
+	float4  ViewPosSZ : TEXCOORD1;
 	float4	Color     : COLOR0;
 };
 
@@ -193,21 +195,25 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	    pos3		=	mul( float4( tailpos  - side * sz, 1 ), Params.View );
 	}
 	
-	p0.Position	= mul( pos0, Params.Projection );
-	p0.TexCoord	= float2(image.z, image.y);
-	p0.Color 	= color;
+	p0.Position	 = mul( pos0, Params.Projection );
+	p0.TexCoord	 = float2(image.z, image.y);
+	p0.ViewPosSZ = float4( pos0.xyz, 1/sz );
+	p0.Color 	 = color;
 	
-	p1.Position	= mul( pos1, Params.Projection );
-	p1.TexCoord	= float2(image.x, image.y);
-	p1.Color 	= color;
+	p1.Position	 = mul( pos1, Params.Projection );
+	p1.TexCoord	 = float2(image.x, image.y);
+	p1.ViewPosSZ = float4( pos1.xyz, 1/sz );
+	p1.Color 	 = color;
 	
-	p2.Position	= mul( pos2, Params.Projection );
-	p2.TexCoord	= float2(image.x, image.w);
-	p2.Color 	= color;
+	p2.Position	 = mul( pos2, Params.Projection );
+	p2.TexCoord	 = float2(image.x, image.w);
+	p2.ViewPosSZ = float4( pos2.xyz, 1/sz );
+	p2.Color 	 = color;
 	
-	p3.Position	= mul( pos3, Params.Projection );
-	p3.TexCoord	= float2(image.z, image.w);
-	p3.Color 	= color;
+	p3.Position	 = mul( pos3, Params.Projection );
+	p3.TexCoord	 = float2(image.z, image.w);
+	p3.ViewPosSZ = float4( pos3.xyz, 1/sz );
+	p3.Color 	 = color;
 	
 	#ifdef DRAW
 	if (prt.Effects==ParticleFX_Lit || prt.Effects==ParticleFX_LitShadow) {
@@ -238,13 +244,31 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 }
 
 
+//	Soft particles :
+//	http://developer.download.nvidia.com/SDK/10/direct3d/Source/SoftParticles/doc/SoftParticles_hi.pdf
 
-float4 PSMain( GSOutput input ) : SV_Target
+float4 PSMain( GSOutput input, float4 vpos : SV_POSITION ) : SV_Target
 {
 	#ifdef DRAW
 		float4 color	=	Texture.Sample( Sampler, input.TexCoord ) * input.Color;
 		//	saves about 5%-10% of rasterizer time:
 		clip( color.a < 0.001f ? -1:1 );
+		
+		float  depth 	= DepthValues.Load( int3(vpos.xy,0) ).r;
+		float  a 		= Params.LinearizeDepthA;
+		float  b        = Params.LinearizeDepthB;
+		float  sceneZ   = 1 / (depth * a + b);
+		
+		float  prtZ		= abs(input.ViewPosSZ.z);
+
+		// - profile!
+		// if (depth < vpos.z) {
+		// clip(-1);
+		// }
+		
+		float softFactor	=	saturate( (sceneZ - prtZ) * input.ViewPosSZ.w );
+
+		color.rgba *= softFactor;
 	#endif
 	
 	#ifdef DRAW_SHADOW

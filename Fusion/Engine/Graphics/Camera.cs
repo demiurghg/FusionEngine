@@ -19,6 +19,9 @@ namespace Fusion.Engine.Graphics {
 		private Matrix	projMatrixL		;
 		private Matrix	projMatrixR		;
 
+		private float	projZNear;
+		private float	projZFar;
+
 
 		/// <summary>
 		/// 
@@ -45,6 +48,9 @@ namespace Fusion.Engine.Graphics {
 			if (convergence<=0) {	
 				throw new ArgumentOutOfRangeException("convergence must be > 0");
 			}
+
+			projZNear			=	near;
+			projZFar			=	far;
 
 			float offset		=	separation / convergence * near / 2;
 			float nearHeight	=	height;
@@ -206,6 +212,29 @@ namespace Fusion.Engine.Graphics {
 			throw new ArgumentException("stereoEye");
 		}
 
+
+		/// <summary>
+		///	Gets A coefficient for linear Z-value reconstruction.
+		///	To reconstruct Z-value use the following formula:
+		/// 1 / (depth * a + b)
+		/// </summary>
+		public float LinearizeDepthA {
+			get {
+				return 1 / projZFar - 1 / projZNear;
+			}
+		}
+
+
+		/// <summary>
+		///	Gets B coefficient for linear Z-value reconstruction.
+		///	To reconstruct Z-value use the following formula:
+		/// 1 / (depth * a + b)
+		/// </summary>
+		public float LinearizeDepthB {
+			get {
+				return 1 / projZNear;
+			}
+		}
 
 
 		/// <summary>

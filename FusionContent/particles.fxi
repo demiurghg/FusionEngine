@@ -16,7 +16,7 @@ struct PARTICLE {
 	float4	Color0;
 	float4	Color1;
 	float4	LightLevel;
-	float	Gravity;
+	float	Gravity; 
 	float	Damping;
 	float	Size0;
 	float	Size1;
@@ -39,6 +39,8 @@ struct PARAMS {
 	float4		CameraUp;
 	float4		CameraPosition;
 	float4		Gravity;
+	float		LinearizeDepthA;
+	float		LinearizeDepthB;
 	int			MaxParticles;
 	float		DeltaTime;
 	uint		DeadListSize;
