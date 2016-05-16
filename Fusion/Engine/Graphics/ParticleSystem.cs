@@ -8,6 +8,7 @@ using Fusion.Core;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
+using Fusion.Core.Configuration;
 
 
 
@@ -42,6 +43,20 @@ namespace Fusion.Engine.Graphics {
 		StructuredBuffer	particleLighting;
 		ConstantBuffer		paramsCB;
 		ConstantBuffer		imagesCB;
+
+		[Config]
+		public float SimulationStepTime {
+			get { 
+				return simulationStepTime; 
+			}
+			set { 
+				if (value<=0) {
+					throw new ArgumentOutOfRangeException("value must be positive");
+				}
+				simulationStepTime = value; 
+			}
+		}
+		float simulationStepTime = 1 / 60.0f;
 
 
 		/// <summary>
@@ -282,6 +297,7 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		public void KillParticles ()
 		{
+			timeAccumulator	=	0;
 			requestKill = true;
 			ClearParticleBuffer();
 		}
@@ -293,9 +309,9 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		void SetupGPUParameters ( GameTime gameTime, Camera camera, Matrix view, Matrix projection, Flags flags )
+		void SetupGPUParameters ( float stepTime, Camera camera, Matrix view, Matrix projection, Flags flags )
 		{
-			var deltaTime		=	gameTime.ElapsedSec;
+			var deltaTime		=	stepTime;
 			var cameraMatrix	=	Matrix.Invert( view );
 
 			//	kill particles by applying very large delta.
@@ -338,6 +354,9 @@ namespace Fusion.Engine.Graphics {
 
 
 
+		float timeAccumulator = 0;
+
+
 
 		/// <summary>
 		/// Updates particle properties.
@@ -349,6 +368,10 @@ namespace Fusion.Engine.Graphics {
 
 			var view		=	camera.GetViewMatrix( StereoEye.Mono );
 			var projection	=	camera.GetProjectionMatrix( StereoEye.Mono );
+
+
+			timeAccumulator	+=	gameTime.ElapsedSec;
+
 
 			using ( new PixEvent("Particle Simulation") ) {
 
@@ -365,7 +388,7 @@ namespace Fusion.Engine.Graphics {
 					device.SetCSRWBuffer( 0, simulationBuffer,		0 );
 					device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
 
-					SetupGPUParameters( gameTime, camera, view, projection, Flags.INJECTION );
+					SetupGPUParameters( 0, camera, view, projection, Flags.INJECTION );
 					device.ComputeShaderConstants[0]	= paramsCB ;
 
 					device.PipelineState	=	factory[ (int)Flags.INJECTION ];
@@ -375,6 +398,7 @@ namespace Fusion.Engine.Graphics {
 
 					ClearParticleBuffer();
 				}
+
 
 				//
 				//	Simulate :
@@ -387,13 +411,20 @@ namespace Fusion.Engine.Graphics {
 						device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
 						device.SetCSRWBuffer( 2, sortParticlesBuffer, 0 );
 
-						SetupGPUParameters( gameTime, camera, view, projection, Flags.SIMULATION);
-						device.ComputeShaderConstants[0] = paramsCB ;
+						float stepTime = SimulationStepTime;
 
-						device.PipelineState	=	factory[ (int)Flags.SIMULATION ];
+						while ( timeAccumulator > stepTime ) {
+
+							SetupGPUParameters( stepTime, camera, view, projection, Flags.SIMULATION);
+							device.ComputeShaderConstants[0] = paramsCB ;
+
+							device.PipelineState	=	factory[ (int)Flags.SIMULATION ];
 	
-						/// GPU time : 1.665 ms	 --> 0.38 ms
-						device.Dispatch( MathUtil.IntDivUp( MaxSimulatedParticles, BlockSize ) );//*/
+							/// GPU time : 1.665 ms	 --> 0.38 ms
+							device.Dispatch( MathUtil.IntDivUp( MaxSimulatedParticles, BlockSize ) );//*/
+
+							timeAccumulator -= stepTime;
+						}
 					}
 				}
 
@@ -436,7 +467,7 @@ namespace Fusion.Engine.Graphics {
 					imagesCB.SetData( Images.GetNormalizedRectangles( MaxImages ) );
 				}
 
-				SetupGPUParameters( gameTime, camera, view, projection, flags );
+				SetupGPUParameters( 0, camera, view, projection, flags );
 				device.ComputeShaderConstants[0] = paramsCB ;
 
 				//

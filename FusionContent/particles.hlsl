@@ -91,10 +91,11 @@ void CSMain(
 
 		//	meausure distance :
 		float  time		=	p.Time;
-		float3 accel	=	p.Acceleration + Params.Gravity.xyz * p.Gravity;
-		float3 position	=	p.Position + p.Velocity * time + accel * time * time / 2;
 		
-		float4 ppPos	=	mul( mul( float4(position,1), Params.View ), Params.Projection );
+		particleBuffer[ id ].Velocity	=	p.Velocity + p.Acceleration * Params.DeltaTime;	
+		particleBuffer[ id ].Position	=	p.Position + p.Velocity     * Params.DeltaTime;	
+		
+		float4 ppPos	=	mul( mul( float4(particleBuffer[ id ].Position,1), Params.View ), Params.Projection );
 
 		sortParticleBuffer[ id ] = float2( -abs(ppPos.z / ppPos.w), id );
 	}
@@ -163,14 +164,13 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 		return;
 	}
 	
+	float time		=	prt.Time;
 	float factor	=	saturate(prt.Time / prt.LifeTime);
 	
 	float  sz 		=   lerp( prt.Size0, prt.Size1, factor )/2;
-	float  time		=	prt.Time;
 	float4 color	=	lerp( prt.Color0, prt.Color1, Ramp( prt.FadeIn, prt.FadeOut, factor ) );
-	float3 accel	=	prt.Acceleration + Params.Gravity.xyz * prt.Gravity;
-	float3 position	=	prt.Position     + prt.Velocity * time + accel * time * time / 2;
-	float3 tailpos	=	prt.TailPosition + prt.Velocity * time + accel * time * time / 2;
+	float3 position	=	prt.Position    ;// + prt.Velocity * time + accel * time * time / 2;
+	float3 tailpos	=	prt.TailPosition;// + prt.Velocity * time + accel * time * time / 2;
 	float  a		=	lerp( prt.Angle0, prt.Angle1, factor );	
 
 	float2x2	m	=	float2x2( cos(a), sin(a), -sin(a), cos(a) );
