@@ -41,6 +41,10 @@ namespace Fusion.Engine.Graphics {
 		public HdrFilter HdrFilter { get{ return hdrFilter; } }
 		public HdrFilter hdrFilter;
 		
+		[GameModule("DofFilter", "dof", InitOrder.After)]
+		public DofFilter DofFilter { get{ return dofFilter; } }
+		public DofFilter dofFilter;
+		
 		[GameModule("LightRenderer", "rs", InitOrder.Before)]
 		public LightRenderer	LightRenderer { get { return lightRenderer; } }
 		public LightRenderer	lightRenderer;
@@ -138,6 +142,7 @@ namespace Fusion.Engine.Graphics {
 			filter			=	new Filter( Game );
 			ssaoFilter		=	new SsaoFilter( Game );
 			hdrFilter		=	new HdrFilter( Game );
+			dofFilter		=	new DofFilter( Game );
 			lightRenderer	=	new LightRenderer( Game );
 			sceneRenderer	=	new SceneRenderer( Game, this );
 			sky				=	new Sky( Game );

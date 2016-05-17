@@ -33,6 +33,13 @@ namespace Fusion.Engine.Graphics {
 		}
 
 		/// <summary>
+		/// Gets sky settings.
+		/// </summary>
+		public DofSettings DofSettings {
+			get; private set;
+		}
+
+		/// <summary>
 		/// Gets view light set.
 		/// This value is already initialized when View object is created.
 		/// </summary>
@@ -99,6 +106,7 @@ namespace Fusion.Engine.Graphics {
 
 			HdrSettings		=	new HdrSettings();
 			SkySettings		=	new SkySettings();
+			DofSettings		=	new DofSettings();
 
 			Instances		=	new List<MeshInstance>();
 			LightSet		=	new LightSet( Game.RenderSystem );
@@ -332,6 +340,9 @@ namespace Fusion.Engine.Graphics {
 
 			//	render lights :
 			rs.LightRenderer.RenderLighting( stereoEye, Camera, viewHdrFrame, this, Radiance );
+
+			//	render "solid" DOF :
+			rs.DofFilter.Render( gameTime, viewHdrFrame.LightAccumulator, viewHdrFrame.HdrBuffer, viewHdrFrame.DepthBuffer, this );
 
 			//	render and simulate particles :
 			ParticleSystem.Render( gameTime, Camera, stereoEye, viewHdrFrame );

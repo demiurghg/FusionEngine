@@ -232,6 +232,8 @@
     <Compile Include="Engine\Common\UserInterface.Internal.cs" />
     <Compile Include="Engine\Graphics\Design\TextureLocationEditor.cs" />
     <Compile Include="Engine\Graphics\Effects\BitonicSort.cs" />
+    <Compile Include="Engine\Graphics\Effects\DofSettings.cs" />
+    <Compile Include="Engine\Graphics\Effects\DofFilter.cs" />
     <Compile Include="Engine\Graphics\Effects\SsaoFilter.cs" />
     <Compile Include="Engine\Graphics\Effects\SsaoFilter.Config.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BaseBingMapsSource.cs" />

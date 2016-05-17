@@ -47,6 +47,7 @@ namespace Fusion.Drivers.Graphics {
 			AlphaBlend			=	Create( ColorChannels.All,	Blend.SrcAlpha,		Blend.InvSrcAlpha	);
 			AlphaBlendPremul	=	Create( ColorChannels.All,	Blend.One,			Blend.InvSrcAlpha	);						
 			AlphaMaskWrite		=	Create( ColorChannels.Alpha );
+			AlphaOnly			=	Create( ColorChannels.Alpha );
 			Additive			=	Create( ColorChannels.All,	Blend.One,			Blend.One,			Blend.One, Blend.One );	
 			Screen				=	Create( ColorChannels.All,	Blend.InvDstColor,	Blend.One			);						
 			Multiply			=	Create( ColorChannels.All,	Blend.Zero,			Blend.SrcColor		);						

@@ -214,11 +214,11 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
-		///	Gets A coefficient for linear Z-value reconstruction.
+		///	Gets scale coefficient for linear Z-value reconstruction.
 		///	To reconstruct Z-value use the following formula:
-		/// 1 / (depth * a + b)
+		/// 1 / (depth * scale + bias)
 		/// </summary>
-		public float LinearizeDepthA {
+		internal float LinearizeDepthScale {
 			get {
 				return 1 / projZFar - 1 / projZNear;
 			}
@@ -226,11 +226,11 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
-		///	Gets B coefficient for linear Z-value reconstruction.
+		///	Gets bias coefficient for linear Z-value reconstruction.
 		///	To reconstruct Z-value use the following formula:
-		/// 1 / (depth * a + b)
+		/// 1 / (depth * scale + bias)
 		/// </summary>
-		public float LinearizeDepthB {
+		internal float LinearizeDepthBias {
 			get {
 				return 1 / projZNear;
 			}

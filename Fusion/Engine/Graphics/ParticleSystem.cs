@@ -113,6 +113,8 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(216)] public int		MaxParticles;
 			[FieldOffset(220)] public float		DeltaTime;
 			[FieldOffset(224)] public uint		DeadListSize;
+			[FieldOffset(228)] public float		CocScale;
+			[FieldOffset(232)] public float		CocBias;
 		} 
 
 		Random rand = new Random();
@@ -309,9 +311,10 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		void SetupGPUParameters ( float stepTime, Camera camera, Matrix view, Matrix projection, Flags flags )
+		void SetupGPUParameters ( float stepTime, RenderWorld renderWorld, Matrix view, Matrix projection, Flags flags )
 		{
 			var deltaTime		=	stepTime;
+			var camera			=	renderWorld.Camera;
 			var cameraMatrix	=	Matrix.Invert( view );
 
 			//	kill particles by applying very large delta.
@@ -336,8 +339,10 @@ namespace Fusion.Engine.Graphics {
 			param.CameraPosition	=	new Vector4( cameraMatrix.TranslationVector	, 1 );
 			param.Gravity			=	new Vector4( this.Gravity, 0 );
 			param.MaxParticles		=	MaxSimulatedParticles;
-			param.LinearizeDepthA	=	(camera==null) ? 1 : camera.LinearizeDepthA;
-			param.LinearizeDepthB	=	(camera==null) ? 1 : camera.LinearizeDepthB;
+			param.LinearizeDepthA	=	camera.LinearizeDepthScale;
+			param.LinearizeDepthB	=	camera.LinearizeDepthBias;
+			param.CocBias			=	renderWorld.DofSettings.CocBias;
+			param.CocScale			=	renderWorld.DofSettings.CocScale;
 
 			if (flags==Flags.INJECTION) {
 				param.MaxParticles	=	injectionCount;
@@ -388,7 +393,7 @@ namespace Fusion.Engine.Graphics {
 					device.SetCSRWBuffer( 0, simulationBuffer,		0 );
 					device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
 
-					SetupGPUParameters( 0, camera, view, projection, Flags.INJECTION );
+					SetupGPUParameters( 0, renderWorld, view, projection, Flags.INJECTION );
 					device.ComputeShaderConstants[0]	= paramsCB ;
 
 					device.PipelineState	=	factory[ (int)Flags.INJECTION ];
@@ -415,7 +420,7 @@ namespace Fusion.Engine.Graphics {
 
 						while ( timeAccumulator > stepTime ) {
 
-							SetupGPUParameters( stepTime, camera, view, projection, Flags.SIMULATION);
+							SetupGPUParameters( stepTime, renderWorld, view, projection, Flags.SIMULATION);
 							device.ComputeShaderConstants[0] = paramsCB ;
 
 							device.PipelineState	=	factory[ (int)Flags.SIMULATION ];
@@ -467,7 +472,7 @@ namespace Fusion.Engine.Graphics {
 					imagesCB.SetData( Images.GetNormalizedRectangles( MaxImages ) );
 				}
 
-				SetupGPUParameters( 0, camera, view, projection, flags );
+				SetupGPUParameters( 0, renderWorld, view, projection, flags );
 				device.ComputeShaderConstants[0] = paramsCB ;
 
 				//

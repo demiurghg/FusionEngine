@@ -44,4 +44,6 @@ struct PARAMS {
 	int			MaxParticles;
 	float		DeltaTime;
 	uint		DeadListSize;
+	float		CocScale;
+	float		CocBias;
 };
