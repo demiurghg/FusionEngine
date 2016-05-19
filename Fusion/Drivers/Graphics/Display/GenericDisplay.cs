@@ -37,7 +37,7 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// <param name="parameters"></param>
 		public GenericDisplay( Game game, GraphicsDevice device, GraphicsParameters parameters ) : base( game, device, parameters )
 		{
-			window	=	CreateForm( parameters, null );
+			window = CreateTouchForm(parameters, null);
 
 			try {
 				NvApi.Initialize();

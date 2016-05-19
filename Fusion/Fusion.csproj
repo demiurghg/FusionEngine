@@ -198,6 +198,12 @@
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
     <Compile Include="Drivers\Graphics\Resources\UnorderedAccess.cs" />
     <Compile Include="Drivers\Graphics\Resources\VolumeRWTexture.cs" />
+    <Compile Include="Drivers\Input\Touch\BackgroundTouch.cs" />
+    <Compile Include="Drivers\Input\Touch\BaseTouchHandler.cs" />
+    <Compile Include="Drivers\Input\Touch\TouchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Drivers\Input\Touch\Win32TouchFunctions.cs" />
     <Compile Include="Engine\Audio\AudioChannels.cs" />
     <Compile Include="Engine\Audio\Enums.cs" />
     <Compile Include="Engine\Audio\SoundWorld.cs" />
@@ -368,6 +374,7 @@
     <Compile Include="Engine\Input\Bind.cs" />
     <Compile Include="Engine\Input\BindList.cs" />
     <Compile Include="Engine\Input\KeyBind.cs" />
+    <Compile Include="Engine\Input\Touch.cs" />
     <Compile Include="Engine\Input\Unbind.cs" />
     <Compile Include="Engine\Client\GameClient.Internal.cs" />
     <Compile Include="Engine\Media\MediaState.cs" />

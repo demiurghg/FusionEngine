@@ -149,12 +149,11 @@ namespace Fusion.Drivers.Graphics.Display {
 			layers		= new Layers();
 			layerEyeFov = layers.AddLayerEyeFov();
 
-			hmd.SetTrackingOriginType(OVR.TrackingOrigin.FloorLevel);
+			hmd.SetTrackingOriginType(OVR.TrackingOrigin.EyeLevel);
 
 			frameIndex = 0;
-
-			Game.RenderSystem.Config.Width	= eyeTextures[0].Viewport.Width;
-			Game.RenderSystem.Config.Height = eyeTextures[0].Viewport.Height;
+			Game.RenderSystem.Width		= eyeTextures[0].Viewport.Width;
+			Game.RenderSystem.Height	= eyeTextures[0].Viewport.Height;
 		}
 
 

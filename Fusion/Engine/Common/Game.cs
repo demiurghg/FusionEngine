@@ -83,6 +83,12 @@ namespace Fusion.Engine.Common {
 		public Mouse Mouse { get { return mouse; } }
 
 		/// <summary>
+		/// Gets mouse.
+		/// </summary>
+		[GameModule("Touch", "touch", InitOrder.After)]
+		public Touch Touch { get { return touch; } }
+
+		/// <summary>
 		/// Gets gamepads
 		/// </summary>
 		public GamepadCollection Gamepads { get { return gamepads; } }
@@ -202,6 +208,7 @@ namespace Fusion.Engine.Common {
 		Invoker				invoker			;
 		Keyboard			keyboard		;
 		Mouse				mouse			;
+		Touch				touch;
 		GamepadCollection	gamepads		;
 		UserStorage			userStorage		;
 
@@ -322,6 +329,7 @@ namespace Fusion.Engine.Common {
 
 			keyboard			=	new Keyboard(this);
 			mouse				=	new Mouse(this);
+			touch				=	new Touch(this);
 			gamepads			=	new GamepadCollection(this);
 
 			userStorage			=	new UserStorage(this);
