@@ -1,4 +1,4 @@
-﻿#if false
+﻿#if true
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +19,8 @@ namespace Fusion.Drivers.Graphics.Display {
 
 		StereoEye[] eyeList = new[] { StereoEye.Left, StereoEye.Right };
 
-		SwapChain				swapChain = null;
-		SwapChainDescription	swapChainDesc;
-		
+		SwapChain	swapChain;
+
 		Form window;
 
 		RenderTarget2D backbufferColor1Resolved;
@@ -32,30 +31,30 @@ namespace Fusion.Drivers.Graphics.Display {
 		Wrap	oculus;		// Oculus Wraper
 		Hmd		hmd;		// Head mounted display
 		EyeTexture[]		eyeTextures;
-		OVR.Posef[]			eyeRenderPose  = new OVR.Posef[2];
-		OVR.EyeRenderDesc[]	eyeRenderDesc;
+		OVR.Posef[]			eyePoses;
+		MirrorTexture		mirrorTexture;
+		Layers				layers;
+		LayerEyeFov			layerEyeFov;
+		long				frameIndex;
+		double				sampleTime;
 
 		OculusTextureSwapChain[] oculusSwapChains;
 
 		/// <summary>
 		/// 
 		/// </summary>
+		/// <param name="game"></param>
+		/// <param name="device"></param>
 		/// <param name="parameters"></param>
 		public OculusRiftDisplay( Game game, GraphicsDevice device, GraphicsParameters parameters ) : base( game, device, parameters )
 		{
-			window = CreateForm(parameters, null);
-
 			oculus = new Wrap();
 
 			// Initialize the Oculus runtime.
 			oculus.Initialize();
 
 			OVR.GraphicsLuid graphicsLuid;
-
-			// Use the head mounted display, if it's available, otherwise use the debug HMD.
-			
 			hmd = oculus.Hmd_Create(out graphicsLuid);
-
 
 			if (hmd == null) {
 				MessageBox.Show("Oculus Rift not detected.", "Uh oh", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -66,12 +65,10 @@ namespace Fusion.Drivers.Graphics.Display {
 				MessageBox.Show("The HMD is not enabled.", "There's a tear in the Rift", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
 
-			// Create a backbuffer that's the same size as the HMD's resolution.
-			OVR.Sizei backBufferSize;
-			backBufferSize.Width	= hmd.Resolution.Width;
-			backBufferSize.Height	= hmd.Resolution.Height;
+			parameters.Width	= hmd.Resolution.Width;
+			parameters.Height	= hmd.Resolution.Height;
 
-
+			window = CreateForm(parameters, null);
 
 			var deviceFlags = DeviceCreationFlags.None;
 			deviceFlags |= parameters.UseDebugDevice ? DeviceCreationFlags.Debug : DeviceCreationFlags.None;
@@ -81,9 +78,9 @@ namespace Fusion.Drivers.Graphics.Display {
 			var featureLevel = HardwareProfileChecker.GetFeatureLevel(parameters.GraphicsProfile);
 
 
-			swapChainDesc = new SwapChainDescription {
+			var swapChainDesc = new SwapChainDescription {
 				BufferCount			= 1,
-				ModeDescription		= new ModeDescription(backBufferSize.Width, backBufferSize.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
+				ModeDescription		= new ModeDescription(hmd.Resolution.Width, hmd.Resolution.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
 				IsWindowed			= true,
 				OutputHandle		= window.Handle,
 				SampleDescription	= new SampleDescription(parameters.MsaaLevel, 0),
@@ -96,9 +93,8 @@ namespace Fusion.Drivers.Graphics.Display {
 			D3D.Device.CreateWithSwapChain(driverType, deviceFlags, new[] { featureLevel }, swapChainDesc, out d3dDevice, out swapChain);
 
 
-			var factory = swapChain.GetParent<Factory>();
-			factory.MakeWindowAssociation(window.Handle, WindowAssociationFlags.IgnoreAll);
-
+			var myFactory = swapChain.GetParent<Factory>();
+			myFactory.MakeWindowAssociation(window.Handle, WindowAssociationFlags.IgnoreAll);
 		}
 
 
@@ -112,85 +108,53 @@ namespace Fusion.Drivers.Graphics.Display {
 
 			backbufferColor = new RenderTarget2D(device, swapChain.GetBackBuffer<D3D.Texture2D>(0));
 
+			oculusSwapChains	= new OculusTextureSwapChain[2];
+			eyeTextures			= new EyeTexture[2];
 
-			// Configure Stereo settings.
-			OVR.Sizei recommenedTex0Size = hmd.GetFovTextureSize(OVR.EyeType.Left, hmd.DefaultEyeFov[0], 1.0f);
-			OVR.Sizei recommenedTex1Size = hmd.GetFovTextureSize(OVR.EyeType.Right, hmd.DefaultEyeFov[1], 1.0f);
+			for (int i = 0; i < 2; i++) {
+				OVR.Sizei idealSize = hmd.GetFovTextureSize((OVR.EyeType)i, hmd.DefaultEyeFov[i], 1.0f);
+				oculusSwapChains[i] = hmd.CreateTextureSwapChain(d3dDevice.NativePointer, idealSize.Width, idealSize.Height);
+				
+				eyeTextures[i]		= new EyeTexture(device, oculusSwapChains[i]) {
+					DepthStencil2D		= new DepthStencil2D(device, DepthFormat.D24S8, idealSize.Width, idealSize.Height),
+					Viewport			= new Viewport(0, 0, idealSize.Width, idealSize.Height),
+					ViewportSize		= new OVR.Recti(new OVR.Vector2i(0, 0), new OVR.Sizei {Width = idealSize.Width, Height = idealSize.Height})
+				};
 
-			int ms	= backbufferColor.SampleCount;
+				//eyeTextures[i].DepthBufferDescription = new Texture2DDescription {
+				//	Width			= idealSize.Width,
+				//	Height			= idealSize.Height,
+				//	ArraySize		= 1,
+				//	MipLevels		= 1,
+				//	Format			= Format.D32_Float,
+				//	CpuAccessFlags	= CpuAccessFlags.None,
+				//	Usage			= ResourceUsage.Default,
+				//	BindFlags		= BindFlags.DepthStencil,
+				//	OptionFlags		= ResourceOptionFlags.None,
+				//	SampleDescription = new SampleDescription(1, 0)
+				//};
 
-			backbufferColor1	=	new RenderTarget2D( device, ColorFormat.Rgba8, recommenedTex0Size.Width, recommenedTex0Size.Height, ms );
-			backbufferDepth1	=	new DepthStencil2D( device, DepthFormat.D24S8, recommenedTex0Size.Width, recommenedTex0Size.Height, ms );
-			backbufferColor2	=	new RenderTarget2D( device, ColorFormat.Rgba8, recommenedTex1Size.Width, recommenedTex1Size.Height, ms );
-			backbufferDepth2	=	new DepthStencil2D( device, DepthFormat.D24S8, recommenedTex1Size.Width, recommenedTex1Size.Height, ms );
-
-			if (ms>1) {
-				backbufferColor1Resolved	=	new RenderTarget2D( device, ColorFormat.Rgba8, recommenedTex0Size.Width, recommenedTex0Size.Height );
-				backbufferColor2Resolved	=	new RenderTarget2D( device, ColorFormat.Rgba8, recommenedTex1Size.Width, recommenedTex1Size.Height );
 			}
 
 
-			OVR.FovPort[] eyeFov = new OVR.FovPort[]
-			{ 
-				hmd.DefaultEyeFov[0], 
-				hmd.DefaultEyeFov[1] 
-			};
+			hmd.CreateMirrorTexture(d3dDevice.NativePointer,
+				new OVR.MirrorTextureDesc {
+					Format		= OVR.TextureFormat.OVR_FORMAT_R8G8B8A8_UNORM_SRGB,
+					Width		= backbufferColor.Width,
+					Height		= backbufferColor.Height,
+					MiscFlags	 = OVR.TextureMiscFlags.None
+				}, out mirrorTexture);
 
-			OVR.Sizei size1 = new OVR.Sizei(recommenedTex0Size.Width, recommenedTex0Size.Height);
-			OVR.Sizei size2 = new OVR.Sizei(recommenedTex1Size.Width, recommenedTex1Size.Height);
 
-			OVR.Recti[] eyeRenderViewport	= new OVR.Recti[2];
-			eyeRenderViewport[0].Position	= new OVR.Vector2i(0, 0);
-			eyeRenderViewport[0].Size		= size1;
-			eyeRenderViewport[1].Position	= new OVR.Vector2i(0, 0); ;
-			eyeRenderViewport[1].Size		= size2;
+			layers		= new Layers();
+			layerEyeFov = layers.AddLayerEyeFov();
 
-			// Query D3D texture data.
-			eyeTexture = new OVR.D3D11.D3D11TextureData[2];
-			eyeTexture[0].Header.API			= OVR.RenderAPIType.D3D11;
-			eyeTexture[0].Header.TextureSize	= size1;
-			eyeTexture[0].Header.RenderViewport = eyeRenderViewport[0];
-			
+			hmd.SetTrackingOriginType(OVR.TrackingOrigin.FloorLevel);
 
-			// Right eye uses the same texture, but different rendering viewport.
-			eyeTexture[1] = eyeTexture[0];
-			eyeTexture[1].Header.RenderViewport = eyeRenderViewport[1];
+			frameIndex = 0;
 
-			if (ms > 1) {
-				eyeTexture[0].Texture				= backbufferColor1Resolved.Surface.Resource.NativePointer;
-				eyeTexture[0].ShaderResourceView	= backbufferColor1Resolved.SRV.NativePointer;
-
-				eyeTexture[1].Texture				= backbufferColor2Resolved.Surface.Resource.NativePointer;
-				eyeTexture[1].ShaderResourceView	= backbufferColor2Resolved.SRV.NativePointer;
-			} else {
-				eyeTexture[0].Texture				= backbufferColor1.Surface.Resource.NativePointer;
-				eyeTexture[0].ShaderResourceView	= backbufferColor1.SRV.NativePointer;
-
-				eyeTexture[1].Texture				= backbufferColor2.Surface.Resource.NativePointer;
-				eyeTexture[1].ShaderResourceView	= backbufferColor2.SRV.NativePointer;
-			}
-
-			// Configure d3d11.
-			OVR.D3D11.D3D11ConfigData d3d11cfg	= new OVR.D3D11.D3D11ConfigData();
-			d3d11cfg.Header.API					= OVR.RenderAPIType.D3D11;
-			d3d11cfg.Header.BackBufferSize		= new OVR.Sizei(hmd.Resolution.Width, hmd.Resolution.Height);
-			d3d11cfg.Header.Multisample			= 1;
-			d3d11cfg.Device						= d3dDevice.NativePointer;
-			d3d11cfg.DeviceContext				= d3dDevice.ImmediateContext.NativePointer;
-			d3d11cfg.BackBufferRenderTargetView = backbufferColor.Surface.RTV.NativePointer;
-			d3d11cfg.SwapChain					= swapChain.NativePointer;
-
-			eyeRenderDesc = hmd.ConfigureRendering(d3d11cfg, OVR.DistortionCaps.ovrDistortionCap_Chromatic | OVR.DistortionCaps.ovrDistortionCap_Vignette | OVR.DistortionCaps.ovrDistortionCap_TimeWarp | OVR.DistortionCaps.ovrDistortionCap_Overdrive, eyeFov);
-			if (eyeRenderDesc == null) {
-				throw new ArgumentNullException("eyeRenderDesc", "Achtung eyeRenderDesc = null");
-			}
-
-			// Specify which head tracking capabilities to enable.
-			hmd.SetEnabledCaps(OVR.HmdCaps.LowPersistence /*| OVR.HmdCaps.DynamicPrediction*/);
-
-			// Start the sensor which informs of the Rift's pose and motion
-			hmd.ConfigureTracking(OVR.TrackingCaps.ovrTrackingCap_Orientation | OVR.TrackingCaps.ovrTrackingCap_MagYawCorrection | OVR.TrackingCaps.ovrTrackingCap_Position, OVR.TrackingCaps.None);
-
+			Game.RenderSystem.Config.Width	= eyeTextures[0].Viewport.Width;
+			Game.RenderSystem.Config.Height = eyeTextures[0].Viewport.Height;
 		}
 
 
@@ -200,44 +164,45 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// </summary>
 		public override void Prepare()
 		{
-			hmd.BeginFrame(0);
-			
-			OVR.EyeType eye = hmd.EyeRenderOrder[0];
-			eyeRenderPose[(int)eye] = hmd.GetHmdPosePerEye(eye);
-			eye = hmd.EyeRenderOrder[1];
-			eyeRenderPose[(int)eye] = hmd.GetHmdPosePerEye(eye);
+			double				displayMidpoint = hmd.GetPredictedDisplayTime(frameIndex);
+			OVR.TrackingState	trackingState	= hmd.GetTrackingState(displayMidpoint);
+								eyePoses		= new OVR.Posef[2];
 
-			var trackingState = hmd.GetTrackingState(oculus.GetTimeInSeconds());
-			var hPos = trackingState.HeadPose.ThePose.Position;
-			var hRot = trackingState.HeadPose.ThePose.Orientation;
+
+			////////////////// Get Eye poses //////////////////////////////////////////////////////////////////////////
+			var leftEyeRenderDesc = hmd.GetRenderDesc(OVR.EyeType.Left, hmd.DefaultEyeFov[0]);
+			var rightEyeRenderDesc = hmd.GetRenderDesc(OVR.EyeType.Right, hmd.DefaultEyeFov[1]);
+
+			var eyeRenderDescs = new [] { leftEyeRenderDesc, rightEyeRenderDesc };
+
+			OVR.Vector3f[] hmdToEyeOffset = { leftEyeRenderDesc.HmdToEyeOffset, rightEyeRenderDesc.HmdToEyeOffset };
+
+			hmd.GetEyePoses(frameIndex, 1, hmdToEyeOffset, eyePoses, out sampleTime);
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			var left = new OculusRiftSensors.Eye {
-					Position	= new Vector3(eyeRenderPose[0].Position.X, eyeRenderPose[0].Position.Y, eyeRenderPose[0].Position.Z),
-					Rotation	= new Quaternion(eyeRenderPose[0].Orientation.X, eyeRenderPose[0].Orientation.Y, eyeRenderPose[0].Orientation.Z, eyeRenderPose[0].Orientation.W),
-				};
+				Position = eyePoses[0].Position.ToVector3(),
+				Rotation = eyePoses[0].Orientation.ToQuaternion(),
+			};
 
 			var right = new OculusRiftSensors.Eye {
-					Position	= new Vector3(eyeRenderPose[1].Position.X, eyeRenderPose[1].Position.Y, eyeRenderPose[1].Position.Z),
-					Rotation	= new Quaternion(eyeRenderPose[1].Orientation.X, eyeRenderPose[1].Orientation.Y, eyeRenderPose[1].Orientation.Z, eyeRenderPose[1].Orientation.W),
-				};
+				Position	= eyePoses[1].Position.ToVector3(),
+				Rotation	= eyePoses[1].Orientation.ToQuaternion(),
+			};
 
 
-			var leftProj	= oculus.Matrix4f_Projection(eyeRenderDesc[0].Fov, 0.1f, 1000.0f, true).ToMatrix();
+			var leftProj	= oculus.Matrix4f_Projection(eyeRenderDescs[0].Fov, 0.1f, 1000.0f, OVR.ProjectionModifier.None).ToMatrix();
 			leftProj.Transpose();
-			var rightProj	= oculus.Matrix4f_Projection(eyeRenderDesc[1].Fov, 0.1f, 1000.0f, true).ToMatrix();
+			var rightProj	= oculus.Matrix4f_Projection(eyeRenderDescs[1].Fov, 0.1f, 1000.0f, OVR.ProjectionModifier.None).ToMatrix();
 			rightProj.Transpose();
-
 
 			left.Projection		= leftProj;
 			right.Projection	= rightProj;
 
 			OculusRiftSensors.LeftEye	= left;
 			OculusRiftSensors.RightEye	= right;
-			OculusRiftSensors.HeadPosition = new Vector3(hPos.X, hPos.Y, hPos.Z);
-			OculusRiftSensors.HeadRotation = new Quaternion(hRot.X, hRot.Y, hRot.Z, hRot.W);
-
-			//Console.WriteLine("Cam pose: " + trackingState.CameraPose.Position.X + " " + trackingState.CameraPose.Position.Y + " " +trackingState.CameraPose.Position.Z);
-			//Console.WriteLine("Leveled Cam pose: " + trackingState.LeveledCameraPose.Position.X + " " + trackingState.LeveledCameraPose.Position.Y + " " + trackingState.LeveledCameraPose.Position.Z);
+			OculusRiftSensors.HeadPosition = trackingState.HeadPose.ThePose.Position.ToVector3();
+			OculusRiftSensors.HeadRotation = trackingState.HeadPose.ThePose.Orientation.ToQuaternion();
 		}
 
 
@@ -258,13 +223,40 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// <param name="syncInterval"></param>
 		public override void SwapBuffers(int syncInterval)
 		{
-			if (backbufferColor1Resolved != null) {
-				device.Resolve(backbufferColor1, backbufferColor1Resolved);
-				device.Resolve(backbufferColor2, backbufferColor2Resolved);
+			eyeTextures[0].SwapTexture.Commit();
+			eyeTextures[1].SwapTexture.Commit();
+
+			layerEyeFov.Header.Type		= OVR.LayerType.EyeFov;
+			layerEyeFov.Header.Flags	= OVR.LayerFlags.None;
+			layerEyeFov.SensorSampleTime = sampleTime;
+			
+			for (int i = 0; i < 2; i++) {
+				layerEyeFov.ColorTexture[i] = eyeTextures[i].SwapTexture.TextureChain;
+				layerEyeFov.Viewport[i]		= eyeTextures[i].ViewportSize;
+				layerEyeFov.Fov[i]			= hmd.DefaultEyeFov[i];
+				layerEyeFov.RenderPose[i]	= eyePoses[i];
 			}
 
+			if (hmd.SubmitFrame(frameIndex, layers) < 0) {
+				Log.Warning("OculusRiftDisplay SubmitFrame returned error");
+			}
 
-			hmd.SubmitFrame();
+			OVR.SessionStatus sessionStatus;
+			hmd.GetSessionStatus(out sessionStatus);
+			if (sessionStatus.ShouldQuit > 0)
+				Application.Exit();
+			if (sessionStatus.ShouldRecenter > 0)
+				hmd.RecenterPose();
+
+			frameIndex++;
+
+			var mirrorTextureD3D11 = new SharpDX.Direct3D11.Texture2D(mirrorTexture.GetMirrorBufferPtr());
+
+			d3dDevice.ImmediateContext.CopyResource(mirrorTextureD3D11, backbufferColor.Surface.Resource);
+
+			mirrorTextureD3D11.Dispose();
+
+			swapChain.Present(0, PresentFlags.None);
 		}
 
 
@@ -276,10 +268,10 @@ namespace Fusion.Drivers.Graphics.Display {
 		{
 			if (disposing) {
 				SafeDispose( ref backbufferColor );
-				SafeDispose( ref backbufferColor1 );
-				SafeDispose( ref backbufferDepth1 );
-				SafeDispose( ref backbufferColor2 );
-				SafeDispose( ref backbufferDepth2 );
+
+				oculus.Shutdown();
+
+				SafeDispose( ref eyeTextures );
 
 				SafeDispose( ref backbufferColor1Resolved );
 				SafeDispose( ref backbufferColor2Resolved );
@@ -318,10 +310,13 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// </summary>
 		public override RenderTarget2D	BackbufferColor {
 			get { 
+
 				if (TargetEye==StereoEye.Left) {
-					return backbufferColor1; 
+					int textureIndex = eyeTextures[0].SwapTexture.GetCurrentTextureIndex();
+					return eyeTextures[0].RenderTargets[textureIndex]; 
 				} else if ( TargetEye==StereoEye.Right ) {
-					return backbufferColor2; 
+					int textureIndex = eyeTextures[1].SwapTexture.GetCurrentTextureIndex();
+					return eyeTextures[1].RenderTargets[textureIndex];  
 				} else {
 					throw new InvalidOperationException("TargetEye must be StereoEye.Left or StereoEye.Right");
 				}
@@ -336,9 +331,9 @@ namespace Fusion.Drivers.Graphics.Display {
 		public override DepthStencil2D	BackbufferDepth {
 			get {
 				if (TargetEye==StereoEye.Left) {
-					return backbufferDepth1; 
+					return eyeTextures[0].DepthStencil2D; 
 				} else if ( TargetEye==StereoEye.Right ) {
-					return backbufferDepth2; 
+					return eyeTextures[1].DepthStencil2D; 
 				} else {
 					throw new InvalidOperationException("TargetEye must be StereoEye.Left or StereoEye.Right");
 				}
@@ -363,10 +358,6 @@ namespace Fusion.Drivers.Graphics.Display {
 		{
 			get; set;
 		}
-		
-
-
-		bool fullscr = false;
 
 
 		/// <summary>
@@ -374,22 +365,10 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// </summary>
 		public override bool Fullscreen {
 			get	{
-				return fullscr;
+				return false;
 			}
 			set {
-				if (value!=fullscr) {
-					fullscr = value;
 
-					if (fullscr) {
-						window.FormBorderStyle	=	FormBorderStyle.None;
-						window.WindowState		=	FormWindowState.Maximized;
-						window.TopMost			=	true;
-					} else {
-						window.FormBorderStyle	=	FormBorderStyle.Sizable;
-						window.WindowState		=	FormWindowState.Normal;
-						window.TopMost			=	false;
-					}
-				}
 			}
 		}
 
@@ -400,18 +379,19 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// </summary>
 		public class EyeTexture : IDisposable
 		{
-			public EyeTexture(D3D.Device device, OculusTextureSwapChain swapTexture)
+			public EyeTexture(GraphicsDevice graphicDevice, OculusTextureSwapChain swapTexture)
 			{
-				GraphicDevice	= device;
 				SwapTexture		= swapTexture;
 
-				Textures = new SharpDX.Direct3D11.Texture2D[SwapTexture.TextureCount];
-				RenderTargetViews = new RenderTargetView[Textures.Length];
+				Textures		= new SharpDX.Direct3D11.Texture2D[SwapTexture.TextureCount];
+				RenderTargets	= new RenderTarget2D[Textures.Length];
 
 				for (int i = 0; i < SwapTexture.TextureCount; i++) {
-					Textures[i] = new SharpDX.Direct3D11.Texture2D(SwapTexture.Texture2DResources[i]);
-					RenderTargetViews[i] = new RenderTargetView(device, Textures[i],
-						new RenderTargetViewDescription {Format = Format.R8G8B8A8_UNorm, Dimension = RenderTargetViewDimension.Texture2D});
+					Textures[i]			= new SharpDX.Direct3D11.Texture2D(SwapTexture.Texture2DResources[i]);
+					RenderTargets[i]	= new RenderTarget2D(graphicDevice, Textures[i], new RenderTargetViewDescription {
+						Format		= Format.R8G8B8A8_UNorm,
+						Dimension	= RenderTargetViewDimension.Texture2D
+					});
 				}
 
 			}
@@ -435,33 +415,27 @@ namespace Fusion.Drivers.Graphics.Display {
 					Textures = null;
 				}
 
-				if (RenderTargetViews != null) {
-					foreach (RenderTargetView renderTargetView in RenderTargetViews)
+				if (RenderTargets != null) {
+					foreach (var renderTargetView in RenderTargets)
 						renderTargetView.Dispose();
 
-					RenderTargetViews = null;
+					RenderTargets = null;
 				}
 
-				if (DepthBuffer != null) {
-					DepthBuffer.Dispose();
-					DepthBuffer = null;
-				}
+				if (DepthStencil2D != null) {
+					DepthStencil2D.Dispose();
 
-				if (DepthStencilView != null) {
-					DepthStencilView.Dispose();
-					DepthStencilView = null;
+					DepthStencil2D = null;
 				}
 			}
 
 			#endregion
 
-			public D3D.Device						GraphicDevice;
 			public OculusTextureSwapChain			SwapTexture;
 			public SharpDX.Direct3D11.Texture2D[]	Textures;
-			public RenderTargetView[]				RenderTargetViews;
-			public Texture2DDescription				DepthBufferDescription;
-			public SharpDX.Direct3D11.Texture2D		DepthBuffer;
-			public DepthStencilView					DepthStencilView;
+			public RenderTarget2D[]					RenderTargets;
+			//public Texture2DDescription				DepthBufferDescription;
+			public DepthStencil2D					DepthStencil2D;
 			public Viewport							Viewport;
 			public OVR.FovPort						FieldOfView;
 			public OVR.Recti						ViewportSize;
@@ -470,5 +444,48 @@ namespace Fusion.Drivers.Graphics.Display {
 		}
 
 	}
+
+
+	public static class OculusFusionHelpers
+	{
+		/// <summary>
+		/// Convert a Vector4 to a Vector3
+		/// </summary>
+		/// <param name="vector4">Vector4 to convert to a Vector3.</param>
+		/// <returns>Vector3 based on the X, Y and Z coordinates of the Vector4.</returns>
+		public static Vector3 ToVector3(this Vector4 vector4)
+		{
+			return new Vector3(vector4.X, vector4.Y, vector4.Z);
+		}
+
+		/// <summary>
+		/// Convert an ovrVector3f to SharpDX Vector3.
+		/// </summary>
+		/// <param name="ovrVector3f">ovrVector3f to convert to a SharpDX Vector3.</param>
+		/// <returns>SharpDX Vector3, based on the ovrVector3f.</returns>
+		public static Vector3 ToVector3(this OVR.Vector3f ovrVector3f)
+		{
+			return new Vector3(ovrVector3f.X, ovrVector3f.Y, ovrVector3f.Z);
+		}
+
+		/// <summary>
+		/// Convert an ovrMatrix4f to a SharpDX Matrix.
+		/// </summary>
+		/// <param name="ovrMatrix4f">ovrMatrix4f to convert to a SharpDX Matrix.</param>
+		/// <returns>SharpDX Matrix, based on the ovrMatrix4f.</returns>
+		public static Matrix ToMatrix(this OVR.Matrix4f ovrMatrix4f)
+		{
+			return new Matrix(ovrMatrix4f.M11, ovrMatrix4f.M12, ovrMatrix4f.M13, ovrMatrix4f.M14, ovrMatrix4f.M21, ovrMatrix4f.M22, ovrMatrix4f.M23, ovrMatrix4f.M24, ovrMatrix4f.M31, ovrMatrix4f.M32, ovrMatrix4f.M33, ovrMatrix4f.M34, ovrMatrix4f.M41, ovrMatrix4f.M42, ovrMatrix4f.M43, ovrMatrix4f.M44);
+		}
+
+		/// <summary>
+		/// Converts an ovrQuatf to a SharpDX Quaternion.
+		/// </summary>
+		public static Quaternion ToQuaternion(this OVR.Quaternionf ovrQuatf)
+		{
+			return new Quaternion(ovrQuatf.X, ovrQuatf.Y, ovrQuatf.Z, ovrQuatf.W);
+		}
+	}
+
 }
 #endif
