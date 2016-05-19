@@ -149,13 +149,13 @@ namespace Fusion.Drivers.Graphics {
 
 				tex2D	=	new D3D.Texture2D( resource );
 				SRV		=	new D3D.ShaderResourceView( resourceView );
-			}
 
-			Width		=	tex2D.Description.Width;
-			Height		=	tex2D.Description.Height;
-			Depth		=	1;
-			mipCount	=	tex2D.Description.MipLevels;
-			format		=	Converter.Convert( tex2D.Description.Format );
+				Width		=	tex2D.Description.Width;
+				Height		=	tex2D.Description.Height;
+				Depth		=	1;
+				mipCount	=	tex2D.Description.MipLevels;
+				format		=	Converter.Convert( tex2D.Description.Format );
+				}
 		}
 
 

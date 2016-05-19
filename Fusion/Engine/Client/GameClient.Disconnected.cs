@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Threading;
-using Fusion.Engine.Network;
 using System.IO;
 using Fusion.Engine.Common;
 using Fusion.Engine.Server;
@@ -19,6 +18,8 @@ namespace Fusion.Engine.Client {
 
 			public Disconnected ( GameClient gameClient, string reason ) : base(gameClient, ClientState.Disconnected)
 			{
+				Message	=	reason;
+
 				//	Notify client that game ended?
 				gameClient.UnloadContent();
 

@@ -9,6 +9,7 @@ using Fusion.Core.Shell;
 using System.IO;
 using Fusion.Engine.Common;
 using Fusion.Core.Content;
+using Fusion.Core.Configuration;
 
 
 namespace Fusion.Engine.Server {
@@ -60,6 +61,7 @@ namespace Fusion.Engine.Server {
 		/// Gets and sets target server frame rate.
 		/// Value must be within range 1..240.
 		/// </summary>
+		[Config]
 		public float TargetFrameRate {
 			get { return targetFrameRate; }
 			set {

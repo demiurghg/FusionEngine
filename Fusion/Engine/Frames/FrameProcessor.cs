@@ -20,8 +20,9 @@ namespace Fusion.Engine.Frames {
 
 	public class FrameProcessor : GameModule {
 
-		[Config]
-		public Config	Config	{ get; set; }
+		[Config]	public bool		ShowFrames			{ get; set; }
+		[Config]	public bool		SkipUserInterface	{ get; set; }
+		[Config]	public bool		ShowProfilingInfo	{ get; set; }
 
 		/// <summary>
 		/// Sets and gets current root frame.
@@ -77,7 +78,6 @@ namespace Fusion.Engine.Frames {
 		/// <param name="height"></param>
 		public FrameProcessor ( Game game, string defaultFont ) : base(game)
 		{
-			Config				=	new Fusion.Engine.Frames.Config();
 			defaultFontPath		=	defaultFont;
 			mouseProcessor		=	new MouseProcessor( Game, this );
 		}
@@ -139,7 +139,7 @@ namespace Fusion.Engine.Frames {
 			ForceLayout		=	forceLayout;
 
 			if (RootFrame!=null) {
-				RootFrame.UpdateInternal( gameTime, 0, 0 );
+				RootFrame.UpdateInternal( gameTime );
 			}
 		}
 
@@ -182,18 +182,13 @@ namespace Fusion.Engine.Frames {
 		/// <param name="gameTime"></param>
 		void Draw ( GameTime gameTime, SpriteLayer spriteLayer )
 		{
-			if (Config.SkipUserInterface) {
+			if (SkipUserInterface) {
 				return;
 			}
 
-			var sb	=	spriteLayer;
-			var vp  =	Game.RenderSystem.DisplayBounds;
+			spriteLayer.Clear();
 
-			sb.Clear();
-		
-			if (RootFrame!=null) {
-				RootFrame.DrawInternal( gameTime, sb, Color.White );
-			}
+			Frame.DrawNonRecursive( RootFrame, gameTime, spriteLayer );
 		}
 
 

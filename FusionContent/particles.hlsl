@@ -1,51 +1,10 @@
 
 #if 0
-$ubershader INITIALIZE|INJECTION|SIMULATION|DRAW
+$ubershader INITIALIZE|INJECTION|SIMULATION|DRAW|DRAW_SHADOW
 #endif
 
-// change ParticleSystem.cs too!
-#define BLOCK_SIZE		256		
-#define MAX_INJECTED 	4096
-#define MAX_PARTICLES 	(256*256)
-#define MAX_IMAGES		512
-
-#define BEAM			0x0001
-#define LIT				0x0002
-#define SHADOW			0x0004
-
-struct PARTICLE {
-	float3	Position;
-	float3	Velocity;
-	float3	Acceleration;
-	float3	TailPosition;
-	float4	Color0;
-	float4	Color1;
-	float	Gravity;
-	float	Damping;
-	float	Size0;
-	float	Size1;
-	float	Angle0;
-	float	Angle1;
-	float	LifeTime;
-	float	Time;
-	float	FadeIn;
-	float	FadeOut;
-	uint	ImageIndex;
-	uint 	Effects;
-};
-
-struct PARAMS {
-	float4x4	View;
-	float4x4	Projection;
-	float4		CameraForward;
-	float4		CameraRight;
-	float4		CameraUp;
-	float4		CameraPosition;
-	float4		Gravity;
-	int			MaxParticles;
-	float		DeltaTime;
-	uint		DeadListSize;
-};
+#include "particles.fxi"
+#include "lighting.fxi"
 
 cbuffer CB1 : register(b0) { 
 	PARAMS Params; 
@@ -68,6 +27,8 @@ Texture2D						Texture 				: 	register(t0);
 StructuredBuffer<PARTICLE>		injectionBuffer			:	register(t1);
 StructuredBuffer<PARTICLE>		particleBufferGS		:	register(t2);
 StructuredBuffer<float2>		sortParticleBufferGS	:	register(t3);
+StructuredBuffer<float4>		particleLighting		:	register(t4);
+Texture2D						DepthValues				: 	register(t5);
 
 //-----------------------------------------------
 //	UAVs :
@@ -130,10 +91,11 @@ void CSMain(
 
 		//	meausure distance :
 		float  time		=	p.Time;
-		float3 accel	=	p.Acceleration + Params.Gravity.xyz * p.Gravity;
-		float3 position	=	p.Position + p.Velocity * time + accel * time * time / 2;
 		
-		float4 ppPos	=	mul( mul( float4(position,1), Params.View ), Params.Projection );
+		particleBuffer[ id ].Velocity	=	p.Velocity + p.Acceleration * Params.DeltaTime;	
+		particleBuffer[ id ].Position	=	p.Position + p.Velocity     * Params.DeltaTime;	
+		
+		float4 ppPos	=	mul( mul( float4(particleBuffer[ id ].Position,1), Params.View ), Params.Projection );
 
 		sortParticleBuffer[ id ] = float2( -abs(ppPos.z / ppPos.w), id );
 	}
@@ -151,13 +113,14 @@ struct VSOutput {
 };
 
 struct GSOutput {
-	float4	Position : SV_Position;
-	float2	TexCoord : TEXCOORD0;
+	float4	Position  : SV_Position;
+	float2	TexCoord  : TEXCOORD0;
+	float4  ViewPosSZ : TEXCOORD1;
 	float4	Color     : COLOR0;
 };
 
 
-#if DRAW
+#if (defined DRAW) || (defined DRAW_SHADOW)
 VSOutput VSMain( uint vertexID : SV_VertexID )
 {
 	VSOutput output;
@@ -201,14 +164,13 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 		return;
 	}
 	
+	float time		=	prt.Time;
 	float factor	=	saturate(prt.Time / prt.LifeTime);
 	
 	float  sz 		=   lerp( prt.Size0, prt.Size1, factor )/2;
-	float  time		=	prt.Time;
 	float4 color	=	lerp( prt.Color0, prt.Color1, Ramp( prt.FadeIn, prt.FadeOut, factor ) );
-	float3 accel	=	prt.Acceleration + Params.Gravity.xyz * prt.Gravity;
-	float3 position	=	prt.Position     + prt.Velocity * time + accel * time * time / 2;
-	float3 tailpos	=	prt.TailPosition + prt.Velocity * time + accel * time * time / 2;
+	float3 position	=	prt.Position    ;// + prt.Velocity * time + accel * time * time / 2;
+	float3 tailpos	=	prt.TailPosition;// + prt.Velocity * time + accel * time * time / 2;
 	float  a		=	lerp( prt.Angle0, prt.Angle1, factor );	
 
 	float2x2	m	=	float2x2( cos(a), sin(a), -sin(a), cos(a) );
@@ -223,7 +185,7 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	float4 pos2	=	mul( float4( position - rt - up, 1 ), Params.View );
 	float4 pos3	=	mul( float4( position + rt - up, 1 ), Params.View );
 	
-	if (prt.Effects && BEAM == BEAM) {
+	if (prt.Effects==ParticleFX_Beam) {
 		float3 dir	=	normalize(position - tailpos);
 		float3 eye	=	normalize(Params.CameraPosition.xyz - tailpos);
 		float3 side	=	normalize(cross( eye, dir ));
@@ -233,25 +195,41 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 	    pos3		=	mul( float4( tailpos  - side * sz, 1 ), Params.View );
 	}
 	
-	p0.Position	= mul( pos0, Params.Projection );
-	p0.TexCoord	= float2(image.z, image.y);
-	p0.Color 	= color;
+	p0.Position	 = mul( pos0, Params.Projection );
+	p0.TexCoord	 = float2(image.z, image.y);
+	p0.ViewPosSZ = float4( pos0.xyz, 1/sz );
+	p0.Color 	 = color;
 	
-	p1.Position	= mul( pos1, Params.Projection );
-	p1.TexCoord	= float2(image.x, image.y);
-	p1.Color 	= color;
+	p1.Position	 = mul( pos1, Params.Projection );
+	p1.TexCoord	 = float2(image.x, image.y);
+	p1.ViewPosSZ = float4( pos1.xyz, 1/sz );
+	p1.Color 	 = color;
 	
-	p2.Position	= mul( pos2, Params.Projection );
-	p2.TexCoord	= float2(image.x, image.w);
-	p2.Color 	= color;
+	p2.Position	 = mul( pos2, Params.Projection );
+	p2.TexCoord	 = float2(image.x, image.w);
+	p2.ViewPosSZ = float4( pos2.xyz, 1/sz );
+	p2.Color 	 = color;
 	
-	p3.Position	= mul( pos3, Params.Projection );
-	p3.TexCoord	= float2(image.z, image.w);
-	p3.Color 	= color;
+	p3.Position	 = mul( pos3, Params.Projection );
+	p3.TexCoord	 = float2(image.z, image.w);
+	p3.ViewPosSZ = float4( pos3.xyz, 1/sz );
+	p3.Color 	 = color;
 	
+	#ifdef DRAW
+	if (prt.Effects==ParticleFX_Lit || prt.Effects==ParticleFX_LitShadow) {
+		p0.Color.rgb	*= particleLighting[ prtId ].rgb;
+		p1.Color.rgb	*= particleLighting[ prtId ].rgb;
+		p2.Color.rgb	*= particleLighting[ prtId ].rgb;
+		p3.Color.rgb	*= particleLighting[ prtId ].rgb;
+	}
+	#endif
 	
+	#ifdef DRAW_SHADOW
+	if (prt.Effects!=ParticleFX_LitShadow) {
+		return;
+	}
+	#endif
 	
-
 	outputStream.Append(p0);
 	outputStream.Append(p1);
 	outputStream.Append(p2);
@@ -266,13 +244,39 @@ void GSMain( point VSOutput inputPoint[1], inout TriangleStream<GSOutput> output
 }
 
 
+//	Soft particles :
+//	http://developer.download.nvidia.com/SDK/10/direct3d/Source/SoftParticles/doc/SoftParticles_hi.pdf
 
-float4 PSMain( GSOutput input ) : SV_Target
+float4 PSMain( GSOutput input, float4 vpos : SV_POSITION ) : SV_Target
 {
-	float4 color	=	Texture.Sample( Sampler, input.TexCoord ) * input.Color;
+	#ifdef DRAW
+		float4 color	=	Texture.Sample( Sampler, input.TexCoord ) * input.Color;
+		//	saves about 5%-10% of rasterizer time:
+		clip( color.a < 0.001f ? -1:1 );
+		
+		float  depth 	= DepthValues.Load( int3(vpos.xy,0) ).r;
+		float  a 		= Params.LinearizeDepthA;
+		float  b        = Params.LinearizeDepthB;
+		float  sceneZ   = 1 / (depth * a + b);
+		
+		float  prtZ		= abs(input.ViewPosSZ.z);
+
+		// - profile!
+		// if (depth < vpos.z) {
+		// clip(-1);
+		// }
+		
+		float softFactor	=	saturate( (sceneZ - prtZ) * input.ViewPosSZ.w );
+
+		color.rgba *= softFactor;
+	#endif
 	
-	//	saves about 5%-10% of rasterizer time:
-	clip( color.a < 0.001f ? -1:1 );
+	#ifdef DRAW_SHADOW
+		float4 textureColor	=	Texture.Sample( Sampler, input.TexCoord );
+		float4 vertexColor  =  	input.Color;
+		float4 color		=	1 - vertexColor.a * textureColor.a;
+	#endif
+	
 	return color;
 }
 #endif

@@ -8,6 +8,7 @@ using Fusion.Core;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
+using Fusion.Core.Configuration;
 
 
 
@@ -26,10 +27,10 @@ namespace Fusion.Engine.Graphics {
 		StateFactory	factory;
 		RenderWorld	renderWorld;
 
-		const int BlockSize				=	256;
-		const int MaxInjectingParticles	=	4096;
-		const int MaxSimulatedParticles =	256 * 256;
-		const int MaxImages				=	512;
+		public const int BlockSize				=	256;
+		public const int MaxInjectingParticles	=	4096;
+		public const int MaxSimulatedParticles =	256 * 256;
+		public const int MaxImages				=	512;
 
 		bool toMuchInjectedParticles = false;
 
@@ -39,14 +40,50 @@ namespace Fusion.Engine.Graphics {
 		StructuredBuffer	simulationBuffer;
 		StructuredBuffer	deadParticlesIndices;
 		StructuredBuffer	sortParticlesBuffer;
+		StructuredBuffer	particleLighting;
 		ConstantBuffer		paramsCB;
 		ConstantBuffer		imagesCB;
+
+		[Config]
+		public float SimulationStepTime {
+			get { 
+				return simulationStepTime; 
+			}
+			set { 
+				if (value<=0) {
+					throw new ArgumentOutOfRangeException("value must be positive");
+				}
+				simulationStepTime = value; 
+			}
+		}
+		float simulationStepTime = 1 / 60.0f;
+
+
+		/// <summary>
+		/// Gets structured buffer of simulated particles.
+		/// </summary>
+		internal StructuredBuffer SimulatedParticles {
+			get {
+				return simulationBuffer;
+			}
+		}
+
+
+		/// <summary>
+		/// Gets structured buffer of simulated particles.
+		/// </summary>
+		internal StructuredBuffer ParticleLighting {
+			get {
+				return particleLighting;
+			}
+		}
 
 		enum Flags {
 			INJECTION		=	0x01,
 			SIMULATION		=	0x02,
 			DRAW			=	0x04,
 			INITIALIZE		=	0x08,
+			DRAW_SHADOW		=	0x10,
 		}
 
 
@@ -57,9 +94,11 @@ namespace Fusion.Engine.Graphics {
 //       float4 CameraUp;               // Offset:  160
 //       float4 CameraPosition;         // Offset:  176
 //       float4 Gravity;                // Offset:  192
-//       int MaxParticles;              // Offset:  208
-//       float DeltaTime;               // Offset:  212
-//       uint DeadListSize;             // Offset:  216		
+//       float LinearizeDepthA;         // Offset:  208
+//       float LinearizeDepthB;         // Offset:  212
+//       int MaxParticles;              // Offset:  216
+//       float DeltaTime;               // Offset:  220
+//       uint DeadListSize;             // Offset:  224
 		[StructLayout(LayoutKind.Explicit, Size=256)]
 		struct PrtParams {
 			[FieldOffset(  0)] public Matrix	View;
@@ -69,9 +108,13 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(160)] public Vector4	CameraUp;
 			[FieldOffset(176)] public Vector4	CameraPosition;
 			[FieldOffset(192)] public Vector4	Gravity;
-			[FieldOffset(208)] public int		MaxParticles;
-			[FieldOffset(212)] public float		DeltaTime;
-			[FieldOffset(216)] public uint		DeadListSize;
+			[FieldOffset(208)] public float		LinearizeDepthA;
+			[FieldOffset(212)] public float		LinearizeDepthB;
+			[FieldOffset(216)] public int		MaxParticles;
+			[FieldOffset(220)] public float		DeltaTime;
+			[FieldOffset(224)] public uint		DeadListSize;
+			[FieldOffset(228)] public float		CocScale;
+			[FieldOffset(232)] public float		CocBias;
 		} 
 
 		Random rand = new Random();
@@ -109,11 +152,11 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="rs"></param>
-		internal ParticleSystem ( RenderSystem rs, RenderWorld viewLayer )
+		internal ParticleSystem ( RenderSystem rs, RenderWorld renderWorld )
 		{
 			this.rs				=	rs;
 			this.Game			=	rs.Game;
-			this.renderWorld	=	viewLayer;
+			this.renderWorld	=	renderWorld;
 
 			Gravity	=	Vector3.Down * 9.80665f;
 
@@ -122,6 +165,7 @@ namespace Fusion.Engine.Graphics {
 
 			injectionBuffer			=	new StructuredBuffer( Game.GraphicsDevice, typeof(Particle),	MaxInjectingParticles, StructuredBufferFlags.None );
 			simulationBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(Particle),	MaxSimulatedParticles, StructuredBufferFlags.None );
+			particleLighting		=	new StructuredBuffer( Game.GraphicsDevice, typeof(Vector4),		MaxSimulatedParticles, StructuredBufferFlags.None );
 			sortParticlesBuffer		=	new StructuredBuffer( Game.GraphicsDevice, typeof(Vector2),		MaxSimulatedParticles, StructuredBufferFlags.None );
 			deadParticlesIndices	=	new StructuredBuffer( Game.GraphicsDevice, typeof(uint),		MaxSimulatedParticles, StructuredBufferFlags.Append );
 
@@ -164,6 +208,7 @@ namespace Fusion.Engine.Graphics {
 
 				SafeDispose( ref injectionBuffer );
 				SafeDispose( ref simulationBuffer );
+				SafeDispose( ref particleLighting );
 				SafeDispose( ref sortParticlesBuffer );
 				SafeDispose( ref deadParticlesIndices );
 			}
@@ -182,6 +227,19 @@ namespace Fusion.Engine.Graphics {
 			ps.BlendState			=	BlendState.AlphaBlendPremul;
 			ps.DepthStencilState	=	DepthStencilState.Readonly;
 			ps.Primitive			=	Primitive.PointList;
+
+			if (flag==Flags.DRAW_SHADOW) {
+
+				var bs = new BlendState();
+				bs.DstAlpha	=	Blend.One;
+				bs.SrcAlpha	=	Blend.One;
+				bs.SrcColor	=	Blend.DstColor;
+				bs.DstColor	=	Blend.Zero;
+				bs.AlphaOp	=	BlendOp.Add;
+
+				ps.BlendState			=	bs;
+				ps.DepthStencilState	=	DepthStencilState.Readonly;
+			}
 		}
 
 
@@ -230,20 +288,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void ClearParticleBuffer ()
 		{
-			//for (int i=0; i<MaxInjectingParticles; i++) {
-			//	injectionBufferCPU[i].Timing.X = -999999;
-			//}
 			injectionCount = 0;
-		}
-
-
-
-		/// <summary>
-		/// Updates particle properties.
-		/// </summary>
-		/// <param name="gameTime"></param>
-		internal void Simulate ( GameTime gameTime )
-		{
 		}
 
 
@@ -254,6 +299,7 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		public void KillParticles ()
 		{
+			timeAccumulator	=	0;
 			requestKill = true;
 			ClearParticleBuffer();
 		}
@@ -265,73 +311,90 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
+		void SetupGPUParameters ( float stepTime, RenderWorld renderWorld, Matrix view, Matrix projection, Flags flags )
+		{
+			var deltaTime		=	stepTime;
+			var camera			=	renderWorld.Camera;
+			var cameraMatrix	=	Matrix.Invert( view );
+
+			//	kill particles by applying very large delta.
+			if (requestKill) {
+				deltaTime	=	float.MaxValue / 2;
+				requestKill	=	false;
+			}
+			if (rs.FreezeParticles) {
+				deltaTime = 0;
+			}
+
+			//	fill constant data :
+			PrtParams param		=	new PrtParams();
+
+			param.View				=	view;
+			param.Projection		=	projection;
+			param.MaxParticles		=	0;
+			param.DeltaTime			=	deltaTime;
+			param.CameraForward		=	new Vector4( cameraMatrix.Forward	, 0 );
+			param.CameraRight		=	new Vector4( cameraMatrix.Right	, 0 );
+			param.CameraUp			=	new Vector4( cameraMatrix.Up		, 0 );
+			param.CameraPosition	=	new Vector4( cameraMatrix.TranslationVector	, 1 );
+			param.Gravity			=	new Vector4( this.Gravity, 0 );
+			param.MaxParticles		=	MaxSimulatedParticles;
+			param.LinearizeDepthA	=	camera.LinearizeDepthScale;
+			param.LinearizeDepthB	=	camera.LinearizeDepthBias;
+			param.CocBias			=	renderWorld.DofSettings.CocBias;
+			param.CocScale			=	renderWorld.DofSettings.CocScale;
+
+			if (flags==Flags.INJECTION) {
+				param.MaxParticles	=	injectionCount;
+			}
+
+			//	copy to gpu :
+			paramsCB.SetData( param );
+
+			//	set DeadListSize to prevent underflow:
+			if (flags==Flags.INJECTION) {
+				deadParticlesIndices.CopyStructureCount( paramsCB, Marshal.OffsetOf( typeof(PrtParams), "DeadListSize").ToInt32() );
+			}
+		}
+
+
+
+		float timeAccumulator = 0;
+
+
+
+		/// <summary>
+		/// Updates particle properties.
+		/// </summary>
 		/// <param name="gameTime"></param>
-		internal void Render ( GameTime gameTime, Camera camera, StereoEye stereoEye, HdrFrame viewFrame )
+		internal void Simulate ( GameTime gameTime, Camera camera )
 		{
 			var device	=	Game.GraphicsDevice;
 
-			if (rs.Config.SkipParticles) {
-				return;
-			}
+			var view		=	camera.GetViewMatrix( StereoEye.Mono );
+			var projection	=	camera.GetProjectionMatrix( StereoEye.Mono );
 
-			using ( new PixEvent("Particle Rendering") ) {
+
+			timeAccumulator	+=	gameTime.ElapsedSec;
+
+
+			using ( new PixEvent("Particle Simulation") ) {
 
 				device.ResetStates();
-
-				int	w	=	device.DisplayBounds.Width;
-				int h	=	device.DisplayBounds.Height;
-
-				//
-				//	Setup images :
-				//
-				if (Images!=null && !Images.IsDisposed) {
-					imagesCB.SetData( Images.GetNormalizedRectangles( MaxImages ) );
-				}
-			
-
-				var deltaTime	=	gameTime.ElapsedSec;
-
-				//	kill particles by applying very large delta.
-				if (requestKill) {
-					deltaTime	=	float.MaxValue / 2;
-					requestKill	=	false;
-				}
-				if (rs.Config.FreezeParticles) {
-					deltaTime = 0;
-				}
-
-				//
-				//	Setup parameters :
-				//	
-				PrtParams param = new PrtParams();
-				param.View			=	renderWorld.Camera.GetViewMatrix( stereoEye );
-				param.Projection	=	renderWorld.Camera.GetProjectionMatrix( stereoEye );
-				param.MaxParticles	=	0;
-				param.DeltaTime		=	deltaTime;
-				param.CameraForward	=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Forward	, 0 );
-				param.CameraRight	=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Right	, 0 );
-				param.CameraUp		=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).Up		, 0 );
-				param.CameraPosition=	new Vector4( renderWorld.Camera.GetCameraMatrix( StereoEye.Mono ).TranslationVector	, 0 );
-				param.Gravity		=	new Vector4( this.Gravity, 0 );
-				param.MaxParticles	=	injectionCount;
-
-				paramsCB.SetData( param );
-
-				//	set DeadListSize to prevent underflow:
-				deadParticlesIndices.CopyStructureCount( paramsCB, Marshal.OffsetOf( typeof(PrtParams), "DeadListSize").ToInt32() );
-
-				device.ComputeShaderConstants[0]	= paramsCB ;
-
 
 				//
 				//	Inject :
 				//
 				using (new PixEvent("Injection")) {
+
 					injectionBuffer.SetData( injectionBufferCPU );
 
 					device.ComputeShaderResources[1]	= injectionBuffer ;
 					device.SetCSRWBuffer( 0, simulationBuffer,		0 );
 					device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
+
+					SetupGPUParameters( 0, renderWorld, view, projection, Flags.INJECTION );
+					device.ComputeShaderConstants[0]	= paramsCB ;
 
 					device.PipelineState	=	factory[ (int)Flags.INJECTION ];
 			
@@ -341,34 +404,76 @@ namespace Fusion.Engine.Graphics {
 					ClearParticleBuffer();
 				}
 
+
 				//
 				//	Simulate :
 				//
 				using (new PixEvent("Simulation")) {
 
-					if (!renderWorld.IsPaused && !rs.Config.SkipParticlesSimulation) {
+					if (!renderWorld.IsPaused && !rs.SkipParticlesSimulation) {
 	
 						device.SetCSRWBuffer( 0, simulationBuffer,		0 );
 						device.SetCSRWBuffer( 1, deadParticlesIndices, -1 );
 						device.SetCSRWBuffer( 2, sortParticlesBuffer, 0 );
 
-						param.MaxParticles	=	MaxSimulatedParticles;
-						paramsCB.SetData( param );
-						device.ComputeShaderConstants[0] = paramsCB ;
+						float stepTime = SimulationStepTime;
 
-						device.PipelineState	=	factory[ (int)Flags.SIMULATION ];
+						while ( timeAccumulator > stepTime ) {
+
+							SetupGPUParameters( stepTime, renderWorld, view, projection, Flags.SIMULATION);
+							device.ComputeShaderConstants[0] = paramsCB ;
+
+							device.PipelineState	=	factory[ (int)Flags.SIMULATION ];
 	
-						/// GPU time : 1.665 ms	 --> 0.38 ms
-						device.Dispatch( MathUtil.IntDivUp( MaxSimulatedParticles, BlockSize ) );//*/
+							/// GPU time : 1.665 ms	 --> 0.38 ms
+							device.Dispatch( MathUtil.IntDivUp( MaxSimulatedParticles, BlockSize ) );//*/
+
+							timeAccumulator -= stepTime;
+						}
 					}
 				}
 
-
+				//
+				//	Sort :
+				//
 				using (new PixEvent("Sort")) {
 					rs.BitonicSort.Sort( sortParticlesBuffer );
 				}
 
 
+				if (rs.ShowParticles) {
+					rs.Counters.DeadParticles	=	deadParticlesIndices.GetStructureCount();
+				}
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void RenderGeneric ( string passName, GameTime gameTime, Camera camera, Viewport viewport, Matrix view, Matrix projection, RenderTargetSurface colorTarget, DepthStencilSurface depthTarget, ShaderResource depthValues, Flags flags )
+		{
+			var device	=	Game.GraphicsDevice;
+
+			if (rs.SkipParticles) {
+				return;
+			}
+
+
+			using ( new PixEvent(passName) ) {
+
+				device.ResetStates();
+
+				//
+				//	Setup images :
+				//
+				if (Images!=null && !Images.IsDisposed) {
+					imagesCB.SetData( Images.GetNormalizedRectangles( MaxImages ) );
+				}
+
+				SetupGPUParameters( 0, renderWorld, view, projection, flags );
+				device.ComputeShaderConstants[0] = paramsCB ;
 
 				//
 				//	Render
@@ -378,13 +483,14 @@ namespace Fusion.Engine.Graphics {
 					device.ResetStates();
 	
 					//	target and viewport :
-					device.SetTargets( viewFrame.DepthBuffer, viewFrame.HdrBuffer );
-					device.SetViewport( 0,0,viewFrame.HdrBuffer.Width, viewFrame.HdrBuffer.Height );
+					device.SetTargets( depthTarget, colorTarget );
+					device.SetViewport( viewport );
 
 					//	params CB :			
 					device.ComputeShaderConstants[0]	= paramsCB ;
 					device.VertexShaderConstants[0]		= paramsCB ;
 					device.GeometryShaderConstants[0]	= paramsCB ;
+					device.PixelShaderConstants[0]		= paramsCB ;
 
 					//	atlas CB :
 					device.VertexShaderConstants[1]		= imagesCB ;
@@ -392,25 +498,57 @@ namespace Fusion.Engine.Graphics {
 					device.PixelShaderConstants[1]		= imagesCB ;
 
 					//	sampler & textures :
-					device.PixelShaderSamplers[0]	= SamplerState.LinearClamp4Mips ;
+					device.PixelShaderSamplers[0]		=	SamplerState.LinearClamp4Mips ;
 
-					device.PixelShaderResources[0]		=	Images==null? null : Images.Texture.Srv;
+					device.PixelShaderResources[0]		=	Images==null? rs.WhiteTexture.Srv : Images.Texture.Srv;
+					device.PixelShaderResources[5]		=	depthValues;
 					device.GeometryShaderResources[1]	=	simulationBuffer ;
 					device.GeometryShaderResources[2]	=	simulationBuffer ;
 					device.GeometryShaderResources[3]	=	sortParticlesBuffer;
+					device.GeometryShaderResources[4]	=	particleLighting;
 
 					//	setup PS :
-					device.PipelineState	=	factory[ (int)Flags.DRAW ];
+					device.PipelineState	=	factory[ (int)flags ];
 
 					//	GPU time : 0.81 ms	-> 0.91 ms
 					device.Draw( MaxSimulatedParticles, 0 );
-
-
-					if (rs.Config.ShowParticles) {
-						rs.Counters.DeadParticles	=	deadParticlesIndices.GetStructureCount();
-					}
 				}
 			}
+		}
+
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="gameTime"></param>
+		internal void Render ( GameTime gameTime, Camera camera, StereoEye stereoEye, HdrFrame viewFrame )
+		{
+			var view		=	camera.GetViewMatrix( stereoEye );
+			var projection	=	camera.GetProjectionMatrix( stereoEye );
+
+			var colorTarget	=	viewFrame.HdrBuffer.Surface;
+			var depthTarget	=	viewFrame.DepthBuffer.Surface;
+
+			var viewport	=	new Viewport( 0, 0, colorTarget.Width, colorTarget.Height );
+
+			RenderGeneric( "Particles", gameTime, camera, viewport, view, projection, colorTarget, null, viewFrame.DepthBuffer, Flags.DRAW );
+		}
+
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="gameTime"></param>
+		internal void RenderShadow ( GameTime gameTime, Viewport viewport, Matrix view, Matrix projection, RenderTargetSurface particleShadow, DepthStencilSurface depthBuffer )
+		{
+			var colorTarget	=	particleShadow;
+			var depthTarget	=	depthBuffer;
+
+			RenderGeneric( "Particles Shadow", gameTime, null, viewport, view, projection, colorTarget, depthTarget, null, Flags.DRAW_SHADOW );
 		}
 	}
 }

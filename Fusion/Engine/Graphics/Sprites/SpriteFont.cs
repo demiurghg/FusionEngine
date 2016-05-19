@@ -251,7 +251,6 @@ namespace Fusion.Engine.Graphics {
 		} */
 
 
-
 		/// <summary>
 		/// Draws the string
 		/// </summary>
@@ -260,7 +259,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="xPos"></param>
 		/// <param name="yPos"></param>
 		/// <param name="color"></param>
-		public void DrawString( SpriteLayer spriteBatch, string text, float xPos, float yPos, Color color, float tracking = 0, bool bl = true, bool flip = false ) 
+		public void DrawString( SpriteLayer spriteBatch, string text, float xPos, float yPos, Color color, int frameIndex=0, float tracking = 0, bool useBaseLine = true, bool flip = false ) 
 		{
 			if (text==null) {
 				return;
@@ -271,13 +270,13 @@ namespace Fusion.Engine.Graphics {
 			if (!flip) {
 				x = xPos;
 				y = yPos;// - fontInfo.baseLine;
-				if (bl) {
+				if (useBaseLine) {
 					y -= fontInfo.baseLine;
 				}
 			} else {
 				x = yPos;
 				y = xPos;// - fontInfo.baseLine;
-				if (bl) {
+				if (useBaseLine) {
 					x -= fontInfo.baseLine;
 				}
 			}
@@ -328,16 +327,16 @@ namespace Fusion.Engine.Graphics {
 				var c = color;// * spriteBatch.ColorMultiplier;
 
 				if (!flip) {
-					var v0	=	new SpriteVertex( new Vector3(dstRect.X,                 dstRect.Y                 , 0), c, new Vector2((srcRect.X                ) / w, (srcRect.Y                 ) / h) );
-					var v1	=	new SpriteVertex( new Vector3(dstRect.X + dstRect.Width, dstRect.Y                 , 0), c, new Vector2((srcRect.X + srcRect.Width) / w, (srcRect.Y                 ) / h) );
-					var v2	=	new SpriteVertex( new Vector3(dstRect.X + dstRect.Width, dstRect.Y + dstRect.Height, 0), c, new Vector2((srcRect.X + srcRect.Width) / w, (srcRect.Y + srcRect.Height) / h) );
-					var v3	=	new SpriteVertex( new Vector3(dstRect.X,                 dstRect.Y + dstRect.Height, 0), c, new Vector2((srcRect.X                ) / w, (srcRect.Y + srcRect.Height) / h) );
+					var v0	=	new SpriteVertex( new Vector3(dstRect.X,                 dstRect.Y                 , 0), c, new Vector2((srcRect.X                ) / w, (srcRect.Y                 ) / h), frameIndex );
+					var v1	=	new SpriteVertex( new Vector3(dstRect.X + dstRect.Width, dstRect.Y                 , 0), c, new Vector2((srcRect.X + srcRect.Width) / w, (srcRect.Y                 ) / h), frameIndex );
+					var v2	=	new SpriteVertex( new Vector3(dstRect.X + dstRect.Width, dstRect.Y + dstRect.Height, 0), c, new Vector2((srcRect.X + srcRect.Width) / w, (srcRect.Y + srcRect.Height) / h), frameIndex );
+					var v3	=	new SpriteVertex( new Vector3(dstRect.X,                 dstRect.Y + dstRect.Height, 0), c, new Vector2((srcRect.X                ) / w, (srcRect.Y + srcRect.Height) / h), frameIndex );
 					spriteBatch.DrawQuad( fontTexture, v0, v1, v2, v3 );
 				} else {																		                   
-					var v0	=	new SpriteVertex( new Vector3(dstRect.Y                 , dstRect.X                , 0), c, new Vector2((srcRect.X                ) / w, (srcRect.Y                 ) / h) );
-					var v1	=	new SpriteVertex( new Vector3(dstRect.Y                 , dstRect.X - dstRect.Width, 0), c, new Vector2((srcRect.X + srcRect.Width) / w, (srcRect.Y                 ) / h) );
-					var v2	=	new SpriteVertex( new Vector3(dstRect.Y + dstRect.Height, dstRect.X - dstRect.Width, 0), c, new Vector2((srcRect.X + srcRect.Width) / w, (srcRect.Y + srcRect.Height) / h) );
-					var v3	=	new SpriteVertex( new Vector3(dstRect.Y + dstRect.Height, dstRect.X                , 0), c, new Vector2((srcRect.X                ) / w, (srcRect.Y + srcRect.Height) / h) );
+					var v0	=	new SpriteVertex( new Vector3(dstRect.Y                 , dstRect.X                , 0), c, new Vector2((srcRect.X                ) / w, (srcRect.Y                 ) / h), frameIndex );
+					var v1	=	new SpriteVertex( new Vector3(dstRect.Y                 , dstRect.X - dstRect.Width, 0), c, new Vector2((srcRect.X + srcRect.Width) / w, (srcRect.Y                 ) / h), frameIndex );
+					var v2	=	new SpriteVertex( new Vector3(dstRect.Y + dstRect.Height, dstRect.X - dstRect.Width, 0), c, new Vector2((srcRect.X + srcRect.Width) / w, (srcRect.Y + srcRect.Height) / h), frameIndex );
+					var v3	=	new SpriteVertex( new Vector3(dstRect.Y + dstRect.Height, dstRect.X                , 0), c, new Vector2((srcRect.X                ) / w, (srcRect.Y + srcRect.Height) / h), frameIndex );
 					spriteBatch.DrawQuad( fontTexture, v0, v1, v2, v3 );
 				}
 

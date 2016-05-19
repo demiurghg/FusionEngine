@@ -197,6 +197,7 @@
     <Compile Include="Drivers\Graphics\Resources\TextureCubeArray.cs" />
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
     <Compile Include="Drivers\Graphics\Resources\UnorderedAccess.cs" />
+    <Compile Include="Drivers\Graphics\Resources\VolumeRWTexture.cs" />
     <Compile Include="Engine\Audio\AudioChannels.cs" />
     <Compile Include="Engine\Audio\Enums.cs" />
     <Compile Include="Engine\Audio\SoundWorld.cs" />
@@ -210,10 +211,11 @@
     <Compile Include="Engine\Audio\SoundEffectInstance.cs" />
     <Compile Include="Engine\Audio\SoundEffectLoader.cs" />
     <Compile Include="Engine\Audio\SoundState.cs" />
-    <Compile Include="Engine\Audio\SoundSystemConfig.cs">
+    <Compile Include="Engine\Audio\SoundSystem.Config.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Engine\Client\ClientState.cs" />
+    <Compile Include="Engine\Client\GameClient.Events.cs" />
     <Compile Include="Engine\Client\GameClient.Disconnected.cs" />
     <Compile Include="Engine\Client\GameClient.Active.cs" />
     <Compile Include="Engine\Client\GameClient.StandBy.cs" />
@@ -222,24 +224,30 @@
     <Compile Include="Engine\Client\GameClient.Connecting.cs" />
     <Compile Include="Engine\Client\GameClient.State.cs" />
     <Compile Include="Engine\Client\GameLoader.cs" />
-    <Compile Include="Engine\Client\JitterBuffer.cs" />
     <Compile Include="Engine\Common\AtomCollection.cs" />
+    <Compile Include="Engine\Common\Commands\ShowModules.cs" />
     <Compile Include="Engine\Common\Commands\SlowdownServer.cs" />
     <Compile Include="Engine\Common\Commands\FreezeClient.cs" />
     <Compile Include="Engine\Common\Commands\FreezeServer.cs" />
     <Compile Include="Engine\Common\Commands\CrashClient.cs" />
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
     <Compile Include="Engine\Common\AtomAttribute.cs" />
-    <Compile Include="Engine\Common\GameInterface.Internal.cs" />
+    <Compile Include="Engine\Common\UserInterface.Internal.cs" />
     <Compile Include="Engine\Graphics\Design\TextureLocationEditor.cs" />
     <Compile Include="Engine\Graphics\Effects\BitonicSort.cs" />
+    <Compile Include="Engine\Graphics\Effects\DofSettings.cs" />
+    <Compile Include="Engine\Graphics\Effects\DofFilter.cs" />
     <Compile Include="Engine\Graphics\Effects\SsaoFilter.cs" />
-    <Compile Include="Engine\Graphics\Effects\SsaoFilterConfig.cs" />
+    <Compile Include="Engine\Graphics\Effects\SsaoFilter.Config.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BaseBingMapsSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BingMapSatellite.cs" />
     <Compile Include="Engine\Graphics\GIS\DebugGisLayer.cs" />
     <Compile Include="Engine\Graphics\GIS\PointsGisLayerCPU.cs" />
     <Compile Include="Engine\Graphics\GIS\TextGisLayer.cs" />
+    <Compile Include="Engine\Graphics\Lights\LightRenderer.Extents.cs" />
+    <Compile Include="Engine\Graphics\Lights\LightRenderer.Tiles.cs" />
+    <Compile Include="Engine\Graphics\Lights\LightRenderer.Shadows.cs" />
+    <Compile Include="Engine\Graphics\Lights\SkyLight.cs" />
     <Compile Include="Engine\Graphics\Materials\BaseIllum.cs" />
     <Compile Include="Engine\Graphics\Materials\MaterialData.cs" />
     <Compile Include="Engine\Graphics\Materials\MaterialInstance.cs" />
@@ -248,6 +256,7 @@
     <Compile Include="Engine\Graphics\Particle.cs" />
     <Compile Include="Engine\Graphics\ParticleSystem.cs" />
     <Compile Include="Engine\Graphics\RenderCounters.cs" />
+    <Compile Include="Engine\Graphics\Sprites\SpriteFrame.cs" />
     <Compile Include="Engine\Graphics\Sprites\SpriteLayerCollection.cs" />
     <Compile Include="Engine\Graphics\SurfaceFlags.cs" />
     <Compile Include="Engine\Graphics\Utils\DebugLayer.cs" />
@@ -269,7 +278,7 @@
     <Compile Include="Engine\Graphics\HdrFrame.cs" />
     <Compile Include="Engine\Graphics\Lights\EnvLight.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.cs" />
-    <Compile Include="Engine\Graphics\Lights\LightRendererConfig.cs" />
+    <Compile Include="Engine\Graphics\Lights\LightRenderer.Config.cs" />
     <Compile Include="Engine\Graphics\Lights\DirectLight.cs" />
     <Compile Include="Engine\Graphics\Lights\ShadowContext.cs" />
     <Compile Include="Engine\Graphics\Materials\MaterialLoader.cs" />
@@ -318,7 +327,7 @@
     <Compile Include="Engine\Common\Commands\ServerDrop.cs" />
     <Compile Include="Engine\Common\InitOrder.cs" />
     <Compile Include="Engine\Graphics\RenderLayer.cs" />
-    <Compile Include="Engine\Graphics\RenderSystemConfig.cs" />
+    <Compile Include="Engine\Graphics\RenderSystem.Config.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BaseMapSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\GoogleMaps\BaseGoogleMapSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\GoogleMaps\GoogleSatelliteMap.cs" />
@@ -365,6 +374,7 @@
     <Compile Include="Engine\Media\Video.cs" />
     <Compile Include="Engine\Media\VideoPlayer.cs" />
     <Compile Include="Engine\Media\VideoSampleGrabber.cs" />
+    <Compile Include="Engine\Common\Network.cs" />
     <Compile Include="Engine\Server\GameServer.Internal.cs" />
     <Compile Include="Engine\Common\GameModuleAttribute.cs" />
     <Compile Include="Engine\Common\Game.cs" />
@@ -462,14 +472,12 @@
     <Compile Include="Engine\Input\Events.cs" />
     <Compile Include="Engine\Input\Keys.cs" />
     <Compile Include="Engine\Input\Mouse.cs" />
-    <Compile Include="Engine\Network\NetworkConfig.cs" />
-    <Compile Include="Engine\Network\NetworkEngine.cs" />
+    <Compile Include="Engine\Common\NetDeflate.cs" />
     <Compile Include="Engine\Server\NetCommand.cs" />
     <Compile Include="Engine\Server\NetConnExt.cs" />
     <Compile Include="Engine\Server\Snapshot.cs" />
     <Compile Include="Engine\Server\SnapshotQueue.cs" />
     <Compile Include="Engine\Storage\UserStorage.cs" />
-    <Compile Include="Engine\Frames\Config.cs" />
     <Compile Include="Engine\Frames\Context.cs" />
     <Compile Include="Engine\Frames\Enums.cs" />
     <Compile Include="Engine\Frames\Frame.cs" />
@@ -482,7 +490,7 @@
     <Compile Include="Engine\Frames\FrameProcessor.cs" />
     <Compile Include="Engine\Frames\Utils.cs" />
     <Compile Include="Framework\ClearCmd.cs" />
-    <Compile Include="Framework\GameConsoleConfig.cs" />
+    <Compile Include="Framework\GameConsole.Config.cs" />
     <Compile Include="Framework\EditBox.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -570,11 +578,7 @@
       <Name>Lidgren.Network</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Engine\Physics\" />
-    <Folder Include="Engine\SFX\" />
-    <Folder Include="Engine\Triggers\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

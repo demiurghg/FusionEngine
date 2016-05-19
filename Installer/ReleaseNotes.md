@@ -1,7 +1,29 @@
+# Fusion Engine Version 0.05 Release Notes
+
+## New features
+ 1. Particles now uses only premultiplied blend state.
+ 2. Added new types of particles: Particle Beams.
+ 3. Added client state change event.
+ 4. Sprite clipping.
+ 5. Frames content clipping
+ 5. Added local sounds in SoundWorld.
+ 
+## Fixes
+ 1. Fixed choppy sound through XAudio operation sets.
+ 2. Fixed file share error while simultaneous asset loading.
+
+## Notes
+Changes are breaking.
+ 1. Some SpriteLayer's functions are renamed.
+ 2. Some SpriteFont's functions are renamed.
+ 3. Some Frame's functions are renamed and have new parameters.
+
+
+
 # Fusion Engine Version 0.04 Release Notes
 
 ## New features
- 1. net.ShowLatency now enables and disables printing if latency update.
+ 1. net.ShowLatency now enables and disables printing if latency updated.
  2. SSAO and HBAO
  3. Network Atoms
  

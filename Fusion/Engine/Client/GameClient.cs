@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Threading;
-using Fusion.Engine.Network;
 using System.IO;
 using Fusion.Engine.Common;
 using Fusion.Core.Content;
@@ -43,6 +42,7 @@ namespace Fusion.Engine.Client {
 		}
 		AtomCollection atoms = null;
 
+
 		/// <summary>
 		/// Gets current client state.
 		/// </summary>
@@ -55,6 +55,8 @@ namespace Fusion.Engine.Client {
 		/// <param name="Game"></param>
 		public GameClient ( Game game ) : base(game) 
 		{
+			ClientStateChanged += (s,e)=>{};
+
 			Guid	=	Guid.NewGuid();
 			content	=	new ContentManager(game);
 			InitInternal();

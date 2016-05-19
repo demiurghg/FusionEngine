@@ -654,9 +654,8 @@ namespace Fusion.Engine.Frames {
 		/// <param name="parentX"></param>
 		/// <param name="parentY"></param>
 		/// <param name="frame"></param>
-		internal void UpdateInternal ( GameTime gameTime, int parentX, int parentY )
+		internal void UpdateInternal ( GameTime gameTime )
 		{
-		#if true
 			var bfsList  = BFSList( this );
 			var bfsListR = bfsList.ToList();
 			bfsListR.Reverse();
@@ -679,22 +678,24 @@ namespace Fusion.Engine.Frames {
 
 			bfsList .ForEach( f => f.OnTick() );
 			bfsList .ForEach( f => f.Update( gameTime ) );
+		}
 
-		#else
-			UpdateTransitions( gameTime );
 
-			GlobalRectangle		=	new Rectangle( X + parentX, Y + parentY, Width, Height );
 
-			UpdateMoveAndResize(true);
-
-			foreach ( var child in Children ) {
-				child.UpdateInternal( gameTime, parentX + X, parentY + Y );
-			} //*/
-
-			OnTick();
-
-			Update( gameTime );
-		#endif
+		class DrawFrameItem {
+			public DrawFrameItem ( Frame frame, Color color, Rectangle outerClip, Rectangle innerClip, string text )
+			{
+				this.Frame		=	frame;
+				this.OuterClip	=	outerClip;
+				this.InnerClip	=	innerClip;
+				this.Color		=	color;
+				this.Text		=	text;
+			}
+			public Frame Frame;
+			public Color Color;
+			public Rectangle OuterClip;
+			public Rectangle InnerClip;
+			public string Text;
 		}
 
 
@@ -703,27 +704,74 @@ namespace Fusion.Engine.Frames {
 		/// 
 		/// </summary>
 		/// <param name="gameTime"></param>
-		/// <param name="frame"></param>
-		internal void DrawInternal ( GameTime gameTime, SpriteLayer sb, Color colorMultiplier )
+		/// <param name="sb"></param>
+		static internal void DrawNonRecursive ( Frame rootFrame, GameTime gameTime, SpriteLayer spriteLayer )
 		{
-			var vp = Game.GraphicsDevice.DisplayBounds;
+			if (rootFrame==null) {
+				return;
+			}
 
-			if ( IsDrawable && MathUtil.IsRectInsideRect( vp, GlobalRectangle ) ) {
+			var stack = new Stack<DrawFrameItem>();
+			var list  = new List<DrawFrameItem>();
 
-				if (ClippingMode==ClippingMode.None) {
+			stack.Push( new DrawFrameItem(rootFrame, Color.White, rootFrame.GlobalRectangle, rootFrame.GetBorderedRectangle(), rootFrame.Text ) );
 
-					colorMultiplier	=	colorMultiplier * OverallColor;
 
-					DrawFrameBorders( sb, colorMultiplier );
+			while (stack.Any()) {
+				
+				var currentDrawFrame = stack.Pop();
 
-					Draw( gameTime, sb, colorMultiplier );
+				if (!currentDrawFrame.Frame.IsDrawable) {
+					continue;
+				}
 
-					foreach ( var child in Children ) {
-						child.DrawInternal( gameTime, sb, colorMultiplier );
+				list.Add( currentDrawFrame );
+
+				foreach ( var child in currentDrawFrame.Frame.Children.Reverse() ) {
+
+					var color = currentDrawFrame.Color * child.OverallColor;
+					var inner = Clip( child.GetBorderedRectangle(), currentDrawFrame.InnerClip );
+					var outer = Clip( child.GlobalRectangle,		currentDrawFrame.InnerClip );
+
+					if ( MathUtil.IsRectInsideRect( child.GlobalRectangle, currentDrawFrame.InnerClip ) ) {
+						stack.Push( new DrawFrameItem(child, color, outer, inner, currentDrawFrame.Text + "-" + child.Text ) );
 					}
 				}
 			}
+
+
+
+			for (int i=0; i<list.Count; i++) {
+				var drawFrame = list[i];
+
+				spriteLayer.SetClipRectangle( i*2+0, drawFrame.OuterClip, drawFrame.Color );
+				spriteLayer.SetClipRectangle( i*2+1, drawFrame.InnerClip, drawFrame.Color );
+
+				drawFrame.Frame.DrawFrameBorders( spriteLayer, i*2+0 );
+				drawFrame.Frame.DrawFrame( gameTime, spriteLayer,   i*2+1 );
+			}
 		}
+
+
+
+		/// <summary>
+		/// Clips one rectangle by another.
+		/// </summary>
+		/// <param name="child"></param>
+		/// <param name="parent"></param>
+		/// <returns></returns>
+		static Rectangle Clip ( Rectangle child, Rectangle parent )
+		{
+			var r = new Rectangle();
+
+			r.Left		=	Math.Max( child.Left,	parent.Left		);
+			r.Right		=	Math.Min( child.Right,	parent.Right	);
+			r.Top		=	Math.Max( child.Top,	parent.Top		);
+			r.Bottom	=	Math.Min( child.Bottom,	parent.Bottom	);
+
+			return r;
+		}
+
 
 
 		/// <summary>
@@ -739,7 +787,7 @@ namespace Fusion.Engine.Frames {
 		/// <summary>
 		/// Draws frame stuff
 		/// </summary>
-		void DrawFrameBorders ( SpriteLayer sb, Color colorMultiplier )
+		void DrawFrameBorders ( SpriteLayer spriteLayer, int clipRectIndex )
 		{
 			int gx	=	GlobalRectangle.X;
 			int gy	=	GlobalRectangle.Y;
@@ -752,14 +800,14 @@ namespace Fusion.Engine.Frames {
 
 			var whiteTex = Game.RenderSystem.WhiteTexture;
 
-			var clr	=	BorderColor * colorMultiplier;
+			var clr	=	BorderColor;
 
-			sb.Draw( whiteTex,	gx,				gy,				w,		bt,				clr ); 
-			sb.Draw( whiteTex,	gx,				gy + h - bb,	w,		bb,				clr ); 
-			sb.Draw( whiteTex,	gx,				gy + bt,		bl,		h - bt - bb,	clr ); 
-			sb.Draw( whiteTex,	gx + w - br,	gy + bt,		br,		h - bt - bb,	clr ); 
+			spriteLayer.Draw( whiteTex,	gx,				gy,				w,		bt,				clr, clipRectIndex ); 
+			spriteLayer.Draw( whiteTex,	gx,				gy + h - bb,	w,		bb,				clr, clipRectIndex ); 
+			spriteLayer.Draw( whiteTex,	gx,				gy + bt,		bl,		h - bt - bb,	clr, clipRectIndex ); 
+			spriteLayer.Draw( whiteTex,	gx + w - br,	gy + bt,		br,		h - bt - bb,	clr, clipRectIndex ); 
 
-			sb.Draw( whiteTex,	GetBorderedRectangle(), BackColor * colorMultiplier );
+			spriteLayer.Draw( whiteTex,	GetBorderedRectangle(), BackColor, clipRectIndex );
 		}
 
 
@@ -768,10 +816,10 @@ namespace Fusion.Engine.Frames {
 		/// Draws frame stuff.
 		/// </summary>
 		/// <param name="gameTime"></param>
-		protected virtual void Draw ( GameTime gameTime, SpriteLayer sb, Color colorMultiplier )
+		protected virtual void DrawFrame ( GameTime gameTime, SpriteLayer spriteLayer, int clipRectIndex )
 		{
-			DrawFrameImage( sb, colorMultiplier );
-			DrawFrameText( sb, colorMultiplier );
+			DrawFrameImage( spriteLayer, clipRectIndex );
+			DrawFrameText ( spriteLayer, clipRectIndex );
 		}
 
 
@@ -886,11 +934,11 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-
+		
 		/// <summary>
 		/// 
 		/// </summary>
-		protected void DrawFrameImage (SpriteLayer sb, Color colorMultiplier )
+		protected virtual void DrawFrameImage (SpriteLayer spriteLayer, int clipRectIndex )
 		{
 			if (Image==null) {
 				return;
@@ -900,24 +948,24 @@ namespace Fusion.Engine.Frames {
 			var bp = GetBorderedRectangle();
 
 			if (ImageMode==FrameImageMode.Stretched) {
-				sb.Draw( Image, gp, ImageColor * colorMultiplier );
+				spriteLayer.Draw( Image, bp, ImageColor, clipRectIndex );
 				return;
 			}
 
 			if (ImageMode==FrameImageMode.Centered) {
-				int x = gp.X + gp.Width/2  - Image.Width/2;
-				int y = gp.Y + gp.Height/2 - Image.Height/2;
-				sb.Draw( Image, x, y, Image.Width, Image.Height, ImageColor * colorMultiplier );
+				int x = bp.X + gp.Width/2  - Image.Width/2;
+				int y = bp.Y + gp.Height/2 - Image.Height/2;
+				spriteLayer.Draw( Image, x, y, Image.Width, Image.Height, ImageColor, clipRectIndex );
 				return;
 			}
 
 			if (ImageMode==FrameImageMode.Tiled) {
-				sb.Draw( Image, bp, new Rectangle(0,0,bp.Width,bp.Height), ImageColor * colorMultiplier );
+				spriteLayer.Draw( Image, bp, new Rectangle(0,0,bp.Width,bp.Height), ImageColor, clipRectIndex );
 				return;
 			}
 
 			if (ImageMode == FrameImageMode.DirectMapped) {
-				sb.Draw(Image, gp, gp, ImageColor * colorMultiplier);
+				spriteLayer.Draw(Image, bp, bp, ImageColor, clipRectIndex );
 				return;
 			}
 
@@ -930,7 +978,7 @@ namespace Fusion.Engine.Frames {
 		/// Draws string
 		/// </summary>
 		/// <param name="text"></param>
-		protected void DrawFrameText ( SpriteLayer sb, Color colorMultiplier )
+		protected virtual void DrawFrameText ( SpriteLayer spriteLayer, int clipRectIndex )
 		{											
 			if (string.IsNullOrEmpty(Text)) {
 				return;
@@ -989,10 +1037,10 @@ namespace Fusion.Engine.Frames {
 			} */
 
 			if (ShadowColor.A!=0) {
-				Font.DrawString( sb, Text, x + TextOffsetX+ShadowOffset.X, y + TextOffsetY+ShadowOffset.Y, ShadowColor * colorMultiplier, 0, false );
+				Font.DrawString( spriteLayer, Text, x + TextOffsetX+ShadowOffset.X, y + TextOffsetY+ShadowOffset.Y, ShadowColor, clipRectIndex, 0, false );
 			}
 
-			Font.DrawString( sb, Text, x + TextOffsetX, y + TextOffsetY, ForeColor * colorMultiplier, 0, false );
+			Font.DrawString( spriteLayer, Text, x + TextOffsetX, y + TextOffsetY, ForeColor, clipRectIndex, 0, false );
 		}
 
 

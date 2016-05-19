@@ -33,6 +33,13 @@ namespace Fusion.Engine.Graphics {
 		}
 
 		/// <summary>
+		/// Gets sky settings.
+		/// </summary>
+		public DofSettings DofSettings {
+			get; private set;
+		}
+
+		/// <summary>
 		/// Gets view light set.
 		/// This value is already initialized when View object is created.
 		/// </summary>
@@ -99,6 +106,7 @@ namespace Fusion.Engine.Graphics {
 
 			HdrSettings		=	new HdrSettings();
 			SkySettings		=	new SkySettings();
+			DofSettings		=	new DofSettings();
 
 			Instances		=	new List<MeshInstance>();
 			LightSet		=	new LightSet( Game.RenderSystem );
@@ -112,8 +120,8 @@ namespace Fusion.Engine.Graphics {
 
 			radianceFrame	=	new HdrFrame( Game, 512,512 );
 
-			Radiance		=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, RenderSystemConfig.EnvMapSize, true );
-			RadianceCache	=	new TextureCubeArray( Game.GraphicsDevice, 128, RenderSystemConfig.MaxEnvLights, ColorFormat.Rgba16F, true );
+			Radiance		=	new RenderTargetCube( Game.GraphicsDevice, ColorFormat.Rgba16F, RenderSystem.EnvMapSize, true );
+			RadianceCache	=	new TextureCubeArray( Game.GraphicsDevice, 128, RenderSystem.MaxEnvLights, ColorFormat.Rgba16F, true );
 
 			Resize( width, height );
 		}
@@ -299,8 +307,17 @@ namespace Fusion.Engine.Graphics {
 			//	clear g-buffer and hdr-buffers:
 			ClearBuffers( viewHdrFrame );
 
-			//	render shadows :
-			rs.LightRenderer.RenderShadows( this, this.LightSet );
+			//	single pass for stereo rendering :
+			if (stereoEye!=StereoEye.Right) {
+
+				//	simulate particles BEFORE lighting
+				//	to make particle lit (position is required) and 
+				//	get simulated particles for shadows.
+				ParticleSystem.Simulate( gameTime, Camera );
+
+				//	render shadows :
+				rs.LightRenderer.RenderShadows( this, this.LightSet );
+			}
 
 			//	render g-buffer :
 			rs.SceneRenderer.RenderGBuffer( stereoEye, Camera, viewHdrFrame, this );
@@ -308,12 +325,13 @@ namespace Fusion.Engine.Graphics {
 			//	render ssao :
 			rs.SsaoFilter.Render( stereoEye, Camera, viewHdrFrame.DepthBuffer, viewHdrFrame.NormalMapBuffer );
 
-			switch (rs.Config.ShowGBuffer) {
+			switch (rs.ShowGBuffer) {
 				case 1 : rs.Filter.Copy( targetSurface, viewHdrFrame.DiffuseBuffer ); return;
 				case 2 : rs.Filter.Copy( targetSurface, viewHdrFrame.SpecularBuffer ); return;
 				case 3 : rs.Filter.Copy( targetSurface, viewHdrFrame.NormalMapBuffer ); return;
 				case 4 : rs.Filter.Copy( targetSurface, viewHdrFrame.ScatteringBuffer ); return;
 				case 5 : rs.Filter.Copy( targetSurface, rs.SsaoFilter.OcclusionMap ); return;
+				case 6 : rs.Filter.StretchRect( targetSurface, rs.LightRenderer.ParticleShadow ); return;
 			}
 
 			//	render sky :
@@ -323,6 +341,9 @@ namespace Fusion.Engine.Graphics {
 			//	render lights :
 			rs.LightRenderer.RenderLighting( stereoEye, Camera, viewHdrFrame, this, Radiance );
 
+			//	render "solid" DOF :
+			rs.DofFilter.Render( gameTime, viewHdrFrame.LightAccumulator, viewHdrFrame.HdrBuffer, viewHdrFrame.DepthBuffer, this );
+
 			//	render and simulate particles :
 			ParticleSystem.Render( gameTime, Camera, stereoEye, viewHdrFrame );
 
@@ -331,7 +352,7 @@ namespace Fusion.Engine.Graphics {
 
 
 			//	apply FXAA
-			if (rs.Config.UseFXAA) {
+			if (rs.UseFXAA) {
 				rs.Filter.Fxaa( targetSurface, TempFXBuffer );
 			} else {
 				rs.Filter.Copy( targetSurface, TempFXBuffer );
@@ -351,10 +372,6 @@ namespace Fusion.Engine.Graphics {
 		public void RenderRadiance ()
 		{
 			var sw = new Stopwatch();
-
-			/*if (!Game.Keyboard.IsKeyDown(Input.Keys.F3)) {
-				return;
-			} //*/
 
 			Log.Message("Radiance capture...");
 

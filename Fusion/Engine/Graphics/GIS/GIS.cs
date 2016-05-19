@@ -223,20 +223,23 @@ namespace Fusion.Engine.Graphics.GIS
 	    {
 		    if (!layers.Any()) return;
 
-			constantData.ViewProj		= Camera.ViewMatrixFloat * Camera.ProjMatrixFloat;
-			constantData.ViewPositionX	= Camera.FinalCamPosition.X;
-			constantData.ViewPositionY	= Camera.FinalCamPosition.Y;
-			constantData.ViewPositionZ	= Camera.FinalCamPosition.Z;
+			using (new PixEvent("GIS")) {
 
-			constBuffer.SetData(constantData);
+				constantData.ViewProj		= Camera.ViewMatrixFloat * Camera.ProjMatrixFloat;
+				constantData.ViewPositionX	= Camera.FinalCamPosition.X;
+				constantData.ViewPositionY	= Camera.FinalCamPosition.Y;
+				constantData.ViewPositionZ	= Camera.FinalCamPosition.Z;
 
-			var batches = layers.OrderByDescending(x => x.ZOrder);
+				constBuffer.SetData(constantData);
+
+				var batches = layers.OrderByDescending(x => x.ZOrder);
 			
-		    foreach (var batch in batches) {
-			    if (!batch.IsVisible) continue;
+				foreach (var batch in batches) {
+					if (!batch.IsVisible) continue;
 
-				batch.Draw(gameTime, constBuffer);
-		    }
+					batch.Draw(gameTime, constBuffer);
+				}
+			}
 	    }
 
 
