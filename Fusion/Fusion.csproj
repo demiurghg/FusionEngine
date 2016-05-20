@@ -52,6 +52,9 @@
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="OculusWrap">
+      <HintPath>..\SDKs\OculusWrap\OculusWrap.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\SDKs\SharpDX\SharpDX.dll</HintPath>
@@ -195,6 +198,12 @@
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
     <Compile Include="Drivers\Graphics\Resources\UnorderedAccess.cs" />
     <Compile Include="Drivers\Graphics\Resources\VolumeRWTexture.cs" />
+    <Compile Include="Drivers\Input\Touch\BackgroundTouch.cs" />
+    <Compile Include="Drivers\Input\Touch\BaseTouchHandler.cs" />
+    <Compile Include="Drivers\Input\Touch\TouchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Drivers\Input\Touch\Win32TouchFunctions.cs" />
     <Compile Include="Engine\Audio\AudioChannels.cs" />
     <Compile Include="Engine\Audio\Enums.cs" />
     <Compile Include="Engine\Audio\SoundWorld.cs" />
@@ -239,6 +248,7 @@
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BaseBingMapsSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BingMapSatellite.cs" />
     <Compile Include="Engine\Graphics\GIS\DebugGisLayer.cs" />
+    <Compile Include="Engine\Graphics\GIS\PointsGisLayerCPU.cs" />
     <Compile Include="Engine\Graphics\GIS\TextGisLayer.cs" />
     <Compile Include="Engine\Graphics\Lights\CascadedShadowMap.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.CSMController.cs" />
@@ -367,6 +377,7 @@
     <Compile Include="Engine\Input\Bind.cs" />
     <Compile Include="Engine\Input\BindList.cs" />
     <Compile Include="Engine\Input\KeyBind.cs" />
+    <Compile Include="Engine\Input\Touch.cs" />
     <Compile Include="Engine\Input\Unbind.cs" />
     <Compile Include="Engine\Client\GameClient.Internal.cs" />
     <Compile Include="Engine\Media\MediaState.cs" />

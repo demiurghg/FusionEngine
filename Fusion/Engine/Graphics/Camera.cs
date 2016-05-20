@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
+using Fusion.Drivers.Graphics.Display;
+using Fusion.Drivers.Input;
+using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Graphics {
 	public class Camera {
@@ -60,7 +63,7 @@ namespace Fusion.Engine.Graphics {
 			this.projMatrix		=	Matrix.PerspectiveOffCenterRH( -nearWidth/2, nearWidth/2, -nearHeight/2, nearHeight/2, near, far );
 			this.projMatrixR	=	Matrix.PerspectiveOffCenterRH( -nearWidth/2 - offset, nearWidth/2 - offset, -nearHeight/2, nearHeight/2, near, far );
 			this.projMatrixL	=	Matrix.PerspectiveOffCenterRH( -nearWidth/2 + offset, nearWidth/2 + offset, -nearHeight/2, nearHeight/2, near, far );
-																					
+																		
 			//	View :
 			this.viewMatrix		=	viewMatrix;
 			this.viewMatrixL	=	viewMatrix	*	Matrix.Translation( Vector3.UnitX * separation / 2 );
@@ -70,6 +73,25 @@ namespace Fusion.Engine.Graphics {
 			this.cameraMatrix	=	Matrix.Invert( viewMatrix );
 			this.cameraMatrixL	=	Matrix.Invert( viewMatrixL );
 			this.cameraMatrixR	=	Matrix.Invert( viewMatrixR );
+
+
+			if (Game.Instance.GraphicsDevice.Display is OculusRiftDisplay) {
+				
+				if (OculusRiftSensors.LeftEye != null && OculusRiftSensors.RightEye != null) {
+					projMatrixL = OculusRiftSensors.LeftEye.Projection;
+					projMatrixR = OculusRiftSensors.RightEye.Projection;
+
+
+					var leftEyePos	= new Vector3(OculusRiftSensors.LeftEye.Position.X, -OculusRiftSensors.LeftEye.Position.Y, -OculusRiftSensors.LeftEye.Position.Z)	;
+					var rightEyePos = new Vector3(OculusRiftSensors.RightEye.Position.X, -OculusRiftSensors.RightEye.Position.Y, -OculusRiftSensors.RightEye.Position.Z);
+
+					var leftRot		= OculusRiftSensors.LeftEye.Rotation;	leftRot.Invert();	leftRot.Normalize();
+					var rightRot	= OculusRiftSensors.RightEye.Rotation;	rightRot.Invert();	rightRot.Normalize();
+
+					viewMatrixL = viewMatrix * Matrix.RotationQuaternion(leftRot)	* Matrix.Translation(leftEyePos);
+					viewMatrixR = viewMatrix * Matrix.RotationQuaternion(rightRot)	* Matrix.Translation(rightEyePos);
+				}
+			}
 		}
 
 

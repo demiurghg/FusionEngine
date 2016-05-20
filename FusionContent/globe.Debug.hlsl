@@ -23,8 +23,13 @@ struct VS_OUTPUT {
 cbuffer CBStage		: register(b0) 	{ ConstData Stage : packoffset( c0 ); }
 
 
+Texture2D		DiffuseMap		: register(t0);
+SamplerState	Sampler			: register(s0);
+
+
 #if 0
 $ubershader DRAW_LINES
+$ubershader DRAW_TEXTURED_POLY
 #endif
 
 
@@ -55,6 +60,15 @@ VS_OUTPUT VSMain ( VS_INPUT v )
 float4 PSMain ( VS_OUTPUT input ) : SV_Target
 {
 	float4 color = input.Color;
+	return color;
+}
+#endif
+
+#ifdef DRAW_TEXTURED_POLY
+float4 PSMain ( VS_OUTPUT input ) : SV_Target
+{
+	float4	color = DiffuseMap.Sample(Sampler, input.Tex.xy);
+	//color = float4(1.0f, 0.0f, 0.0f, 1.0f);
 	return color;
 }
 #endif

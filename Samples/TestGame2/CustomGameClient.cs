@@ -17,16 +17,12 @@ using Fusion.Core.Configuration;
 
 namespace TestGame2 {
 
-	public class Config {
-		public bool Show { get; set; }
-	}
+	//public class Config {
+	//	public bool Show { get; set; }
+	//}
 
 
 	class CustomGameClient : GameClient {
-
-		[Config]
-		public Config Config { get; set; }
-		
 
 		[Command("chat", CommandAffinity.Client)]
 		public class Chat : NoRollbackCommand {
@@ -51,7 +47,7 @@ namespace TestGame2 {
 		/// <param name="engine"></param>
 		public CustomGameClient ( Game game )	: base(game)
 		{
-			Config	= new Config();
+			//Config	= new Config();
 		}
 
 
@@ -111,9 +107,9 @@ namespace TestGame2 {
 		public override void FeedSnapshot ( GameTime svTime, byte[] snapshot, uint ackCommandID ) 
 		{
 			var str = Encoding.UTF8.GetString( snapshot );
-			if (Config.Show) {
-				Log.Message("FOOD : {0}", str);
-			}
+			//if (Config.Show) {
+			//	Log.Message("FOOD : {0}", str);
+			//}
 		}
 
 

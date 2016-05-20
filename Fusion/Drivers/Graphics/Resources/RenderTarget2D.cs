@@ -60,7 +60,7 @@ namespace Fusion.Drivers.Graphics {
 		/// </summary>
 		/// <param name="device"></param>
 		/// <param name="backbufColor"></param>
-		internal RenderTarget2D ( GraphicsDevice device, D3D.Texture2D backbufColor ) : base( device )
+		internal RenderTarget2D ( GraphicsDevice device, D3D.Texture2D backbufColor, RenderTargetViewDescription? desc = null ) : base( device )
 		{
 			Log.Debug("RenderTarget2D: from backbuffer.");
 
@@ -77,7 +77,13 @@ namespace Fusion.Drivers.Graphics {
 
 			tex2D			=	backbufColor;
 			surfaces		=	new RenderTargetSurface[1];
-			surfaces[0]		=	new RenderTargetSurface( new RenderTargetView( device.Device, backbufColor ), null, tex2D, 0, Format, Width, Height, SampleCount );
+
+			if (desc.HasValue) {
+				surfaces[0] = new RenderTargetSurface(new RenderTargetView(device.Device, backbufColor, desc.Value), null, tex2D, 0, Format, Width, Height, SampleCount);
+			}
+			else {
+				surfaces[0] = new RenderTargetSurface(new RenderTargetView(device.Device, backbufColor), null, tex2D, 0, Format, Width, Height, SampleCount);
+			}
 		} 
 
 

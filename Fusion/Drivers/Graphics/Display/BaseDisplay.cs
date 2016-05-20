@@ -14,6 +14,7 @@ using System.Windows.Forms;
 using Forms = System.Windows.Forms;
 using Fusion.Engine.Common;
 using Fusion.Core.Mathematics;
+using Fusion.Input.Touch;
 
 
 namespace Fusion.Drivers.Graphics.Display {
@@ -272,6 +273,47 @@ namespace Fusion.Drivers.Graphics.Display {
 			return form;
 		}
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="parameters"></param>
+		/// <param name="output"></param>
+		/// <returns></returns>
+		public Form CreateTouchForm(GraphicsParameters parameters, Output output)
+		{
+			var form = new TouchForm() {
+				Text			=	Game.GameTitle,
+				BackColor		=	System.Drawing.Color.Black,
+				ClientSize		=	new System.Drawing.Size(parameters.Width, parameters.Height),
+				Icon			=	Game.Icon ?? Fusion.Properties.Resources.fusionIcon,
+				ControlBox		=	false,
+				StartPosition	=	output == null ? FormStartPosition.CenterScreen : FormStartPosition.Manual,
+			};
+
+
+			if (output != null) {
+				var bounds	= output.Description.DesktopBounds;
+				var scrW	= bounds.Right - bounds.Left;
+				var scrH	= bounds.Bottom - bounds.Top;
+
+				form.Location = new System.Drawing.Point(bounds.Left + (scrW - form.Width) / 2, bounds.Top + (scrH - form.Height) / 2);
+				form.Text += " - [" + output.Description.DeviceName + "]";
+			}
+
+			form.KeyDown	+= form_KeyDown;
+			form.KeyUp		+= form_KeyUp;
+			form.KeyPress	+= form_KeyPress;
+			form.Resize		+= (s, e) => Game.InputDevice.RemoveAllPressedKeys();
+			form.Move		+= (s, e) => Game.InputDevice.RemoveAllPressedKeys();
+
+			form.TouchTap			+= (pos) => Game.InputDevice.NotifyTouchTap(pos);
+			form.TouchDoubleTap		+= (pos) => Game.InputDevice.NotifyTouchDoubleTap(pos);
+			form.TouchSecondaryTap	+= (pos) => Game.InputDevice.NotifyTouchSecondaryTap(pos);
+			form.TouchManipulation	+= (center, delta, scale) => Game.InputDevice.NotifyTouchManipulation(center, delta, scale);
+
+			return form;
+		}
 
 
 		void form_FormClosing ( object sender, FormClosingEventArgs e )

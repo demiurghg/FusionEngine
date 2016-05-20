@@ -169,12 +169,12 @@ namespace Fusion.Engine.Graphics {
 			if (GisLayers.Any()) {
 
 				if (GlobeDepthStencil == null) {
-					GlobeDepthStencil = new DepthStencil2D(Game.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height);
+					GlobeDepthStencil = new DepthStencil2D(Game.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height, targetSurface.SampleCount);
 				}
 				else if (GlobeDepthStencil.Width != targetSurface.Width || GlobeDepthStencil.Height != targetSurface.Height) {
 					
 					GlobeDepthStencil.Dispose();
-					GlobeDepthStencil = new DepthStencil2D(Game.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height);
+					GlobeDepthStencil = new DepthStencil2D(Game.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height, targetSurface.SampleCount);
 				}
 
 				rs.Device.Clear(GlobeDepthStencil.Surface);

@@ -235,9 +235,9 @@ namespace Fusion.Engine.Server {
 		void UpdateNetworkAndLogic ( GameTime svTime, NetServer server, SnapshotQueue snapshotQueue )
 		{
 			#if DEBUG
-			server.Configuration.SimulatedLoss				=	Game.Network.Config.SimulatePacketsLoss;
-			server.Configuration.SimulatedMinimumLatency	=	Game.Network.Config.SimulateMinLatency;
-			server.Configuration.SimulatedRandomLatency		=	Game.Network.Config.SimulateRandomLatency;
+			server.Configuration.SimulatedLoss				=	Game.Network.SimulatePacketsLoss;
+			server.Configuration.SimulatedMinimumLatency	=	Game.Network.SimulateMinLatency;
+			server.Configuration.SimulatedRandomLatency		=	Game.Network.SimulateRandomLatency;
 			#endif
 
 			//	read input messages :
