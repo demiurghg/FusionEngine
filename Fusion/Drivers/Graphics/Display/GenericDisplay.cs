@@ -37,7 +37,13 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// <param name="parameters"></param>
 		public GenericDisplay( Game game, GraphicsDevice device, GraphicsParameters parameters ) : base( game, device, parameters )
 		{
-			window = CreateTouchForm(parameters, null);
+			try {
+				window = CreateTouchForm(parameters, null);
+			}
+			catch (System.EntryPointNotFoundException e) {
+				Log.Warning("Looks like your system does't support touch gestures. You need Windows 8.1 or newer for this.");
+				window = CreateForm(parameters, null);
+			}
 
 			try {
 				NvApi.Initialize();
