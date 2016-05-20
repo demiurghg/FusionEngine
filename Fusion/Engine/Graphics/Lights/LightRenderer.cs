@@ -21,12 +21,10 @@ namespace Fusion.Engine.Graphics {
 
 		RenderSystem rs { get { return Game.RenderSystem; } }
 
-		DepthStencil2D		csmDepth		;
-		RenderTarget2D		csmColor		;
 		DepthStencil2D		spotDepth		;
 		RenderTarget2D		spotColor		;
 
-		RenderTarget2D		particleShadow	;
+		CascadedShadowMap	cascadedShadowMap;
 
 
 		OmniLightGPU[]		omniLightData;
@@ -36,14 +34,10 @@ namespace Fusion.Engine.Graphics {
 		StructuredBuffer	spotLightBuffer	;
 		StructuredBuffer	envLightBuffer	;
 
-		public RenderTarget2D	CSMColor { get { return csmColor; } }
-		public DepthStencil2D	CSMDepth { get { return csmDepth; } }
+		internal RenderTarget2D	SpotColor { get { return spotColor; } }
+		internal DepthStencil2D	SpotDepth { get { return spotDepth; } }
 
-		public RenderTarget2D	SpotColor { get { return spotColor; } }
-		public DepthStencil2D	SpotDepth { get { return spotDepth; } }
-
-		public RenderTarget2D	ParticleShadow { get { return particleShadow; } }
-
+		internal CascadedShadowMap CascadedShadowMap { get { return cascadedShadowMap; } }
 
 
 		enum LightingFlags {
@@ -81,6 +75,7 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(624)] public float		ShowCSLoadOmni;
 			[FieldOffset(628)] public float		ShowCSLoadEnv;
 			[FieldOffset(632)] public float		ShowCSLoadSpot;
+			[FieldOffset(636)] public int		CascadeCount;
 		}
 
 
@@ -183,21 +178,15 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void CreateShadowMaps ()
 		{
-			SafeDispose( ref csmColor );
-			SafeDispose( ref csmDepth );
+			SafeDispose( ref cascadedShadowMap );
 
 			SafeDispose( ref spotColor );
 			SafeDispose( ref spotDepth );
 
-			SafeDispose( ref particleShadow );
+			cascadedShadowMap	=	new CascadedShadowMap( Game.GraphicsDevice, CSMCascadeSize, CSMCascadeCount );
 
-			csmColor		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  CSMSize * 4, CSMSize );
-			csmDepth		=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, CSMSize * 4, CSMSize );
-
-			particleShadow	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8_sRGB, CSMSize * 4, CSMSize );
-
-			spotColor		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  SpotShadowSize * 4, SpotShadowSize * 4 );
-			spotDepth		=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, SpotShadowSize * 4, SpotShadowSize * 4 );
+			spotColor			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  SpotShadowSize * 4, SpotShadowSize * 4 );
+			spotDepth			=	new DepthStencil2D( Game.GraphicsDevice, DepthFormat.D24S8, SpotShadowSize * 4, SpotShadowSize * 4 );
 
 		}
 
@@ -210,12 +199,10 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				SafeDispose( ref csmDepth );
-				SafeDispose( ref csmColor );
 				SafeDispose( ref spotDepth );
 				SafeDispose( ref spotColor );
 
-				SafeDispose( ref particleShadow );
+				SafeDispose( ref cascadedShadowMap );
 
 				SafeDispose( ref lightingCB );
 
@@ -278,6 +265,9 @@ namespace Fusion.Engine.Graphics {
 					cbData.ShowCSLoadEnv			=	ShowEnvLightTileLoad  ? 1 : 0;
 					cbData.ShowCSLoadSpot			=	ShowSpotLightTileLoad ? 1 : 0;
 
+					cbData.CascadeCount				=	cascadedShadowMap.CascadeCount;
+
+
 					ComputeOmniLightsTiles( view, projection, viewLayer.LightSet );
 					ComputeSpotLightsTiles( view, projection, viewLayer.LightSet );
 					ComputeEnvLightsTiles(  view, projection, viewLayer.LightSet );
@@ -299,7 +289,7 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderResources[2]	=	hdrFrame.NormalMapBuffer;
 					device.ComputeShaderResources[3]	=	hdrFrame.ScatteringBuffer;
 					device.ComputeShaderResources[4]	=	hdrFrame.DepthBuffer;
-					device.ComputeShaderResources[5]	=	csmColor;
+					device.ComputeShaderResources[5]	=	cascadedShadowMap.ColorBuffer;
 					device.ComputeShaderResources[6]	=	spotColor;
 					device.ComputeShaderResources[7]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
 					device.ComputeShaderResources[8]	=	omniLightBuffer;
@@ -308,7 +298,7 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderResources[11]	=	rs.SsaoFilter.OcclusionMap;
 					device.ComputeShaderResources[12]	=	viewLayer.RadianceCache;
 					device.ComputeShaderResources[13]	=	viewLayer.ParticleSystem.SimulatedParticles;
-					device.ComputeShaderResources[14]	=	particleShadow;
+					device.ComputeShaderResources[14]	=	cascadedShadowMap.ParticleShadow;
 
 					device.ComputeShaderConstants[0]	=	lightingCB;
 

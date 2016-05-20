@@ -331,7 +331,8 @@ namespace Fusion.Engine.Graphics {
 				case 3 : rs.Filter.Copy( targetSurface, viewHdrFrame.NormalMapBuffer ); return;
 				case 4 : rs.Filter.Copy( targetSurface, viewHdrFrame.ScatteringBuffer ); return;
 				case 5 : rs.Filter.Copy( targetSurface, rs.SsaoFilter.OcclusionMap ); return;
-				case 6 : rs.Filter.StretchRect( targetSurface, rs.LightRenderer.ParticleShadow ); return;
+				case 6 : rs.Filter.StretchRect( targetSurface, rs.LightRenderer.CascadedShadowMap.ParticleShadow ); return;
+				case 7 : rs.Filter.StretchRect( targetSurface, rs.LightRenderer.CascadedShadowMap.ColorBuffer ); return;
 			}
 
 			//	render sky :

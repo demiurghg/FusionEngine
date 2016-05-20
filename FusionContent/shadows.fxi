@@ -71,7 +71,7 @@ static float2 poisonDisk[16] = {
 	float2(-0.4085272f, -0.8579809f)
 };
 
-float3	ComputeCSM ( float4 worldPos, LightingParams params, SamplerComparisonState shadowSampler, Texture2D csmTexture, bool useFilter )
+float3	ComputeCSM ( float4 worldPos, LightingParams params, SamplerComparisonState shadowSampler, SamplerState linearSampler, Texture2D csmTexture, Texture2D particleShadow, bool useFilter )
 {
 	float3	colorizer		= float3(1,1,1);
 	float	shadowId	= -1;
@@ -81,19 +81,19 @@ float3	ComputeCSM ( float4 worldPos, LightingParams params, SamplerComparisonSta
 	//	select cascade :
 	smProj	   =  mul( worldPos, params.CSMViewProjection3 );
 	smProj.xy /=  smProj.w;	smProj.w   =  1;
-	if (abs(smProj.x)<0.99 && abs(smProj.y)<0.99) { colorizer = float3(0,0,4); shadowId = 3; smProj2 = smProj; }
+	if (abs(smProj.x)<0.99 && abs(smProj.y)<0.99 && params.CascadeCount>3) { colorizer = float3(0,0,4); shadowId = 3; smProj2 = smProj; }
 
 	smProj	   =  mul( worldPos, params.CSMViewProjection2 );
 	smProj.xy /=  smProj.w;	smProj.w   =  1;
-	if (abs(smProj.x)<0.99 && abs(smProj.y)<0.99) { colorizer = float3(0,2,0); shadowId = 2; smProj2 = smProj; }
+	if (abs(smProj.x)<0.99 && abs(smProj.y)<0.99 && params.CascadeCount>2) { colorizer = float3(0,2,0); shadowId = 2; smProj2 = smProj; }
 	
 	smProj	   =  mul( worldPos, params.CSMViewProjection1 );
 	smProj.xy /=  smProj.w;	smProj.w   =  1;
-	if (abs(smProj.x)<0.99 && abs(smProj.y)<0.99) { colorizer = float3(2,0,0); shadowId = 1; smProj2 = smProj; }
+	if (abs(smProj.x)<0.99 && abs(smProj.y)<0.99 && params.CascadeCount>1) { colorizer = float3(2,0,0); shadowId = 1; smProj2 = smProj; }
 
 	smProj	   =  mul( worldPos, params.CSMViewProjection0 );
 	smProj.xy /=  smProj.w;	smProj.w   =  1;
-	if (abs(smProj.x)<0.99 && abs(smProj.y)<0.99) { colorizer = float3(1,1,1); shadowId = 0; smProj2 = smProj; }
+	if (abs(smProj.x)<0.99 && abs(smProj.y)<0.99 && params.CascadeCount>0) { colorizer = float3(1,1,1); shadowId = 0; smProj2 = smProj; }
 
 	//	compute UVs 
 	float2	csmSize;
@@ -102,10 +102,10 @@ float3	ComputeCSM ( float4 worldPos, LightingParams params, SamplerComparisonSta
 	float2	offset	=	1 / csmSize;
 	float2	smUV	=	0.5 * (float2(1, -1) * smProj2.xy + float2(1, 1));
 	float2	smUVprt	=	0.5 * (float2(1, -1) * smProj2.xy + float2(1, 1));
-			smUV	=	smUV * float2(0.25,1) + float2( shadowId/4, 0 );
+			smUV	=	smUV * float2(1.0f/params.CascadeCount,1) + float2( shadowId/(float)params.CascadeCount, 0 );
 	
-	float  z  		= 	smProj2.z;
-	float  shadow	=	0;
+	float   z  		= 	smProj2.z;
+	float3  shadow	=	0;
 	
 	float radius = params.CSMFilterRadius.x;
 	
@@ -116,6 +116,8 @@ float3	ComputeCSM ( float4 worldPos, LightingParams params, SamplerComparisonSta
 			float  sh  = csmTexture.SampleCmpLevelZero( shadowSampler, smUV + offset * radius * float2(x,y), z );
 			shadow += sh / 16;
 		}
+
+		shadow *= particleShadow.SampleLevel( linearSampler, smUV, 0 ).rgb;
 		
 	} else {
 		shadow = csmTexture.SampleCmpLevelZero( shadowSampler, smUV, z );
