@@ -47,13 +47,16 @@ namespace Fusion.Engine.Graphics {
 			ICSMController csmCtrl	=	lightSet.DirectLight.CSMController ?? csmController;
 
 
+			int activeCascadeCount	=	Math.Min( cascadedShadowMap.CascadeCount, csmCtrl.GetActiveCascadeCount() );
+
+
 			using (new PixEvent("Cascaded Shadow Maps")) {
 
 				Game.GraphicsDevice.ResetStates();
 			
 				cascadedShadowMap.Clear();
 
-				for (int i=0; i<cascadedShadowMap.CascadeCount; i++) {
+				for (int i=0; i<activeCascadeCount; i++) {
 
 					var context = new ShadowContext();
 					context.ShadowView			=	csmCtrl.GetShadowViewMatrix( i );
@@ -73,7 +76,7 @@ namespace Fusion.Engine.Graphics {
 
 			using (new PixEvent("Particle Shadows")) {
 			
-				for (int i=0; i<cascadedShadowMap.CascadeCount; i++) {
+				for (int i=0; i<activeCascadeCount; i++) {
 
 					var viewport = cascadedShadowMap.GetSplitViewport(i);
 					var colorBuffer = cascadedShadowMap.ParticleShadow.Surface;

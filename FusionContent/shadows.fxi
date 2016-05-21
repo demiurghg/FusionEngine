@@ -102,7 +102,7 @@ float3	ComputeCSM ( float4 worldPos, LightingParams params, SamplerComparisonSta
 	float2	offset	=	1 / csmSize;
 	float2	smUV	=	0.5 * (float2(1, -1) * smProj2.xy + float2(1, 1));
 	float2	smUVprt	=	0.5 * (float2(1, -1) * smProj2.xy + float2(1, 1));
-			smUV	=	smUV * float2(1.0f/params.CascadeCount,1) + float2( shadowId/(float)params.CascadeCount, 0 );
+			smUV	=	smUV * float2(params.CascadeScale,1) + float2( shadowId*params.CascadeScale, 0 );
 	
 	float   z  		= 	smProj2.z;
 	float3  shadow	=	0;

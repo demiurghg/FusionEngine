@@ -26,6 +26,18 @@ namespace Fusion.Engine.Graphics {
 
 
 
+			public bool IsCascadeDirty ( int cascadeIndex )
+			{
+				return true;
+			}
+
+
+			public int GetActiveCascadeCount()
+			{
+				return CascadedShadowMap.MaxCascadeCount;
+			}
+
+
 			public void ComputeMatricies ( Matrix viewMatrix, Vector3 lightDir, int cascadeSize, float splitSize, float splitOffset, float splitFactor, float projDepth )
 			{
 				var	smSize		=	cascadeSize;

@@ -19,6 +19,19 @@ namespace Fusion.Engine.Graphics {
 	public interface ICSMController {
 
 		/// <summary>
+		/// Indicates whether specifed cascade should be updated.
+		/// </summary>
+		/// <param name="cascadeIndex"></param>
+		/// <returns></returns>
+		bool IsCascadeDirty ( int cascadeIndex );
+
+		/// <summary>
+		/// Gets number of currently active shadow cascades.
+		/// </summary>
+		/// <returns></returns>
+		int GetActiveCascadeCount ();
+
+		/// <summary>
 		/// Gets view matrix for each cascade.
 		/// </summary>
 		/// <param name="cascadeIndex">Cascade index. Value must be within range 0..CascadedShadowMap.MaxCascadeCount</param>

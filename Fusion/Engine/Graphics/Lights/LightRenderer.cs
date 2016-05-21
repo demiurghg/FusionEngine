@@ -52,7 +52,7 @@ namespace Fusion.Engine.Graphics {
 			CLEAR_VOXEL				=	0x0004,
 		}
 
-		[StructLayout(LayoutKind.Explicit, Size=640)]
+		[StructLayout(LayoutKind.Explicit, Size=656)]
 		struct LightingParams {
 			[FieldOffset(  0)] public Matrix	View;
 			[FieldOffset( 64)] public Matrix	Projection;
@@ -76,6 +76,8 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(628)] public float		ShowCSLoadEnv;
 			[FieldOffset(632)] public float		ShowCSLoadSpot;
 			[FieldOffset(636)] public int		CascadeCount;
+			[FieldOffset(640)] public float		CascadeScale;
+
 		}
 
 
@@ -235,6 +237,8 @@ namespace Fusion.Engine.Graphics {
 
 				ICSMController csmCtrl	=	viewLayer.LightSet.DirectLight.CSMController ?? csmController;
 
+				int activeCascadeCount	=	Math.Min( cascadedShadowMap.CascadeCount, csmCtrl.GetActiveCascadeCount() );
+
 
 				//
 				//	Setup compute shader parameters and states :
@@ -266,7 +270,8 @@ namespace Fusion.Engine.Graphics {
 					cbData.ShowCSLoadEnv			=	ShowEnvLightTileLoad  ? 1 : 0;
 					cbData.ShowCSLoadSpot			=	ShowSpotLightTileLoad ? 1 : 0;
 
-					cbData.CascadeCount				=	cascadedShadowMap.CascadeCount;
+					cbData.CascadeCount				=	activeCascadeCount;
+					cbData.CascadeScale				=	1.0f / (float)cascadedShadowMap.CascadeCount;
 
 
 					ComputeOmniLightsTiles( view, projection, viewLayer.LightSet );
