@@ -13,8 +13,23 @@ using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
 
+	/// <summary>
+	/// Defines interface for cacascade shadow map controller.
+	/// </summary>
 	public interface ICSMController {
+
+		/// <summary>
+		/// Gets view matrix for each cascade.
+		/// </summary>
+		/// <param name="cascadeIndex">Cascade index. Value must be within range 0..CascadedShadowMap.MaxCascadeCount</param>
+		/// <returns></returns>
 		Matrix GetShadowViewMatrix ( int cascadeIndex );
+
+		/// <summary>
+		/// Gets projection matrix for each cascade.
+		/// </summary>
+		/// <param name="cascadeIndex">Cascade index. Value must be within range 0..CascadedShadowMap.MaxCascadeCount</param>
+		/// <returns></returns>
 		Matrix GetShadowProjectionMatrix ( int cascadeIndex );
 	}
 }
