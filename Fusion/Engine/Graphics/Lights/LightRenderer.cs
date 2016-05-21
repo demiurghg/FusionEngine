@@ -214,8 +214,6 @@ namespace Fusion.Engine.Graphics {
 			base.Dispose( disposing );
 		}
 
-		Matrix[] csmViewProjections = new Matrix[4];
-
 
 		/// <summary>
 		/// 
@@ -235,6 +233,9 @@ namespace Fusion.Engine.Graphics {
 				var height	=	hdrFrame.HdrBuffer.Height;
 
 
+				ICSMController csmCtrl	=	viewLayer.LightSet.DirectLight.CSMController ?? csmController;
+
+
 				//
 				//	Setup compute shader parameters and states :
 				//
@@ -249,10 +250,10 @@ namespace Fusion.Engine.Graphics {
 					cbData.DirectLightIntensity		=	viewLayer.LightSet.DirectLight.Intensity.ToVector4();
 					cbData.Projection				=	projection;
 
-					cbData.CSMViewProjection0		=	csmViewProjections[0];
-					cbData.CSMViewProjection1		=	csmViewProjections[1];
-					cbData.CSMViewProjection2		=	csmViewProjections[2];
-					cbData.CSMViewProjection3		=	csmViewProjections[3];
+					cbData.CSMViewProjection0		=	csmCtrl.GetShadowViewMatrix(0) * csmCtrl.GetShadowProjectionMatrix(0);
+					cbData.CSMViewProjection1		=	csmCtrl.GetShadowViewMatrix(1) * csmCtrl.GetShadowProjectionMatrix(1);
+					cbData.CSMViewProjection2		=	csmCtrl.GetShadowViewMatrix(2) * csmCtrl.GetShadowProjectionMatrix(2);
+					cbData.CSMViewProjection3		=	csmCtrl.GetShadowViewMatrix(3) * csmCtrl.GetShadowProjectionMatrix(3);
 
 					cbData.View						=	view;
 					cbData.ViewPosition				=	new Vector4(viewPos,1);
