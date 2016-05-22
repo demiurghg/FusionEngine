@@ -18,7 +18,7 @@ using Fusion.Engine.Common;
 
 
 namespace Fusion.Drivers.Graphics {
-	public class Texture3D : ShaderResource {
+	internal class Texture3D : ShaderResource {
 
 		D3D.Texture3D	tex3D;
 		ColorFormat		format;

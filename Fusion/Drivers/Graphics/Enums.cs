@@ -16,7 +16,7 @@ using D3DComparison		=	SharpDX.Direct3D11.Comparison;
 
 namespace Fusion.Drivers.Graphics {
 
-	public enum GraphicsProfile {
+	internal enum GraphicsProfile {
 		HiDef,
 		Reach,
 		Mobile,
@@ -26,7 +26,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines stereo mode
 	/// </summary>
-	public enum StereoMode {
+	internal enum StereoMode {
 		Disabled,	///	No stereo
 		NV3DVision,	///	NVidia 3DVision stereo
 		DualHead,	///	Dual-head projector stereo
@@ -38,7 +38,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines interlacing mode for interlaced stereo
 	/// </summary>
-	public enum InterlacingMode {
+	internal enum InterlacingMode {
 		VerticalLR,
 		VerticalRL,
 		HorizontalLR,
@@ -57,7 +57,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Structured buffer flags.
 	/// </summary>
-	public enum StructuredBufferFlags {
+	internal enum StructuredBufferFlags {
 		None,
 		Append,
 		Counter,
@@ -67,7 +67,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines currenly rendered eye for stereo rendering
 	/// </summary>
-	public enum StereoEye {
+	internal enum StereoEye {
 		Left, Right, Mono
 	}
 
@@ -75,7 +75,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines color formats for textures and render targets
 	/// </summary>
-	public enum ColorFormat {
+	internal enum ColorFormat {
 		Unknown,
 		R32F,
 		R16F,
@@ -96,7 +96,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines color formats for depth-stencil surfaces
 	/// </summary>
-	public enum DepthFormat {
+	internal enum DepthFormat {
 		D24S8,
 		D16,
 		D32F,
@@ -107,7 +107,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines vertex field format
 	/// </summary>
-	public enum VertexFormat {
+	internal enum VertexFormat {
 		Float,
 		Vector2,
 		Vector3,
@@ -132,7 +132,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines cube face
 	/// </summary>
-	public enum CubeFace {
+	internal enum CubeFace {
 		FacePosX = 0,
 		FaceNegX = 1,
 		FacePosY = 2,
@@ -145,7 +145,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines primitive type
 	/// </summary>
-	public enum Primitive { 			//	Undefined						= 0,
+	internal enum Primitive { 			//	Undefined						= 0,
 		PointList			= 1,		//	PointList						= 1,
 		LineList			= 2,		//	LineList						= 2,
 		LineStrip			= 3,		//	LineStrip						= 3,
@@ -194,7 +194,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines winding orders that may be used to identify back faces for culling. 
 	/// </summary>
-	public enum CullMode {
+	internal enum CullMode {
 		CullNone,
 		CullCW,
 		CullCCW,
@@ -204,7 +204,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines comparison functions that can be chosen for alpha, stencil, or depth-buffer tests. 
 	/// </summary>
-	public enum ComparisonFunc {
+	internal enum ComparisonFunc {
 		Always			,	///	Always pass the test.
 		Equal			,	///	Accept the new pixel if its value is equal to the value of the current pixel.
 		Greater			,	///	Accept the new pixel if its value is greater than the value of the current pixel.
@@ -219,7 +219,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines color blending factors.
 	/// </summary>
-	public enum Blend {
+	internal enum Blend {
 		Zero				,	///	Each component of the color is multiplied by (0, 0, 0, 0).
 		One					,	///	Each component of the color is multiplied by (1, 1, 1, 1).
 		SrcColor			,	///	Each component of the color is multiplied by the source color. This can be represented as (Rs, Gs, Bs, As), where R, G, B, and A respectively stand for the red, green, blue, and alpha source values.
@@ -239,7 +239,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines how to combine a source color with the destination color already on the render target for color blending. 
 	/// </summary>
-	public enum BlendOp {
+	internal enum BlendOp {
 		Add, 
 		Max,
 		Min,
@@ -252,7 +252,7 @@ namespace Fusion.Drivers.Graphics {
 	/// Defines color channel mask
 	/// </summary>
 	[Flags]
-	public enum ColorChannels {
+	internal enum ColorChannels {
 		None	=	0x00,
 		Red		=	0x01,
 		Green	=	0x02,
@@ -265,7 +265,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines fill mode
 	/// </summary>
-	public enum FillMode {
+	internal enum FillMode {
 		Solid,
 		Wireframe,
 	}
@@ -275,7 +275,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines texture filter
 	/// </summary>
-	public enum Filter {
+	internal enum Filter {
 		MinMagMipPoint = 0,
 		MinMagPointMipLinear = 1,
 		MinPointMagLinearMipPoint = 4,
@@ -301,7 +301,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines texture adressing mode
 	/// </summary>
-	public enum AddressMode {
+	internal enum AddressMode {
 		Wrap = 1,
 		Mirror = 2,
 		Clamp = 3,
@@ -314,7 +314,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Defines stencil operation
 	/// </summary>
-	public enum StencilOp {
+	internal enum StencilOp {
 		Keep = 1,
 		Zero = 2,
 		Replace = 3,
@@ -331,7 +331,7 @@ namespace Fusion.Drivers.Graphics {
 	/// </summary>
 	static class Converter {
 
-		public static int SizeOf( ColorFormat format )
+		internal static int SizeOf( ColorFormat format )
 		{
 			switch ( format ) {
 				case ColorFormat.R32F		: return 4;
@@ -352,7 +352,7 @@ namespace Fusion.Drivers.Graphics {
 		}
 		
 		
-		public static int SizeOf( VertexFormat format )
+		internal static int SizeOf( VertexFormat format )
 		{
 			switch ( format ) {
 				case VertexFormat.Float		: return 4;
@@ -377,7 +377,7 @@ namespace Fusion.Drivers.Graphics {
 			throw new ArgumentException("bad format");
 		}
 		
-		public static Format Convert ( ColorFormat format )
+		internal static Format Convert ( ColorFormat format )
 		{
 			switch ( format ) {
 				case ColorFormat.R32F		: return Format.R32_Float;
@@ -400,7 +400,7 @@ namespace Fusion.Drivers.Graphics {
 		}
 
 
-		public static Format ConvertToTex ( DepthFormat format )
+		internal static Format ConvertToTex ( DepthFormat format )
 		{
 			switch ( format ) {
 				case DepthFormat.D24S8	: return Format.R24G8_Typeless;
@@ -410,7 +410,7 @@ namespace Fusion.Drivers.Graphics {
 		}
 
 
-		public static Format ConvertToSRV ( DepthFormat format )
+		internal static Format ConvertToSRV ( DepthFormat format )
 		{
 			switch ( format ) {
 				case DepthFormat.D24S8	: return Format.R24_UNorm_X8_Typeless;
@@ -421,7 +421,7 @@ namespace Fusion.Drivers.Graphics {
 		}
 
 
-		public static Format ConvertToDSV ( DepthFormat format )
+		internal static Format ConvertToDSV ( DepthFormat format )
 		{
 			switch ( format ) {
 				case DepthFormat.D24S8	: return Format.D24_UNorm_S8_UInt;
@@ -433,7 +433,7 @@ namespace Fusion.Drivers.Graphics {
 
 
 
-		public static Format Convert ( VertexFormat format )
+		internal static Format Convert ( VertexFormat format )
 		{
 			switch ( format ) {
 				case VertexFormat.Float		: return Format.R32_Float;
@@ -458,7 +458,7 @@ namespace Fusion.Drivers.Graphics {
 		}
 
 
-		public static PrimitiveTopology	Convert ( Primitive primitive )
+		internal static PrimitiveTopology	Convert ( Primitive primitive )
 		{
 			return (PrimitiveTopology) (int) primitive;
 			//throw new ArgumentException("Bad primitive");
@@ -466,7 +466,7 @@ namespace Fusion.Drivers.Graphics {
 
 
 
-		public static BlendOperation Convert ( BlendOp op )
+		internal static BlendOperation Convert ( BlendOp op )
 		{
 			switch ( op ) {
 				case BlendOp.Add 	:	return BlendOperation.Add;
@@ -481,7 +481,7 @@ namespace Fusion.Drivers.Graphics {
 
 
 
-		public static BlendOption	Convert ( Blend blend )
+		internal static BlendOption	Convert ( Blend blend )
 		{
 			switch ( blend ) {
 				case Blend.Zero					: return BlendOption.Zero	;
@@ -508,7 +508,7 @@ namespace Fusion.Drivers.Graphics {
 
 
 
-		public static D3DFillMode Convert ( FillMode fillMode )
+		internal static D3DFillMode Convert ( FillMode fillMode )
 		{
 			switch ( fillMode ) {
 				case FillMode.Solid		:	return D3DFillMode.Solid;
@@ -520,7 +520,7 @@ namespace Fusion.Drivers.Graphics {
 
 
 
-		public static D3DComparison Convert ( ComparisonFunc cmp )
+		internal static D3DComparison Convert ( ComparisonFunc cmp )
 		{
 			switch ( cmp ) {
 				case ComparisonFunc.Always			:	return D3DComparison.Always;
@@ -538,26 +538,26 @@ namespace Fusion.Drivers.Graphics {
 
 
 
-		public static D3DFilter Convert ( Filter filter ) 
+		internal static D3DFilter Convert ( Filter filter ) 
 		{
 			return (D3DFilter)(int)filter;
 		}
 
 
 
-		public static D3DAddressMode Convert ( AddressMode addressMode ) 
+		internal static D3DAddressMode Convert ( AddressMode addressMode ) 
 		{
 			return (D3DAddressMode)(int)addressMode;
 		}
 
 
-		public static StencilOperation Convert ( StencilOp op )
+		internal static StencilOperation Convert ( StencilOp op )
 		{
 			return (StencilOperation)(int)op;
 		}
 
 
-		public static ColorFormat Convert ( Format format )
+		internal static ColorFormat Convert ( Format format )
 		{
 			switch ( format ) {
 				case Format.R32_Typeless	:

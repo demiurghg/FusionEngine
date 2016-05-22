@@ -164,7 +164,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="stereoEye"></param>
 		/// <param name="viewport"></param>
 		/// <param name="targetSurface"></param>
-		protected void RenderGIS ( GameTime gameTime, StereoEye stereoEye, Viewport viewport, RenderTargetSurface targetSurface ) 
+		internal void RenderGIS ( GameTime gameTime, StereoEye stereoEye, Viewport viewport, RenderTargetSurface targetSurface ) 
 		{
 			if (GisLayers.Any()) {
 

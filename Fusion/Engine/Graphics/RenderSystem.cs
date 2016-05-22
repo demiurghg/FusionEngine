@@ -18,7 +18,7 @@ namespace Fusion.Engine.Graphics {
 		internal readonly GraphicsDevice Device;
 
 		[GameModule("Sprites", "sprite", InitOrder.After)]
-		public SpriteEngine	SpriteEngine { get { return spriteEngine; } }
+		internal SpriteEngine	SpriteEngine { get { return spriteEngine; } }
 		SpriteEngine	spriteEngine;
 
 		[GameModule("GIS", "gis", InitOrder.After)]
@@ -26,36 +26,36 @@ namespace Fusion.Engine.Graphics {
 		Gis gis;
 
 		[GameModule("Filter", "filter", InitOrder.After)]
-		public Filter Filter { get{ return filter; } }
-		public Filter filter;
+		internal Filter Filter { get{ return filter; } }
+		private  Filter filter;
 
 		[GameModule("SsaoFilter", "ssao", InitOrder.After)]
-		public SsaoFilter SsaoFilter { get{ return ssaoFilter; } }
-		public SsaoFilter ssaoFilter;
+		internal SsaoFilter SsaoFilter { get{ return ssaoFilter; } }
+		private  SsaoFilter ssaoFilter;
 
 		[GameModule("BitonicSort", "bitonic", InitOrder.After)]
-		public BitonicSort BitonicSort { get{ return bitonicSort; } }
-		public BitonicSort bitonicSort;
+		internal BitonicSort BitonicSort { get{ return bitonicSort; } }
+		private  BitonicSort bitonicSort;
 
 		[GameModule("HdrFilter", "hdr", InitOrder.After)]
-		public HdrFilter HdrFilter { get{ return hdrFilter; } }
-		public HdrFilter hdrFilter;
+		internal HdrFilter HdrFilter { get{ return hdrFilter; } }
+		private  HdrFilter hdrFilter;
 		
 		[GameModule("DofFilter", "dof", InitOrder.After)]
-		public DofFilter DofFilter { get{ return dofFilter; } }
-		public DofFilter dofFilter;
+		internal DofFilter DofFilter { get{ return dofFilter; } }
+		private  DofFilter dofFilter;
 		
 		[GameModule("LightRenderer", "rs", InitOrder.Before)]
-		public LightRenderer	LightRenderer { get { return lightRenderer; } }
-		public LightRenderer	lightRenderer;
+		internal LightRenderer	LightRenderer { get { return lightRenderer; } }
+		private  LightRenderer	lightRenderer;
 		
 		[GameModule("SceneRendere", "scene", InitOrder.Before)]
-		public SceneRenderer	SceneRenderer { get { return sceneRenderer; } }
-		public SceneRenderer	sceneRenderer;
+		internal SceneRenderer	SceneRenderer { get { return sceneRenderer; } }
+		private  SceneRenderer	sceneRenderer;
 		
 		[GameModule("Sky", "sky", InitOrder.After)]
-		public Sky	Sky { get { return sky; } }
-		public Sky	sky;
+		internal Sky	Sky { get { return sky; } }
+		private  Sky	sky;
 
 		/// <summary>
 		/// Gets render counters.

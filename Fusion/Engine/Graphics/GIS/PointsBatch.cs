@@ -62,7 +62,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public bool IsDoubleBuffer { get; protected set; }
 
-		public Texture2D	TextureAtlas;
+		internal Texture2D	TextureAtlas;
 		public Vector2		ImageSizeInAtlas;
 		public float		SizeMultiplier;
 		public int			PointsCount { get { return PointsCpu.Length; } }
@@ -135,7 +135,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
+		internal override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
 			if (TextureAtlas == null) return;
 

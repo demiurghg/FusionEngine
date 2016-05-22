@@ -15,7 +15,7 @@ namespace Fusion.Drivers.Graphics {
 	/// Never dispose RenderTargetSurface. 
 	/// I always will be disposed by owning object.
 	/// </summary>
-	public class RenderTargetSurface : DisposableBase {
+	internal class RenderTargetSurface : DisposableBase {
 
 		public int			Width			{ get; private set; }
 		public int			Height			{ get; private set; }

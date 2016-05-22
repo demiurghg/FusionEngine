@@ -15,7 +15,7 @@ namespace Fusion.Engine.Graphics {
 		[Vertex("COLOR")]		public Color	Color	;
 		[Vertex("TEXCOORD")]	public Vector2	TexCoord;
 
-		static public VertexInputElement[] Elements {
+		static internal VertexInputElement[] Elements {
 			get {
 				return VertexInputElement.FromStructure( typeof(VertexColorTexture) );
 			}

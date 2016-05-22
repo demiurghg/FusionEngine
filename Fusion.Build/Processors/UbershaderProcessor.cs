@@ -199,7 +199,7 @@ namespace Fusion.Build.Processors {
 
 				using ( var bw = new BinaryWriter( fs ) ) {
 
-					bw.WriteFourCC( Ubershader.UbershaderSignature );
+					bw.WriteFourCC( UbershaderSignatures.UbershaderSignature );
 
 					//	params :
 
@@ -210,27 +210,27 @@ namespace Fusion.Build.Processors {
 
 						bw.Write( entry.Defines );
 
-						bw.WriteFourCC( Ubershader.PSBytecodeSignature );
+						bw.WriteFourCC( UbershaderSignatures.PSBytecodeSignature );
 						bw.Write( entry.PSBytecode.Length );
 						bw.Write( entry.PSBytecode );
 
-						bw.WriteFourCC( Ubershader.VSBytecodeSignature );
+						bw.WriteFourCC( UbershaderSignatures.VSBytecodeSignature );
 						bw.Write( entry.VSBytecode.Length );
 						bw.Write( entry.VSBytecode );
 
-						bw.WriteFourCC( Ubershader.GSBytecodeSignature );
+						bw.WriteFourCC( UbershaderSignatures.GSBytecodeSignature );
 						bw.Write( entry.GSBytecode.Length );
 						bw.Write( entry.GSBytecode );
 
-						bw.WriteFourCC( Ubershader.HSBytecodeSignature );
+						bw.WriteFourCC( UbershaderSignatures.HSBytecodeSignature );
 						bw.Write( entry.HSBytecode.Length );
 						bw.Write( entry.HSBytecode );
 
-						bw.WriteFourCC( Ubershader.DSBytecodeSignature );
+						bw.WriteFourCC( UbershaderSignatures.DSBytecodeSignature );
 						bw.Write( entry.DSBytecode.Length );
 						bw.Write( entry.DSBytecode );
 
-						bw.WriteFourCC( Ubershader.CSBytecodeSignature );
+						bw.WriteFourCC( UbershaderSignatures.CSBytecodeSignature );
 						bw.Write( entry.CSBytecode.Length );
 						bw.Write( entry.CSBytecode );
 					}

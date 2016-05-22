@@ -88,7 +88,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
+		internal override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
 			UpdateText();
 		}

@@ -15,7 +15,7 @@ using Fusion.Core.Content;
 namespace Fusion.Drivers.Graphics {
 
 	[Serializable]
-	public class UbershaderException : GraphicsException {
+	internal class UbershaderException : GraphicsException {
 
 		/// <summary>
 		/// Bit flags thats causes ubershader exception

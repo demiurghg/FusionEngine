@@ -14,7 +14,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Describes blending state.
 	/// </summary>
-	public sealed class BlendState {
+	internal sealed class BlendState {
 
 		public	Blend			SrcColor		{ get; set; }
 		public	Blend			DstColor		{ get; set; }

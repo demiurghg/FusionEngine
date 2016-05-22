@@ -14,8 +14,18 @@ using Fusion.Core;
 using Fusion.Core.Content;
 
 
-namespace Fusion.Engine.Graphics.Scene {
+namespace Fusion.Engine.Graphics {
 	
+	/// <summary>
+	/// Raw format:
+	///		RAWG			-	magic
+	///		GCTX			-	magic
+	///		Texture count	-
+	///		Texture names [ Texture Count ]
+	/// 
+	/// 
+	/// 
+	/// </summary>
 	public class GeometryCache : DisposableBase {
 
 		/// <summary>
@@ -38,7 +48,7 @@ namespace Fusion.Engine.Graphics.Scene {
 		/// <summary>
 		/// Gets total number of indices
 		/// </summary>
-		public int VertexCount {
+		public int IndexCount {
 			get;
 			private set;
 		}

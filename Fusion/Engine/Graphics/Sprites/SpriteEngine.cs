@@ -10,7 +10,7 @@ using Fusion.Core;
 using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Graphics {
-	public class SpriteEngine : GameModule {
+	internal class SpriteEngine : GameModule {
 
 		enum Flags {
 			OPAQUE				=	0x0001, 

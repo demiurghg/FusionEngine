@@ -622,7 +622,7 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		/// <param name="gameTime"></param>
 		/// <param name="stereoEye"></param>
-		protected virtual void Draw ( GameTime gameTime, StereoEye stereoEye )
+		void Draw ( GameTime gameTime, StereoEye stereoEye )
 		{
 			//GIS.Draw(gameTime, stereoEye);
 

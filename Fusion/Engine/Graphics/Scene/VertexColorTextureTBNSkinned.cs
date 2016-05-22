@@ -21,7 +21,7 @@ namespace Fusion.Engine.Graphics {
 		[Vertex("BLENDWEIGHTS")]	public Vector4	SkinWeights;
 
 
-		static public VertexInputElement[] Elements {
+		static internal VertexInputElement[] Elements {
 			get {
 				return VertexInputElement.FromStructure( typeof(VertexColorTextureTBNSkinned) );
 			}

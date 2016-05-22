@@ -17,7 +17,7 @@ using Fusion.Core.Mathematics;
 
 
 namespace Fusion.Drivers.Graphics {
-	public struct VertexInputElement {
+	internal struct VertexInputElement {
 
 		public static int AppendAligned { get { return -1; } }
 

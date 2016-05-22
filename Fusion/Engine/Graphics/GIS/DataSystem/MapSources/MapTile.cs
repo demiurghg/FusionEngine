@@ -7,7 +7,7 @@ using Fusion.Drivers.Graphics;
 
 namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 {
-	public class MapTile
+	internal class MapTile
 	{
 		public Texture2D	Tile;
 

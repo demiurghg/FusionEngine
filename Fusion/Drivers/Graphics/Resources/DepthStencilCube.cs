@@ -16,7 +16,7 @@ using DXGI = SharpDX.DXGI;
 namespace Fusion.Drivers.Graphics {
 
 
-	public class DepthStencilCube : ShaderResource {
+	internal class DepthStencilCube : ShaderResource {
 
 		
 		/// <summary>

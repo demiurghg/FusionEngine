@@ -17,7 +17,7 @@ namespace Fusion.Engine.Graphics {
 		[Vertex("NORMAL")]		public Vector3	Normal;
 
 
-		static public VertexInputElement[] Elements {
+		static internal VertexInputElement[] Elements {
 			get {
 				return VertexInputElement.FromStructure( typeof(VertexColorTextureNormal) );
 			}

@@ -13,7 +13,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Describes rasterizer state.
 	/// </summary>
-	public sealed class RasterizerState {
+	internal sealed class RasterizerState {
 
 		public CullMode	CullMode			{ get; set; }
 		public int		DepthBias			{ get; set; }

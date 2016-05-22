@@ -28,8 +28,8 @@
     <HelpTitle>Fusion</HelpTitle>
     <ContentPlacement>AboveNamespaces</ContentPlacement>
     <DocumentationSources>
-      <DocumentationSource sourceFile="%FUSION_BIN%\Fusion.dll" />
-      <DocumentationSource sourceFile="%FUSION_BIN%\Fusion.XML" />
+      <DocumentationSource sourceFile="..\Fusion\bin\x64\Release\Fusion.dll" />
+      <DocumentationSource sourceFile="..\Fusion\bin\x64\Release\Fusion.XML" />
     </DocumentationSources>
     <MissingTags>Summary, AutoDocumentCtors, Namespace, AutoDocumentDispose</MissingTags>
     <VisibleItems>Attributes, ExplicitInterfaceImplementations, InheritedMembers, InheritedFrameworkMembers, Protected</VisibleItems>

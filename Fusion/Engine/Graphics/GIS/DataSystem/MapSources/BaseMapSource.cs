@@ -31,12 +31,12 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 		/// </summary>
 		public int?		MaxZoom		= 21;
 		public int		TileSize	= 256;
-		public static	Texture2D	EmptyTile;
+		internal static	Texture2D	EmptyTile;
 
 		List<string> ToRemove = new List<string>();
 		
 		ConcurrentQueue<MapTile>			cacheQueue	= new ConcurrentQueue<MapTile>();
-		public Dictionary<string, MapTile>	RamCache	= new Dictionary<string, MapTile>();
+		internal Dictionary<string, MapTile>	RamCache	= new Dictionary<string, MapTile>();
 
 		Random r = new Random();
 
@@ -105,14 +105,14 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 
 		//public MapTile GetTile(Vector2 latLon, int zoom);
 		//public MapTile GetTile(float lat, float lon, int zoom);
-		public MapTile GetTile(int x, int y, int zoom)
+		internal MapTile GetTile(int x, int y, int zoom)
 		{
 			return CheckTileInMemory(x, y, zoom);
 		}
 
 		
 
-		public bool DownloadTile(MapTile tile)
+		internal bool DownloadTile(MapTile tile)
 		{
 			try {
 				var request = (HttpWebRequest) WebRequest.Create(tile.Url);

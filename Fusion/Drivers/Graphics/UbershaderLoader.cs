@@ -16,7 +16,7 @@ using Fusion.Engine.Common;
 namespace Fusion.Drivers.Graphics {
 
 	[ContentLoader(typeof(Ubershader))]
-	public class UbershaderLoader : ContentLoader {
+	internal class UbershaderLoader : ContentLoader {
 
 		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 		{

@@ -1,1 +1,1 @@
-%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe /p:Configuration=Release /p:OutputPath="%FUSION_DIR%\Documentation" "%~dp0\fusionDoc.shfbproj"
+%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe /p:Configuration=Release /p:OutputPath="C:\GITHUB\FusionEngine\Docs" "%~dp0\fusionDoc.shfbproj"

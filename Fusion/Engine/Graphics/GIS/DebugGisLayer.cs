@@ -41,7 +41,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
+		internal override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
 			Game.GraphicsDevice.VertexShaderConstants[0]	= constBuffer;
 			Game.GraphicsDevice.PipelineState				= factory[(int)(DebugFlags.DRAW_LINES)];

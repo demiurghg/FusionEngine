@@ -112,7 +112,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Render ( RenderTargetSurface colorBuffer, Camera camera )
+		internal void Render ( RenderTargetSurface colorBuffer, Camera camera )
 		{
 			DrawTracers();
 

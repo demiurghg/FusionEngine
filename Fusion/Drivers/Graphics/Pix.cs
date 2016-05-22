@@ -33,7 +33,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// Pix event class.
 	/// </summary>
-	public sealed class PixEvent : IDisposable {
+	internal sealed class PixEvent : IDisposable {
 		public PixEvent (string eventName) {
 
 			StackTrace	st = new StackTrace();

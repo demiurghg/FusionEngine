@@ -30,7 +30,7 @@ namespace Fusion.Drivers.Graphics {
 	/// Pipeline state represents all GPU states as single object.
 	/// 
 	/// </summary>
-	public sealed class PipelineState : GraphicsResource {
+	internal sealed class PipelineState : GraphicsResource {
 
 		public int SamplersCount { get { return CommonShaderStage.SamplerRegisterCount; } }
 

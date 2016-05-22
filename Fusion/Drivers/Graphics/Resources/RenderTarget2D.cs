@@ -18,7 +18,7 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Drivers.Graphics {
 
-	public class RenderTarget2D : ShaderResource {
+	internal class RenderTarget2D : ShaderResource {
 
 		/// <summary>
 		/// Samples count

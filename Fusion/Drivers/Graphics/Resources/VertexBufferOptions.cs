@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 
 
 namespace Fusion.Drivers.Graphics {
-	public enum VertexBufferOptions {
+	internal enum VertexBufferOptions {
 
 		/// <summary>
 		/// Fastest vertex buffer, slow update.

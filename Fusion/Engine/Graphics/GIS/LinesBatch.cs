@@ -68,7 +68,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public bool IsDoubleBuffer { get; protected set; }
 
-		public Texture2D Texture;
+		internal Texture2D Texture;
 
 		VertexBuffer firstBuffer;
 		VertexBuffer secondBuffer;
@@ -116,7 +116,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
+		internal override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
 			var dev = Game.GraphicsDevice;
 

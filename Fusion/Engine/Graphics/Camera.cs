@@ -123,7 +123,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="origin"></param>
 		/// <param name="rightHanded"></param>
-		public void SetupCameraCubeFace ( Vector3 origin, CubeFace cubeFace, float near, float far )
+		internal void SetupCameraCubeFace ( Vector3 origin, CubeFace cubeFace, float near, float far )
 		{
 			Matrix view = Matrix.Identity;
 			Matrix proj = Matrix.Identity;
@@ -147,7 +147,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="stereoEye"></param>
 		/// <returns></returns>
-		public Matrix GetViewMatrix ( StereoEye stereoEye )
+		internal Matrix GetViewMatrix ( StereoEye stereoEye )
 		{
 			if (stereoEye==StereoEye.Mono) return viewMatrix;
 			if (stereoEye==StereoEye.Left) return viewMatrixL;
@@ -161,7 +161,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="stereoEye"></param>
 		/// <returns></returns>
-		public Matrix GetProjectionMatrix ( StereoEye stereoEye )
+		internal Matrix GetProjectionMatrix ( StereoEye stereoEye )
 		{
 			if (stereoEye==StereoEye.Mono) return projMatrix;
 			if (stereoEye==StereoEye.Left) return projMatrixL;
@@ -176,7 +176,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="stereoEye"></param>
 		/// <returns></returns>
-		public Matrix GetCameraMatrix ( StereoEye stereoEye )
+		internal Matrix GetCameraMatrix ( StereoEye stereoEye )
 		{
 			if (stereoEye==StereoEye.Mono) return cameraMatrix;
 			if (stereoEye==StereoEye.Left) return cameraMatrixL;
@@ -190,7 +190,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="stereoEye"></param>
 		/// <returns></returns>
-		public Vector3 GetCameraPosition ( StereoEye stereoEye )
+		internal Vector3 GetCameraPosition ( StereoEye stereoEye )
 		{
 			if (stereoEye==StereoEye.Mono)  return cameraMatrix .TranslationVector;
 			if (stereoEye==StereoEye.Left)  return cameraMatrixL.TranslationVector;
@@ -204,7 +204,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="stereoEye"></param>
 		/// <returns></returns>
-		public Vector4 GetCameraPosition4 ( StereoEye stereoEye )
+		internal Vector4 GetCameraPosition4 ( StereoEye stereoEye )
 		{
 			if (stereoEye==StereoEye.Mono)  return new Vector4(cameraMatrix .TranslationVector, 1);
 			if (stereoEye==StereoEye.Left)  return new Vector4(cameraMatrixL.TranslationVector, 1);

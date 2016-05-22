@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 using Fusion.Engine.Graphics;
 
 namespace Fusion.Engine.Graphics {
-	public class HdrFilter : GameModule {
+	internal class HdrFilter : GameModule {
 
 
 		Ubershader	shader;

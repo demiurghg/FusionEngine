@@ -17,9 +17,9 @@ namespace Fusion.Engine.Graphics.GIS
 {
 	public class PolyGisLayer : Gis.GisLayer
 	{
-		protected Ubershader	shader;
-		protected StateFactory	factory;
-		protected StateFactory	factoryXray;
+		internal Ubershader	shader;
+		internal StateFactory	factory;
+		internal StateFactory	factoryXray;
 
 		[Flags]
 		public enum PolyFlags : int
@@ -44,8 +44,8 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public bool IsDoubleBuffer { get; protected set; }
 
-		public Texture2D Texture;
-		public Texture2D Palette;
+		internal Texture2D Texture;
+		internal Texture2D Palette;
 
 		public float PaletteValue			{ get { return constData.Data.X; } set { constData.Data.X = value; } }
 		public float PaletteTransparency	{ get { return constData.Data.Y; } set { constData.Data.Y = value; } }
@@ -54,15 +54,15 @@ namespace Fusion.Engine.Graphics.GIS
 			public Vector4 Data;
 		}
 		protected ConstData			constData;
-		protected ConstantBuffer	cb;
+		internal ConstantBuffer	cb;
 
 		//public Vector2	PatternSize;
 		//public float	ArrowsScale;
 
-		protected VertexBuffer	firstBuffer;
-		protected VertexBuffer	secondBuffer;
-		protected VertexBuffer	currentBuffer;
-		protected IndexBuffer	indexBuffer;
+		internal VertexBuffer	firstBuffer;
+		internal VertexBuffer	secondBuffer;
+		internal VertexBuffer	currentBuffer;
+		internal IndexBuffer	indexBuffer;
 
 		public Gis.GeoPoint[] PointsCpu { get; protected set; }
 
@@ -122,7 +122,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
+		internal override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
 			if (currentBuffer == null || indexBuffer == null) {
 				Log.Warning("Poly layer null reference");

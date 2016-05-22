@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 
 
 namespace Fusion.Drivers.Graphics {
-	public class VertexBuffer : GraphicsResource {
+	internal class VertexBuffer : GraphicsResource {
 		
 		/// <summary>
 		/// Vertex stride

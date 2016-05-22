@@ -14,7 +14,7 @@ using Fusion.Core;
 
 
 namespace Fusion.Drivers.Graphics {
-	public class IndexBuffer : DisposableBase {
+	internal class IndexBuffer : DisposableBase {
 
 		/// <summary>
 		/// Capacity of this vertex buffer

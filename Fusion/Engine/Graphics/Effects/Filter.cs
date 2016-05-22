@@ -15,7 +15,7 @@ namespace Fusion.Engine.Graphics
 	/// <summary>
 	/// Class for base image processing such as copying, blurring, enhancement, anti-aliasing etc.
 	/// </summary>
-	public class Filter : GameModule {
+	internal class Filter : GameModule {
 		readonly GraphicsDevice rs;
 
 		const int MaxBlurTaps	=	33;

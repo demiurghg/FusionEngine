@@ -18,13 +18,12 @@ using Fusion.Engine.Common;
 
 namespace Fusion.Drivers.Graphics {
 	
-	public interface IUbershaderEnum {
+	internal interface IUbershaderEnum {
 		void Enumerate ( PipelineState pipelineState, int combination );
 	}
 
 
-	public partial class Ubershader : GraphicsResource {
-
+	public static class UbershaderSignatures {
 		public const string UbershaderSignature = "USH1";
 		public const string PSBytecodeSignature = "PSBC";
 		public const string VSBytecodeSignature = "VSBC";
@@ -32,6 +31,11 @@ namespace Fusion.Drivers.Graphics {
 		public const string HSBytecodeSignature = "HSBC";
 		public const string DSBytecodeSignature = "DSBC";
 		public const string CSBytecodeSignature = "CSBC";
+	}
+
+
+	internal partial class Ubershader : GraphicsResource {
+
 
 		class UsdbEntry {
 
@@ -84,7 +88,7 @@ namespace Fusion.Drivers.Graphics {
 
 				var foucCC = br.ReadFourCC();
 
-				if (foucCC!=UbershaderSignature) {
+				if (foucCC!=UbershaderSignatures.UbershaderSignature) {
 					throw new IOException("Bad ubershader signature");
 				}
 

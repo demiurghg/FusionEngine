@@ -19,7 +19,7 @@ using Fusion.Engine.Common;
 
 
 namespace Fusion.Drivers.Graphics {
-	public class Texture2D : ShaderResource {
+	internal class Texture2D : ShaderResource {
 
 		D3D.Texture2D	tex2D;
 		ColorFormat		format;

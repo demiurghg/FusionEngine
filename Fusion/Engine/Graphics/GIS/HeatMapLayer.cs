@@ -17,7 +17,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public float InterpFactor = 0;
 
-		public Texture2D HeatTexture { get; protected set; }
+		internal Texture2D HeatTexture { get; set; }
 		private RenderTarget2D Temp;
 		private RenderTarget2D Final;
 		private RenderTarget2D Prev;
@@ -138,7 +138,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
+		internal override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
 			constData.Data = new Vector4(MaxHeatMapLevel, MinHeatMapLevel, HeatMapTransparency, InterpFactor);
 			cb.SetData(constData);

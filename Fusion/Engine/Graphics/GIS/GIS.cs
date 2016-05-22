@@ -75,7 +75,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		    public uint ZOrder;
 
-			public virtual void Draw	(GameTime gameTime, ConstantBuffer constBuffer) {}
+			internal virtual void Draw	(GameTime gameTime, ConstantBuffer constBuffer) {}
 			public virtual void Update	(GameTime gameTime) {}
 
 			public virtual List<SelectedItem> Select(DVector3 nearPoint, DVector3 farPoint)
@@ -219,7 +219,7 @@ namespace Fusion.Engine.Graphics.GIS
 	    }
 
 
-	    public  void Draw(GameTime gameTime, StereoEye stereoEye, ICollection<GisLayer> layers)
+	    internal  void Draw(GameTime gameTime, StereoEye stereoEye, ICollection<GisLayer> layers)
 	    {
 		    if (!layers.Any()) return;
 

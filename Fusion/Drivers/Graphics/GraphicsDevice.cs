@@ -24,7 +24,7 @@ using Fusion.Engine.Common;
 
 namespace Fusion.Drivers.Graphics {
 
-	public partial class GraphicsDevice : DisposableBase {
+	internal partial class GraphicsDevice : DisposableBase {
 
 		/// <summary>
 		/// Current graphics profile.
