@@ -52,7 +52,7 @@ namespace Fusion.Engine.Graphics {
 			CLEAR_VOXEL				=	0x0004,
 		}
 
-		[StructLayout(LayoutKind.Explicit, Size=640)]
+		[StructLayout(LayoutKind.Explicit, Size=656)]
 		struct LightingParams {
 			[FieldOffset(  0)] public Matrix	View;
 			[FieldOffset( 64)] public Matrix	Projection;
@@ -76,6 +76,8 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(628)] public float		ShowCSLoadEnv;
 			[FieldOffset(632)] public float		ShowCSLoadSpot;
 			[FieldOffset(636)] public int		CascadeCount;
+			[FieldOffset(640)] public float		CascadeScale;
+
 		}
 
 
@@ -214,8 +216,6 @@ namespace Fusion.Engine.Graphics {
 			base.Dispose( disposing );
 		}
 
-		Matrix[] csmViewProjections = new Matrix[4];
-
 
 		/// <summary>
 		/// 
@@ -235,6 +235,11 @@ namespace Fusion.Engine.Graphics {
 				var height	=	hdrFrame.HdrBuffer.Height;
 
 
+				ICSMController csmCtrl	=	viewLayer.LightSet.DirectLight.CSMController ?? csmController;
+
+				int activeCascadeCount	=	Math.Min( cascadedShadowMap.CascadeCount, csmCtrl.GetActiveCascadeCount() );
+
+
 				//
 				//	Setup compute shader parameters and states :
 				//
@@ -249,10 +254,10 @@ namespace Fusion.Engine.Graphics {
 					cbData.DirectLightIntensity		=	viewLayer.LightSet.DirectLight.Intensity.ToVector4();
 					cbData.Projection				=	projection;
 
-					cbData.CSMViewProjection0		=	csmViewProjections[0];
-					cbData.CSMViewProjection1		=	csmViewProjections[1];
-					cbData.CSMViewProjection2		=	csmViewProjections[2];
-					cbData.CSMViewProjection3		=	csmViewProjections[3];
+					cbData.CSMViewProjection0		=	csmCtrl.GetShadowViewMatrix(0) * csmCtrl.GetShadowProjectionMatrix(0);
+					cbData.CSMViewProjection1		=	csmCtrl.GetShadowViewMatrix(1) * csmCtrl.GetShadowProjectionMatrix(1);
+					cbData.CSMViewProjection2		=	csmCtrl.GetShadowViewMatrix(2) * csmCtrl.GetShadowProjectionMatrix(2);
+					cbData.CSMViewProjection3		=	csmCtrl.GetShadowViewMatrix(3) * csmCtrl.GetShadowProjectionMatrix(3);
 
 					cbData.View						=	view;
 					cbData.ViewPosition				=	new Vector4(viewPos,1);
@@ -265,7 +270,8 @@ namespace Fusion.Engine.Graphics {
 					cbData.ShowCSLoadEnv			=	ShowEnvLightTileLoad  ? 1 : 0;
 					cbData.ShowCSLoadSpot			=	ShowSpotLightTileLoad ? 1 : 0;
 
-					cbData.CascadeCount				=	cascadedShadowMap.CascadeCount;
+					cbData.CascadeCount				=	activeCascadeCount;
+					cbData.CascadeScale				=	1.0f / (float)cascadedShadowMap.CascadeCount;
 
 
 					ComputeOmniLightsTiles( view, projection, viewLayer.LightSet );

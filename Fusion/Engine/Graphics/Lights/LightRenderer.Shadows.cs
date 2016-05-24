@@ -13,6 +13,9 @@ using System.Runtime.InteropServices;
 namespace Fusion.Engine.Graphics {
 	public partial class LightRenderer {
 
+		DefaultCSMController	csmController	=	new DefaultCSMController();
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -30,11 +33,21 @@ namespace Fusion.Engine.Graphics {
 
 			CheckShadowSize();
 
-			
-			Matrix[] shadowViews, shadowProjections;
-			//	shadow is computed for both eyes :
-			var view = camera.GetViewMatrix( StereoEye.Mono );
-			ComputeCSMMatricies( view, renderWorld.LightSet.DirectLight.Direction, out shadowViews, out shadowProjections, out csmViewProjections );
+
+			csmController.ComputeMatricies( 
+				camera.GetViewMatrix(StereoEye.Mono), 
+				lightSet.DirectLight.Direction, 
+				cascadedShadowMap.CascadeSize,
+				this.SplitSize,
+				this.SplitOffset,
+				this.SplitFactor,
+				this.CSMProjectionDepth );
+
+
+			ICSMController csmCtrl	=	lightSet.DirectLight.CSMController ?? csmController;
+
+
+			int activeCascadeCount	=	Math.Min( cascadedShadowMap.CascadeCount, csmCtrl.GetActiveCascadeCount() );
 
 
 			using (new PixEvent("Cascaded Shadow Maps")) {
@@ -43,11 +56,11 @@ namespace Fusion.Engine.Graphics {
 			
 				cascadedShadowMap.Clear();
 
-				for (int i=0; i<cascadedShadowMap.CascadeCount; i++) {
+				for (int i=0; i<activeCascadeCount; i++) {
 
 					var context = new ShadowContext();
-					context.ShadowView			=	shadowViews[i];
-					context.ShadowProjection	=	shadowProjections[i];
+					context.ShadowView			=	csmCtrl.GetShadowViewMatrix( i );
+					context.ShadowProjection	=	csmCtrl.GetShadowProjectionMatrix( i );
 					context.ShadowViewport		=	cascadedShadowMap.GetSplitViewport( i );
 					context.FarDistance			=	1;
 					context.SlopeBias			=	CSMSlopeBias;
@@ -63,13 +76,15 @@ namespace Fusion.Engine.Graphics {
 
 			using (new PixEvent("Particle Shadows")) {
 			
-				for (int i=0; i<cascadedShadowMap.CascadeCount; i++) {
+				for (int i=0; i<activeCascadeCount; i++) {
 
 					var viewport = cascadedShadowMap.GetSplitViewport(i);
 					var colorBuffer = cascadedShadowMap.ParticleShadow.Surface;
 					var depthBuffer = cascadedShadowMap.DepthBuffer.Surface;
+					var viewMatrix	= csmController.GetShadowViewMatrix( i );
+					var projMatrix	= csmController.GetShadowProjectionMatrix( i );
 
-					renderWorld.ParticleSystem.RenderShadow( new GameTime(), viewport, shadowViews[i], shadowProjections[i], colorBuffer, depthBuffer );
+					renderWorld.ParticleSystem.RenderShadow( new GameTime(), viewport, viewMatrix, projMatrix, colorBuffer, depthBuffer );
 				}
 			}
 
@@ -119,49 +134,5 @@ namespace Fusion.Engine.Graphics {
 
 			}
 		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="view"></param>
-		/// <returns></returns>
-		void ComputeCSMMatricies ( Matrix view, Vector3 lightDir2, out Matrix[] shadowViews, out Matrix[] shadowProjections, out Matrix[] shadowViewProjections )
-		{
-			shadowViews				=	new Matrix[4];
-			shadowProjections		=	new Matrix[4];
-			shadowViewProjections	=	new Matrix[4];
-
-			var	smSize		=	cascadedShadowMap.CascadeSize;
-			var camMatrix	=	Matrix.Invert( view );
-			var viewPos		=	camMatrix.TranslationVector;
-
-
-			for ( int i = 0; i<4; i++ ) {
-
-				float	offset		=	SplitOffset * (float)Math.Pow( SplitFactor, i );
-				float	radius		=	SplitSize   * (float)Math.Pow( SplitFactor, i );
-
-				Vector3 viewDir		=	camMatrix.Forward.Normalized();
-				Vector3	lightDir	=	lightDir2.Normalized();
-				Vector3	origin		=	viewPos + viewDir * offset;
-
-				Matrix	lightRot	=	Matrix.LookAtRH( Vector3.Zero, Vector3.Zero + lightDir, Vector3.UnitY );
-				Matrix	lightRotI	=	Matrix.Invert( lightRot );
-				Vector3	lsOrigin	=	Vector3.TransformCoordinate( origin, lightRot );
-				float	snapValue	=	4.0f * radius / smSize;
-				lsOrigin.X			=	(float)Math.Round(lsOrigin.X / snapValue) * snapValue;
-				lsOrigin.Y			=	(float)Math.Round(lsOrigin.Y / snapValue) * snapValue;
-				lsOrigin.Z			=	(float)Math.Round(lsOrigin.Z / snapValue) * snapValue;
-				origin				=	Vector3.TransformCoordinate( lsOrigin, lightRotI );//*/
-
-				shadowViews[i]				=	Matrix.LookAtRH( origin, origin + lightDir, Vector3.UnitY );
-				shadowProjections[i]		=	Matrix.OrthoRH( radius*2, radius*2, -CSMProjectionDepth/2, CSMProjectionDepth/2);
-
-				shadowViewProjections[i]	=	shadowViews[i] * shadowProjections[i];
-			}
-		}
-
 	}
 }
