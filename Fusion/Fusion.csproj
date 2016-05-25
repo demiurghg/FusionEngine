@@ -332,7 +332,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Engine\Input\Bind.cs" />
-    <Compile Include="Engine\Input\BindList.cs" />
+    <Compile Include="Engine\Input\ListBindings.cs" />
     <Compile Include="Engine\Input\KeyBind.cs" />
     <Compile Include="Engine\Input\Touch.cs" />
     <Compile Include="Engine\Input\Unbind.cs" />

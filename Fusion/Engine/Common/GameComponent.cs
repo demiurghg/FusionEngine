@@ -35,7 +35,7 @@ namespace Fusion.Engine.Common {
 
 
 		/// <summary>
-		/// Intializes module.
+		/// Intializes component.
 		/// </summary>
 		public abstract void Initialize ();
 
@@ -64,99 +64,6 @@ namespace Fusion.Engine.Common {
 				Log.Message("Dispose : {0}", component.GetType().Name );
 				SafeDispose( ref component );
 			}
-		}
-
-
-
-		/// <summary>
-		/// Gets configuration as collection of KeyData.
-		/// Derived classes can replace this to customize what to save into configuration. 
-		/// </summary>
-		/// <returns>Collection of KeyData</returns>
-		public virtual IEnumerable<KeyData> GetConfiguration ()
-		{
-			var sectionData		=	new List<KeyData>();
-			var configObject	=	this;
-
-			if (configObject==null) {
-				return sectionData;
-			}
-
-			foreach ( var prop in GetConfigurationProperties() ) {
-
-				var name	=	prop.Name;
-				var value	=	prop.GetValue( configObject );
-				var conv	=	TypeDescriptor.GetConverter( prop.PropertyType );
-				var keyData	=	new KeyData(name);
-
-				keyData.Value	=	conv.ConvertToInvariantString( value );
-
-				sectionData.Add( keyData );
-			}
-
-			return sectionData;
-		}
-
-
-
-		/// <summary>
-		/// Sets module configuration from collection of KeyData.
-		/// Derived classes can replace this to customize how to load configuration. 
-		/// </summary>
-		/// <param name="configuration"></param>
-		public virtual void SetConfiguration ( IEnumerable<KeyData> configuration )
-		{
-			var configObject	=	this;
-
-			if (configObject==null) {
-				return;
-			}
-
-			foreach ( var keyData in configuration ) {
-						
-				var prop =	GetConfigurationProperty( keyData.KeyName );
-
-				if (prop==null) {
-					Log.Warning("Config property {0} does not exist. Key ignored.", keyData.KeyName );
-					continue;
-				}
-
-				var conv	=	TypeDescriptor.GetConverter( prop.PropertyType );
-						
-				prop.SetValue( configObject, conv.ConvertFromInvariantString( keyData.Value ));
-			}
-		}
-
-
-
-		/// <summary>
-		/// Gets all properties marked with ConfigAttribute.
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerable<PropertyInfo> GetConfigurationProperties ()
-		{
-			return GetType().GetProperties().Where( p=>p.GetCustomAttribute(typeof(ConfigAttribute))!=null).ToArray();
-		}
-
-
-
-		/// <summary>
-		/// Gets all properties marked with ConfigAttribute.
-		/// </summary>
-		/// <returns></returns>
-		PropertyInfo GetConfigurationProperty ( string name )
-		{
-			var prop = GetType().GetProperty( name );
-
-			if (prop==null) {
-				return null;
-			}
-
-			if (prop.GetCustomAttribute(typeof(ConfigAttribute))==null) {
-				return null;
-			}
-
-			return prop;
 		}
 	}
 }

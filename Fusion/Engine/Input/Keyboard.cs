@@ -118,46 +118,6 @@ namespace Fusion.Engine.Input {
 		}
 
 
-		/// <summary>
-		/// Gets keyboard configuration.
-		/// </summary>
-		/// <returns></returns>
-		public override IEnumerable<KeyData> GetConfiguration ()
-		{
-			return Bindings.Select( bind => new KeyData( bind.Key.ToString(), bind.KeyDownCommand + " | " + bind.KeyUpCommand ) );
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="configuration"></param>
-		public override void SetConfiguration ( IEnumerable<KeyData> configuration )
-		{
-			bindings.Clear();
-
-			foreach ( var keyData in configuration ) {
-
-				var key = (Keys)Enum.Parse(typeof(Keys), keyData.KeyName, true );
-
-				var cmds	=	keyData.Value.Split('|').Select( s => s.Trim() ).ToArray();
-
-				string cmdDown	=	null;
-				string cmdUp	=	null;
-
-				if (!string.IsNullOrWhiteSpace(cmds[0])) {
-					cmdDown = cmds[0];
-				}
-
-				if (cmds.Length>1 && !string.IsNullOrWhiteSpace(cmds[1])) {
-					cmdUp = cmds[1];
-				}
-
-				Bind( key, cmdDown, cmdUp );
-			}
-		}
-
 
 
 		/// <summary>

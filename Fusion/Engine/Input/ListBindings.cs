@@ -10,15 +10,15 @@ namespace Fusion.Engine.Input {
 	/// <summary>
 	///	Binds key.
 	/// </summary>
-	[Command("listBind", CommandAffinity.Default)]
-	internal class BindList : NoRollbackCommand {
+	[Command("listBindings", CommandAffinity.Default)]
+	internal class ListBindings : NoRollbackCommand {
 
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="invoker"></param>
-		public BindList ( Invoker invoker ) : base(invoker)
+		public ListBindings ( Invoker invoker ) : base(invoker)
 		{
 		}
 

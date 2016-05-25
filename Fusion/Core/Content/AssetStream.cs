@@ -137,7 +137,7 @@ namespace Fusion.Core.Content {
 			}
 
 			if (dependencies.Any( p => Path.IsPathRooted(p) ) ) {
-				throw new ArgumentException("Dependencies contains rooted path");
+				throw new ArgumentException("Dependencies must not contain rooted path");
 			}
 
 			BuildParameters	=	buildParameters;
