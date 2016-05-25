@@ -321,7 +321,7 @@ namespace Fusion.Drivers.Graphics.Display {
 			if (Game.ExitRequested) {
 				e.Cancel	=	false;
 			} else {
-				Game.GameInterface.RequestToExit();
+				Game.UserInterface.RequestToExit();
 				e.Cancel	=	true;
 			}
 		}

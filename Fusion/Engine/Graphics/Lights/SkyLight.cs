@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 
 
 namespace Fusion.Engine.Graphics.Lights {
-	public class SkyLight : GameModule {
+	public class SkyLight : GameComponent {
 
 		/// <summary>
 		/// 

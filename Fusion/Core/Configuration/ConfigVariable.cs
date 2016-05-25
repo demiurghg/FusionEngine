@@ -10,24 +10,14 @@ namespace Fusion.Core.Configuration {
 
 	internal class ConfigVariable {
 
-		static string Separator = ".";
-
-		public readonly string Prefix;
 		public readonly string Name;
-		public readonly PropertyInfo Property;
-		public readonly object Object;
+		public readonly string FullName;
+		public readonly PropertyInfo TargetProperty;
+		public readonly object TargetObject;
+		public readonly string ComponentName;
 
 		readonly TypeConverter converter;
 
-
-		/// <summary>
-		/// Variable full name.
-		/// </summary>
-		public string FullName {
-			get {
-				return Prefix + Separator + Name;
-			}
-		}
 		
 
 		/// <summary>
@@ -36,13 +26,14 @@ namespace Fusion.Core.Configuration {
 		/// <param name="name"></param>
 		/// <param name="pi"></param>
 		/// <param name="obj"></param>
-		public ConfigVariable ( string prefix, string name, PropertyInfo pi, object obj )
+		public ConfigVariable ( string componentName, string prefix, string name, PropertyInfo targetProperty, object targetObject )
 		{
-			Prefix		=	prefix;
-			Name		=	name;
-			Property	=	pi;
-			Object		=	obj;
-			converter	=	TypeDescriptor.GetConverter( Property.PropertyType );
+			Name			=	name;
+			FullName		=	prefix + "." + name;
+			ComponentName	=	componentName;
+			TargetProperty	=	targetProperty;
+			TargetObject	=	targetObject;
+			converter		=	TypeDescriptor.GetConverter( TargetProperty.PropertyType );
 		}
 
 
@@ -52,7 +43,7 @@ namespace Fusion.Core.Configuration {
 		/// <param name="value"></param>
 		public void Set ( string value )
 		{
-			Property.SetValue( Object, converter.ConvertFromInvariantString( value ) );
+			TargetProperty.SetValue( TargetObject, converter.ConvertFromInvariantString( value ) );
 		}
 
 
@@ -63,7 +54,7 @@ namespace Fusion.Core.Configuration {
 		/// <returns></returns>
 		public string Get ()
 		{
-			return converter.ConvertToInvariantString( Property.GetValue(Object) );
+			return converter.ConvertToInvariantString( TargetProperty.GetValue(TargetObject) );
 		}
 	}
 

@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace Fusion.Engine.Common {
 
-	public abstract partial class UserInterface : GameModule {
+	public abstract partial class UserInterface : GameComponent {
 
 		NetClient client;
 

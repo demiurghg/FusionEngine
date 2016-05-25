@@ -18,7 +18,6 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void ComputeOmniLightsTiles ( Matrix view, Matrix proj, LightSet lightSet )
 		{
-			#warning Display bounds?
 			var vp = Game.GraphicsDevice.DisplayBounds;
 
 			omniLightData = Enumerable

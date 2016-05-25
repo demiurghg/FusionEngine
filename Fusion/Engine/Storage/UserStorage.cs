@@ -37,7 +37,7 @@ namespace Fusion.Engine.Storage {
 		internal UserStorage ( Game Game )
 		{
 			string myDocs	=	Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			string appName	=	Path.GetFileNameWithoutExtension( AppDomain.CurrentDomain.FriendlyName.Replace(".vshost","") );
+			string appName	=	Game.GameID;// Path.GetFileNameWithoutExtension( AppDomain.CurrentDomain.FriendlyName.Replace(".vshost","") );
 
 			storageDir		=	Directory.CreateDirectory( Path.Combine( myDocs, appName ) );
 		}
@@ -60,7 +60,7 @@ namespace Fusion.Engine.Storage {
 
 
 		/// <summary>
-		/// 
+		/// Gets full system path to user storage directory.
 		/// </summary>
 		/// <param name="relative"></param>
 		/// <returns></returns>

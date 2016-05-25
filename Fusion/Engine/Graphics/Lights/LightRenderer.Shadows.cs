@@ -61,7 +61,7 @@ namespace Fusion.Engine.Graphics {
 					var context = new ShadowContext();
 					context.ShadowView			=	csmCtrl.GetShadowViewMatrix( i );
 					context.ShadowProjection	=	csmCtrl.GetShadowProjectionMatrix( i );
-					context.ShadowViewport		=	cascadedShadowMap.GetSplitViewport( i );
+					context.ShadowViewport		=	cascadedShadowMap.GetCascadeViewport( i );
 					context.FarDistance			=	1;
 					context.SlopeBias			=	CSMSlopeBias;
 					context.DepthBias			=	CSMDepthBias;
@@ -78,7 +78,7 @@ namespace Fusion.Engine.Graphics {
 			
 				for (int i=0; i<activeCascadeCount; i++) {
 
-					var viewport = cascadedShadowMap.GetSplitViewport(i);
+					var viewport = cascadedShadowMap.GetCascadeViewport(i);
 					var colorBuffer = cascadedShadowMap.ParticleShadow.Surface;
 					var depthBuffer = cascadedShadowMap.DepthBuffer.Surface;
 					var viewMatrix	= csmController.GetShadowViewMatrix( i );

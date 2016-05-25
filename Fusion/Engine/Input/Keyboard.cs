@@ -12,7 +12,7 @@ using Fusion.Core.IniParser.Model;
 
 
 namespace Fusion.Engine.Input {
-	public class Keyboard : GameModule {
+	public class Keyboard : GameComponent {
 
 		InputDevice device;
 

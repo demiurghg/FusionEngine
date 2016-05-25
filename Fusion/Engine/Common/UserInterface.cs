@@ -8,7 +8,7 @@ using System.Net;
 
 namespace Fusion.Engine.Common {
 
-	public abstract partial class UserInterface : GameModule {
+	public abstract partial class UserInterface : GameComponent {
 
 		/// <summary>
 		/// Creates instance of UserInterface

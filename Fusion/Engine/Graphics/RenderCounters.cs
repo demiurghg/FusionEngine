@@ -9,7 +9,6 @@ using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
-using Fusion.Engine.Graphics.GIS;
 
 namespace Fusion.Engine.Graphics {
 

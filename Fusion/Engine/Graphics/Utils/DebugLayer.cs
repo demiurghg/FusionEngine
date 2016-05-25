@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
 
-	public class DebugLayer : GameModule
+	public class DebugLayer : GameComponent
 	{
 		struct LineVertex {
 			[Vertex("POSITION")] public Vector3 Pos;

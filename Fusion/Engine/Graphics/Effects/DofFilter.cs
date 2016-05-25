@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 using Fusion.Engine.Graphics;
 
 namespace Fusion.Engine.Graphics {
-	public class DofFilter : GameModule {
+	public class DofFilter : GameComponent {
 
 		Ubershader		shader;
 		ConstantBuffer	paramsCB;

@@ -9,7 +9,7 @@ using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Input
 {
-	public class Touch : GameModule		
+	public class Touch : GameComponent		
 	{
 		InputDevice device;
 

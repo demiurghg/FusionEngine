@@ -7,8 +7,6 @@ using Fusion.Core.Mathematics;
 using Fusion.Core;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
-using Fusion.Engine.Graphics.GIS;
-using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
 
 namespace Fusion.Engine.Graphics {
 
@@ -73,21 +71,6 @@ namespace Fusion.Engine.Graphics {
 			get; private set;
 		}
 
-		/// <summary>
-		/// Gets collection of GIS layers.
-		/// </summary>
-		public ICollection<Gis.GisLayer> GisLayers {
-			get; private set;
-		}
-
-		public GlobeCamera GlobeCamera {
-			get;
-			set;
-		}
-
-
-		internal DepthStencil2D GlobeDepthStencil;
-
 
 		/// <summary>
 		/// Creates ViewLayer instance
@@ -104,8 +87,6 @@ namespace Fusion.Engine.Graphics {
 			Camera		=	new Camera();
 
 			SpriteLayers	=	new SpriteLayerCollection();
-			GisLayers		=	new List<Gis.GisLayer>();
-			GlobeCamera		=	new GlobeCamera(Game);
 		}
 
 
@@ -117,7 +98,6 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				SafeDispose( ref GlobeDepthStencil );
 			}
 			base.Dispose( disposing );
 		}
@@ -143,9 +123,6 @@ namespace Fusion.Engine.Graphics {
 
 			var viewport	=	new Viewport( 0,0, targetSurface.Width, targetSurface.Height );
 
-			//	Render GIS stuff :
-			RenderGIS( gameTime, stereoEye, viewport, targetSurface );
-
 			//	draw debug stuff :
 			//  ...
 
@@ -153,40 +130,6 @@ namespace Fusion.Engine.Graphics {
 			rs.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );
 
 			rs.Filter.FillAlphaOne( targetSurface );
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="gameTime"></param>
-		/// <param name="stereoEye"></param>
-		/// <param name="viewport"></param>
-		/// <param name="targetSurface"></param>
-		protected void RenderGIS ( GameTime gameTime, StereoEye stereoEye, Viewport viewport, RenderTargetSurface targetSurface ) 
-		{
-			if (GisLayers.Any()) {
-
-				if (GlobeDepthStencil == null) {
-					GlobeDepthStencil = new DepthStencil2D(Game.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height, targetSurface.SampleCount);
-				}
-				else if (GlobeDepthStencil.Width != targetSurface.Width || GlobeDepthStencil.Height != targetSurface.Height) {
-					
-					GlobeDepthStencil.Dispose();
-					GlobeDepthStencil = new DepthStencil2D(Game.GraphicsDevice, DepthFormat.D24S8, targetSurface.Width, targetSurface.Height, targetSurface.SampleCount);
-				}
-
-				rs.Device.Clear(GlobeDepthStencil.Surface);
-
-				Game.GraphicsDevice.SetTargets(GlobeDepthStencil.Surface, targetSurface);
-				
-				GlobeCamera.Viewport = viewport;
-				GlobeCamera.Update(gameTime);
-
-				rs.Gis.Camera = GlobeCamera;
-				rs.Gis.Draw(gameTime, stereoEye, GisLayers);
-			}
 		}
 	}
 }

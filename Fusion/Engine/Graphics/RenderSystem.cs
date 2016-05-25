@@ -9,51 +9,37 @@ using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
-using Fusion.Engine.Graphics.GIS;
 
 namespace Fusion.Engine.Graphics {
 
-	public partial class RenderSystem : GameModule {
+	public partial class RenderSystem : GameComponent {
 
 		internal readonly GraphicsDevice Device;
 
-		[GameModule("Sprites", "sprite", InitOrder.After)]
 		public SpriteEngine	SpriteEngine { get { return spriteEngine; } }
 		SpriteEngine	spriteEngine;
 
-		[GameModule("GIS", "gis", InitOrder.After)]
-		public Gis Gis { get { return gis; } }
-		Gis gis;
-
-		[GameModule("Filter", "filter", InitOrder.After)]
 		public Filter Filter { get{ return filter; } }
-		public Filter filter;
+		Filter filter;
 
-		[GameModule("SsaoFilter", "ssao", InitOrder.After)]
 		public SsaoFilter SsaoFilter { get{ return ssaoFilter; } }
-		public SsaoFilter ssaoFilter;
+		SsaoFilter ssaoFilter;
 
-		[GameModule("BitonicSort", "bitonic", InitOrder.After)]
 		public BitonicSort BitonicSort { get{ return bitonicSort; } }
-		public BitonicSort bitonicSort;
+		BitonicSort bitonicSort;
 
-		[GameModule("HdrFilter", "hdr", InitOrder.After)]
 		public HdrFilter HdrFilter { get{ return hdrFilter; } }
-		public HdrFilter hdrFilter;
+		HdrFilter hdrFilter;
 		
-		[GameModule("DofFilter", "dof", InitOrder.After)]
 		public DofFilter DofFilter { get{ return dofFilter; } }
-		public DofFilter dofFilter;
+		DofFilter dofFilter;
 		
-		[GameModule("LightRenderer", "rs", InitOrder.Before)]
 		public LightRenderer	LightRenderer { get { return lightRenderer; } }
-		public LightRenderer	lightRenderer;
+		LightRenderer	lightRenderer;
 		
-		[GameModule("SceneRendere", "scene", InitOrder.Before)]
 		public SceneRenderer	SceneRenderer { get { return sceneRenderer; } }
-		public SceneRenderer	sceneRenderer;
+		SceneRenderer	sceneRenderer;
 		
-		[GameModule("Sky", "sky", InitOrder.After)]
 		public Sky	Sky { get { return sky; } }
 		public Sky	sky;
 
@@ -104,14 +90,13 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
-		/// Gets default render world.
+		/// Gets render world.
 		/// </summary>
 		public RenderWorld RenderWorld {
 			get {
 				return renderWorld;
 			}
 		}
-
 
 		RenderWorld renderWorld;
 
@@ -136,9 +121,7 @@ namespace Fusion.Engine.Graphics {
 
 			this.Device	=	Game.GraphicsDevice;
 
-			viewLayers	=	new List<RenderLayer>();
 			spriteEngine	=	new SpriteEngine( this );
-			gis				=	new Gis(Game);
 			filter			=	new Filter( Game );
 			ssaoFilter		=	new SsaoFilter( Game );
 			hdrFilter		=	new HdrFilter( Game );
@@ -180,6 +163,18 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize ()
 		{
+			//	init components :
+			InitializeComponent( spriteEngine	);
+			InitializeComponent( filter			);
+			InitializeComponent( ssaoFilter		);
+			InitializeComponent( hdrFilter		);
+			InitializeComponent( dofFilter		);
+			InitializeComponent( lightRenderer	);
+			InitializeComponent( sceneRenderer	);
+			InitializeComponent( sky			);	
+			InitializeComponent( bitonicSort	);
+
+			//	create default textures :
 			whiteTexture	=	new DynamicTexture( this, 4,4, typeof(Color), false, false );
 			whiteTexture.SetData( Enumerable.Range(0,16).Select( i => Color.White ).ToArray() );
 			
@@ -195,9 +190,8 @@ namespace Fusion.Engine.Graphics {
 			var baseIllum = new BaseIllum();
 			defaultMaterial	=	baseIllum.CreateMaterialInstance(this, Game.Content);
 
-			//	add default render world
+			//	add default render world :
 			renderWorld	=	new RenderWorld(Game, Width, Height);
-			AddLayer( renderWorld );
 		}
 
 
@@ -210,9 +204,9 @@ namespace Fusion.Engine.Graphics {
 		{
 			if (disposing) {
 
-				SafeDispose( ref renderWorld );
+				DisposeComponents();
 
-				SafeDispose( ref spriteEngine );
+				SafeDispose( ref renderWorld );
 
 				SafeDispose( ref grayTexture );
 				SafeDispose( ref whiteTexture );
@@ -235,67 +229,12 @@ namespace Fusion.Engine.Graphics {
 		{
 			Counters.Reset();
 
-			Gis.Update(gameTime);
-			//GIS.Draw(gameTime, StereoEye.Mono);
-
-			RenderLayer[] layersToDraw;
-
-			lock (viewLayers) {
-				layersToDraw = viewLayers
-					.OrderBy( c1 => c1.Order )
-					.Where( c2 => c2.Visible )
-					.ToArray();
-			}
-
-			foreach ( var viewLayer in layersToDraw ) {
-				viewLayer.Render( gameTime, stereoEye );
-			}
+			RenderWorld.Render( gameTime, stereoEye );
 
 			if (ShowCounters) {
 				Counters.PrintCounters();
 			}
 		}
-
-
-
-		/// <summary>
-		/// Adds view layer.
-		/// </summary>
-		/// <param name="viewLayer"></param>
-		public void AddLayer ( RenderLayer viewLayer )
-		{
-			lock (viewLayers) {
-				viewLayers.Add( viewLayer );
-			}
-		}
-
-
-
-		/// <summary>
-		/// Removes layer.
-		/// </summary>
-		/// <param name="viewLayer"></param>
-		/// <returns>True if element was removed. False if layer does not exist.</returns>
-		public bool RemoveLayer ( RenderLayer viewLayer )
-		{
-			lock (viewLayers) {
-				if (viewLayers.Contains(viewLayer)) {
-					viewLayers.Remove( viewLayer );
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-
-
-		/// <summary>
-		/// Gets collection of Composition.
-		/// </summary>
-		readonly ICollection<RenderLayer> viewLayers = new List<RenderLayer>();
-
-
 
 		/*-----------------------------------------------------------------------------------------
 		 * 

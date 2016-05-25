@@ -18,7 +18,9 @@ using Fusion.Core.Shell;
 
 namespace Fusion.Framework {
 	
-	public sealed partial class GameConsole : GameModule {
+	public sealed partial class GameConsole : GameComponent {
+
+		const string FontName = "conchars";
 
 
 		class Line {
@@ -67,11 +69,11 @@ namespace Fusion.Framework {
 		/// </summary>
 		/// <param name="Game"></param>
 		/// <param name="font"></param>
-		public GameConsole ( Game Game, string font ) : base(Game)
+		public GameConsole ( Game Game ) : base(Game)
 		{
 			SetDefaults();
 
-			this.font		=	font;
+			this.font		=	FontName;
 
 			editBox		=	new EditBox(this);
 		}

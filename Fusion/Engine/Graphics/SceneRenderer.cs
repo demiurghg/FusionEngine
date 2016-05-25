@@ -14,7 +14,7 @@ using Fusion.Core.Development;
 
 namespace Fusion.Engine.Graphics {
 
-	public class SceneRenderer : GameModule {
+	public class SceneRenderer : GameComponent {
 
 		readonly RenderSystem	rs;
 		internal const int MaxBones = 128;

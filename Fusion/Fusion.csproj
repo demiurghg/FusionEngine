@@ -119,7 +119,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\Configuration\ConfigSerializer.cs" />
     <Compile Include="Core\Configuration\ConfigVariable.cs" />
     <Compile Include="Core\Content\AssetStream.cs" />
     <Compile Include="Core\Content\BytesLoader.cs" />
@@ -231,13 +230,12 @@
     <Compile Include="Engine\Client\GameClient.State.cs" />
     <Compile Include="Engine\Client\GameLoader.cs" />
     <Compile Include="Engine\Common\AtomCollection.cs" />
-    <Compile Include="Engine\Common\Commands\ShowModules.cs" />
     <Compile Include="Engine\Common\Commands\SlowdownServer.cs" />
     <Compile Include="Engine\Common\Commands\FreezeClient.cs" />
     <Compile Include="Engine\Common\Commands\FreezeServer.cs" />
     <Compile Include="Engine\Common\Commands\CrashClient.cs" />
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
-    <Compile Include="Engine\Common\AtomAttribute.cs" />
+    <Compile Include="Core\Configuration\ConfigManager.cs" />
     <Compile Include="Engine\Common\UserInterface.Internal.cs" />
     <Compile Include="Engine\Graphics\Design\TextureLocationEditor.cs" />
     <Compile Include="Engine\Graphics\Effects\BitonicSort.cs" />
@@ -245,11 +243,6 @@
     <Compile Include="Engine\Graphics\Effects\DofFilter.cs" />
     <Compile Include="Engine\Graphics\Effects\SsaoFilter.cs" />
     <Compile Include="Engine\Graphics\Effects\SsaoFilter.Config.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BaseBingMapsSource.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BingMapSatellite.cs" />
-    <Compile Include="Engine\Graphics\GIS\DebugGisLayer.cs" />
-    <Compile Include="Engine\Graphics\GIS\PointsGisLayerCPU.cs" />
-    <Compile Include="Engine\Graphics\GIS\TextGisLayer.cs" />
     <Compile Include="Engine\Graphics\Lights\CascadedShadowMap.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.CSMController.cs" />
     <Compile Include="Engine\Graphics\Lights\ICSMController.cs" />
@@ -281,9 +274,6 @@
     <Compile Include="Engine\Graphics\Effects\Sky.cs" />
     <Compile Include="Engine\Graphics\Effects\SkyModel.cs" />
     <Compile Include="Engine\Graphics\Effects\SkySettings.cs" />
-    <Compile Include="Engine\Graphics\GIS\AnimatedModelLayer.cs" />
-    <Compile Include="Engine\Graphics\GIS\HeatMapLayer.cs" />
-    <Compile Include="Engine\Graphics\GIS\ModelLayer.cs" />
     <Compile Include="Engine\Graphics\HdrFrame.cs" />
     <Compile Include="Engine\Graphics\Lights\EnvLight.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.cs" />
@@ -334,41 +324,8 @@
     <Compile Include="Engine\Common\Commands\Map.cs" />
     <Compile Include="Engine\Common\Commands\ServerInfo.cs" />
     <Compile Include="Engine\Common\Commands\ServerDrop.cs" />
-    <Compile Include="Engine\Common\InitOrder.cs" />
     <Compile Include="Engine\Graphics\RenderLayer.cs" />
     <Compile Include="Engine\Graphics\RenderSystem.Config.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BaseMapSource.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\GoogleMaps\BaseGoogleMapSource.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\GoogleMaps\GoogleSatelliteMap.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\MapBox\BaseMapBoxMap.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\MapBox\PencilMap.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\MapBox\PirateMap.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\MapBox\SpaceStationMap.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\MapTile.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\OpenStreetMaps\BaseOpenStreetMap.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\OpenStreetMaps\BaseOpenStreetMapNodes.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\Projections\MapProjection.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\Projections\MercatorProjection.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\Projections\MercatorProjectionYandex.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\YandexMaps\BaseYandexMap.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\YandexMaps\YandexSatelliteMap.cs" />
-    <Compile Include="Engine\Graphics\GIS\DataSystem\WebDownloader.cs" />
-    <Compile Include="Engine\Graphics\GIS\GeoHelper.cs" />
-    <Compile Include="Engine\Graphics\GIS\GIS.cs" />
-    <Compile Include="Engine\Graphics\GIS\GlobeCamera.cs" />
-    <Compile Include="Engine\Graphics\GIS\GlobeMath\DMathUtil.cs" />
-    <Compile Include="Engine\Graphics\GIS\GlobeMath\DMatrix.cs" />
-    <Compile Include="Engine\Graphics\GIS\GlobeMath\DMatrix3x3.cs" />
-    <Compile Include="Engine\Graphics\GIS\GlobeMath\DQuaternion.cs" />
-    <Compile Include="Engine\Graphics\GIS\GlobeMath\DVector2.cs" />
-    <Compile Include="Engine\Graphics\GIS\GlobeMath\DVector3.cs" />
-    <Compile Include="Engine\Graphics\GIS\GlobeMath\DVector4.cs" />
-    <Compile Include="Engine\Graphics\GIS\LinesBatch.cs" />
-    <Compile Include="Engine\Graphics\GIS\PointsBatch.cs" />
-    <Compile Include="Engine\Graphics\GIS\PolyBatch.cs" />
-    <Compile Include="Engine\Graphics\GIS\TilesBatch.cs" />
-    <Compile Include="Engine\Graphics\GIS\TilesBatch.MapSources.cs" />
-    <Compile Include="Engine\Graphics\GIS\TilesBatch.Tile.cs" />
     <Compile Include="Engine\Graphics\Lights\LightSet.cs" />
     <Compile Include="Engine\Graphics\Textures\TargetFormat.cs" />
     <Compile Include="Engine\Graphics\RenderWorld.cs">
@@ -386,7 +343,6 @@
     <Compile Include="Engine\Media\VideoSampleGrabber.cs" />
     <Compile Include="Engine\Common\Network.cs" />
     <Compile Include="Engine\Server\GameServer.Internal.cs" />
-    <Compile Include="Engine\Common\GameModuleAttribute.cs" />
     <Compile Include="Engine\Common\Game.cs" />
     <Compile Include="Drivers\Graphics\GraphicsParameters.cs">
       <SubType>Code</SubType>
@@ -451,7 +407,7 @@
     <Compile Include="Core\Mathematics\Vector4.cs" />
     <Compile Include="Core\Mathematics\Viewport.cs" />
     <Compile Include="Core\Mathematics\ViewportF.cs" />
-    <Compile Include="Engine\Common\GameModule.cs">
+    <Compile Include="Engine\Common\GameComponent.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Engine\Client\GameClient.cs" />

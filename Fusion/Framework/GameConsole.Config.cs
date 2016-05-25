@@ -14,7 +14,7 @@ using Fusion.Core.Configuration;
 
 namespace Fusion.Framework {
 	
-	public partial class GameConsole : GameModule {
+	public partial class GameConsole : GameComponent {
 
 		[Config] public float FallSpeed { get; set; }
 

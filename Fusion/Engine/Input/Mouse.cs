@@ -10,7 +10,7 @@ using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Input {
 
-	public class Mouse : GameModule {
+	public class Mouse : GameComponent {
 		
 		InputDevice device;
 

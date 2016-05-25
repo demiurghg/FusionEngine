@@ -150,7 +150,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="splitIndex"></param>
 		/// <returns></returns>
-		public Viewport GetSplitViewport( int cascadeIndex )
+		public Viewport GetCascadeViewport( int cascadeIndex )
 		{
 			if ( cascadeIndex < 0 || cascadeIndex >= cascadeCount ) {
 				throw new ArgumentOutOfRangeException("cascadeIndex must be within 0.." + (cascadeCount-1).ToString() );

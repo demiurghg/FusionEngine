@@ -16,7 +16,7 @@ using Fusion.Core.Content;
 namespace Fusion.Engine.Server {
 	
 
-	public abstract partial class GameServer : GameModule {
+	public abstract partial class GameServer : GameComponent {
 
 		Task serverTask;
 		CancellationTokenSource killToken;

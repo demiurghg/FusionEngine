@@ -15,7 +15,7 @@ namespace Fusion.Engine.Client {
 	/// <summary>
 	/// Provides basic client-server interaction and client-side game logic.
 	/// </summary>
-	public abstract partial class GameClient : GameModule {
+	public abstract partial class GameClient : GameComponent {
 
 		public class ClientEventArgs : EventArgs {	
 			public ClientState ClientState;

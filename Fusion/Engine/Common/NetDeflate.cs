@@ -16,7 +16,7 @@ using System.IO;
 
 namespace Fusion.Engine.Common {
 
-	public static class NetDeflate {
+	internal static class NetDeflate {
 
 		
 		/// <summary>

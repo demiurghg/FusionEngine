@@ -15,7 +15,7 @@ using Fusion.Core.Content;
 
 
 namespace Fusion.Engine.Client {
-	public abstract partial class GameClient : GameModule {
+	public abstract partial class GameClient : GameComponent {
 
 		NetClient	client;
 		State		state;

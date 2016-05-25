@@ -9,7 +9,7 @@ using Fusion.Core.Configuration;
 
 namespace Fusion.Engine.Graphics {
 
-	public partial class RenderSystem : GameModule {
+	public partial class RenderSystem : GameComponent {
 
 		public const int	EnvMapSize = 128;
 		public const int	EnvMapSpecularMipCount = 7;

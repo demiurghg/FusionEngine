@@ -26,13 +26,13 @@ namespace Fusion.Core.Shell.Commands {
 			Log.Message("");
 			Log.Message("Variables:");
 
-			var list = Invoker.Variables.ToList()
+			var list = Game.Config.Variables.ToList()
 					.Select( e1 => e1.Value )
-					.OrderBy( e => e.Prefix + e.Name )
+					.OrderBy( e => e.Name )
 					.ToList();
 			
 			foreach ( var variable in list ) {
-				Log.Message("  {0,-35} = {1}", variable.Prefix + "." + variable.Name, variable.Get() );
+				Log.Message("  {0,-35} = {1}", variable.Name, variable.Get() );
 			}
 			Log.Message("{0} vars", list.Count );
 		}

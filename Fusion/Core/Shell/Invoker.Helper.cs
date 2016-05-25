@@ -67,7 +67,7 @@ namespace Fusion.Core.Shell {
 			var cmdList =	CommandList
 							.ToList();
 
-			var varList	=	variables.Select( a => a.Value )
+			var varList	=	Game.Config.Variables.Select( a => a.Value )
 							.OrderBy( b => b.FullName )
 							.ToList();
 
@@ -153,7 +153,7 @@ namespace Fusion.Core.Shell {
 		{
 			var suggestion = new Suggestion(input);
 
-			var type = variable.Property.PropertyType;
+			var type = variable.TargetProperty.PropertyType;
 			var candidates = new string[0];
 
 			//

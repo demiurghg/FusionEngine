@@ -18,7 +18,7 @@ using Fusion.Engine.Graphics;
 namespace Fusion.Engine.Frames {
 
 
-	public class FrameProcessor : GameModule {
+	public class FrameProcessor : GameComponent {
 
 		[Config]	public bool		ShowFrames			{ get; set; }
 		[Config]	public bool		SkipUserInterface	{ get; set; }

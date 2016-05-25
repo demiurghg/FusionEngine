@@ -15,14 +15,12 @@ namespace Fusion.Core.Shell {
 		/// </summary>
 		public Game Game { get; private set; }
 
-
 		/// <summary>
 		/// Invoker's context object to target invoker and commands to particular object.
 		/// </summary>
 		public object Context { get; private set; }
 
 		Dictionary<string, Type> commands;
-		Dictionary<string, ConfigVariable> variables;
 
 		object lockObject = new object();
 
@@ -35,16 +33,6 @@ namespace Fusion.Core.Shell {
 		/// Alphabetically sorted array of command names
 		/// </summary>
 		public string[] CommandList { get; private set; }
-
-		/// <summary>
-		/// Gets dictionary of all available variables.
-		/// </summary>
-		internal Dictionary<string, ConfigVariable> Variables {
-			get {
-				return variables;
-			}
-		}
-
 
 
 		/// <summary>
@@ -80,20 +68,6 @@ namespace Fusion.Core.Shell {
 
 
 		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="obj"></param>
-		/// <param name="name"></param>
-		internal void FeedConfigs ( IEnumerable<ConfigVariable> variables )
-		{
-			lock (lockObject) {
-				this.variables	=	variables.ToDictionary( var1 => var1.Prefix + "." + var1.Name );
-			}
-		}
-
-
-
-		/// <summary>
 		/// Parses and pushes command to the queue.
 		/// </summary>
 		/// <param name="commandLine"></param>
@@ -116,9 +90,9 @@ namespace Fusion.Core.Shell {
 
 				ConfigVariable variable;
 
-				if (Variables.TryGetValue( cmdName, out variable )) {
+				if (Game.Config.Variables.TryGetValue( cmdName, out variable )) {
 					if (argList.Count()==0) {
-						Log.Message("{0} = {1}", variable.FullName, variable.Get() );
+						Log.Message("{0} = {1}", variable.Name, variable.Get() );
 						return null;
 					} else {
 						return Push( string.Format("set {0} \"{1}\"", cmdName, string.Join(" ", argList) ) );

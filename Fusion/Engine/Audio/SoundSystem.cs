@@ -15,7 +15,7 @@ using Fusion.Core.Configuration;
 
 
 namespace Fusion.Engine.Audio {
-	public partial class SoundSystem : GameModule {
+	public partial class SoundSystem : GameComponent {
 
         internal XAudio2 Device { get; private set; }
         internal MasteringVoice MasterVoice { get; private set; }

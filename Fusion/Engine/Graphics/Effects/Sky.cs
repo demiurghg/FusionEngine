@@ -13,7 +13,7 @@ using System.Diagnostics;
 
 namespace Fusion.Engine.Graphics {
 
-	public class Sky : GameModule {
+	public class Sky : GameComponent {
 		[Flags]
 		enum SkyFlags : int
 		{

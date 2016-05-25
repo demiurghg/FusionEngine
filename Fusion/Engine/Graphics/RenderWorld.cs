@@ -7,8 +7,6 @@ using Fusion.Core.Mathematics;
 using Fusion.Core;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
-using Fusion.Engine.Graphics.GIS;
-using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
 using System.Diagnostics;
 
 namespace Fusion.Engine.Graphics {
@@ -271,9 +269,6 @@ namespace Fusion.Engine.Graphics {
 			//	Render HDR stuff: mesh instances, 
 			//	special effects, sky, water, light etc. 
 			RenderHdrScene( gameTime, stereoEye, viewport, targetSurface );
-
-			//	Render GIS stuff :
-			RenderGIS( gameTime, stereoEye, viewport, targetSurface );
 
 			//	draw sprites :
 			rs.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );

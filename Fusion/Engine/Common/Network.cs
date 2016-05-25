@@ -16,7 +16,7 @@ using System.IO;
 
 namespace Fusion.Engine.Common {
 
-	public class Network : GameModule {
+	public class Network : GameComponent {
 
 		[Config]
 		public int Port { get; set; }

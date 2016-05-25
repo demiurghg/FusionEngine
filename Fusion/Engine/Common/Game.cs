@@ -23,7 +23,6 @@ using Fusion.Core.IniParser;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Input;
 using Fusion.Engine.Client;
-using Fusion.Engine.Graphics.GIS;
 using Fusion.Engine.Server;
 using Lidgren.Network;
 using Fusion.Engine.Storage;
@@ -45,6 +44,11 @@ namespace Fusion.Engine.Common {
 		public static Game Instance = null;
 
 		/// <summary>
+		/// Gets settings.
+		/// </summary>
+		public ConfigManager Config { get { return config; } }
+
+		/// <summary>
 		/// Gets the current input device
 		/// </summary>
 		internal InputDevice	InputDevice { get { return inputDevice; } }
@@ -55,17 +59,20 @@ namespace Fusion.Engine.Common {
 		internal GraphicsDevice GraphicsDevice { get { return graphicsDevice; } }
 
 		/// <summary>
-		/// Gets the current graphics engine
+		/// Gets the render system
 		/// </summary>
-		[GameModule("Rendering", "rs", InitOrder.After)]
 		public	RenderSystem RenderSystem { get { return renderSystem; } }
 
-		[GameModule("Audio", "snd", InitOrder.After)]
+		/// <summary>
+		/// Gets the sound system
+		/// </summary>
 		public SoundSystem SoundSystem { get { return soundSystem; } }
 
-		[GameModule("Network", "net", InitOrder.After)]
+		/// <summary>
+		/// Gets the network system.
+		/// Actually used only for configuration both client and server.
+		/// </summary>
 		public Network Network { get { return network; } }
-
 
 		/// <summary>
 		/// Gets current content manager
@@ -75,19 +82,16 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Gets keyboard.
 		/// </summary>
-		[GameModule("Keyboard", "kb", InitOrder.After)]
 		public Keyboard Keyboard { get { return keyboard; } }
 
 		/// <summary>
 		/// Gets mouse.
 		/// </summary>
-		[GameModule("Mouse", "mouse", InitOrder.After)]
 		public Mouse Mouse { get { return mouse; } }
 
 		/// <summary>
 		/// Gets mouse.
 		/// </summary>
-		[GameModule("Touch", "touch", InitOrder.After)]
 		public Touch Touch { get { return touch; } }
 
 		/// <summary>
@@ -96,7 +100,7 @@ namespace Fusion.Engine.Common {
 		public GamepadCollection Gamepads { get { return gamepads; } }
 
 		/// <summary>
-		/// Gets current content manager
+		/// Gets invoker
 		/// </summary>
 		public	Invoker Invoker { get { return invoker; } }
 
@@ -108,14 +112,13 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Gets console
 		/// </summary>
-		[GameModule("Console", "con", InitOrder.Before)]
 		public GameConsole Console { get { return console; } }
 
 		/// <summary>
 		/// Gets frame processor
 		/// </summary>
-		[GameModule("Frames", "gui", InitOrder.Before)]
 		public FrameProcessor Frames { get { return frames; } }
+
 
 		/// <summary>
 		/// Sets and gets game window icon.
@@ -210,13 +213,12 @@ namespace Fusion.Engine.Common {
 		internal bool ExitRequested { get { return requestExit; } }
 
 
+		ConfigManager		config		;
 		InputDevice			inputDevice		;
 		GraphicsDevice		graphicsDevice	;
-		//AudioEngine			audioEngine		;
-		//InputEngine			inputEngine		;
 		RenderSystem		renderSystem	;
 		SoundSystem			soundSystem		;
-		Network		network			;
+		Network				network			;
 		ContentManager		content			;
 		Invoker				invoker			;
 		Keyboard			keyboard		;
@@ -238,21 +240,53 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Current game server.
 		/// </summary>
-		[GameModule("Server", "sv", InitOrder.After)]
-		public GameServer GameServer { get { return sv; } set { sv = value; } }
+		public GameServer GameServer { 
+			get { return sv; } 
+			set { 
+				if (IsInitialized) {
+					throw new InvalidOperationException("Can not set server after initialization");
+				}
+				if (sv!=null) {
+					throw new InvalidOperationException("Game server is already set");
+				}
+				sv = value; 
+				Config.ExposeProperties( sv, "GameServer", "sv" );
+			} 
+		}
 		
 		/// <summary>
 		/// Current game client.
 		/// </summary>
-		[GameModule("Client", "cl", InitOrder.After)]
-		public GameClient GameClient { get { return cl; } set { cl = value; } }
+		public GameClient GameClient {
+			get { return cl; } 
+			set { 
+				if (IsInitialized) {
+					throw new InvalidOperationException("Can not set client after initialization");
+				}
+				if (cl!=null) {
+					throw new InvalidOperationException("Game client is already set");
+				}
+				cl = value; 
+				Config.ExposeProperties( cl, "GameClient", "cl" );
+			} 
+		}
 
 		/// <summary>
 		/// Current game interface.
 		/// </summary>
-		[GameModule("Interface", "ui", InitOrder.After)]
-		public UserInterface GameInterface { get { return gi; } set { gi = value; } }
-
+		public UserInterface UserInterface {
+			get { return gi; } 
+			set { 
+				if (IsInitialized) {
+					throw new InvalidOperationException("Can not set user interface after initialization");
+				}
+				if (gi!=null) {
+					throw new InvalidOperationException("User interface is already set");
+				}
+				gi = value; 
+				Config.ExposeProperties( gi, "UserInterface", "ui" );
+			} 
+		}
 
 
 		/// <summary>
@@ -303,7 +337,7 @@ namespace Fusion.Engine.Common {
 		/// Initializes a new instance of this class, which provides 
 		/// basic graphics device initialization, game logic, rendering code, and a game loop.
 		/// </summary>
-		public Game (string gameId)
+		public Game ( string gameId )
 		{
 			this.gameId	=	gameId;
 			Enabled	=	true;
@@ -333,6 +367,7 @@ namespace Fusion.Engine.Common {
 			//	http://msdn.microsoft.com/en-us/library/bb384202.aspx
 			GCSettings.LatencyMode	=	GCLatencyMode.SustainedLowLatency;
 
+			config				=	new ConfigManager( this );
 			inputDevice			=	new InputDevice( this );
 			graphicsDevice		=	new GraphicsDevice( this );
 			renderSystem		=	new RenderSystem( this );
@@ -341,7 +376,7 @@ namespace Fusion.Engine.Common {
 			content				=	new ContentManager( this );
 			gameTimeInternal	=	new GameTime();
 			invoker				=	new Invoker(this, CommandAffinity.Default);
-			console				=	new GameConsole(this, "conchars");
+			console				=	new GameConsole(this);
 
 			keyboard			=	new Keyboard(this);
 			mouse				=	new Mouse(this);
@@ -352,6 +387,11 @@ namespace Fusion.Engine.Common {
 
 			userStorage			=	new UserStorage(this);
 
+			config.ExposeProperties( SoundSystem,	"SoundSystem",		"snd"	);
+			config.ExposeProperties( RenderSystem,	"RenderSystem",		"rs"	);
+			config.ExposeProperties( Frames,		"Frames",			"frames");
+			config.ExposeProperties( Console,		"Console",			"con"	);
+			config.ExposeProperties( Network,		"Network",			"net"	);
 		}
 
 
@@ -403,24 +443,35 @@ namespace Fusion.Engine.Common {
 			var p = new GraphicsParameters();
 			RenderSystem.ApplyParameters( ref p );
 
-			GraphicsDevice.Initialize( p );
+			//	initialize drivers :
+			GraphicsDevice.Initialize(p);
 			InputDevice.Initialize();
-			SoundSystem.Initialize();
+																		   
+			//	initiliaze core systems :
+			Initialize( SoundSystem );
+			Initialize( RenderSystem );
+			Initialize( Keyboard );
+			Initialize( Mouse );
+			Initialize( Touch );
+
+			//	initialize additional systems :
+			Initialize( Console );
+			Initialize( Frames );
+
+			//	initialize game-specific systems :
+			Initialize( UserInterface );
+			Initialize( GameClient );
+			Initialize( GameServer );
 
 			//	init game :
 			Log.Message("");
 
-			//	init game modules :
-			GameModule.InitializeAll( this );
-
-			//	add initialized modules to dictionary :
-			moduleDictionary	=	new Dictionary<Type,object>();
-			foreach ( var bind in GameModule.Enumerate(this) ) {
-				moduleDictionary.Add( bind.Module.GetType(), bind.Module );
-			}
-
+			//	attach console sprite layer :
 			Console.ConsoleSpriteLayer.Order = int.MaxValue / 2;
 			RenderSystem.RenderWorld.SpriteLayers.Add( Console.ConsoleSpriteLayer );
+
+			Frames.FramesSpriteLayer.Order = int.MaxValue / 2 - 1;
+			RenderSystem.RenderWorld.SpriteLayers.Add( Frames.FramesSpriteLayer );
 
 			initialized	=	true;
 
@@ -431,31 +482,20 @@ namespace Fusion.Engine.Common {
 		}
 
 
-		Dictionary<Type,object> moduleDictionary;
+
+		Stack<GameComponent> modules = new Stack<GameComponent>();
 
 
-		/// <summary>
-		/// Gets module by its type.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public T GetModule<T>()
+		void Initialize ( GameComponent module )
 		{
-			object module;
+			Log.Message( "---- Init : {0} ----", module.GetType().Name);
+			module.Initialize();
 
-			if (moduleDictionary.TryGetValue( typeof(T), out module )) {
-				return (T)module;
-			} else {
-
-				module = moduleDictionary.FirstOrDefault( bind => bind.Value is T );
-
-				if (module==null) {
-					throw new InvalidOperationException(string.Format("Game module type of {} not found", typeof(T)));
-				}
-
-				return (T)module;
-			}
+			modules.Push( module );
 		}
+
+
+
 
 
 		/// <summary>
@@ -475,7 +515,6 @@ namespace Fusion.Engine.Common {
 			//	if it is still running :
 			cl.Wait();
 			sv.Wait();
-
 			
 			//	call exit event :
 			if (Exiting!=null) {
@@ -484,17 +523,22 @@ namespace Fusion.Engine.Common {
 
 			if (disposing) {
 
-				GameModule.DisposeAll( this );
+				while ( modules.Any() ) {
+					var module = modules.Pop();
+					Log.Message("Disposing : {0}", module.GetType().Name );
+					module.Dispose();
+				}
 
-				content.Dispose();
+				Log.Message("Disposing : Content");
+				SafeDispose( ref content );
 
-				Log.Message("Disposing : Input Device");
+				Log.Message("Disposing : InputDevice");
 				SafeDispose( ref inputDevice );
 
-				Log.Message("Disposing : Graphics Device");
+				Log.Message("Disposing : GraphicsDevice");
 				SafeDispose( ref graphicsDevice );
 
-				Log.Message("Disposing : User Storage");
+				Log.Message("Disposing : UserStorage");
 				SafeDispose( ref userStorage );
 			}
 
@@ -667,15 +711,10 @@ namespace Fusion.Engine.Common {
 		/// <param name="path"></param>
 		public void LoadConfiguration ( string filename )
 		{
-			Log.Message("Loading configuration...");
+			//Log.Message("Loading configuration...");
 
-			Invoker.FeedConfigs( ConfigSerializer.GetConfigVariables( GameModule.Enumerate(this) ) );
+			//Invoker.FeedConfigs( ConfigSerializer.GetConfigVariables( GameModule.Enumerate(this) ) );
 
-			if (userStorage.FileExists(filename)) {
-				ConfigSerializer.LoadFromStream( GameModule.Enumerate(this), UserStorage.OpenFile(filename, FileMode.Open, FileAccess.Read) );
-			} else {
-				Log.Warning("Can not load configuration from {0}", filename);
-			}
 		}
 
 
@@ -685,10 +724,10 @@ namespace Fusion.Engine.Common {
 		/// <param name="path"></param>
 		public void SaveConfiguration ( string filename )
 		{	
-			Log.Message("Saving configuration...");
+			//Log.Message("Saving configuration...");
 
-			UserStorage.DeleteFile(filename);
-			ConfigSerializer.SaveToStream( GameModule.Enumerate(this), UserStorage.OpenFile(filename, FileMode.Create, FileAccess.Write) );
+			//UserStorage.DeleteFile(filename);
+			//ConfigSerializer.SaveToStream( GameModule.Enumerate(this), UserStorage.OpenFile(filename, FileMode.Create, FileAccess.Write) );
 		}
 
 

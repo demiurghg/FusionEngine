@@ -429,6 +429,18 @@ namespace Fusion.Core {
 		}	  
 
 
+		/// <summary>
+		/// Checks whether type has attribute of given type
+		/// </summary>
+		/// <typeparam name="AttributeType"></typeparam>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		public static bool HasAttribute<T> ( this PropertyInfo type ) where T : Attribute
+		{
+			return type.GetCustomAttributes( typeof(T), true ).Any();
+		}	  
+
+
 
 		/// <summary>
 		/// Searches all loaded assemblies for all public subclasses of given type

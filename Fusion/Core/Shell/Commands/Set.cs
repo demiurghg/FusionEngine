@@ -37,7 +37,7 @@ namespace Fusion.Core.Shell.Commands {
 		{
 			ConfigVariable variable;
 
-			if (!Invoker.Variables.TryGetValue( Variable, out variable )) {
+			if (!Game.Config.Variables.TryGetValue( Variable, out variable )) {
 				throw new Exception(string.Format("Variable '{0}' does not exist", Variable) );
 			}
 
@@ -69,7 +69,7 @@ namespace Fusion.Core.Shell.Commands {
 		{
 			ConfigVariable variable;
 
-			if (!Invoker.Variables.TryGetValue( Variable, out variable )) {
+			if (!Game.Config.Variables.TryGetValue( Variable, out variable )) {
 				throw new Exception(string.Format("Variable '{0}' does not exist", Variable) );
 			}
 
