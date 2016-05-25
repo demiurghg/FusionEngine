@@ -135,10 +135,6 @@ namespace Fusion.Engine.Audio {
 					e.Apply3D( Listener, operationSet );
 				}
 			}
-
-
 		}
-
-
 	}
 }

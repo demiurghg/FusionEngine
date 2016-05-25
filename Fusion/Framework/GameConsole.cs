@@ -18,7 +18,7 @@ using Fusion.Core.Shell;
 
 namespace Fusion.Framework {
 	
-	public partial class GameConsole : GameModule {
+	public sealed partial class GameConsole : GameModule {
 
 
 		class Line {

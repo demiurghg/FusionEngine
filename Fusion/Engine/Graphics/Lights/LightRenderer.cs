@@ -110,8 +110,6 @@ namespace Fusion.Engine.Graphics {
 
 
 		Ubershader		lightingShader;
-		Ubershader		voxelShader;
-		StateFactory	voxelFactory;
 		StateFactory	factory;
 		ConstantBuffer	lightingCB;
 

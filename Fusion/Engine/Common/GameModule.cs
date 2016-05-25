@@ -163,7 +163,7 @@ namespace Fusion.Engine.Common {
 		/// Gets all properties marked with ConfigAttribute.
 		/// </summary>
 		/// <returns></returns>
-		public PropertyInfo GetConfigurationProperty ( string name )
+		PropertyInfo GetConfigurationProperty ( string name )
 		{
 			var prop = GetType().GetProperty( name );
 

@@ -40,7 +40,7 @@ namespace Fusion.Drivers.Graphics.Display {
 			try {
 				window = CreateTouchForm(parameters, null);
 			}
-			catch (System.EntryPointNotFoundException e) {
+			catch (System.EntryPointNotFoundException) {
 				Log.Warning("Looks like your system does't support touch gestures. You need Windows 8.1 or newer for this.");
 				window = CreateForm(parameters, null);
 			}

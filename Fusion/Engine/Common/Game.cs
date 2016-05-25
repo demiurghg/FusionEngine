@@ -28,6 +28,8 @@ using Fusion.Engine.Server;
 using Lidgren.Network;
 using Fusion.Engine.Storage;
 using Fusion.Engine.Audio;
+using Fusion.Framework;
+using Fusion.Engine.Frames;
 
 
 namespace Fusion.Engine.Common {
@@ -103,6 +105,17 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		public UserStorage UserStorage { get { return userStorage; } }
 
+		/// <summary>
+		/// Gets console
+		/// </summary>
+		[GameModule("Console", "con", InitOrder.Before)]
+		public GameConsole Console { get { return console; } }
+
+		/// <summary>
+		/// Gets frame processor
+		/// </summary>
+		[GameModule("Frames", "gui", InitOrder.Before)]
+		public FrameProcessor Frames { get { return frames; } }
 
 		/// <summary>
 		/// Sets and gets game window icon.
@@ -211,6 +224,8 @@ namespace Fusion.Engine.Common {
 		Touch				touch;
 		GamepadCollection	gamepads		;
 		UserStorage			userStorage		;
+		GameConsole			console;
+		FrameProcessor		frames;
 
 
 		GameTime	gameTimeInternal;
@@ -326,34 +341,17 @@ namespace Fusion.Engine.Common {
 			content				=	new ContentManager( this );
 			gameTimeInternal	=	new GameTime();
 			invoker				=	new Invoker(this, CommandAffinity.Default);
+			console				=	new GameConsole(this, "conchars");
 
 			keyboard			=	new Keyboard(this);
 			mouse				=	new Mouse(this);
 			touch				=	new Touch(this);
 			gamepads			=	new GamepadCollection(this);
 
+			frames				=	new FrameProcessor(this, "profont");
+
 			userStorage			=	new UserStorage(this);
 
-		}
-
-
-
-		/// <summary>
-		/// http://stackoverflow.com/questions/2384592/is-there-a-way-to-force-all-referenced-assemblies-to-be-loaded-into-the-app-doma
-		/// TODO : Recursive load.
-		/// </summary>
-		void ForceAssemblies ()
-		{
-			var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
-			var loadedPaths = loadedAssemblies.Select(a => a.Location).ToArray();
-
-			var referencedPaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll");
-			var toLoad = referencedPaths.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
-
-			foreach ( var path in toLoad ) {
-				Log.Message("Forcing assembly : {0}", path );
-				loadedAssemblies.Add( AppDomain.CurrentDomain.Load( AssemblyName.GetAssemblyName(path) ) );
-			}
 		}
 
 
@@ -420,6 +418,9 @@ namespace Fusion.Engine.Common {
 			foreach ( var bind in GameModule.Enumerate(this) ) {
 				moduleDictionary.Add( bind.Module.GetType(), bind.Module );
 			}
+
+			Console.ConsoleSpriteLayer.Order = int.MaxValue / 2;
+			RenderSystem.RenderWorld.SpriteLayers.Add( Console.ConsoleSpriteLayer );
 
 			initialized	=	true;
 
