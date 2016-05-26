@@ -17,7 +17,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// 
 	/// </summary>
-	public sealed class StateFactory : GraphicsResource {
+	internal sealed class StateFactory : GraphicsResource {
 
 		Ubershader		ubershader;
 		Dictionary<int, PipelineState>	pipelineStates;

@@ -17,7 +17,7 @@ namespace Fusion.Drivers.Graphics {
 		public const int	Format_Integer	=	2;
 
 
-		public class SignatureEntry {
+		internal class SignatureEntry {
 			public string	Name;
 			public int		Index;
 			public int		Mask;

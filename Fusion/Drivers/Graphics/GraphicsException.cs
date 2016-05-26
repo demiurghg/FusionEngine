@@ -19,7 +19,7 @@ using System.IO;
 namespace Fusion.Drivers.Graphics {
 
 	[Serializable]
-	public class GraphicsException : Exception {
+	internal class GraphicsException : Exception {
 
 		public GraphicsException ()
 		{

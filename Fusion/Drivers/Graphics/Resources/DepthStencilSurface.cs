@@ -8,7 +8,7 @@ using SharpDX.Direct3D11;
 using Fusion.Core;
 
 namespace Fusion.Drivers.Graphics {
-	public class DepthStencilSurface : DisposableBase {
+	internal class DepthStencilSurface : DisposableBase {
 
 		public int			Width			{ get; private set; }
 		public int			Height			{ get; private set; }

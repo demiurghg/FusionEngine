@@ -11,7 +11,7 @@ namespace Fusion.Drivers.Graphics {
 	/// <summary>
 	/// The constant buffer collection.
 	/// </summary>
-	public sealed class ConstantBufferCollection : GraphicsResource {
+	internal sealed class ConstantBufferCollection : GraphicsResource {
 
 		readonly ConstantBuffer[]	buffers;	
 		readonly CommonShaderStage	stage;

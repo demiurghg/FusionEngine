@@ -17,7 +17,7 @@ namespace Fusion.Engine.Graphics {
 		public class Glyph {
 			public Rectangle	DstRect;
 			public Rectangle	SrcRect;
-			public Texture2D	Texture;
+			public DiscTexture	Texture;
 			public Color		Color;
 		}
 
@@ -70,9 +70,9 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="device"></param>
 		/// <param name="fileName"></param>
-		public SpriteFont ( GraphicsDevice rs, Stream stream )
+		public SpriteFont ( RenderSystem rs, Stream stream )
 		{
-			this.rs	=	rs;
+			this.rs	=	rs.Device;
 
 			using (var br = new BinaryReader(stream)) {
 

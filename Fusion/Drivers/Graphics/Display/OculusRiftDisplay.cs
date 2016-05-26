@@ -376,7 +376,7 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// <summary>
 		/// Contains all the fields used by each eye.
 		/// </summary>
-		public class EyeTexture : IDisposable
+		internal class EyeTexture : IDisposable
 		{
 			public EyeTexture(GraphicsDevice graphicDevice, OculusTextureSwapChain swapTexture)
 			{

@@ -18,12 +18,7 @@ using Fusion.Engine.Common;
 
 namespace Fusion.Drivers.Graphics {
 	
-	public interface IUbershaderEnum {
-		void Enumerate ( PipelineState pipelineState, int combination );
-	}
-
-
-	public partial class Ubershader : GraphicsResource {
+	internal partial class Ubershader : GraphicsResource {
 
 		public const string UbershaderSignature = "USH1";
 		public const string PSBytecodeSignature = "PSBC";

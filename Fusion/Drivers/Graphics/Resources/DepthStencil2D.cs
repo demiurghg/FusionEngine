@@ -16,7 +16,7 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Drivers.Graphics {
 	
-	public class DepthStencil2D : ShaderResource {
+	internal class DepthStencil2D : ShaderResource {
 
 		/// <summary>
 		/// Samples count

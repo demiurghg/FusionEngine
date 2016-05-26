@@ -16,32 +16,32 @@ namespace Fusion.Engine.Graphics {
 
 		internal readonly GraphicsDevice Device;
 
-		public SpriteEngine	SpriteEngine { get { return spriteEngine; } }
+		internal SpriteEngine	SpriteEngine { get { return spriteEngine; } }
 		SpriteEngine	spriteEngine;
 
-		public Filter Filter { get{ return filter; } }
+		internal Filter Filter { get{ return filter; } }
 		Filter filter;
 
-		public SsaoFilter SsaoFilter { get{ return ssaoFilter; } }
+		internal SsaoFilter SsaoFilter { get{ return ssaoFilter; } }
 		SsaoFilter ssaoFilter;
 
-		public BitonicSort BitonicSort { get{ return bitonicSort; } }
+		internal BitonicSort BitonicSort { get{ return bitonicSort; } }
 		BitonicSort bitonicSort;
 
-		public HdrFilter HdrFilter { get{ return hdrFilter; } }
+		internal HdrFilter HdrFilter { get{ return hdrFilter; } }
 		HdrFilter hdrFilter;
 		
-		public DofFilter DofFilter { get{ return dofFilter; } }
+		internal DofFilter DofFilter { get{ return dofFilter; } }
 		DofFilter dofFilter;
 		
-		public LightRenderer	LightRenderer { get { return lightRenderer; } }
+		internal LightRenderer	LightRenderer { get { return lightRenderer; } }
 		LightRenderer	lightRenderer;
 		
-		public SceneRenderer	SceneRenderer { get { return sceneRenderer; } }
+		internal SceneRenderer	SceneRenderer { get { return sceneRenderer; } }
 		SceneRenderer	sceneRenderer;
 		
-		public Sky	Sky { get { return sky; } }
-		public Sky	sky;
+		internal Sky	Sky { get { return sky; } }
+		Sky	sky;
 
 		/// <summary>
 		/// Gets render counters.

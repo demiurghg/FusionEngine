@@ -14,7 +14,7 @@ using Fusion.Engine.Common;
 
 
 namespace Fusion.Engine.Graphics {
-	public partial class SsaoFilter : GameComponent {
+	internal partial class SsaoFilter : GameComponent {
 
 		public enum SampleNum
 		{

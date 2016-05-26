@@ -16,7 +16,7 @@ namespace Fusion.Engine.Graphics
 	/// <summary>
 	/// Class for base image processing such as copying, blurring, enhancement, anti-aliasing etc.
 	/// </summary>
-	public class BitonicSort : GameComponent {
+	internal class BitonicSort : GameComponent {
 
 		readonly GraphicsDevice device;
 

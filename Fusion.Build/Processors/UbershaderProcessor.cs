@@ -23,6 +23,14 @@ namespace Fusion.Build.Processors {
 	[AssetProcessor("Shaders","")]
 	public partial class UbershaderProcessor : AssetProcessor {
 			
+		public const string UbershaderSignature = "USH1";
+		public const string PSBytecodeSignature = "PSBC";
+		public const string VSBytecodeSignature = "VSBC";
+		public const string GSBytecodeSignature = "GSBC";
+		public const string HSBytecodeSignature = "HSBC";
+		public const string DSBytecodeSignature = "DSBC";
+		public const string CSBytecodeSignature = "CSBC";
+
 		public enum ShaderMatrixPacking {
 			RowMajor,
 			ColumnMajor,
@@ -199,7 +207,7 @@ namespace Fusion.Build.Processors {
 
 				using ( var bw = new BinaryWriter( fs ) ) {
 
-					bw.WriteFourCC( Ubershader.UbershaderSignature );
+					bw.WriteFourCC( UbershaderSignature );
 
 					//	params :
 
@@ -210,27 +218,27 @@ namespace Fusion.Build.Processors {
 
 						bw.Write( entry.Defines );
 
-						bw.WriteFourCC( Ubershader.PSBytecodeSignature );
+						bw.WriteFourCC( PSBytecodeSignature );
 						bw.Write( entry.PSBytecode.Length );
 						bw.Write( entry.PSBytecode );
 
-						bw.WriteFourCC( Ubershader.VSBytecodeSignature );
+						bw.WriteFourCC( VSBytecodeSignature );
 						bw.Write( entry.VSBytecode.Length );
 						bw.Write( entry.VSBytecode );
 
-						bw.WriteFourCC( Ubershader.GSBytecodeSignature );
+						bw.WriteFourCC( GSBytecodeSignature );
 						bw.Write( entry.GSBytecode.Length );
 						bw.Write( entry.GSBytecode );
 
-						bw.WriteFourCC( Ubershader.HSBytecodeSignature );
+						bw.WriteFourCC( HSBytecodeSignature );
 						bw.Write( entry.HSBytecode.Length );
 						bw.Write( entry.HSBytecode );
 
-						bw.WriteFourCC( Ubershader.DSBytecodeSignature );
+						bw.WriteFourCC( DSBytecodeSignature );
 						bw.Write( entry.DSBytecode.Length );
 						bw.Write( entry.DSBytecode );
 
-						bw.WriteFourCC( Ubershader.CSBytecodeSignature );
+						bw.WriteFourCC( CSBytecodeSignature );
 						bw.Write( entry.CSBytecode.Length );
 						bw.Write( entry.CSBytecode );
 					}

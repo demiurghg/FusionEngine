@@ -19,14 +19,14 @@ using Fusion.Engine.Common;
 
 
 namespace Fusion.Drivers.Graphics {
-	public class Texture2D : ShaderResource {
+	internal class Texture2D : ShaderResource {
 
 		D3D.Texture2D	tex2D;
 		ColorFormat		format;
 		int				mipCount;
 
 		[ContentLoader(typeof(Texture2D))]
-		public class Loader : ContentLoader {
+		internal class Loader : ContentLoader {
 
 			public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 			{

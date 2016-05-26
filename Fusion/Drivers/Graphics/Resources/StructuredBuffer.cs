@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 
 namespace Fusion.Drivers.Graphics {
 
-	public class StructuredBuffer : ShaderResource {
+	internal class StructuredBuffer : ShaderResource {
 
 		/// <summary>
 		/// Structure stride in bytes

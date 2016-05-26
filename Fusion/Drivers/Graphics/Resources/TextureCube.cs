@@ -20,7 +20,7 @@ using Fusion.Engine.Common;
 
 
 namespace Fusion.Drivers.Graphics {
-	public class TextureCube : ShaderResource {
+	internal class TextureCube : ShaderResource {
 
 		D3D.Texture2D	texCube;
 		ColorFormat		format;
@@ -30,7 +30,7 @@ namespace Fusion.Drivers.Graphics {
 		ShaderResource	srgbResource;
 
 		[ContentLoader(typeof(TextureCube))]
-		public class Loader : ContentLoader {
+		internal class Loader : ContentLoader {
 
 			public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
 			{

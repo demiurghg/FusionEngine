@@ -23,7 +23,7 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Drivers.Graphics {
 
-	public class GraphicsResource : DisposableBase {
+	internal class GraphicsResource : DisposableBase {
 
 		/// <summary>
 		/// Gets the GraphicsDevice associated with this GraphicsResource.

@@ -16,7 +16,7 @@ using DXGI = SharpDX.DXGI;
 namespace Fusion.Drivers.Graphics {
 
 
-	public class RenderTargetCube : ShaderResource {
+	internal class RenderTargetCube : ShaderResource {
 
 		/// <summary>
 		/// Samples count
