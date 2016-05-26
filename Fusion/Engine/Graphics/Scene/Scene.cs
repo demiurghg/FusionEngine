@@ -16,7 +16,7 @@ using Fusion.Core.Content;
 
 
 namespace Fusion.Engine.Graphics {
-	public class Scene : DisposableBase {
+	public sealed class Scene : DisposableBase {
 
 		List<Node>			nodes		= new List<Node>();
 		List<Mesh>			meshes		= new List<Mesh>();

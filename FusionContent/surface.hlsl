@@ -40,9 +40,6 @@ struct PSInput {
 	float3	Normal 		: TEXCOORD3;
 	float4	ProjPos		: TEXCOORD4;
 	float3 	WorldPos	: TEXCOORD5;
-	#ifdef VOXELIZE
-	int		Axis		: TEXCOORD6;
-	#endif
 };
 
 struct GBuffer {
@@ -61,7 +58,6 @@ SamplerState	Sampler		: 	register(s0);
 Texture2D		Textures[16]: 	register(t0);
 
 #ifdef _UBERSHADER
-$ubershader VOXELIZE RIGID|SKINNED
 $ubershader GBUFFER RIGID|SKINNED BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
 $ubershader SHADOW RIGID|SKINNED  BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
 $ubershader SHADOW RIGID|SKINNED
@@ -157,96 +153,9 @@ PSInput VSMain( VSInput input )
 	output.Binormal		=  	normalize(binormal.xyz);
 	output.WorldPos		=	wPos.xyz;
 	
-	#ifdef VOXELIZE
-	output.Axis			=	0;
-	#endif
-	
 	return output;
 }
 
-
-#ifdef VOXELIZE
-PSInput FlipXAxis ( PSInput input )
-{
-	PSInput output  	= input;
-	output.Position.x 	= input.Position.z * 2 - 1;
-	output.Position.y 	= input.Position.y;
-	output.Position.z 	= input.Position.x * 0.5 + 0.5;
-	output.Position.w 	= input.Position.w;
-	output.ProjPos		= output.Position;
-	output.Axis     	= 0;
-	return output;
-}
-
-PSInput FlipYAxis ( PSInput input )
-{
-	PSInput output  	= input;
-	output.Position.x 	= input.Position.x;
-	output.Position.y 	= input.Position.z * -2 + 1;
-	output.Position.z 	= input.Position.y * -0.5 + 0.5;
-	output.Position.w 	= input.Position.w;
-	output.ProjPos		= output.Position;
-	output.Axis			= 1;
-	return output;
-}
-
-PSInput FlipZAxis ( PSInput input )
-{
-	PSInput output  = input;
-	output.Position = input.Position.xyzw;
-	output.ProjPos 	= input.Position.xyzw;
-	output.Axis		= 2;
-	return output;
-}
-#endif
-
-
-#ifdef VOXELIZE
-
-[maxvertexcount(3)]
-void GSMain( triangle PSInput inputTriangle[3], inout TriangleStream<PSInput> outputStream )
-{
-	float3 v01	=	(inputTriangle[0].ProjPos.xyz - inputTriangle[1].ProjPos.xyz) * float3(1,1,2);
-	float3 v02	=	(inputTriangle[0].ProjPos.xyz - inputTriangle[2].ProjPos.xyz) * float3(1,1,2);
-	float3 n	=	normalize(cross( v01, v02 ));
-	float3 N	=	normalize(n);
-	n.x = abs(n.x);
-	n.y = abs(n.y);
-	n.z = abs(n.z);
-	//n = float3(0,0,1);
-
-	PSInput v0	=	inputTriangle[0];
-	PSInput v1	=	inputTriangle[1];
-	PSInput v2	=	inputTriangle[2];
-
-	v0.Normal	=	N;
-	v1.Normal	=	N;
-	v2.Normal	=	N;
-	
-	if (n.z >= n.x && n.z >= n.y) {
-		outputStream.Append(FlipZAxis(v0));
-		outputStream.Append(FlipZAxis(v1));
-		outputStream.Append(FlipZAxis(v2));
-		outputStream.RestartStrip();
-		return;
-	} 
-	else if (n.y >= n.z && n.y >= n.x) {
-		outputStream.Append(FlipYAxis(v0));
-		outputStream.Append(FlipYAxis(v1));
-		outputStream.Append(FlipYAxis(v2));
-		outputStream.RestartStrip();
-		return;
-	} 
-	else if (n.x >= n.y && n.x >= n.z) {
-		outputStream.Append(FlipXAxis(v0));
-		outputStream.Append(FlipXAxis(v1));
-		outputStream.Append(FlipXAxis(v2));
-		outputStream.RestartStrip();
-		return;
-	}
-	return;
-}
-#endif
 
  
 /*-----------------------------------------------------------------------------
@@ -379,42 +288,5 @@ float4 PSMain( PSInput input ) : SV_TARGET0
 }
 #endif
 
-
-
-#ifdef VOXELIZE 
-
-//	check CheEngine
-//	http://pastebin.com/0QD3qydP
-
-RWTexture3D<float4> lightGrid : register(u1);
-
-void write( float3 location, int axis, float4 value, float3 normal )
-{
-	if (axis==2) {
-		lightGrid[ int3(location.xyz-normal) ] = value;
-	} else if (axis==1) {
-		lightGrid[ int3(location.xzy-normal) ] = value;
-	} else if (axis==0) {
-		lightGrid[ int3(location.zyx-normal) ] = value;
-	}
-}
-
-float4 PSMain( PSInput input ) : SV_TARGET0
-{	
-	float3 location;
-	float depth	= (input.ProjPos.z / input.ProjPos.w)*64;	
-	location.xy = input.Position.xy;
-	location.z 	= depth;
-	//float grad	= (ddx(depth) + ddy(depth))*0.5f;
-
-	SURFACE surface;
-	surface	=	MaterialCombiner( input.TexCoord );
-	float4 color = float4(surface.Diffuse,1);
-	
-	write( location, input.Axis, float4(surface.Diffuse.rgb,1), 1*input.Normal * float3(-1,1,-1) );
-	
-	return color;
-}
-#endif
 
 

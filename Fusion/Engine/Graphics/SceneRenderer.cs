@@ -118,11 +118,6 @@ namespace Fusion.Engine.Graphics {
 			if (flags.HasFlag( SurfaceFlags.RIGID )) {
 				ps.VertexInputElements	=	VertexColorTextureTBNRigid.Elements;
 			}
-
-			if (flags.HasFlag( SurfaceFlags.VOXELIZE )) {
-				ps.RasterizerState		=	RasterizerState.CullNone;
-				ps.DepthStencilState	=	DepthStencilState.None;
-			}
 		}
 
 

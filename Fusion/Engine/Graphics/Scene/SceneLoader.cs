@@ -20,7 +20,7 @@ namespace Fusion.Engine.Graphics {
 	/// Scene loader
 	/// </summary>
 	[ContentLoader(typeof(Scene))]
-	public class SceneLoader : ContentLoader {
+	public sealed class SceneLoader : ContentLoader {
 
 
 		/// <summary>
