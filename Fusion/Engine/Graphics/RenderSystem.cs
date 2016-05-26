@@ -49,25 +49,6 @@ namespace Fusion.Engine.Graphics {
 		internal RenderCounters Counters { get; private set; }
 
 
-		/// <summary>
-		/// Fullscreen
-		/// </summary>
-		[Config]
-		public bool Fullscreen { 
-			get { 
-				return isFullscreen;
-			}
-			set { 
-				if (isFullscreen!=value) {
-					isFullscreen = value;
-					if (Device!=null) {
-						Device.FullScreen = value;
-					}
-				}
-			}
-		}
-		bool isFullscreen = false;
-
 
 
 		RenderTarget2D	hdrTarget;

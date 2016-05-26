@@ -51,7 +51,7 @@ namespace Fusion.Drivers.Graphics.Display {
 			//
 			//	Create main window
 			//	
-			window	=	CreateForm( parameters, null );
+			window	=	CreateForm( parameters, null, false );
 
 
 			var deviceFlags			=	DeviceCreationFlags.None;

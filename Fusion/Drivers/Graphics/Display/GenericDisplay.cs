@@ -38,11 +38,11 @@ namespace Fusion.Drivers.Graphics.Display {
 		public GenericDisplay( Game game, GraphicsDevice device, GraphicsParameters parameters ) : base( game, device, parameters )
 		{
 			try {
-				window = CreateTouchForm(parameters, null);
+				window = CreateForm(parameters, null, false);
 			}
 			catch (System.EntryPointNotFoundException) {
 				Log.Warning("Looks like your system does't support touch gestures. You need Windows 8.1 or newer for this.");
-				window = CreateForm(parameters, null);
+				window = CreateForm(parameters, null, false);
 			}
 
 			try {
@@ -92,6 +92,8 @@ namespace Fusion.Drivers.Graphics.Display {
 
 			clientWidth		=	window.ClientSize.Width;
 			clientHeight	=	window.ClientSize.Height;
+
+			fullscr			=	parameters.FullScreen;
 		}
 
 
@@ -238,10 +240,5 @@ namespace Fusion.Drivers.Graphics.Display {
 		public override DepthStencil2D	BackbufferDepth {
 			get { return backbufferDepth; }
 		}
-
-
-
-
-
 	}
 }

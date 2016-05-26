@@ -431,6 +431,9 @@ namespace Fusion.Engine.Common {
 		}
 
 
+		bool requestFullscreenOnStartup = false;
+
+
 
 		/// <summary>
 		/// InitInternal
@@ -442,6 +445,13 @@ namespace Fusion.Engine.Common {
 
 			var p = new GraphicsParameters();
 			RenderSystem.ApplyParameters( ref p );
+
+			//	going to fullscreen immediatly on startup lead to 
+			//	bugs and inconsistnecy for diferrent stereo modes,
+			//	so we store fullscreen mode and apply it on next update step.
+			requestFullscreenOnStartup	=	p.FullScreen;
+			p.FullScreen = false;
+
 
 			//	initialize drivers :
 			GraphicsDevice.Initialize(p);
@@ -586,12 +596,20 @@ namespace Fusion.Engine.Common {
 
 		bool isActiveLastFrame = true;
 
+		bool skipFirstFrame	= true;
+
 
 		/// <summary>
 		/// 
 		/// </summary>
 		internal void UpdateInternal ()
 		{
+			/*if (skipFirstFrame) {
+				skipFirstFrame = false;
+				Thread.Sleep(1);
+				return;
+			} */
+
 			if (IsDisposed) {
 				throw new ObjectDisposedException("Game");
 			}
@@ -612,6 +630,11 @@ namespace Fusion.Engine.Common {
 
 			if (Enabled) {
 
+				if (requestFullscreenOnStartup) {
+					graphicsDevice.FullScreen = requestFullscreenOnStartup;
+					requestFullscreenOnStartup = false;
+				}
+
 				if (requestReload) {
 					if (Reloading!=null) {
 						Reloading(this, EventArgs.Empty);
@@ -619,6 +642,7 @@ namespace Fusion.Engine.Common {
 					requestReload = false;
 				}
 
+				graphicsDevice.Prepare();
 				graphicsDevice.Display.Prepare();
 
 				//	pre update :

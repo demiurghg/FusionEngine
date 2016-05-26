@@ -26,6 +26,8 @@ namespace Fusion.Drivers.Graphics {
 
 	public partial class GraphicsDevice : DisposableBase {
 
+		public bool IsInitialized { get; private set; }
+
 		/// <summary>
 		/// Current graphics profile.
 		/// </summary>
@@ -222,6 +224,7 @@ namespace Fusion.Drivers.Graphics {
 		public GraphicsDevice ( Game game )
 		{
 			this.Game	=	game;
+			IsInitialized = false;
 		}
 
 
@@ -233,6 +236,7 @@ namespace Fusion.Drivers.Graphics {
 		/// </summary>
 		internal void Initialize ( GraphicsParameters parameters )
 		{
+			IsInitialized			=	false;
 			this.GraphicsProfile	=	parameters.GraphicsProfile;
 
 			try {
@@ -287,7 +291,9 @@ namespace Fusion.Drivers.Graphics {
 
 			ResetStates();
 
-			FullScreen	=	parameters.FullScreen;
+			//FullScreen	=	parameters.FullScreen;
+
+			IsInitialized = true;
 		}
 
 
@@ -342,11 +348,22 @@ namespace Fusion.Drivers.Graphics {
 		/// </summary>
 		internal void NotifyViewportChanges ()
 		{
+			Log.Message("Display bounds changed: {0} {1}", DisplayBounds.Width, DisplayBounds.Height );
+
 			if (DisplayBoundsChanged!=null) {
 				lock (deviceContext) {
 					DisplayBoundsChanged( this, EventArgs.Empty );
 				}
 			}
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		internal void Prepare ()
+		{
+			display.Update();
 		}
 
 
@@ -369,8 +386,6 @@ namespace Fusion.Drivers.Graphics {
 				}
 
 				display.SwapBuffers( syncInterval );
-
-				display.Update();
 			}
 		}
 

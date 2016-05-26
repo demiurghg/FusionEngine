@@ -21,6 +21,25 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// Fullscreen
+		/// </summary>
+		[Config]
+		public bool Fullscreen { 
+			get { 
+				return isFullscreen;
+			}
+			set { 
+				if (isFullscreen!=value) {
+					isFullscreen = value;
+					if (Device!=null && Device.IsInitialized) {
+						Device.FullScreen = value;
+					}
+				}
+			}
+		}
+		bool isFullscreen = false;
+
+		/// <summary>
 		/// Screen width
 		/// </summary>
 		[Config]

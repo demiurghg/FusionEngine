@@ -15,6 +15,7 @@ using Forms = System.Windows.Forms;
 using Fusion.Engine.Common;
 using Fusion.Core.Mathematics;
 using Fusion.Input.Touch;
+using System.Runtime.InteropServices;
 
 
 namespace Fusion.Drivers.Graphics.Display {
@@ -214,6 +215,7 @@ namespace Fusion.Drivers.Graphics.Display {
 		protected delegate void ChangeFullscreenDelegate(Form window, bool fullscr);
 		protected ChangeFullscreenDelegate changeFullscreen = new ChangeFullscreenDelegate( ChangeFullscreen );
 
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -222,14 +224,23 @@ namespace Fusion.Drivers.Graphics.Display {
 		static void ChangeFullscreen ( Form window, bool fullscr ) 
 		{
 			if (fullscr) {
+				Log.Message("Going to fullscreen mode...");
+
+				window.TopMost			=	true;
 				window.FormBorderStyle	=	FormBorderStyle.None;
 				window.WindowState		=	FormWindowState.Maximized;
-				window.TopMost			=	true;
+				window.StartPosition	=	FormStartPosition.CenterScreen;
+
 			} else {
+				Log.Message("Going to windowed mode...");
+
 				window.FormBorderStyle	=	FormBorderStyle.Sizable;
 				window.WindowState		=	FormWindowState.Normal;
 				window.TopMost			=	false;
+				window.StartPosition	=	FormStartPosition.CenterScreen;
 			}
+
+			Log.Message("Window state: {0} {1} {2}", window.Width, window.Height, window.WindowState );
 		}
 
 
@@ -239,16 +250,49 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// </summary>
 		/// <param name="parameters"></param>
 		/// <returns></returns>
-		public Form CreateForm ( GraphicsParameters parameters, Output output )
+		public Form CreateForm ( GraphicsParameters parameters, Output output, bool supportTouch )
 		{
-			var form = new Form() {
-				Text			=	Game.GameTitle,
-				BackColor		=	System.Drawing.Color.Black,
-				ClientSize		=	new System.Drawing.Size( parameters.Width, parameters.Height ),
-				Icon			=	Game.Icon ?? Fusion.Properties.Resources.fusionIcon,
-				ControlBox		=	false,
-				StartPosition	=	output==null ? FormStartPosition.CenterScreen : FormStartPosition.Manual,
-			};
+			Form form = null;
+			TouchForm touchForm = null;
+
+			var text		=	Game.GameTitle;
+			var color		=	System.Drawing.Color.Black;
+			var clientSize	=	new System.Drawing.Size(parameters.Width, parameters.Height);
+			var icon		=	Game.Icon ?? Fusion.Properties.Resources.fusionIcon;
+			var controlBox	=	false;
+			var startPos	=	output == null ? FormStartPosition.CenterScreen : FormStartPosition.Manual;
+
+			//var windowState	=	parameters.FullScreen ? FormWindowState.Maximized : FormWindowState.Normal;
+			//var border		=	parameters.FullScreen ? FormBorderStyle.None : FormBorderStyle.Sizable;
+
+			var windowState	=	FormWindowState.Normal;
+			var border		=	FormBorderStyle.Sizable;
+
+
+			if (supportTouch) {
+				touchForm = new TouchForm() {
+					Text			=	text,
+					BackColor		=	color,
+					ClientSize		=	clientSize,
+					Icon			=	icon,
+					ControlBox		=	controlBox,
+					StartPosition	=	startPos,
+					WindowState		=	windowState,
+					FormBorderStyle	=	border,
+				};
+				form = touchForm;
+			} else {
+				form = new Form() {
+					Text			=	text,
+					BackColor		=	color,
+					ClientSize		=	clientSize,
+					Icon			=	icon,
+					ControlBox		=	controlBox,
+					StartPosition	=	startPos,
+					WindowState		=	windowState,
+					FormBorderStyle	=	border,
+				};
+			}
 
 
 			if (output!=null) {
@@ -268,49 +312,14 @@ namespace Fusion.Drivers.Graphics.Display {
 			form.Move += (s,e) => Game.InputDevice.RemoveAllPressedKeys();
 			form.FormClosing += form_FormClosing;
 
-			ChangeFullscreen( form, parameters.FullScreen );
-
-			return form;
-		}
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="parameters"></param>
-		/// <param name="output"></param>
-		/// <returns></returns>
-		public Form CreateTouchForm(GraphicsParameters parameters, Output output)
-		{
-			var form = new TouchForm() {
-				Text			=	Game.GameTitle,
-				BackColor		=	System.Drawing.Color.Black,
-				ClientSize		=	new System.Drawing.Size(parameters.Width, parameters.Height),
-				Icon			=	Game.Icon ?? Fusion.Properties.Resources.fusionIcon,
-				ControlBox		=	false,
-				StartPosition	=	output == null ? FormStartPosition.CenterScreen : FormStartPosition.Manual,
-			};
-
-
-			if (output != null) {
-				var bounds	= output.Description.DesktopBounds;
-				var scrW	= bounds.Right - bounds.Left;
-				var scrH	= bounds.Bottom - bounds.Top;
-
-				form.Location = new System.Drawing.Point(bounds.Left + (scrW - form.Width) / 2, bounds.Top + (scrH - form.Height) / 2);
-				form.Text += " - [" + output.Description.DeviceName + "]";
+			if (supportTouch) {
+				touchForm.TouchTap			+= (pos) => Game.InputDevice.NotifyTouchTap(pos);
+				touchForm.TouchDoubleTap	+= (pos) => Game.InputDevice.NotifyTouchDoubleTap(pos);
+				touchForm.TouchSecondaryTap	+= (pos) => Game.InputDevice.NotifyTouchSecondaryTap(pos);
+				touchForm.TouchManipulation	+= (center, delta, scale) => Game.InputDevice.NotifyTouchManipulation(center, delta, scale);
 			}
 
-			form.KeyDown	+= form_KeyDown;
-			form.KeyUp		+= form_KeyUp;
-			form.KeyPress	+= form_KeyPress;
-			form.Resize		+= (s, e) => Game.InputDevice.RemoveAllPressedKeys();
-			form.Move		+= (s, e) => Game.InputDevice.RemoveAllPressedKeys();
-
-			form.TouchTap			+= (pos) => Game.InputDevice.NotifyTouchTap(pos);
-			form.TouchDoubleTap		+= (pos) => Game.InputDevice.NotifyTouchDoubleTap(pos);
-			form.TouchSecondaryTap	+= (pos) => Game.InputDevice.NotifyTouchSecondaryTap(pos);
-			form.TouchManipulation	+= (center, delta, scale) => Game.InputDevice.NotifyTouchManipulation(center, delta, scale);
+			ChangeFullscreen( form, parameters.FullScreen );
 
 			return form;
 		}

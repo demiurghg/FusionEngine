@@ -51,7 +51,7 @@ namespace Fusion.Drivers.Graphics.Display {
 			}
 
 
-			window	=	CreateForm( parameters, null );
+			window	=	CreateForm( parameters, null, false );
 
 			var deviceFlags			=	DeviceCreationFlags.None;
 				deviceFlags			|=	parameters.UseDebugDevice ? DeviceCreationFlags.Debug : DeviceCreationFlags.None;

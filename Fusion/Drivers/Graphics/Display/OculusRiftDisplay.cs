@@ -68,7 +68,7 @@ namespace Fusion.Drivers.Graphics.Display {
 			parameters.Width	= hmd.Resolution.Width;
 			parameters.Height	= hmd.Resolution.Height;
 
-			window = CreateForm(parameters, null);
+			window = CreateForm(parameters, null, false);
 
 			var deviceFlags = DeviceCreationFlags.None;
 			deviceFlags |= parameters.UseDebugDevice ? DeviceCreationFlags.Debug : DeviceCreationFlags.None;

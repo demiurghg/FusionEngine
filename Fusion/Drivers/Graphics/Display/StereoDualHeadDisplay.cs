@@ -61,8 +61,8 @@ namespace Fusion.Drivers.Graphics.Display {
 			
 
 
-			window1	=	CreateForm( parameters, leftOut );
-			window2	=	CreateForm( parameters, rightOut );
+			window1	=	CreateForm( parameters, leftOut, false );
+			window2	=	CreateForm( parameters, rightOut, false );
 			window1.Tag	=	leftOut.Description;
 			window2.Tag	=	rightOut.Description;
 
@@ -124,6 +124,8 @@ namespace Fusion.Drivers.Graphics.Display {
 
 			clientWidth		=	window1.ClientSize.Width;
 			clientHeight	=	window1.ClientSize.Height;
+
+			fullscr			=	parameters.FullScreen;
 		}
 
 
