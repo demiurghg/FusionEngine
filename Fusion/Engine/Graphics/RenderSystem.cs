@@ -83,6 +83,14 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// Gets collection of sprite layers.
+		/// </summary>
+		public ICollection<SpriteLayer>	SpriteLayers {
+			get; private set;
+		}
+
+
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="engine"></param>
@@ -171,8 +179,11 @@ namespace Fusion.Engine.Graphics {
 			var baseIllum = new BaseIllum();
 			defaultMaterial	=	baseIllum.CreateMaterialInstance(this, Game.Content);
 
+			//	set sprite layers :
+			SpriteLayers	=	new SpriteLayerCollection();
+
 			//	add default render world :
-			renderWorld	=	new RenderWorld(Game, Width, Height);
+			renderWorld		=	new RenderWorld(Game, Width, Height);
 		}
 
 
@@ -210,7 +221,14 @@ namespace Fusion.Engine.Graphics {
 		{
 			Counters.Reset();
 
-			RenderWorld.Render( gameTime, stereoEye );
+			var targetColorSurface	=	Device.Display.BackbufferColor.Surface;
+			var targetDepthSurface	=	Device.Display.BackbufferDepth.Surface;
+
+			//	render world :
+			RenderWorld.Render( gameTime, stereoEye, targetColorSurface );
+
+			//	draw sprites :
+			SpriteEngine.DrawSprites( gameTime, stereoEye, targetColorSurface, SpriteLayers );
 
 			if (ShowCounters) {
 				Counters.PrintCounters();

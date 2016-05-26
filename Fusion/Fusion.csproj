@@ -324,7 +324,6 @@
     <Compile Include="Engine\Common\Commands\Map.cs" />
     <Compile Include="Engine\Common\Commands\ServerInfo.cs" />
     <Compile Include="Engine\Common\Commands\ServerDrop.cs" />
-    <Compile Include="Engine\Graphics\RenderLayer.cs" />
     <Compile Include="Engine\Graphics\RenderSystem.Config.cs" />
     <Compile Include="Engine\Graphics\Lights\LightSet.cs" />
     <Compile Include="Engine\Graphics\Textures\TargetFormat.cs" />

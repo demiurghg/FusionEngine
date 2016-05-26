@@ -14,7 +14,34 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// Represents entire visible world.
 	/// </summary>
-	public class RenderWorld : RenderLayer {
+	public class RenderWorld : DisposableBase {
+
+		readonly Game			Game;
+		readonly RenderSystem	rs;
+
+		/// <summary>
+		/// Gets and sets view's camera.
+		/// This value is already initialized when View object is created.
+		/// </summary>
+		public Camera Camera {
+			get; set;
+		}
+
+		/// <summary>
+		/// Indicated whether target buffer should be cleared before rendering.
+		/// </summary>
+		public bool Clear {	
+			get; set;
+		}
+
+		/// <summary>
+		/// Gets and sets clear color
+		/// </summary>
+		public Color4 ClearColor {
+			get; set;
+		}
+
+
 
 		/// <summary>
 		/// Gets HDR settings.
@@ -91,8 +118,13 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="Game">Game engine</param>
 		/// <param name="width">Target width.</param>
 		/// <param name="height">Target height.</param>
-		public RenderWorld ( Game game, int width, int height ) : base( game )
+		public RenderWorld ( Game game, int width, int height )
 		{
+			Game		=	game;
+			this.rs		=	Game.RenderSystem;
+
+			Camera		=	new Camera();
+
 			var vp	=	Game.GraphicsDevice.DisplayBounds;
 
 			if (width<=0) {
@@ -255,9 +287,9 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// Renders view
 		/// </summary>
-		internal override void Render ( GameTime gameTime, StereoEye stereoEye )
+		internal void Render ( GameTime gameTime, StereoEye stereoEye, RenderTargetSurface targetSurface )
 		{
-			var targetSurface = (Target == null) ? rs.Device.BackbufferColor.Surface : Target.RenderTarget.Surface;
+			//var targetSurface = (Target == null) ? rs.Device.BackbufferColor.Surface : Target.RenderTarget.Surface;
 
 			//	clear target buffer if necassary :
 			if (Clear) {
@@ -270,8 +302,8 @@ namespace Fusion.Engine.Graphics {
 			//	special effects, sky, water, light etc. 
 			RenderHdrScene( gameTime, stereoEye, viewport, targetSurface );
 
-			//	draw sprites :
-			rs.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );
+			//	fill alpha with one value :
+			rs.Filter.FillAlphaOne( targetSurface );
 		}
 
 

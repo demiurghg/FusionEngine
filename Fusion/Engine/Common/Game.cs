@@ -478,10 +478,10 @@ namespace Fusion.Engine.Common {
 
 			//	attach console sprite layer :
 			Console.ConsoleSpriteLayer.Order = int.MaxValue / 2;
-			RenderSystem.RenderWorld.SpriteLayers.Add( Console.ConsoleSpriteLayer );
+			RenderSystem.SpriteLayers.Add( Console.ConsoleSpriteLayer );
 
 			Frames.FramesSpriteLayer.Order = int.MaxValue / 2 - 1;
-			RenderSystem.RenderWorld.SpriteLayers.Add( Frames.FramesSpriteLayer );
+			RenderSystem.SpriteLayers.Add( Frames.FramesSpriteLayer );
 
 			initialized	=	true;
 

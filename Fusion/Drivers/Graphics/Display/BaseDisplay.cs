@@ -224,23 +224,17 @@ namespace Fusion.Drivers.Graphics.Display {
 		static void ChangeFullscreen ( Form window, bool fullscr ) 
 		{
 			if (fullscr) {
-				Log.Message("Going to fullscreen mode...");
-
 				window.TopMost			=	true;
 				window.FormBorderStyle	=	FormBorderStyle.None;
 				window.WindowState		=	FormWindowState.Maximized;
 				window.StartPosition	=	FormStartPosition.CenterScreen;
 
 			} else {
-				Log.Message("Going to windowed mode...");
-
 				window.FormBorderStyle	=	FormBorderStyle.Sizable;
 				window.WindowState		=	FormWindowState.Normal;
 				window.TopMost			=	false;
 				window.StartPosition	=	FormStartPosition.CenterScreen;
 			}
-
-			Log.Message("Window state: {0} {1} {2}", window.Width, window.Height, window.WindowState );
 		}
 
 
