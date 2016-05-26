@@ -7,7 +7,7 @@ using SharpDX;
 using Fusion;
 using Fusion.Core.Mathematics;
 
-namespace Fusion {
+namespace Fusion.Core.Mathematics {
 
 	/// <summary>
 	/// Represents two-dimensional KdTree.

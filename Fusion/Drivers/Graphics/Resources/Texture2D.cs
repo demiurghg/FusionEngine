@@ -15,6 +15,7 @@ using SharpDX.Direct3D;
 using Native.Dds;
 using Native.Wic;
 using Fusion.Core;
+using Fusion.Core.Extensions;
 using Fusion.Engine.Common;
 
 

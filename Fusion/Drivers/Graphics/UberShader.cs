@@ -11,6 +11,7 @@ using D3D11 = SharpDX.Direct3D11;
 using Fusion.Core;
 using Fusion.Core.Content;
 using Fusion.Core.Mathematics;
+using Fusion.Core.Extensions;
 using System.Text.RegularExpressions;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Common;

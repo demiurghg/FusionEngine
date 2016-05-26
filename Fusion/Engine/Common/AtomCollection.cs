@@ -7,6 +7,7 @@ using System.IO;
 using Fusion;
 using Fusion.Core;
 using Fusion.Core.Content;
+using Fusion.Core.Extensions;
 using Lidgren.Network;
 
 namespace Fusion.Engine.Common {

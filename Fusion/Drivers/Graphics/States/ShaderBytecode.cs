@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core;
+using Fusion.Core.Extensions;
 
 namespace Fusion.Drivers.Graphics {
 

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Fusion {
 
-	public static class MinMaxSelectorEnumerableExtension {
+	public static class LinqExtensions {
 		
 		public static T SelectMaxOrDefault<T>(this IEnumerable<T> list, Func<T, float> selector)
 		{
@@ -31,6 +31,11 @@ namespace Fusion {
 					yield return element;
 				}
 			}
+		}
+
+		public static IEnumerable<T> TakeLast<T>(this IEnumerable<T> source, int count)
+		{
+			return source.Skip(Math.Max(0, source.Count() - count));
 		}
 	}
 }

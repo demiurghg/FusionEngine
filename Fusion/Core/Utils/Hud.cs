@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Fusion {
 
-	public class HudString {
+	internal class HudString {
 		public readonly Color	Color;
 		public readonly Guid	Category;
 		public readonly string	Text;
@@ -25,7 +25,7 @@ namespace Fusion {
 	/// <summary>
 	/// Represents class to monitor everything.
 	/// </summary>
-	public static class Hud {
+	internal static class Hud {
 
 		static object lockObj = new object();
 

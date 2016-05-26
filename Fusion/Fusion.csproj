@@ -129,6 +129,12 @@
     <Compile Include="Core\Development\LaunchBox.Designer.cs">
       <DependentUpon>LaunchBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="Core\Extensions\BinaryReaderExtensions.cs" />
+    <Compile Include="Core\Extensions\BinaryWriterExtensions.cs" />
+    <Compile Include="Core\Extensions\StringExtensions.cs" />
+    <Compile Include="Core\Extensions\TypeExtensions.cs" />
+    <Compile Include="Core\Extensions\MemberInfoExtensions.cs" />
+    <Compile Include="Core\Extensions\StreamExtensions.cs" />
     <Compile Include="Core\IniParser\Exceptions\ParsingException.cs" />
     <Compile Include="Core\IniParser\FileIniParser.cs" />
     <Compile Include="Core\IniParser\Helpers\Assert.cs" />
@@ -160,7 +166,6 @@
     <Compile Include="Core\Utils\LogMessageType.cs" />
     <Compile Include="Core\Utils\Crc32.cs" />
     <Compile Include="Core\Utils\Hud.cs" />
-    <Compile Include="Core\Utils\TimeProbe.cs" />
     <Compile Include="Core\Configuration\ConfigAttribute.cs" />
     <Compile Include="Core\Content\ContentException.cs" />
     <Compile Include="Core\Content\ContentLoader.cs" />
@@ -393,7 +398,7 @@
     <Compile Include="Core\Mathematics\Plane.cs" />
     <Compile Include="Core\Mathematics\Point.cs" />
     <Compile Include="Core\Mathematics\Quaternion.cs" />
-    <Compile Include="Core\Mathematics\RandomExt.cs" />
+    <Compile Include="Core\Extensions\RandomExtensions.cs" />
     <Compile Include="Core\Mathematics\Ray.cs" />
     <Compile Include="Core\Mathematics\Rectangle.cs" />
     <Compile Include="Core\Mathematics\RectangleF.cs" />
@@ -478,17 +483,16 @@
     <Compile Include="Core\Utils\CharStream.cs" />
     <Compile Include="Core\Utils\ColoredLogListener.cs" />
     <Compile Include="Core\Utils\StdLogListener.cs" />
-    <Compile Include="Core\Utils\KdTree3.cs" />
-    <Compile Include="Core\Utils\KdTree2.cs" />
+    <Compile Include="Core\Mathematics\KdTree3.cs" />
+    <Compile Include="Core\Mathematics\KdTree2.cs" />
     <Compile Include="Drivers\Graphics\GraphicsDevice.cs" />
-    <Compile Include="Core\Utils\ConsoleExt.cs" />
+    <Compile Include="Core\Extensions\ConsoleExtensions.cs" />
     <Compile Include="Engine\Common\GameTime.cs" />
     <Compile Include="Drivers\Input\InputDevice.cs" />
     <Compile Include="Drivers\Input\Keys.cs" />
-    <Compile Include="Core\Utils\LinqExt.cs" />
+    <Compile Include="Core\Extensions\LinqExtensions.cs" />
     <Compile Include="Core\Utils\Log.cs" />
-    <Compile Include="Core\Utils\Misc.cs" />
-    <Compile Include="Core\Utils\PerlinNoiseGenerator.cs" />
+    <Compile Include="Core\Extensions\Misc.cs" />
     <Compile Include="Core\Utils\Pix.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Engine\Graphics\Scene\Mesh.cs" />
@@ -496,7 +500,6 @@
     <Compile Include="Engine\Graphics\Scene\MeshVertex.cs" />
     <Compile Include="Engine\Graphics\Scene\Node.cs" />
     <Compile Include="Engine\Graphics\Scene\Scene.cs" />
-    <Compile Include="Core\Utils\Serializer.cs" />
     <Compile Include="Core\Mathematics\Temperature.cs" />
     <Compile Include="Core\Utils\Wildcard.cs" />
     <Compile Include="Core\Utils\LogRecorder.cs" />

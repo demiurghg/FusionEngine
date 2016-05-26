@@ -7,8 +7,8 @@ using System.Diagnostics;
 using System.IO;
 using Forms = System.Windows.Forms;
 
-namespace Fusion {
-	public static class ConsoleExt {
+namespace Fusion.Core.Extensions {
+	public static class ConsoleExtensions {
 
 		static class NativeMethods {
 			[DllImport("kernel32.dll", ExactSpelling = true)]

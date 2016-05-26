@@ -12,6 +12,7 @@ using Fusion.Drivers.Graphics;
 using System.Threading;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
+using Fusion.Core.Extensions;
 using FX = SharpDX.D3DCompiler;
 using SharpDX.D3DCompiler;
 using Fusion.Core.Shell;

@@ -6,6 +6,7 @@ using SharpDX;
 using Fusion.Engine.Graphics;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
+using Fusion.Core.Extensions;
 
 
 namespace Fusion.Engine.Graphics {

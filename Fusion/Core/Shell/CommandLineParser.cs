@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.ComponentModel;
+using Fusion.Core.Extensions;
 
 namespace Fusion.Core.Shell
 {

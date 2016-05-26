@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using Fusion.Core.Mathematics;
+using Fusion.Core.Extensions;
 
 namespace Fusion.Build.ImageUtils {
 	internal partial class Image {

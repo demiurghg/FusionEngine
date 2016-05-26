@@ -14,6 +14,7 @@ using SharpDX.Windows;
 using System.Runtime.InteropServices;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
+using Fusion.Core.Extensions;
 
 
 namespace Fusion.Drivers.Graphics {

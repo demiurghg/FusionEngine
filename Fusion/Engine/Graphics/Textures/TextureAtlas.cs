@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using Fusion.Core.Content;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
+using Fusion.Core.Extensions;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
 

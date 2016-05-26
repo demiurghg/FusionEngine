@@ -19,13 +19,14 @@
 // THE SOFTWARE.
 
 using System;
+using Fusion.Core.Mathematics;
 
-namespace Fusion.Core.Mathematics
+namespace Fusion.Core.Extensions
 {
     /// <summary>
     /// Random functions on common types.
     /// </summary>
-    public static class RandomExt
+    public static class RandomExtensions
     {
 		/// <summary>
 		/// 

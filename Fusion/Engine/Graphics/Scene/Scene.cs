@@ -9,6 +9,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using SharpDX;
 using Fusion;
 using Fusion.Core.Mathematics;
+using Fusion.Core.Extensions;
 using Fusion.Drivers.Graphics;
 using Fusion.Core;
 using Fusion.Core.Content;

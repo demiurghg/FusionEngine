@@ -8,6 +8,7 @@ using Fusion.Core.Shell;
 using Fusion;
 using Fusion.Core;
 using Fusion.Core.Content;
+using Fusion.Core.Extensions;
 
 namespace Fusion.Build.Processors {
 

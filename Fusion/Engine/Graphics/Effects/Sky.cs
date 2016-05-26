@@ -10,6 +10,7 @@ using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using Fusion.Core.Extensions;
 
 namespace Fusion.Engine.Graphics {
 

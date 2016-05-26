@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Fusion.Core.IniParser;
 using Fusion.Core.IniParser.Model;
+using Fusion.Core.Extensions;
 using Fusion.Engine.Common;
 
 namespace Fusion.Core.Configuration {
