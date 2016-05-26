@@ -375,7 +375,7 @@ namespace Fusion.Engine.Common {
 			network				=	new Network( this );
 			content				=	new ContentManager( this );
 			gameTimeInternal	=	new GameTime();
-			invoker				=	new Invoker(this, CommandAffinity.Default);
+			invoker				=	new Invoker(this);
 			console				=	new GameConsole(this);
 
 			keyboard			=	new Keyboard(this);
@@ -392,6 +392,10 @@ namespace Fusion.Engine.Common {
 			config.ExposeProperties( Frames,		"Frames",			"frames");
 			config.ExposeProperties( Console,		"Console",			"con"	);
 			config.ExposeProperties( Network,		"Network",			"net"	);
+
+			config.ExposeProperties( Keyboard,		"Keyboard",			"kb"	);
+			config.ExposeProperties( Touch,			"Touch",			"touch"	);
+			config.ExposeProperties( Mouse,			"Mouse",			"mouse"	);
 		}
 
 

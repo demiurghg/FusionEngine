@@ -40,7 +40,7 @@ namespace Fusion.Core.Shell {
 		/// Creates instance of Invoker.
 		/// </summary>
 		/// <param name="game">Game instance</param>
-		public Invoker ( Game game, CommandAffinity affinity )
+		public Invoker ( Game game )
 		{
 			Initialize( game, Command.GatherCommands() );
 		}

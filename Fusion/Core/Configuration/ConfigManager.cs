@@ -8,10 +8,12 @@ using Fusion.Core.IniParser;
 using Fusion.Core.IniParser.Model;
 using Fusion.Core.Extensions;
 using Fusion.Engine.Common;
+using Fusion.Engine.Input;
 
 namespace Fusion.Core.Configuration {
 	public class ConfigManager {
 
+		const string KeyboardBindings = "KeyboardBindings";
 
 		/// <summary>
 		/// Gets dictionary of all configuration variables.
@@ -104,6 +106,20 @@ namespace Fusion.Core.Configuration {
 								.ToList();
 
 
+				//
+				//	Write keyboard bindings :
+				//
+				iniData.Sections.AddSection( KeyboardBindings );
+				var keyboardSection = iniData.Sections[ KeyboardBindings ];
+				var bindingsData  = game.Keyboard.Bindings.Select( bind => new KeyData( bind.Key.ToString(), bind.KeyDownCommand + " | " + bind.KeyUpCommand ) );
+
+				foreach ( var bind in bindingsData ) {
+					keyboardSection.AddKey( bind );
+				}
+
+				//
+				//	Write variables :
+				//
 				foreach ( var cvar in sortedList ) {
 					
 					if (!iniData.Sections.ContainsSection( cvar.ComponentName )) {
@@ -115,8 +131,9 @@ namespace Fusion.Core.Configuration {
 					section.AddKey( new KeyData( cvar.Name, cvar.Get() ) );
 				}
 
-
+				//
 				//	write file :
+				//
 				var parser = new StreamIniDataParser();
 
 				using ( var sw = new StreamWriter(stream) ) {
@@ -168,8 +185,42 @@ namespace Fusion.Core.Configuration {
 				}
 			
 
-				//	read data :
+				//
+				//	Read keyboard bindings :
+				//	
+				if ( iniData.Sections.ContainsSection(KeyboardBindings) ) {
+					var section = iniData.Sections[KeyboardBindings];
+
+					foreach ( var keyData in section ) {
+
+						var key = (Keys)Enum.Parse(typeof(Keys), keyData.KeyName, true );
+						
+						var cmds	=	keyData.Value.Split('|').Select( s => s.Trim() ).ToArray();
+
+						string cmdDown	=	null;
+						string cmdUp	=	null;
+
+						if (!string.IsNullOrWhiteSpace(cmds[0])) {
+							cmdDown = cmds[0];
+						}
+
+						if (cmds.Length>1 && !string.IsNullOrWhiteSpace(cmds[1])) {
+							cmdUp = cmds[1];
+						}
+
+						game.Keyboard.Bind( key, cmdDown, cmdUp );
+					}
+				}
+
+
+				//
+				//	Read variables :
+				//
 				foreach ( var section in iniData.Sections ) {
+
+					if (section.SectionName == KeyboardBindings) {
+						continue;
+					}
 
 					var cvarDict = configVariables
 									.Where( cv1 => cv1.Value.ComponentName==section.SectionName )

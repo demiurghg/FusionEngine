@@ -15,9 +15,6 @@ namespace Fusion.Core.Configuration {
 		public readonly PropertyInfo TargetProperty;
 		public readonly object TargetObject;
 		public readonly string ComponentName;
-
-		readonly TypeConverter converter;
-
 		
 
 		/// <summary>
@@ -33,7 +30,6 @@ namespace Fusion.Core.Configuration {
 			ComponentName	=	componentName;
 			TargetProperty	=	targetProperty;
 			TargetObject	=	targetObject;
-			converter		=	TypeDescriptor.GetConverter( TargetProperty.PropertyType );
 		}
 
 
@@ -43,7 +39,7 @@ namespace Fusion.Core.Configuration {
 		/// <param name="value"></param>
 		public void Set ( string value )
 		{
-			TargetProperty.SetValue( TargetObject, converter.ConvertFromInvariantString( value ) );
+			TargetProperty.SetValue( TargetObject, StringConverter.FromString( TargetProperty.PropertyType, value ) );
 		}
 
 
@@ -54,7 +50,7 @@ namespace Fusion.Core.Configuration {
 		/// <returns></returns>
 		public string Get ()
 		{
-			return converter.ConvertToInvariantString( TargetProperty.GetValue(TargetObject) );
+			return StringConverter.ToString( TargetProperty.GetValue( TargetObject ) );
 		}
 	}
 

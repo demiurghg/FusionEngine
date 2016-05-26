@@ -92,7 +92,9 @@ namespace Fusion.Engine.Input {
 		/// <param name="keyUpCommand"></param>
 		public void Bind ( Keys key, string keyDownCommand, string keyUpCommand )
 		{
-			bindings.Add( key, new KeyBind(key, keyDownCommand, keyUpCommand ) );
+			lock(bindings) {
+				bindings.Add( key, new KeyBind(key, keyDownCommand, keyUpCommand ) );
+			}
 		}
 
 
@@ -103,7 +105,21 @@ namespace Fusion.Engine.Input {
 		/// <param name="key"></param>
 		public void Unbind ( Keys key )
 		{
-			bindings.Remove(key);
+			lock(bindings) {
+				bindings.Remove(key);
+			}
+		}
+
+
+		/// <summary>
+		/// Unbind commands from key.
+		/// </summary>
+		/// <param name="key"></param>
+		public void UnbindAll ( Keys key )
+		{
+			lock(bindings) {
+				bindings.Clear();
+			}
 		}
 
 
@@ -114,7 +130,9 @@ namespace Fusion.Engine.Input {
 		/// <returns></returns>
 		public bool IsBound ( Keys key )
 		{
-			return bindings.ContainsKey( key );
+			lock(bindings) {
+				return bindings.ContainsKey( key );
+			}
 		}
 
 
