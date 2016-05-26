@@ -11,7 +11,7 @@ using Driver = Fusion.Engine.Audio;
 using SharpDX.X3DAudio;
 
 namespace Fusion.Engine.Audio {
-	public class SoundWorld {
+	public sealed class SoundWorld {
 
 		public readonly Game Game;
 

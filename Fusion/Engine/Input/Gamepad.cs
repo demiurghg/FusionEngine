@@ -13,7 +13,7 @@ namespace Fusion.Engine.Input {
 	/// <summary>
 	/// 
 	/// </summary>
-	public class Gamepad {
+	public sealed class Gamepad {
 
 		DrvGamePad gamePad;
 

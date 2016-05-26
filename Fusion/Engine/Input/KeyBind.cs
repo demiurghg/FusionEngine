@@ -9,7 +9,7 @@ namespace Fusion.Engine.Input {
 	/// <summary>
 	/// 
 	/// </summary>
-	public class KeyBind {
+	public sealed class KeyBind {
 
 		/// <summary>
 		/// Key that associated with the commands.

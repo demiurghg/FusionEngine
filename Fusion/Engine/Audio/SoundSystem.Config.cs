@@ -12,7 +12,7 @@ using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Audio {
 
-	public partial class SoundSystem : GameComponent {
+	public sealed partial class SoundSystem : GameComponent {
 
 		/// <summary>
 		/// Mastering voice value.

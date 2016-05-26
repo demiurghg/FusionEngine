@@ -9,7 +9,7 @@ using Fusion.Drivers.Input;
 using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Input {
-	public class GamepadCollection {
+	public sealed class GamepadCollection {
 
 		
 		Gamepad[] gamepads;

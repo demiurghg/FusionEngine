@@ -20,7 +20,6 @@ namespace Fusion.Framework {
 	
 	public sealed partial class GameConsole : GameComponent {
 
-		const string FontName = "conchars";
 
 
 		class Line {
@@ -37,8 +36,10 @@ namespace Fusion.Framework {
 		List<string> lines = new List<string>();
 
 		#if USE_PROFONT
+		const string FontName = "profont";
 		SpriteFont	consoleFont;
 		#else
+		const string FontName = "conchars";
 		DiscTexture	consoleFont;
 		#endif
 		SpriteLayer consoleLayer;

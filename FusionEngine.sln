@@ -133,6 +133,7 @@ Global
 		{3A55CF44-C83F-4C37-B80E-A01D00E3DA08}.Hybrid|x64.ActiveCfg = Hybrid|x64
 		{3A55CF44-C83F-4C37-B80E-A01D00E3DA08}.Hybrid|x64.Build.0 = Hybrid|x64
 		{3A55CF44-C83F-4C37-B80E-A01D00E3DA08}.Release|x64.ActiveCfg = Release|x64
+		{3A55CF44-C83F-4C37-B80E-A01D00E3DA08}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

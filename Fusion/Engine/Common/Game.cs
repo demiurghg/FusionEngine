@@ -383,7 +383,7 @@ namespace Fusion.Engine.Common {
 			touch				=	new Touch(this);
 			gamepads			=	new GamepadCollection(this);
 
-			frames				=	new FrameProcessor(this, "profont");
+			frames				=	new FrameProcessor(this, "opensans");
 
 			userStorage			=	new UserStorage(this);
 
@@ -654,6 +654,9 @@ namespace Fusion.Engine.Common {
 
 				InputDevice.UpdateInput();
 
+				Frames.Update( gameTimeInternal );
+				Console.Update( gameTimeInternal );
+
 				//GIS.Update(gameTimeInternal);
 
 				UpdateClientServerGame( gameTimeInternal );
@@ -737,12 +740,10 @@ namespace Fusion.Engine.Common {
 		/// Loads configuration for each subsystem
 		/// </summary>
 		/// <param name="path"></param>
+		[Obsolete]
 		public void LoadConfiguration ( string filename )
 		{
-			//Log.Message("Loading configuration...");
-
-			//Invoker.FeedConfigs( ConfigSerializer.GetConfigVariables( GameModule.Enumerate(this) ) );
-
+			Config.Load( filename );
 		}
 
 
@@ -750,12 +751,10 @@ namespace Fusion.Engine.Common {
 		/// Saves configuration to XML file	for each subsystem
 		/// </summary>
 		/// <param name="path"></param>
+		[Obsolete]
 		public void SaveConfiguration ( string filename )
 		{	
-			//Log.Message("Saving configuration...");
-
-			//UserStorage.DeleteFile(filename);
-			//ConfigSerializer.SaveToStream( GameModule.Enumerate(this), UserStorage.OpenFile(filename, FileMode.Create, FileAccess.Write) );
+			Config.Save( filename );
 		}
 
 

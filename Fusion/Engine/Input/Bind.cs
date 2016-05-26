@@ -11,7 +11,7 @@ namespace Fusion.Engine.Input {
 	///	Binds key.
 	/// </summary>
 	[Command("bind", CommandAffinity.Default)]
-	internal class Bind : Command {
+	internal sealed class Bind : Command {
 
 		
 		[CommandLineParser.Required]

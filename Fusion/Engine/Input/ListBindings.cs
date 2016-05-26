@@ -11,7 +11,7 @@ namespace Fusion.Engine.Input {
 	///	Binds key.
 	/// </summary>
 	[Command("listBindings", CommandAffinity.Default)]
-	internal class ListBindings : NoRollbackCommand {
+	internal sealed class ListBindings : NoRollbackCommand {
 
 
 		/// <summary>

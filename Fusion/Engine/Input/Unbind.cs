@@ -7,7 +7,7 @@ using Fusion.Core.Shell;
 
 namespace Fusion.Engine.Input {
 	[Command("unbind", CommandAffinity.Default)]
-	internal class Unbind : Command {
+	internal sealed class Unbind : Command {
 
 		[CommandLineParser.Required]
 		public Keys Key { get; set; }
