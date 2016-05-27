@@ -128,7 +128,7 @@ namespace Fusion.Core.Development {
 		private void openConfig_Click ( object sender, EventArgs e )
 		{
 			ShellExecute( configPath, true );
-			game.LoadConfiguration(configName);
+			game.Config.Load(configName);
 			UpdateControls();
 		}
 

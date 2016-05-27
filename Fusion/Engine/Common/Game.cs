@@ -383,7 +383,7 @@ namespace Fusion.Engine.Common {
 			touch				=	new Touch(this);
 			gamepads			=	new GamepadCollection(this);
 
-			frames				=	new FrameProcessor(this, "opensans");
+			frames				=	new FrameProcessor(this);
 
 			userStorage			=	new UserStorage(this);
 

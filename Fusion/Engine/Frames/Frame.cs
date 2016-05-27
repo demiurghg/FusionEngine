@@ -308,7 +308,7 @@ namespace Fusion.Engine.Frames {
 
 
 		/// <summary>
-		/// 
+		/// Constructor
 		/// </summary>
 		/// <param name="game"></param>
 		/// <param name="x"></param>
@@ -317,21 +317,24 @@ namespace Fusion.Engine.Frames {
 		/// <param name="h"></param>
 		/// <param name="text"></param>
 		/// <param name="backColor"></param>
-		/// <returns></returns>
-		public static Frame Create ( FrameProcessor ui, int x, int y, int w, int h, string text, Color backColor )
+		public Frame ( FrameProcessor ui, int x, int y, int w, int h, string text, SpriteFont font, Color backColor )
 		{
-			return new Frame( ui ) {
-				X = x,
-				Y = y,
-				Width = w,
-				Height = h,
-				Text = text,
-				BackColor = backColor,
-			};
+			Game	=	ui.Game;
+			this.ui	=	ui;
+			Init();
+
+			Font			=	font;
+			X				=	x;
+			Y				=	y;
+			Width			=	w;
+			Height			=	h;
+			Text			=	text;
+			BackColor		=	backColor;
+
 		}
 
 
-
+		
 		/// <summary>
 		/// Constructor
 		/// </summary>
@@ -346,14 +349,20 @@ namespace Fusion.Engine.Frames {
 		{
 			Game	=	ui.Game;
 			this.ui	=	ui;
+			if (ui.DefaultFont==null) {
+				throw new NullReferenceException( "FrameProcessor.DefaultFont is null. Set DefaultFont or use Frame constructor with explicitly specified font." );
+			}
+
 			Init();
 
+			Font			=	ui.DefaultFont;
 			X				=	x;
 			Y				=	y;
 			Width			=	w;
 			Height			=	h;
 			Text			=	text;
 			BackColor		=	backColor;
+
 		}
 
 
@@ -982,6 +991,10 @@ namespace Fusion.Engine.Frames {
 		{											
 			if (string.IsNullOrEmpty(Text)) {
 				return;
+			}
+
+			if (Font==null) {
+				throw new InvalidOperationException("Frame.Font must be set to render text.");
 			}
 
 			var r	=	Font.MeasureStringF( Text );

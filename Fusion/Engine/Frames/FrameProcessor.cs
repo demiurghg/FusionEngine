@@ -24,10 +24,20 @@ namespace Fusion.Engine.Frames {
 		[Config]	public bool		SkipUserInterface	{ get; set; }
 		[Config]	public bool		ShowProfilingInfo	{ get; set; }
 
+
 		/// <summary>
 		/// Sets and gets current root frame.
 		/// </summary>
 		public	Frame RootFrame { get; set; }
+
+
+		/// <summary>
+		/// Gets ans sets default font.
+		/// If this value not set, 
+		/// the creation of Frames without explicitly specified font will fail.
+		/// </summary>
+		public	SpriteFont DefaultFont { get; set; }
+
 
 		/// <summary>
 		/// Gets and sets current target frame.
@@ -50,12 +60,6 @@ namespace Fusion.Engine.Frames {
 		}
 		Frame targetFrame = null;
 
-		/// <summary>
-		/// Gets default font.
-		/// </summary>
-		public	SpriteFont DefaultFont { get; private set; }
-		string	defaultFontPath	;
-
 		MouseProcessor	mouseProcessor;
 
 
@@ -76,9 +80,8 @@ namespace Fusion.Engine.Frames {
 		/// </summary>
 		/// <param name="width"></param>
 		/// <param name="height"></param>
-		public FrameProcessor ( Game game, string defaultFont ) : base(game)
+		public FrameProcessor ( Game game ) : base(game)
 		{
-			defaultFontPath		=	defaultFont;
 			mouseProcessor		=	new MouseProcessor( Game, this );
 		}
 
@@ -89,8 +92,6 @@ namespace Fusion.Engine.Frames {
 		/// </summary>
 		public override void Initialize()
 		{
-			 DefaultFont	=	Game.Content.Load<SpriteFont>(defaultFontPath);
-
 			 spriteLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
 
 			 mouseProcessor.Initialize();
