@@ -120,6 +120,9 @@ namespace Fusion.Engine.Graphics {
 			sky				=	new Sky( Game );
 			bitonicSort		=	new BitonicSort( Game );
 
+			Game.Config.ExposeProperties( lightRenderer, "LightRenderer", "light" );
+			Game.Config.ExposeProperties( ssaoFilter,    "SSAO",		"ssao" );
+
 			Device.DisplayBoundsChanged += (s,e) => {
 				var handler = DisplayBoundsChanged;
 				if (handler!=null) {

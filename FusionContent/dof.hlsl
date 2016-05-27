@@ -217,10 +217,16 @@ float4 PSMain(PS_IN input) : SV_Target
 
 	float dofMinThreshold = 0.05f;
 	float centerCoc = clamp(Source.Load(int3(input.position.xy, 0)).a, -1, 1);
-	float2 discRadius = 30.0f * abs(centerCoc) * input.uv.zw;
+	float2 discRadius = 30.0f * min(0,centerCoc) * input.uv.zw;
 	// float2 discRadiusLow = discRadius * 4.0f * 0.8f;
 
 	float4 outColor = 0.0f;
+	
+	/*if (centerCoc<0) {
+		return abs(centerCoc) * float4(0,0,1,1);
+	} else {
+		return centerCoc * float4(1,0,0,1);
+	}//*/
 
 	[fastopt]
 	for(int t = 0; t < tapCount; ++t) { 

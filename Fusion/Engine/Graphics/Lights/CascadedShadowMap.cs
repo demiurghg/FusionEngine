@@ -18,7 +18,7 @@ namespace Fusion.Engine.Graphics {
 
 		readonly GraphicsDevice device;
 
-		public const int MaxCascadeSize		= 2048;
+		public const int MaxCascadeSize		= 8192;
 		public const int MaxCascadeCount	= 4;
 
 

@@ -15,6 +15,8 @@ namespace Fusion.Engine.Graphics {
 
 		int csmCascadeSize;
 		int csmCascadeCount;
+		object csmLock = new object();
+
 
 		/// <summary>
 		/// Cascaded shadow map size.
@@ -23,13 +25,27 @@ namespace Fusion.Engine.Graphics {
 		public int CSMCascadeSize {	
 			get { return csmCascadeSize; }
 			set {
-				if (value<64 || value>2048) {
-					throw new ArgumentOutOfRangeException("value must be within 64..2048");
+				lock (csmLock) {
+					if (csmCascadeCount>=3) {
+						if (value<64 || value>2048) {
+							throw new ArgumentOutOfRangeException("value must be within 64..2048 for three of four cascades");
+						}
+					}
+					if (csmCascadeCount==2) {
+						if (value<64 || value>4096) {
+							throw new ArgumentOutOfRangeException("value must be within 64..4096 for two cascades");
+						}
+					}
+					if (csmCascadeCount==1) {
+						if (value<64 || value>8192) {
+							throw new ArgumentOutOfRangeException("value must be within 64..8192 for one cascade");
+						}
+					}
+					if (!MathUtil.IsPowerOfTwo(value)) {
+						throw new ArgumentException("value must be power of 2");
+					}
+					csmCascadeSize	=	value;
 				}
-				if (!MathUtil.IsPowerOfTwo(value)) {
-					throw new ArgumentException("value must be power of 2");
-				}
-				csmCascadeSize	=	value;
 			}
 		}
 
@@ -40,10 +56,21 @@ namespace Fusion.Engine.Graphics {
 		public int CSMCascadeCount {
 			get { return csmCascadeCount; }
 			set {
-				if (value<1 || value>4) {
-					throw new ArgumentOutOfRangeException("value must be within 1..4");
+				lock (csmLock) {
+					if (value<1 || value>4) {
+						throw new ArgumentOutOfRangeException("value must be within 1..4");
+					}
+					if ((value==3 || value==4) && csmCascadeSize > 2048) {
+						csmCascadeSize = 2048;
+					}
+					if (value==2 && csmCascadeSize > 4096) {
+						csmCascadeSize = 4096;
+					}
+					if (value==1 && csmCascadeSize > 8192) {
+						csmCascadeSize = 8192;
+					}
+					csmCascadeCount	=	value;
 				}
-				csmCascadeCount	=	value;
 			}
 		}
 
