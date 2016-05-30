@@ -4,7 +4,7 @@ struct BATCH {
 	float4x4	World			;
 	float4		ViewPos			;
 	float4		BiasSlopeFar	;
-	float		Time;
+	float4		Color;
 };
 
 
@@ -228,7 +228,7 @@ SURFACE MaterialCombiner ( float2 uv )
 	surface.Emission	=	emission.rgb;
 
 	surface.Diffuse		*=	Material.ColorLevel;
-	surface.Emission 	*=	Material.EmissionLevel;
+	surface.Emission 	*=	(Material.EmissionLevel * Batch.Color);
 	surface.Specular	*=	Material.SpecularLevel;
 	surface.Roughness 	= 	lerp( Material.RoughnessMinimum, Material.RoughnessMaximum, surface.Roughness );
 	
