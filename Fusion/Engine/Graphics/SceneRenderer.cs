@@ -201,7 +201,9 @@ namespace Fusion.Engine.Graphics {
 					cbData.Projection	=	projection;
 					cbData.World		=	instance.World;
 					cbData.ViewPos		=	viewPosition;
-					
+
+                    cbData.Color = instance.Color;
+
 					constBuffer.SetData( cbData );
 
 					device.PixelShaderConstants[0]	= constBuffer ;
