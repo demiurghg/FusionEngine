@@ -223,7 +223,7 @@ namespace Fusion.Engine.Frames {
 				bool doubleClick	=	false;
 				var mousePosition	=	Game.InputDevice.MousePosition;
 
-				Log.Verbose("DC: {0} {1}", doubleClickStopwatch.Elapsed, SysInfoDoubleClickTime );
+				//Log.Verbose("DC: {0} {1}", doubleClickStopwatch.Elapsed, SysInfoDoubleClickTime );
 
 				if ( (currentHovered==doubleClickPushedFrame) 
 					&& (doubleClickButton==key) 

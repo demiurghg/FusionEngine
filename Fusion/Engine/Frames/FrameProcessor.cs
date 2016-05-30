@@ -28,7 +28,7 @@ namespace Fusion.Engine.Frames {
 		/// <summary>
 		/// Sets and gets current root frame.
 		/// </summary>
-		public	Frame RootFrame { get; set; }
+		public	Frame RootFrame { get; private set; }
 
 
 		/// <summary>
@@ -92,11 +92,27 @@ namespace Fusion.Engine.Frames {
 		/// </summary>
 		public override void Initialize()
 		{
-			 spriteLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
+			spriteLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
 
-			 mouseProcessor.Initialize();
+			//	create root frame :
+			var vp			=	Game.RenderSystem.DisplayBounds;
+			RootFrame		=	new Frame( this, 0,0, vp.Width, vp.Height, null, null, Color.Zero );
+			Game.RenderSystem.DisplayBoundsChanged += RenderSystem_DisplayBoundsChanged;
+
+			mouseProcessor.Initialize();
 		}
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		void RenderSystem_DisplayBoundsChanged ( object sender, EventArgs e )
+		{
+			RootFrame.Width		=	Game.RenderSystem.DisplayBounds.Width;
+			RootFrame.Height	=	Game.RenderSystem.DisplayBounds.Height;
+		}
 
 
 		/// <summary>

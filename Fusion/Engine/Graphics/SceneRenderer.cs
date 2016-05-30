@@ -38,6 +38,7 @@ namespace Fusion.Engine.Graphics {
 			public Matrix	World;
 			public Vector4	ViewPos			;
 			public Vector4	BiasSlopeFar	;
+			public Color4	Color;
 		}
 
 
@@ -200,7 +201,9 @@ namespace Fusion.Engine.Graphics {
 					cbData.Projection	=	projection;
 					cbData.World		=	instance.World;
 					cbData.ViewPos		=	viewPosition;
-					
+
+                    cbData.Color = instance.Color;
+
 					constBuffer.SetData( cbData );
 
 					device.PixelShaderConstants[0]	= constBuffer ;
@@ -312,6 +315,7 @@ namespace Fusion.Engine.Graphics {
 
 					device.PipelineState	=	factory[ (int)ApplyFlags( null, instance, SurfaceFlags.SHADOW ) ];
 					cbData.World			=	instance.World;
+					cbData.Color			=	instance.Color;
 
 					constBuffer.SetData( cbData );
 

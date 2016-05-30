@@ -54,10 +54,12 @@ namespace Fusion.Framework {
 
 		int scroll = 0;
 
+		bool isShown = false;
+
 		/// <summary>
 		/// Show/Hide console.
 		/// </summary>
-		public bool Show { get; set; }
+		public bool IsShown { get { return isShown; } }
 
 
 		Invoker.Suggestion suggestion = null;
@@ -142,6 +144,19 @@ namespace Fusion.Framework {
 
 
 
+		public void Show ()
+		{
+			isShown	=	true;
+		}
+
+
+		public void Hide ()
+		{
+			isShown = false;
+		}
+
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -183,7 +198,7 @@ namespace Fusion.Framework {
 
 			RefreshConsoleLayer();
 
-			if (Show) {
+			if (isShown) {
 				showFactor = MathUtil.Clamp( showFactor + FallSpeed * gameTime.ElapsedSec, 0,1 );
 			} else {															   
 				showFactor = MathUtil.Clamp( showFactor - FallSpeed * gameTime.ElapsedSec, 0,1 );
@@ -218,7 +233,7 @@ namespace Fusion.Framework {
 			//
 			//	Draw suggestions :
 			//	
-			if (Show && suggestion!=null && suggestion.Candidates.Any()) {
+			if (isShown && suggestion!=null && suggestion.Candidates.Any()) {
 
 				var candidates = suggestion.Candidates;
 
@@ -362,10 +377,10 @@ namespace Fusion.Framework {
 		void Keyboard_FormKeyDown ( object sender, KeyEventArgs e )
 		{
 			if (e.Key==Keys.OemTilde) {
-				Show = !Show;
+				isShown = !isShown;
 				return;
 			}
-			if (!Show) {
+			if (!isShown) {
 				return;
 			}
 			switch (e.Key) {
@@ -393,7 +408,7 @@ namespace Fusion.Framework {
 
 		void Keyboard_FormKeyPress ( object sender, KeyPressArgs e )
 		{
-			if (!Show) {
+			if (!isShown) {
 				return;
 			}
 			switch (e.KeyChar) {
