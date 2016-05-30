@@ -781,7 +781,7 @@ namespace Fusion.Engine.Common {
 
 
 
-		internal void StartServer ( string map )
+		public void StartServer ( string map )
 		{
 			var postCmd = string.Format("connect 127.0.0.1 {0}", Network.Port );
 
@@ -795,21 +795,21 @@ namespace Fusion.Engine.Common {
 		}
 
 
-		internal void KillServer ()
+		public void KillServer ()
 		{
 			GameServer.KillInternal();
 		}
 
 
 
-		internal void Connect ( string host, int port )
+		public void Connect ( string host, int port )
 		{
 			GameClient.ConnectInternal(host, port);
 			//	Kill server!
 		}
 
 
-		internal void Disconnect ( string message )
+		public void Disconnect ( string message )
 		{
 			GameClient.DisconnectInternal(message);
 			//	Kill server!

@@ -209,6 +209,11 @@ namespace Fusion.Engine.Frames {
 		/// <summary>
 		/// 
 		/// </summary>
+		public	float		TextTracking		{ get; set; }
+
+		/// <summary>
+		/// 
+		/// </summary>
 		public	FrameAnchor	Anchor			{ get; set; }
 
 
@@ -997,7 +1002,7 @@ namespace Fusion.Engine.Frames {
 				throw new InvalidOperationException("Frame.Font must be set to render text.");
 			}
 
-			var r	=	Font.MeasureStringF( Text );
+			var r	=	Font.MeasureStringF( Text, TextTracking );
 			int x	=	0;
 			int y	=	0;
 			var gp	=	GetPaddedRectangle();
@@ -1050,10 +1055,10 @@ namespace Fusion.Engine.Frames {
 			} */
 
 			if (ShadowColor.A!=0) {
-				Font.DrawString( spriteLayer, Text, x + TextOffsetX+ShadowOffset.X, y + TextOffsetY+ShadowOffset.Y, ShadowColor, clipRectIndex, 0, false );
+				Font.DrawString( spriteLayer, Text, x + TextOffsetX+ShadowOffset.X, y + TextOffsetY+ShadowOffset.Y, ShadowColor, clipRectIndex, TextTracking, false );
 			}
 
-			Font.DrawString( spriteLayer, Text, x + TextOffsetX, y + TextOffsetY, ForeColor, clipRectIndex, 0, false );
+			Font.DrawString( spriteLayer, Text, x + TextOffsetX, y + TextOffsetY, ForeColor, clipRectIndex, TextTracking, false );
 		}
 
 
