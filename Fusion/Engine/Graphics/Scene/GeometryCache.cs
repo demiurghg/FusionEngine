@@ -53,6 +53,24 @@ namespace Fusion.Engine.Graphics.Scene {
 		}
 
 
+		internal VertexBuffer VertexBuffer { 
+			get { 
+				return vertexBuffer; 
+			} 
+		}
+
+		internal IndexBuffer IndexBuffer { 
+			get { 
+				return indexBuffer; 
+			}
+		}
+
+		public bool					IsSkinned		{ get; private set; }
+
+		VertexBuffer vertexBuffer;
+		IndexBuffer	 indexBuffer;
+
+
 		/// <summary>
 		/// 
 		/// </summary>
