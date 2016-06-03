@@ -14,7 +14,7 @@ using Fusion.Core;
 using Fusion.Core.Content;
 
 
-namespace Fusion.Engine.Graphics.Scene {
+namespace Fusion.Engine.Graphics {
 	
 	public class GeometryCache : DisposableBase {
 
@@ -38,7 +38,7 @@ namespace Fusion.Engine.Graphics.Scene {
 		/// <summary>
 		/// Gets total number of indices
 		/// </summary>
-		public int VertexCount {
+		public int IndexCount {
 			get;
 			private set;
 		}
