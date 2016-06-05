@@ -70,6 +70,28 @@ namespace Fusion.Core.Configuration {
 		}
 
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="variableName"></param>
+		/// <param name="value"></param>
+		public void Set ( string name, string value )
+		{
+			ConfigVariable cvar;
+
+			if (configVariables.TryGetValue( name, out cvar )) {
+				try {
+					cvar.Set( value );
+				} catch ( Exception e ) {
+					Log.Warning("Can not set '{0}' = '{1}', because: {2}", name, value, e.Message );
+				}
+			} else {
+				Log.Warning("Config variable '{0}' does not exist", name );
+			}
+		}
+
+
 		
 		/// <summary>
 		/// Saves configuration to file in user storage.
