@@ -82,6 +82,14 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		/// <summary>
+		/// Tag
+		/// </summary>
+		public object Tag {
+			get; set;
+		}
+
+
 		readonly internal VertexBuffer	vb;
 		readonly internal IndexBuffer	ib;
 
