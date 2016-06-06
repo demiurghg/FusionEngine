@@ -112,7 +112,7 @@ void CSMain(
 	
 	normal.xyz			=	normalize(normal.xyz);
 
-	float4	projPos		=	float4( (location.x+0.5f)/(float)width*2-1, (location.y-0.5f)/(float)height*(-2)+1, depth, 1 );
+	float4	projPos		=	float4( (location.x+0.5f)/(float)width*2-1, (location.y+0.5f)/(float)height*(-2)+1, depth, 1 );
 
 	//float4	projPos		=	float4( input.projPos.xy / input.projPos.w, depth, 1 );
 	float4	worldPos	=	mul( projPos, Params.InverseViewProjection );
