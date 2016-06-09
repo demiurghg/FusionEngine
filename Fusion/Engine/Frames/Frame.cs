@@ -65,6 +65,12 @@ namespace Fusion.Engine.Frames {
 		public	object		Tag;
 
 		/// <summary>
+		/// Indicated whether double click enabled on given control.
+		/// Default value is False
+		/// </summary>
+		public  bool		IsDoubleClickEnabled { get; set; }
+
+		/// <summary>
 		/// 
 		/// </summary>
 		public	ClippingMode	 ClippingMode	{ get; set; }
@@ -967,8 +973,8 @@ namespace Fusion.Engine.Frames {
 			}
 
 			if (ImageMode==FrameImageMode.Centered) {
-				int x = bp.X + gp.Width/2  - Image.Width/2;
-				int y = bp.Y + gp.Height/2 - Image.Height/2;
+				int x = bp.X + gp.Width/2  - Image.Width/2	+ ImageOffsetX;
+				int y = bp.Y + gp.Height/2 - Image.Height/2	+ ImageOffsetY;
 				spriteLayer.Draw( Image, x, y, Image.Width, Image.Height, ImageColor, clipRectIndex );
 				return;
 			}

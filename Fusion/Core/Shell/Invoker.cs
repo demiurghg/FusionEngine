@@ -220,16 +220,18 @@ namespace Fusion.Core.Shell {
 		/// <summary>
 		/// Undo one command.
 		/// </summary>
-		public void Undo ()
+		public bool Undo ()
 		{
 			lock (lockObject) {
 
 				if (!history.Any()) {
-					throw new Exception("No more commands to undo");
+					return false;
 				}
 
 				var cmd = history.Pop();
 				cmd.Rollback();
+
+				return true;
 			}
 		}
 

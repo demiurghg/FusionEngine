@@ -92,6 +92,30 @@ namespace Fusion.Core.Configuration {
 		}
 
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="variableName"></param>
+		/// <param name="value"></param>
+		public string Get ( string name, string defaultValue = null )
+		{
+			ConfigVariable cvar;
+
+			if (configVariables.TryGetValue( name, out cvar )) {
+				try {
+					return cvar.Get();
+				} catch ( Exception e ) {
+					Log.Warning("Can not get '{0}', because: {1}", name, e.Message );
+					return defaultValue;
+				}
+			} else {
+				Log.Warning("Config variable '{0}' does not exist", name );
+				return defaultValue;
+			}
+		}
+
+
 		
 		/// <summary>
 		/// Saves configuration to file in user storage.
