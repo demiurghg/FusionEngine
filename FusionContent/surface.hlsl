@@ -55,7 +55,7 @@ cbuffer 		CBLayer 	: 	register(b1) { MATERIAL Material   : packoffset( c0 ); }
 cbuffer 		CBLayer 	: 	register(b2) { float4   UVMods[16] : packoffset( c0 ); }	
 cbuffer 		CBBatch 	: 	register(b3) { float4x4 Bones[128] : packoffset( c0 ); }	
 SamplerState	Sampler		: 	register(s0);
-Texture2D		Textures[16]: 	register(t0);
+Texture2D		Textures[4]: 	register(t0);
 
 #ifdef _UBERSHADER
 $ubershader GBUFFER RIGID|SKINNED BASE_ILLUM
@@ -200,21 +200,6 @@ SURFACE MaterialCombiner ( float2 uv )
 	float4 surfMap		=	Textures[1].Sample( Sampler, uv ).rgba;
 	float4 normalMap	=	Textures[2].Sample( Sampler, uv ).rgba * 2 - 1;
 	float4 emission		=	Textures[3].Sample( Sampler, uv ).rgba;
-	float4 dirt			=	Textures[4].Sample( Sampler, uv ).rgba;
-	
-#ifdef ALPHA_EMISSION_MASK
-	emission *= (1 - color.a); 
-#endif
-	//emission *= emission;
-	
-	//	experimental:
-	/*color.r 	=	Overlay( color.r, dirt.r );
-	color.g 	=	Overlay( color.g, dirt.g );
-	color.b 	=	Overlay( color.b, dirt.b );
-	surfMap.g 	=	Overlay( surfMap.g, dirt.a );*/
-	
-	color.rgb = lerp(color.rgb, color.rgb*dirt.rgb, mtrl.DirtLevel);
-	surfMap.g = 1 - (1-dirt.a*mtrl.DirtLevel) * (1-surfMap.g);
 	
 	float3 metalS		=	color.rgb * (surfMap.r);
 	float3 nonmetalS	=	float3(0.31,0.31,0.31) * surfMap.r;
@@ -260,9 +245,7 @@ GBuffer PSMain( PSInput input )
 	
 	//	NB: Multiply normal length by local normal projection on surface normal.
 	//	Shortened normal will be used as Fresnel decay (self occlusion) factor.
-	//float3 worldNormal 	= 	normalize( mul( surface.Normal, tbnToWorld ).xyz ) * (0.5+0.5*surface.Normal.z);
-
-	float3 worldNormal 	= 	input.Normal;
+	float3 worldNormal 	= 	normalize( mul( surface.Normal, tbnToWorld ).xyz ) * (0.5+0.5*surface.Normal.z);
 	
 	//	Use sRGB texture for better 
 	//	diffuse/specular intensity distribution

@@ -138,8 +138,6 @@ namespace Fusion.Engine.Graphics {
 				new TextureMapBind( SurfaceTexture	, "defaultMatte"	),
 				new TextureMapBind( NormalMapTexture, "defaultNormals"	),
 				new TextureMapBind( EmissionTexture	, "defaultBlack"	),
-				new TextureMapBind( DirtTexture		, "defaultDirt"		),
-				new TextureMapBind( DetailTexture	, "defaultDetail"	),
 			};
 		}
 
