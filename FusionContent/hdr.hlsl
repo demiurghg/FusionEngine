@@ -12,6 +12,9 @@ struct PARAMS {
 	float	BloomAmount;
 	float	DirtMaskLerpFactor;
 	float	DirtAmount;
+	float	Saturation;
+	float	Maximum;
+	float	Minimum;
 };
 
 Texture2D		SourceHdrImage 		: register(t0);
@@ -151,14 +154,18 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 		float3 x = max(0,exposured-0.004);
 		float3 tonemapped = (x*(6.2*x+.5))/(x*(6.2*x+1.7)+0.06);
 	#endif
+
+	float desaturated	=	dot( tonemapped, float3(0.3f,0.6f,0.2f));
 	
+	tonemapped		=	lerp( float3(desaturated,desaturated,desaturated), tonemapped, Params.Saturation );
+	
+	tonemapped.r	=	lerp( Params.Minimum, Params.Maximum, tonemapped.r );
+	tonemapped.g	=	lerp( Params.Minimum, Params.Maximum, tonemapped.g );
+	tonemapped.b	=	lerp( Params.Minimum, Params.Maximum, tonemapped.b );
 	
 	tonemapped	=	Dither( xpos, ypos, tonemapped );
-	
-	
-	// dithering :
-	
-	return  float4( tonemapped, dot( tonemapped, float3(0.3f,0.6f,0.2f)) );
+
+	return  float4( tonemapped, desaturated );
 }
 
 #endif

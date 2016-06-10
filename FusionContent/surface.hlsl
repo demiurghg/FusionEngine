@@ -58,8 +58,8 @@ SamplerState	Sampler		: 	register(s0);
 Texture2D		Textures[16]: 	register(t0);
 
 #ifdef _UBERSHADER
-$ubershader GBUFFER RIGID|SKINNED BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
-$ubershader SHADOW RIGID|SKINNED  BASE_ILLUM +(ALPHA_EMISSION_MASK|ALPHA_DETAIL_MASK) 
+$ubershader GBUFFER RIGID|SKINNED BASE_ILLUM
+$ubershader SHADOW RIGID|SKINNED  BASE_ILLUM
 $ubershader SHADOW RIGID|SKINNED
 #endif
 
@@ -196,11 +196,11 @@ SURFACE MaterialCombiner ( float2 uv )
 	
 	//uv = uv * layerData.Tiling.xy + layerData.Offset.xy;
 	
-	float4 color		=	Textures[0].Sample( Sampler, uv * UVMods[0].xy + UVMods[0].zw ).rgba;
-	float4 surfMap		=	Textures[1].Sample( Sampler, uv * UVMods[1].xy + UVMods[1].zw ).rgba;
-	float4 normalMap	=	Textures[2].Sample( Sampler, uv * UVMods[2].xy + UVMods[2].zw ).rgba * 2 - 1;
-	float4 emission		=	Textures[3].Sample( Sampler, uv * UVMods[3].xy + UVMods[4].zw ).rgba;
-	float4 dirt			=	Textures[4].Sample( Sampler, uv * UVMods[4].xy + UVMods[4].zw ).rgba;
+	float4 color		=	Textures[0].Sample( Sampler, uv ).rgba;
+	float4 surfMap		=	Textures[1].Sample( Sampler, uv ).rgba;
+	float4 normalMap	=	Textures[2].Sample( Sampler, uv ).rgba * 2 - 1;
+	float4 emission		=	Textures[3].Sample( Sampler, uv ).rgba;
+	float4 dirt			=	Textures[4].Sample( Sampler, uv ).rgba;
 	
 #ifdef ALPHA_EMISSION_MASK
 	emission *= (1 - color.a); 
@@ -260,7 +260,9 @@ GBuffer PSMain( PSInput input )
 	
 	//	NB: Multiply normal length by local normal projection on surface normal.
 	//	Shortened normal will be used as Fresnel decay (self occlusion) factor.
-	float3 worldNormal 	= 	normalize( mul( surface.Normal, tbnToWorld ).xyz ) * (0.5+0.5*surface.Normal.z);
+	//float3 worldNormal 	= 	normalize( mul( surface.Normal, tbnToWorld ).xyz ) * (0.5+0.5*surface.Normal.z);
+
+	float3 worldNormal 	= 	input.Normal;
 	
 	//	Use sRGB texture for better 
 	//	diffuse/specular intensity distribution
