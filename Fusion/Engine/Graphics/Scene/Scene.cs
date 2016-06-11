@@ -144,6 +144,21 @@ namespace Fusion.Engine.Graphics {
 		 *	
 		---------------------------------------------------------------------*/
 
+		public string GetFullNodePath ( Node node )
+		{
+			string path;
+
+			path = node.Name;
+
+			while ( node.ParentIndex >= 0 ) {
+				node = Nodes[ node.ParentIndex ];
+				path = node.Name + "|" + path;
+			}
+
+			return path;
+		}
+
+
 		/// <summary>
 		/// Copies absolute transform to provided array.
 		/// </summary>

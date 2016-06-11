@@ -101,10 +101,10 @@ namespace Fusion.Engine.Graphics {
 		{
 			SurfaceFlags flags = SurfaceFlags.BASE_ILLUM;
 			
-			switch (AlphaUsage) {
-				case AlphaUsage.EmissionMask : flags |= SurfaceFlags.ALPHA_EMISSION_MASK; break;
-				case AlphaUsage.DetailMask   : flags |= SurfaceFlags.ALPHA_DETAIL_MASK; break;
-			}	
+			//switch (AlphaUsage) {
+			//	case AlphaUsage.EmissionMask : flags |= SurfaceFlags.ALPHA_EMISSION_MASK; break;
+			//	case AlphaUsage.DetailMask   : flags |= SurfaceFlags.ALPHA_DETAIL_MASK; break;
+			//}	
 
 			return flags;
 		}
@@ -138,8 +138,6 @@ namespace Fusion.Engine.Graphics {
 				new TextureMapBind( SurfaceTexture	, "defaultMatte"	),
 				new TextureMapBind( NormalMapTexture, "defaultNormals"	),
 				new TextureMapBind( EmissionTexture	, "defaultBlack"	),
-				new TextureMapBind( DirtTexture		, "defaultDirt"		),
-				new TextureMapBind( DetailTexture	, "defaultDetail"	),
 			};
 		}
 

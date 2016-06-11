@@ -25,7 +25,6 @@ namespace Fusion.Engine.Graphics {
 
 		ShaderResource[]	shaderResources;
 		ConstantBuffer		constBufferParams;
-		ConstantBuffer		constBufferUVMods;
 
 		/// <summary>
 		/// Gets material's constant buffer :
@@ -33,15 +32,6 @@ namespace Fusion.Engine.Graphics {
 		internal ConstantBuffer ConstantBufferParameters {
 			get {
 				return constBufferParams;
-			}
-		}
-
-		/// <summary>
-		/// Gets material's constant buffer :
-		/// </summary>
-		internal ConstantBuffer ConstantBufferUVModifiers {
-			get {
-				return constBufferUVMods;
 			}
 		}
 
@@ -106,9 +96,6 @@ namespace Fusion.Engine.Graphics {
 			//
 			constBufferParams	=	new ConstantBuffer( rs.Device, typeof(MaterialData) );
 			constBufferParams.SetData( parameters );
-
-			constBufferUVMods	=	new ConstantBuffer( rs.Device, typeof(Vector4), MaxTextures );
-			constBufferUVMods.SetData( uvMods );
 		}
 
 
@@ -121,7 +108,6 @@ namespace Fusion.Engine.Graphics {
 		{
 			if (disposing) {
 				SafeDispose( ref constBufferParams );
-				SafeDispose( ref constBufferUVMods );
 			}
 			base.Dispose( disposing );
 		}

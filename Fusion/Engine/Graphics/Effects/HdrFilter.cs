@@ -28,7 +28,7 @@ namespace Fusion.Engine.Graphics {
 		//	float LuminanceHighBound;      // Offset:    8
 		//	float KeyValue;                // Offset:   12
 		//	float BloomAmount;             // Offset:   16
-		[StructLayout(LayoutKind.Explicit, Size=32)]
+		[StructLayout(LayoutKind.Explicit, Size=64)]
 		struct Params {
 			[FieldOffset( 0)]	public	float	AdaptationRate;
 			[FieldOffset( 4)]	public	float 	LuminanceLowBound;
@@ -37,6 +37,10 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(16)]	public	float	BloomAmount;
 			[FieldOffset(20)]	public	float	DirtMaskLerpFactor;
 			[FieldOffset(24)]	public	float	DirtAmount;
+			[FieldOffset(28)]	public	float	Saturation;
+			[FieldOffset(32)]	public	float	MaximumOutputValue;
+			[FieldOffset(36)]	public	float	MinimumOutputValue;
+			[FieldOffset(40)]	public	float	__Value;
 		}
 
 
@@ -143,6 +147,9 @@ namespace Fusion.Engine.Graphics {
 			paramsData.BloomAmount			=	settings.BloomAmount;
 			paramsData.DirtMaskLerpFactor	=	settings.DirtMaskLerpFactor;
 			paramsData.DirtAmount			=	settings.DirtAmount;
+			paramsData.Saturation			=	settings.Saturation;
+			paramsData.MaximumOutputValue	=	settings.MaximumOutputValue;
+			paramsData.MinimumOutputValue	=	settings.MinimumOutputValue;
 
 			paramsCB.SetData( paramsData );
 			device.PixelShaderConstants[0]	=	paramsCB;

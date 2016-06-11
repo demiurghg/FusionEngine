@@ -223,9 +223,7 @@ namespace Fusion.Engine.Graphics {
 							device.PipelineState	=	instance.IsSkinned ? sg.Material.GBufferSkinned : sg.Material.GBufferRigid;
 
 							device.PixelShaderConstants[1]	= sg.Material.ConstantBufferParameters;
-							device.PixelShaderConstants[2]	= sg.Material.ConstantBufferUVModifiers;
 							device.VertexShaderConstants[1]	= sg.Material.ConstantBufferParameters;
-							device.VertexShaderConstants[2]	= sg.Material.ConstantBufferUVModifiers;
 
 							sg.Material.SetTextures( device );
 
@@ -251,21 +249,6 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		SurfaceFlags ApplyFlags ( MaterialInstance material, MeshInstance instance, SurfaceFlags flags )
 		{
-			//if (material!=null) {
-			//	switch ( material.Options ) {
-			//		case MaterialOptions.SingleLayer : flags |= SurfaceFlags.LAYER0; break;	
-			//		case MaterialOptions.DoubleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1; break;
-			//		case MaterialOptions.TripleLayer : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2; break;
-			//		case MaterialOptions.QuadLayer	 : flags |= SurfaceFlags.LAYER0|SurfaceFlags.LAYER1|SurfaceFlags.LAYER2|SurfaceFlags.LAYER3; break;
-
-			//		case MaterialOptions.Terrain : flags |= SurfaceFlags.TERRAIN; break;
-
-			//		case MaterialOptions.TriplanarWorldSingle : flags |= SurfaceFlags.TRIPLANAR_SINGLE; break;
-			//		case MaterialOptions.TriplanarWorldDouble : flags |= SurfaceFlags.TRIPLANAR_DOUBLE; break;
-			//		case MaterialOptions.TriplanarWorldTriple : flags |= SurfaceFlags.TRIPLANAR_TRIPLE; break;
-			//	}
-			//}
-
 			if (instance.IsSkinned) {
 				flags |= SurfaceFlags.SKINNED;
 			} else {

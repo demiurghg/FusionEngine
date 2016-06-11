@@ -22,8 +22,5 @@ namespace Fusion.Engine.Graphics {
 
 		RIGID					=	1 << 4,
 		SKINNED					=	1 << 5,
-
-		ALPHA_EMISSION_MASK		=	1 << 6,
-		ALPHA_DETAIL_MASK		=	1 << 7, 			
 	}
 }

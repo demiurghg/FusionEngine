@@ -93,6 +93,25 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// Gets and sets overall image saturation
+		/// Default value is 1.
+		/// </summary>
+		public float Saturation { get; set; }
+
+		/// <summary>
+		/// Minimum output value.
+		/// Default value is 1.
+		/// </summary>
+		public float MaximumOutputValue { get; set; }
+
+		/// <summary>
+		/// Minimum output value.
+		/// Default value is 0.
+		/// </summary>
+		public float MinimumOutputValue { get; set; }
+
+
+		/// <summary>
 		/// Ctor.
 		/// </summary>
 		public HdrSettings ()
@@ -105,6 +124,10 @@ namespace Fusion.Engine.Graphics {
 			BloomAmount			=	0.1f;
 			GaussBlurSigma		=	3.0f;
 			DirtAmount			=	0.9f;
+
+			Saturation			=	1;
+			MaximumOutputValue	=	1;
+			MinimumOutputValue	=	0;
 
 		}
 	}

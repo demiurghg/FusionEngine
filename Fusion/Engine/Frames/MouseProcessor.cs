@@ -225,7 +225,8 @@ namespace Fusion.Engine.Frames {
 
 				//Log.Verbose("DC: {0} {1}", doubleClickStopwatch.Elapsed, SysInfoDoubleClickTime );
 
-				if ( (currentHovered==doubleClickPushedFrame) 
+				if ( (currentHovered==doubleClickPushedFrame)
+					&& (currentHovered.IsDoubleClickEnabled) 
 					&& (doubleClickButton==key) 
 					&& (doubleClickStopwatch.ElapsedMilliseconds < SysInfoDoubleClickTime) 
 					&& IsPointWithinDoubleClickArea( doubleClickPosition, mousePosition ) 
