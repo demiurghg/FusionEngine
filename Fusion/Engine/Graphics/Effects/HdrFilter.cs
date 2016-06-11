@@ -119,83 +119,83 @@ namespace Fusion.Engine.Graphics {
 
 			var settings	=	viewLayer.HdrSettings;
 
-			//
-			//	Rough downsampling of source HDR-image :
-			//
-			filter.StretchRect( averageLum.Surface, hdrImage, SamplerState.PointClamp );
-			averageLum.BuildMipmaps();
+			using ( new PixEvent("HDR Postprocessing") ) {
 
-			//
-			//	Make bloom :
-			//
-			filter.StretchRect( viewLayer.Bloom0.Surface, hdrImage, SamplerState.LinearClamp );
-			viewLayer.Bloom0.BuildMipmaps();
+				//
+				//	Rough downsampling of source HDR-image :
+				//
+				filter.StretchRect( averageLum.Surface, hdrImage, SamplerState.PointClamp );
+				averageLum.BuildMipmaps();
 
-			filter.GaussBlur( viewLayer.Bloom0, viewLayer.Bloom1, settings.GaussBlurSigma, 0 );
-			filter.GaussBlur( viewLayer.Bloom0, viewLayer.Bloom1, settings.GaussBlurSigma, 1 );
-			filter.GaussBlur( viewLayer.Bloom0, viewLayer.Bloom1, settings.GaussBlurSigma, 2 );
-			filter.GaussBlur( viewLayer.Bloom0, viewLayer.Bloom1, settings.GaussBlurSigma, 3 );
+				//
+				//	Make bloom :
+				//
+				filter.StretchRect( viewLayer.Bloom0.Surface, hdrImage, SamplerState.LinearClamp );
+				viewLayer.Bloom0.BuildMipmaps();
 
-			//
-			//	Setup parameters :
-			//
-			var paramsData	=	new Params();
-			paramsData.AdaptationRate		=	1 - (float)Math.Pow( 0.5f, gameTime.ElapsedSec / settings.AdaptationHalfLife );
-			paramsData.LuminanceLowBound	=	settings.LuminanceLowBound;
-			paramsData.LuminanceHighBound	=	settings.LuminanceHighBound;
-			paramsData.KeyValue				=	settings.KeyValue;
-			paramsData.BloomAmount			=	settings.BloomAmount;
-			paramsData.DirtMaskLerpFactor	=	settings.DirtMaskLerpFactor;
-			paramsData.DirtAmount			=	settings.DirtAmount;
-			paramsData.Saturation			=	settings.Saturation;
-			paramsData.MaximumOutputValue	=	settings.MaximumOutputValue;
-			paramsData.MinimumOutputValue	=	settings.MinimumOutputValue;
+				filter.GaussBlur( viewLayer.Bloom0, viewLayer.Bloom1, settings.GaussBlurSigma, 0 );
+				filter.GaussBlur( viewLayer.Bloom0, viewLayer.Bloom1, settings.GaussBlurSigma, 1 );
+				filter.GaussBlur( viewLayer.Bloom0, viewLayer.Bloom1, settings.GaussBlurSigma, 2 );
+				filter.GaussBlur( viewLayer.Bloom0, viewLayer.Bloom1, settings.GaussBlurSigma, 3 );
 
-			paramsCB.SetData( paramsData );
-			device.PixelShaderConstants[0]	=	paramsCB;
+				//
+				//	Setup parameters :
+				//
+				var paramsData	=	new Params();
+				paramsData.AdaptationRate		=	1 - (float)Math.Pow( 0.5f, gameTime.ElapsedSec / settings.AdaptationHalfLife );
+				paramsData.LuminanceLowBound	=	settings.LuminanceLowBound;
+				paramsData.LuminanceHighBound	=	settings.LuminanceHighBound;
+				paramsData.KeyValue				=	settings.KeyValue;
+				paramsData.BloomAmount			=	settings.BloomAmount;
+				paramsData.DirtMaskLerpFactor	=	settings.DirtMaskLerpFactor;
+				paramsData.DirtAmount			=	settings.DirtAmount;
+				paramsData.Saturation			=	settings.Saturation;
+				paramsData.MaximumOutputValue	=	settings.MaximumOutputValue;
+				paramsData.MinimumOutputValue	=	settings.MinimumOutputValue;
 
-			//
-			//	Measure and adapt :
-			//
-			device.SetTargets( null, viewLayer.MeasuredNew );
+				paramsCB.SetData( paramsData );
+				device.PixelShaderConstants[0]	=	paramsCB;
 
-			device.PixelShaderResources[0]	=	averageLum;
-			device.PixelShaderResources[1]	=	viewLayer.MeasuredOld;
+				//
+				//	Measure and adapt :
+				//
+				device.SetTargets( null, viewLayer.MeasuredNew );
 
-			device.PipelineState		=	factory[ (int)(Flags.MEASURE_ADAPT) ];
+				device.PixelShaderResources[0]	=	averageLum;
+				device.PixelShaderResources[1]	=	viewLayer.MeasuredOld;
+
+				device.PipelineState		=	factory[ (int)(Flags.MEASURE_ADAPT) ];
 				
-			device.Draw( 3, 0 );
+				device.Draw( 3, 0 );
 
 
-			//
-			//	Tonemap and compose :
-			//
-			device.SetTargets( null, target );
+				//
+				//	Tonemap and compose :
+				//
+				device.SetTargets( null, target );
 
-			device.PixelShaderResources[0]	=	hdrImage;// averageLum;
-			device.PixelShaderResources[1]	=	viewLayer.MeasuredNew;// averageLum;
-			device.PixelShaderResources[2]	=	viewLayer.Bloom0;// averageLum;
-			device.PixelShaderResources[3]	=	settings.DirtMask1==null ? whiteTex.Srv : settings.DirtMask1.Srv;
-			device.PixelShaderResources[4]	=	settings.DirtMask2==null ? whiteTex.Srv : settings.DirtMask2.Srv;
-			device.PixelShaderSamplers[0]	=	SamplerState.LinearClamp;
+				device.PixelShaderResources[0]	=	hdrImage;// averageLum;
+				device.PixelShaderResources[1]	=	viewLayer.MeasuredNew;// averageLum;
+				device.PixelShaderResources[2]	=	viewLayer.Bloom0;// averageLum;
+				device.PixelShaderResources[3]	=	settings.DirtMask1==null ? whiteTex.Srv : settings.DirtMask1.Srv;
+				device.PixelShaderResources[4]	=	settings.DirtMask2==null ? whiteTex.Srv : settings.DirtMask2.Srv;
+				device.PixelShaderSamplers[0]	=	SamplerState.LinearClamp;
 
-			Flags op = Flags.LINEAR;
-			if (settings.TonemappingOperator==TonemappingOperator.Filmic)   { op = Flags.FILMIC;   }
-			if (settings.TonemappingOperator==TonemappingOperator.Linear)   { op = Flags.LINEAR;	 }
-			if (settings.TonemappingOperator==TonemappingOperator.Reinhard) { op = Flags.REINHARD; }
+				Flags op = Flags.LINEAR;
+				if (settings.TonemappingOperator==TonemappingOperator.Filmic)   { op = Flags.FILMIC;   }
+				if (settings.TonemappingOperator==TonemappingOperator.Linear)   { op = Flags.LINEAR;	 }
+				if (settings.TonemappingOperator==TonemappingOperator.Reinhard) { op = Flags.REINHARD; }
 
-			device.PipelineState		=	factory[ (int)(Flags.TONEMAPPING|op) ];
+				device.PipelineState		=	factory[ (int)(Flags.TONEMAPPING|op) ];
 				
-			device.Draw( 3, 0 );
+				device.Draw( 3, 0 );
 			
-			device.ResetStates();
+				device.ResetStates();
 
 
-			//	swap luminanice buffers :
-			Misc.Swap( ref viewLayer.MeasuredNew, ref viewLayer.MeasuredOld );
+				//	swap luminanice buffers :
+				Misc.Swap( ref viewLayer.MeasuredNew, ref viewLayer.MeasuredOld );
+			}
 		}
-
-
-
 	}
 }
