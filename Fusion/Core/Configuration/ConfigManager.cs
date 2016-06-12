@@ -47,6 +47,10 @@ namespace Fusion.Core.Configuration {
 		/// <param name="?"></param>
 		public void ExposeProperties ( object targetObject, string niceName, string shortName )
 		{
+			if (game.IsInitialized) {	
+				throw new InvalidOperationException("Could not expose target object properties after game initialized");
+			}
+
 			var props = targetObject
 				.GetType()
 				.GetProperties()

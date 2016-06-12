@@ -10,15 +10,15 @@ using Fusion.Build.ImageUtils;
 
 namespace Fusion.Build.Processors {
 
-	[AssetProcessor("Megatexture", "Merges scenes and textures into giant texture/geometry map")]
-	public class MegatextureProcessor : AssetProcessor {
+	[AssetProcessor("Map", "Performs map assembly")]
+	public class MapProcessor : AssetProcessor {
 
 		const int MegatextureSize = 128 * 1024;
 
 		/// <summary>
 		/// 
 		/// </summary>
-		public MegatextureProcessor ()
+		public MapProcessor ()
 		{
 		}
 
@@ -49,36 +49,15 @@ namespace Fusion.Build.Processors {
 								.Select( f3 => Path.Combine( fileDir, f3 ) )
 								.ToArray();
 
+			foreach ( var scene in fileNames ) {
+				Log.Message("...scene: {0}", scene );
+			}
 
 			var depNames	=	File.ReadAllLines(assetFile.FullSourcePath)
 								.Select( f1 => f1.Trim() )
 								.Where( f2 => !f2.StartsWith("#") && !string.IsNullOrWhiteSpace(f2) )
 								.Select( f3 => Path.Combine( Path.GetDirectoryName(assetFile.KeyPath), f3 ) )
 								.ToArray();
-
-			var images		=	fileNames
-								.Select( fn => LoadImage( fn ) )
-								.OrderByDescending( img0 => img0.Width * img0.Height )
-								.ThenByDescending( img1 => img1.Width )
-								.ThenByDescending( img2 => img2.Height )
-								.ToList();
-
-			if (!images.Any()) {
-				throw new InvalidOperationException("At least one subimage must be added to the texture atlas");
-			}
-
-
-			//
-			//	Pack atlas :
-			//			
-			AtlasNode root = new AtlasNode(0,0, MegatextureSize, MegatextureSize, 0 );
-
-			foreach ( var img in images ) {
-				var n = root.Insert( img );
-				if (n==null) {
-					throw new InvalidOperationException("No enough room to place image");
-				}
-			}
 
 		}
 
