@@ -15,13 +15,11 @@ using System.Diagnostics;
 
 namespace Fusion.Core.Development {
 
-	public partial class LaunchBox : Form {
-
-		readonly Game game;
+	public static class LaunchBox {
 
 		public static bool Show ( Game game, string config )
 		{
-			var form = new LaunchBox( game, config );
+			var form = new LaunchBoxForm( game, config );
 
 			var dr = form.ShowDialog();
 
@@ -31,13 +29,17 @@ namespace Fusion.Core.Development {
 				return false;
 			}
 		} 
+	}
 
+	internal partial class LaunchBoxForm : Form {
+
+		readonly Game game;
 
 		string configPath;
 		string configName;
 
 
-		private LaunchBox ( Game game, string config )
+		public LaunchBoxForm ( Game game, string config )
 		{
 			this.game	=	game;
 			configName	=	config;
@@ -59,6 +61,7 @@ namespace Fusion.Core.Development {
 			versionLabel.Text	=	game.GetReleaseInfo();
 
 			//	stereo mode :
+			stereoMode.Items.Clear();
 			stereoMode.Items.AddRange( Enum.GetValues(typeof(StereoMode)).Cast<object>().ToArray() );
 			stereoMode.SelectedItem = game.RenderSystem.StereoMode;
 
@@ -134,7 +137,7 @@ namespace Fusion.Core.Development {
 
 
 
-		private void button2_Click ( object sender, EventArgs e )
+		private void openConfigDir_Click ( object sender, EventArgs e )
 		{
 			ShellExecute( Path.GetDirectoryName(configPath) );
 		}
@@ -149,7 +152,7 @@ namespace Fusion.Core.Development {
 
 
 
-		private void button4_Click ( object sender, EventArgs e )
+		private void openContentDir_Click ( object sender, EventArgs e )
 		{
 			var file = (string)game.Invoker.PushAndExecute("contentFile");
 			ShellExecute(Path.GetDirectoryName(file));
@@ -166,7 +169,6 @@ namespace Fusion.Core.Development {
 
 		private void rebuildContent_Click ( object sender, EventArgs e )
 		{
-			
 			game.Invoker.PushAndExecute("contentBuild /force");
 		}
 	}

@@ -177,45 +177,47 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		internal void RenderFogTable( SkySettings settings )
 		{
-			var	sunPos		= settings.SunPosition;
-			var sunColor	= settings.SunLightColor;
+			using ( new PixEvent("Fog Table") ) {
+				var	sunPos		= settings.SunPosition;
+				var sunColor	= settings.SunLightColor;
 
-			var rotation	=	Matrix.Identity;
-			var projection	=	MathUtil.ComputeCubemapProjectionMatrixLH( 0.125f, 10.0f );
-			var cubeWVPS	=	MathUtil.ComputeCubemapViewMatriciesLH( Vector3.Zero, rotation, projection );
+				var rotation	=	Matrix.Identity;
+				var projection	=	MathUtil.ComputeCubemapProjectionMatrixLH( 0.125f, 10.0f );
+				var cubeWVPS	=	MathUtil.ComputeCubemapViewMatriciesLH( Vector3.Zero, rotation, projection );
 
-			var flags		=	SkyFlags.FOG;
+				var flags		=	SkyFlags.FOG;
 
-			ApplyColorSpace( ref flags, settings );
+				ApplyColorSpace( ref flags, settings );
 				
-			rs.PipelineState	=	factory[(int)flags];
-//			rs.DepthStencilState = DepthStencilState.None ;
+				rs.PipelineState	=	factory[(int)flags];
+	//			rs.DepthStencilState = DepthStencilState.None ;
 
-			skyConstsData.SunPosition	= sunPos;
-			skyConstsData.SunColor		= sunColor;
-			skyConstsData.Turbidity		= settings.SkyTurbidity;
-			skyConstsData.Temperature	= Temperature.Get( settings.SunTemperature ); 
-			skyConstsData.SkyIntensity	= settings.SkyIntensity;
+				skyConstsData.SunPosition	= sunPos;
+				skyConstsData.SunColor		= sunColor;
+				skyConstsData.Turbidity		= settings.SkyTurbidity;
+				skyConstsData.Temperature	= Temperature.Get( settings.SunTemperature ); 
+				skyConstsData.SkyIntensity	= settings.SkyIntensity;
 
-			for( int i = 0; i < 6; ++i ) {
-				rs.SetTargets( null, SkyCube.GetSurface(0, (CubeFace)i ) );
+				for( int i = 0; i < 6; ++i ) {
+					rs.SetTargets( null, SkyCube.GetSurface(0, (CubeFace)i ) );
 
-				SkyCube.SetViewport();
+					SkyCube.SetViewport();
 
-				skyConstsData.MatrixWVP = cubeWVPS[i];
+					skyConstsData.MatrixWVP = cubeWVPS[i];
 	
-				skyConstsCB.SetData( skyConstsData );
-				rs.VertexShaderConstants[0] = skyConstsCB;
-				rs.PixelShaderConstants[0] = skyConstsCB;
+					skyConstsCB.SetData( skyConstsData );
+					rs.VertexShaderConstants[0] = skyConstsCB;
+					rs.PixelShaderConstants[0] = skyConstsCB;
 
 
-				rs.SetupVertexInput( skyVB, null );
-				rs.Draw( skyVB.Capacity, 0 );
+					rs.SetupVertexInput( skyVB, null );
+					rs.Draw( skyVB.Capacity, 0 );
+				}
+
+				rs.ResetStates();
+
+				SkyCube.BuildMipmaps();
 			}
-
-			rs.ResetStates();
-
-			SkyCube.BuildMipmaps();
 		}
 
 
@@ -227,47 +229,49 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="techName"></param>
 		internal void Render( Camera camera, StereoEye stereoEye, HdrFrame frame, SkySettings settings )
 		{
-			var scale		=	Matrix.Scaling( settings.SkySphereSize );
-			var rotation	=	Matrix.Identity;
+			using ( new PixEvent("Sky Rendering") ) {
+				var scale		=	Matrix.Scaling( settings.SkySphereSize );
+				var rotation	=	Matrix.Identity;
 
-			var	sunPos		=	settings.SunPosition;
-			var sunColor	=	settings.SunGlowColor;
+				var	sunPos		=	settings.SunPosition;
+				var sunColor	=	settings.SunGlowColor;
 
-			rs.ResetStates();
+				rs.ResetStates();
 
-			//rs.DepthStencilState = depthBuffer==null? DepthStencilState.None : DepthStencilState.Default ;
+				//rs.DepthStencilState = depthBuffer==null? DepthStencilState.None : DepthStencilState.Default ;
 
-			rs.SetTargets( frame.DepthBuffer.Surface, frame.HdrBuffer.Surface );
+				rs.SetTargets( frame.DepthBuffer.Surface, frame.HdrBuffer.Surface );
 
-			var viewMatrix = camera.GetViewMatrix( stereoEye );
-			var projMatrix = camera.GetProjectionMatrix( stereoEye );
+				var viewMatrix = camera.GetViewMatrix( stereoEye );
+				var projMatrix = camera.GetProjectionMatrix( stereoEye );
 
-			skyConstsData.MatrixWVP		= scale * rotation * MathUtil.Transformation( viewMatrix.Right, viewMatrix.Up, viewMatrix.Backward ) * projMatrix;
-			skyConstsData.SunPosition	= sunPos;
-			skyConstsData.SunColor		= sunColor;
-			skyConstsData.Turbidity		= settings.SkyTurbidity;
-			skyConstsData.Temperature	= Temperature.Get( settings.SunTemperature ); 
-			skyConstsData.SkyIntensity	= settings.SkyIntensity;
+				skyConstsData.MatrixWVP		= scale * rotation * MathUtil.Transformation( viewMatrix.Right, viewMatrix.Up, viewMatrix.Backward ) * projMatrix;
+				skyConstsData.SunPosition	= sunPos;
+				skyConstsData.SunColor		= sunColor;
+				skyConstsData.Turbidity		= settings.SkyTurbidity;
+				skyConstsData.Temperature	= Temperature.Get( settings.SunTemperature ); 
+				skyConstsData.SkyIntensity	= settings.SkyIntensity;
 	
-			skyConstsCB.SetData( skyConstsData );
+				skyConstsCB.SetData( skyConstsData );
 			
-			rs.VertexShaderConstants[0] = skyConstsCB;
-			rs.PixelShaderConstants[0] = skyConstsCB;
+				rs.VertexShaderConstants[0] = skyConstsCB;
+				rs.PixelShaderConstants[0] = skyConstsCB;
 
 
-			//
-			//	Sky :
-			//
-			SkyFlags flags = SkyFlags.SKY;
+				//
+				//	Sky :
+				//
+				SkyFlags flags = SkyFlags.SKY;
 
-			ApplyColorSpace( ref flags, settings );
+				ApplyColorSpace( ref flags, settings );
 				
-			rs.PipelineState	=	factory[(int)flags];
+				rs.PipelineState	=	factory[(int)flags];
 						
-			rs.SetupVertexInput( skyVB, null );
-			rs.Draw( skyVB.Capacity, 0 );
+				rs.SetupVertexInput( skyVB, null );
+				rs.Draw( skyVB.Capacity, 0 );
 
-			rs.ResetStates();
+				rs.ResetStates();
+			}
 		}
 	}
 }

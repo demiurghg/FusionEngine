@@ -1,5 +1,5 @@
 ﻿namespace Fusion.Core.Development {
-	partial class LaunchBox {
+	partial class LaunchBoxForm {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -44,8 +44,8 @@
 			this.label5 = new System.Windows.Forms.Label();
 			this.displayWidth = new System.Windows.Forms.NumericUpDown();
 			this.displayHeight = new System.Windows.Forms.NumericUpDown();
-			this.button2 = new System.Windows.Forms.Button();
-			this.button4 = new System.Windows.Forms.Button();
+			this.openConfigDir = new System.Windows.Forms.Button();
+			this.openContentDir = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.displayWidth)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.displayHeight)).BeginInit();
@@ -261,33 +261,33 @@
             0,
             0});
 			// 
-			// button2
+			// openConfigDir
 			// 
-			this.button2.Location = new System.Drawing.Point(264, 312);
-			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(24, 23);
-			this.button2.TabIndex = 9;
-			this.button2.Text = "...";
-			this.button2.UseVisualStyleBackColor = true;
-			this.button2.Click += new System.EventHandler(this.button2_Click);
+			this.openConfigDir.Location = new System.Drawing.Point(264, 312);
+			this.openConfigDir.Name = "openConfigDir";
+			this.openConfigDir.Size = new System.Drawing.Size(24, 23);
+			this.openConfigDir.TabIndex = 9;
+			this.openConfigDir.Text = "...";
+			this.openConfigDir.UseVisualStyleBackColor = true;
+			this.openConfigDir.Click += new System.EventHandler(this.openConfigDir_Click);
 			// 
-			// button4
+			// openContentDir
 			// 
-			this.button4.Location = new System.Drawing.Point(264, 341);
-			this.button4.Name = "button4";
-			this.button4.Size = new System.Drawing.Size(24, 23);
-			this.button4.TabIndex = 11;
-			this.button4.Text = "...";
-			this.button4.UseVisualStyleBackColor = true;
-			this.button4.Click += new System.EventHandler(this.button4_Click);
+			this.openContentDir.Location = new System.Drawing.Point(264, 341);
+			this.openContentDir.Name = "openContentDir";
+			this.openContentDir.Size = new System.Drawing.Size(24, 23);
+			this.openContentDir.TabIndex = 11;
+			this.openContentDir.Text = "...";
+			this.openContentDir.UseVisualStyleBackColor = true;
+			this.openContentDir.Click += new System.EventHandler(this.openContentDir_Click);
 			// 
 			// LaunchBox
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(300, 527);
-			this.Controls.Add(this.button4);
-			this.Controls.Add(this.button2);
+			this.Controls.Add(this.openContentDir);
+			this.Controls.Add(this.openConfigDir);
 			this.Controls.Add(this.displayHeight);
 			this.Controls.Add(this.displayWidth);
 			this.Controls.Add(this.label5);
@@ -342,7 +342,7 @@
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.NumericUpDown displayWidth;
 		private System.Windows.Forms.NumericUpDown displayHeight;
-		private System.Windows.Forms.Button button2;
-		private System.Windows.Forms.Button button4;
+		private System.Windows.Forms.Button openConfigDir;
+		private System.Windows.Forms.Button openContentDir;
 	}
 }
