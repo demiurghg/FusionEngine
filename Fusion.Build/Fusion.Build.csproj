@@ -67,10 +67,12 @@
     <Compile Include="BuildContentFileCmd.cs" />
     <Compile Include="ImageUtils\Image.cs" />
     <Compile Include="ImageUtils\Image.Tga.cs" />
+    <Compile Include="Mapping\MapTexture.cs" />
+    <Compile Include="Mapping\MapScene.cs" />
     <Compile Include="Processors\AssetProcessor.cs" />
     <Compile Include="Processors\AssetProcessorAttribute.cs" />
     <Compile Include="Processors\AssetProcessorBinding.cs" />
-    <Compile Include="Processors\MapProcessor.cs" />
+    <Compile Include="Mapping\MapProcessor.cs" />
     <Compile Include="Processors\MaterialProcessor.cs" />
     <Compile Include="Processors\TextureAtlasProcessor.cs" />
     <Compile Include="Processors\CopyProcessor.cs" />
@@ -97,6 +99,7 @@
       <Name>Fusion</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\FusionFramework.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

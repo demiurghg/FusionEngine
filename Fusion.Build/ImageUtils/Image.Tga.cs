@@ -69,6 +69,38 @@ namespace Fusion.Build.ImageUtils {
    		}
 
 
+		public static TgaHeader TakeTga ( string path )
+		{
+			var fs = File.OpenRead( path );
+			var br = new BinaryReader( fs );
+
+			var header	=	new TgaHeader();
+
+			/* char	 */	header.idlength			=	br.ReadByte();
+			/* char	 */	header.colourmaptype	=	br.ReadByte();
+			/* char	 */	header.datatypecode		=	br.ReadByte();
+			/* short */	header.colourmaporigin	=	br.ReadInt16();
+			/* short */	header.colourmaplength	=	br.ReadInt16();
+			/* char	 */	header.colourmapdepth	=	br.ReadByte();
+			/* short */	header.x_origin			=	br.ReadInt16();
+			/* short */	header.y_origin			=	br.ReadInt16();
+			/* short */	header.width			=	br.ReadInt16();
+			/* short */	header.height			=	br.ReadInt16();
+			/* char	 */	header.bitsperpixel		=	br.ReadByte();
+			/* char	 */	header.imagedescriptor	=	br.ReadByte();
+
+			if ( header.datatypecode != 2 ) {
+				throw new Exception(string.Format("Only uncompressed RGB and RGBA images are supported. Got {0} data type code", header.datatypecode));
+			}
+
+			if ( header.bitsperpixel != 24 && header.bitsperpixel != 32 ) {
+				throw new Exception(string.Format("Only 24- and 32-bit images are supported. Got {0} bits per pixel", header.bitsperpixel));
+			}
+
+			return header;
+		}
+
+
 		public static Image LoadTga ( string path )
 		{
 			var fs = File.OpenRead( path );
@@ -104,6 +136,10 @@ namespace Fusion.Build.ImageUtils {
 			Image	image	= new Image( w, h );
 			byte[]	data	= new byte[ w * h * bytePerPixel ];
 
+			//	skip ID :
+			br.ReadBytes( header.idlength );
+
+			//	read image data :
 			br.Read( data, 0, w * h * bytePerPixel );
 
 			br.Dispose();
@@ -120,12 +156,20 @@ namespace Fusion.Build.ImageUtils {
 							image.RawImageData[ y * w + x ] = new Color( data[p*3+2], data[p*3+1], data[p*3+0], (byte)255 );
 						}
 					}
-				} else {
+				} else if (bytePerPixel==4) {
 					for ( int x=0; x<w; ++x ) {
 						for ( int y=0; y<h; ++y ) {
 							int p =  flip ? ((h-y-1) * w + x) : (y * w + x);
 
 							image.RawImageData[ y * w + x ] = new Color( data[p*4+2], data[p*4+1], data[p*4+0], data[p*4+3] );
+						}
+					}
+				} else if (bytePerPixel==1) {
+					for ( int x=0; x<w; ++x ) {
+						for ( int y=0; y<h; ++y ) {
+							int p =  flip ? ((h-y-1) * w + x) : (y * w + x);
+
+							image.RawImageData[ y * w + x ] = new Color( data[p], data[p], data[p], (byte)255 );
 						}
 					}
 				}

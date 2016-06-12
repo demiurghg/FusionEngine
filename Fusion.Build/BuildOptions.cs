@@ -72,6 +72,16 @@ namespace Fusion.Build {
 		}
 
 		/// <summary>
+		/// Full output directory
+		/// </summary>
+		[CommandLineParser.Ignore]
+		public string FullVTDirectory { 
+			get {
+				return Path.GetFullPath( Path.Combine(OutputDirectory, "VTPages") );
+			}
+		}
+
+		/// <summary>
 		/// Full temp directory
 		/// </summary>
 		[CommandLineParser.Ignore]
@@ -132,6 +142,10 @@ namespace Fusion.Build {
 
 			if ( !Directory.Exists(FullOutputDirectory) ) {
 				var dir = Directory.CreateDirectory( FullOutputDirectory );
+			}
+
+			if ( !Directory.Exists(FullVTDirectory) ) {
+				var dir = Directory.CreateDirectory( FullVTDirectory );
 			}
 
 			if ( !Directory.Exists(FullInputDirectory) ) {
