@@ -1,5 +1,5 @@
 ﻿namespace Fusion.Core.Development {
-	partial class LaunchBox {
+	partial class LaunchBoxForm {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>

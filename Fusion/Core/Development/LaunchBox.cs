@@ -15,13 +15,11 @@ using System.Diagnostics;
 
 namespace Fusion.Core.Development {
 
-	public partial class LaunchBox : Form {
-
-		readonly Game game;
+	public static class LaunchBox {
 
 		public static bool Show ( Game game, string config )
 		{
-			var form = new LaunchBox( game, config );
+			var form = new LaunchBoxForm( game, config );
 
 			var dr = form.ShowDialog();
 
@@ -31,13 +29,17 @@ namespace Fusion.Core.Development {
 				return false;
 			}
 		} 
+	}
 
+	internal partial class LaunchBoxForm : Form {
+
+		readonly Game game;
 
 		string configPath;
 		string configName;
 
 
-		private LaunchBox ( Game game, string config )
+		public LaunchBoxForm ( Game game, string config )
 		{
 			this.game	=	game;
 			configName	=	config;

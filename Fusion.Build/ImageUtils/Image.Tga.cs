@@ -56,10 +56,10 @@ namespace Fusion.Build.ImageUtils {
 				bw.Write( (byte)0x28 );	/* 0010 1000 */					   /* imagedescriptor;	*/
 
 				foreach ( var c in image.RawImageData ) {
-					byte r = (byte) MathUtil.Clamp(c.Red	* 255, 0, 255);
-					byte g = (byte) MathUtil.Clamp(c.Green	* 255, 0, 255);
-					byte b = (byte) MathUtil.Clamp(c.Blue	* 255, 0, 255);
-					byte a = (byte) MathUtil.Clamp(c.Alpha	* 255, 0, 255);
+					byte r = c.R;
+					byte g = c.G;
+					byte b = c.B;
+					byte a = c.A;
 					bw.Write(b);
 					bw.Write(g);
 					bw.Write(r);
@@ -117,10 +117,7 @@ namespace Fusion.Build.ImageUtils {
 						for ( int y=0; y<h; ++y ) {
 							int p =  flip ? ((h-y-1) * w + x) : (y * w + x);
 
-							image.RawImageData[ y * w + x ].Red		=	data[p*3+2]	/ 255.0f;
-							image.RawImageData[ y * w + x ].Green	=	data[p*3+1]	/ 255.0f; 
-							image.RawImageData[ y * w + x ].Blue	=	data[p*3+0]	/ 255.0f; 
-							image.RawImageData[ y * w + x ].Alpha	=	255			/ 255.0f;
+							image.RawImageData[ y * w + x ] = new Color( data[p*3+2], data[p*3+1], data[p*3+0], (byte)255 );
 						}
 					}
 				} else {
@@ -128,10 +125,7 @@ namespace Fusion.Build.ImageUtils {
 						for ( int y=0; y<h; ++y ) {
 							int p =  flip ? ((h-y-1) * w + x) : (y * w + x);
 
-							image.RawImageData[ y * w + x ].Red		=	data[p*4+2] / 255.0f;
-							image.RawImageData[ y * w + x ].Green	=	data[p*4+1] / 255.0f; 
-							image.RawImageData[ y * w + x ].Blue	=	data[p*4+0] / 255.0f; 
-							image.RawImageData[ y * w + x ].Alpha	=	data[p*4+3] / 255.0f;
+							image.RawImageData[ y * w + x ] = new Color( data[p*4+2], data[p*4+1], data[p*4+0], data[p*4+3] );
 						}
 					}
 				}
