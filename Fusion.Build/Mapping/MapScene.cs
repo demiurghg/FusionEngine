@@ -12,9 +12,10 @@ using Fusion.Engine.Graphics;
 namespace Fusion.Build.Mapping {
 
 
-	public class MapScene {
+	internal class MapScene {
 		
-		readonly string sceneDirectory;
+		readonly string fullSceneDirectory;
+		readonly string keySceneDirectory;
 
 		/// <summary>
 		/// Gets full source file path on disk.
@@ -46,14 +47,7 @@ namespace Fusion.Build.Mapping {
 		}
 
 		string builtScenePath = null;
-
-		
-		/// <summary>
-		/// 
-		/// </summary>
-		public ICollection<MapTexture> Textures {
-			get; private set;
-		}
+		Scene scene;
 
 
 		/// <summary>
@@ -63,9 +57,10 @@ namespace Fusion.Build.Mapping {
 		/// <param name="fullPath"></param>
 		public MapScene ( string keyPath, string sourceFullPath )
 		{
-			sceneDirectory	=	Path.GetDirectoryName( sourceFullPath );
-			SourceFullPath	=	sourceFullPath;
-			KeyPath			=	keyPath;
+			keySceneDirectory	=	Path.GetDirectoryName( keyPath );
+			fullSceneDirectory	=	Path.GetDirectoryName( sourceFullPath );
+			SourceFullPath		=	sourceFullPath;
+			KeyPath				=	keyPath;
 		}
 
 
@@ -74,10 +69,11 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <param name="context"></param>
-		public void BuildScene ( BuildContext context )
+		public void BuildScene ( BuildContext context, VTPageTable pageTable )
 		{
 			builtScenePath		=	context.GetTempFileName( KeyPath, ".vtscene" );
 
+			//	do not merge!
 			var cmdLine			=	string.Format("\"{0}\" /out:\"{1}\" /merge:0 /anim /geom /report", 
 				SourceFullPath, 
 				builtScenePath
@@ -90,11 +86,66 @@ namespace Fusion.Build.Mapping {
 				Log.Message("...scene is utd : {0}", KeyPath );
 			}
 
-			var scene = Scene.Load( File.OpenRead( builtScenePath ) );
 
-			Textures	=	scene.Materials
-						.Select( mtrl => new MapTexture( Path.Combine( sceneDirectory, Path.ChangeExtension( mtrl.Texture, ".tga" ) ) ) )
-						.ToList();
+			scene		=	Scene.Load( File.OpenRead( builtScenePath ) );
+
+
+			foreach ( var mtrl in scene.Materials ) {
+				
+				var keyTexPath	=	Path.Combine( keySceneDirectory,  Path.ChangeExtension( mtrl.Texture, ".tga" ) );
+				var fullTexPath	=	Path.Combine( fullSceneDirectory, Path.ChangeExtension( mtrl.Texture, ".tga" ) );
+
+				pageTable.AddTexture( keyTexPath, fullTexPath, this );
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="targetPath"></param>
+		public void SaveScene ( string path )
+		{
+			scene.Save( File.OpenWrite( path ) );
+		} 
+
+
+
+		/// <summary>
+		/// TODO : split vertices that share triangles with diferrent materials!
+		/// </summary>
+		public void RemapTexCoords ( VTPageTable pageTable )
+		{
+			foreach ( var mesh in scene.Meshes ) {
+
+				foreach ( var subset in mesh.Subsets ) {
+
+					var material	=	scene.Materials[ subset.MaterialIndex ];
+					var texPath		=	Path.Combine( keySceneDirectory,  Path.ChangeExtension( material.Texture, ".tga" ) );
+					var texture		=	pageTable.GetTextureByKeyPath( texPath );
+
+					var startPrimitive	=	subset.StartPrimitive;
+					var endPrimitive	=	subset.StartPrimitive + subset.PrimitiveCount;
+
+					for ( int tri = startPrimitive; tri < endPrimitive; tri++ ) {
+
+						var triangle = mesh.Triangles[ tri ];
+
+						var v0	=	mesh.Vertices[ triangle.Index0 ];
+						var v1	=	mesh.Vertices[ triangle.Index1 ];
+						var v2	=	mesh.Vertices[ triangle.Index2 ];
+
+						v0.TexCoord0 = texture.RemapTexCoords( v0.TexCoord0 );
+						v1.TexCoord0 = texture.RemapTexCoords( v0.TexCoord0 );
+						v2.TexCoord0 = texture.RemapTexCoords( v0.TexCoord0 );
+
+						mesh.Vertices[ triangle.Index0 ]	=	v0;
+						mesh.Vertices[ triangle.Index1 ]	=	v1;
+						mesh.Vertices[ triangle.Index2 ]	=	v2;
+					}
+				}
+			}
 		}
 		
 	}
