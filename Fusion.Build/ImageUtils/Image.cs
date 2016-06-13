@@ -119,6 +119,26 @@ namespace Fusion.Build.ImageUtils {
 		}
 
 
+		/// <summary>
+		/// Samples image at given coordinates with wraping addressing mode
+		/// </summary>
+		/// <param name="u"></param>
+		/// <param name="v"></param>
+		/// <returns></returns>
+		public Color SampleMip ( int x, int y, bool wrap = true)
+		{
+			var c00 = RawImageData[ Address( x*2+0, y*2+0, true ) ];
+			var c01 = RawImageData[ Address( x*2+0, y*2+1, true ) ];
+			var c10 = RawImageData[ Address( x*2+1, y*2+0, true ) ];
+			var c11 = RawImageData[ Address( x*2+1, y*2+1, true ) ];
+
+			var c0x	= Color.Lerp( c00, c01, 0.5f );
+			var c1x	= Color.Lerp( c10, c11, 0.5f );
+
+			return Color.Lerp( c0x, c1x, 0.5f );
+		}
+
+
 
 		/// <summary>
 		/// 

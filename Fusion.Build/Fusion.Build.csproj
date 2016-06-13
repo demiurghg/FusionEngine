@@ -67,8 +67,10 @@
     <Compile Include="BuildContentFileCmd.cs" />
     <Compile Include="ImageUtils\Image.cs" />
     <Compile Include="ImageUtils\Image.Tga.cs" />
+    <Compile Include="Mapping\VTAtlasNode.cs" />
     <Compile Include="Mapping\MapTexture.cs" />
     <Compile Include="Mapping\MapScene.cs" />
+    <Compile Include="Mapping\VTPageTable.cs" />
     <Compile Include="Processors\AssetProcessor.cs" />
     <Compile Include="Processors\AssetProcessorAttribute.cs" />
     <Compile Include="Processors\AssetProcessorBinding.cs" />

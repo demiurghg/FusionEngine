@@ -13,9 +13,10 @@ using Fusion.Build.ImageUtils;
 namespace Fusion.Build.Mapping {
 
 
-	public class MapTexture {
+	internal class MapTexture {
 		
-		public readonly string Name;
+		public readonly string KeyPath;
+		public readonly string FullPath;
 
 		public int TexelOffsetX;
 		public int TexelOffsetY;
@@ -27,14 +28,22 @@ namespace Fusion.Build.Mapping {
 		public int AddressY { get { return TexelOffsetY / MapProcessor.VTPageSize; } }
 
 		/// <summary>
+		/// Gets list of scenes that reference this texture
+		/// </summary>
+		public HashSet<MapScene> References { get; private set; }
+
+
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="fullPath"></param>
-		public MapTexture ( string fullPath )
-		{					
-			var pageSize	=	MapProcessor.VTPageSize;
+		public MapTexture ( string keyPath, string fullPath )
+		{			
+			const int pageSize	=	MapProcessor.VTPageSize;
 
-			Name	=	fullPath;
+			References	=	new HashSet<MapScene>();
+			FullPath		=	fullPath;
+			KeyPath		=	keyPath;
 
 			var header = Image.TakeTga( fullPath );
 
@@ -50,11 +59,33 @@ namespace Fusion.Build.Mapping {
 		}
 
 
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="uv"></param>
+		/// <returns></returns>
+		public Vector2 RemapTexCoords ( Vector2 uv )
+		{
+			double size	= MapProcessor.VTSize;
 
-		public void GeneratePages ( BuildContext context )
+			double u = ( uv.X * Width + TexelOffsetX ) / size;
+			double v = ( uv.X * Width + TexelOffsetX ) / size;
+
+			return new Vector2( (float)u, (float)v );
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="pageTable"></param>
+		public void GeneratePages ( BuildContext context, VTPageTable pageTable )
 		{
 			var pageSize	=	MapProcessor.VTPageSize;
-			var image		=	Image.LoadTga( Name );
+			var image		=	Image.LoadTga( FullPath );
 
 			var pageCountX	=	image.Width / pageSize;
 			var pageCountY	=	image.Height / pageSize;
@@ -70,10 +101,10 @@ namespace Fusion.Build.Mapping {
 						}
 					}
 
-					var dir		=	context.GetFullVTOutputPath();
-					var name	=	string.Format("{0:000000}_{1:000000}.tga", x + AddressX, y + AddressX );
+					var address	=	VTPageTable.ComputeAddress( x + AddressX, y + AddressY, 0 );
+					pageTable.Add( address );
 
-					Image.SaveTga( page, Path.Combine( dir, name ) );
+					pageTable.SavePage( address, context.GetFullVTOutputPath(), page );
 				}
 			}
 		}
