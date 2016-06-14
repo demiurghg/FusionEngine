@@ -91,9 +91,19 @@ namespace Fusion.Build.Mapping {
 
 
 			foreach ( var mtrl in scene.Materials ) {
+
+				string keyTexPath;
+				string fullTexPath;
 				
-				var keyTexPath	=	Path.Combine( keySceneDirectory,  Path.ChangeExtension( mtrl.Texture, ".tga" ) );
-				var fullTexPath	=	Path.Combine( fullSceneDirectory, Path.ChangeExtension( mtrl.Texture, ".tga" ) );
+				if (string.IsNullOrWhiteSpace(mtrl.Texture)) {
+					mtrl.Texture	=	"defaultColor.tga";
+					keyTexPath		=	mtrl.Texture;
+					fullTexPath		=	context.ResolveContentPath( mtrl.Texture );
+				} else {
+					mtrl.Texture	=	Path.Combine( keySceneDirectory,  Path.ChangeExtension( mtrl.Texture, ".tga" ) );
+					keyTexPath		=	mtrl.Texture;
+					fullTexPath		=	context.ResolveContentPath( mtrl.Texture );
+				}
 
 				pageTable.AddTexture( keyTexPath, fullTexPath, this );
 			}
@@ -122,7 +132,7 @@ namespace Fusion.Build.Mapping {
 				foreach ( var subset in mesh.Subsets ) {
 
 					var material	=	scene.Materials[ subset.MaterialIndex ];
-					var texPath		=	Path.Combine( keySceneDirectory,  Path.ChangeExtension( material.Texture, ".tga" ) );
+					var texPath		=	material.Texture;
 					var texture		=	pageTable.GetTextureByKeyPath( texPath );
 
 					var startPrimitive	=	subset.StartPrimitive;
