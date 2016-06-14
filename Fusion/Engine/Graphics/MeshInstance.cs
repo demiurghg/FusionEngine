@@ -149,5 +149,28 @@ namespace Fusion.Engine.Graphics {
 					.ToArray();
 			}
 		}
+
+        public MeshInstance(GeometryCache cache, MaterialInstance[] materials)
+        {
+            Visible = true;
+            World = Matrix.Identity;
+            Color = Color4.Zero;
+            Blending = new Vector4(1, 1, 1, 1);
+
+            vb = cache.VertexBuffer;
+            ib = cache.IndexBuffer;
+
+            vertexCount = cache.VertexCount;
+            indexCount = cache.IndexCount;
+
+            ShadingGroups = cache.Subsets
+                            .Select(s => new ShadingGroup(s, materials[0]))
+                            .ToArray();
+            IsSkinned = true;
+            BoneTransforms = Enumerable
+                .Range(0, SceneRenderer.MaxBones)
+                .Select(i => Matrix.Identity)
+                .ToArray();
+        }
 	}
 }
