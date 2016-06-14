@@ -69,8 +69,8 @@ namespace Fusion.Build.Mapping {
 		{
 			double size	= MapProcessor.VTSize;
 
-			double u = ( uv.X * Width + TexelOffsetX ) / size;
-			double v = ( uv.X * Width + TexelOffsetX ) / size;
+			double u = ( MathUtil.Wrap(uv.X,0,1) * Width  + (double)TexelOffsetX ) / size;
+			double v = ( MathUtil.Wrap(uv.Y,0,1) * Height + (double)TexelOffsetY ) / size;
 
 			return new Vector2( (float)u, (float)v );
 		}

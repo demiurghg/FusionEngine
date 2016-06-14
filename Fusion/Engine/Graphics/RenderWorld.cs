@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 using Fusion.Core.Mathematics;
 using Fusion.Core;
@@ -277,6 +278,79 @@ namespace Fusion.Engine.Graphics {
 		{
 			IsPaused	=	false;
 		}
+
+		/*-----------------------------------------------------------------------------------------
+		 * 
+		 *	Start/stop:
+		 * 
+		-----------------------------------------------------------------------------------------*/
+
+		Scene		scene;
+		internal UserTexture	texture;
+
+
+		/// <summary>
+		/// Starts render world and initiate deferred content loading.
+		/// </summary>
+		/// <param name="mapName"></param>
+		public void Start ( string mapName )
+		{
+			scene	=	Scene.Load( File.OpenRead(@"Content\VTPages\test.map.scene") );
+
+			foreach ( var mesh in scene.Meshes ) {	
+				mesh.CreateVertexAndIndexBuffers( rs.Device );
+			}
+
+			texture	=	new UserTexture( rs, File.OpenRead(@"Content\VTPages\fallback.png"), true );
+		}
+
+
+
+		/// <summary>
+		/// Stops render world and purges all gpu data
+		/// </summary>
+		public void Stop ()
+		{
+			SafeDispose( ref scene );
+			particleSystem.KillParticles();
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		public IEnumerable<MeshInstance> CreateModelInstances ()
+		{
+			var defMtrl = rs.DefaultMaterial;
+           
+			//(game.UserInterface as AtlasInterface).startMenu.AddMessageBox();
+			Instances.Clear();
+
+
+			var transforms = new Matrix[scene.Nodes.Count];
+			scene.ComputeAbsoluteTransforms(transforms);
+			var materials = scene.Materials.Select(m => Game.Content.Load<MaterialInstance>(m.Name, defMtrl)).ToArray();
+																									
+			for (int i = 0; i < scene.Nodes.Count; i++)	{
+
+				var meshIndex = scene.Nodes[i].MeshIndex;
+
+				if (meshIndex < 0) {
+					continue;
+				}
+
+				var inst	=	new MeshInstance(rs, scene, scene.Meshes[meshIndex], materials);
+				inst.World	=	transforms[i];
+
+				Instances.Add( inst );
+			}
+
+			return Instances.ToArray();
+		}
+
 
 		/*-----------------------------------------------------------------------------------------
 		 * 

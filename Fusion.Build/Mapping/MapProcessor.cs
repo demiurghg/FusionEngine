@@ -60,16 +60,16 @@ namespace Fusion.Build.Mapping {
 			Log.Message("Packing textures to atlas...");
 			PackTextureAtlas( pageTable.Textures );
 
-			Log.Message("Generating pages...");
-			GeneratePages( pageTable.Textures, context, pageTable );
+			//Log.Message("Generating pages...");
+			//GeneratePages( pageTable.Textures, context, pageTable );
 
-			for (int mip=0; mip<VTMips-1; mip++) {
-				Log.Message("Generating mip level {0}/{1}...", mip, VTMips);
-				GenerateMipLevels( context, pageTable, mip );
-			}
+			//for (int mip=0; mip<VTMips-1; mip++) {
+			//	Log.Message("Generating mip level {0}/{1}...", mip, VTMips);
+			//	GenerateMipLevels( context, pageTable, mip );
+			//}
 
-			Log.Message("Generating fallback image...");
-			GenerateFallbackImage( context, pageTable, VTMips-1 );
+			//Log.Message("Generating fallback image...");
+			//GenerateFallbackImage( context, pageTable, VTMips-1 );
 
 			Log.Message("Remapping texture coordinates...");
 			foreach ( var mapScene in mapScenes ) {
@@ -103,7 +103,7 @@ namespace Fusion.Build.Mapping {
 			foreach ( var img in sortedList ) {
 				var n = root.Insert( img );
 				if (n==null) {
-					throw new BuildException("No enough room to place texture. Are U mad, dude???");
+					throw new BuildException("No enough room to place texture.");
 				}
 			}
 

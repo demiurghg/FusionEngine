@@ -186,7 +186,7 @@ namespace Fusion.Engine.Graphics {
 				device.ResetStates();
 
 				device.SetTargets( depth, hdr, diffuse, specular, normals, scattering );
-				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
+				device.PixelShaderSamplers[0]	= SamplerState.LinearClamp ;
 
 				var instances	=	viewLayer.Instances;
 
@@ -225,7 +225,8 @@ namespace Fusion.Engine.Graphics {
 							device.PixelShaderConstants[1]	= sg.Material.ConstantBufferParameters;
 							device.VertexShaderConstants[1]	= sg.Material.ConstantBufferParameters;
 
-							sg.Material.SetTextures( device );
+							//sg.Material.SetTextures( device );
+							device.PixelShaderResources[0]	= viewLayer.texture.Srv;
 
 							device.DrawIndexed( sg.IndicesCount, sg.StartIndex, 0 );
 

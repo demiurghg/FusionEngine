@@ -281,6 +281,10 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public void MergeVertices ( float tolerance )
 		{
+			if (tolerance<=0) {
+				return;
+			}
+
 			OctNode	root = null;
 			List<MeshVertex> oldVertices = new List<MeshVertex>( Vertices );
 			Vertices.Clear();

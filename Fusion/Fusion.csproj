@@ -255,11 +255,24 @@
     <Compile Include="Engine\Graphics\Lights\LightRenderer.Tiles.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.Shadows.cs" />
     <Compile Include="Engine\Graphics\Lights\SkyLight.cs" />
-    <Compile Include="Engine\Graphics\Materials\BaseIllum.cs" />
-    <Compile Include="Engine\Graphics\Materials\MaterialData.cs" />
-    <Compile Include="Engine\Graphics\Materials\MaterialInstance.cs" />
-    <Compile Include="Engine\Graphics\Materials\TextureMap.cs" />
-    <Compile Include="Engine\Graphics\Materials\TextureMapBind.cs" />
+    <Compile Include="Engine\Graphics\Materials\BaseIllum.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Engine\Graphics\Materials\MaterialData.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Engine\Graphics\Materials\MaterialInstance.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Engine\Graphics\Materials\MaterialLoader.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Engine\Graphics\Materials\TextureMap.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Engine\Graphics\Materials\TextureMapBind.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Engine\Graphics\Particle.cs" />
     <Compile Include="Engine\Graphics\ParticleSystem.cs" />
     <Compile Include="Engine\Graphics\RenderCounters.cs" />
@@ -285,7 +298,6 @@
     <Compile Include="Engine\Graphics\Lights\LightRenderer.Config.cs" />
     <Compile Include="Engine\Graphics\Lights\DirectLight.cs" />
     <Compile Include="Engine\Graphics\Lights\ShadowContext.cs" />
-    <Compile Include="Engine\Graphics\Materials\MaterialLoader.cs" />
     <Compile Include="Engine\Graphics\SceneRenderer.cs" />
     <Compile Include="Engine\Graphics\Scene\MaterialRef.cs" />
     <Compile Include="Engine\Graphics\Scene\VertexColorTextureTBNSkinned.cs" />

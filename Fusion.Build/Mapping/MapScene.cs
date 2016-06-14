@@ -74,7 +74,7 @@ namespace Fusion.Build.Mapping {
 			builtScenePath		=	context.GetTempFileName( KeyPath, ".vtscene" );
 
 			//	do not merge!
-			var cmdLine			=	string.Format("\"{0}\" /out:\"{1}\" /merge:0 /anim /geom /report", 
+			var cmdLine			=	string.Format("\"{0}\" /out:\"{1}\" /merge:-1 /anim /geom /report", 
 				SourceFullPath, 
 				builtScenePath
 			);
@@ -147,14 +147,19 @@ namespace Fusion.Build.Mapping {
 						var v2	=	mesh.Vertices[ triangle.Index2 ];
 
 						v0.TexCoord0 = texture.RemapTexCoords( v0.TexCoord0 );
-						v1.TexCoord0 = texture.RemapTexCoords( v0.TexCoord0 );
-						v2.TexCoord0 = texture.RemapTexCoords( v0.TexCoord0 );
+						v1.TexCoord0 = texture.RemapTexCoords( v1.TexCoord0 );
+						v2.TexCoord0 = texture.RemapTexCoords( v2.TexCoord0 );
 
 						mesh.Vertices[ triangle.Index0 ]	=	v0;
 						mesh.Vertices[ triangle.Index1 ]	=	v1;
 						mesh.Vertices[ triangle.Index2 ]	=	v2;
 					}
 				}
+
+				mesh.MergeVertices(0);
+				mesh.DefragmentSubsets(scene, true);
+				mesh.ComputeTangentFrame();
+				mesh.ComputeBoundingBox();
 			}
 		}
 		

@@ -38,13 +38,6 @@ namespace Fusion.Engine.Graphics {
 		}
 
 		/// <summary>
-		/// Instance material layer blending. Default value 1,1,1,1
-		/// </summary>
-		public Vector4 Blending {
-			get; set;
-		}
-
-		/// <summary>
 		/// Gets and sets mesh.
 		/// </summary>
 		public Mesh Mesh {
@@ -124,7 +117,6 @@ namespace Fusion.Engine.Graphics {
 			Visible		=	true;
 			World		=	Matrix.Identity;
 			Color		=	Color4.Zero;
-			Blending	=	new Vector4(1,1,1,1);
 
 			vb			=	mesh.VertexBuffer;
 			ib			=	mesh.IndexBuffer;
@@ -155,7 +147,6 @@ namespace Fusion.Engine.Graphics {
             Visible = true;
             World = Matrix.Identity;
             Color = Color4.Zero;
-            Blending = new Vector4(1, 1, 1, 1);
 
             vb = cache.VertexBuffer;
             ib = cache.IndexBuffer;
