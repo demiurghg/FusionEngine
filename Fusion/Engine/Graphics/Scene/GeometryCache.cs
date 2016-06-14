@@ -22,6 +22,8 @@ namespace Fusion.Engine.Graphics {
 	
 	public class GeometryCache : DisposableBase {
 
+
+	    private readonly RenderSystem rs;
 		/// <summary>
 		/// Gets total geometry clip length
 		/// </summary>
@@ -74,6 +76,10 @@ namespace Fusion.Engine.Graphics {
 		VertexBuffer vertexBuffer;
 		IndexBuffer	 indexBuffer;
 
+        public List<MeshSubset> Subsets { get; private set; }
+	    public List<List<MeshVertex>> framesList { get; private set; }
+
+	    private int currentFrame = 0;
 
 		/// <summary>
 		/// 
@@ -82,6 +88,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="stream"></param>
 		public GeometryCache ( RenderSystem rs, Stream stream )
 		{
+		    this.rs = rs;
             ReadStream(stream);
 		}
 
@@ -118,23 +125,32 @@ namespace Fusion.Engine.Graphics {
                 var indicesSection = reader.ReadFourCC();
                 IndexCount = reader.Read<int>();
                 VertexCount = reader.Read<int>();
-                List<int> indicesData = new List<int>();
+                var indicesData = new int[IndexCount];
                 for (int i = 0; i < IndexCount; i++)
                 {
-                    indicesData.Add(reader.Read<int>());
+                    indicesData[i]=reader.Read<int>();
                 }
-
+                indexBuffer = IndexBuffer.Create(rs.Game.GraphicsDevice, indicesData);
                 /*
                     FourCC        subset section ("SBST")
                     int           number of subsets
-                    (int,int)[]   start index, index count
+                    (int,int,int)[]   start index, index count, Material Index 
                 */
                 var subsetSection = reader.ReadFourCC();
                 var countSubsets = reader.Read<int>();
-                List<Tuple<int, int>> startCountIndex = new List<Tuple<int, int>>();
+                Subsets = new List<MeshSubset>();
                 for (int i = 0; i < countSubsets; i++)
                 {
-                    startCountIndex.Add(new Tuple<int, int>(reader.Read<int>(), reader.Read<int>()));
+                    var startIndex = reader.Read<int>();
+                    var indexCount = reader.Read<int>();
+                    var materialIndex = reader.Read<int>();
+
+                    Subsets.Add(new MeshSubset()
+                    {
+                        StartPrimitive = startIndex,
+                        PrimitiveCount = indexCount,
+                        MaterialIndex = materialIndex,
+                    });
                 }
                 /*
                     FourCC        animated data section ("ANIM")
@@ -157,36 +173,43 @@ namespace Fusion.Engine.Graphics {
                                     - Half4   - color
                  */
 
-                List<List<VertexData>> framesList = new List<List<VertexData>>();
+
+                framesList = new List<List<MeshVertex>>();
                 for (int i = 0; i < countFrames; i++)
                 {
                     var frameDataSection = reader.ReadFourCC();
                     var reserved = reader.Read<int>();
-                    List<VertexData> vertexDataList = new List<VertexData>();
+                    List<MeshVertex> vertexDataList = new List<MeshVertex>();
                     for (int j = 0; j < VertexCount; j++)
                     {
-                        VertexData vertexData = new VertexData();
-                        vertexData.position = reader.Read<Vector3>();
-                        vertexData.texCoord = reader.Read<Vector2>();
-                        vertexData.normal = reader.Read<Vector3>();
-                        vertexData.tangent = reader.Read<Vector3>();
-                        vertexData.binormal = reader.Read<Vector3>();
-                        vertexData.color = reader.Read<Half4>();
+                        MeshVertex vertexData = new MeshVertex();
+                        vertexData.Position = reader.Read<Vector3>();
+                        vertexData.TexCoord0 = reader.Read<Vector2>();
+                        vertexData.Normal = reader.Read<Vector3>();
+                        vertexData.Tangent = reader.Read<Vector3>();
+                        vertexData.Binormal = reader.Read<Vector3>();
+                        reader.Read<Half4>();
+                        vertexData.Color0 = Color.Red;
                         vertexDataList.Add(vertexData);
                     }
                     framesList.Add(vertexDataList);
                 }
+                // fill vertex buffer for first iteration
+                Update();
             }
         }
 
-        struct VertexData
+        public void Update()
         {
-            public Vector3 position;
-            public Vector2 texCoord;
-            public Vector3 normal;
-            public Vector3 tangent;
-            public Vector3 binormal;
-            public Half4 color;
+            if (framesList == null || framesList.Count <= 0)
+                return;
+
+            IsSkinned = framesList[currentFrame].Any(v => v.SkinIndices != Int4.Zero);
+            vertexBuffer = new VertexBuffer(rs.Game.GraphicsDevice, typeof(MeshVertex), VertexCount);
+            vertexBuffer.SetData(framesList[currentFrame].ToArray());
+            currentFrame++;
+            if (currentFrame >= framesList.Count)
+                currentFrame = 0;
         }
 	}
 }
