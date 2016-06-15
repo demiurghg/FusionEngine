@@ -6,8 +6,8 @@ using System.IO;
 using Fusion.Core.Mathematics;
 
 
-namespace Fusion.Build.ImageUtils {
-	internal partial class Image {
+namespace Fusion.Engine.Imaging {
+	public partial class Image {
 
 		public int	Width	{ get; protected set; }
 		public int	Height	{ get; protected set; }
@@ -15,7 +15,6 @@ namespace Fusion.Build.ImageUtils {
 		public Color[]	RawImageData { get; protected set; }
 
 		public object Tag { get; set; }
-		public string Name { get; set; }
 		
 
 		/// <summary>

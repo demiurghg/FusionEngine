@@ -15,6 +15,7 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	internal class HdrFrame : DisposableBase {
 
+		public RenderTarget2D	FeedbackBuffer	;
 		public RenderTarget2D	HdrBuffer		;	
 		public RenderTarget2D	LightAccumulator;
 		public RenderTarget2D	SSSAccumulator	;
@@ -28,6 +29,7 @@ namespace Fusion.Engine.Graphics {
 
 		public HdrFrame ( Game game, int width, int height )
 		{
+			//FeedbackBuffer		=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.R,		width,	height,	false, false );
 			HdrBuffer			=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba16F,		width,	height,	false, false );
 			LightAccumulator	=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba16F,		width,	height,	false, true );
 			SSSAccumulator		=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba16F,		width,	height,	false, true );
@@ -52,6 +54,7 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing) {
+				SafeDispose( ref FeedbackBuffer		);
 				SafeDispose( ref HdrBuffer			);
 				SafeDispose( ref LightAccumulator	);
 				SafeDispose( ref SSSAccumulator		);

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Threading.Tasks;
-using Fusion.Build.ImageUtils;
+using Fusion.Engine.Imaging;
 using Fusion.Core.Mathematics;
 
 namespace Fusion.Build.Mapping {

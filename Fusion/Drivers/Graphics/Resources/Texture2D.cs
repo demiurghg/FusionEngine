@@ -134,12 +134,24 @@ namespace Fusion.Drivers.Graphics {
 			bool	result;
 
 			lock (device.DeviceContext) {
+				
+				if (fileInMemory.Length<4) {
+					throw new GraphicsException( "Bad image: " + name );
+				}
+
 				if ((char)fileInMemory[0]=='D' &&
 					(char)fileInMemory[1]=='D' &&
 					(char)fileInMemory[2]=='S' &&
-					(char)fileInMemory[3]==' ' ) {
-	
+					(char)fileInMemory[3]==' ' 
+				) {
 					result = DdsLoader.CreateTextureFromMemory( device.Device.NativePointer, fileInMemory, forceSRgb, ref resource, ref resourceView );
+				//} if (fileInMemory[0]==0 &&
+				//	  fileInMemory[1]==0 &&
+				//	  fileInMemory[2]==2 &&
+				//	  fileInMemory[3]==0 
+				//) {
+				//	**** TGA ***
+				//} 
 				} else {
 					result = WicLoader.CreateTextureFromMemory( device.Device.NativePointer, fileInMemory, forceSRgb, ref resource, ref resourceView );
 				}
@@ -156,9 +168,8 @@ namespace Fusion.Drivers.Graphics {
 				Depth		=	1;
 				mipCount	=	tex2D.Description.MipLevels;
 				format		=	Converter.Convert( tex2D.Description.Format );
-				}
+			}
 		}
-
 
 
 		/// <summary>

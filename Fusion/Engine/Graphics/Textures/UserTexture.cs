@@ -7,6 +7,7 @@ using System.IO;
 using Fusion.Drivers.Graphics;
 using Fusion.Core.Content;
 using Fusion.Engine.Common;
+using Fusion.Engine.Imaging;
 
 namespace Fusion.Engine.Graphics {
 
@@ -43,6 +44,41 @@ namespace Fusion.Engine.Graphics {
 			this.Width		=	texture.Width;
 			this.Height		=	texture.Height;
 			this.Srv		=	texture;
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="rs"></param>
+		/// <param name="texture"></param>
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		UserTexture ( RenderSystem rs, Texture2D texture, int width, int height )
+		{
+			this.texture	=	texture;
+			this.Width		=	width;
+			this.Height		=	height;
+			this.Srv		=	texture;
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="rs"></param>
+		/// <param name="stream"></param>
+		/// <param name="forceSRgb"></param>
+		/// <returns></returns>
+		static public UserTexture CreateFromTga ( RenderSystem rs, Stream stream, bool forceSRgb )
+		{
+			Image image =	Image.LoadTga( stream );
+
+			var texture	=	new Texture2D( rs.Device, image.Width, image.Height, ColorFormat.Rgba8, false, forceSRgb );
+
+			texture.SetData( image.RawImageData );
+
+			return new UserTexture( rs, texture, image.Width, image.Height );
 		}
 
 

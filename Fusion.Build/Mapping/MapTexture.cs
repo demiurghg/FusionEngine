@@ -8,7 +8,7 @@ using Fusion;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Extensions;
 using Fusion.Engine.Graphics;
-using Fusion.Build.ImageUtils;
+using Fusion.Engine.Imaging;
 
 namespace Fusion.Build.Mapping {
 
@@ -45,7 +45,7 @@ namespace Fusion.Build.Mapping {
 			FullPath		=	fullPath;
 			KeyPath		=	keyPath;
 
-			var header = Image.TakeTga( fullPath );
+			var header = Image.TakeTga( File.OpenRead(fullPath) );
 
 			if (header.height%pageSize!=0) {
 				throw new BuildException(string.Format("Width of '{0}' must be multiple of {1}", fullPath, pageSize));
@@ -85,7 +85,7 @@ namespace Fusion.Build.Mapping {
 		public void GeneratePages ( BuildContext context, VTPageTable pageTable )
 		{
 			var pageSize	=	MapProcessor.VTPageSize;
-			var image		=	Image.LoadTga( FullPath );
+			var image		=	Image.LoadTga( File.OpenRead(FullPath) );
 
 			var pageCountX	=	image.Width / pageSize;
 			var pageCountY	=	image.Height / pageSize;

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Shell;
-using Fusion.Build.ImageUtils;
+using Fusion.Engine.Imaging;
 
 namespace Fusion.Build.Processors {
 
@@ -52,7 +52,9 @@ namespace Fusion.Build.Processors {
 		Image LoadImage ( string fileName )
 		{
 			try {
-				return Image.LoadTga( fileName );
+				var image = Image.LoadTga( File.OpenRead(fileName) );
+				image.Tag = fileName;
+				return image;
 			} catch ( Exception e ) {
 				throw new BuildException( string.Format("Failed to load atlas fragment {0}: {1}", fileName, e.Message ) );
 			}
@@ -247,7 +249,7 @@ namespace Fusion.Build.Processors {
 			public void WriteLayout ( BinaryWriter bw ) 
 			{
 				if (tex!=null) {
-					var name = Path.GetFileNameWithoutExtension( tex.Name );
+					var name = Path.GetFileNameWithoutExtension( (string)tex.Tag );
 					//stringBuilder.AppendFormat("{0} {1} {2} {3} {4}\r\n", name, x + padding, y + padding, tex.Width, tex.Height );
 					bw.Write( name );
 					bw.Write( x + padding );

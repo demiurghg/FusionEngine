@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Shell;
-using Fusion.Build.ImageUtils;
+using Fusion.Engine.Imaging;
 using Fusion.Build.Processors;
 
 namespace Fusion.Build.Mapping {

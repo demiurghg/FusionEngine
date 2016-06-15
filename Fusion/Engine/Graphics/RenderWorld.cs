@@ -301,7 +301,7 @@ namespace Fusion.Engine.Graphics {
 				mesh.CreateVertexAndIndexBuffers( rs.Device );
 			}
 
-			texture	=	new UserTexture( rs, File.OpenRead(@"Content\VTPages\fallback.png"), true );
+			texture	=	UserTexture.CreateFromTga( rs, File.OpenRead(@"Content\VTPages\fallback.tga"), true );
 		}
 
 
