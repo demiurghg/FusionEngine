@@ -91,22 +91,9 @@ namespace Fusion.Engine.Graphics {
 			
 			GetMaterialData( ref data );
 
-			var mtrl = new MaterialInstance( rs, content, data, GetTextureBindings(), GetSurfaceFlags() );
+			var mtrl = new MaterialInstance( rs, content, data, GetTextureBindings() );
 
 			return mtrl;
-		}
-
-
-		protected virtual SurfaceFlags GetSurfaceFlags ()
-		{
-			SurfaceFlags flags = SurfaceFlags.BASE_ILLUM;
-			
-			//switch (AlphaUsage) {
-			//	case AlphaUsage.EmissionMask : flags |= SurfaceFlags.ALPHA_EMISSION_MASK; break;
-			//	case AlphaUsage.DetailMask   : flags |= SurfaceFlags.ALPHA_DETAIL_MASK; break;
-			//}	
-
-			return flags;
 		}
 
 

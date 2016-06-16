@@ -324,15 +324,12 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		public IEnumerable<MeshInstance> CreateModelInstances ()
 		{
-			var defMtrl = rs.DefaultMaterial;
-           
 			//(game.UserInterface as AtlasInterface).startMenu.AddMessageBox();
 			Instances.Clear();
 
 
 			var transforms = new Matrix[scene.Nodes.Count];
 			scene.ComputeAbsoluteTransforms(transforms);
-			var materials = scene.Materials.Select(m => Game.Content.Load<MaterialInstance>(m.Name, defMtrl)).ToArray();
 																									
 			for (int i = 0; i < scene.Nodes.Count; i++)	{
 
@@ -342,7 +339,7 @@ namespace Fusion.Engine.Graphics {
 					continue;
 				}
 
-				var inst	=	new MeshInstance(rs, scene, scene.Meshes[meshIndex], materials);
+				var inst	=	new MeshInstance(rs, scene, scene.Meshes[meshIndex]);
 				inst.World	=	transforms[i];
 
 				Instances.Add( inst );
@@ -392,6 +389,9 @@ namespace Fusion.Engine.Graphics {
 			Game.GraphicsDevice.Clear( frame.NormalMapBuffer.Surface,	Color4.Black );
 			Game.GraphicsDevice.Clear( frame.ScatteringBuffer.Surface,	Color4.Black );
 
+			Game.GraphicsDevice.Clear( frame.FeedbackBufferDepth.Surface,	1, 0 );
+			Game.GraphicsDevice.Clear( frame.FeedbackBufferColor.Surface,	Color4.Zero );
+
 			Game.GraphicsDevice.Clear( frame.DepthBuffer.Surface,		1, 0 );
 			Game.GraphicsDevice.Clear( frame.HdrBuffer.Surface,			Color4.Black );
 		}
@@ -411,6 +411,9 @@ namespace Fusion.Engine.Graphics {
 			//	single pass for stereo rendering :
 			if (stereoEye!=StereoEye.Right) {
 
+				//	render feedback buffer :
+				rs.SceneRenderer.RenderFeedbackBuffer( StereoEye.Mono, Camera, viewHdrFrame, this.Instances );
+
 				//	simulate particles BEFORE lighting
 				//	to make particle lit (position is required) and 
 				//	get simulated particles for shadows.
@@ -419,6 +422,7 @@ namespace Fusion.Engine.Graphics {
 				//	render shadows :
 				rs.LightRenderer.RenderShadows( this, this.LightSet );
 			}
+
 
 			//	render g-buffer :
 			rs.SceneRenderer.RenderGBuffer( stereoEye, Camera, viewHdrFrame, this );
@@ -434,6 +438,7 @@ namespace Fusion.Engine.Graphics {
 				case 5 : rs.Filter.Copy( targetSurface, rs.SsaoFilter.OcclusionMap ); return;
 				case 6 : rs.Filter.StretchRect( targetSurface, rs.LightRenderer.CascadedShadowMap.ParticleShadow ); return;
 				case 7 : rs.Filter.StretchRect( targetSurface, rs.LightRenderer.CascadedShadowMap.ColorBuffer ); return;
+				case 8 : rs.Filter.StretchRect( targetSurface, viewHdrFrame.FeedbackBufferColor, SamplerState.PointClamp ); return;
 			}
 
 			//	render sky :

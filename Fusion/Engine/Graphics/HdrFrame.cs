@@ -15,21 +15,30 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	internal class HdrFrame : DisposableBase {
 
-		public RenderTarget2D	FeedbackBuffer	;
-		public RenderTarget2D	HdrBuffer		;	
-		public RenderTarget2D	LightAccumulator;
-		public RenderTarget2D	SSSAccumulator	;
-		public DepthStencil2D	DepthBuffer		;	
-		public RenderTarget2D	DiffuseBuffer	;
-		public RenderTarget2D	SpecularBuffer	;
-		public RenderTarget2D	NormalMapBuffer	;
-		public RenderTarget2D	ScatteringBuffer;
+		public const int FeedbackBufferWidth	=	80;
+		public const int FeedbackBufferHeight	=	60;
+
+		public FeedbackBuffer	FeedbackBufferColor	;
+		public DepthStencil2D	FeedbackBufferDepth	;
+
+		public RenderTarget2D	HdrBuffer			;	
+		public RenderTarget2D	LightAccumulator	;
+		public RenderTarget2D	SSSAccumulator		;
+		public DepthStencil2D	DepthBuffer			;	
+		public RenderTarget2D	DiffuseBuffer		;
+		public RenderTarget2D	SpecularBuffer		;
+		public RenderTarget2D	NormalMapBuffer		;
+		public RenderTarget2D	ScatteringBuffer	;
 		public RenderTarget2D	SSAOBuffer;
 
 
 		public HdrFrame ( Game game, int width, int height )
 		{
-			//FeedbackBuffer		=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.R,		width,	height,	false, false );
+			int fbbw = FeedbackBufferWidth;
+			int fbbh = FeedbackBufferHeight;
+
+			FeedbackBufferColor	=	new FeedbackBuffer( game.GraphicsDevice,							fbbw,	fbbh	  );
+			FeedbackBufferDepth	=	new DepthStencil2D( game.GraphicsDevice, DepthFormat.D24S8,			fbbw,	fbbh,	1 );
 			HdrBuffer			=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba16F,		width,	height,	false, false );
 			LightAccumulator	=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba16F,		width,	height,	false, true );
 			SSSAccumulator		=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba16F,		width,	height,	false, true );
@@ -54,16 +63,17 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing) {
-				SafeDispose( ref FeedbackBuffer		);
-				SafeDispose( ref HdrBuffer			);
-				SafeDispose( ref LightAccumulator	);
-				SafeDispose( ref SSSAccumulator		);
-				SafeDispose( ref DepthBuffer		);
-				SafeDispose( ref DiffuseBuffer		);
-				SafeDispose( ref SpecularBuffer 	);
-				SafeDispose( ref NormalMapBuffer	);
-				SafeDispose( ref ScatteringBuffer	);
-				SafeDispose( ref SSAOBuffer			);
+				SafeDispose( ref FeedbackBufferColor	);
+				SafeDispose( ref FeedbackBufferDepth	);
+				SafeDispose( ref HdrBuffer				);
+				SafeDispose( ref LightAccumulator		);
+				SafeDispose( ref SSSAccumulator			);
+				SafeDispose( ref DepthBuffer			);
+				SafeDispose( ref DiffuseBuffer			);
+				SafeDispose( ref SpecularBuffer 		);
+				SafeDispose( ref NormalMapBuffer		);
+				SafeDispose( ref ScatteringBuffer		);
+				SafeDispose( ref SSAOBuffer				);
 			} 
 
 			base.Dispose(disposing);

@@ -47,7 +47,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="rs"></param>
 		/// <param name="maxTextures"></param>
-		internal MaterialInstance ( RenderSystem rs, ContentManager content, MaterialData parameters, IEnumerable<TextureMapBind> textureBinds, SurfaceFlags surfaceFlags )
+		internal MaterialInstance ( RenderSystem rs, ContentManager content, MaterialData parameters, IEnumerable<TextureMapBind> textureBinds )
 		{
 			if (rs==null) {
 				throw new ArgumentNullException("rs");
@@ -63,10 +63,10 @@ namespace Fusion.Engine.Graphics {
 			//
 			var factory	=	rs.SceneRenderer.Factory;
 
-			var gbufferRigid	=	SurfaceFlags.GBUFFER | SurfaceFlags.RIGID	| surfaceFlags ;
-			var gbufferSkinned	=	SurfaceFlags.GBUFFER | SurfaceFlags.SKINNED | surfaceFlags ;
-			var shadowRigid		=	SurfaceFlags.SHADOW  | SurfaceFlags.RIGID	| surfaceFlags ;
-			var shadowSkinned	=	SurfaceFlags.SHADOW  | SurfaceFlags.SKINNED | surfaceFlags ;
+			var gbufferRigid	=	SurfaceFlags.GBUFFER | SurfaceFlags.RIGID	;
+			var gbufferSkinned	=	SurfaceFlags.GBUFFER | SurfaceFlags.SKINNED ;
+			var shadowRigid		=	SurfaceFlags.SHADOW  | SurfaceFlags.RIGID	;
+			var shadowSkinned	=	SurfaceFlags.SHADOW  | SurfaceFlags.SKINNED ;
 
 			GBufferRigid	=	factory[ (int)gbufferRigid ];
 			GBufferSkinned	=	factory[ (int)gbufferSkinned ];

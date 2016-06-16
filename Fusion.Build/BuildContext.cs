@@ -184,7 +184,13 @@ namespace Fusion.Build {
 		/// <returns></returns>
 		public string ResolveContentPath ( string path )
 		{
-			return ResolvePath( path, ContentDirectories );
+			var resolvedPath = ResolvePath( path, ContentDirectories );
+
+			if (resolvedPath==null) {
+				throw new BuildException(string.Format("Path '{0}' not resolved", path));
+			}
+
+			return resolvedPath;
 		}
 
 		
@@ -205,7 +211,7 @@ namespace Fusion.Build {
 				if (File.Exists( path )) {
 					return path;
 				} else {
-					throw new BuildException(string.Format("Path '{0}' not resolved", path));
+					return null;
 				}
 			}
 
@@ -220,7 +226,7 @@ namespace Fusion.Build {
 				}
 			}
 
-			throw new BuildException(string.Format("Path '{0}' not resolved", path));
+			return null;
 		}
 
 
@@ -233,12 +239,7 @@ namespace Fusion.Build {
 		/// <returns></returns>
 		public bool ContentFileExists ( string path )
 		{
-			try {
-				ResolveContentPath( path );
-				return true;
-			} catch ( BuildException ) {
-				return false;
-			}
+			return ResolvePath( path, ContentDirectories ) != null;
 		}
 
 

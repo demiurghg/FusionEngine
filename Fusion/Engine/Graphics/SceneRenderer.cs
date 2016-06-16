@@ -146,7 +146,6 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		float t = 0;
 
 		/// <summary>
 		/// 
@@ -190,6 +189,10 @@ namespace Fusion.Engine.Graphics {
 
 				var instances	=	viewLayer.Instances;
 
+				if (instances.Any()) {
+					device.PixelShaderResources[0]	= viewLayer.texture.Srv;
+				}
+
 				//#warning INSTANSING!
 				foreach ( var instance in instances ) {
 
@@ -218,20 +221,12 @@ namespace Fusion.Engine.Graphics {
 
 					try {
 
-						foreach ( var sg in instance.ShadingGroups ) {
+						device.PipelineState	=	factory[ (int)( SurfaceFlags.GBUFFER | SurfaceFlags.RIGID ) ];
 
-							device.PipelineState	=	instance.IsSkinned ? sg.Material.GBufferSkinned : sg.Material.GBufferRigid;
+						device.DrawIndexed( instance.indexCount, 0, 0 );
 
-							device.PixelShaderConstants[1]	= sg.Material.ConstantBufferParameters;
-							device.VertexShaderConstants[1]	= sg.Material.ConstantBufferParameters;
-
-							//sg.Material.SetTextures( device );
-							device.PixelShaderResources[0]	= viewLayer.texture.Srv;
-
-							device.DrawIndexed( sg.IndicesCount, sg.StartIndex, 0 );
-
-							rs.Counters.SceneDIPs++;
-						}
+						rs.Counters.SceneDIPs++;
+						
 					} catch ( UbershaderException e ) {
 						Log.Warning( e.Message );					
 						ExceptionDialog.Show( e );
@@ -248,7 +243,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="material"></param>
 		/// <param name="flags"></param>
 		/// <returns></returns>
-		SurfaceFlags ApplyFlags ( MaterialInstance material, MeshInstance instance, SurfaceFlags flags )
+		SurfaceFlags ApplyFlags ( MeshInstance instance, SurfaceFlags flags )
 		{
 			if (instance.IsSkinned) {
 				flags |= SurfaceFlags.SKINNED;
@@ -257,6 +252,72 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			return flags;
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="context"></param>
+		internal void RenderFeedbackBuffer ( StereoEye stereoEye, Camera camera, HdrFrame frame, IEnumerable<MeshInstance> instances )
+		{
+			if (rs.SkipFeedback) {
+				return;
+			}
+
+			using ( new PixEvent("FeedbackBuffer") ) {
+				if (surfaceShader==null) {
+					return;
+				}
+
+				var device			=	Game.GraphicsDevice;
+
+				var cbData			=	new CBMeshInstanceData();
+
+				var view			=	camera.GetViewMatrix( stereoEye );
+				var projection		=	camera.GetProjectionMatrix( stereoEye );
+				var viewPosition	=	camera.GetCameraPosition4( stereoEye );
+
+				device.SetTargets( frame.FeedbackBufferDepth.Surface, frame.FeedbackBufferColor.Surface );
+				device.SetViewport( 0,0, frame.FeedbackBufferColor.Width, frame.FeedbackBufferColor.Height );
+
+				device.PixelShaderConstants[0]	= constBuffer ;
+				device.VertexShaderConstants[0]	= constBuffer ;
+				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
+
+				cbData.Projection	=	projection;
+				cbData.View			=	view;
+				cbData.ViewPos		=	viewPosition;
+				cbData.BiasSlopeFar	=	Vector4.Zero;
+
+				//#warning INSTANSING!
+				foreach ( var instance in instances ) {
+
+					if (!instance.Visible) {
+						continue;
+					}
+
+					device.PipelineState	=	factory[ (int)ApplyFlags( instance, SurfaceFlags.FEEDBACK ) ];
+					cbData.World			=	instance.World;
+					cbData.Color			=	instance.Color;
+
+					constBuffer.SetData( cbData );
+
+					if (instance.IsSkinned) {
+						constBufferBones.SetData( instance.BoneTransforms );
+						device.VertexShaderConstants[3]	= constBufferBones ;
+					}
+
+					device.SetupVertexInput( instance.vb, instance.ib );
+					device.DrawIndexed( instance.indexCount, 0, 0 );
+				}
+			}
+
+			var feedbackBuffer = new FeedbackData[ HdrFrame.FeedbackBufferWidth * HdrFrame.FeedbackBufferHeight ];
+			frame.FeedbackBufferColor.GetData( feedbackBuffer );
+
+			feedbackBuffer.Count();
 		}
 
 
@@ -297,7 +358,7 @@ namespace Fusion.Engine.Graphics {
 						continue;
 					}
 
-					device.PipelineState	=	factory[ (int)ApplyFlags( null, instance, SurfaceFlags.SHADOW ) ];
+					device.PipelineState	=	factory[ (int)ApplyFlags( instance, SurfaceFlags.SHADOW ) ];
 					cbData.World			=	instance.World;
 					cbData.Color			=	instance.Color;
 

@@ -125,6 +125,12 @@ namespace Fusion.Engine.Graphics {
 		[Config]
 		public bool SkipSceneRendering { get; set; }
 
+		/// <summary>
+		/// Shows particles statistics.
+		/// </summary>
+		[Config]
+		public bool SkipFeedback { get; set; }
+
 
 		/// <summary>
 		/// Shows particles statistics.

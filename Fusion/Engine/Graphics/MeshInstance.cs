@@ -89,30 +89,13 @@ namespace Fusion.Engine.Graphics {
 		readonly internal int indexCount;
 		readonly internal int vertexCount;
 
-		internal struct ShadingGroup {
-
-			public ShadingGroup( MeshSubset subset, MaterialInstance material )
-			{
-				StartIndex	=	subset.StartPrimitive * 3;
-				IndicesCount=	subset.PrimitiveCount * 3;
-				Material	=	material;
-			}
-			
-			public int StartIndex;
-			public int IndicesCount;
-			public MaterialInstance Material;
-		}
-
-
-		internal readonly ShadingGroup[] ShadingGroups;
-
 
 		/// <summary>
 		/// Creates instance from mesh in scene.
 		/// </summary>
 		/// <param name="rs"></param>
 		/// <param name="mesh"></param>
-		public MeshInstance ( RenderSystem rs, Scene scene, Mesh mesh, MaterialInstance[] materials )
+		public MeshInstance ( RenderSystem rs, Scene scene, Mesh mesh )
 		{
 			Visible		=	true;
 			World		=	Matrix.Identity;
@@ -123,10 +106,6 @@ namespace Fusion.Engine.Graphics {
 			
 			vertexCount	=	mesh.VertexCount;
 			indexCount	=	mesh.IndexCount;
-
-			ShadingGroups	=	mesh.Subsets	
-							.Select( s => new ShadingGroup( s, materials[s.MaterialIndex] ) )
-							.ToArray();
 
 			IsSkinned	=	mesh.IsSkinned;
 
@@ -142,7 +121,7 @@ namespace Fusion.Engine.Graphics {
 			}
 		}
 
-        public MeshInstance(GeometryCache cache, MaterialInstance[] materials)
+        public MeshInstance(GeometryCache cache)
         {
             Visible = true;
             World = Matrix.Identity;
@@ -154,9 +133,6 @@ namespace Fusion.Engine.Graphics {
             vertexCount = cache.VertexCount;
             indexCount = cache.IndexCount;
 
-            ShadingGroups = cache.Subsets
-                            .Select(s => new ShadingGroup(s, materials[0]))
-                            .ToArray();
             IsSkinned = true;
             BoneTransforms = Enumerable
                 .Range(0, SceneRenderer.MaxBones)

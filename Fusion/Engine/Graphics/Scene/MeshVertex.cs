@@ -39,19 +39,9 @@ namespace Fusion.Engine.Graphics {
 		public	Vector2		TexCoord0	;
 
 		/// <summary>
-		/// Additional texture coordianets.
-		/// </summary>
-		public	Vector2		TexCoord1	;
-
-		/// <summary>
 		/// Primary vertex color.
 		/// </summary>
 		public	Color		Color0		;
-
-		/// <summary>
-		/// Secondary vertex color.
-		/// </summary>
-		public	Color		Color1		;
 
 		/// <summary>
 		/// Four component skin vertices.
@@ -75,9 +65,9 @@ namespace Fusion.Engine.Graphics {
 				 && this.Binormal		==	other.Binormal	 
 				 && this.Normal			==	other.Normal		 
 				 && this.TexCoord0		==	other.TexCoord0	 
-				 && this.TexCoord1		==	other.TexCoord1	 
+				 //&& this.TexCoord1		==	other.TexCoord1	 
 				 && this.Color0			==	other.Color0		 
-				 && this.Color1			==	other.Color1		 
+				 //&& this.Color1			==	other.Color1		 
 				 && this.SkinIndices	==	other.SkinIndices 
 				 && this.SkinWeights	==	other.SkinWeights );
 		}
@@ -92,7 +82,7 @@ namespace Fusion.Engine.Graphics {
 
 		public override int GetHashCode()
 		{
-			return Misc.FastHash( Position, Tangent, Binormal, Normal, TexCoord0, TexCoord1, Color0, Color1, SkinIndices, SkinWeights );
+			return Misc.FastHash( Position, Tangent, Binormal, Normal, TexCoord0, Color0, SkinIndices, SkinWeights );
 		}
 
 

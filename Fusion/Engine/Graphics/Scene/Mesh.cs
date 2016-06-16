@@ -341,10 +341,10 @@ namespace Fusion.Engine.Graphics {
 			if ( Vector3.DistanceSquared( v0.Binormal	, v1.Binormal	 ) > toleranceSquared ) return false;
 			if ( Vector3.DistanceSquared( v0.Normal		, v1.Normal		 ) > toleranceSquared ) return false;
 			if ( Vector2.DistanceSquared( v0.TexCoord0	, v1.TexCoord0	 ) > toleranceSquared ) return false;
-			if ( Vector2.DistanceSquared( v0.TexCoord1	, v1.TexCoord1	 ) > toleranceSquared ) return false;
+			//if ( Vector2.DistanceSquared( v0.TexCoord1	, v1.TexCoord1	 ) > toleranceSquared ) return false;
 
 			if ( v0.Color0 != v1.Color0 ) return false;
-			if ( v0.Color1 != v1.Color1 ) return false;
+			//if ( v0.Color1 != v1.Color1 ) return false;
 
 			if ( Vector4.DistanceSquared( v0.SkinWeights, v1.SkinWeights ) > toleranceSquared ) return false;
 			if ( v0.SkinIndices != v1.SkinIndices ) return false;

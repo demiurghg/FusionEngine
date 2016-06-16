@@ -58,9 +58,9 @@ SamplerState	Sampler		: 	register(s0);
 Texture2D		Textures[4]: 	register(t0);
 
 #ifdef _UBERSHADER
-$ubershader GBUFFER RIGID|SKINNED BASE_ILLUM
-$ubershader SHADOW RIGID|SKINNED  BASE_ILLUM
+$ubershader GBUFFER RIGID|SKINNED
 $ubershader SHADOW RIGID|SKINNED
+$ubershader FEEDBACK RIGID|SKINNED
 #endif
 
 
@@ -178,14 +178,6 @@ struct SURFACE {
 //	Blend mode refernce:
 //	http://www.deepskycolors.com/archivo/2010/04/21/formulas-for-Photoshop-blending-modes.html	
 
-float Overlay ( float target, float blend )
-{
-	return lerp( 
-		(1 - (1-2*(target-0.5)) * (1-blend)),
-		((2*target) * blend),
-		step(target, 0.5));
-}
-	
 	
 SURFACE MaterialCombiner ( float2 uv )
 {
@@ -235,21 +227,18 @@ GBuffer PSMain( PSInput input )
 		
 	SURFACE surface;
 	
-	surface.Diffuse	=	0.5;
+	surface.Diffuse		=	0.5;
 	surface.Specular	=	0.0;
-	surface.Roughness = 0.1f;
-	surface.Normal	= float3(0,0,1);
-	surface.Emission = 0;
+	surface.Roughness	= 	0.1f;
+	surface.Normal		= 	float3(0,0,1);
+	surface.Emission 	= 	0;
 
-	surface	=	MaterialCombiner( input.TexCoord );
+	surface.Diffuse		=	Textures[0].Sample( Sampler, input.TexCoord ).rgba;
 	
 	//	NB: Multiply normal length by local normal projection on surface normal.
 	//	Shortened normal will be used as Fresnel decay (self occlusion) factor.
 	float3 worldNormal 	= 	normalize( mul( surface.Normal, tbnToWorld ).xyz ) * (0.5+0.5*surface.Normal.z);
 	worldNormal	=	input.Normal;
-	
-	/*surface.Diffuse.rgb	=	0;
-	surface.Diffuse.rg	=	frac(input.TexCoord.xy*32);//*/
 	
 	//	Use sRGB texture for better 
 	//	diffuse/specular intensity distribution
@@ -260,6 +249,40 @@ GBuffer PSMain( PSInput input )
 	output.scattering	=	0;//float4( float3(0.85,0.85,1.00) * 0.3, 0.33f );
 	
 	return output;
+}
+#endif
+
+static const int VT_PAGE_COUNT = 128;
+static const int VT_PAGE_SIZE  = 128;
+static const int VT_MAX_MIP    = 6;
+
+//
+//	https://www.opengl.org/discussion_boards/showthread.php/171485-Texture-LOD-calculation-(useful-for-atlasing)
+//
+float MipLevel( float2 uv )
+{
+	float2 dx = ddx( uv * VT_PAGE_SIZE*VT_PAGE_COUNT );
+	float2 dy = ddy( uv * VT_PAGE_SIZE*VT_PAGE_COUNT );
+	float d = max( dot( dx, dx ), dot( dy, dy ) );
+
+	// Clamp the value to the max mip level counts
+	const float rangeClamp = pow(2, (VT_MAX_MIP - 1) * 2);
+	d = clamp(d, 1.0, rangeClamp);
+
+	float mipLevel = 0.5 * log2(d);
+	mipLevel = floor(mipLevel);   
+
+	return mipLevel;
+}
+
+#ifdef FEEDBACK
+uint4 PSMain( PSInput input ) : SV_TARGET0
+{
+	int pageX	=	(int)floor( input.TexCoord.x * VT_PAGE_COUNT);
+	int pageY	=	(int)floor( input.TexCoord.y * VT_PAGE_COUNT);
+	int	mip		=	(int)MipLevel( input.TexCoord.xy );
+	
+	return uint4(pageX,pageY,mip,4096);
 }
 #endif
 

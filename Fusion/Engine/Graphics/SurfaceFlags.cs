@@ -17,8 +17,7 @@ namespace Fusion.Engine.Graphics {
 	public enum SurfaceFlags {
 		GBUFFER					=	1 << 0,
 		SHADOW					=	1 << 1,
-
-		BASE_ILLUM				=	1 << 3,
+		FEEDBACK				=	1 << 2,
 
 		RIGID					=	1 << 4,
 		SKINNED					=	1 << 5,

@@ -64,6 +64,7 @@ namespace FScene {
 					Log.Message("Merging instances...");
 					scene.DetectAndMergeInstances();
 					
+					#if false
 					if (options.BaseDirectory!=null) {
 
 						Log.Message("Resolving assets path...");
@@ -80,6 +81,7 @@ namespace FScene {
 							ResolveMaterial( mtrl, relativeDir, sceneDir );
 						}
 					}
+					#endif
 
 					//
 					//	Save scene :
@@ -122,7 +124,7 @@ namespace FScene {
 
 
 
-
+		#if false
 		static void ResolveMaterial ( MaterialRef material, string relativeSceneDir, string fullSceneDir )
 		{
 			var mtrlName		=	ContentUtils.CreateSafeName( material.Name );
@@ -166,5 +168,6 @@ namespace FScene {
 				return fallback;
 			}
 		}
+		#endif
 	}
 }

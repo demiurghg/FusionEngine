@@ -197,6 +197,7 @@
     <Compile Include="Drivers\Graphics\Collections\ShaderResourceCollection.cs" />
     <Compile Include="Drivers\Graphics\GraphicsResource.cs" />
     <Compile Include="Drivers\Graphics\Pix.cs" />
+    <Compile Include="Drivers\Graphics\Resources\FeedbackBuffer.cs" />
     <Compile Include="Drivers\Graphics\Resources\FormattedBuffer.cs" />
     <Compile Include="Drivers\Graphics\Resources\TextureCubeArray.cs" />
     <Compile Include="Drivers\Graphics\Resources\VertexBufferOptions.cs" />
@@ -248,6 +249,7 @@
     <Compile Include="Engine\Graphics\Effects\DofFilter.cs" />
     <Compile Include="Engine\Graphics\Effects\SsaoFilter.cs" />
     <Compile Include="Engine\Graphics\Effects\SsaoFilter.Config.cs" />
+    <Compile Include="Engine\Graphics\FeedbackData.cs" />
     <Compile Include="Engine\Graphics\Lights\CascadedShadowMap.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.CSMController.cs" />
     <Compile Include="Engine\Graphics\Lights\ICSMController.cs" />
@@ -255,24 +257,6 @@
     <Compile Include="Engine\Graphics\Lights\LightRenderer.Tiles.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.Shadows.cs" />
     <Compile Include="Engine\Graphics\Lights\SkyLight.cs" />
-    <Compile Include="Engine\Graphics\Materials\BaseIllum.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Engine\Graphics\Materials\MaterialData.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Engine\Graphics\Materials\MaterialInstance.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Engine\Graphics\Materials\MaterialLoader.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Engine\Graphics\Materials\TextureMap.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Engine\Graphics\Materials\TextureMapBind.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Engine\Graphics\Particle.cs" />
     <Compile Include="Engine\Graphics\ParticleSystem.cs" />
     <Compile Include="Engine\Graphics\RenderCounters.cs" />
