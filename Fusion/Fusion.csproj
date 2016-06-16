@@ -330,6 +330,7 @@
     <Compile Include="Engine\Graphics\RenderWorld.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Engine\Graphics\VirtualTexture.cs" />
     <Compile Include="Engine\Imaging\Image.cs" />
     <Compile Include="Engine\Imaging\Image.Tga.cs" />
     <Compile Include="Engine\Input\Bind.cs" />

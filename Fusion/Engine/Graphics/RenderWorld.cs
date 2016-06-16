@@ -286,7 +286,6 @@ namespace Fusion.Engine.Graphics {
 		-----------------------------------------------------------------------------------------*/
 
 		Scene		scene;
-		internal UserTexture	texture;
 
 
 		/// <summary>
@@ -301,7 +300,7 @@ namespace Fusion.Engine.Graphics {
 				mesh.CreateVertexAndIndexBuffers( rs.Device );
 			}
 
-			texture	=	UserTexture.CreateFromTga( rs, File.OpenRead(@"Content\VTPages\fallback.tga"), true );
+			rs.VirtualTexture.Start(@"Content\VTPages");
 		}
 
 

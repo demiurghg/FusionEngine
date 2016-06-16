@@ -156,7 +156,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="diffuse"></param>
 		/// <param name="specular"></param>
 		/// <param name="normals"></param>
-		internal void RenderGBuffer ( StereoEye stereoEye, Camera camera, HdrFrame frame, RenderWorld viewLayer )
+		internal void RenderGBuffer ( StereoEye stereoEye, Camera camera, HdrFrame frame, RenderWorld rw )
 		{		
 			using ( new PixEvent("RenderGBuffer") ) {
 				if (surfaceShader==null) {	
@@ -187,10 +187,10 @@ namespace Fusion.Engine.Graphics {
 				device.SetTargets( depth, hdr, diffuse, specular, normals, scattering );
 				device.PixelShaderSamplers[0]	= SamplerState.LinearClamp ;
 
-				var instances	=	viewLayer.Instances;
+				var instances	=	rw.Instances;
 
 				if (instances.Any()) {
-					device.PixelShaderResources[0]	= viewLayer.texture.Srv;
+					device.PixelShaderResources[0]	= rs.VirtualTexture.FallbackTexture.Srv;
 				}
 
 				//#warning INSTANSING!
