@@ -13,6 +13,26 @@ namespace Fusion.Engine.Graphics {
 		public Int16 Dummy;
 
 
+		public static FeedbackData FromChild ( FeedbackData feedback )
+		{
+			if (feedback.Mip >= VTConfig.MaxMipLevel) {
+				throw new ArgumentException("mip >= max mip");
+			}
+
+			return new FeedbackData() { 
+				PageX = (short)( feedback.PageX/2 ),
+				PageY = (short)( feedback.PageY/2 ),
+				Mip	  = (short)( feedback.Mip + 1 ),
+				Dummy = (short)( feedback.Dummy   )
+			};
+		}
+
+
+		public override string ToString ()
+		{
+			return string.Format("{0} {1} {2}", PageX, PageY, Mip );
+		}
+
         /// <summary>
         /// Determines whether the specified <see cref="Vector4"/> is equal to this instance.
         /// </summary>

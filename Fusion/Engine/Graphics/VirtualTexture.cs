@@ -19,8 +19,15 @@ namespace Fusion.Engine.Graphics {
 		[Config]
 		public int MaxPPF { get; set; }
 
-		public UserTexture	FallbackTexture;
+
+		[Config]
+		public bool ShowPageRequest { get; set; }
+
+		public UserTexture		FallbackTexture;
 		
+
+		public RenderTarget2D	PhysicalPages;
+		public Texture2D		PageTable;
 
 		/// <summary>
 		/// 
@@ -41,6 +48,10 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize ()
 		{
+			int size		=	VTConfig.PhysicalPageCount * VTConfig.PageSize;
+			PhysicalPages	=	new RenderTarget2D( rs.Device, ColorFormat.Rgba8_sRGB, size, size, false );
+
+			PageTable		=	new Texture2D( rs.Device, 
 		}
 
 
@@ -52,6 +63,9 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
+
+				SafeDispose( ref PhysicalPages );
+				SafeDispose( ref PageTable );
 
 			}
 			base.Dispose( disposing );
@@ -86,7 +100,31 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="data"></param>
 		public void Update ( FeedbackData[] data )
 		{
-		}
+			var uniquePages = data.Distinct().Where( p => p.Dummy!=0 ).ToArray();
 
+			List<FeedbackData> feedbackTree = new List<FeedbackData>();
+
+			foreach ( var page in uniquePages ) {
+
+				var ppage = page;
+
+				feedbackTree.Add( ppage );
+
+				while (ppage.Mip < VTConfig.MaxMipLevel) {
+					ppage = FeedbackData.FromChild( ppage );
+					feedbackTree.Add( ppage );
+				}
+
+			}
+
+			var pageRequest = feedbackTree.Distinct().OrderBy( p => p.Mip ).ToArray();
+
+			if (ShowPageRequest) {
+				Log.Message("VT page requests: ");
+				foreach ( var p in pageRequest ) {
+					Log.Message(" - {0}", p.ToString());
+				}
+			}
+		}
 	}
 }

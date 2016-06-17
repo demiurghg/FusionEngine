@@ -8,16 +8,17 @@ using Fusion.Core.Mathematics;
 using Fusion.Core.Shell;
 using Fusion.Engine.Imaging;
 using Fusion.Build.Processors;
+using Fusion.Engine.Graphics;
 
 namespace Fusion.Build.Mapping {
 
 	[AssetProcessor("Map", "Performs map assembly")]
 	public class MapProcessor : AssetProcessor {
 
-		public const int VTPageSize	=	128;
-		public const int VTSize		=	128 * 128;
-		public const int VTPageNum	=	VTSize / VTPageSize;
-		public const int VTMips		=	6;
+		public const int VTPageSize	=	VTConfig.PageSize;
+		public const int VTSize		=	VTConfig.TextureSize;
+		public const int VTPageNum	=	VTConfig.PageCount;
+		public const int VTMips		=	VTConfig.MipCount;
 
 
 

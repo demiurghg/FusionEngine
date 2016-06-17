@@ -317,7 +317,7 @@ namespace Fusion.Engine.Graphics {
 			var feedbackBuffer = new FeedbackData[ HdrFrame.FeedbackBufferWidth * HdrFrame.FeedbackBufferHeight ];
 			frame.FeedbackBufferColor.GetData( feedbackBuffer );
 
-			feedbackBuffer.Count();
+			rs.VirtualTexture.Update( feedbackBuffer );
 		}
 
 

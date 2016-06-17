@@ -278,11 +278,11 @@ float MipLevel( float2 uv )
 #ifdef FEEDBACK
 uint4 PSMain( PSInput input ) : SV_TARGET0
 {
-	int pageX	=	(int)floor( input.TexCoord.x * VT_PAGE_COUNT);
-	int pageY	=	(int)floor( input.TexCoord.y * VT_PAGE_COUNT);
+	int pageX	=	(int)floor( input.TexCoord.x * VT_PAGE_COUNT );
+	int pageY	=	(int)floor( input.TexCoord.y * VT_PAGE_COUNT );
 	int	mip		=	(int)MipLevel( input.TexCoord.xy );
 	
-	return uint4(pageX,pageY,mip,4096);
+	return uint4( pageX>>mip, pageY>>mip, mip, 4096 );
 }
 #endif
 
