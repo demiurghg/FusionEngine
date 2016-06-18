@@ -70,6 +70,7 @@ namespace GISTest {
 		SpriteLayer		uiLayer;
 		DiscTexture		texture;
 		RenderWorld		masterView;
+		RenderLayer		viewLayer;
 		SoundWorld		soundWorld;
 		TargetTexture	targetTexture;
 		DiscTexture		debugFont;
@@ -84,7 +85,8 @@ namespace GISTest {
 		Vector3		position = new Vector3(0,10,0);
 		float		yaw = 0, pitch = 0;
 
-		SurveillanceCamera camera;
+		PointsGisLayerCPU	pointsCPU;
+		PointsGisLayer		pointsGPU;
 
 
 		/// <summary>
@@ -112,24 +114,30 @@ namespace GISTest {
 			var bounds		=	Game.RenderSystem.DisplayBounds;
 			masterView		=	Game.RenderSystem.RenderWorld;
 
-			Game.RenderSystem.DisplayBoundsChanged += (s,e) => {
-				masterView.Resize( Game.RenderSystem.DisplayBounds.Width, Game.RenderSystem.DisplayBounds.Height );
-			};
+
+			Game.RenderSystem.RemoveLayer(masterView);
+
+			viewLayer = new RenderLayer(Game);
+			Game.RenderSystem.AddLayer(viewLayer);
+
+			//Game.RenderSystem.DisplayBoundsChanged += (s,e) => {
+			//	masterView.Resize( Game.RenderSystem.DisplayBounds.Width, Game.RenderSystem.DisplayBounds.Height );
+			//};
 
 			targetTexture		=	new TargetTexture(Game.RenderSystem, bounds.Width, bounds.Height, TargetFormat.LowDynamicRange );
 
 			testLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
 			uiLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
 
-			tiles = new TilesGisLayer(Game, masterView.GlobeCamera);
-			masterView.GisLayers.Add(tiles);
+			tiles = new TilesGisLayer(Game, viewLayer.GlobeCamera);
+			viewLayer.GisLayers.Add(tiles);
 
-			text = new TextGisLayer(Game, 100, masterView.GlobeCamera);
-			masterView.GisLayers.Add(text);
+			text = new TextGisLayer(Game, 100, viewLayer.GlobeCamera);
+			//masterView.GisLayers.Add(text);
 
-			masterView.SpriteLayers.Add( testLayer );
-			masterView.SpriteLayers.Add( text.TextSpriteLayer );
-			masterView.SpriteLayers.Add(console.ConsoleSpriteLayer);
+			//masterView.SpriteLayers.Add( testLayer );
+			//masterView.SpriteLayers.Add( text.TextSpriteLayer );
+			viewLayer.SpriteLayers.Add(console.ConsoleSpriteLayer);
 
 			
 			text.GeoTextArray[0] = new TextGisLayer.GeoText {
@@ -150,9 +158,38 @@ namespace GISTest {
 
 			Game.Reloading += (s,e) => LoadContent();
 
-			camera = new SurveillanceCamera();
 
-			camera.Start(Game.RenderSystem, "http://195.91.141.150/mjpg/video.mjpg");
+			var r = new Random();
+
+			//pointsCPU = new PointsGisLayerCPU(Game, 8000000);
+			//pointsCPU.TextureAtlas = Game.Content.Load<Texture2D>("Zombie");
+			//
+			//for (int i = 0; i < pointsCPU.PointsCountToDraw; i++) {
+			//	pointsCPU.AddPoint(i, DMathUtil.DegreesToRadians(new DVector2(30.240383 + r.NextDouble(-1, 1) * 0.1, 59.944007 - r.NextDouble(-1, 1) * 0.05)), 0, 0.01f);
+			//}
+			//pointsCPU.UpdatePointsBuffer();
+			//viewLayer.GisLayers.Add(pointsCPU);
+			
+
+			pointsGPU = new PointsGisLayer(Game, 1677000, true);
+			pointsGPU.TextureAtlas = Game.Content.Load<Texture2D>("Zombie");
+			pointsGPU.ImageSizeInAtlas = new Vector2(36, 36);
+			
+			for (int i = 0; i < pointsGPU.PointsCountToDraw; i++) {
+				var pos = DMathUtil.DegreesToRadians(new DVector2(30.240383 + r.NextDouble(-1, 1)*0.2, 59.944007 - r.NextDouble(-1, 1)*0.1));
+				pointsGPU.PointsCpu[i] = new Gis.GeoPoint {
+					Lon = pos.X,
+					Lat = pos.Y,
+					Color = Color4.White,
+					Tex0 = new Vector4(0, 0, 0.02f, 0)
+				};
+			}
+			pointsGPU.UpdatePointsBuffer();
+			viewLayer.GisLayers.Add(pointsGPU);
+
+
+			viewLayer.GlobeCamera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
+			viewLayer.GlobeCamera.CameraDistance = GeoHelper.EarthRadius + 5;
 		}
 
 
@@ -171,6 +208,11 @@ namespace GISTest {
 				Builder.SafeBuild();
 				Game.Reload();
 			}
+
+
+			if (e.Key == Keys.LeftShift) {
+				viewLayer.GlobeCamera.ToggleViewToPointCamera();
+			}
 		}
 
 
@@ -182,8 +224,6 @@ namespace GISTest {
 				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
 				SafeDispose( ref targetTexture );
-
-				if(camera != null) camera.Stop();
 			}
 			base.Dispose( disposing );
 		}
@@ -207,28 +247,53 @@ namespace GISTest {
 		{
 			console.Update( gameTime );
 
-			testLayer.Color	= Color.White;
-
-			Hud.Clear(HudFps);
-			Hud.Add(HudFps, Color.Orange, "FPS     : {0,6:0.00}", gameTime.Fps );
 
 
-			testLayer.Clear();
-			testLayer.BlendMode = SpriteBlendMode.AlphaBlend;
+			///////////////////////////////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////////////////////////////
+			//var r = new Random();
 
-			int line = 0;
-			foreach ( var debugString in Hud.GetLines() ) {
-				testLayer.DrawDebugString( debugFont, 0+1, line*8+1, debugString.Text, Color.Black );
-				testLayer.DrawDebugString( debugFont, 0+0, line*8+0, debugString.Text, debugString.Color );
-				line++;
-			}
-
-
-			if(camera.CameraTexture != null)
-				testLayer.Draw(camera.CameraTexture, new Rectangle(100, 100, camera.CameraTexture.Width, camera.CameraTexture.Height), Color.White);
+			//for (int i = 0; i < pointsCPU.PointsCountToDraw; i++)
+			//{
+			//	pointsCPU.AddPoint(i, DMathUtil.DegreesToRadians(new DVector2(30.240383 + r.NextDouble(-1, 1) * 0.1, 59.944007 - r.NextDouble(-1, 1) * 0.05)), 0, 0.01f);
+			//}
+			//pointsCPU.UpdatePointsBuffer();
 
 
-			//text.Update(gameTime);
+			//for (int i = 0; i < pointsGPU.PointsCountToDraw; i++)
+			//{
+			//	//var pos = DMathUtil.DegreesToRadians(new DVector2(30.240383 + r.NextDouble(-1, 1) * 0.1, 59.944007 - r.NextDouble(-1, 1) * 0.05));
+			//	//pointsGPU.PointsCpu[i] = new Gis.GeoPoint
+			//	//{
+			//	//	Lon = pos.X,
+			//	//	Lat = pos.Y,
+			//	//	Color = Color4.White,
+			//	//	Tex0 = new Vector4(0, 0, 0.02f, 0)
+			//	//};
+			//
+			//	pointsGPU.PointsCpu[i] = pointsGPU.PointsCpu[pointsGPU.PointsCountToDraw - 1 - i];
+			//}
+			pointsGPU.UpdatePointsBuffer();
+
+			///////////////////////////////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////////////////////////////
+			//testLayer.Color	= Color.White;
+			//
+			//Hud.Clear(HudFps);
+			//Hud.Add(HudFps, Color.Orange, "FPS     : {0,6:0.00}", gameTime.Fps );
+			//
+			//
+			//testLayer.Clear();
+			//testLayer.BlendMode = SpriteBlendMode.AlphaBlend;
+			//
+			//int line = 0;
+			//foreach ( var debugString in Hud.GetLines() ) {
+			//	testLayer.DrawDebugString( debugFont, 0+1, line*8+1, debugString.Text, Color.Black );
+			//	testLayer.DrawDebugString( debugFont, 0+0, line*8+0, debugString.Text, debugString.Color );
+			//	line++;
+			//}
+			//
+			////text.Update(gameTime);
 			tiles.Update(gameTime);
 		}
 
