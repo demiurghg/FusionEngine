@@ -50,7 +50,7 @@ namespace GISTest {
 				engine.LoadConfiguration("Config.ini");
 
 				//	apply configuration here:
-				engine.RenderSystem.Config.UseDebugDevice =	false;
+				engine.RenderSystem.UseDebugDevice =	false;
 				engine.TrackObjects		=	false;
 				engine.GameTitle		=	"Test Game 2";
 

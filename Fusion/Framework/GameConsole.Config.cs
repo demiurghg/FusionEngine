@@ -10,37 +10,38 @@ using Fusion.Core.Mathematics;
 using Fusion.Engine.Common;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Input;
+using Fusion.Core.Configuration;
 
 namespace Fusion.Framework {
 	
-	public class GameConsoleConfig {
+	public partial class GameConsole : GameModule {
 
-		public float FallSpeed { get; set; }
+		[Config] public float FallSpeed { get; set; }
 
-		public float CursorBlinkRate { get; set; }
+		[Config] public float CursorBlinkRate { get; set; }
 
-		public Color MessageColor	{ get; set; }
-		public Color ErrorColor		{ get; set; }
-		public Color WarningColor	{ get; set; }
-		public Color CmdLineColor	{ get; set; }
-		public Color VersionColor	{ get; set; }
+		[Config] public Color MessageColor	{ get; set; }
+		[Config] public Color ErrorColor		{ get; set; }
+		[Config] public Color WarningColor	{ get; set; }
+		[Config] public Color CmdLineColor	{ get; set; }
+		[Config] public Color VersionColor	{ get; set; }
 
-		public Color BackColor		{ get; set; }
-		public Color HelpColor		{ get; set; }
-		public Color HintColor		{ get; set; }
-
-
-		public string CommandHistory0 { get; set; }
-		public string CommandHistory1 { get; set; }
-		public string CommandHistory2 { get; set; }
-		public string CommandHistory3 { get; set; }
-		public string CommandHistory4 { get; set; }
-		public string CommandHistory5 { get; set; }
-		public string CommandHistory6 { get; set; }
-		public string CommandHistory7 { get; set; }
+		[Config] public Color BackColor		{ get; set; }
+		[Config] public Color HelpColor		{ get; set; }
+		[Config] public Color HintColor		{ get; set; }
 
 
-		public GameConsoleConfig ()
+		[Config] public string CommandHistory0 { get; set; }
+		[Config] public string CommandHistory1 { get; set; }
+		[Config] public string CommandHistory2 { get; set; }
+		[Config] public string CommandHistory3 { get; set; }
+		[Config] public string CommandHistory4 { get; set; }
+		[Config] public string CommandHistory5 { get; set; }
+		[Config] public string CommandHistory6 { get; set; }
+		[Config] public string CommandHistory7 { get; set; }
+
+
+		void SetDefaults ()
 		{
 			FallSpeed		=	5;
 			

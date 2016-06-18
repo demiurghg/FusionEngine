@@ -37,7 +37,13 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// <param name="parameters"></param>
 		public GenericDisplay( Game game, GraphicsDevice device, GraphicsParameters parameters ) : base( game, device, parameters )
 		{
-			window	=	CreateForm( parameters, null );
+			try {
+				window = CreateTouchForm(parameters, null);
+			}
+			catch (System.EntryPointNotFoundException e) {
+				Log.Warning("Looks like your system does't support touch gestures. You need Windows 8.1 or newer for this.");
+				window = CreateForm(parameters, null);
+			}
 
 			try {
 				NvApi.Initialize();
@@ -47,8 +53,8 @@ namespace Fusion.Drivers.Graphics.Display {
 				Log.Debug(nvex.Message);
 			}
 
-			//var deviceFlags			=	DeviceCreationFlags.SingleThreaded;
-			var deviceFlags			=	DeviceCreationFlags.BgraSupport /*| (DeviceCreationFlags)2048*/;
+			var deviceFlags			=	DeviceCreationFlags.BgraSupport;
+				//deviceFlags			|=	DeviceCreationFlags.SingleThreaded;
 				deviceFlags			|=	parameters.UseDebugDevice ? DeviceCreationFlags.Debug : DeviceCreationFlags.None;
 
 			var driverType			=	DriverType.Hardware;

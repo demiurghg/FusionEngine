@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Threading;
-using Fusion.Engine.Network;
 using System.IO;
 using Fusion.Engine.Common;
 using Fusion.Engine.Server;
@@ -25,6 +24,8 @@ namespace Fusion.Engine.Client {
 
 			public Loading ( GameClient gameClient, string serverInfo ) : base(gameClient, ClientState.Loading)
 			{
+				Message	=	serverInfo;
+
 				loader	=	gameClient.LoadContent( serverInfo );
 
 				if (loader==null) {

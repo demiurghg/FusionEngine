@@ -76,7 +76,7 @@ namespace Fusion.Engine.Graphics.GIS
 				var cartPos		= GeoHelper.SphericalToCartesian(text.LonLat, GeoHelper.EarthRadius);
 				var screenPos	= GlobeCamera.CartesianToScreen(cartPos);
 
-				TextSpriteLayer.DrawDebugString(Font, (int)screenPos.X, (int)screenPos.Y, text.Text, text.Color, Scale);
+				TextSpriteLayer.DrawDebugString(Font, (int)screenPos.X, (int)screenPos.Y, text.Text, text.Color, Scale, 0);
 				//spriteFont.DrawString(TextSpriteLayer, text.Text, screenPos.X, screenPos.Y, text.Color);
 			}
 		}

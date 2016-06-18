@@ -161,9 +161,11 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 
-		public static DMatrix CalculateBasisOnSurface(DVector2 lonLatRad)
+		public static DMatrix CalculateBasisOnSurface(DVector2 lonLatRad, bool includeTranslation = false)
 		{
-			DVector3 up = SphericalToCartesian(lonLatRad, EarthRadius);
+			var translation = SphericalToCartesian(lonLatRad, EarthRadius);
+
+			DVector3 up = translation;
 			up.Normalize();
 
 			var xAxis = DVector3.TransformNormal(DVector3.UnitX, DMatrix.RotationAxis(DVector3.UnitY, lonLatRad.X));
@@ -174,6 +176,8 @@ namespace Fusion.Engine.Graphics.GIS
 			mat.Right = xAxis;
 			mat.Forward = DVector3.Cross(xAxis, up);
 			mat.Forward.Normalize();
+
+			if (includeTranslation) mat.TranslationVector = translation;
 
 			return mat;
 		}

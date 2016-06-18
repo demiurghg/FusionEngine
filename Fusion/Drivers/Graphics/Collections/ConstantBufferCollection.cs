@@ -15,6 +15,7 @@ namespace Fusion.Drivers.Graphics {
 
 		readonly ConstantBuffer[]	buffers;	
 		readonly CommonShaderStage	stage;
+		readonly DeviceContext	deviceContext;
 
 
 		/// <summary>
@@ -25,6 +26,7 @@ namespace Fusion.Drivers.Graphics {
 		{
 			buffers		=	new ConstantBuffer[ Count ];
 			this.stage	=	stage;
+			deviceContext	=	device.DeviceContext;
 		}
 
 
@@ -60,8 +62,10 @@ namespace Fusion.Drivers.Graphics {
 		/// <returns></returns>
 		public ConstantBuffer this[int index] {
 			set {
-				buffers[ index ] = value;
-				stage.SetConstantBuffer( index, (value==null) ? null : value.buffer );
+				lock (deviceContext) {
+					buffers[ index ] = value;
+					stage.SetConstantBuffer( index, (value==null) ? null : value.buffer );
+				}
 			}
 			get {
 				return buffers[ index ];

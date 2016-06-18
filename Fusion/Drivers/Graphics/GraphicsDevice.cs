@@ -240,7 +240,7 @@ namespace Fusion.Drivers.Graphics {
 				if (parameters.StereoMode==StereoMode.NV3DVision)	display	=	new NV3DVisionDisplay( Game, this, parameters ); else 
 				if (parameters.StereoMode==StereoMode.DualHead)		display	=	new StereoDualHeadDisplay( Game, this, parameters ); else 
 				if (parameters.StereoMode==StereoMode.Interlaced)	display	=	new StereoInterlacedDisplay( Game, this, parameters ); else 
-				//if (parameters.StereoMode==StereoMode.OculusRift)	display	=	new OculusRiftDisplay( Game, this, parameters ); else 
+				if (parameters.StereoMode==StereoMode.OculusRift)	display	=	new OculusRiftDisplay( Game, this, parameters ); else 
 					throw new ArgumentException("parameters.StereoMode");
 
 			} catch ( GraphicsException e ) {
@@ -667,7 +667,9 @@ namespace Fusion.Drivers.Graphics {
 		{
 			SetTargets( BackbufferDepth, BackbufferColor );
 
-			deviceContext.Rasterizer.SetViewport( SharpDXHelper.Convert( new ViewportF( 0,0, BackbufferColor.Width, BackbufferColor.Height ) ) );
+			lock (deviceContext) {
+				deviceContext.Rasterizer.SetViewport( SharpDXHelper.Convert( new ViewportF( 0,0, BackbufferColor.Width, BackbufferColor.Height ) ) );
+			}
 		}
 
 
@@ -967,6 +969,42 @@ namespace Fusion.Drivers.Graphics {
 
 			lock (deviceContext) {
 				DeviceContext.OutputMerger.SetUnorderedAccessView ( register, surface==null?null:surface.UAV, -1 ); 
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="register"></param>
+		/// <param name="volumeTexture"></param>
+		public void SetPSRWTexture ( int register, VolumeRWTexture volumeTexture )
+		{
+			if (register>8) {
+				throw new GraphicsException("Could not bind RW texture at register " + register.ToString() + " (max 8)");
+			}
+
+			lock (deviceContext) {
+				DeviceContext.OutputMerger.SetUnorderedAccessView ( register, volumeTexture==null?null:volumeTexture.UAV, -1 ); 
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="register"></param>
+		/// <param name="volumeTexture"></param>
+		public void SetCSRWTexture ( int register, VolumeRWTexture volumeTexture )
+		{
+			if (register>8) {
+				throw new GraphicsException("Could not bind RW texture at register " + register.ToString() + " (max 8)");
+			}
+
+			lock (deviceContext) {
+				DeviceContext.ComputeShader.SetUnorderedAccessView ( register, volumeTexture==null?null:volumeTexture.UAV, -1 ); 
 			}
 		}
 	}

@@ -22,7 +22,6 @@ using Fusion.Core.Shell;
 using Fusion.Core.IniParser;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Input;
-using Fusion.Engine.Network;
 using Fusion.Engine.Client;
 using Fusion.Engine.Graphics.GIS;
 using Fusion.Engine.Server;
@@ -63,7 +62,7 @@ namespace Fusion.Engine.Common {
 		public SoundSystem SoundSystem { get { return soundSystem; } }
 
 		[GameModule("Network", "net", InitOrder.After)]
-		public NetworkEngine Network { get { return network; } }
+		public Network Network { get { return network; } }
 
 
 		/// <summary>
@@ -82,6 +81,12 @@ namespace Fusion.Engine.Common {
 		/// </summary>
 		[GameModule("Mouse", "mouse", InitOrder.After)]
 		public Mouse Mouse { get { return mouse; } }
+
+		/// <summary>
+		/// Gets mouse.
+		/// </summary>
+		[GameModule("Touch", "touch", InitOrder.After)]
+		public Touch Touch { get { return touch; } }
 
 		/// <summary>
 		/// Gets gamepads
@@ -198,11 +203,12 @@ namespace Fusion.Engine.Common {
 		//InputEngine			inputEngine		;
 		RenderSystem		renderSystem	;
 		SoundSystem			soundSystem		;
-		NetworkEngine		network			;
+		Network		network			;
 		ContentManager		content			;
 		Invoker				invoker			;
 		Keyboard			keyboard		;
 		Mouse				mouse			;
+		Touch				touch;
 		GamepadCollection	gamepads		;
 		UserStorage			userStorage		;
 
@@ -316,13 +322,14 @@ namespace Fusion.Engine.Common {
 			graphicsDevice		=	new GraphicsDevice( this );
 			renderSystem		=	new RenderSystem( this );
 			soundSystem			=	new SoundSystem( this );
-			network				=	new NetworkEngine( this );
+			network				=	new Network( this );
 			content				=	new ContentManager( this );
 			gameTimeInternal	=	new GameTime();
 			invoker				=	new Invoker(this, CommandAffinity.Default);
 
 			keyboard			=	new Keyboard(this);
 			mouse				=	new Mouse(this);
+			touch				=	new Touch(this);
 			gamepads			=	new GamepadCollection(this);
 
 			userStorage			=	new UserStorage(this);
@@ -601,7 +608,7 @@ namespace Fusion.Engine.Common {
 					this.Draw( gameTimeInternal, eye );
 				}
 
-				GraphicsDevice.Present(RenderSystem.Config.VSyncInterval);
+				GraphicsDevice.Present(RenderSystem.VSyncInterval);
 
 				InputDevice.EndUpdateInput();
 			}
@@ -709,7 +716,7 @@ namespace Fusion.Engine.Common {
 
 		internal void StartServer ( string map )
 		{
-			var postCmd = string.Format("connect 127.0.0.1 {0}", Network.Config.Port );
+			var postCmd = string.Format("connect 127.0.0.1 {0}", Network.Port );
 
 			//	Disconnect!
 

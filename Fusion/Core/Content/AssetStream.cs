@@ -171,7 +171,7 @@ namespace Fusion.Core.Content {
 		{
 			mode	=	Mode.Read;
 
-			fileStream	=	File.Open( path, FileMode.Open, FileAccess.Read );
+			fileStream	=	File.Open( path, FileMode.Open, FileAccess.Read, FileShare.Read );
 
 			using (var reader = new BinaryReader(fileStream, Encoding.UTF8, true) ) {
 

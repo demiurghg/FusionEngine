@@ -53,10 +53,19 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize()
 		{
-			shader		=	device.Game.Content.Load<Ubershader>("sprite");
-			factory		=	shader.CreateFactory( typeof(Flags), (ps,i) => StateEnum( ps, (Flags)i) );
+			LoadContent();
+
+			Game.Reloading	+= (s,e) => LoadContent();
+
 			constBuffer	=	new ConstantBuffer( device, typeof(ConstData) );
 			constData	=	new ConstData();
+		}
+
+
+		void LoadContent ()
+		{
+			shader		=	device.Game.Content.Load<Ubershader>("sprite");
+			factory		=	shader.CreateFactory( typeof(Flags), (ps,i) => StateEnum( ps, (Flags)i) );
 		}
 
 
@@ -138,47 +147,50 @@ namespace Fusion.Engine.Graphics {
 					continue;
 				}
 
-				Matrix absTransform	=	parentTransform * layer.Transform;
-				Color4 absColor		=	parentColor * layer.Color.ToColor4();
+				using ( new PixEvent("SpriteLayer") ) {
 
-				constData.Transform		=	absTransform * projection;
-				constData.ClipRectangle	=	new Vector4(0,0,0,0);
-				constData.MasterColor	=	absColor;
+					Matrix absTransform	=	parentTransform * layer.Transform;
+					Color4 absColor		=	parentColor * layer.Color.ToColor4();
 
-				constBuffer.SetData( constData );
+					constData.Transform		=	absTransform * projection;
+					constData.ClipRectangle	=	new Vector4(0,0,0,0);
+					constData.MasterColor	=	absColor;
 
-				device.VertexShaderConstants[0]	=	constBuffer;
-				device.PixelShaderConstants[0]	=	constBuffer;
+					constBuffer.SetData( constData );
+
+					device.VertexShaderConstants[0]	=	constBuffer;
+					device.PixelShaderConstants[0]	=	constBuffer;
 				
-				PipelineState ps = null;
-				SamplerState ss = null;
+					PipelineState ps = null;
+					SamplerState ss = null;
 
-				switch ( layer.FilterMode ) {
-					case SpriteFilterMode.PointClamp		: ss = SamplerState.PointClamp;			break;
-					case SpriteFilterMode.PointWrap			: ss = SamplerState.PointWrap;			break;
-					case SpriteFilterMode.LinearClamp		: ss = SamplerState.LinearClamp;		break;
-					case SpriteFilterMode.LinearWrap		: ss = SamplerState.LinearWrap;			break;
-					case SpriteFilterMode.AnisotropicClamp	: ss = SamplerState.AnisotropicClamp;	break;
-					case SpriteFilterMode.AnisotropicWrap	: ss = SamplerState.AnisotropicWrap;	break;
+					switch ( layer.FilterMode ) {
+						case SpriteFilterMode.PointClamp		: ss = SamplerState.PointClamp;			break;
+						case SpriteFilterMode.PointWrap			: ss = SamplerState.PointWrap;			break;
+						case SpriteFilterMode.LinearClamp		: ss = SamplerState.LinearClamp;		break;
+						case SpriteFilterMode.LinearWrap		: ss = SamplerState.LinearWrap;			break;
+						case SpriteFilterMode.AnisotropicClamp	: ss = SamplerState.AnisotropicClamp;	break;
+						case SpriteFilterMode.AnisotropicWrap	: ss = SamplerState.AnisotropicWrap;	break;
+					}
+
+					switch ( layer.BlendMode ) {
+						case SpriteBlendMode.Opaque				: ps = factory[(int)Flags.OPAQUE			]; break;
+						case SpriteBlendMode.AlphaBlend			: ps = factory[(int)Flags.ALPHA_BLEND		]; break;
+						case SpriteBlendMode.AlphaBlendPremul	: ps = factory[(int)Flags.ALPHA_BLEND_PREMUL]; break;
+						case SpriteBlendMode.Additive			: ps = factory[(int)Flags.ADDITIVE			]; break;
+						case SpriteBlendMode.Screen				: ps = factory[(int)Flags.SCREEN			]; break;
+						case SpriteBlendMode.Multiply			: ps = factory[(int)Flags.MULTIPLY			]; break;
+						case SpriteBlendMode.NegMultiply		: ps = factory[(int)Flags.NEG_MULTIPLY		]; break;
+						case SpriteBlendMode.AlphaOnly			: ps = factory[(int)Flags.ALPHA_ONLY		]; break;
+					}
+
+					device.PipelineState			=	ps;
+					device.PixelShaderSamplers[0]	=	ss;
+
+					layer.Draw( gameTime, stereoEye );
+
+					DrawSpritesRecursive( gameTime, stereoEye, surface, layer.Layers, absTransform, absColor );
 				}
-
-				switch ( layer.BlendMode ) {
-					case SpriteBlendMode.Opaque				: ps = factory[(int)Flags.OPAQUE			]; break;
-					case SpriteBlendMode.AlphaBlend			: ps = factory[(int)Flags.ALPHA_BLEND		]; break;
-					case SpriteBlendMode.AlphaBlendPremul	: ps = factory[(int)Flags.ALPHA_BLEND_PREMUL]; break;
-					case SpriteBlendMode.Additive			: ps = factory[(int)Flags.ADDITIVE			]; break;
-					case SpriteBlendMode.Screen				: ps = factory[(int)Flags.SCREEN			]; break;
-					case SpriteBlendMode.Multiply			: ps = factory[(int)Flags.MULTIPLY			]; break;
-					case SpriteBlendMode.NegMultiply		: ps = factory[(int)Flags.NEG_MULTIPLY		]; break;
-					case SpriteBlendMode.AlphaOnly			: ps = factory[(int)Flags.ALPHA_ONLY		]; break;
-				}
-
-				device.PipelineState			=	ps;
-				device.PixelShaderSamplers[0]	=	ss;
-
-				layer.Draw( gameTime, stereoEye );
-
-				DrawSpritesRecursive( gameTime, stereoEye, surface, layer.Layers, absTransform, absColor );
 			}
 		}
 	}

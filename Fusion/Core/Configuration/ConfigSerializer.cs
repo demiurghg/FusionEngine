@@ -22,15 +22,13 @@ namespace Fusion.Core.Configuration {
 	/// </summary>
 	internal static class ConfigSerializer {
 
-		static IniData globalIniData = null;
-
 
 		public static void SaveToStream ( IEnumerable<GameModule.ModuleBinding> bindings, Stream stream )
 		{
 			try {
 		
 				//	prepare ini data :			
-				IniData iniData = globalIniData ?? new IniData();
+				IniData iniData = new IniData();
 				iniData.Configuration.CommentString	=	"# ";
 
 				foreach ( var bind in bindings ) {
@@ -58,8 +56,8 @@ namespace Fusion.Core.Configuration {
 					parser.WriteData( sw, iniData );
 				}
 
-			} catch (Exception e) {
-				Log.Message("{0}", e.Message);
+			} catch (IniParser.Exceptions.ParsingException e) {
+				Log.Warning("INI parser error: {0}", e.Message);
 			}
 		}
 
@@ -95,34 +93,12 @@ namespace Fusion.Core.Configuration {
 						Log.Warning("Module {0} does not exist. Section ignored.", section.SectionName );
 					}
 
-					var configObject	=	GetConfigObject( bind.Module );
-
 					bind.Module.SetConfiguration( section.Keys );
 				}
 
-				globalIniData = iniData;
-
-			} catch (Exception e) {
-				Log.Message("{0}", e.Message);
+			} catch (IniParser.Exceptions.ParsingException e) {
+				Log.Warning("INI parser error: {0}", e.Message);
 			}
-		}
-
-
-
-		/// <summary>
-		/// Gets single property marked with [Config] attribute.
-		/// If objects does no have such property returns null.
-		/// </summary>
-		/// <param name="obj"></param>
-		/// <returns></returns>
-		static internal object GetConfigObject ( object obj )
-		{
-			var cfgobj = obj.GetType().GetProperties()
-							.Where( prop1 => prop1.GetCustomAttribute<ConfigAttribute>() != null )
-							.Select( prop1 => prop1.GetValue(obj) )
-							.SingleOrDefault();
-
-			return cfgobj;
 		}
 
 
@@ -153,13 +129,13 @@ namespace Fusion.Core.Configuration {
 			foreach ( var bind in bindings ) {
 
 				var prefix			=	bind.ShortName;
-				var configObject	=	GetConfigObject( bind.Module );
+				var configObject	=	bind.Module;
 
 				if (configObject==null) {
 					continue;
 				}
 
-				foreach ( var prop in configObject.GetType().GetProperties() ) {
+				foreach ( var prop in configObject.GetConfigurationProperties() ) {
 
 					var cfgVar	=	new ConfigVariable( prefix, prop.Name, prop, configObject );
 					

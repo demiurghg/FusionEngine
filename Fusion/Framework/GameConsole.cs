@@ -18,11 +18,7 @@ using Fusion.Core.Shell;
 
 namespace Fusion.Framework {
 	
-	public class GameConsole : GameModule {
-
-		//readonly Game Game;
-		[Config]
-		public GameConsoleConfig Config { get; set; }
+	public partial class GameConsole : GameModule {
 
 
 		class Line {
@@ -70,30 +66,11 @@ namespace Fusion.Framework {
 		/// 
 		/// </summary>
 		/// <param name="Game"></param>
-		/// <param name="font">Font texture. Must be 128x128.</param>
-		/// <param name="conback">Console background texture</param>
-		/// <param name="speed">Console fall speed</param>
-		[Obsolete("Parameter 'conback' is not used")]
-		public GameConsole ( Game Game, string font, string conback ) : base(Game)
-		{
-			Config			=	new GameConsoleConfig();
-			
-			this.font		=	font;
-
-			editBox		=	new EditBox(this);
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="Game"></param>
 		/// <param name="font"></param>
 		public GameConsole ( Game Game, string font ) : base(Game)
 		{
-			Config			=	new GameConsoleConfig();
-			
+			SetDefaults();
+
 			this.font		=	font;
 
 			editBox		=	new EditBox(this);
@@ -106,7 +83,7 @@ namespace Fusion.Framework {
 		/// </summary>
 		public override void Initialize ()
 		{
-			editBox.FeedHistory( Config.GetHistory() );
+			editBox.FeedHistory( GetHistory() );
 
 			consoleLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
 			editLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
@@ -204,9 +181,9 @@ namespace Fusion.Framework {
 			RefreshConsoleLayer();
 
 			if (Show) {
-				showFactor = MathUtil.Clamp( showFactor + Config.FallSpeed * gameTime.ElapsedSec, 0,1 );
+				showFactor = MathUtil.Clamp( showFactor + FallSpeed * gameTime.ElapsedSec, 0,1 );
 			} else {															   
-				showFactor = MathUtil.Clamp( showFactor - Config.FallSpeed * gameTime.ElapsedSec, 0,1 );
+				showFactor = MathUtil.Clamp( showFactor - FallSpeed * gameTime.ElapsedSec, 0,1 );
 			}
 
 			consoleLayer.Visible	=	showFactor > 0;
@@ -217,22 +194,22 @@ namespace Fusion.Framework {
 			consoleLayer.SetTransform( new Vector2(0, offset), Vector2.Zero, 0 );
 			editLayer.SetTransform( 0, vp.Height/2 - charHeight );
 
-			Color cursorColor = Config.CmdLineColor;
-			cursorColor.A = (byte)( cursorColor.A * (0.5 + 0.5 * Math.Cos( 2 * Config.CursorBlinkRate * Math.PI * gameTime.Total.TotalSeconds ) > 0.5 ? 1 : 0 ) );
+			Color cursorColor = CmdLineColor;
+			cursorColor.A = (byte)( cursorColor.A * (0.5 + 0.5 * Math.Cos( 2 * CursorBlinkRate * Math.PI * gameTime.Total.TotalSeconds ) > 0.5 ? 1 : 0 ) );
 
 			editLayer.Clear();
 
 			//consoleFont.DrawString( editLayer, "]" + editBox.Text, 0,0, Config.CmdLineColor );
 			//consoleFont.DrawString( editLayer, "_", charWidth + charWidth * editBox.Cursor, 0, cursorColor );
-			DrawString( editLayer, 0, 0,										"]" + editBox.Text, Config.CmdLineColor );
+			DrawString( editLayer, 0, 0,										"]" + editBox.Text, CmdLineColor );
 			DrawString( editLayer, charWidth + charWidth * editBox.Cursor,	0,  "_", cursorColor );
 
 
 			var version = Game.GetReleaseInfo();
-			DrawString( editLayer, vp.Width - charWidth * version.Length, -charHeight, version, Config.VersionColor);
+			DrawString( editLayer, vp.Width - charWidth * version.Length, -charHeight, version, VersionColor);
 
 			var frameRate = string.Format("fps = {0,7:0.00}", gameTime.Fps);
-			DrawString( editLayer, vp.Width - charWidth * frameRate.Length, 0, frameRate, Config.VersionColor);
+			DrawString( editLayer, vp.Width - charWidth * frameRate.Length, 0, frameRate, VersionColor);
 
 			
 			//
@@ -249,11 +226,11 @@ namespace Fusion.Framework {
 
 				w = Math.Max( w, charWidth * 16 );
 
-				editLayer.Draw( null, x, y, w, h, Config.BackColor );
+				editLayer.Draw( null, x, y, w, h, BackColor );
 
 				int line = 0;
 				foreach (var candidate in candidates ) {
-					DrawString( editLayer, x + charWidth, y + charHeight * line, candidate, Config.HelpColor );
+					DrawString( editLayer, x + charWidth, y + charHeight * line, candidate, HelpColor );
 					line ++;
 				}
 			}
@@ -288,7 +265,7 @@ namespace Fusion.Framework {
 			consoleLayer.Clear();
 
 			//	add small gap below command line...
-			consoleLayer.Draw( null, 0,0, vp.Width, vp.Height/2+1, Config.BackColor );
+			consoleLayer.Draw( null, 0,0, vp.Width, vp.Height/2+1, BackColor );
 
 			var lines	=	LogRecorder.GetLines();
 
@@ -303,9 +280,9 @@ namespace Fusion.Framework {
 				Color color = Color.Gray;
 
 				switch (line.MessageType) {
-					case LogMessageType.Information : color = Config.MessageColor; break;
-					case LogMessageType.Error		: color = Config.ErrorColor;   break;
-					case LogMessageType.Warning		: color = Config.WarningColor; break;
+					case LogMessageType.Information : color = MessageColor; break;
+					case LogMessageType.Error		: color = ErrorColor;   break;
+					case LogMessageType.Warning		: color = WarningColor; break;
 				}
 				
 

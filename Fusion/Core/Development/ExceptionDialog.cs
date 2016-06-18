@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Fusion.Core.Development {
 	internal partial class ExceptionDialog : Form {
@@ -15,15 +16,34 @@ namespace Fusion.Core.Development {
 		{
 			InitializeComponent();
 
-			this.labelExceptionType.Text	=	exception.GetType().ToString();
-			this.textBoxMessage.Text = exception.Message;
-			this.textBoxStack.Text = exception.StackTrace.ToString();
 			this.AcceptButton = buttonTerminate;
+
+			ShowExceptionData( exception );
 
 			if (Debugger.IsAttached) {
 				this.buttonTerminate.Text = "Break";
 			}
+
+			if (exception.InnerException!=null) {
+				showInnerException.Click += (s,e) => ShowExceptionData( exception.InnerException );
+			} else {
+				showInnerException.Enabled = false;
+			}
+
+			//	force visible cursor!
+			Cursor.Show();
+			Cursor.Clip	=	new Rectangle( int.MinValue, int.MinValue, int.MaxValue, int.MaxValue );
 		}
+
+
+		
+		void ShowExceptionData ( Exception exception )
+		{
+			this.labelExceptionType.Text	=	exception.GetType().ToString();
+			this.textBoxMessage.Text		=	exception.Message;
+			this.textBoxStack.Text			=	exception.StackTrace.ToString();
+		}
+
 
 
 		public static void Show ( Exception exception )

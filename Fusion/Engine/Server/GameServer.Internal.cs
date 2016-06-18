@@ -7,7 +7,6 @@ using Lidgren.Network;
 using System.Threading;
 using System.Net;
 using Fusion.Core.Shell;
-using Fusion.Engine.Network;
 using Fusion.Engine.Common;
 using Fusion.Engine.Common.Commands;
 using System.Diagnostics;
@@ -104,7 +103,7 @@ namespace Fusion.Engine.Server {
 		void ServerTaskFunc ( string map, string postCommand )
 		{
 			var netConfig		=	new NetPeerConfiguration(Game.GameID);
-			netConfig.Port		=	Game.Network.Config.Port;
+			netConfig.Port		=	Game.Network.Port;
 			netConfig.MaximumConnections	=	32;
 			netConfig.UnreliableSizeBehaviour = NetUnreliableSizeBehaviour.NormalFragmentation;
 			
@@ -236,9 +235,9 @@ namespace Fusion.Engine.Server {
 		void UpdateNetworkAndLogic ( GameTime svTime, NetServer server, SnapshotQueue snapshotQueue )
 		{
 			#if DEBUG
-			server.Configuration.SimulatedLoss				=	Game.Network.Config.SimulatePacketsLoss;
-			server.Configuration.SimulatedMinimumLatency	=	Game.Network.Config.SimulateMinLatency;
-			server.Configuration.SimulatedRandomLatency		=	Game.Network.Config.SimulateRandomLatency;
+			server.Configuration.SimulatedLoss				=	Game.Network.SimulatePacketsLoss;
+			server.Configuration.SimulatedMinimumLatency	=	Game.Network.SimulateMinLatency;
+			server.Configuration.SimulatedRandomLatency		=	Game.Network.SimulateRandomLatency;
 			#endif
 
 			//	read input messages :
@@ -300,7 +299,7 @@ namespace Fusion.Engine.Server {
 					case NetIncomingMessageType.ErrorMessage:		Log.Error	("SV Net: " + msg.ReadString()); break;
 
 					case NetIncomingMessageType.ConnectionLatencyUpdated:
-						if (Game.Network.Config.ShowLatency) {
+						if (Game.Network.ShowLatency) {
 							float latency = msg.ReadFloat();
 							Log.Verbose("...SV ping - {0} {1,6:0.00} ms", msg.SenderEndPoint, (latency*1000) );
 						}
@@ -383,7 +382,7 @@ namespace Fusion.Engine.Server {
 		void SendSnapshot ( NetServer server, SnapshotQueue queue, long serverTicks )
 		{
 			//	snapshot request is stored in connection's tag.s
-			var debug	=	Game.Network.Config.ShowSnapshots;
+			var debug	=	Game.Network.ShowSnapshots;
 			var conns	=	server.Connections.Where ( c => c.IsSnapshotRequested() );
 
 			var sw		=	new Stopwatch();

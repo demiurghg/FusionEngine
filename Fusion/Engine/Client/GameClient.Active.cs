@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Threading;
-using Fusion.Engine.Network;
 using System.IO;
 using Fusion.Engine.Common;
 using Fusion.Engine.Server;
@@ -23,7 +22,7 @@ namespace Fusion.Engine.Client {
 			uint lastSnapshotFrame;
 
 			SnapshotQueue	queue;
-			JitterBuffer	jitter;
+			//JitterBuffer	jitter;
 			Stopwatch		stopwatch;
 			long			clientFrames = 0;
 			long			clientTicks;
@@ -46,6 +45,8 @@ namespace Fusion.Engine.Client {
 				lastServerTicks		=	svTicks;
 				lastSnapshotID		=	snapshotId;
 				lastSnapshotFrame	=	snapshotId;
+
+				Message				=	"";
 
 
 				#if USE_DEJITTER
@@ -122,7 +123,7 @@ namespace Fusion.Engine.Client {
 
 
 				//	show user commands :
-				bool showSnapshot = gameClient.Game.Network.Config.ShowSnapshots;
+				bool showSnapshot = gameClient.Game.Network.ShowUserCommands;
 				if (showSnapshot) {
 					Log.Message("User cmd: #{0} : {1}", lastSnapshotFrame, userCmd.Length );
 				}
@@ -168,6 +169,10 @@ namespace Fusion.Engine.Client {
 				long timeDelta	=	svTicks - lastServerTicks;
 				lastServerTicks	=	svTicks;
 
+				if (indexDelta>1) {
+					Log.Warning("Snapshot(s) dropped: {2} - [{0}-{1}]", lastSnapshotID - indexDelta, lastSnapshotID, indexDelta-1);
+				}
+
 				if (indexDelta==0) {
 					Log.Error("Duplicate snapshot #{0}", snapshotId);
 				} else {
@@ -191,8 +196,6 @@ namespace Fusion.Engine.Client {
 			/// <param name="msg"></param>
 			public override void DataReceived ( NetCommand command, NetIncomingMessage msg )
 			{
-				bool showSnapshot = gameClient.Game.Network.Config.ShowSnapshots;
-
 				if (command==NetCommand.Snapshot) {
 
 					//Log.Message("ping:{0} - offset:{1}", msg.SenderConnection.AverageRoundtripTime, msg.SenderConnection.RemoteTimeOffset);

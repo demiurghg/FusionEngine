@@ -13,6 +13,9 @@ namespace Fusion.Engine.Input {
 	public delegate void KeyUpEventHandler		( object sender, KeyEventArgs e );
 	public delegate void KeyPressEventHandler	( object sender, KeyPressArgs e );
 
+	public delegate void TouchTapEventHandler	( Vector2 p );
+	public delegate void TouchManipulateHandler	(Vector2 center, Vector2 delta, float scale);
+
 
 	public class KeyEventArgs : EventArgs 
 	{

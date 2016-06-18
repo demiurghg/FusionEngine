@@ -125,33 +125,33 @@ namespace Fusion.Engine.Graphics.GIS
 
 
 			// Input bindings
-//		    Game.Mouse.Scroll += (sender, args) => {
-//				if(args.WheelDelta > 0)
-//					Camera.CameraZoom(-0.05f);
-//				else if(args.WheelDelta < 0)
-//					Camera.CameraZoom(0.05f);
-//		    };
+		    Game.Mouse.Scroll += (sender, args) => {
+				if(args.WheelDelta > 0)
+					Camera.CameraZoom(-0.05f);
+				else if(args.WheelDelta < 0)
+					Camera.CameraZoom(0.05f);
+		    };
 
-//		    Game.Mouse.Move += (sender, args) =>
-//		    {
-//				if (Game.InputDevice.IsKeyDown(Keys.LeftButton)) {
-//					DVector2 before, after;
-//					var beforeHit	= Camera.ScreenToSpherical(previousMousePosition.X, previousMousePosition.Y, out before);
-//					var afterHit	= Camera.ScreenToSpherical(args.Position.X, args.Position.Y, out after);
-//
-//					if (beforeHit && afterHit) {
-//						Camera.Yaw		-= after.X - before.X;
-//						Camera.Pitch	+= after.Y - before.Y;
-//					}
-//				}
-//				if(Game.InputDevice.IsKeyDown(Keys.MiddleButton) && Camera.CameraState == GlobeCamera.CameraStates.ViewToPoint) {
-//					Camera.RotateViewToPointCamera(Game.InputDevice.RelativeMouseOffset);
-//			    }
-//				if(Game.InputDevice.IsKeyDown(Keys.RightButton) && Camera.CameraState == GlobeCamera.CameraStates.FreeSurface) {
-//					Camera.RotateFreeSurfaceCamera(Game.InputDevice.RelativeMouseOffset);
-//			    }
-//				previousMousePosition = new Vector2(args.Position.X, args.Position.Y);
-//		    };
+		    Game.Mouse.Move += (sender, args) =>
+		    {
+				if (Game.InputDevice.IsKeyDown(Keys.LeftButton)) {
+					DVector2 before, after;
+					var beforeHit	= Camera.ScreenToSpherical(previousMousePosition.X, previousMousePosition.Y, out before);
+					var afterHit	= Camera.ScreenToSpherical(args.Position.X, args.Position.Y, out after);
+
+					if (beforeHit && afterHit) {
+						Camera.Yaw		-= after.X - before.X;
+						Camera.Pitch	+= after.Y - before.Y;
+					}
+				}
+				if(Game.InputDevice.IsKeyDown(Keys.MiddleButton) && Camera.CameraState == GlobeCamera.CameraStates.ViewToPoint) {
+					Camera.RotateViewToPointCamera(Game.InputDevice.RelativeMouseOffset);
+			    }
+				if(Game.InputDevice.IsKeyDown(Keys.RightButton) && Camera.CameraState == GlobeCamera.CameraStates.FreeSurface) {
+					Camera.RotateFreeSurfaceCamera(Game.InputDevice.RelativeMouseOffset);
+			    }
+				previousMousePosition = new Vector2(args.Position.X, args.Position.Y);
+		    };
 			#endregion
 
 			//Points = new PointsGisBatch(Game, 100)
@@ -223,20 +223,23 @@ namespace Fusion.Engine.Graphics.GIS
 	    {
 		    if (!layers.Any()) return;
 
-			constantData.ViewProj		= Camera.ViewMatrixFloat * Camera.ProjMatrixFloat;
-			constantData.ViewPositionX	= Camera.FinalCamPosition.X;
-			constantData.ViewPositionY	= Camera.FinalCamPosition.Y;
-			constantData.ViewPositionZ	= Camera.FinalCamPosition.Z;
+			using (new PixEvent("GIS")) {
 
-			constBuffer.SetData(constantData);
+				constantData.ViewProj		= Camera.ViewMatrixFloat * Camera.ProjMatrixFloat;
+				constantData.ViewPositionX	= Camera.FinalCamPosition.X;
+				constantData.ViewPositionY	= Camera.FinalCamPosition.Y;
+				constantData.ViewPositionZ	= Camera.FinalCamPosition.Z;
 
-			var batches = layers.OrderByDescending(x => x.ZOrder);
+				constBuffer.SetData(constantData);
+
+				var batches = layers.OrderByDescending(x => x.ZOrder);
 			
-		    foreach (var batch in batches) {
-			    if (!batch.IsVisible) continue;
+				foreach (var batch in batches) {
+					if (!batch.IsVisible) continue;
 
-				batch.Draw(gameTime, constBuffer);
-		    }
+					batch.Draw(gameTime, constBuffer);
+				}
+			}
 	    }
 
 

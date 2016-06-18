@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Threading;
-using Fusion.Engine.Network;
 using System.IO;
 using Fusion.Engine.Common;
 using Fusion.Engine.Server;
@@ -75,7 +74,7 @@ namespace Fusion.Engine.Client {
 					}
 
 					//	read snapshot :
-					var snapshot	=	NetworkEngine.Decompress( msg.ReadBytes(size) );
+					var snapshot	=	NetDeflate.Decompress( msg.ReadBytes(size) );
 
 					//	initial snapshot contains atom table :
 					gameClient.Atoms	=	new AtomCollection( msg );

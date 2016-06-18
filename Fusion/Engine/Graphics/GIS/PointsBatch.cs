@@ -98,10 +98,10 @@ namespace Fusion.Engine.Graphics.GIS
 
 			PointsCpu	= new Gis.GeoPoint[maxPointsCount];
 			
-			Flags		= (int) (PointFlags.DOTS_WORLDSPACE | PointFlags.ROTATION_ANGLE);
+			Flags		= (int) (PointFlags.DOTS_WORLDSPACE);
 
 			shader	= Game.Content.Load<Ubershader>("globe.Point.hlsl");
-			factory = shader.CreateFactory( typeof(PointFlags), Primitive.PointList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
+			factory = shader.CreateFactory( typeof(PointFlags), Primitive.PointList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullCCW, DepthStencilState.None);
 
 			ColorDatas = new ColorData[16];
 			for (int i = 0; i < ColorDatas.Length; i++) {
@@ -120,13 +120,14 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public override void Update(GameTime gameTime)
+		public void Update(GameTime gameTime, GlobeCamera camera = null)
 		{
 			if (TextureAtlas == null) return;
 
+			var curCamera = camera ?? Game.RenderSystem.Gis.Camera;
 
-			dotsData.View				= Game.RenderSystem.Gis.Camera.ViewMatrixFloat;
-			dotsData.Proj				= Game.RenderSystem.Gis.Camera.ProjMatrixFloat;
+			dotsData.View				= curCamera.ViewMatrixFloat;
+			dotsData.Proj				= curCamera.ProjMatrixFloat;
 			dotsData.AtlasSizeImgSize	= new Vector4(TextureAtlas.Width, TextureAtlas.Height, ImageSizeInAtlas.X, ImageSizeInAtlas.Y);
 			dotsData.SizeMult			= new Vector4(SizeMultiplier);
 
@@ -173,7 +174,7 @@ namespace Fusion.Engine.Graphics.GIS
 			if (!GeoHelper.LineIntersection(nearPoint, farPoint, GeoHelper.EarthRadius, out rayHitPoints)) return ret;
 
 			var rayLonLatRad			= GeoHelper.CartesianToSpherical(rayHitPoints[0]);
-			var OneGradusLengthKmInv	= 1.0 / (Math.Cos(rayLonLatRad.Y)*GeoHelper.EarthOneDegreeLengthOnEquatorMeters/1000.0);
+			//var OneGradusLengthKmInv	= 1.0 / (Math.Cos(rayLonLatRad.Y)*GeoHelper.EarthOneDegreeLengthOnEquatorMeters/1000.0);
 
 			for (int i = 0; i < PointsCountToDraw; i++) {
 				int ind		= PointsDrawOffset + i;

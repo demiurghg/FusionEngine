@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Threading;
-using Fusion.Engine.Network;
 using System.IO;
 using Fusion.Engine.Common;
 using Fusion.Engine.Server;
@@ -31,7 +30,16 @@ namespace Fusion.Engine.Client {
 			}
 
 
+			/// <summary>
+			/// gets client state
+			/// </summary>
 			public readonly ClientState ClientState;
+
+
+			/// <summary>
+			/// gets message associated with client state.
+			/// </summary>
+			public string Message { get; protected set; }
 			
 			
 			/// <summary>
@@ -41,7 +49,7 @@ namespace Fusion.Engine.Client {
 			public State ( GameClient gameClient, ClientState clientState )
 			{
 				this.ClientState	=	clientState;
-				this.gameClient	=	gameClient;
+				this.gameClient		=	gameClient;
 			}
 
 

@@ -60,20 +60,20 @@ namespace Fusion.Core.Development {
 
 			//	stereo mode :
 			stereoMode.Items.AddRange( Enum.GetValues(typeof(StereoMode)).Cast<object>().ToArray() );
-			stereoMode.SelectedItem = game.RenderSystem.Config.StereoMode;
+			stereoMode.SelectedItem = game.RenderSystem.StereoMode;
 
 			//	display mode :
-			displayWidth.Value	=	game.RenderSystem.Config.Width;
-			displayHeight.Value	=	game.RenderSystem.Config.Height;
+			displayWidth.Value	=	game.RenderSystem.Width;
+			displayHeight.Value	=	game.RenderSystem.Height;
 
 			//	fullscreen
-			fullscreen.Checked	=	game.RenderSystem.Config.Fullscreen;
+			fullscreen.Checked	=	game.RenderSystem.Fullscreen;
 
 			//	track objects
 			trackObjects.Checked	=	game.TrackObjects;
 
 			//	use debug device :
-			debugDevice.Checked	=	game.RenderSystem.Config.UseDebugDevice;
+			debugDevice.Checked	=	game.RenderSystem.UseDebugDevice;
 		}
 
 
@@ -81,20 +81,20 @@ namespace Fusion.Core.Development {
 		private void button1_Click ( object sender, EventArgs e )
 		{
 			// stereo mode :
-			game.RenderSystem.Config.StereoMode	=	(StereoMode)stereoMode.SelectedItem;
+			game.RenderSystem.StereoMode	=	(StereoMode)stereoMode.SelectedItem;
 
 			//	displya mode :
-			game.RenderSystem.Config.Width	=	(int)displayWidth.Value;
-			game.RenderSystem.Config.Height	=	(int)displayHeight.Value;
+			game.RenderSystem.Width	=	(int)displayWidth.Value;
+			game.RenderSystem.Height	=	(int)displayHeight.Value;
 
 			//	fullscreen
-			game.RenderSystem.Config.Fullscreen	=	fullscreen.Checked;
+			game.RenderSystem.Fullscreen	=	fullscreen.Checked;
 
 			//	track objects
 			game.TrackObjects	=	trackObjects.Checked;
 
 			//	use debug device :
-			game.RenderSystem.Config.UseDebugDevice	=	debugDevice.Checked;
+			game.RenderSystem.UseDebugDevice	=	debugDevice.Checked;
 
 			if (!string.IsNullOrWhiteSpace(startupCommand.Text)) {
 				game.Invoker.Push( startupCommand.Text );

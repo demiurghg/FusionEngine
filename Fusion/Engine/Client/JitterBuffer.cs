@@ -209,9 +209,9 @@ namespace Fusion.Engine.Client {
 				result	=	null;
 			}
 
-			if (game.Network.Config.ShowJitter) {
-				ShowJitter( queueSize, serverTicksBiased, clientTicks, pushed, pulled, playoutDelay*10000 );
-			}
+			//if (game.Network.Config.ShowJitter) {
+			//	ShowJitter( queueSize, serverTicksBiased, clientTicks, pushed, pulled, playoutDelay*10000 );
+			//}
 
 			pushed	=	false;
 

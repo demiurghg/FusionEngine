@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Lidgren.Network;
 using System.Threading;
-using Fusion.Engine.Network;
 using System.IO;
 using Fusion.Engine.Common;
 using Fusion.Engine.Server;
@@ -20,6 +19,8 @@ namespace Fusion.Engine.Client {
 			public Connecting ( GameClient gameClient, IPEndPoint endPoint ) : base(gameClient, ClientState.Connecting)
 			{
 				client.Start();
+
+				Message		=	endPoint.ToString();
 
 				var hail	=	client.CreateMessage();
 				hail.Write( gameClient.Guid.ToByteArray() );
@@ -53,6 +54,7 @@ namespace Fusion.Engine.Client {
 			public override void StatusChanged(NetConnectionStatus status, string message, NetConnection connection)
 			{
  				if (status==NetConnectionStatus.Connected) {
+					string serverInfo = connection.RemoteHailMessage.PeekString();
 					gameClient.SetState( new Loading( gameClient, connection.RemoteHailMessage.PeekString() ) );
 				}
  				if (status==NetConnectionStatus.Disconnected) {

@@ -32,6 +32,7 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.labelExceptionType = new System.Windows.Forms.Label();
+			this.showInnerException = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// buttonTerminate
@@ -58,7 +59,7 @@
 			this.textBoxStack.ReadOnly = true;
 			this.textBoxStack.ScrollBars = System.Windows.Forms.ScrollBars.Both;
 			this.textBoxStack.Size = new System.Drawing.Size(410, 113);
-			this.textBoxStack.TabIndex = 1;
+			this.textBoxStack.TabIndex = 2;
 			this.textBoxStack.WordWrap = false;
 			// 
 			// textLabel
@@ -110,6 +111,17 @@
 			this.labelExceptionType.TabIndex = 7;
 			this.labelExceptionType.Text = "label3\r\n\r\n";
 			// 
+			// showInnerException
+			// 
+			this.showInnerException.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.showInnerException.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.showInnerException.Location = new System.Drawing.Point(222, 276);
+			this.showInnerException.Name = "showInnerException";
+			this.showInnerException.Size = new System.Drawing.Size(103, 23);
+			this.showInnerException.TabIndex = 1;
+			this.showInnerException.Text = "Inner Exception";
+			this.showInnerException.UseVisualStyleBackColor = true;
+			// 
 			// ExceptionDialog
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -121,6 +133,7 @@
 			this.Controls.Add(this.textBoxMessage);
 			this.Controls.Add(this.textLabel);
 			this.Controls.Add(this.textBoxStack);
+			this.Controls.Add(this.showInnerException);
 			this.Controls.Add(this.buttonTerminate);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
@@ -143,5 +156,6 @@
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Label labelExceptionType;
+		private System.Windows.Forms.Button showInnerException;
 	}
 }

@@ -29,6 +29,8 @@ namespace Fusion.Engine.Graphics {
 		Texture2D		defaultNormalMap;
 		Texture2D		defaultEmission	;
 
+		RenderTarget2D	voxelBuffer;
+
 
 		struct CBMeshInstanceData {
 			public Matrix	Projection;
@@ -81,7 +83,7 @@ namespace Fusion.Engine.Graphics {
 
 			defaultEmission	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
 			defaultEmission.SetData( Enumerable.Range(0,16).Select( i => Color.Black ).ToArray() );
-			
+
 			//Ubershader.AddEnumerator( "SceneRenderer", (t
 
 			Game.Reloading += (s,e) => LoadContent();
@@ -115,6 +117,11 @@ namespace Fusion.Engine.Graphics {
 			
 			if (flags.HasFlag( SurfaceFlags.RIGID )) {
 				ps.VertexInputElements	=	VertexColorTextureTBNRigid.Elements;
+			}
+
+			if (flags.HasFlag( SurfaceFlags.VOXELIZE )) {
+				ps.RasterizerState		=	RasterizerState.CullNone;
+				ps.DepthStencilState	=	DepthStencilState.None;
 			}
 		}
 
@@ -158,6 +165,10 @@ namespace Fusion.Engine.Graphics {
 		{		
 			using ( new PixEvent("RenderGBuffer") ) {
 				if (surfaceShader==null) {	
+					return;
+				}
+
+				if (rs.SkipSceneRendering) {
 					return;
 				}
 
