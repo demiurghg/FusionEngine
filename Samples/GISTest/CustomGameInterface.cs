@@ -84,6 +84,8 @@ namespace GISTest {
 		Vector3		position = new Vector3(0,10,0);
 		float		yaw = 0, pitch = 0;
 
+		SurveillanceCamera camera;
+
 
 		/// <summary>
 		/// Ctor
@@ -147,6 +149,10 @@ namespace GISTest {
 			LoadContent();
 
 			Game.Reloading += (s,e) => LoadContent();
+
+			camera = new SurveillanceCamera();
+
+			camera.Start(Game.RenderSystem, "http://195.91.141.150/mjpg/video.mjpg");
 		}
 
 
@@ -176,6 +182,8 @@ namespace GISTest {
 				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
 				SafeDispose( ref targetTexture );
+
+				if(camera != null) camera.Stop();
 			}
 			base.Dispose( disposing );
 		}
@@ -214,6 +222,11 @@ namespace GISTest {
 				testLayer.DrawDebugString( debugFont, 0+0, line*8+0, debugString.Text, debugString.Color );
 				line++;
 			}
+
+
+			if(camera.CameraTexture != null)
+				testLayer.Draw(camera.CameraTexture, new Rectangle(100, 100, camera.CameraTexture.Width, camera.CameraTexture.Height), Color.White);
+
 
 			//text.Update(gameTime);
 			tiles.Update(gameTime);
