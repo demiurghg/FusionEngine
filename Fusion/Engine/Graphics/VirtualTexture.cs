@@ -23,11 +23,19 @@ namespace Fusion.Engine.Graphics {
 		[Config]
 		public bool ShowPageRequest { get; set; }
 
+		[Config]
+		public bool ShowPageLoads { get; set; }
+
+
 		public UserTexture		FallbackTexture;
 		
 
 		public RenderTarget2D	PhysicalPages;
 		public Texture2D		PageTable;
+
+		HashSet<VTAddress>		cache;
+
+		VTTileLoader			tileLoader;
 
 		/// <summary>
 		/// 
@@ -51,7 +59,7 @@ namespace Fusion.Engine.Graphics {
 			int size		=	VTConfig.PhysicalPageCount * VTConfig.PageSize;
 			PhysicalPages	=	new RenderTarget2D( rs.Device, ColorFormat.Rgba8_sRGB, size, size, false );
 
-			PageTable		=	new Texture2D( rs.Device, 
+			//PageTable		=	new Texture2D( rs.Device, 
 		}
 
 
@@ -63,6 +71,10 @@ namespace Fusion.Engine.Graphics {
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
+
+				if (tileLoader!=null) {
+					tileLoader.Stop();
+				}
 
 				SafeDispose( ref PhysicalPages );
 				SafeDispose( ref PageTable );
@@ -81,6 +93,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			var fallbackPath	=	Path.Combine( baseDir, "fallback.tga" );
 			FallbackTexture		=	UserTexture.CreateFromTga( rs, File.OpenRead(fallbackPath), true );	
+			tileLoader			=	new VTTileLoader( this, baseDir );
 		}
 
 
@@ -88,8 +101,9 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Stop ( bool wait )
+		public void Stop ()
 		{
+			tileLoader.Stop();
 		}
 
 
@@ -98,26 +112,36 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="data"></param>
-		public void Update ( FeedbackData[] data )
+		public void Update ( VTAddress[] data )
 		{
 			var uniquePages = data.Distinct().Where( p => p.Dummy!=0 ).ToArray();
 
-			List<FeedbackData> feedbackTree = new List<FeedbackData>();
+			List<VTAddress> feedbackTree = new List<VTAddress>();
 
+			//	
+			//	build tree :
+			//
 			foreach ( var page in uniquePages ) {
 
 				var ppage = page;
 
 				feedbackTree.Add( ppage );
 
-				while (ppage.Mip < VTConfig.MaxMipLevel) {
-					ppage = FeedbackData.FromChild( ppage );
+				while (ppage.MipLevel < VTConfig.MaxMipLevel) {
+					ppage = VTAddress.FromChild( ppage );
 					feedbackTree.Add( ppage );
 				}
 
 			}
 
-			var pageRequest = feedbackTree.Distinct().OrderBy( p => p.Mip ).ToArray();
+			var pageRequest = feedbackTree
+			//	.Where( p0 => cache.Contains(p0) )
+				.Distinct()
+				.OrderBy( p1 => p1.MipLevel )
+				.ToArray();//*/
+
+
+
 
 			if (ShowPageRequest) {
 				Log.Message("VT page requests: ");

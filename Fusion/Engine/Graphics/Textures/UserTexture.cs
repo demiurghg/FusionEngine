@@ -83,6 +83,17 @@ namespace Fusion.Engine.Graphics {
 
 
 
+		public void UpdateFromTga  ( Stream stream )
+		{
+			Image image =	Image.LoadTga( stream );
+
+			if ( image.Width!=Width || image.Height != Height ) {
+				texture.SetData( image.RawImageData );
+			}
+		}
+
+
+
 		/// <summary>
 		///	Disposes DiscTexture 
 		/// </summary>
