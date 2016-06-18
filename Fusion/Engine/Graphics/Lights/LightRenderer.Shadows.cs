@@ -13,6 +13,9 @@ using System.Runtime.InteropServices;
 namespace Fusion.Engine.Graphics {
 	public partial class LightRenderer {
 
+		DefaultCSMController	csmController	=	new DefaultCSMController();
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -27,36 +30,43 @@ namespace Fusion.Engine.Graphics {
 				return;
 			}
 
-			
-			Matrix[] shadowViews, shadowProjections;
-			//	shadow is computed for both eyes :
-			var view = camera.GetViewMatrix( StereoEye.Mono );
-			ComputeCSMMatricies( view, renderWorld.LightSet.DirectLight.Direction, out shadowViews, out shadowProjections, out csmViewProjections );
+
+			CheckShadowSize();
+
+
+			csmController.ComputeMatricies( 
+				camera.GetViewMatrix(StereoEye.Mono), 
+				lightSet.DirectLight.Direction, 
+				cascadedShadowMap.CascadeSize,
+				this.SplitSize,
+				this.SplitOffset,
+				this.SplitFactor,
+				this.CSMProjectionDepth );
+
+
+			ICSMController csmCtrl	=	lightSet.DirectLight.CSMController ?? csmController;
+
+
+			int activeCascadeCount	=	Math.Min( cascadedShadowMap.CascadeCount, csmCtrl.GetActiveCascadeCount() );
 
 
 			using (new PixEvent("Cascaded Shadow Maps")) {
 
 				Game.GraphicsDevice.ResetStates();
 			
-				if ( csmDepth.Height!=CSMSize || spotDepth.Height!=SpotShadowSize * 4) {
-					CreateShadowMaps();
-				}
+				cascadedShadowMap.Clear();
 
-				device.Clear( csmDepth.Surface, 1, 0 );
-				device.Clear( csmColor.Surface, Color4.White );
+				for (int i=0; i<activeCascadeCount; i++) {
 
-				for (int i=0; i<4; i++) {
-
-					var smSize = CSMSize;
 					var context = new ShadowContext();
-					context.ShadowView			=	shadowViews[i];
-					context.ShadowProjection	=	shadowProjections[i];
-					context.ShadowViewport		=	new Viewport( smSize * i, 0, smSize, smSize );
+					context.ShadowView			=	csmCtrl.GetShadowViewMatrix( i );
+					context.ShadowProjection	=	csmCtrl.GetShadowProjectionMatrix( i );
+					context.ShadowViewport		=	cascadedShadowMap.GetSplitViewport( i );
 					context.FarDistance			=	1;
 					context.SlopeBias			=	CSMSlopeBias;
 					context.DepthBias			=	CSMDepthBias;
-					context.ColorBuffer			=	csmColor.Surface;
-					context.DepthBuffer			=	csmDepth.Surface;
+					context.ColorBuffer			=	cascadedShadowMap.ColorBuffer.Surface;
+					context.DepthBuffer			=	cascadedShadowMap.DepthBuffer.Surface;
 
 					Game.RenderSystem.SceneRenderer.RenderShadowMapCascade( context, instances );
 				}
@@ -65,13 +75,17 @@ namespace Fusion.Engine.Graphics {
 
 
 			using (new PixEvent("Particle Shadows")) {
-				
-				device.Clear( particleShadow.Surface, new Color4(1,1,1,1) );
+			
+				for (int i=0; i<activeCascadeCount; i++) {
 
-				var smSize = CSMSize;
-				var viewport = new Viewport( smSize * 1, 0, smSize, smSize );
+					var viewport = cascadedShadowMap.GetSplitViewport(i);
+					var colorBuffer = cascadedShadowMap.ParticleShadow.Surface;
+					var depthBuffer = cascadedShadowMap.DepthBuffer.Surface;
+					var viewMatrix	= csmController.GetShadowViewMatrix( i );
+					var projMatrix	= csmController.GetShadowProjectionMatrix( i );
 
-				renderWorld.ParticleSystem.RenderShadow( new GameTime(), viewport, shadowViews[1], shadowProjections[1], particleShadow.Surface, csmDepth.Surface );
+					renderWorld.ParticleSystem.RenderShadow( new GameTime(), viewport, viewMatrix, projMatrix, colorBuffer, depthBuffer );
+				}
 			}
 
 
@@ -111,43 +125,14 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="view"></param>
-		/// <returns></returns>
-		void ComputeCSMMatricies ( Matrix view, Vector3 lightDir2, out Matrix[] shadowViews, out Matrix[] shadowProjections, out Matrix[] shadowViewProjections )
+		void CheckShadowSize ()
 		{
-			shadowViews				=	new Matrix[4];
-			shadowProjections		=	new Matrix[4];
-			shadowViewProjections	=	new Matrix[4];
+			if (CSMCascadeCount!=cascadedShadowMap.CascadeCount || CSMCascadeSize!=cascadedShadowMap.CascadeSize) {
 
-			var	smSize		=	CSMSize;
-			var camMatrix	=	Matrix.Invert( view );
-			var viewPos		=	camMatrix.TranslationVector;
+				SafeDispose( ref cascadedShadowMap );
+				cascadedShadowMap	=	new CascadedShadowMap( Game.GraphicsDevice, CSMCascadeSize, CSMCascadeCount );
 
-
-			for ( int i = 0; i<4; i++ ) {
-
-				float	offset		=	SplitOffset * (float)Math.Pow( SplitFactor, i );
-				float	radius		=	SplitSize   * (float)Math.Pow( SplitFactor, i );
-
-				Vector3 viewDir		=	camMatrix.Forward.Normalized();
-				Vector3	lightDir	=	lightDir2.Normalized();
-				Vector3	origin		=	viewPos + viewDir * offset;
-
-				Matrix	lightRot	=	Matrix.LookAtRH( Vector3.Zero, Vector3.Zero + lightDir, Vector3.UnitY );
-				Matrix	lightRotI	=	Matrix.Invert( lightRot );
-				Vector3	lsOrigin	=	Vector3.TransformCoordinate( origin, lightRot );
-				float	snapValue	=	4.0f * radius / smSize;
-				lsOrigin.X			=	(float)Math.Round(lsOrigin.X / snapValue) * snapValue;
-				lsOrigin.Y			=	(float)Math.Round(lsOrigin.Y / snapValue) * snapValue;
-				lsOrigin.Z			=	(float)Math.Round(lsOrigin.Z / snapValue) * snapValue;
-				origin				=	Vector3.TransformCoordinate( lsOrigin, lightRotI );//*/
-
-				shadowViews[i]				=	Matrix.LookAtRH( origin, origin + lightDir, Vector3.UnitY );
-				shadowProjections[i]		=	Matrix.OrthoRH( radius*2, radius*2, -CSMProjectionDepth/2, CSMProjectionDepth/2);
-
-				shadowViewProjections[i]	=	shadowViews[i] * shadowProjections[i];
 			}
 		}
-
 	}
 }

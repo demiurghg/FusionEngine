@@ -250,6 +250,9 @@
     <Compile Include="Engine\Graphics\GIS\DebugGisLayer.cs" />
     <Compile Include="Engine\Graphics\GIS\PointsGisLayerCPU.cs" />
     <Compile Include="Engine\Graphics\GIS\TextGisLayer.cs" />
+    <Compile Include="Engine\Graphics\Lights\CascadedShadowMap.cs" />
+    <Compile Include="Engine\Graphics\Lights\LightRenderer.CSMController.cs" />
+    <Compile Include="Engine\Graphics\Lights\ICSMController.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.Extents.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.Tiles.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.Shadows.cs" />

@@ -13,19 +13,37 @@ using System.Runtime.InteropServices;
 namespace Fusion.Engine.Graphics {
 	public partial class LightRenderer : GameModule {
 
-		int csmSize;
+		int csmCascadeSize;
+		int csmCascadeCount;
 
 		/// <summary>
 		/// Cascaded shadow map size.
 		/// </summary>
 		[Config]
-		public int CSMSize {
-			get {
-				return csmSize;
-			}
+		public int CSMCascadeSize {	
+			get { return csmCascadeSize; }
 			set {
-				csmSize =	value;
-				csmSize =	MathUtil.Clamp( 1 << (MathUtil.LogBase2( csmSize )-1), 64, 2048 );
+				if (value<64 || value>2048) {
+					throw new ArgumentOutOfRangeException("value must be within 64..2048");
+				}
+				if (!MathUtil.IsPowerOfTwo(value)) {
+					throw new ArgumentException("value must be power of 2");
+				}
+				csmCascadeSize	=	value;
+			}
+		}
+
+		/// <summary>
+		/// Cascaded shadow map size.
+		/// </summary>
+		[Config]
+		public int CSMCascadeCount {
+			get { return csmCascadeCount; }
+			set {
+				if (value<1 || value>4) {
+					throw new ArgumentOutOfRangeException("value must be within 1..4");
+				}
+				csmCascadeCount	=	value;
 			}
 		}
 
@@ -66,7 +84,7 @@ namespace Fusion.Engine.Graphics {
 		public float CSMDepthBias { get; set; }
 
 		/// <summary>
-		/// Split magnification factor
+		/// Split magnification factor.
 		/// </summary>
 		[Config]
 		public float CSMFilterSize { get; set; }
@@ -188,7 +206,8 @@ namespace Fusion.Engine.Graphics {
 		void SetDefaults ()
 		{
 			CSMProjectionDepth	=	1024;
-			CSMSize				=	1024;
+			CSMCascadeSize		=	1024;
+			CSMCascadeCount		=	4;
 			SplitSize			=	10;
 			SplitFactor			=	2.5f;
 			CSMSlopeBias		=	2;

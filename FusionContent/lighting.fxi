@@ -26,6 +26,9 @@ struct LightingParams {
 	float		ShowCSLoadOmni;
 	float		ShowCSLoadEnv;
 	float		ShowCSLoadSpot;
+	
+	int			CascadeCount;
+	float		CascadeScale;
 };
 
 struct PS_IN {

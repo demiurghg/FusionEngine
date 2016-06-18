@@ -9,6 +9,7 @@ using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Graphics {
+
 	public class DirectLight {
 		
 		Vector3 direction;
@@ -28,6 +29,16 @@ namespace Fusion.Engine.Graphics {
 		/// Note: directional light normally does not decay.
 		/// </summary>
 		public Color4 Intensity {
+			get;
+			set;
+		}
+
+
+		/// <summary>
+		/// Gets and sets csm controller for given directional lights.
+		/// Null value means default CSM splitting.
+		/// </summary>
+		public ICSMController CSMController {
 			get;
 			set;
 		}

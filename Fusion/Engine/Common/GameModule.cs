@@ -12,6 +12,7 @@ using Fusion.Core;
 using Fusion.Framework;
 using Fusion.Core.IniParser.Model;
 using System.ComponentModel;
+using System.Threading;
 
 
 namespace Fusion.Engine.Common {
@@ -68,6 +69,21 @@ namespace Fusion.Engine.Common {
 				action();
 			}
 		}
+
+
+
+		//[Conditional("DEBUG")]
+		/// <summary>
+		/// 
+		/// </summary>
+		internal void VerifyServiceThread()
+		{
+			//Thread ct = Thread.CurrentThread;
+			//if (Thread.CurrentThread != m_networkThread)
+			//	throw new NetException("Executing on wrong thread! Should be service thread thread (is " + ct.Name + " mId " + ct.ManagedThreadId + ")");
+		}
+
+
 
 
 
