@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Threading.Tasks;
-using System.Collections.Concurrent;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
@@ -100,14 +99,19 @@ namespace Fusion.Engine.Graphics {
 					continue;
 				}
 					
-				var fileName = Path.Combine( address.GetFileNameWithoutExtension() + ".tga" );
+				var fileName = Path.Combine( baseDirectory, address.GetFileNameWithoutExtension() + ".tga" );
 
-				if (vt.ShowPageLoads) {
-					Log.Message("...VT tile : {0}", fileName );
+				Log.Message("...vt tile load : {0}", fileName );
+
+				try {
+					
+					var tile = new VTTile( address, File.OpenRead( fileName ) );
+					loadedTiles.Enqueue( tile );
+
+				} catch ( IOException ioex ) {
+					Log.Warning("{0}", ioex );
 				}
-				var tile = new VTTile( address, File.OpenRead( fileName ) );
 
-				loadedTiles.Enqueue( tile );
 			}
 		}
 

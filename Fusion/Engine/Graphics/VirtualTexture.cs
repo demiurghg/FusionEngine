@@ -21,21 +21,22 @@ namespace Fusion.Engine.Graphics {
 
 
 		[Config]
-		public bool ShowPageRequest { get; set; }
+		public bool ShowPageCaching { get; set; }
 
 		[Config]
 		public bool ShowPageLoads { get; set; }
 
 
 		public UserTexture		FallbackTexture;
-		
 
 		public RenderTarget2D	PhysicalPages;
 		public Texture2D		PageTable;
 
-		HashSet<VTAddress>		cache;
+		VTTileLoader	tileLoader;
+		VTTileCache		tileCache;
 
-		VTTileLoader			tileLoader;
+
+
 
 		/// <summary>
 		/// 
@@ -93,7 +94,9 @@ namespace Fusion.Engine.Graphics {
 		{
 			var fallbackPath	=	Path.Combine( baseDir, "fallback.tga" );
 			FallbackTexture		=	UserTexture.CreateFromTga( rs, File.OpenRead(fallbackPath), true );	
+
 			tileLoader			=	new VTTileLoader( this, baseDir );
+			tileCache			=	new VTTileCache( VTConfig.PhysicalPageCount );
 		}
 
 
@@ -108,47 +111,66 @@ namespace Fusion.Engine.Graphics {
 
 
 
+		
+
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="data"></param>
 		public void Update ( VTAddress[] data )
 		{
-			var uniquePages = data.Distinct().Where( p => p.Dummy!=0 ).ToArray();
+			var feedback = data.Distinct().Where( p => p.Dummy!=0 ).ToArray();
 
 			List<VTAddress> feedbackTree = new List<VTAddress>();
 
 			//	
 			//	build tree :
 			//
-			foreach ( var page in uniquePages ) {
+			foreach ( var addr in feedback ) {
 
-				var ppage = page;
+				var paddr = addr;
 
-				feedbackTree.Add( ppage );
+				feedbackTree.Add( paddr );
 
-				while (ppage.MipLevel < VTConfig.MaxMipLevel) {
-					ppage = VTAddress.FromChild( ppage );
-					feedbackTree.Add( ppage );
+				while (paddr.MipLevel < VTConfig.MaxMipLevel) {
+					paddr = VTAddress.FromChild( paddr );
+					feedbackTree.Add( paddr );
 				}
 
 			}
 
-			var pageRequest = feedbackTree
+			//
+			//	distinct :
+			//	
+			feedbackTree = feedbackTree
 			//	.Where( p0 => cache.Contains(p0) )
 				.Distinct()
 				.OrderBy( p1 => p1.MipLevel )
-				.ToArray();//*/
+				.ToList();//*/
 
+			//
+			//	put into cache :
+			//
+			foreach ( var addr in feedbackTree ) {
+				
+				int physAddr;
 
+				if ( tileCache.Add( addr, out physAddr ) ) {
 
+					Log.Message("...vt tile cache: {0} --> {1}", addr, physAddr );
 
-			if (ShowPageRequest) {
-				Log.Message("VT page requests: ");
-				foreach ( var p in pageRequest ) {
-					Log.Message(" - {0}", p.ToString());
+					tileLoader.RequestTile( addr );
 				}
 			}
+
+			//
+			//	update table :
+			//
+
+
+			//
+			//	patch physical texture with loaded tiles :
+			//
 		}
 	}
 }

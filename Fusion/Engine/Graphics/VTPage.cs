@@ -14,11 +14,30 @@ using Fusion.Drivers.Graphics;
 namespace Fusion.Engine.Graphics {
 	public class VTPage {
 
-		public readonly VTAddress Address;
+		///// <summary>
+		///// 
+		///// </summary>
+		//public readonly VTAddress Address;
 
-		public VTPage ( VTAddress address )
-		{
-			this.Address	=	address;	
-		}
+		///// <summary>
+		///// 
+		///// </summary>
+		//public int PhysicalAddress;
+
+		///// <summary>
+		///// 
+		///// </summary>
+		//public int LRUIndex;
+
+
+		///// <summary>
+		///// 
+		///// </summary>
+		///// <param name="address"></param>
+		//public VTPage ( VTAddress address, int physicalAddress )
+		//{
+		//	this.Address			=	address;	
+		//	this.PhysicalAddress	=	address;
+		//}
 	}
 }
