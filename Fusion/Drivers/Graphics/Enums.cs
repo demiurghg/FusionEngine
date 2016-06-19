@@ -340,6 +340,7 @@ namespace Fusion.Drivers.Graphics {
 				case ColorFormat.R16F		: return 2;
 				case ColorFormat.Rg16F		: return 4;
 				case ColorFormat.Rgba8		: return 4;
+				case ColorFormat.Rgba8_sRGB	: return 4;
 				case ColorFormat.Bgra8		: return 4;
 				case ColorFormat.Rgb10A2	: return 4;
 				case ColorFormat.Rgba16F	: return 8;

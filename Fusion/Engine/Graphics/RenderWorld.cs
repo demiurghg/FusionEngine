@@ -440,6 +440,11 @@ namespace Fusion.Engine.Graphics {
 				case 8 : rs.Filter.StretchRect( targetSurface, viewHdrFrame.FeedbackBufferColor, SamplerState.PointClamp ); return;
 			}
 
+			if (rs.VirtualTexture.ShowPhysicalTextures) {
+				rs.Filter.Copy( targetSurface, rs.VirtualTexture.PhysicalPages );
+				return;
+			}
+
 			//	render sky :
 			rs.Sky.Render( Camera, stereoEye, viewHdrFrame, SkySettings );
 			rs.Sky.RenderFogTable( SkySettings );

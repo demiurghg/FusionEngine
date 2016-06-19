@@ -26,11 +26,14 @@ namespace Fusion.Engine.Graphics {
 		[Config]
 		public bool ShowPageLoads { get; set; }
 
+		[Config]
+		public bool ShowPhysicalTextures { get; set; }
 
-		public UserTexture		FallbackTexture;
 
-		public RenderTarget2D	PhysicalPages;
-		public Texture2D		PageTable;
+		public UserTexture	FallbackTexture;
+
+		public Texture2D	PhysicalPages;
+		public Texture2D	PageTable;
 
 		VTTileLoader	tileLoader;
 		VTTileCache		tileCache;
@@ -58,7 +61,7 @@ namespace Fusion.Engine.Graphics {
 		public override void Initialize ()
 		{
 			int size		=	VTConfig.PhysicalPageCount * VTConfig.PageSize;
-			PhysicalPages	=	new RenderTarget2D( rs.Device, ColorFormat.Rgba8_sRGB, size, size, false );
+			PhysicalPages	=	new Texture2D( rs.Device, size, size, ColorFormat.Rgba8_sRGB, false, true );
 
 			//PageTable		=	new Texture2D( rs.Device, 
 		}
@@ -166,6 +169,23 @@ namespace Fusion.Engine.Graphics {
 			//
 			//	update table :
 			//
+			if (tileLoader!=null) {
+				for (int i=0; i<MaxPPF; i++) {
+				
+					VTTile tile;
+
+					if (tileLoader.TryGetTile( out tile )) {
+
+						Rectangle rect;
+
+						if (tileCache.Translate( tile.Address, out rect )) {
+							PhysicalPages.SetData( 0, rect, tile.Data, 0, tile.Data.Length );
+						}
+
+					}
+
+				}
+			}
 
 
 			//

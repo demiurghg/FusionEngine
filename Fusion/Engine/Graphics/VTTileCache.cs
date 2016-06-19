@@ -45,6 +45,37 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="address"></param>
+		/// <param name="rectangle"></param>
+		/// <returns></returns>
+		public bool Translate ( VTAddress address, out Rectangle rectangle )
+		{
+			Page page;
+
+			if (dictionary.TryGetValue(address, out page)) {
+
+				var pa		=	page.Address;
+				var ppc		=	VTConfig.PhysicalPageCount;
+				var size	=	VTConfig.PageSize;
+				int x		=	(pa % ppc) * size;
+				int y		=	(pa / ppc) * size;
+				int w		=	size;
+				int h		=	size;
+				rectangle 	=	new Rectangle( x,y,w,h );
+
+				return true;
+
+			} else {
+
+				rectangle	=	new Rectangle();
+				return false;
+			}
+		}
+
+
+		/// <summary>
 		/// Adds new page to cache.
 		///		
 		///	If page exists:
