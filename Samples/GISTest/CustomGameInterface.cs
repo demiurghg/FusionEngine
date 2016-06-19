@@ -131,6 +131,7 @@ namespace GISTest {
 
 			tiles = new TilesGisLayer(Game, viewLayer.GlobeCamera);
 			viewLayer.GisLayers.Add(tiles);
+			tiles.SetMapSource(TilesGisLayer.MapSource.OpenStreetMap);
 
 			text = new TextGisLayer(Game, 100, viewLayer.GlobeCamera);
 			//masterView.GisLayers.Add(text);
@@ -273,7 +274,7 @@ namespace GISTest {
 			//
 			//	pointsGPU.PointsCpu[i] = pointsGPU.PointsCpu[pointsGPU.PointsCountToDraw - 1 - i];
 			//}
-			pointsGPU.UpdatePointsBuffer();
+			//pointsGPU.UpdatePointsBuffer();
 
 			///////////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////////

@@ -24,7 +24,6 @@ namespace GISTest {
 
 	class CustomGameClient : GameClient {
 
-		[Config]
 		public Config Config { get; set; }
 		
 
