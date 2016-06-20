@@ -64,6 +64,8 @@ namespace Fusion.Engine.Graphics.GIS
 		protected VertexBuffer	currentBuffer;
 		protected IndexBuffer	indexBuffer;
 
+		protected SamplerState Sampler = SamplerState.LinearClamp;
+
 		public Gis.GeoPoint[] PointsCpu { get; protected set; }
 
 		protected PolyGisLayer(Game engine) : base(engine) { }
@@ -147,7 +149,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			Game.GraphicsDevice.VertexShaderConstants[0] = constBuffer;
 
-			Game.GraphicsDevice.PixelShaderSamplers[0] = SamplerState.LinearClamp;
+			Game.GraphicsDevice.PixelShaderSamplers[0] = Sampler;
 			Game.GraphicsDevice.PixelShaderSamplers[1] = SamplerState.AnisotropicClamp;
 
 			Game.GraphicsDevice.SetupVertexInput(currentBuffer, indexBuffer);
@@ -167,7 +169,7 @@ namespace Fusion.Engine.Graphics.GIS
 			public DMatrix		WorldMatrixInvert;
 		}
 
-		public SelectInfo[] objectsInfo;
+		public SelectInfo[] objectsInfo = new SelectInfo[0];
 
 		public class SelectedItem : Gis.SelectedItem
 		{
@@ -264,8 +266,112 @@ namespace Fusion.Engine.Graphics.GIS
 			}
 
 
-			return new PolyGisLayer(engine, points.ToArray(), indeces.ToArray(), true) {
+			return new PolyGisLayer(engine, points.ToArray(), indeces.ToArray(), false) {
 				Flags = (int)(PolyFlags.NO_DEPTH | PolyFlags.DRAW_TEXTURED | PolyFlags.CULL_NONE | PolyFlags.VERTEX_SHADER | PolyFlags.PIXEL_SHADER | PolyFlags.USE_PALETTE_COLOR) 
+			};
+		}
+
+
+		public static PolyGisLayer CreateRoadFromLine(DVector2[] line, double[] distances, double width)
+		{
+			if (line.Length == 0) {
+				return null;
+			}
+
+			float distMul = 4.0f;
+
+			List<Gis.GeoPoint> vertices = new List<Gis.GeoPoint>();
+			List<int> indeces = new List<int>();
+
+			for (int i = 0; i < line.Length - 1; i++)
+			{
+				var p0 = line[i];
+				var p1 = line[i + 1];
+
+				var cPos0 = GeoHelper.SphericalToCartesian(DMathUtil.DegreesToRadians(p0));
+				var cPos1 = GeoHelper.SphericalToCartesian(DMathUtil.DegreesToRadians(p1));
+
+				var normal = DVector3.Normalize(cPos0);
+
+				var dir		= cPos1 - cPos0;
+				var sideVec = DVector3.Normalize(DVector3.Cross(normal, dir));
+
+				var sideOffset = sideVec * width;
+
+
+				// Plane
+				var finalPosRight	= cPos0 + sideOffset;
+				var finalPosLeft	= cPos0 - sideOffset;
+
+				var lonLatRight = GeoHelper.CartesianToSpherical(finalPosRight);
+				var lonLatLeft	= GeoHelper.CartesianToSpherical(finalPosLeft);
+
+				vertices.Add(new Gis.GeoPoint {
+					Lon = lonLatRight.X,
+					Lat = lonLatRight.Y,
+					Color	= Color.Yellow,
+					Tex0	= new Vector4((float)distances[i] * distMul, 0.0f, 0.0f, 0.0f),
+				});
+
+				vertices.Add(new Gis.GeoPoint {
+					Lon = lonLatLeft.X,
+					Lat = lonLatLeft.Y,
+					Color	= Color.Yellow,
+					Tex0	= new Vector4((float)distances[i] * distMul, 1.0f, 0.0f, 0.0f),
+				});
+
+				indeces.Add(i * 2);
+				indeces.Add(i * 2 + 1);
+				indeces.Add((i + 1) * 2);
+
+				indeces.Add(i * 2 + 1);
+				indeces.Add((i + 1) * 2 + 1);
+				indeces.Add((i + 1) * 2);
+
+			}
+
+			{
+				var p0 = line[line.Length - 1];
+				var p1 = line[line.Length - 2];
+
+				var cPos0 = GeoHelper.SphericalToCartesian(DMathUtil.DegreesToRadians(p0));
+				var cPos1 = GeoHelper.SphericalToCartesian(DMathUtil.DegreesToRadians(p1));
+
+				var normal = DVector3.Normalize(cPos0);
+
+				var dir		= cPos0 - cPos1;
+				var sideVec = DVector3.Normalize(DVector3.Cross(normal, dir));
+
+				var sideOffset = sideVec * width;
+
+
+				// Plane
+				var finalPosRight = cPos0 + sideOffset;
+				var finalPosLeft = cPos0 - sideOffset;
+
+				var lonLatRight = GeoHelper.CartesianToSpherical(finalPosRight);
+				var lonLatLeft	= GeoHelper.CartesianToSpherical(finalPosLeft);
+
+
+				vertices.Add(new Gis.GeoPoint {
+					Lon = lonLatRight.X,
+					Lat = lonLatRight.Y,
+					Color	= Color.Yellow,
+					Tex0	= new Vector4((float)distances[line.Length - 1] * distMul, 0.0f, 0.0f, 0.0f),
+				});
+
+				vertices.Add(new Gis.GeoPoint {
+					Lon = lonLatLeft.X,
+					Lat = lonLatLeft.Y,
+					Color	= Color.Yellow,
+					Tex0	= new Vector4((float)distances[line.Length - 1] * distMul, 1.0f, 0.0f, 0.0f),
+				});
+			}
+
+
+			return new PolyGisLayer(Game.Instance, vertices.ToArray(), indeces.ToArray(), false) {
+				Flags	= (int)(PolyFlags.NO_DEPTH | PolyFlags.DRAW_TEXTURED | PolyFlags.CULL_NONE | PolyFlags.VERTEX_SHADER | PolyFlags.PIXEL_SHADER),
+				Sampler = SamplerState.AnisotropicWrap
 			};
 		}
 

@@ -224,20 +224,20 @@ void GSMain ( point VS_OUTPUT inputArray[1], inout TriangleStream<GS_OUTPUT> str
 	output.Color	=	color;
 	output.Normal	=	input.Normal;
 	
-	output.Position	= mul(float4(viewPos.x + halfWidth, viewPos.y + halfWidth, viewPos.z, 1), DotsData.Proj);
-	output.Tex		= float2(texRight, 0.0f);
-	stream.Append( output );
-	
 	output.Position	= mul(float4(viewPos.x - halfWidth, viewPos.y + halfWidth, viewPos.z, 1), DotsData.Proj);
 	output.Tex		= float2(texLeft, 0.0f);
 	stream.Append( output );
 	
-	output.Position	= mul(float4(viewPos.x + halfWidth, viewPos.y - halfWidth, viewPos.z, 1), DotsData.Proj);
-	output.Tex		= float2(texRight, 1.0f);
+	output.Position	= mul(float4(viewPos.x + halfWidth, viewPos.y + halfWidth, viewPos.z, 1), DotsData.Proj);
+	output.Tex		= float2(texRight, 0.0f);
 	stream.Append( output );
-	
+
 	output.Position	= mul(float4(viewPos.x - halfWidth, viewPos.y - halfWidth, viewPos.z, 1), DotsData.Proj);
 	output.Tex		= float2(texLeft, 1.0f);
+	stream.Append( output );
+	
+	output.Position	= mul(float4(viewPos.x + halfWidth, viewPos.y - halfWidth, viewPos.z, 1), DotsData.Proj);
+	output.Tex		= float2(texRight, 1.0f);
 	stream.Append( output );
 #endif
 #ifdef DOTS_WORLDSPACE

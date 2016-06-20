@@ -172,7 +172,7 @@ namespace GISTest {
 			//viewLayer.GisLayers.Add(pointsCPU);
 			
 
-			pointsGPU = new PointsGisLayer(Game, 1677000, true);
+			pointsGPU = new PointsGisLayer(Game, 1000, true);
 			pointsGPU.TextureAtlas = Game.Content.Load<Texture2D>("Zombie");
 			pointsGPU.ImageSizeInAtlas = new Vector2(36, 36);
 			
@@ -182,9 +182,12 @@ namespace GISTest {
 					Lon = pos.X,
 					Lat = pos.Y,
 					Color = Color4.White,
-					Tex0 = new Vector4(0, 0, 0.02f, 0)
+					Tex0 = new Vector4(0, 0, 1.02f, 0)
 				};
 			}
+
+			pointsGPU.Flags = (int)(PointsGisLayer.PointFlags.DOTS_SCREENSPACE);
+
 			pointsGPU.UpdatePointsBuffer();
 			viewLayer.GisLayers.Add(pointsGPU);
 

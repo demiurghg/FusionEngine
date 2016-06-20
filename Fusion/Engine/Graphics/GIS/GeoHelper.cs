@@ -109,7 +109,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public static DVector3 SphericalToCartesian(DVector2 lonLat, double radius)
+		public static DVector3 SphericalToCartesian(DVector2 lonLat, double radius = 6378.137)
 		{
 			double x, y, z;
 			SphericalToCartesian(lonLat.X, lonLat.Y, radius, out x, out y, out z);

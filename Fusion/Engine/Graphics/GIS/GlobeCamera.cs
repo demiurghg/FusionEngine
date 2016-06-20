@@ -89,6 +89,7 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			SaintPetersburg_VO,
 			Vladivostok,
+			Sochi,
 		}
 
 
@@ -148,6 +149,10 @@ namespace Fusion.Engine.Graphics.GIS
 					Yaw		= DMathUtil.DegreesToRadians(131.881642);
 					Pitch	= -DMathUtil.DegreesToRadians(43.111248);
 					break;
+				case Places.Sochi:
+					Yaw		= DMathUtil.DegreesToRadians(39.729996);
+					Pitch	= -DMathUtil.DegreesToRadians(43.600035);
+					break;
 			}
 		}
 
@@ -185,14 +190,16 @@ namespace Fusion.Engine.Graphics.GIS
 		/// <param name="currentMousePos"></param>
 		public void MoveCamera(Vector2 prevMousePos, Vector2 currentMousePos)
 		{
-				DVector2 before, after;
-				var beforeHit	= ScreenToSpherical(prevMousePos.X, prevMousePos.Y, out before);
-				var afterHit	= ScreenToSpherical(currentMousePos.X, currentMousePos.Y, out after);
+			DVector2 before, after;
+			var beforeHit	= ScreenToSpherical(prevMousePos.X, prevMousePos.Y, out before);
+			var afterHit	= ScreenToSpherical(currentMousePos.X, currentMousePos.Y, out after);
 
-				if (beforeHit && afterHit) {
-					Yaw		-= after.X - before.X;
-					Pitch	+= after.Y - before.Y;
-				}
+			//Console.WriteLine(after);
+
+			if (beforeHit && afterHit) {
+				Yaw		-= after.X - before.X;
+				Pitch	+= after.Y - before.Y;
+			}
 		}
 
 		public void RotateViewToPointCamera(Vector2 relativeMouseOffset)
