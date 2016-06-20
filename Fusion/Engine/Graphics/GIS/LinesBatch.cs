@@ -91,7 +91,7 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			shader		= Game.Content.Load<Ubershader>("globe.Line.hlsl");
 			factory		= shader.CreateFactory( typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
-			thinFactory = shader.CreateFactory( typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.Readonly);
+			thinFactory = shader.CreateFactory( typeof(LineFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None);
 			
 			TransparencyMultiplayer = 1.0f;
 			OverallColor			= Color4.White;
