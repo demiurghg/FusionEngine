@@ -26,6 +26,9 @@ namespace Fusion.Engine.Graphics.GIS
 			PencilMap			= 5,
 			SpaceStationMap		= 6,
 			PirateMap			= 7,
+			BingMap				= 8,
+			BingMapSatellite	= 9,
+			Dark				= 10
 		}
 
 		public BaseMapSource CurrentMapSource { get; internal set; }
@@ -43,6 +46,7 @@ namespace Fusion.Engine.Graphics.GIS
 			MapSources.Add(new PirateMap(Game)			);
 			MapSources.Add(new BaseBingMapsSource(Game)	);
 			MapSources.Add(new BingMapSatellite(Game)	);
+			MapSources.Add(new Dark(Game)				);
 		}
 
 

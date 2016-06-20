@@ -247,6 +247,7 @@
     <Compile Include="Engine\Graphics\Effects\SsaoFilter.Config.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BaseBingMapsSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BingMapSatellite.cs" />
+    <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\MapBox\Dark.cs" />
     <Compile Include="Engine\Graphics\GIS\DebugGisLayer.cs" />
     <Compile Include="Engine\Graphics\GIS\PointsGisLayerCPU.cs" />
     <Compile Include="Engine\Graphics\GIS\TextGisLayer.cs" />
