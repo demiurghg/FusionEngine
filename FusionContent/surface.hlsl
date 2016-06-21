@@ -245,7 +245,7 @@ GBuffer PSMain( PSInput input )
 	
 	//	NB: Multiply normal length by local normal projection on surface normal.
 	//	Shortened normal will be used as Fresnel decay (self occlusion) factor.
-	float3 worldNormal 	= 	normalize( mul( surface.Normal, tbnToWorld ).xyz ) * (0.5+0.5*surface.Normal.z);
+	float3 worldNormal 	= 	normalize( mul( surface.Normal * float3(-1,-1,1), tbnToWorld ).xyz ) * (0.5+0.5*surface.Normal.z);
 	
 	//	Use sRGB texture for better 
 	//	diffuse/specular intensity distribution

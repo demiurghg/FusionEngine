@@ -137,10 +137,10 @@ namespace FScene {
 
 				var newMtrl =	new BaseIllum();
 
-				newMtrl.ColorTexture.Path		=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, ""			, newMtrl.ColorTexture.Path		);  
-				newMtrl.SurfaceTexture.Path		=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_surf"	, newMtrl.SurfaceTexture.Path	);  
-				newMtrl.NormalMapTexture.Path	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_local"	, newMtrl.NormalMapTexture.Path	);  
-				newMtrl.EmissionTexture.Path	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_glow"	, newMtrl.EmissionTexture.Path	);  
+				newMtrl.ColorTexture.Path		=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, ""					, newMtrl.ColorTexture.Path		);  
+				newMtrl.SurfaceTexture.Path		=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_surf"			, newMtrl.SurfaceTexture.Path	);  
+				newMtrl.NormalMapTexture.Path	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_local", "_bump"	, newMtrl.NormalMapTexture.Path	);  
+				newMtrl.EmissionTexture.Path	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_glow"			, newMtrl.EmissionTexture.Path	);  
 
 				File.WriteAllText( mtrlFileName, BaseIllum.ExportToXml(newMtrl) );
 			}
@@ -163,6 +163,30 @@ namespace FScene {
 			if ( File.Exists(fileName) ) {
 				return Path.Combine( relativeSceneDir, noExt + postfix + ext );
 			} else {
+				return fallback;
+			}
+		}
+
+
+		static string ResolveTexture ( string relativeSceneDir, string fullSceneDir, string textureName, string postfix, string altPostfix, string fallback )
+		{	
+			if (string.IsNullOrWhiteSpace(textureName)) {
+				return "";
+			}
+
+			var ext		=	Path.GetExtension( textureName );
+			var noExt	=	Path.Combine( Path.GetDirectoryName(textureName), Path.GetFileNameWithoutExtension( textureName ) );
+
+			var fileName	=	Path.Combine( fullSceneDir, noExt + postfix + ext );
+			var fileNameAlt	=	Path.Combine( fullSceneDir, noExt + altPostfix + ext );
+			
+			if ( File.Exists(fileName) ) {
+				return Path.Combine( relativeSceneDir, noExt + postfix + ext );
+
+			} else if ( File.Exists(fileNameAlt) ) {
+				return Path.Combine( relativeSceneDir, noExt + altPostfix + ext );
+
+			}else {
 				return fallback;
 			}
 		}
