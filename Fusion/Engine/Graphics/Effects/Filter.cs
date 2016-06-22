@@ -492,7 +492,7 @@ namespace Fusion.Engine.Graphics
 		/// <param name="mipLevel"></param>
 		public void GaussBlur ( RenderTarget2D srcDst, RenderTarget2D temporary, float sigma, int mipLevel )
 		{
-			GaussBlurInternal( srcDst, temporary, sigma, 0f, mipLevel, null, null );
+			GaussBlurInternal( srcDst, srcDst, temporary, sigma, 0f, mipLevel, null, null );
 		}
 
 
@@ -507,9 +507,9 @@ namespace Fusion.Engine.Graphics
 		/// <param name="normalData"></param>
 		/// <param name="sigma"></param>
 		/// <param name="mipLevel"></param>
-		public void GaussBlurBilateral ( RenderTarget2D srcDst, RenderTarget2D temporary, ShaderResource depthData, ShaderResource normalData, float sigma, float sharpness, int mipLevel )
+		public void GaussBlurBilateral ( RenderTarget2D src, RenderTarget2D dst, RenderTarget2D temporary, ShaderResource depthData, ShaderResource normalData, float sigma, float sharpness, int mipLevel )
 		{
-			GaussBlurInternal( srcDst, temporary, sigma, sharpness, mipLevel, depthData, normalData );
+			GaussBlurInternal( src, dst, temporary, sigma, sharpness, mipLevel, depthData, normalData );
 		}
 
 
@@ -521,7 +521,7 @@ namespace Fusion.Engine.Graphics
 		/// <param name="temporary"></param>
 		/// <param name="sigma"></param>
 		/// <param name="kernelSize"></param>
-		void GaussBlurInternal ( RenderTarget2D srcDst, RenderTarget2D temporary, float sigma, float sharpness, int mipLevel, ShaderResource depthData, ShaderResource normalData )
+		void GaussBlurInternal ( RenderTarget2D src, RenderTarget2D dst, RenderTarget2D temporary, float sigma, float sharpness, int mipLevel, ShaderResource depthData, ShaderResource normalData )
 		{
 			var taps = GetGaussWeightsBuffer( sigma, mipLevel );
 
@@ -544,8 +544,8 @@ namespace Fusion.Engine.Graphics
 				rs.SetTargets( null, temporary.GetSurface(mipLevel) );
 
 				rs.PipelineState			=	factory[ combination|(int)ShaderFlags.PASS1 ];
-				rs.VertexShaderResources[0]	=	srcDst;
-				rs.PixelShaderResources[0]	=	srcDst;
+				rs.VertexShaderResources[0]	=	src;
+				rs.PixelShaderResources[0]	=	src;
 				rs.PixelShaderResources[1]	=	depthData;
 				rs.PixelShaderResources[2]	=	normalData;
 
@@ -561,8 +561,8 @@ namespace Fusion.Engine.Graphics
 				rs.VertexShaderResources[0] =	null;
 				rs.PixelShaderResources[0]	=	null;
 
-				SetViewport(srcDst.GetSurface(mipLevel));
-				rs.SetTargets( null, srcDst.GetSurface(mipLevel) );
+				SetViewport(dst.GetSurface(mipLevel));
+				rs.SetTargets( null, dst.GetSurface(mipLevel) );
 
 				rs.PipelineState			=	factory[ combination|(int)ShaderFlags.PASS2 ];
 				rs.VertexShaderResources[0] =	temporary;

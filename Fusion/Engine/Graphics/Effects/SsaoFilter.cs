@@ -29,7 +29,7 @@ namespace Fusion.Engine.Graphics {
 
 		public ShaderResource	OcclusionMap { 
 			get {
-				return occlusionMap0;
+				return occlusionMapFull;
 			}
 		}
 
@@ -42,8 +42,9 @@ namespace Fusion.Engine.Graphics {
 
 		RenderTarget2D	downsampledDepth;
 		RenderTarget2D	downsampledNormals;
-		RenderTarget2D	occlusionMap0;
-		RenderTarget2D	occlusionMap1;
+		RenderTarget2D	occlusionMapHalf;
+		RenderTarget2D	occlusionMapFull;
+		RenderTarget2D	temporary;
 
 		Texture2D		randomDir;
 
@@ -141,18 +142,20 @@ namespace Fusion.Engine.Graphics {
 		{
 			var disp	=	Game.GraphicsDevice.DisplayBounds;
 
-			var newWidth	=	Math.Max(64, disp.Width);
-			var newHeight	=	Math.Max(64, disp.Height);
+			var newWidth	=	Math.Max(64, disp.Width/2);
+			var newHeight	=	Math.Max(64, disp.Height/2);
 
 			SafeDispose( ref downsampledDepth );
 			SafeDispose( ref downsampledNormals );
-			SafeDispose( ref occlusionMap0 );
-			SafeDispose( ref occlusionMap1 );
+			SafeDispose( ref occlusionMapFull );
+			SafeDispose( ref occlusionMapHalf );
+			SafeDispose( ref temporary );
 
-			downsampledDepth	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  newWidth, newHeight, false, false );
-			downsampledNormals	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidth, newHeight, false, false );
-			occlusionMap0		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidth, newHeight, false, false );
-			occlusionMap1		=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidth, newHeight, false, false );
+			downsampledDepth	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  newWidth,	newHeight,	 false, false );
+			downsampledNormals	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidth,	newHeight,	 false, false );
+			occlusionMapHalf	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidth,	newHeight,	 false, false );
+			occlusionMapFull	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width, disp.Height, false, false );
+			temporary			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width, disp.Height, false, false );
 		}
 
 
@@ -177,10 +180,11 @@ namespace Fusion.Engine.Graphics {
 		{
 			if (disposing) {
 				SafeDispose( ref factory );
-				SafeDispose( ref downsampledNormals );
 				SafeDispose( ref downsampledDepth );
-				SafeDispose( ref occlusionMap0 );
-				SafeDispose( ref occlusionMap1 );
+				SafeDispose( ref downsampledNormals );
+				SafeDispose( ref occlusionMapFull );
+				SafeDispose( ref occlusionMapHalf );
+				SafeDispose( ref temporary );
 				SafeDispose( ref paramsCB	 );
 				SafeDispose( ref sampleDirectionsCB );
 				SafeDispose( ref randomDir );
@@ -299,7 +303,7 @@ namespace Fusion.Engine.Graphics {
 			//
 			//	Measure and adapt :
 			//
-			device.SetTargets(null, occlusionMap0);
+			device.SetTargets(null, occlusionMapFull);
 
 			device.PixelShaderResources[0] = downsampledDepth;
 			device.PixelShaderResources[1] = downsampledNormals;
@@ -329,7 +333,8 @@ namespace Fusion.Engine.Graphics {
 			var filter	=	Game.RenderSystem.Filter;
 
 			if (!Enabled) {
-				device.Clear( occlusionMap0.Surface, Color4.White );
+				device.Clear( occlusionMapHalf.Surface, Color4.White );
+				device.Clear( occlusionMapFull.Surface, Color4.White );
 				return;
 			}
 
@@ -360,9 +365,9 @@ namespace Fusion.Engine.Graphics {
 					device.PixelShaderConstants[1]  =   sampleDirectionsCB;
 
 					//
-					//	Measure and adapt :
+					//	SSAO :
 					//
-					device.SetTargets( null, occlusionMap0 );
+					device.SetTargets( null, occlusionMapHalf );
 
 					device.PixelShaderResources[0]	=	downsampledDepth;
 					device.PixelShaderResources[1]	=	downsampledNormals;
@@ -380,7 +385,9 @@ namespace Fusion.Engine.Graphics {
 
 				using (new PixEvent("Bilateral Filter")) {
 					if (BlurSigma!=0) {
-						filter.GaussBlurBilateral( occlusionMap0, occlusionMap1, downsampledDepth, downsampledNormals, BlurSigma, Sharpness, 0 );
+						filter.GaussBlurBilateral( occlusionMapHalf, occlusionMapFull, temporary, depthBuffer, wsNormals, BlurSigma, Sharpness, 0 );
+					} else {
+						filter.StretchRect( occlusionMapFull.Surface, occlusionMapHalf );
 					}
 				}
 			}
