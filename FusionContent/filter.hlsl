@@ -468,7 +468,7 @@ float diffWeight( float3 color1, float3 color2 )
 float4 PSMain(PS_IN input) : SV_Target
 {
 	#ifdef BILATERAL
-	
+		//	check: http://www.shellandslate.com/download/fastmedian_5506.pdf
 		float4 color = Source.SampleLevel(SamplerLinearClamp, input.uv, 0) * Weights[0].x;
 		float4 addColor = float4(0, 0, 0, 0);
 		float normalizationTerm = 0;

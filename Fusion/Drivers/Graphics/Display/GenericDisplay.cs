@@ -38,7 +38,7 @@ namespace Fusion.Drivers.Graphics.Display {
 		public GenericDisplay( Game game, GraphicsDevice device, GraphicsParameters parameters ) : base( game, device, parameters )
 		{
 			try {
-				window = CreateForm(parameters, null, false);
+				window = CreateForm(parameters, null, true);
 			}
 			catch (System.EntryPointNotFoundException) {
 				Log.Warning("Looks like your system does't support touch gestures. You need Windows 8.1 or newer for this.");

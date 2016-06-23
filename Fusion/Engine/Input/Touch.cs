@@ -18,6 +18,25 @@ namespace Fusion.Engine.Input
 		public event TouchTapEventHandler	SecondaryTap;
 		public event TouchManipulateHandler Manipulate;
 
+		public class TouchEventArgs : EventArgs {
+
+			public TouchEventArgs ( int id, Point location )
+			{
+				PointerID	=	id;
+				Location	=	location;
+			}
+			
+			public int PointerID;
+			public Point Location;
+		}
+
+		public event EventHandler<TouchEventArgs> PointerDown;
+		public event EventHandler<TouchEventArgs> PointerUp;
+		public event EventHandler<TouchEventArgs> PointerUpdate;
+		public event EventHandler PointerLostCapture;
+
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -80,6 +99,39 @@ namespace Fusion.Engine.Input
 			}
 
 			base.Dispose( disposing );
+		}
+
+
+		internal void CallPointerUpEvent ( int pointerId, Point location )
+		{
+			var handler = PointerUp;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs( pointerId, location ) );
+			}
+		}
+
+		internal void CallPointerDownEvent ( int pointerId, Point location )
+		{
+			var handler = PointerDown;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs( pointerId, location ) );
+			}
+		}
+
+		internal void CallPointerUpdateEvent ( int pointerId, Point location )
+		{
+			var handler = PointerUpdate;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs( pointerId, location ) );
+			}
+		}
+
+		internal void CallPointerLostCapture ()
+		{
+			var handler = PointerLostCapture;
+			if (handler!=null) {
+				handler( this, EventArgs.Empty );
+			}
 		}
 
 

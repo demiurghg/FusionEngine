@@ -68,6 +68,22 @@ namespace Fusion.Drivers.Input {
 		public event KeyUpEventHandler			FormKeyUp;
 		public event KeyPressEventHandler		FormKeyPress;
 
+		public class TouchEventArgs : EventArgs {
+
+			public TouchEventArgs ( int id, Point location )
+			{
+				PointerID	=	id;
+				Location	=	location;
+			}
+			
+			public int PointerID;
+			public Point Location;
+		}
+
+		public event EventHandler<TouchEventArgs> PointerDown;
+		public event EventHandler<TouchEventArgs> PointerUp;
+		public event EventHandler<TouchEventArgs> PointerUpdate;
+
 
 		public event Action<Vector2> TouchGestureTap;
 		public event Action<Vector2> TouchGestureDoubleTap;

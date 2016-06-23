@@ -68,8 +68,19 @@ namespace Fusion.Engine.Frames {
 			Game.Keyboard.KeyUp += InputDevice_KeyUp;
 			Game.Mouse.Scroll += InputDevice_MouseScroll;
 
+			Game.Touch.Tap += Touch_Tap;
+
 			oldMousePoint	=	Game.InputDevice.MousePosition;
 		}
+
+
+
+		void Touch_Tap ( Vector2 p )
+		{
+			var frame = GetHoveredFrame( (int)p.X, (int)p.Y );
+			CallClick( frame, Keys.LeftButton, false );
+		}
+
 
 		/// <summary>
 		/// 
@@ -252,6 +263,7 @@ namespace Fusion.Engine.Frames {
 		}
 
 
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -352,6 +364,22 @@ namespace Fusion.Engine.Frames {
 			Frame mouseHoverFrame = null;
 
 			UpdateHoverRecursive( ui.RootFrame, Game.InputDevice.MousePosition, ref mouseHoverFrame );
+
+			return mouseHoverFrame;
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="root"></param>
+		/// <returns></returns>
+		Frame GetHoveredFrame ( int x, int y )
+		{
+			Frame mouseHoverFrame = null;
+
+			UpdateHoverRecursive( ui.RootFrame, new Point(x,y), ref mouseHoverFrame );
 
 			return mouseHoverFrame;
 		}
