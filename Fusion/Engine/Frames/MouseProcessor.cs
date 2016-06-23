@@ -82,7 +82,6 @@ namespace Fusion.Engine.Frames {
 		void Touch_PointerDown ( object sender, Touch.TouchEventArgs e )
 		{
 			PushFrame( GetHoveredFrame(e.Location), Keys.LeftButton, e.Location );
-			Log.Message("Pointer Down : {0} {1} {2}", e.PointerID, e.Location.X, e.Location.Y );
 		}
 
 
@@ -90,13 +89,11 @@ namespace Fusion.Engine.Frames {
 		{
 			ReleaseFrame( GetHoveredFrame(e.Location), Keys.LeftButton, e.Location );
 			Update( e.Location, true );
-			Log.Message("Pointer Up : {0} {1} {2}", e.PointerID, e.Location.X, e.Location.Y );
 		}
 
 
 		void Touch_PointerUpdate ( object sender, Touch.TouchEventArgs e )
 		{
-			Log.Message("Pointer Update : {0} {1} {2}", e.PointerID, e.Location.X, e.Location.Y );
 			Update( e.Location );
 		}
 
