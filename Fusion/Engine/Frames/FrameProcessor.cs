@@ -178,7 +178,7 @@ namespace Fusion.Engine.Frames {
 
 				UpdateUI( gameTime );
 
-				mouseProcessor.Update( RootFrame );
+				//mouseProcessor.Update();
 
 			sw.Stop();
 

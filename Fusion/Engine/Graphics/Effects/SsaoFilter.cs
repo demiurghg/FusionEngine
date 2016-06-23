@@ -144,6 +144,8 @@ namespace Fusion.Engine.Graphics {
 
 			var newWidth	=	Math.Max(64, disp.Width/2);
 			var newHeight	=	Math.Max(64, disp.Height/2);
+			var newWidthF	=	Math.Max(64, disp.Width);
+			var newHeightF	=	Math.Max(64, disp.Height);
 
 			SafeDispose( ref downsampledDepth );
 			SafeDispose( ref downsampledNormals );
@@ -154,8 +156,8 @@ namespace Fusion.Engine.Graphics {
 			downsampledDepth	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.R32F,  newWidth,	newHeight,	 false, false );
 			downsampledNormals	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidth,	newHeight,	 false, false );
 			occlusionMapHalf	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidth,	newHeight,	 false, false );
-			occlusionMapFull	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width, disp.Height, false, false );
-			temporary			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, disp.Width, disp.Height, false, false );
+			occlusionMapFull	=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidthF, newHeightF, false, false );
+			temporary			=	new RenderTarget2D( Game.GraphicsDevice, ColorFormat.Rgba8, newWidthF, newHeightF, false, false );
 		}
 
 

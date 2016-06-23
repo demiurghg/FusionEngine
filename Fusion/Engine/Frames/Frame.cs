@@ -529,10 +529,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnClick (Keys key, bool doubleClick)
+		internal void OnClick ( Point location, Keys key, bool doubleClick)
 		{
-			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
-			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
+			int x = location.X - GlobalRectangle.X;
+			int y = location.Y - GlobalRectangle.Y;
 
 			if (doubleClick) {
 				if (DoubleClick!=null) {
@@ -546,10 +546,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnMouseIn ()
+		internal void OnMouseIn ( Point location )
 		{
-			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
-			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
+			int x = location.X - GlobalRectangle.X;
+			int y = location.Y - GlobalRectangle.Y;
 
 			if (MouseIn!=null) {
 				MouseIn(this, new MouseEventArgs(){ Key = Keys.None, X = x, Y = y } );
@@ -557,10 +557,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnMouseMove (int dx, int dy)
+		internal void OnMouseMove ( Point location, int dx, int dy)
 		{
-			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
-			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
+			int x = location.X - GlobalRectangle.X;
+			int y = location.Y - GlobalRectangle.Y;
 
 			if (MouseMove!=null) {
 				MouseMove(this, new MouseEventArgs(){ Key = Keys.None, X = x, Y = y, DX = dx, DY = dy });
@@ -568,10 +568,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnMouseOut ()
+		internal void OnMouseOut ( Point location )
 		{
-			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
-			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
+			int x = location.X - GlobalRectangle.X;
+			int y = location.Y - GlobalRectangle.Y;
 
 			if (MouseOut!=null) {
 				MouseOut(this, new MouseEventArgs(){ Key = Keys.None, X = x, Y = y } );
@@ -579,10 +579,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnMouseDown ( Keys key )
+		internal void OnMouseDown ( Point location, Keys key )
 		{
-			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
-			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
+			int x = location.X - GlobalRectangle.X;
+			int y = location.Y - GlobalRectangle.Y;
 
 			if (MouseDown!=null) {
 				MouseDown( this, new MouseEventArgs(){ Key = key, X = x, Y = y } );
@@ -590,10 +590,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnMouseUp ( Keys key )
+		internal void OnMouseUp ( Point location, Keys key )
 		{
-			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
-			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
+			int x = location.X - GlobalRectangle.X;
+			int y = location.Y - GlobalRectangle.Y;
 
 			if (MouseUp!=null) {
 				MouseUp( this, new MouseEventArgs(){ Key = key, X = x, Y = y } );

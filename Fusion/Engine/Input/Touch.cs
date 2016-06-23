@@ -33,7 +33,6 @@ namespace Fusion.Engine.Input
 		public event EventHandler<TouchEventArgs> PointerDown;
 		public event EventHandler<TouchEventArgs> PointerUp;
 		public event EventHandler<TouchEventArgs> PointerUpdate;
-		public event EventHandler PointerLostCapture;
 
 
 
@@ -128,10 +127,10 @@ namespace Fusion.Engine.Input
 
 		internal void CallPointerLostCapture ()
 		{
-			var handler = PointerLostCapture;
-			if (handler!=null) {
-				handler( this, EventArgs.Empty );
-			}
+			//var handler = PointerLostCapture;
+			//if (handler!=null) {
+			//	handler( this, EventArgs.Empty );
+			//}
 		}
 
 
