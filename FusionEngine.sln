@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestModel", "..\medicine-bl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CppCalculations", "..\medicine-bloodflow\BloodFlowModel_0\CppCalculations\CppCalculations.vcxproj", "{3A95FAB9-05D4-4099-A5C7-BCEF21E6256F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CppCalculations_x64", "..\medicine-bloodflow\BloodFlowModel_0\CppCalculations_x64\CppCalculations_x64.vcxproj", "{54811370-2907-4898-81E5-26E31324847B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -307,6 +309,24 @@ Global
 		{3A95FAB9-05D4-4099-A5C7-BCEF21E6256F}.Release|x64.Build.0 = Release|x64
 		{3A95FAB9-05D4-4099-A5C7-BCEF21E6256F}.Release|x86.ActiveCfg = Release|Win32
 		{3A95FAB9-05D4-4099-A5C7-BCEF21E6256F}.Release|x86.Build.0 = Release|Win32
+		{54811370-2907-4898-81E5-26E31324847B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{54811370-2907-4898-81E5-26E31324847B}.Debug|Win32.Build.0 = Debug|Win32
+		{54811370-2907-4898-81E5-26E31324847B}.Debug|x64.ActiveCfg = Debug|x64
+		{54811370-2907-4898-81E5-26E31324847B}.Debug|x64.Build.0 = Debug|x64
+		{54811370-2907-4898-81E5-26E31324847B}.Debug|x86.ActiveCfg = Debug|Win32
+		{54811370-2907-4898-81E5-26E31324847B}.Debug|x86.Build.0 = Debug|Win32
+		{54811370-2907-4898-81E5-26E31324847B}.Hybrid|Win32.ActiveCfg = Release|Win32
+		{54811370-2907-4898-81E5-26E31324847B}.Hybrid|Win32.Build.0 = Release|Win32
+		{54811370-2907-4898-81E5-26E31324847B}.Hybrid|x64.ActiveCfg = Release|x64
+		{54811370-2907-4898-81E5-26E31324847B}.Hybrid|x64.Build.0 = Release|x64
+		{54811370-2907-4898-81E5-26E31324847B}.Hybrid|x86.ActiveCfg = Release|Win32
+		{54811370-2907-4898-81E5-26E31324847B}.Hybrid|x86.Build.0 = Release|Win32
+		{54811370-2907-4898-81E5-26E31324847B}.Release|Win32.ActiveCfg = Release|Win32
+		{54811370-2907-4898-81E5-26E31324847B}.Release|Win32.Build.0 = Release|Win32
+		{54811370-2907-4898-81E5-26E31324847B}.Release|x64.ActiveCfg = Release|x64
+		{54811370-2907-4898-81E5-26E31324847B}.Release|x64.Build.0 = Release|x64
+		{54811370-2907-4898-81E5-26E31324847B}.Release|x86.ActiveCfg = Release|Win32
+		{54811370-2907-4898-81E5-26E31324847B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
