@@ -381,8 +381,8 @@ namespace Fusion.Engine.Graphics.GIS
 			var scene = engine.Content.Load<Scene>(fileName);
 
 			var s = fileName.Split('_');
-			double easting	= double.Parse(s[1]);
-			double northing = double.Parse(s[2]);
+			double easting	= double.Parse(s[1].Replace(',', '.'));
+			double northing = double.Parse(s[2].Replace(',', '.'));
 			string region	= s[3];
 			
 			var transforms = new Matrix[scene.Nodes.Count];

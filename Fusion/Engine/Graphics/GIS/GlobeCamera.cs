@@ -194,8 +194,6 @@ namespace Fusion.Engine.Graphics.GIS
 			var beforeHit	= ScreenToSpherical(prevMousePos.X, prevMousePos.Y, out before);
 			var afterHit	= ScreenToSpherical(currentMousePos.X, currentMousePos.Y, out after);
 
-			//Console.WriteLine(after);
-
 			if (beforeHit && afterHit) {
 				Yaw		-= after.X - before.X;
 				Pitch	+= after.Y - before.Y;
@@ -453,6 +451,12 @@ namespace Fusion.Engine.Graphics.GIS
 
 		class SurfaceCameraState
 		{
+			public enum TransitionType : uint
+			{
+				SmoothStep	= 0,
+				Linear		= 1
+			}
+
 			public string	Id;
 
 			public DVector3	FreeSurfacePosition;
@@ -463,6 +467,7 @@ namespace Fusion.Engine.Graphics.GIS
 			public float	TransitionTime;
 
 			public DQuaternion FreeRotation;
+			public TransitionType Transition;
 		}
 
 		private string GenerateId() {
@@ -484,9 +489,9 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			// Id FreeCameraPosition FreeSurfaceYaw FreeSurfacePitch WaitTime TransitionTime
 			File.AppendAllText(fileName,
-				stateName == "" ? GenerateId() : stateName + '\t'
-					+ FreeSurfacePosition.X + '\t' + FreeSurfacePosition.Y + '\t' + FreeSurfacePosition.Z + '\t'
-					+ FreeSurfaceYaw + '\t' + FreeSurfacePitch + "\t1\t1"
+				(stateName == "" ? GenerateId() : stateName) + "\t"
+					+ FreeSurfacePosition.X + "\t" + FreeSurfacePosition.Y + "\t" + FreeSurfacePosition.Z + "\t"
+					+ FreeSurfaceYaw + "\t" + FreeSurfacePitch + "\t" + (uint)SurfaceCameraState.TransitionType.SmoothStep + "\t1\t1\n"
 				);
 		}
 
@@ -500,6 +505,7 @@ namespace Fusion.Engine.Graphics.GIS
 			}
 
 			cameraAnimTrackStates = states;
+			ResetAnimation();
 		}
 
 		public void LoadCameraStates(string fileName = "cameraStates.txt")
@@ -533,8 +539,9 @@ namespace Fusion.Engine.Graphics.GIS
 				curState.FreeSurfacePosition	= new DVector3(double.Parse(s[1]), double.Parse(s[2]), double.Parse(s[3]));
 				curState.FreeSurfaceYaw			= double.Parse(s[4]);
 				curState.FreeSurfacePitch		= double.Parse(s[5]);
-				curState.WaitTime				= float.Parse(s[6]);
-				curState.TransitionTime			= float.Parse(s[7]);
+				curState.Transition				= (SurfaceCameraState.TransitionType) uint.Parse(s[6]);
+				curState.WaitTime				= float.Parse(s[7]);
+				curState.TransitionTime			= float.Parse(s[8]);
 
 				curState.FreeRotation = DQuaternion.RotationAxis(DVector3.UnitY, curState.FreeSurfaceYaw) * DQuaternion.RotationAxis(DVector3.UnitX, curState.FreeSurfacePitch);
 
@@ -554,7 +561,7 @@ namespace Fusion.Engine.Graphics.GIS
 			var state = cameraAnimTrackStates[curStateInd];
 
 
-			curTime += 0.016f; //gameTime.ElapsedSec;
+			curTime += gameTime.ElapsedSec; // 0.016f; //
 			
 			if (curTime < state.WaitTime || curStateInd >= cameraAnimTrackStates.Count - 1) {
 				SetState(state);
@@ -568,10 +575,22 @@ namespace Fusion.Engine.Graphics.GIS
 			float time		= curTime - state.WaitTime;
 			float amount	= time/state.TransitionTime;
 
-			float	factor = MathUtil.SmoothStep(amount);
-					factor = MathUtil.Clamp(factor, 0.0f, 1.0f);
 
-			var nextState = cameraAnimTrackStates[curStateInd+1];
+			var nextState = cameraAnimTrackStates[curStateInd + 1];
+
+
+			float factor = 0;
+
+			switch (nextState.Transition) {
+				case SurfaceCameraState.TransitionType.SmoothStep:
+					factor = MathUtil.SmoothStep(amount);
+					break;
+				case SurfaceCameraState.TransitionType.Linear:
+					factor = amount;
+					break;
+			};
+
+			factor = MathUtil.Clamp(factor, 0.0f, 1.0f);
 
 			var curPos		= DVector3.Lerp(state.FreeSurfacePosition, nextState.FreeSurfacePosition, factor);
 			var curFreeRot	= DQuaternion.Slerp(state.FreeRotation, nextState.FreeRotation, factor);

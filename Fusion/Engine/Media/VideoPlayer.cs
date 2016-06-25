@@ -144,11 +144,9 @@ namespace Fusion.Engine.Media
 			const int sleepTimeFactor = 50;
 			DynamicTexture texture = null;
 
-			for (int i = 0; i < retries; i++)
-			{
+			for (int i = 0; i < retries; i++) {
 				texture = PlatformGetTexture();
-				if (texture != null)
-				{
+				if (texture != null) {
 					break;
 				}
 				var sleepTime = i * sleepTimeFactor;
@@ -156,8 +154,7 @@ namespace Fusion.Engine.Media
 				Thread.Sleep(sleepTime); //Sleep for longer and longer times
 
 			}
-			if (texture == null)
-			{
+			if (texture == null) {
 				Debug.WriteLine("Platform returned a null texture");
 				//throw new InvalidOperationException("Platform returned a null texture");
 			}
@@ -304,14 +301,14 @@ namespace Fusion.Engine.Media
 		 *	Media session stuff :
 		 * 
 		-----------------------------------------------------------------------------------------*/
-		private static MediaSession _session;
-		private static AudioStreamVolume _volumeController;
-		private static PresentationClock _clock;
+		private MediaSession _session;
+		private AudioStreamVolume _volumeController;
+		private PresentationClock _clock;
 
 		// HACK: Need SharpDX to fix this.
-		private static Guid AudioStreamVolumeGuid;
+		private Guid AudioStreamVolumeGuid;
 
-		private static Callback _callback;
+		private Callback _callback;
 
 		internal bool SetNewVideo = false;
 
@@ -335,7 +332,7 @@ namespace Fusion.Engine.Media
 			public IDisposable Shadow { get; set; }
 			public void Invoke(AsyncResult asyncResultRef)
 			{
-				var ev = _session.EndGetEvent(asyncResultRef);
+				var ev = _player._session.EndGetEvent(asyncResultRef);
 
 				// Trigger an "on Video Ended" event here if needed
 				if (ev.TypeInfo == MediaEventTypes.SessionTopologyStatus && ev.Get(EventAttributeKeys.TopologyStatus) == TopologyStatus.Ended)
@@ -350,7 +347,7 @@ namespace Fusion.Engine.Media
 				if (ev.TypeInfo == MediaEventTypes.SessionTopologyStatus && ev.Get(EventAttributeKeys.TopologyStatus) == TopologyStatus.Ready)
 					_player.OnTopologyReady();
 
-				_session.BeginGetEvent(this, null);
+				_player._session.BeginGetEvent(this, null);
 
 				SafeDispose( ref ev );
 			}
@@ -372,13 +369,16 @@ namespace Fusion.Engine.Media
 
 			MediaAttributes attr = new MediaAttributes(0);
 			//MediaManagerState.CheckStartup();
-			
-			MediaManager.Startup();
+
+			if (!isStarted) {
+				MediaManager.Startup();
+				isStarted = true;
+			}
 
 			MediaFactory.CreateMediaSession(attr, out _session);
 		}
 
-
+		private static bool isStarted = false;
 
 		/// <summary>
 		/// 
@@ -408,11 +408,9 @@ namespace Fusion.Engine.Media
 			if (texData == null)
 				return null;
 
-			// TODO: This could likely be optimized if we held on to the SharpDX Surface/Texture data,
-			// and set it on an XNA one rather than constructing a new one every time this is called.
-			//var retTex = new Texture2D(Game.Instance.GraphicsDevice, _currentVideo.Width, _currentVideo.Height, ColorFormat.Bgra8, false);
-
-			_currentVideo.VideoFrame.SetData(texData);
+			lock (sampleGrabber.TextureData) {
+				_currentVideo.VideoFrame.SetData(sampleGrabber.TextureData);
+			}
 
 			return _currentVideo.VideoFrame;
 		}

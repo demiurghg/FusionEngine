@@ -84,6 +84,13 @@ namespace Fusion.Engine.Graphics {
 			}
 			base.Dispose( disposing );
 		}
+
+
+
+		public void ResolveTo(TargetTexture resDest)
+		{
+			RenderTarget.ResolveTo(resDest.RenderTarget.SRV.Resource);
+		}
 		
 	}
 }

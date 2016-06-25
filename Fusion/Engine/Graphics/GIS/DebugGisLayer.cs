@@ -114,14 +114,14 @@ namespace Fusion.Engine.Graphics.GIS
 				Y = pos0.Y,
 				Z = pos0.Z,
 				Tex0	= Vector4.Zero,
-				Color	= color.ToColor4()
+				Color	= color
 			});
 			lines.Add(new Gis.CartPoint {
 				X = pos1.X,
 				Y = pos1.Y,
 				Z = pos1.Z,
 				Tex0	= Vector4.Zero,
-				Color	= color.ToColor4()
+				Color	= color
 			});
 
 			isDirty = true;
@@ -135,42 +135,42 @@ namespace Fusion.Engine.Graphics.GIS
 				Y		= pos.Y,
 				Z		= pos.Z,
 				Tex0	= Vector4.Zero,
-				Color	= Color.Red.ToColor4()
+				Color	= Color.Red
 			});
 			lines.Add(new Gis.CartPoint {
 				X		= pos.X - size,
 				Y		= pos.Y,
 				Z		= pos.Z,
 				Tex0	= Vector4.Zero,
-				Color	= Color.Red.ToColor4()
+				Color	= Color.Red
 			});
 			lines.Add(new Gis.CartPoint {
 				X		= pos.X,
 				Y		= pos.Y + size,
 				Z		= pos.Z,
 				Tex0	= Vector4.Zero,
-				Color	= Color.Green.ToColor4()
+				Color	= Color.Green
 			});
 			lines.Add(new Gis.CartPoint {
 				X		= pos.X,
 				Y		= pos.Y - size,
 				Z		= pos.Z,
 				Tex0	= Vector4.Zero,
-				Color	= Color.Green.ToColor4()
+				Color	= Color.Green
 			});
 			lines.Add(new Gis.CartPoint {
 				X		= pos.X,
 				Y		= pos.Y,
 				Z		= pos.Z + size,
 				Tex0	= Vector4.Zero,
-				Color	= Color.Blue.ToColor4()
+				Color	= Color.Blue
 			});
 			lines.Add(new Gis.CartPoint {
 				X		= pos.X,
 				Y		= pos.Y,
 				Z		= pos.Z - size,
 				Tex0	= Vector4.Zero,
-				Color	= Color.Blue.ToColor4()
+				Color	= Color.Blue
 			});
 
 			isDirty = true;

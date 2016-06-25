@@ -14,10 +14,16 @@ namespace Fusion.Engine.Media
 
 		public void OnProcessSample(Guid guidMajorMediaType, int dwSampleFlags, long llSampleTime, long llSampleDuration, IntPtr sampleBufferRef, int dwSampleSize)
 		{
-			if (TextureData == null || TextureData.Length != dwSampleSize)
+			if (TextureData == null || TextureData.Length != dwSampleSize) {
 				TextureData = new byte[dwSampleSize];
+			}
 
-			Marshal.Copy(sampleBufferRef, TextureData, 0, dwSampleSize);
+			lock (TextureData) {
+				Marshal.Copy(sampleBufferRef, TextureData, 0, dwSampleSize);
+				for (int i = 3; i < TextureData.Length; i += 4) {
+					TextureData[i] = (byte) 255;
+				}
+			}
 		}
 
 		public void OnSetPresentationClock(PresentationClock presentationClockRef)

@@ -105,7 +105,7 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 			color = input.Color;
 		#endif
 		
-		return frsn*float4(color.xyz, color.a);
+		return frsn*float4(color.xyz, color.a * ModelStage.ViewPositionTransparency.a);
 	#else
 		#ifdef DRAW_COLORED
 			color = input.Color;
