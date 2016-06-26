@@ -128,8 +128,7 @@ namespace Fusion.Engine.Graphics.GIS
 				var meshindex = model.Nodes[i].MeshIndex;
 				if (meshindex < 0) continue;
 
-				selectInfo[i] = new SelectInfo
-				{
+				selectInfo[i] = new SelectInfo {
 					BoundingBox = model.Meshes[meshindex].ComputeBoundingBox(),
 					MeshIndex = meshindex,
 					NodeIndex = i,

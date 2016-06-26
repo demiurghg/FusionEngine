@@ -166,6 +166,16 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
+		public override void Dispose()
+		{
+			DotsBuffer.Dispose();
+			ColorBuffer.Dispose();
+			//shader.Dispose();
+			//factory.Dispose();
+			firstBuffer.Dispose();
+		}
+
+
 		public override List<Gis.SelectedItem> Select(DVector3 nearPoint, DVector3 farPoint)
 		{
 			DVector3[] rayHitPoints;

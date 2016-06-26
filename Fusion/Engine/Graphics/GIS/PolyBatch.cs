@@ -114,7 +114,22 @@ namespace Fusion.Engine.Graphics.GIS
 			constData	= new ConstData();
 			constData.Data = Vector4.One;
 		}
-		
+
+
+		public override void Dispose()
+		{
+			//shader.Dispose();	
+			factory.Dispose();
+			factoryXray.Dispose();
+
+			firstBuffer.Dispose();
+			indexBuffer.Dispose();
+
+			cb.Dispose();
+
+			base.Dispose();
+		}
+
 
 		public void UpdatePointsBuffer()
 		{

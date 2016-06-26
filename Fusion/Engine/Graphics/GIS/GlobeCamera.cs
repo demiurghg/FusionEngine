@@ -61,8 +61,8 @@ namespace Fusion.Engine.Graphics.GIS
 		public DVector3 FinalCamPosition = DVector3.Zero;
 
 		
-		double ViewToPointYaw	=  Math.PI;
-		double ViewToPointPitch = -Math.PI/2.01;
+		public double ViewToPointYaw	{ set; get; }
+		public double ViewToPointPitch	{ set; get; }
 
 		#region Free Surface Camera
 

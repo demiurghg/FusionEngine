@@ -102,10 +102,10 @@ namespace Fusion.Engine.Graphics.GIS
 				mapSource.Dispose();
 			}
 
-			if (BaseMapSource.EmptyTile != null) {
-				BaseMapSource.EmptyTile.Dispose();
-				BaseMapSource.EmptyTile = null;
-			}
+			//if (BaseMapSource.EmptyTile != null) {
+			//	BaseMapSource.EmptyTile.Dispose();
+			//	BaseMapSource.EmptyTile = null;
+			//}
 
 			foreach (var tile in tilesToRender) {
 				tile.Value.Dispose();
