@@ -180,10 +180,10 @@ namespace Fusion.Engine.Graphics.GIS
 						w.Write(point.Tex0.Y);
 						w.Write(point.Tex0.Z);
 						w.Write(point.Tex0.W);
-						w.Write(point.Color.R);
-						w.Write(point.Color.G);
-						w.Write(point.Color.B);
-						w.Write(point.Color.A);
+						//w.Write(point.Color.R);
+						//w.Write(point.Color.G);
+						//w.Write(point.Color.B);
+						//w.Write(point.Color.A);
 					}
 				}
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Fusion;
@@ -33,7 +32,7 @@ namespace Fusion.Engine.Graphics.GIS
 		    [Vertex("TEXCOORD", 1)] public double	Lat;
 		    [Vertex("TEXCOORD", 2)] public Vector4	Tex0;
 		    [Vertex("TEXCOORD", 3)] public Vector4	Tex1;
-		    [Vertex("Color")]		public Color	Color;
+		    [Vertex("Color")]		public Color4	Color;
 	    }
 
 
@@ -43,7 +42,7 @@ namespace Fusion.Engine.Graphics.GIS
 		    [Vertex("TEXCOORD", 1)] public double	Y;
 		    [Vertex("TEXCOORD", 2)] public double	Z;
 		    [Vertex("TEXCOORD", 3)] public Vector4	Tex0;
-		    [Vertex("Color")]		public Color	Color;
+		    [Vertex("Color")]		public Color4	Color;
 	    }
 
 

@@ -13,8 +13,7 @@ namespace Fusion.Engine.Input {
 	public delegate void KeyUpEventHandler		( object sender, KeyEventArgs e );
 	public delegate void KeyPressEventHandler	( object sender, KeyPressArgs e );
 
-	public delegate void TouchTapEventHandler	( Vector2 p );
-	public delegate void TouchManipulateHandler	(Vector2 center, Vector2 delta, float scale);
+	public delegate void TouchTapEventHandler(TouchEventArgs args);
 
 
 	public class KeyEventArgs : EventArgs 
@@ -38,5 +37,15 @@ namespace Fusion.Engine.Input {
 	public class MouseMoveEventArgs : EventArgs 
 	{
 		public Vector2	Position;
+	}
+
+
+	public class TouchEventArgs
+	{
+		public Point Position;
+		public float ScaleDelta;
+		public float RotationDelta;
+		public bool	IsEventBegin;
+		public bool	IsEventEnd;
 	}
 }

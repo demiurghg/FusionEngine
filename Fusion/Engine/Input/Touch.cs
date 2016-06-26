@@ -16,7 +16,7 @@ namespace Fusion.Engine.Input
 		public event TouchTapEventHandler	Tap;
 		public event TouchTapEventHandler	DoubleTap;
 		public event TouchTapEventHandler	SecondaryTap;
-		public event TouchManipulateHandler Manipulate;
+		public event TouchTapEventHandler	Manipulate;
 
 		/// <summary>
 		/// 
@@ -32,28 +32,28 @@ namespace Fusion.Engine.Input
 			device.TouchGestureManipulate	+= DeviceOnTouchGestureManipulate;
 		}
 
-		private void DeviceOnTouchGestureManipulate(Vector2 center, Vector2 delta, float scale)
+		private void DeviceOnTouchGestureManipulate(TouchEventArgs args)
 		{
 			if (Manipulate != null)
-				Manipulate(center, delta, scale);
+				Manipulate(args);
 		}
 
-		private void DeviceOnTouchGestureSecondaryTap(Vector2 point)
+		private void DeviceOnTouchGestureSecondaryTap(TouchEventArgs args)
 		{
 			if (SecondaryTap != null)
-				SecondaryTap(point);
+				SecondaryTap(args);
 		}
 
-		private void DeviceOnTouchGestureDoubleTap(Vector2 point)
+		private void DeviceOnTouchGestureDoubleTap(TouchEventArgs args)
 		{
 			if (DoubleTap != null)
-				DoubleTap(point);
+				DoubleTap(args);
 		}
 
-		private void DeviceOnTouchGestureTap(Vector2 point)
+		private void DeviceOnTouchGestureTap(TouchEventArgs args)
 		{
 			if (Tap != null)
-				Tap(point);
+				Tap(args);
 		}
 
 

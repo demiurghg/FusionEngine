@@ -509,7 +509,7 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnClick (Keys key, bool doubleClick)
+		public void OnClick (Keys key, bool doubleClick)
 		{
 			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
 			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;

@@ -6,6 +6,7 @@ using System.Security.Permissions;
 using System.Threading;
 using System.Windows.Forms;
 using Fusion.Core.Mathematics;
+using Fusion.Engine.Input;
 using Point = System.Drawing.Point;
 
 namespace Fusion.Input.Touch
@@ -16,10 +17,10 @@ namespace Fusion.Input.Touch
 
         BackgroundTouch background;
 
-	    public event Action<Vector2> TouchTap;
-		public event Action<Vector2> TouchDoubleTap;
-		public event Action<Vector2> TouchSecondaryTap;
-	    public event Action<Vector2, Vector2, float> TouchManipulation;
+		public event Action<TouchEventArgs> TouchTap;
+		public event Action<TouchEventArgs> TouchDoubleTap;
+		public event Action<TouchEventArgs> TouchSecondaryTap;
+	    public event Action<TouchEventArgs> TouchManipulation;
 
         #endregion
 
@@ -118,31 +119,31 @@ namespace Fusion.Input.Touch
         }
 
 
-	    public void NotifyTap(Vector2 pos)
+		public void NotifyTap(TouchEventArgs args)
 	    {
 		    if (TouchTap != null) {
-			    TouchTap(pos);
+				TouchTap(args);
 		    }
 	    }
 
-	    public void NotifyDoubleTap(Vector2 pos)
+		public void NotifyDoubleTap(TouchEventArgs args)
 	    {
 		    if (TouchDoubleTap != null) {
-			    TouchDoubleTap(pos);
+				TouchDoubleTap(args);
 		    }
 	    }
 
-	    internal void NotifyTouchManipulation(Vector2 center, Vector2 delta, float scale)
+	    internal void NotifyTouchManipulation(TouchEventArgs args)
 	    {
 		    if (TouchManipulation != null) {
-			    TouchManipulation(center, delta, scale);
+				TouchManipulation(args);
 		    }
 	    }
 
-		internal void NotifyTouchSecondaryTap(Vector2 pos)
+		internal void NotifyTouchSecondaryTap(TouchEventArgs args)
 		{
 			if (TouchSecondaryTap != null) {
-				TouchSecondaryTap(pos);
+				TouchSecondaryTap(args);
 			}
 		}
 

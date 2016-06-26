@@ -307,10 +307,10 @@ namespace Fusion.Drivers.Graphics.Display {
 			form.Resize		+= (s, e) => Game.InputDevice.RemoveAllPressedKeys();
 			form.Move		+= (s, e) => Game.InputDevice.RemoveAllPressedKeys();
 
-			form.TouchTap			+= (pos) => Game.InputDevice.NotifyTouchTap(pos);
-			form.TouchDoubleTap		+= (pos) => Game.InputDevice.NotifyTouchDoubleTap(pos);
-			form.TouchSecondaryTap	+= (pos) => Game.InputDevice.NotifyTouchSecondaryTap(pos);
-			form.TouchManipulation	+= (center, delta, scale) => Game.InputDevice.NotifyTouchManipulation(center, delta, scale);
+			form.TouchTap			+= (args) => Game.InputDevice.NotifyTouchTap(args);
+			form.TouchDoubleTap		+= (args) => Game.InputDevice.NotifyTouchDoubleTap(args);
+			form.TouchSecondaryTap	+= (args) => Game.InputDevice.NotifyTouchSecondaryTap(args);
+			form.TouchManipulation	+= (args) => Game.InputDevice.NotifyTouchManipulation(args);
 
 			return form;
 		}

@@ -181,10 +181,10 @@ namespace TestGame2 {
 
 			Game.Reloading += (s,e) => LoadContent();
 
-			Game.Touch.Tap			+= vector2 => System.Console.WriteLine("You just perform tap gesture at point: " + vector2);
-			Game.Touch.DoubleTap	+= vector2 => System.Console.WriteLine("You just perform double tap gesture at point: " + vector2);
-			Game.Touch.SecondaryTap += vector2 => System.Console.WriteLine("You just perform secondary tap gesture at point: " + vector2);
-			Game.Touch.Manipulate	+= (center, delta, scale) => System.Console.WriteLine("You just perform touch manipulation: " + center + "	" + delta + "	" + scale);
+			Game.Touch.Tap			+= args => System.Console.WriteLine("You just perform tap gesture at point: " + args.Position);
+			Game.Touch.DoubleTap	+= args => System.Console.WriteLine("You just perform double tap gesture at point: " + args.Position);
+			Game.Touch.SecondaryTap += args => System.Console.WriteLine("You just perform secondary tap gesture at point: " + args.Position);
+			Game.Touch.Manipulate	+= args => System.Console.WriteLine("You just perform touch manipulation: " + args.Position + "	" + args.ScaleDelta + "	" + args.RotationDelta + " " + args.IsEventBegin + " " + args.IsEventEnd);
 		}
 
 

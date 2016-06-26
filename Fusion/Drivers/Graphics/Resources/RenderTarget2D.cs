@@ -399,6 +399,11 @@ namespace Fusion.Drivers.Graphics {
 		}
 
 
+		public void ResolveTo(RenderTargetSurface resDest)
+		{
+			device.Resolve(Surface, resDest);
+		}
+
 
 		/// <summary>
 		/// Saves rendertarget to file.

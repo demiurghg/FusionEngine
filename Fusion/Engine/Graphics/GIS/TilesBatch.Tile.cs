@@ -16,8 +16,8 @@ namespace Fusion.Engine.Graphics.GIS
 		int lowestLod	= 9;
 		int minLod		= 3;
 
-		int tileDensity = 10;
-		int CurrentLevel = 8;
+		int tileDensity		= 5;
+		int CurrentLevel	= 8;
 
 		bool updateTiles = false;
 
@@ -25,8 +25,8 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			public int X, Y, Z;
 
-			public Node Parent;
-			public Node[] Childs;
+			public Node		Parent;
+			public Node[]	Childs;
 		}
 
 		struct TraversalInfo

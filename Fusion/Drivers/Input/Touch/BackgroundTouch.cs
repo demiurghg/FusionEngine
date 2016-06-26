@@ -7,6 +7,8 @@ using System.Threading;
 using System.Diagnostics;
 using System.Windows.Forms;
 using Fusion.Core.Mathematics;
+using Fusion.Engine.Input;
+using Point = Fusion.Core.Mathematics.Point;
 
 namespace Fusion.Input.Touch
 {
@@ -14,8 +16,6 @@ namespace Fusion.Input.Touch
     {
 	    TouchForm touchForm;
 
-	    Vector2 center;
-	    Vector2 prevTranslation;
 
         public BackgroundTouch(TouchForm tForm) : base()
         {
@@ -37,7 +37,8 @@ namespace Fusion.Input.Touch
                     Win32TouchFunctions.INTERACTION_CONFIGURATION_FLAGS.MANIPULATION |
                     Win32TouchFunctions.INTERACTION_CONFIGURATION_FLAGS.MANIPULATION_SCALING |
 					Win32TouchFunctions.INTERACTION_CONFIGURATION_FLAGS.MANIPULATION_TRANSLATION_X |
-                    Win32TouchFunctions.INTERACTION_CONFIGURATION_FLAGS.MANIPULATION_TRANSLATION_Y)
+                    Win32TouchFunctions.INTERACTION_CONFIGURATION_FLAGS.MANIPULATION_TRANSLATION_Y | 
+					Win32TouchFunctions.INTERACTION_CONFIGURATION_FLAGS.MANIPULATION_ROTATION)
             };
 
             Win32TouchFunctions.SetInteractionConfigurationInteractionContext(Context, cfg.Length, cfg);
@@ -50,40 +51,44 @@ namespace Fusion.Input.Touch
 				var p = touchForm.PointToClient(new System.Drawing.Point((int)output.Data.X, (int)output.Data.Y));
 
 	            if (output.Data.Tap.Count == 1) {
-					touchForm.NotifyTap(new Vector2(p.X, p.Y));
+					touchForm.NotifyTap(new TouchEventArgs {
+						IsEventBegin	= output.IsBegin(),
+						IsEventEnd		= output.IsEnd(),
+						Position		= new Point(p.X, p.Y)
+					});
 	            } 
 				else if (output.Data.Tap.Count == 2) {
-					touchForm.NotifyDoubleTap(new Vector2(p.X, p.Y));
+					touchForm.NotifyDoubleTap(new TouchEventArgs {
+						IsEventBegin	= output.IsBegin(),
+						IsEventEnd		= output.IsEnd(),
+						Position		= new Point(p.X, p.Y)
+					});
                 }
             }
             else if (output.Data.Interaction == Win32TouchFunctions.INTERACTION.SECONDARY_TAP)
             {
 				var p = touchForm.PointToClient(new System.Drawing.Point((int)output.Data.X, (int)output.Data.Y));
 
-				touchForm.NotifyTouchSecondaryTap(new Vector2(p.X, p.Y));
+				touchForm.NotifyTouchSecondaryTap(new TouchEventArgs {
+					IsEventBegin	= output.IsBegin(),
+					IsEventEnd		= output.IsEnd(),
+					Position		= new Point(p.X, p.Y)
+				});
             }
 			else if (output.Data.Interaction == Win32TouchFunctions.INTERACTION.HOLD) {
 				
 			}
 			else if (output.Data.Interaction == Win32TouchFunctions.INTERACTION.MANIPULATION) {
-				if (output.IsBegin()) {
-					var p	= touchForm.PointToClient(new System.Drawing.Point((int)output.Data.X, (int)output.Data.Y));
-					center	= new Vector2(p.X, p.Y);
-					prevTranslation = new Vector2();
-					return;
-				}
-
-				var mt = output.Data.Manipulation.Cumulative;
-
-				var translation = new Vector2(mt.TranslationX, mt.TranslationY);
-
-				var delta = translation - prevTranslation;
-
-				prevTranslation = translation;
-
-
-				touchForm.NotifyTouchManipulation(center, delta, mt.Scale);
-
+				var p	= touchForm.PointToClient(new System.Drawing.Point((int)output.Data.X, (int)output.Data.Y));
+				
+				touchForm.NotifyTouchManipulation(new TouchEventArgs {
+					IsEventBegin	= output.IsBegin(),
+					IsEventEnd		= output.IsEnd(),
+					Position		= new Point(p.X, p.Y),
+					RotationDelta	= output.Data.Manipulation.Delta.Rotation,
+					ScaleDelta		= output.Data.Manipulation.Delta.Scale
+				} );
+				
 				//output.IsEnd()
 			}
         }

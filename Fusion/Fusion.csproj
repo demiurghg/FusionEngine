@@ -245,10 +245,12 @@
     <Compile Include="Engine\Graphics\Effects\DofFilter.cs" />
     <Compile Include="Engine\Graphics\Effects\SsaoFilter.cs" />
     <Compile Include="Engine\Graphics\Effects\SsaoFilter.Config.cs" />
+    <Compile Include="Engine\Graphics\GIS\CartesianPoints.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BaseBingMapsSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BingMapSatellite.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\MapBox\Dark.cs" />
     <Compile Include="Engine\Graphics\GIS\DebugGisLayer.cs" />
+    <Compile Include="Engine\Graphics\GIS\LasPointsCloud.cs" />
     <Compile Include="Engine\Graphics\GIS\PointsGisLayerCPU.cs" />
     <Compile Include="Engine\Graphics\GIS\TextGisLayer.cs" />
     <Compile Include="Engine\Graphics\Lights\CascadedShadowMap.cs" />

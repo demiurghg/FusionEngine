@@ -96,7 +96,6 @@ namespace Fusion.Engine.Graphics.GIS
 			TransparencyMultiplayer = 1.0f;
 			OverallColor			= Color4.White;
 			linesConstantBuffer		= new ConstantBuffer(engine.GraphicsDevice, typeof(LinesConstDataStruct));
-			//linesConstantBuffer.SetData(linesConstData);
 
 			var vbOptions = isDynamic ? VertexBufferOptions.Dynamic : VertexBufferOptions.Default;
 
@@ -104,7 +103,7 @@ namespace Fusion.Engine.Graphics.GIS
 			currentBuffer	= firstBuffer;
 
 			PointsCpu	= new Gis.GeoPoint[linesPointsCount];
-			Flags		= (int)(LineFlags.ARC_LINE);
+			Flags		= (int)(LineFlags.THIN_LINE);
 		}
 
 

@@ -159,6 +159,20 @@ VS_OUTPUT VSMain ( VS_INPUT v )
 	output.Color	= v.Color;
 	output.Tex		= v.Tex0;
 	
+#ifdef THIN_LINE
+	float3 viewDirection 	= normalize(float3(cameraPos));
+	float3 worldNormal 		= normalize(float3(normPos));
+	
+	float factor = 1;
+	float dotRes = dot(viewDirection, worldNormal);
+	
+	if(dotRes < 0.4f) {
+		factor = saturate(dotRes-0.2)/0.4f;
+	}
+	
+	output.Color.a = output.Color.a * factor;
+#endif
+	
 	return output;
 }
 

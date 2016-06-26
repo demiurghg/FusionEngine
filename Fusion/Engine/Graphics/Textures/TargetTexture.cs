@@ -89,7 +89,7 @@ namespace Fusion.Engine.Graphics {
 
 		public void ResolveTo(TargetTexture resDest)
 		{
-			RenderTarget.ResolveTo(resDest.RenderTarget.SRV.Resource);
+			RenderTarget.ResolveTo(resDest.RenderTarget.Surface);
 		}
 		
 	}

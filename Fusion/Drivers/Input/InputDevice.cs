@@ -12,6 +12,8 @@ using System.ComponentModel;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 using Fusion.Engine.Common;
+using Fusion.Engine.Input;
+
 //using FRBTouch.MultiTouch;
 //using FRBTouch.MultiTouch.Win32Helper;
 //using SharpDX.DirectInput;
@@ -69,10 +71,10 @@ namespace Fusion.Drivers.Input {
 		public event KeyPressEventHandler		FormKeyPress;
 
 
-		public event Action<Vector2> TouchGestureTap;
-		public event Action<Vector2> TouchGestureDoubleTap;
-		public event Action<Vector2> TouchGestureSecondaryTap;
-		public event Action<Vector2, Vector2, float> TouchGestureManipulate;
+		public event Action<TouchEventArgs> TouchGestureTap;
+		public event Action<TouchEventArgs> TouchGestureDoubleTap;
+		public event Action<TouchEventArgs> TouchGestureSecondaryTap;
+		public event Action<TouchEventArgs> TouchGestureManipulate;
 
 
 
@@ -410,33 +412,33 @@ namespace Fusion.Drivers.Input {
 		}
 
 
-		public void NotifyTouchTap(Vector2 tapPosition)
+		public void NotifyTouchTap(TouchEventArgs args)
 		{
 			if (TouchGestureTap != null) {
-				TouchGestureTap(tapPosition);
+				TouchGestureTap(args);
 			}
 		}
 
-		public void NotifyTouchDoubleTap(Vector2 tapPosition)
+		public void NotifyTouchDoubleTap(TouchEventArgs args)
 		{
 			if (TouchGestureDoubleTap != null) {
-				TouchGestureDoubleTap(tapPosition);
+				TouchGestureDoubleTap(args);
 			}
 		}
 
 
-		public void NotifyTouchSecondaryTap(Vector2 tapPosition)
+		public void NotifyTouchSecondaryTap(TouchEventArgs args)
 		{
 			if (TouchGestureSecondaryTap != null) {
-				TouchGestureSecondaryTap(tapPosition);
+				TouchGestureSecondaryTap(args);
 			}
 		}
 
 
-		public void NotifyTouchManipulation(Vector2 center, Vector2 delta, float scale)
+		public void NotifyTouchManipulation(TouchEventArgs args)
 		{
 			if (TouchGestureManipulate != null) {
-				TouchGestureManipulate(center, delta, scale);
+				TouchGestureManipulate(args);
 			}
 		}
 
