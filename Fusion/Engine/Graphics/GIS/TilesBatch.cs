@@ -47,6 +47,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
+		private int t = 0;
 		public override void Update(GameTime gameTime)
 		{
 
@@ -61,9 +62,13 @@ namespace Fusion.Engine.Graphics.GIS
 			CurrentMapSource.Update(gameTime);			
 
 			DetermineTiles();
+			//DetermineTiles(3);
 
 			//Console.WriteLine();
-			//Console.WriteLine("Tiles to render: " + tilesToRender.Count);
+			//if (t != gameTime.Total.Seconds) {
+			//	t = gameTime.Total.Seconds;
+			//	Console.WriteLine("Tiles to render: " + tilesToRender.Count);
+			//}
 			//Console.WriteLine("Free tiles:		" + tilesFree.Count);
 		}
 

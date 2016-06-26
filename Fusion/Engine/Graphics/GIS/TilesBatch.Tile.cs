@@ -244,14 +244,14 @@ namespace Fusion.Engine.Graphics.GIS
 			/////////////////////////////////////////////////////
 
 
-			var cameraPos = DVector3.Transform(new DVector3(0, 0, 6700), DQuaternion.RotationYawPitchRoll(0.52932849788406378, -1.0458657020378879, 0));
-			//var cameraPos = camera.CameraPosition;
+			//var cameraPos = DVector3.Transform(new DVector3(0, 0, 6700), DQuaternion.RotationYawPitchRoll(0.52932849788406378, -1.0458657020378879, 0));
+			var cameraPos = camera.CameraPosition;
 			var cameraNorm = DVector3.Normalize(cameraPos);
 
-			var debug		= Gis.Debug; 
-			debug.Clear();
-			debug.DrawPoint(cameraPos, 200);
-			Console.WriteLine("Camera pos: " + cameraPos);
+			//var debug		= Gis.Debug; 
+			//debug.Clear();
+			//debug.DrawPoint(cameraPos, 200);
+			//Console.WriteLine("Camera pos: " + cameraPos);
 
 			Stack<Node> nodes = new Stack<Node>();
 			long numTiles = 1 << startZoomLevel;
@@ -297,7 +297,7 @@ namespace Fusion.Engine.Graphics.GIS
 					}
 				}
 				else {
-					if (DVector3.Dot(cameraNorm, nodeNorm) > 0.0)
+					if (DVector3.Dot(cameraNorm, nodeNorm) > -0.1)
 						AddTileToRenderList(node.X, node.Y, node.Z);
 				}
 			}

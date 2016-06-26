@@ -54,7 +54,7 @@ namespace Fusion.Engine.Graphics.GIS
 		public double CameraDistance {
 			get { return cameraDistance; }
 			set {
-				cameraDistance = DMathUtil.Clamp(value, EarthRadius + Parameters.ClosestDistanceToSurface, Parameters.MaxCameraDistance);
+				cameraDistance = DMathUtil.Clamp(value, Parameters.MinCameraDistance, Parameters.MaxCameraDistance);
 			}
 		}
 
@@ -99,6 +99,9 @@ namespace Fusion.Engine.Graphics.GIS
 			public double MaxPitch			{ set; get; }
 			public double MinPitch			{ set; get; }
 			public double MaxCameraDistance { set; get; }
+
+			public double MaxViewToPointPitch { set; get; }
+			public double MinViewToPointPitch { set; get; }
 			
 			public double CameraFovDegrees	{ set; get; }
 			public double FrustumZNear		{ set; get; }
@@ -111,7 +114,7 @@ namespace Fusion.Engine.Graphics.GIS
 			public double MaxVelocityFreeSurfCam	{ set; get; }
 			public double MinVelocityFreeSurfCam	{ set; get; }
 
-			public double ClosestDistanceToSurface { set; get; }
+			public double MinCameraDistance { set; get; }
 
 		}
 
@@ -123,18 +126,23 @@ namespace Fusion.Engine.Graphics.GIS
 				MaxPitch					= DMathUtil.DegreesToRadians(87.5),
 				MinPitch					= DMathUtil.DegreesToRadians(-87.5),
 				MaxCameraDistance			= 100000.0,
+				MinCameraDistance			= EarthRadius + 0.01,
 				CameraFovDegrees			= 45,
 				FrustumZNear				= 0.0009765625f,
 				FrustumZFar					= 131072,
 				MaxDistVelocityThreshold	= 10000,
 				MinDistVelocityThreshold	= 0.5,
-				MaxVelocityFreeSurfCam		= 800,
-				MinVelocityFreeSurfCam		= 0.01,
-				ClosestDistanceToSurface	= 0.01
+				MaxVelocityFreeSurfCam	= 800,
+				MinVelocityFreeSurfCam	= 0.01,
+				MaxViewToPointPitch = -Math.PI / 2.01,
+				MinViewToPointPitch = 0
 			};
 
 
 			Viewport = new Viewport(0, 0, 1920, 1080);
+
+			ViewToPointYaw		= Math.PI;
+			ViewToPointPitch	= -Math.PI / 2.01;
 		}
 
 
@@ -213,7 +221,7 @@ namespace Fusion.Engine.Graphics.GIS
 			ViewToPointYaw		+= yawDelta;
 			ViewToPointPitch	-= pitchDelta;
 
-			ViewToPointPitch = DMathUtil.Clamp(ViewToPointPitch, -Math.PI / 2.01, 0.0);
+			ViewToPointPitch = DMathUtil.Clamp(ViewToPointPitch, -Math.PI / 2.01, Parameters.MinViewToPointPitch);
 		}
 
 
