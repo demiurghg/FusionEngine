@@ -25,11 +25,13 @@ namespace Fusion.Engine.Server {
 
 		Queue<string> notifications = null;
 
+		public event Action OnServerShutdown;
+
 
 		/// <summary>
 		/// Gets whether server is still alive.
 		/// </summary>
-		internal bool IsAlive {
+		public bool IsAlive {
 			get {
 				return serverTask != null; 
 			}
@@ -216,6 +218,11 @@ namespace Fusion.Engine.Server {
 				//	shutdown connection :
 				//
 				server.Shutdown("Server shutdown");
+
+				while (server.Status != NetPeerStatus.NotRunning) {
+					Thread.Sleep(10);
+				}
+				
 				Log.Message("SV: Shutdown");
 
 				notifications	=	null;
@@ -224,6 +231,10 @@ namespace Fusion.Engine.Server {
 				serverTask	=	null;
 				server		=	null;
 				pings		=	null;
+
+				if (OnServerShutdown != null) {
+					OnServerShutdown();
+				}
 			}
 		}
 
