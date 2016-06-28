@@ -14,6 +14,7 @@ struct ModelConstData {
 
 struct InstancingData {
 	float4x4 	World;
+	float4		Color;
 };
 
 
@@ -67,8 +68,11 @@ VS_OUTPUT VSMain ( VS_INPUT v
 	
 	float4x4 worldMatrix = ModelStage.World;
 	
+	output.Color 	= v.Color;
+	
 	#ifdef INSTANCED
-		worldMatrix = mul(InstData[id].World, worldMatrix);
+		worldMatrix 	= mul(InstData[id].World, worldMatrix);
+		output.Color 	= InstData[id].Color;
 	#endif
 	
 	float4 tempPos 	= mul( float4(v.Position.xyz, 	1), worldMatrix ) + float4(ModelStage.ViewPositionTransparency.xyz, 0);
@@ -76,7 +80,7 @@ VS_OUTPUT VSMain ( VS_INPUT v
 	
 	output.Position	= mul(float4(tempPos.xyz, 1), Stage.ViewProj);
 	output.Normal 	= normalize(normal.xyz);
-	output.Color 	= v.Color;
+	
 	output.Tangent 	= v.Tangent;
 	output.Binormal = v.Binormal;
 	output.TexCoord = v.TexCoord;

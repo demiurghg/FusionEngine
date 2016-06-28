@@ -312,6 +312,10 @@ namespace Fusion.Drivers.Graphics.Display {
 			form.TouchSecondaryTap	+= (args) => Game.InputDevice.NotifyTouchSecondaryTap(args);
 			form.TouchManipulation	+= (args) => Game.InputDevice.NotifyTouchManipulation(args);
 
+			form.FormClosing += form_FormClosing;
+
+			ChangeFullscreen(form, parameters.FullScreen);
+
 			return form;
 		}
 

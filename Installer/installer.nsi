@@ -167,10 +167,10 @@ Section "Install Visual C++ Redistributable for Visual Studio 2012" Section3
 SectionEnd
 
 
-Section "Install Visual Studio Project Template"
-	File /oname=$PLUGINSDIR\FusionPackage.vsix "FusionPackage.vsix"
-	ExecShell "open" '$PLUGINSDIR\FusionPackage.vsix'
-SectionEnd
+;Section "Install Visual Studio Project Template"
+;	File /oname=$PLUGINSDIR\FusionPackage.vsix "FusionPackage.vsix"
+;	ExecShell "open" '$PLUGINSDIR\FusionPackage.vsix'
+;SectionEnd
 
 
 Section "DirectX and VC++ Redistributables"

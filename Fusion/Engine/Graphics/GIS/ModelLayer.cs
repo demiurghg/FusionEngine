@@ -60,9 +60,19 @@ namespace Fusion.Engine.Graphics.GIS
 
 		private Matrix			modelRotationMatrix;
 
+		[StructLayout(LayoutKind.Explicit)]
 		public struct InstancedDataStruct
 		{
-			public Matrix World;
+			[FieldOffset(0)]
+			public Matrix	World;
+			[FieldOffset(64)]
+			public Color4	Color;
+
+			public InstancedDataStruct(Matrix world, Color color)
+			{
+				World = world;
+				Color = color;
+			}
 		}
 
 		public InstancedDataStruct[] InstancedDataCPU { get; private set; }
