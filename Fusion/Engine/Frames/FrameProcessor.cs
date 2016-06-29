@@ -102,6 +102,7 @@ namespace Fusion.Engine.Frames {
 			Game.RenderSystem.DisplayBoundsChanged += RenderSystem_DisplayBoundsChanged;
 
 			mouseProcessor.Initialize();
+			touchProcessor.Initialize();
 		}
 
 

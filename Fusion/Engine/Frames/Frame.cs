@@ -268,12 +268,14 @@ namespace Fusion.Engine.Frames {
 			public int	Height;
 		}
 
-		public class TapEventArgs : EventArgs {
+		public class TouchEventArgs : EventArgs {
+			public int	 TouchID;
 			public Point Location;
 		}
 
-		public class SweepEventArgs : EventArgs {
-			public Point Location;
+		public class ManipulationEventArgs : EventArgs {
+			public Vector2 Translation;
+			public float   Scaling;
 		}
 
 		public event EventHandler	Tick;
@@ -291,7 +293,13 @@ namespace Fusion.Engine.Frames {
 		public event EventHandler<StatusEventArgs>	StatusChanged;
 		public event EventHandler<MoveEventArgs>	Move;
 		public event EventHandler<ResizeEventArgs>	Resize;
-		public event EventHandler<TapEventArgs>		Tap;
+		public event EventHandler<TouchEventArgs>	Tap;
+		public event EventHandler<TouchEventArgs>	TouchDown;
+		public event EventHandler<TouchEventArgs>	TouchUp;
+		public event EventHandler<TouchEventArgs>	TouchMove;
+		public event EventHandler<ManipulationEventArgs>	ManipulationStart;
+		public event EventHandler<ManipulationEventArgs>	ManipulationUpdate;
+		public event EventHandler<ManipulationEventArgs>	ManipulationEnd;
 		#endregion
 
 
@@ -616,6 +624,67 @@ namespace Fusion.Engine.Frames {
 				MouseWheel( this, new MouseEventArgs(){ Wheel = wheel } );
 			} else if ( Parent!=null ) {
 				Parent.OnMouseWheel( wheel );
+			}
+		}
+
+
+		internal void OnTap ( int id, Point location )
+		{
+			var handler = Tap;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs(){ TouchID = id, Location = location } );
+			}
+		}
+
+
+		internal void OnTouchDown ( int id, Point location )
+		{
+			var handler = TouchDown;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs(){ TouchID = id, Location = location } );
+			}
+		}
+
+
+		internal void OnTouchUp ( int id, Point location )
+		{
+			var handler = TouchUp;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs(){ TouchID = id, Location = location } );
+			}
+		}
+
+
+		internal void OnTouchMove ( int id, Point location )
+		{
+			var handler = TouchMove;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs(){ TouchID = id, Location = location } );
+			}
+		}
+
+
+		internal void OnManipulationStart ( Vector2 translation, float scaling )
+		{
+			var handler = ManipulationStart;
+			if (handler!=null) {
+				handler( this, new ManipulationEventArgs(){ Translation = translation, Scaling = scaling } );
+			}
+		}
+
+		internal void OnManipulationUpdate ( Vector2 translation, float scaling )
+		{
+			var handler = ManipulationUpdate;
+			if (handler!=null) {
+				handler( this, new ManipulationEventArgs(){ Translation = translation, Scaling = scaling } );
+			}
+		}
+
+		internal void OnManipulationEnd ( Vector2 translation, float scaling )
+		{
+			var handler = ManipulationEnd;
+			if (handler!=null) {
+				handler( this, new ManipulationEventArgs(){ Translation = translation, Scaling = scaling } );
 			}
 		}
 
