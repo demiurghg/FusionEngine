@@ -242,6 +242,7 @@
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
     <Compile Include="Core\Configuration\ConfigManager.cs" />
     <Compile Include="Engine\Common\UserInterface.Internal.cs" />
+    <Compile Include="Engine\Frames\TouchProcessor.cs" />
     <Compile Include="Engine\Graphics\Design\TextureLocationEditor.cs" />
     <Compile Include="Engine\Graphics\Effects\BitonicSort.cs" />
     <Compile Include="Engine\Graphics\Effects\DofSettings.cs" />

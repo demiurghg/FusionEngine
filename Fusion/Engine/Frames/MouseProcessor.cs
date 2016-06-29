@@ -70,32 +70,32 @@ namespace Fusion.Engine.Frames {
 			Game.Mouse.Move += Mouse_Move;
 
 
-			Game.Touch.PointerDown += Touch_PointerDown;
-			Game.Touch.PointerUp += Touch_PointerUp;
-			Game.Touch.PointerUpdate += Touch_PointerUpdate;
+			//Game.Touch.PointerDown += Touch_PointerDown;
+			//Game.Touch.PointerUp += Touch_PointerUp;
+			//Game.Touch.PointerUpdate += Touch_PointerUpdate;
 
 
 			oldMousePoint	=	Game.InputDevice.MousePosition;
 		}
 
 
-		void Touch_PointerDown ( object sender, Touch.TouchEventArgs e )
-		{
-			PushFrame( GetHoveredFrame(e.Location), Keys.LeftButton, e.Location );
-		}
+		//void Touch_PointerDown ( object sender, Touch.TouchEventArgs e )
+		//{
+		//	PushFrame( ui.GetHoveredFrame(e.Location), Keys.LeftButton, e.Location );
+		//}
 
 
-		void Touch_PointerUp ( object sender, Touch.TouchEventArgs e )
-		{
-			ReleaseFrame( GetHoveredFrame(e.Location), Keys.LeftButton, e.Location );
-			Update( e.Location, true );
-		}
+		//void Touch_PointerUp ( object sender, Touch.TouchEventArgs e )
+		//{
+		//	ReleaseFrame( ui.GetHoveredFrame(e.Location), Keys.LeftButton, e.Location );
+		//	Update( e.Location, true );
+		//}
 
 
-		void Touch_PointerUpdate ( object sender, Touch.TouchEventArgs e )
-		{
-			Update( e.Location );
-		}
+		//void Touch_PointerUpdate ( object sender, Touch.TouchEventArgs e )
+		//{
+		//	Update( e.Location );
+		//}
 
 
 
@@ -105,8 +105,31 @@ namespace Fusion.Engine.Frames {
 		}
 
 
+		void InputDevice_KeyDown ( object sender, KeyEventArgs e )
+		{
+			if (e.Key==Keys.LeftButton || e.Key==Keys.RightButton) {
+				PushFrame( ui.GetHoveredFrame(Game.Mouse.Position), e.Key, Game.Mouse.Position );
+			}
+		}
 
-		//void MouseMove (// 
+
+		void InputDevice_KeyUp ( object sender, KeyEventArgs e )
+		{
+			if (e.Key==Keys.LeftButton || e.Key==Keys.RightButton) {
+				ReleaseFrame( ui.GetHoveredFrame(Game.Mouse.Position), e.Key, Game.Mouse.Position);
+			}
+		}
+
+
+
+		void InputDevice_MouseScroll ( object sender, MouseScrollEventArgs e )
+		{
+			var hovered = ui.GetHoveredFrame(Game.Mouse.Position);
+			if ( hovered!=null ) {
+				hovered.OnMouseWheel( e.WheelDelta );
+			}
+		}
+
 
 
 		/// <summary>
@@ -117,7 +140,7 @@ namespace Fusion.Engine.Frames {
 		{
 			var root		=	ui.RootFrame;
 
-			var hovered		=	GetHoveredFrame(mousePoint);
+			var hovered		=	ui.GetHoveredFrame(mousePoint);
 			
 			//
 			//	update mouse move :
@@ -141,7 +164,7 @@ namespace Fusion.Engine.Frames {
 			//
 			if (heldFrame==null) {
 				var oldHoveredFrame	=	hoveredFrame;
-				var newHoveredFrame	=	GetHoveredFrame(mousePoint);
+				var newHoveredFrame	=	ui.GetHoveredFrame(mousePoint);
 
 				hoveredFrame		=	newHoveredFrame;
 
@@ -152,13 +175,6 @@ namespace Fusion.Engine.Frames {
 
 					CallMouseIn			( mousePoint, newHoveredFrame );
 					CallStatusChanged	( mousePoint, newHoveredFrame, FrameStatus.Hovered );
-				}
-			}
-
-			if (releaseTouch) {
-				if (hovered!=null) {
-					CallMouseOut( mousePoint, hovered );
-					CallStatusChanged( mousePoint, hovered, FrameStatus.None );
 				}
 			}
 		}
@@ -296,42 +312,6 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		void InputDevice_KeyDown ( object sender, KeyEventArgs e )
-		{
-			if (e.Key==Keys.LeftButton || e.Key==Keys.RightButton) {
-				PushFrame( GetHoveredFrame(Game.Mouse.Position), e.Key, Game.Mouse.Position );
-			}
-		}
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		void InputDevice_KeyUp ( object sender, KeyEventArgs e )
-		{
-			if (e.Key==Keys.LeftButton || e.Key==Keys.RightButton) {
-				ReleaseFrame( GetHoveredFrame(Game.Mouse.Position), e.Key, Game.Mouse.Position);
-			}
-		}
-
-
-
-		void InputDevice_MouseScroll ( object sender, MouseScrollEventArgs e )
-		{
-			var hovered = GetHoveredFrame(Game.Mouse.Position);
-			if ( hovered!=null ) {
-				hovered.OnMouseWheel( e.WheelDelta );
-			}
-		}
-
 		/*-----------------------------------------------------------------------------------------
 		 * 
 		 *	Callers :
@@ -380,63 +360,5 @@ namespace Fusion.Engine.Frames {
 			}
 		}
 
-
-		/*-----------------------------------------------------------------------------------------
-		 * 
-		 *	Stuff :
-		 * 
-		-----------------------------------------------------------------------------------------*/
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="root"></param>
-		/// <returns></returns>
-		Frame GetHoveredFrame ( Point location )
-		{
-			Frame mouseHoverFrame = null;
-
-			UpdateHoverRecursive( ui.RootFrame, location, ref mouseHoverFrame );
-
-			return mouseHoverFrame;
-		}
-
-
-
-		/// <summary>
-		/// Updates current hovered frame
-		/// </summary>
-		/// <param name="frame"></param>
-		/// <param name="viewCtxt"></param>
-		void UpdateHoverRecursive ( Frame frame, Point p, ref Frame mouseHoverFrame )
-		{
-			if (frame==null) {
-				return;
-			}
-
-			var absLeft		=	frame.GlobalRectangle.Left;
-			var absTop		=	frame.GlobalRectangle.Top;
-			var absRight	=	frame.GlobalRectangle.Right;
-			var absBottom	=	frame.GlobalRectangle.Bottom;
-
-			if (!frame.CanAcceptControl) {
-				return;
-			}
-			
-			bool hovered	=	p.X >= absLeft 
-							&&	p.X <  absRight 
-							&&	p.Y >= absTop
-							&&	p.Y <  absBottom;
-
-			if (hovered) {
-				mouseHoverFrame = frame;
-				foreach (var child in frame.Children) {
-					UpdateHoverRecursive( child, p, ref mouseHoverFrame );
-				}
-			}
-
-		}
 	}
 }

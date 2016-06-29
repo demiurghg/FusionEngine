@@ -268,6 +268,14 @@ namespace Fusion.Engine.Frames {
 			public int	Height;
 		}
 
+		public class TapEventArgs : EventArgs {
+			public Point Location;
+		}
+
+		public class SweepEventArgs : EventArgs {
+			public Point Location;
+		}
+
 		public event EventHandler	Tick;
 		public event EventHandler	LayoutChanged;
 		public event EventHandler	Activated;
@@ -283,6 +291,7 @@ namespace Fusion.Engine.Frames {
 		public event EventHandler<StatusEventArgs>	StatusChanged;
 		public event EventHandler<MoveEventArgs>	Move;
 		public event EventHandler<ResizeEventArgs>	Resize;
+		public event EventHandler<TapEventArgs>		Tap;
 		#endregion
 
 

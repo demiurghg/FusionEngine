@@ -61,6 +61,7 @@ namespace Fusion.Engine.Frames {
 		Frame targetFrame = null;
 
 		MouseProcessor	mouseProcessor;
+		TouchProcessor	touchProcessor;
 
 
 		/// <summary>
@@ -83,6 +84,7 @@ namespace Fusion.Engine.Frames {
 		public FrameProcessor ( Game game ) : base(game)
 		{
 			mouseProcessor		=	new MouseProcessor( Game, this );
+			touchProcessor		=	new TouchProcessor( Game, this );
 		}
 
 
@@ -178,8 +180,6 @@ namespace Fusion.Engine.Frames {
 
 				UpdateUI( gameTime );
 
-				//mouseProcessor.Update();
-
 			sw.Stop();
 
 			uiUpdateProfiling	=	sw.Elapsed;
@@ -215,5 +215,55 @@ namespace Fusion.Engine.Frames {
 		 * 
 		-----------------------------------------------------------------------------------------*/
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="root"></param>
+		/// <returns></returns>
+		public Frame GetHoveredFrame ( Point location )
+		{
+			Frame mouseHoverFrame = null;
+
+			UpdateHoverRecursive( RootFrame, location, ref mouseHoverFrame );
+
+			return mouseHoverFrame;
+		}
+
+
+
+		/// <summary>
+		/// Updates current hovered frame
+		/// </summary>
+		/// <param name="frame"></param>
+		/// <param name="viewCtxt"></param>
+		public void UpdateHoverRecursive ( Frame frame, Point p, ref Frame mouseHoverFrame )
+		{
+			if (frame==null) {
+				return;
+			}
+
+			var absLeft		=	frame.GlobalRectangle.Left;
+			var absTop		=	frame.GlobalRectangle.Top;
+			var absRight	=	frame.GlobalRectangle.Right;
+			var absBottom	=	frame.GlobalRectangle.Bottom;
+
+			if (!frame.CanAcceptControl) {
+				return;
+			}
+			
+			bool hovered	=	p.X >= absLeft 
+							&&	p.X <  absRight 
+							&&	p.Y >= absTop
+							&&	p.Y <  absBottom;
+
+			if (hovered) {
+				mouseHoverFrame = frame;
+				foreach (var child in frame.Children) {
+					UpdateHoverRecursive( child, p, ref mouseHoverFrame );
+				}
+			}
+
+		}
 	}
 }

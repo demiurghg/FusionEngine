@@ -13,10 +13,10 @@ namespace Fusion.Engine.Input
 	{
 		InputDevice device;
 
-		public event TouchTapEventHandler	Tap;
-		public event TouchTapEventHandler	DoubleTap;
-		public event TouchTapEventHandler	SecondaryTap;
-		public event TouchManipulateHandler Manipulate;
+		//public event TouchTapEventHandler	Tap;
+		//public event TouchTapEventHandler	DoubleTap;
+		//public event TouchTapEventHandler	SecondaryTap;
+		//public event TouchManipulateHandler Manipulate;
 
 		public class TouchEventArgs : EventArgs {
 
@@ -44,13 +44,13 @@ namespace Fusion.Engine.Input
 		{
 			this.device = Game.InputDevice;
 
-			device.TouchGestureTap			+= DeviceOnTouchGestureTap;
-			device.TouchGestureDoubleTap	+= DeviceOnTouchGestureDoubleTap;
-			device.TouchGestureSecondaryTap += DeviceOnTouchGestureSecondaryTap;
-			device.TouchGestureManipulate	+= DeviceOnTouchGestureManipulate;
+			//device.TouchGestureTap			+= DeviceOnTouchGestureTap;
+			//device.TouchGestureDoubleTap	+= DeviceOnTouchGestureDoubleTap;
+			//device.TouchGestureSecondaryTap += DeviceOnTouchGestureSecondaryTap;
+			//device.TouchGestureManipulate	+= DeviceOnTouchGestureManipulate;
 		}
 
-		private void DeviceOnTouchGestureManipulate(Vector2 center, Vector2 delta, float scale)
+		/*private void DeviceOnTouchGestureManipulate(Vector2 center, Vector2 delta, float scale)
 		{
 			if (Manipulate != null)
 				Manipulate(center, delta, scale);
@@ -72,7 +72,7 @@ namespace Fusion.Engine.Input
 		{
 			if (Tap != null)
 				Tap(point);
-		}
+		} */
 
 
 		/// <summary>
@@ -91,10 +91,10 @@ namespace Fusion.Engine.Input
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				device.TouchGestureTap			-= DeviceOnTouchGestureTap;
-				device.TouchGestureDoubleTap	-= DeviceOnTouchGestureDoubleTap;
-				device.TouchGestureSecondaryTap -= DeviceOnTouchGestureSecondaryTap;
-				device.TouchGestureManipulate	-= DeviceOnTouchGestureManipulate;
+				//device.TouchGestureTap			-= DeviceOnTouchGestureTap;
+				//device.TouchGestureDoubleTap	-= DeviceOnTouchGestureDoubleTap;
+				//device.TouchGestureSecondaryTap -= DeviceOnTouchGestureSecondaryTap;
+				//device.TouchGestureManipulate	-= DeviceOnTouchGestureManipulate;
 			}
 
 			base.Dispose( disposing );
