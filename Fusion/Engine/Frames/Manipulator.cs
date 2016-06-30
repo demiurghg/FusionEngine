@@ -35,6 +35,17 @@ namespace Fusion.Engine.Frames {
 			{
 				NewLocation = new Vector2( newLocation.X, newLocation.Y );
 			}
+
+			public float GetScaling ( Vector2 oldCenter, Vector2 newCenter )
+			{
+				var oldDistance = Vector2.Distance( OldLocation, oldCenter );
+				var newDistance = Vector2.Distance( NewLocation, newCenter );
+
+				if (newDistance<1 || oldDistance<1) {
+					return 1;
+				}
+				return (newDistance / oldDistance);
+			}
 		}
 
 
@@ -43,7 +54,7 @@ namespace Fusion.Engine.Frames {
 
 
 		Vector2 totalTranslation = Vector2.Zero;
-
+		float	totalScaling = 1;
 
 
 		/// <summary>
@@ -61,16 +72,19 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-
-
-
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="frame"></param>
 		public Manipulator ( Frame frame )
 		{
-			Log.Message("Manipulator created");
 			targetFrame = frame;
 		}
 
 
+		/// <summary>
+		/// Updates manipulator state on each game update
+		/// </summary>
 		public void Update ()
 		{
 			if (!Activated) {
@@ -92,41 +106,53 @@ namespace Fusion.Engine.Frames {
 				newCenter.X	=	touches.Average( p => p.Value.NewLocation.X );
 				newCenter.Y	=	touches.Average( p => p.Value.NewLocation.Y );
 
-				var delta = newCenter - oldCenter;
+				var deltaScaling		=	touches.Average( p => p.Value.GetScaling( oldCenter, newCenter ) );
+				var deltaTranlsation	=	newCenter - oldCenter;
 
-				totalTranslation += delta;
+				totalTranslation += deltaTranlsation;
+				totalScaling *= deltaScaling;
 
-				if (delta.Length()>1) {
-					targetFrame.OnManipulationUpdate( totalTranslation, 1 );
+				if (deltaTranlsation.Length()>0 || deltaScaling!=1) {
+
+					//Log.Message("Delta: {0} {1}", delta.X, delta.Y );
+
+					targetFrame.OnManipulationUpdate( totalTranslation, totalScaling, deltaTranlsation, deltaScaling );
 
 					foreach ( var touch in touches ) {
 						touch.Value.OldLocation = touch.Value.NewLocation;
 					}
 				}
 			}
-
-			//if (Activated
 		}
 
 
 
+		/// <summary>
+		/// Activates manipulator
+		/// </summary>
 		public void Activate()
 		{
-			Log.Message("Manipulator activated");
 			Activated = true;
 
-			targetFrame.OnManipulationStart( Vector2.Zero, 1 );
+			targetFrame.OnManipulationStart( Vector2.Zero, 1, Vector2.Zero, 1 );
 		}
 
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public void Stop()
 		{
-			targetFrame.OnManipulationEnd( totalTranslation, 1 );
-			Log.Message("Manipulator stopped");
+			targetFrame.OnManipulationEnd( totalTranslation, totalScaling, Vector2.Zero, 1 );
 		}
 
 
-
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="location"></param>
+		/// <returns></returns>
 		public int TouchDown ( int id, Point location )
 		{	
 			touches.Add( id, new Touch( id, location ) );
@@ -134,6 +160,12 @@ namespace Fusion.Engine.Frames {
 		}
 
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="location"></param>
+		/// <returns></returns>
 		public int TouchUp ( int id, Point location )
 		{
 			touches.Remove( id );
@@ -141,6 +173,11 @@ namespace Fusion.Engine.Frames {
 		}
 
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="location"></param>
 		public void TouchMove ( int id, Point location )
 		{
 			touches[ id ].Move( location );

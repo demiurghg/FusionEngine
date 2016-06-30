@@ -282,6 +282,8 @@ namespace Fusion.Engine.Frames {
 		public class ManipulationEventArgs : EventArgs {
 			public Vector2 Translation;
 			public float   Scaling;
+			public Vector2 DeltaTranslation;
+			public float   DeltaScaling;
 		}
 
 		public event EventHandler	Tick;
@@ -407,6 +409,7 @@ namespace Fusion.Engine.Frames {
 		/// <param name="game"></param>
 		void Init ()
 		{
+			IsManipulationEnabled	=	false;
 			Padding			=	0;
 			Visible			=	true;
 			Enabled			=	true;
@@ -670,27 +673,42 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnManipulationStart ( Vector2 translation, float scaling )
+		internal void OnManipulationStart ( Vector2 translation, float scaling, Vector2 deltaTranslation, float deltaScaling )
 		{
 			var handler = ManipulationStart;
 			if (handler!=null) {
-				handler( this, new ManipulationEventArgs(){ Translation = translation, Scaling = scaling } );
+				handler( this, new ManipulationEventArgs(){ 
+					Translation = translation, 
+					Scaling = scaling,
+					DeltaTranslation = deltaTranslation,
+					DeltaScaling = deltaScaling,
+				});
 			}
 		}
 
-		internal void OnManipulationUpdate ( Vector2 translation, float scaling )
+		internal void OnManipulationUpdate ( Vector2 translation, float scaling, Vector2 deltaTranslation, float deltaScaling )
 		{
 			var handler = ManipulationUpdate;
 			if (handler!=null) {
-				handler( this, new ManipulationEventArgs(){ Translation = translation, Scaling = scaling } );
+				handler( this, new ManipulationEventArgs(){ 
+					Translation = translation, 
+					Scaling = scaling,
+					DeltaTranslation = deltaTranslation,
+					DeltaScaling = deltaScaling,
+				});
 			}
 		}
 
-		internal void OnManipulationEnd ( Vector2 translation, float scaling )
+		internal void OnManipulationEnd ( Vector2 translation, float scaling, Vector2 deltaTranslation, float deltaScaling )
 		{
 			var handler = ManipulationEnd;
 			if (handler!=null) {
-				handler( this, new ManipulationEventArgs(){ Translation = translation, Scaling = scaling } );
+				handler( this, new ManipulationEventArgs(){ 
+					Translation = translation, 
+					Scaling = scaling,
+					DeltaTranslation = deltaTranslation,
+					DeltaScaling = deltaScaling,
+				});
 			}
 		}
 

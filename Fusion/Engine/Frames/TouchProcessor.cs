@@ -120,12 +120,10 @@ namespace Fusion.Engine.Frames {
 			}*/
 			touchRecord.Current = location;
 
-			
-			var hoveredFrame = ui.GetHoveredFrame( location );
-
 			//
 			//	Touch :
 			//
+			var hoveredFrame = ui.GetHoveredFrame( location );
 			if ( hoveredFrame == touchRecord.Frame ) {
 				touchRecord.Frame.OnTouchMove( pointerId, location );
 			}
@@ -166,12 +164,15 @@ namespace Fusion.Engine.Frames {
 			//
 			//	Manipulator :
 			//
-			if (!manipulators.ContainsKey(hoveredFrame)) {
-				var m = new Manipulator( hoveredFrame );
-				manipulators.Add( hoveredFrame, m );
-			} 
+			if (hoveredFrame.IsManipulationEnabled) {
+			
+				if (!manipulators.ContainsKey(hoveredFrame)) {
+					var m = new Manipulator( hoveredFrame );
+					manipulators.Add( hoveredFrame, m );
+				} 
 
-			manipulators[hoveredFrame].TouchDown( pointerId, location );
+				manipulators[hoveredFrame].TouchDown( pointerId, location );
+			}
 		}
 
 
@@ -195,21 +196,6 @@ namespace Fusion.Engine.Frames {
 			
 			var hoveredFrame = ui.GetHoveredFrame( location );
 
-			//
-			//	Touch events:
-			//
-			if (hoveredFrame==touchRecord.Frame) {
-
-				touchRecord.Frame.OnTouchUp( pointerId, location );
-				touchRecord.Frame.OnTap( pointerId, location );
-				touchRecord.Frame.OnStatusChanged( FrameStatus.None );
-
-			} else {
-				
-				touchRecord.Frame.OnTouchUp( pointerId, location );
-				touchRecord.Frame.OnStatusChanged( FrameStatus.None );
-
-			}
 
 			//
 			//	Manipulator :
@@ -225,6 +211,29 @@ namespace Fusion.Engine.Frames {
 					m.Stop();
 					manipulators.Remove( touchRecord.Frame );
 				}
+			}
+
+			//	disable Tap after manipulations!
+			bool tap = true;
+			if (m!=null && m.Activated) {
+				tap = false;
+			}
+
+
+			//
+			//	Touch events:
+			//
+			if (hoveredFrame==touchRecord.Frame && tap) {
+
+				touchRecord.Frame.OnTouchUp( pointerId, location );
+				touchRecord.Frame.OnTap( pointerId, location );
+				touchRecord.Frame.OnStatusChanged( FrameStatus.None );
+
+			} else {
+				
+				touchRecord.Frame.OnTouchUp( pointerId, location );
+				touchRecord.Frame.OnStatusChanged( FrameStatus.None );
+
 			}
 		}
 

@@ -311,10 +311,6 @@ namespace Fusion.Drivers.Graphics.Display {
 				touchForm.PointerDown		+= (s,e) => Game.Touch.CallPointerDownEvent( e.PointerID, e.Location );
 				touchForm.PointerUpdate		+= (s,e) => Game.Touch.CallPointerUpdateEvent( e.PointerID, e.Location );
 				touchForm.PointerLostCapture+= (s,e) => Game.Touch.CallPointerLostCapture();
-				touchForm.TouchTap			+= (pos) => Game.InputDevice.NotifyTouchTap(pos);
-				touchForm.TouchDoubleTap	+= (pos) => Game.InputDevice.NotifyTouchDoubleTap(pos);
-				touchForm.TouchSecondaryTap	+= (pos) => Game.InputDevice.NotifyTouchSecondaryTap(pos);
-				touchForm.TouchManipulation	+= (center, delta, scale) => Game.InputDevice.NotifyTouchManipulation(center, delta, scale);
 			}
 
 			ChangeFullscreen( form, parameters.FullScreen );

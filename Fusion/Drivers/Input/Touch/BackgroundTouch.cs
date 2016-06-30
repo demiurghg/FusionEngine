@@ -10,6 +10,7 @@ using Fusion.Core.Mathematics;
 
 namespace Fusion.Input.Touch
 {
+	#if false
     public class BackgroundTouch : BaseTouchHandler
     {
 	    TouchForm touchForm;
@@ -88,4 +89,5 @@ namespace Fusion.Input.Touch
 			}
         }
     }
+	#endif
 }

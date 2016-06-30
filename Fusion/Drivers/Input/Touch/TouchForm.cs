@@ -14,14 +14,6 @@ namespace Fusion.Input.Touch
     {
         #region ** fields
 
-        BackgroundTouch background;
-
-	    public event Action<Vector2> TouchTap;
-		public event Action<Vector2> TouchDoubleTap;
-		public event Action<Vector2> TouchSecondaryTap;
-	    public event Action<Vector2, Vector2, float> TouchManipulation;
-		
-
 		public class TouchEventArgs : EventArgs {
 
 			public TouchEventArgs ( int id, Point location )
@@ -46,8 +38,6 @@ namespace Fusion.Input.Touch
         public TouchForm() : base()
         {
 			Win32TouchFunctions.EnableMouseInPointer(false);
-
-			background = new BackgroundTouch(this);
         }
 
         #endregion
@@ -57,8 +47,6 @@ namespace Fusion.Input.Touch
         protected override void Dispose(bool disposing)
         {
             if (disposing) {
-                background.Dispose();
-                background = null;
             }
             base.Dispose(disposing);
         }
@@ -98,9 +86,6 @@ namespace Fusion.Input.Touch
 					        this.Capture = true;
 				        }
 
-				        background.AddPointer(pointerID);
-				        background.ProcessPointerFrames(pointerID, pi.FrameID);
-
 						var pointerDown = PointerDown;
 						if (pointerDown!=null) {
 							pointerDown( new object(), new TouchEventArgs( pointerID, new Point( pt.X, pt.Y ) ) );
@@ -115,11 +100,6 @@ namespace Fusion.Input.Touch
 					        this.Capture = false;
 				        }
 
-				        if (background.ActivePointers.Contains(pointerID)) {
-					        background.ProcessPointerFrames(pointerID, pi.FrameID);
-					        background.RemovePointer(pointerID);
-				        }
-
 						var pointerUp = PointerUp;
 						if (pointerUp!=null) {
 							pointerUp( new object(), new TouchEventArgs( pointerID, new Point( pt.X, pt.Y ) ) );
@@ -128,10 +108,6 @@ namespace Fusion.Input.Touch
 				        break;
 
 			        case Win32TouchFunctions.WM_POINTERUPDATE:
-
-				        if (background.ActivePointers.Contains(pointerID)) {
-					        background.ProcessPointerFrames(pointerID, pi.FrameID);
-				        }
 
 						var pointerUpdate = PointerUpdate;
 						if (pointerUpdate!=null) {
@@ -143,10 +119,6 @@ namespace Fusion.Input.Touch
 			        case Win32TouchFunctions.WM_POINTERCAPTURECHANGED:
 
 				        this.Capture = false;
-
-				        if (background.ActivePointers.Contains(pointerID)) {
-					        background.StopProcessing();
-				        }
 
 						var pointerLostCapture = PointerLostCapture;
 						if (pointerLostCapture!=null) {
@@ -161,38 +133,5 @@ namespace Fusion.Input.Touch
 		        Log.Warning(e.Message);
 	        }
         }
-
-
-		//public void 
-
-
-	    public void NotifyTap(Vector2 pos)
-	    {
-		    if (TouchTap != null) {
-			    TouchTap(pos);
-		    }
-	    }
-
-	    public void NotifyDoubleTap(Vector2 pos)
-	    {
-		    if (TouchDoubleTap != null) {
-			    TouchDoubleTap(pos);
-		    }
-	    }
-
-	    internal void NotifyTouchManipulation(Vector2 center, Vector2 delta, float scale)
-	    {
-		    if (TouchManipulation != null) {
-			    TouchManipulation(center, delta, scale);
-		    }
-	    }
-
-		internal void NotifyTouchSecondaryTap(Vector2 pos)
-		{
-			if (TouchSecondaryTap != null) {
-				TouchSecondaryTap(pos);
-			}
-		}
-
     }
 }
