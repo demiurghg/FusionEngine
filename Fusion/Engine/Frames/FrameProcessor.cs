@@ -158,6 +158,8 @@ namespace Fusion.Engine.Frames {
 			SuppressLayout	=	suppressLayout;
 			ForceLayout		=	forceLayout;
 
+			touchProcessor.UpdateManipulations( gameTime );
+
 			if (RootFrame!=null) {
 				RootFrame.UpdateInternal( gameTime );
 			}

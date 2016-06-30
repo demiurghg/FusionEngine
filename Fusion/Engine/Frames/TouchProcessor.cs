@@ -22,32 +22,19 @@ namespace Fusion.Engine.Frames {
 		class TouchRecord {
 			public TouchRecord( int id, Point location, Frame frame ) 
 			{
+				Current		=	location;
 				Location	=	location;
 				Frame		=	frame;
 			}
 			public readonly int ID;
 			public readonly Point Location;
+			public Point Current;
 			public readonly Frame Frame;
 		}
 
 
-		class Manipulation {
-
-			public Manipulation ( Frame frame ) 
-			{
-				TargetFrame = frame;
-				TotalTranslation	=	Vector2.Zero;
-				TotalScaling		=	1;
-			}
-
-			public readonly Frame TargetFrame;
-			public Vector2  TotalTranslation;
-			public float    TotalScaling;
-		}
-
-
 		Dictionary<int,TouchRecord> touchRecords = new Dictionary<int,TouchRecord>();
-		Dictionary<Frame,Manipulation> manipulations = new Dictionary<Frame,Manipulation>();
+		Dictionary<Frame,Manipulator> manipulators = new Dictionary<Frame,Manipulator>();
 
 
 		/// <summary>
@@ -75,21 +62,18 @@ namespace Fusion.Engine.Frames {
 
 		void Touch_PointerDown ( object sender, Touch.TouchEventArgs e )
 		{
-			Log.Message("PointerDown:   {0} {1} {2}", e.PointerID, e.Location.X, e.Location.Y );
 			PushFrame( ui.GetHoveredFrame(e.Location), e.PointerID, e.Location );
 		}
 
 
 		void Touch_PointerUp ( object sender, Touch.TouchEventArgs e )
 		{
-			Log.Message("PointerUp:     {0} {1} {2}", e.PointerID, e.Location.X, e.Location.Y );
 			ReleaseFrame( ui.GetHoveredFrame(e.Location), e.PointerID, e.Location );
 		}
 
 
 		void Touch_PointerUpdate ( object sender, Touch.TouchEventArgs e )
 		{
-			Log.Message("PointerUpdate: {0} {1} {2}", e.PointerID, e.Location.X, e.Location.Y );
 			UpdateFrame( e.PointerID, e.Location );
 		}
 
@@ -101,6 +85,18 @@ namespace Fusion.Engine.Frames {
 		 *	Stuff :
 		 * 
 		-----------------------------------------------------------------------------------------*/
+
+		public void UpdateManipulations ( GameTime gameTime )
+		{
+			foreach ( var m in manipulators ) {
+				m.Value.Update();
+			}
+		}
+
+
+
+
+
 
 		/// <summary>
 		/// 
@@ -117,11 +113,29 @@ namespace Fusion.Engine.Frames {
 			if (touchRecord.Frame==null) {
 				return;
 			}
+
+			//	do not call event if location not changed
+			/*if (touchRecord.Current==location) {
+				return;
+			}*/
+			touchRecord.Current = location;
+
 			
 			var hoveredFrame = ui.GetHoveredFrame( location );
 
+			//
+			//	Touch :
+			//
 			if ( hoveredFrame == touchRecord.Frame ) {
 				touchRecord.Frame.OnTouchMove( pointerId, location );
+			}
+
+			//
+			//	Manipulator :
+			//	
+			Manipulator m;
+			if (manipulators.TryGetValue( touchRecord.Frame, out m )) {
+				m.TouchMove( pointerId, location );
 			}
 		}
 
@@ -143,18 +157,21 @@ namespace Fusion.Engine.Frames {
 
 			touchRecords.Add( pointerId, new TouchRecord(pointerId, location, hoveredFrame) ); 
 
-			//	update simple touch :
+			//
+			//	Touch events :
+			//
 			hoveredFrame.OnTouchDown( pointerId, location );
 			hoveredFrame.OnStatusChanged( FrameStatus.Pushed );
 
+			//
+			//	Manipulator :
+			//
+			if (!manipulators.ContainsKey(hoveredFrame)) {
+				var m = new Manipulator( hoveredFrame );
+				manipulators.Add( hoveredFrame, m );
+			} 
 
-			//	update manipulation :
-			if (!manipulations.ContainsKey(hoveredFrame)) {
-				
-				var m = new Manipulation( hoveredFrame );
-				manipulations.Add( m.TargetFrame, m );
-				m.TargetFrame.OnManipulationStart( m.TotalTranslation, m.TotalScaling );
-			}
+			manipulators[hoveredFrame].TouchDown( pointerId, location );
 		}
 
 
@@ -178,7 +195,9 @@ namespace Fusion.Engine.Frames {
 			
 			var hoveredFrame = ui.GetHoveredFrame( location );
 
-
+			//
+			//	Touch events:
+			//
 			if (hoveredFrame==touchRecord.Frame) {
 
 				touchRecord.Frame.OnTouchUp( pointerId, location );
@@ -190,6 +209,22 @@ namespace Fusion.Engine.Frames {
 				touchRecord.Frame.OnTouchUp( pointerId, location );
 				touchRecord.Frame.OnStatusChanged( FrameStatus.None );
 
+			}
+
+			//
+			//	Manipulator :
+			//
+			Manipulator m;
+
+			if (manipulators.TryGetValue( touchRecord.Frame, out m )) {
+				
+				int count = m.TouchUp( pointerId, location );
+				
+				if (count==0) {	
+					Log.Message("Drop manipulator");
+					m.Stop();
+					manipulators.Remove( touchRecord.Frame );
+				}
 			}
 		}
 

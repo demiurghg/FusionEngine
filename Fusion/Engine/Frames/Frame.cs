@@ -71,6 +71,12 @@ namespace Fusion.Engine.Frames {
 		public  bool		IsDoubleClickEnabled { get; set; }
 
 		/// <summary>
+		/// Indicated whether double click enabled on given control.
+		/// Default value is False
+		/// </summary>
+		public  bool		IsManipulationEnabled { get; set; }
+
+		/// <summary>
 		/// 
 		/// </summary>
 		public	ClippingMode	 ClippingMode	{ get; set; }
