@@ -50,7 +50,19 @@ namespace Fusion.Engine.Audio {
 				var DeviceFormat = Device.GetDeviceDetails(0).OutputFormat;
 
                 // Just use the default device.
-                const int deviceId = 0;
+                int deviceId = 0;
+
+				Log.Debug("Audio devices :");
+				for ( int devId = 0; devId < Device.DeviceCount; devId++ ) {
+					var device = Device.GetDeviceDetails( devId );
+
+					if (device.Role == DeviceRole.GlobalDefaultDevice)
+						deviceId = devId;
+
+					Log.Debug( "[{1}] {0}", device.DisplayName, devId );
+					Log.Debug( "    role : {0}", device.Role );
+					Log.Debug( "    id   : {0}", device.DeviceID );
+				}
 
                 if (MasterVoice == null) {
                     // Let windows autodetect number of channels and sample rate.
@@ -64,14 +76,7 @@ namespace Fusion.Engine.Audio {
 
 				var dev3d = Device3D;
 
-				Log.Debug("Audio devices :");
-				for ( int devId = 0; devId < Device.DeviceCount; devId++ ) {
-					var device = Device.GetDeviceDetails( devId );
-
-					Log.Debug( "[{1}] {0}", device.DisplayName, devId );
-					Log.Debug( "    role : {0}", device.Role );
-					Log.Debug( "    id   : {0}", device.DeviceID );
-				}
+				
             }
             catch
             {

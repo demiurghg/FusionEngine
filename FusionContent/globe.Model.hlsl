@@ -72,7 +72,7 @@ VS_OUTPUT VSMain ( VS_INPUT v
 	
 	#ifdef INSTANCED
 		worldMatrix 	= mul(InstData[id].World, worldMatrix);
-		output.Color 	= InstData[id].Color;
+		output.Color 	= InstData[id].Color * v.Color;
 	#endif
 	
 	float4 tempPos 	= mul( float4(v.Position.xyz, 	1), worldMatrix ) + float4(ModelStage.ViewPositionTransparency.xyz, 0);
