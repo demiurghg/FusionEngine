@@ -460,7 +460,7 @@ PS_IN VSMain(uint VertexID : SV_VertexID)
 float diffWeight( float3 color1, float3 color2 )
 {
 	float diff = length( color1 - color2 );
-	return exp( - diff * diff * 20 );
+	return exp( - diff * diff * 5 );
 }
 
 
@@ -468,19 +468,19 @@ float diffWeight( float3 color1, float3 color2 )
 float4 PSMain(PS_IN input) : SV_Target
 {
 	#ifdef BILATERAL
-	
+		//	check: http://www.shellandslate.com/download/fastmedian_5506.pdf
 		float4 color = Source.SampleLevel(SamplerLinearClamp, input.uv, 0) * Weights[0].x;
 		float4 addColor = float4(0, 0, 0, 0);
 		float normalizationTerm = 0;
 		float weight = 0;
-		float3	normalW = normalize( (NormalsSource.Sample( SamplerLinearClamp, input.uv ).xyz)*2 - 1 );
+		float3	normalW = ( (NormalsSource.Sample( SamplerLinearClamp, input.uv ).xyz)*2 - 1 );
 
 		[unroll]
-		for (int i = 1; i < 33; i++) {
+		for (int i = 8; i <25 ; i+=1) {
 
 			float2 locationTexCoord = input.uv + input.texelSize * Weights[i].w;
 			float4 otherColor = Source.SampleLevel(SamplerLinearClamp, locationTexCoord, Weights[i].y);
-			float3 otherNormalW = normalize( (NormalsSource.Sample( SamplerLinearClamp, locationTexCoord ).xyz)*2 - 1 );
+			float3 otherNormalW = ( (NormalsSource.Sample( SamplerLinearClamp, locationTexCoord ).xyz)*2 - 1 );
 
 			weight = Weights[i].x * diffWeight( normalW, otherNormalW );
 

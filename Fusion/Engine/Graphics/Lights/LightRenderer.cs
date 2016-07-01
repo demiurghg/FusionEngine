@@ -322,7 +322,7 @@ namespace Fusion.Engine.Graphics {
 					//	Dispatch particles :
 					//
 					using (new PixEvent("Particle Lighting")) {
-						if (stereoEye!=StereoEye.Right) {
+						if (stereoEye!=StereoEye.Right && !rs.SkipParticles) {
 							int threadGroupCount	=	MathUtil.IntDivUp( ParticleSystem.MaxSimulatedParticles, ParticleSystem.BlockSize );
 							device.PipelineState	=	factory[ (int)LightingFlags.PARTICLES ];
 							device.Dispatch( threadGroupCount, 1, 1 );

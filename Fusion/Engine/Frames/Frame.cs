@@ -71,6 +71,12 @@ namespace Fusion.Engine.Frames {
 		public  bool		IsDoubleClickEnabled { get; set; }
 
 		/// <summary>
+		/// Indicated whether double click enabled on given control.
+		/// Default value is False
+		/// </summary>
+		public  bool		IsManipulationEnabled { get; set; }
+
+		/// <summary>
 		/// 
 		/// </summary>
 		public	ClippingMode	 ClippingMode	{ get; set; }
@@ -268,6 +274,18 @@ namespace Fusion.Engine.Frames {
 			public int	Height;
 		}
 
+		public class TouchEventArgs : EventArgs {
+			public int	 TouchID;
+			public Point Location;
+		}
+
+		public class ManipulationEventArgs : EventArgs {
+			public Vector2 Translation;
+			public float   Scaling;
+			public Vector2 DeltaTranslation;
+			public float   DeltaScaling;
+		}
+
 		public event EventHandler	Tick;
 		public event EventHandler	LayoutChanged;
 		public event EventHandler	Activated;
@@ -283,6 +301,13 @@ namespace Fusion.Engine.Frames {
 		public event EventHandler<StatusEventArgs>	StatusChanged;
 		public event EventHandler<MoveEventArgs>	Move;
 		public event EventHandler<ResizeEventArgs>	Resize;
+		public event EventHandler<TouchEventArgs>	Tap;
+		public event EventHandler<TouchEventArgs>	TouchDown;
+		public event EventHandler<TouchEventArgs>	TouchUp;
+		public event EventHandler<TouchEventArgs>	TouchMove;
+		public event EventHandler<ManipulationEventArgs>	ManipulationStart;
+		public event EventHandler<ManipulationEventArgs>	ManipulationUpdate;
+		public event EventHandler<ManipulationEventArgs>	ManipulationEnd;
 		#endregion
 
 
@@ -384,6 +409,7 @@ namespace Fusion.Engine.Frames {
 		/// <param name="game"></param>
 		void Init ()
 		{
+			IsManipulationEnabled	=	false;
 			Padding			=	0;
 			Visible			=	true;
 			Enabled			=	true;
@@ -529,10 +555,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnClick (Keys key, bool doubleClick)
+		internal void OnClick ( Point location, Keys key, bool doubleClick)
 		{
-			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
-			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
+			int x = location.X - GlobalRectangle.X;
+			int y = location.Y - GlobalRectangle.Y;
 
 			if (doubleClick) {
 				if (DoubleClick!=null) {
@@ -546,10 +572,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnMouseIn ()
+		internal void OnMouseIn ( Point location )
 		{
-			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
-			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
+			int x = location.X - GlobalRectangle.X;
+			int y = location.Y - GlobalRectangle.Y;
 
 			if (MouseIn!=null) {
 				MouseIn(this, new MouseEventArgs(){ Key = Keys.None, X = x, Y = y } );
@@ -557,10 +583,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnMouseMove (int dx, int dy)
+		internal void OnMouseMove ( Point location, int dx, int dy)
 		{
-			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
-			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
+			int x = location.X - GlobalRectangle.X;
+			int y = location.Y - GlobalRectangle.Y;
 
 			if (MouseMove!=null) {
 				MouseMove(this, new MouseEventArgs(){ Key = Keys.None, X = x, Y = y, DX = dx, DY = dy });
@@ -568,10 +594,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnMouseOut ()
+		internal void OnMouseOut ( Point location )
 		{
-			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
-			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
+			int x = location.X - GlobalRectangle.X;
+			int y = location.Y - GlobalRectangle.Y;
 
 			if (MouseOut!=null) {
 				MouseOut(this, new MouseEventArgs(){ Key = Keys.None, X = x, Y = y } );
@@ -579,10 +605,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnMouseDown ( Keys key )
+		internal void OnMouseDown ( Point location, Keys key )
 		{
-			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
-			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
+			int x = location.X - GlobalRectangle.X;
+			int y = location.Y - GlobalRectangle.Y;
 
 			if (MouseDown!=null) {
 				MouseDown( this, new MouseEventArgs(){ Key = key, X = x, Y = y } );
@@ -590,10 +616,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-		internal void OnMouseUp ( Keys key )
+		internal void OnMouseUp ( Point location, Keys key )
 		{
-			int x = Game.InputDevice.MousePosition.X - GlobalRectangle.X;
-			int y = Game.InputDevice.MousePosition.Y - GlobalRectangle.Y;
+			int x = location.X - GlobalRectangle.X;
+			int y = location.Y - GlobalRectangle.Y;
 
 			if (MouseUp!=null) {
 				MouseUp( this, new MouseEventArgs(){ Key = key, X = x, Y = y } );
@@ -607,6 +633,82 @@ namespace Fusion.Engine.Frames {
 				MouseWheel( this, new MouseEventArgs(){ Wheel = wheel } );
 			} else if ( Parent!=null ) {
 				Parent.OnMouseWheel( wheel );
+			}
+		}
+
+
+		internal void OnTap ( int id, Point location )
+		{
+			var handler = Tap;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs(){ TouchID = id, Location = location } );
+			}
+		}
+
+
+		internal void OnTouchDown ( int id, Point location )
+		{
+			var handler = TouchDown;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs(){ TouchID = id, Location = location } );
+			}
+		}
+
+
+		internal void OnTouchUp ( int id, Point location )
+		{
+			var handler = TouchUp;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs(){ TouchID = id, Location = location } );
+			}
+		}
+
+
+		internal void OnTouchMove ( int id, Point location )
+		{
+			var handler = TouchMove;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs(){ TouchID = id, Location = location } );
+			}
+		}
+
+
+		internal void OnManipulationStart ( Vector2 translation, float scaling, Vector2 deltaTranslation, float deltaScaling )
+		{
+			var handler = ManipulationStart;
+			if (handler!=null) {
+				handler( this, new ManipulationEventArgs(){ 
+					Translation = translation, 
+					Scaling = scaling,
+					DeltaTranslation = deltaTranslation,
+					DeltaScaling = deltaScaling,
+				});
+			}
+		}
+
+		internal void OnManipulationUpdate ( Vector2 translation, float scaling, Vector2 deltaTranslation, float deltaScaling )
+		{
+			var handler = ManipulationUpdate;
+			if (handler!=null) {
+				handler( this, new ManipulationEventArgs(){ 
+					Translation = translation, 
+					Scaling = scaling,
+					DeltaTranslation = deltaTranslation,
+					DeltaScaling = deltaScaling,
+				});
+			}
+		}
+
+		internal void OnManipulationEnd ( Vector2 translation, float scaling, Vector2 deltaTranslation, float deltaScaling )
+		{
+			var handler = ManipulationEnd;
+			if (handler!=null) {
+				handler( this, new ManipulationEventArgs(){ 
+					Translation = translation, 
+					Scaling = scaling,
+					DeltaTranslation = deltaTranslation,
+					DeltaScaling = deltaScaling,
+				});
 			}
 		}
 

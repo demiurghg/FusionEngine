@@ -248,6 +248,8 @@
     <Compile Include="Engine\Graphics\VTPage.cs" />
     <Compile Include="Engine\Graphics\VTTileCache.cs" />
     <Compile Include="Engine\Graphics\VTConfig.cs" />
+    <Compile Include="Engine\Frames\Manipulator.cs" />
+    <Compile Include="Engine\Frames\TouchProcessor.cs" />
     <Compile Include="Engine\Graphics\Design\TextureLocationEditor.cs" />
     <Compile Include="Engine\Graphics\Effects\BitonicSort.cs" />
     <Compile Include="Engine\Graphics\Effects\DofSettings.cs" />

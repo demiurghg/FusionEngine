@@ -122,8 +122,6 @@ namespace FScene {
 
 
 
-
-
 		#if false
 		static void ResolveMaterial ( MaterialRef material, string relativeSceneDir, string fullSceneDir )
 		{
@@ -139,10 +137,10 @@ namespace FScene {
 
 				var newMtrl =	new BaseIllum();
 
-				newMtrl.ColorTexture.Path		=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, ""			, newMtrl.ColorTexture.Path		);  
-				newMtrl.SurfaceTexture.Path		=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_surf"	, newMtrl.SurfaceTexture.Path	);  
-				newMtrl.NormalMapTexture.Path	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_local"	, newMtrl.NormalMapTexture.Path	);  
-				newMtrl.EmissionTexture.Path	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_glow"	, newMtrl.EmissionTexture.Path	);  
+				newMtrl.ColorTexture.Path		=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, ""					, newMtrl.ColorTexture.Path		);  
+				newMtrl.SurfaceTexture.Path		=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_surf"			, newMtrl.SurfaceTexture.Path	);  
+				newMtrl.NormalMapTexture.Path	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_local", "_bump"	, newMtrl.NormalMapTexture.Path	);  
+				newMtrl.EmissionTexture.Path	=	ResolveTexture( relativeSceneDir, fullSceneDir, texPath, "_glow"			, newMtrl.EmissionTexture.Path	);  
 
 				File.WriteAllText( mtrlFileName, BaseIllum.ExportToXml(newMtrl) );
 			}

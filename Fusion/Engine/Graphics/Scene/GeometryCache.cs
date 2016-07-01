@@ -188,14 +188,15 @@ namespace Fusion.Engine.Graphics {
                         vertexData.Normal = reader.Read<Vector3>();
                         vertexData.Tangent = reader.Read<Vector3>();
                         vertexData.Binormal = reader.Read<Vector3>();
-                        reader.Read<Half4>();
-                        vertexData.Color0 = Color.Red;
+
+                        vertexData.Color0 = new Color(reader.Read<Half4>());
                         vertexDataList.Add(vertexData);
                     }
                     framesList.Add(vertexDataList);
                 }
                 // fill vertex buffer for first iteration
-                Update();
+                IsSkinned = framesList[currentFrame].Any(v => v.SkinIndices != Int4.Zero);
+                vertexBuffer = new VertexBuffer(rs.Game.GraphicsDevice, typeof(MeshVertex), VertexCount);
             }
         }
 
@@ -203,9 +204,6 @@ namespace Fusion.Engine.Graphics {
         {
             if (framesList == null || framesList.Count <= 0)
                 return;
-
-            IsSkinned = framesList[currentFrame].Any(v => v.SkinIndices != Int4.Zero);
-            vertexBuffer = new VertexBuffer(rs.Game.GraphicsDevice, typeof(MeshVertex), VertexCount);
             vertexBuffer.SetData(framesList[currentFrame].ToArray());
             currentFrame++;
             if (currentFrame >= framesList.Count)

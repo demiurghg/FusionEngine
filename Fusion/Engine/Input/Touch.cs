@@ -13,10 +13,28 @@ namespace Fusion.Engine.Input
 	{
 		InputDevice device;
 
-		public event TouchTapEventHandler	Tap;
-		public event TouchTapEventHandler	DoubleTap;
-		public event TouchTapEventHandler	SecondaryTap;
-		public event TouchManipulateHandler Manipulate;
+		//public event TouchTapEventHandler	Tap;
+		//public event TouchTapEventHandler	DoubleTap;
+		//public event TouchTapEventHandler	SecondaryTap;
+		//public event TouchManipulateHandler Manipulate;
+
+		public class TouchEventArgs : EventArgs {
+
+			public TouchEventArgs ( int id, Point location )
+			{
+				PointerID	=	id;
+				Location	=	location;
+			}
+			
+			public int PointerID;
+			public Point Location;
+		}
+
+		public event EventHandler<TouchEventArgs> PointerDown;
+		public event EventHandler<TouchEventArgs> PointerUp;
+		public event EventHandler<TouchEventArgs> PointerUpdate;
+
+
 
 		/// <summary>
 		/// 
@@ -26,13 +44,13 @@ namespace Fusion.Engine.Input
 		{
 			this.device = Game.InputDevice;
 
-			device.TouchGestureTap			+= DeviceOnTouchGestureTap;
-			device.TouchGestureDoubleTap	+= DeviceOnTouchGestureDoubleTap;
-			device.TouchGestureSecondaryTap += DeviceOnTouchGestureSecondaryTap;
-			device.TouchGestureManipulate	+= DeviceOnTouchGestureManipulate;
+			//device.TouchGestureTap			+= DeviceOnTouchGestureTap;
+			//device.TouchGestureDoubleTap	+= DeviceOnTouchGestureDoubleTap;
+			//device.TouchGestureSecondaryTap += DeviceOnTouchGestureSecondaryTap;
+			//device.TouchGestureManipulate	+= DeviceOnTouchGestureManipulate;
 		}
 
-		private void DeviceOnTouchGestureManipulate(Vector2 center, Vector2 delta, float scale)
+		/*private void DeviceOnTouchGestureManipulate(Vector2 center, Vector2 delta, float scale)
 		{
 			if (Manipulate != null)
 				Manipulate(center, delta, scale);
@@ -54,7 +72,7 @@ namespace Fusion.Engine.Input
 		{
 			if (Tap != null)
 				Tap(point);
-		}
+		} */
 
 
 		/// <summary>
@@ -73,13 +91,46 @@ namespace Fusion.Engine.Input
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-				device.TouchGestureTap			-= DeviceOnTouchGestureTap;
-				device.TouchGestureDoubleTap	-= DeviceOnTouchGestureDoubleTap;
-				device.TouchGestureSecondaryTap -= DeviceOnTouchGestureSecondaryTap;
-				device.TouchGestureManipulate	-= DeviceOnTouchGestureManipulate;
+				//device.TouchGestureTap			-= DeviceOnTouchGestureTap;
+				//device.TouchGestureDoubleTap	-= DeviceOnTouchGestureDoubleTap;
+				//device.TouchGestureSecondaryTap -= DeviceOnTouchGestureSecondaryTap;
+				//device.TouchGestureManipulate	-= DeviceOnTouchGestureManipulate;
 			}
 
 			base.Dispose( disposing );
+		}
+
+
+		internal void CallPointerUpEvent ( int pointerId, Point location )
+		{
+			var handler = PointerUp;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs( pointerId, location ) );
+			}
+		}
+
+		internal void CallPointerDownEvent ( int pointerId, Point location )
+		{
+			var handler = PointerDown;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs( pointerId, location ) );
+			}
+		}
+
+		internal void CallPointerUpdateEvent ( int pointerId, Point location )
+		{
+			var handler = PointerUpdate;
+			if (handler!=null) {
+				handler( this, new TouchEventArgs( pointerId, location ) );
+			}
+		}
+
+		internal void CallPointerLostCapture ()
+		{
+			//var handler = PointerLostCapture;
+			//if (handler!=null) {
+			//	handler( this, EventArgs.Empty );
+			//}
 		}
 
 

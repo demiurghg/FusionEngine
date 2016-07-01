@@ -120,6 +120,11 @@ namespace Fusion.Engine.Graphics {
 				return;
 			}
 
+			if (Game.RenderSystem.SkipDebugRendering) {
+				vertexDataAccum.Clear();	
+				return;
+			}
+
 			var dev = Game.GraphicsDevice;
 			dev.ResetStates();
 

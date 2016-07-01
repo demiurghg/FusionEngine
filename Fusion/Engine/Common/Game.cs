@@ -788,7 +788,8 @@ namespace Fusion.Engine.Common {
 			//	Disconnect!
 
 			if (GameClient!=null) {
-				GameServer.StartInternal( map, postCmd );
+				GameServer.StartInternal( map, null );
+				GameClient.ConnectInternal( "127.0.0.1", Network.Port );
 			} else {
 				GameServer.StartInternal( map, null );
 			}
