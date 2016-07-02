@@ -45,12 +45,12 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
-		/// 
+		/// Translates virtual texture address to physical rectangle in physical texture.
 		/// </summary>
 		/// <param name="address"></param>
 		/// <param name="rectangle"></param>
-		/// <returns></returns>
-		public bool Translate ( VTAddress address, out Rectangle rectangle )
+		/// <returns>False if address is not presented in cache</returns>
+		public bool TranslateAddress ( VTAddress address, out Rectangle rectangle )
 		{
 			Page page;
 

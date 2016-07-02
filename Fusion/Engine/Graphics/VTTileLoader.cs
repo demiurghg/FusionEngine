@@ -14,6 +14,10 @@ using Fusion.Engine.Imaging;
 using System.Threading;
 
 namespace Fusion.Engine.Graphics {
+
+	/// <summary>
+	/// 
+	/// </summary>
 	internal class VTTileLoader {
 
 		readonly string baseDirectory;
@@ -88,6 +92,9 @@ namespace Fusion.Engine.Graphics {
 
 
 
+		/// <summary>
+		/// Functionas running in separate thread
+		/// </summary>
 		void LoaderTask ()
 		{
 			while (!cancelToken.IsCancellationRequested) {

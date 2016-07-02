@@ -50,12 +50,13 @@ struct GBuffer {
 	float4	scattering	: SV_Target4;
 };
 
-cbuffer 		CBBatch 	: 	register(b0) { BATCH    Batch      : packoffset( c0 ); }	
-cbuffer 		CBLayer 	: 	register(b1) { MATERIAL Material   : packoffset( c0 ); }	
-cbuffer 		CBLayer 	: 	register(b2) { float4   UVMods[16] : packoffset( c0 ); }	
-cbuffer 		CBBatch 	: 	register(b3) { float4x4 Bones[128] : packoffset( c0 ); }	
-SamplerState	Sampler		: 	register(s0);
-Texture2D		Textures[4]: 	register(t0);
+cbuffer 		CBBatch 		: 	register(b0) { BATCH    Batch      : packoffset( c0 ); }	
+cbuffer 		CBLayer 		: 	register(b1) { MATERIAL Material   : packoffset( c0 ); }	
+cbuffer 		CBLayer 		: 	register(b2) { float4   UVMods[16] : packoffset( c0 ); }	
+cbuffer 		CBBatch 		: 	register(b3) { float4x4 Bones[128] : packoffset( c0 ); }	
+SamplerState	Sampler			: 	register(s0);
+SamplerState	SamplerPoint	: 	register(s1);
+Texture2D		Textures[4]		: 	register(t0);
 
 #ifdef _UBERSHADER
 $ubershader GBUFFER RIGID|SKINNED
@@ -234,6 +235,7 @@ GBuffer PSMain( PSInput input )
 	surface.Emission 	= 	0;
 
 	surface.Diffuse		=	Textures[0].Sample( Sampler, input.TexCoord ).rgba;
+	surface.Diffuse		=	Textures[1].Sample( SamplerPoint, input.TexCoord ).rgba;
 	
 	//	NB: Multiply normal length by local normal projection on surface normal.
 	//	Shortened normal will be used as Fresnel decay (self occlusion) factor.

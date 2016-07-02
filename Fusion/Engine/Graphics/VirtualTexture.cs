@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
+using Fusion.Core.Extensions;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 
@@ -60,10 +61,13 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize ()
 		{
-			int size		=	VTConfig.PhysicalPageCount * VTConfig.PageSize;
-			PhysicalPages	=	new Texture2D( rs.Device, size, size, ColorFormat.Rgba8_sRGB, false, true );
+			int physSize	=	VTConfig.PhysicalPageCount * VTConfig.PageSize;
+			int tableSize	=	VTConfig.PageCount;
+			PhysicalPages	=	new Texture2D( rs.Device, physSize, physSize, ColorFormat.Rgba8_sRGB, false, true );
+			PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Bgra8, false, false );
 
-			//PageTable		=	new Texture2D( rs.Device, 
+			var rand = new Random();
+			PageTable.SetData( Enumerable.Range(0,tableSize*tableSize).Select( i => rand.NextColor() ).ToArray() );
 		}
 
 
@@ -178,7 +182,7 @@ namespace Fusion.Engine.Graphics {
 
 						Rectangle rect;
 
-						if (tileCache.Translate( tile.Address, out rect )) {
+						if (tileCache.TranslateAddress( tile.Address, out rect )) {
 							PhysicalPages.SetData( 0, rect, tile.Data, 0, tile.Data.Length );
 						}
 

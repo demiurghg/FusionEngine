@@ -186,11 +186,14 @@ namespace Fusion.Engine.Graphics {
 
 				device.SetTargets( depth, hdr, diffuse, specular, normals, scattering );
 				device.PixelShaderSamplers[0]	= SamplerState.LinearClamp ;
+				device.PixelShaderSamplers[1]	= SamplerState.PointClamp;
 
 				var instances	=	rw.Instances;
 
 				if (instances.Any()) {
 					device.PixelShaderResources[0]	= rs.VirtualTexture.FallbackTexture.Srv;
+					device.PixelShaderResources[1]	= rs.VirtualTexture.PageTable;
+					device.PixelShaderResources[2]	= rs.VirtualTexture.PhysicalPages;
 				}
 
 				//#warning INSTANSING!

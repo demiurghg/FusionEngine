@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace Fusion.Engine.Graphics {
 
+	/// <summary>
+	/// Represents the address of virtual texture tile.
+	/// Address consist of page X index, page Y index & mip level.
+	/// Non-zero dummy used for GPU readback. Zero dummy is ignored.
+	/// </summary>
 	public struct VTAddress : IEquatable<VTAddress> {
 		public Int16 PageX;
 		public Int16 PageY;
