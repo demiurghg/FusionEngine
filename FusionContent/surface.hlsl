@@ -234,8 +234,37 @@ GBuffer PSMain( PSInput input )
 	surface.Normal		= 	float3(0,0,1);
 	surface.Emission 	= 	0;
 
-	surface.Diffuse		=	Textures[0].Sample( Sampler, input.TexCoord ).rgba;
-	surface.Diffuse		=	Textures[1].Sample( SamplerPoint, input.TexCoord ).rgba;
+	//
+	//	Virtual texturing stuff :
+	//-----------------------------------
+	
+	float2 vtexTC		=	input.TexCoord;
+	
+	float4 fallback		=	Textures[0].Sample( Sampler, input.TexCoord ).rgba;
+	float4 physPageTC	=	Textures[1].Sample( SamplerPoint, input.TexCoord ).xyzw;
+	float4 color		=	fallback;
+	
+	float VTVirtualPageCount	=	128;
+	float VTPhysicalPageCount	=	8;
+	
+	if (physPageTC.w>0) {
+		float2 	withinPageTC	=	vtexTC * VTVirtualPageCount / exp2( physPageTC.z );
+				withinPageTC	=	frac( withinPageTC );
+				withinPageTC	=	withinPageTC / VTPhysicalPageCount;
+		
+		float2	finalTC			=	physPageTC + withinPageTC;
+		
+		color			=	Textures[2].Sample( SamplerPoint, finalTC ).rgba;
+		
+		//color			=	physPageTC;
+	}
+	
+	//-----------------------------------
+	//	End of virtual texturing stuff
+	//
+	
+	surface.Diffuse		=	color ;
+	//surface.Diffuse		=	Textures[1].Sample( SamplerPoint, input.TexCoord ).rgba;
 	
 	//	NB: Multiply normal length by local normal projection on surface normal.
 	//	Shortened normal will be used as Fresnel decay (self occlusion) factor.

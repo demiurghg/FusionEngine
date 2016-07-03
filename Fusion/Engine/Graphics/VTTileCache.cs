@@ -22,12 +22,18 @@ namespace Fusion.Engine.Graphics {
 
 		class Page {
 			
-			public Page ( int address )
+			public Page ( int address, int physPageCount, VTAddress va )
 			{
+				this.VA			=	va;
 				this.Address	=	address;
+				this.X			=	(address % physPageCount) / (float)physPageCount;
+				this.Y			=	(address / physPageCount) / (float)physPageCount;
 			}
 			
+			public readonly VTAddress VA;
 			public readonly int Address;
+			public readonly float X;
+			public readonly float Y;
 		}
 
 
@@ -39,6 +45,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			this.capacity	=	size * size;
 			table			=	new Page[capacity];
+			//mapping			=	new Page[VTConfig.PageCount * VTConfig.PageCount];
 			dictionary		=	new Dictionary<VTAddress,Page>(capacity);
 		}
 
@@ -68,10 +75,49 @@ namespace Fusion.Engine.Graphics {
 				return true;
 
 			} else {
-
+			
 				rectangle	=	new Rectangle();
 				return false;
 			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public Vector4[] GetPageTableData ()
+		{
+			Vector4[] mapping = new Vector4[VTConfig.PageCount * VTConfig.PageCount];
+
+			int vpc = VTConfig.PageCount;
+
+			var pairList = dictionary
+				.OrderByDescending( pair => pair.Key.MipLevel )
+				.ToArray();
+
+			foreach ( var pair in pairList ) {
+
+				var va	=	pair.Key;
+				var pa	=	pair.Value;
+				var sz	=	1 << va.MipLevel;
+
+				for ( int x=0; x<sz; x++ ) {
+					for ( int y=0; y<sz; y++ ) {
+
+						int vaX = va.PageX * sz + x;
+						int vaY = va.PageY * sz + y;
+
+						int addr = vaX + vpc * vaY;
+
+						mapping[ addr ] = new Vector4( pa.X, pa.Y, va.MipLevel, 1 );
+
+					}
+				}
+			}
+
+			return mapping;
 		}
 
 
@@ -90,22 +136,27 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="address"></param>
 		/// <returns></returns>
-		public bool Add ( VTAddress address, out int physicalAddress )
+		public bool Add ( VTAddress virtualAddress, out int physicalAddress )
 		{
 			Page page;
 
-			if (dictionary.TryGetValue(address, out page)) {
+			if (dictionary.TryGetValue(virtualAddress, out page)) {
 
 				physicalAddress	=	 page.Address;
 				return false;
 
 			} else {
 
-				page				=	new Page( counter );
+				page				=	new Page( counter, VTConfig.PhysicalPageCount, virtualAddress );
+
+				if (table[counter]!=null) {
+					dictionary.Remove( table[counter].VA );
+				}
+
 				table[ counter ]	=	page;
 				counter				=	(counter+1) % capacity;
 
-				dictionary.Add( address, page );
+				dictionary.Add( virtualAddress, page );
 
 				physicalAddress		=	page.Address;
 

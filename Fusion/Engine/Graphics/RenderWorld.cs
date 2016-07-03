@@ -444,6 +444,10 @@ namespace Fusion.Engine.Graphics {
 				rs.Filter.Copy( targetSurface, rs.VirtualTexture.PhysicalPages );
 				return;
 			}
+			if (rs.VirtualTexture.ShowPageTexture) {
+				rs.Filter.Copy( targetSurface, rs.VirtualTexture.PageTable );
+				return;
+			}
 
 			//	render sky :
 			rs.Sky.Render( Camera, stereoEye, viewHdrFrame, SkySettings );

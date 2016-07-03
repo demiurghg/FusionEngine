@@ -30,6 +30,9 @@ namespace Fusion.Engine.Graphics {
 		[Config]
 		public bool ShowPhysicalTextures { get; set; }
 
+		[Config]
+		public bool ShowPageTexture { get; set; }
+
 
 		public UserTexture	FallbackTexture;
 
@@ -64,10 +67,10 @@ namespace Fusion.Engine.Graphics {
 			int physSize	=	VTConfig.PhysicalPageCount * VTConfig.PageSize;
 			int tableSize	=	VTConfig.PageCount;
 			PhysicalPages	=	new Texture2D( rs.Device, physSize, physSize, ColorFormat.Rgba8_sRGB, false, true );
-			PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Bgra8, false, false );
+			PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Rgba32F, false, false );
 
 			var rand = new Random();
-			PageTable.SetData( Enumerable.Range(0,tableSize*tableSize).Select( i => rand.NextColor() ).ToArray() );
+			PageTable.SetData( Enumerable.Range(0,tableSize*tableSize).Select( i => rand.NextColor4() ).ToArray() );
 		}
 
 
@@ -173,7 +176,7 @@ namespace Fusion.Engine.Graphics {
 			//
 			//	update table :
 			//
-			if (tileLoader!=null) {
+			if (tileLoader!=null && tileCache!=null) {
 				for (int i=0; i<MaxPPF; i++) {
 				
 					VTTile tile;
@@ -189,12 +192,11 @@ namespace Fusion.Engine.Graphics {
 					}
 
 				}
+
+
+				//	update page table :
+				PageTable.SetData( tileCache.GetPageTableData() );
 			}
-
-
-			//
-			//	patch physical texture with loaded tiles :
-			//
 		}
 	}
 }
