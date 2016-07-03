@@ -40,8 +40,7 @@ namespace Fusion.Engine.Audio {
 		/// </summary>
         public override void Initialize()
         {
-            try
-            {
+            try {
                 if (Device == null) {
                     Device = new XAudio2(XAudio2Flags.None, ProcessorSpecifier.DefaultProcessor);
                     Device.StartEngine();
@@ -74,12 +73,7 @@ namespace Fusion.Engine.Audio {
                 var deviceDetails = Device.GetDeviceDetails(deviceId);
                 Speakers = deviceDetails.OutputFormat.ChannelMask;
 
-				var dev3d = Device3D;
-
-				
-            }
-            catch
-            {
+            } catch {
                 // Release the device and null it as
                 // we have no audio support.
                 if (Device != null)
@@ -144,6 +138,8 @@ namespace Fusion.Engine.Audio {
 		/// </summary>
 		internal void Update ( GameTime gameTime )
 		{
+			if (Device == null || SoundWorld == null) return;
+
 			SoundWorld.Update( gameTime, OperationSetCounter );
 
 			Device.CommitChanges( OperationSetCounter );

@@ -407,7 +407,7 @@ namespace Fusion.Engine.Common {
 
 			GraphicsDevice.Initialize( p );
 			InputDevice.Initialize();
-			SoundSystem.Initialize();
+			//SoundSystem.Initialize();
 
 			//	init game :
 			Log.Message("");
@@ -588,7 +588,7 @@ namespace Fusion.Engine.Common {
 				//
 				//	Sound :
 				//
-				SoundSystem.Update( gameTimeInternal );
+				//SoundSystem.Update( gameTimeInternal );
 
 				//
 				//	Render :

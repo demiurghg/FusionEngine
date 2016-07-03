@@ -54,9 +54,11 @@ namespace Fusion.Drivers.Graphics {
 		/// </summary>
 		public bool FullScreen  { 
 			get { return display.Fullscreen; } 
-			set { 
-				lock (deviceContext) {
-					display.Fullscreen = value; 
+			set {
+				if (deviceContext != null) {
+					lock (deviceContext) {
+						display.Fullscreen = value;
+					}
 				}
 			} 
 		}
