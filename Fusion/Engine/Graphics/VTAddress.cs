@@ -41,13 +41,6 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-        /// <summary>
-        /// Determines whether the specified <see cref="Vector4"/> is equal to this instance.
-        /// </summary>
-        /// <param name="other">The <see cref="Vector4"/> to compare with this instance.</param>
-        /// <returns>
-        /// <c>true</c> if the specified <see cref="Vector4"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
         private bool Equals(ref VTAddress other)
         {
             return	( other.PageX == PageX	) &&

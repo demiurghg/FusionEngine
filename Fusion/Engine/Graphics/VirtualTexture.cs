@@ -65,7 +65,7 @@ namespace Fusion.Engine.Graphics {
 		public override void Initialize ()
 		{
 			int physSize	=	VTConfig.PhysicalPageCount * VTConfig.PageSize;
-			int tableSize	=	VTConfig.PageCount;
+			int tableSize	=	VTConfig.VirtualPageCount;
 			PhysicalPages	=	new Texture2D( rs.Device, physSize, physSize, ColorFormat.Rgba8_sRGB, false, true );
 			PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Rgba32F, false, false );
 
@@ -134,7 +134,7 @@ namespace Fusion.Engine.Graphics {
 			List<VTAddress> feedbackTree = new List<VTAddress>();
 
 			//	
-			//	build tree :
+			//	Build tree :
 			//
 			foreach ( var addr in feedback ) {
 
@@ -150,7 +150,7 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			//
-			//	distinct :
+			//	Distinct :
 			//	
 			feedbackTree = feedbackTree
 			//	.Where( p0 => cache.Contains(p0) )
@@ -158,8 +158,18 @@ namespace Fusion.Engine.Graphics {
 				.OrderBy( p1 => p1.MipLevel )
 				.ToList();//*/
 
+
 			//
-			//	put into cache :
+			//	Detect thrashing :
+			//	TODO : get highest mip, remove them, repeat until no thrashing occur.
+			//
+			if (feedbackTree.Count >= VTConfig.PhysicalPageCount * VTConfig.PhysicalPageCount ) {
+				Log.Warning("Thrashing detected - requested {0} tiles", feedbackTree.Count);
+			}
+
+
+			//
+			//	Put into cache :
 			//
 			foreach ( var addr in feedbackTree ) {
 				
@@ -170,6 +180,8 @@ namespace Fusion.Engine.Graphics {
 					Log.Message("...vt tile cache: {0} --> {1}", addr, physAddr );
 
 					tileLoader.RequestTile( addr );
+
+					//
 				}
 			}
 
@@ -185,7 +197,7 @@ namespace Fusion.Engine.Graphics {
 
 						Rectangle rect;
 
-						if (tileCache.TranslateAddress( tile.Address, out rect )) {
+						if (tileCache.TranslateAddress( tile.VirtualAddress, out rect )) {
 							PhysicalPages.SetData( 0, rect, tile.Data, 0, tile.Data.Length );
 						}
 

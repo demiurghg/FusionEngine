@@ -15,15 +15,26 @@ using System.Threading;
 
 
 namespace Fusion.Engine.Graphics {
+
+	/// <summary>
+	/// Represents image data of particular tile.
+	/// </summary>
 	internal class VTTile {
 
 		Image image;
 
-		public VTAddress Address { 
+		/// <summary>
+		/// Virtual address of given tile.
+		/// </summary>
+		public VTAddress VirtualAddress { 
 			get; private set;
 		}
 
 
+
+		/// <summary>
+		/// Gets image data as RGBA8 array.
+		/// </summary>
 		public Color[] Data {
 			get {
 				return image.RawImageData;
@@ -38,7 +49,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="stream"></param>
 		public VTTile ( VTAddress address, Stream stream )
 		{
-			this.Address	=	address;
+			this.VirtualAddress	=	address;
 			image			=	Image.LoadTga( stream );
 		}
 		

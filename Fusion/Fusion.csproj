@@ -245,7 +245,6 @@
     <Compile Include="Engine\Common\UserInterface.Internal.cs" />
     <Compile Include="Engine\Graphics\VTTile.cs" />
     <Compile Include="Engine\Graphics\VTTileLoader.cs" />
-    <Compile Include="Engine\Graphics\VTPage.cs" />
     <Compile Include="Engine\Graphics\VTTileCache.cs" />
     <Compile Include="Engine\Graphics\VTConfig.cs" />
     <Compile Include="Engine\Frames\Manipulator.cs" />

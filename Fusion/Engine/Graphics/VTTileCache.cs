@@ -89,9 +89,9 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		public Vector4[] GetPageTableData ()
 		{
-			Vector4[] mapping = new Vector4[VTConfig.PageCount * VTConfig.PageCount];
+			Vector4[] mapping = new Vector4[VTConfig.VirtualPageCount * VTConfig.VirtualPageCount];
 
-			int vpc = VTConfig.PageCount;
+			int vpc = VTConfig.VirtualPageCount;
 
 			var pairList = dictionary
 				.OrderByDescending( pair => pair.Key.MipLevel )

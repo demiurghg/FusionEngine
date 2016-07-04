@@ -17,7 +17,7 @@ namespace Fusion.Build.Mapping {
 
 		public const int VTPageSize	=	VTConfig.PageSize;
 		public const int VTSize		=	VTConfig.TextureSize;
-		public const int VTPageNum	=	VTConfig.PageCount;
+		public const int VTPageNum	=	VTConfig.VirtualPageCount;
 		public const int VTMips		=	VTConfig.MipCount;
 
 

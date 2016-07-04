@@ -15,8 +15,8 @@ namespace Fusion.Engine.Graphics {
 	public static class VTConfig {
 
 		public const int PageSize			=	128;
-		public const int PageCount			=	128;
-		public const int TextureSize		=	PageSize * PageCount;
+		public const int VirtualPageCount	=	128;
+		public const int TextureSize		=	PageSize * VirtualPageCount;
 		public const int MipCount			=	6;
 		public const int MaxMipLevel		=	MipCount - 1;
 
