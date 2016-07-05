@@ -253,6 +253,15 @@
     <Compile Include="Engine\Graphics\GIS\LasPointsCloud.cs" />
     <Compile Include="Engine\Graphics\GIS\PointsGisLayerCPU.cs" />
     <Compile Include="Engine\Graphics\GIS\TextGisLayer.cs" />
+    <Compile Include="Engine\Graphics\Graph\CalculationSystem.cs" />
+    <Compile Include="Engine\Graphics\Graph\CalculationSystemFixed.cs" />
+    <Compile Include="Engine\Graphics\Graph\Graph.cs" />
+    <Compile Include="Engine\Graphics\Graph\GraphColorConstant.cs" />
+    <Compile Include="Engine\Graphics\Graph\GraphConfig.cs" />
+    <Compile Include="Engine\Graphics\Graph\GraphReader.cs" />
+    <Compile Include="Engine\Graphics\Graph\GreatCircleCamera.cs" />
+    <Compile Include="Engine\Graphics\Graph\LayoutSystem.cs" />
+    <Compile Include="Engine\Graphics\Graph\GraphLayer.cs" />
     <Compile Include="Engine\Graphics\Lights\CascadedShadowMap.cs" />
     <Compile Include="Engine\Graphics\Lights\LightRenderer.CSMController.cs" />
     <Compile Include="Engine\Graphics\Lights\ICSMController.cs" />

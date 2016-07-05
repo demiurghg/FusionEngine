@@ -20,6 +20,7 @@ using Fusion.Core.Shell;
 using System.IO;
 using Fusion.Engine.Media;
 using Fusion.Engine.Audio;
+using Fusion.Engine.Graphics.Graph;
 
 namespace GISTest {
 
@@ -72,7 +73,6 @@ namespace GISTest {
 		RenderWorld		masterView;
 		RenderLayer		viewLayer;
 		SoundWorld		soundWorld;
-		TargetTexture	targetTexture;
 		DiscTexture		debugFont;
 
 		TilesGisLayer	tiles;
@@ -88,6 +88,8 @@ namespace GISTest {
 		PointsGisLayerCPU	pointsCPU;
 		PointsGisLayer		pointsGPU;
 
+
+		private GraphLayer graph;
 
 		/// <summary>
 		/// Ctor
@@ -109,7 +111,7 @@ namespace GISTest {
 		/// </summary>
 		public override void Initialize ()
 		{
-			debugFont		=	Game.Content.Load<DiscTexture>("conchars");
+			debugFont		=	Game.Content.Load<DiscTexture>( "conchars" );
 
 			var bounds		=	Game.RenderSystem.DisplayBounds;
 			masterView		=	Game.RenderSystem.RenderWorld;
@@ -124,15 +126,18 @@ namespace GISTest {
 			//	masterView.Resize( Game.RenderSystem.DisplayBounds.Width, Game.RenderSystem.DisplayBounds.Height );
 			//};
 
-			targetTexture		=	new TargetTexture(Game.RenderSystem, bounds.Width, bounds.Height, TargetFormat.LowDynamicRange );
 
 			testLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
 			uiLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
 
+
+			// Setup tiles
 			tiles = new TilesGisLayer(Game, viewLayer.GlobeCamera);
-			viewLayer.GisLayers.Add(tiles);
+			//viewLayer.GisLayers.Add(tiles);
 			tiles.SetMapSource(TilesGisLayer.MapSource.OpenStreetMap);
 
+			
+			
 			text = new TextGisLayer(Game, 100, viewLayer.GlobeCamera);
 			//masterView.GisLayers.Add(text);
 
@@ -181,7 +186,7 @@ namespace GISTest {
 				pointsGPU.PointsCpu[i] = new Gis.GeoPoint {
 					Lon = pos.X,
 					Lat = pos.Y,
-					Color = Color4.White,
+					Color = Color.White,
 					Tex0 = new Vector4(0, 0, 1.02f, 0)
 				};
 			}
@@ -189,11 +194,25 @@ namespace GISTest {
 			pointsGPU.Flags = (int)(PointsGisLayer.PointFlags.DOTS_SCREENSPACE);
 
 			pointsGPU.UpdatePointsBuffer();
-			viewLayer.GisLayers.Add(pointsGPU);
+			//viewLayer.GisLayers.Add(pointsGPU);
 
 
 			viewLayer.GlobeCamera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
 			viewLayer.GlobeCamera.CameraDistance = GeoHelper.EarthRadius + 5;
+
+
+			Game.Touch.Tap			+= args => System.Console.WriteLine("You just perform tap gesture at point: " + args.Position);
+			Game.Touch.DoubleTap	+= args => System.Console.WriteLine("You just perform double tap gesture at point: " + args.Position);
+			Game.Touch.SecondaryTap += args => System.Console.WriteLine("You just perform secondary tap gesture at point: " + args.Position);
+			Game.Touch.Manipulate	+= args => System.Console.WriteLine("You just perform touch manipulation: " + args.Position + "	" + args.ScaleDelta + "	" + args.RotationDelta + " " + args.IsEventBegin + " " + args.IsEventEnd);
+
+
+			graph = new GraphLayer(Game);
+			graph.Camera = new GreatCircleCamera();
+			
+			graph.Initialize();
+
+			viewLayer.GraphLayers.Add(graph);
 		}
 
 
@@ -227,7 +246,11 @@ namespace GISTest {
 
 				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
-				SafeDispose( ref targetTexture );
+				tiles.Dispose();
+				masterView.Dispose();
+				pointsGPU.Dispose();
+				text.Dispose();
+				viewLayer.Dispose();
 			}
 			base.Dispose( disposing );
 		}
