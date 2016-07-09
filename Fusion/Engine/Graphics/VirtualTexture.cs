@@ -33,6 +33,9 @@ namespace Fusion.Engine.Graphics {
 		[Config]
 		public bool ShowPageTexture { get; set; }
 
+		[Config]
+		public bool ShowTileBorder { get; set; }
+
 
 		public UserTexture	FallbackTexture;
 
@@ -200,6 +203,8 @@ namespace Fusion.Engine.Graphics {
 					if (tileLoader.TryGetTile( out tile )) {
 
 						Rectangle rect;
+
+						tile.DrawBorder( ShowTileBorder );
 
 						if (tileCache.TranslateAddress( tile.VirtualAddress, out rect )) {
 							PhysicalPages.SetData( 0, rect, tile.Data, 0, tile.Data.Length );

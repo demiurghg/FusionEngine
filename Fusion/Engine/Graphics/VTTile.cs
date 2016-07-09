@@ -52,6 +52,23 @@ namespace Fusion.Engine.Graphics {
 			this.VirtualAddress	=	address;
 			image			=	Image.LoadTga( stream );
 		}
+
+
+		public void DrawBorder (bool draw)
+		{
+			if (!draw) {
+				return;
+			}
+
+			int size = VTConfig.PageSize;
+
+			for (int i=0; i<size; i++) {
+				image.Write( 0,      i, Color.Red );
+				image.Write( size-1, i, Color.Red );
+				image.Write( i, 0,      Color.Red );
+				image.Write( i, size-1, Color.Red );
+			}
+		}
 		
 	}
 }

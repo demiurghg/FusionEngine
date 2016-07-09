@@ -118,7 +118,9 @@ namespace Fusion.Engine.Graphics {
 
 						int addr = vaX + vpc * vaY;
 
-						mapping[ addr ] = new Vector4( pa.X, pa.Y, va.MipLevel, 1 );
+						float minMip	=	va.MipLevel;
+
+						mapping[ addr ] = new Vector4( pa.X, pa.Y, minMip, 1 );
 
 					}
 				}
@@ -215,7 +217,7 @@ namespace Fusion.Engine.Graphics {
 
 				page.LfuIndex	|=	(byte)0x1;
 
-				physicalAddress	=	 page.Address;
+				physicalAddress	=	page.Address;
 
 				return false;
 

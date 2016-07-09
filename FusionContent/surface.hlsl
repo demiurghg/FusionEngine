@@ -246,11 +246,11 @@ GBuffer PSMain( PSInput input )
 	//-----------------------------------
 	
 	float2 vtexTC		=	input.TexCoord;
+	float2 atiHack		=	float2(-0.25f/16384, -0.25f/16384); // <-- float2(0,0) for NVIdia
 	
 	float4 fallback		=	Textures[0].Sample( Sampler, input.TexCoord ).rgba;
-	float4 physPageTC	=	Textures[1].Sample( SamplerPoint, input.TexCoord ).xyzw;
+	float4 physPageTC	=	Textures[1].Sample( SamplerPoint, input.TexCoord + atiHack ).xyzw;
 	float4 color		=	fallback;
-	
 	
 	if (physPageTC.w>0) {
 		float2 	withinPageTC	=	vtexTC * VTVirtualPageCount / exp2( physPageTC.z );
@@ -260,8 +260,6 @@ GBuffer PSMain( PSInput input )
 		float2	finalTC			=	physPageTC + withinPageTC;
 		
 		color			=	Textures[2].Sample( SamplerPoint, finalTC ).rgba;
-		
-		//color			=	physPageTC;
 	}
 	
 	//-----------------------------------
