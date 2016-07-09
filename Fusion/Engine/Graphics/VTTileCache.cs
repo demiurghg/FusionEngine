@@ -17,19 +17,21 @@ namespace Fusion.Engine.Graphics {
 		readonly Dictionary<VTAddress,Page> dictionary;
 		readonly Page[]	table;
 		readonly int capacity;
+		readonly int[] bitCount;
 		
 		int		counter;
 
 		class Page {
 			
-			public Page ( int address, int physPageCount, VTAddress va )
+			public Page ( VTAddress va, int pa, int physPageCount )
 			{
 				this.VA			=	va;
-				this.Address	=	address;
-				this.X			=	(address % physPageCount) / (float)physPageCount;
-				this.Y			=	(address / physPageCount) / (float)physPageCount;
+				this.Address	=	pa;
+				this.X			=	(pa % physPageCount) / (float)physPageCount;
+				this.Y			=	(pa / physPageCount) / (float)physPageCount;
 			}
 			
+			public byte LfuIndex = 0xFF;
 			public readonly VTAddress VA;
 			public readonly int Address;
 			public readonly float X;
@@ -40,13 +42,18 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="size"></param>
-		public VTTileCache ( int size )
+		/// <param name="size">Physical page count</param>
+		public VTTileCache ( int physicalPageCount )
 		{
-			this.capacity	=	size * size;
+			this.capacity	=	physicalPageCount * physicalPageCount;
 			table			=	new Page[capacity];
 			//mapping			=	new Page[VTConfig.PageCount * VTConfig.PageCount];
 			dictionary		=	new Dictionary<VTAddress,Page>(capacity);
+
+			bitCount		=	Enumerable
+								.Range(0,256)
+								.Select( n => MathUtil.IteratedBitcount( n ) )
+								.ToArray();
 		}
 
 
@@ -121,6 +128,70 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public void UpdateCache ()
+		{
+			foreach ( var p in table ) {
+				if (p!=null) {
+					p.LfuIndex = (byte)(p.LfuIndex << 1);
+				}
+			}
+		}
+
+
+		/// <summary>
+		/// Gets page to discard
+		/// </summary>
+		/// <returns></returns>
+		Page GetPageToDiscard ()
+		{
+			int minBitCount = int.MaxValue;
+			Page page = null;
+
+			foreach ( var p in table ) {
+
+				if (p==null) {
+					throw new InvalidOperationException("Null page, impossible due to GetFreePhysicalAddress");
+				}
+
+				var bitCount = this.bitCount[ p.LfuIndex ];
+
+				if (minBitCount > bitCount) {
+					minBitCount = bitCount;
+					page = p;
+				}
+			}
+
+			return page;
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="physycalAddress"></param>
+		/// <returns></returns>
+		bool GetFreePhysicalAddress (out int physycalAddress)
+		{
+			physycalAddress = -1;
+			int length =  table.Length;
+
+			for (int addr = 0; addr < length; addr ++ ) {
+				if (table[addr]==null) {
+					physycalAddress = addr;
+					return true;
+				}
+			}
+			
+			return false;
+		}
+
+
+
 		/// <summary>
 		/// Adds new page to cache.
 		///		
@@ -142,25 +213,38 @@ namespace Fusion.Engine.Graphics {
 
 			if (dictionary.TryGetValue(virtualAddress, out page)) {
 
+				page.LfuIndex	|=	(byte)0x1;
+
 				physicalAddress	=	 page.Address;
+
 				return false;
 
 			} else {
 
-				page				=	new Page( counter, VTConfig.PhysicalPageCount, virtualAddress );
+				if ( GetFreePhysicalAddress( out physicalAddress ) ) {
 
-				if (table[counter]!=null) {
-					dictionary.Remove( table[counter].VA );
+					page	=	new Page( virtualAddress, physicalAddress, VTConfig.PhysicalPageCount );
+					
+					table[ physicalAddress ] = page;
+					dictionary.Add( virtualAddress, page );
+
+					return true;
+
+				} else {
+
+					page	=	GetPageToDiscard();
+					
+					physicalAddress = page.Address;
+					dictionary.Remove( page.VA );					
+					
+					page	=	new Page( virtualAddress, physicalAddress, VTConfig.PhysicalPageCount );
+
+					table[ physicalAddress ] = page;
+					dictionary.Add( virtualAddress, page );
+	
+					return true;
 				}
 
-				table[ counter ]	=	page;
-				counter				=	(counter+1) % capacity;
-
-				dictionary.Add( virtualAddress, page );
-
-				physicalAddress		=	page.Address;
-
-				return true;
 			}
 		}
 	}

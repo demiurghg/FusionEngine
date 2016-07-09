@@ -35,6 +35,14 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+
+		public VTAddress GetLessDetailedMip ()
+		{
+			return FromChild(this);
+		}
+
+
+
 		public override string ToString ()
 		{
 			return string.Format("{0} {1} {2}", PageX, PageY, MipLevel );

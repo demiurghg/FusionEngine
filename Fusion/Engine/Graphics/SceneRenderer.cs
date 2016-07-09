@@ -39,6 +39,7 @@ namespace Fusion.Engine.Graphics {
 			public Vector4	ViewPos			;
 			public Vector4	BiasSlopeFar	;
 			public Color4	Color;
+			public Vector4	ViewBounds;
 		}
 
 
@@ -207,8 +208,8 @@ namespace Fusion.Engine.Graphics {
 					cbData.Projection	=	projection;
 					cbData.World		=	instance.World;
 					cbData.ViewPos		=	viewPosition;
-
-                    cbData.Color = instance.Color;
+					cbData.Color		=	instance.Color;
+					cbData.ViewBounds	=	new Vector4( hdr.Width, hdr.Height, hdr.Width, hdr.Height );
 
 					constBuffer.SetData( cbData );
 

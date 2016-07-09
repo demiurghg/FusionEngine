@@ -5,6 +5,7 @@ struct BATCH {
 	float4		ViewPos			;
 	float4		BiasSlopeFar	;
 	float4		Color;
+	float4		ViewBounds		;
 };
 
 
@@ -214,6 +215,12 @@ SURFACE MaterialCombiner ( float2 uv )
 }
 
 
+static const float 	VTVirtualPageCount	= 128;
+static const float 	VTPhysicalPageCount	= 8;
+static const int 	VTPageSize			= 128;
+static const int 	VTMaxMip	  		= 6;
+static const int 	VTFeedbackWidth		=	80;
+static const int 	VTFeedbackHeight	=	60;
 
 #ifdef GBUFFER
 GBuffer PSMain( PSInput input )
@@ -244,8 +251,6 @@ GBuffer PSMain( PSInput input )
 	float4 physPageTC	=	Textures[1].Sample( SamplerPoint, input.TexCoord ).xyzw;
 	float4 color		=	fallback;
 	
-	float VTVirtualPageCount	=	128;
-	float VTPhysicalPageCount	=	8;
 	
 	if (physPageTC.w>0) {
 		float2 	withinPageTC	=	vtexTC * VTVirtualPageCount / exp2( physPageTC.z );
@@ -283,21 +288,18 @@ GBuffer PSMain( PSInput input )
 }
 #endif
 
-static const int VT_PAGE_COUNT = 128;
-static const int VT_PAGE_SIZE  = 128;
-static const int VT_MAX_MIP    = 6;
 
 //
 //	https://www.opengl.org/discussion_boards/showthread.php/171485-Texture-LOD-calculation-(useful-for-atlasing)
 //
 float MipLevel( float2 uv )
 {
-	float2 dx = ddx( uv * VT_PAGE_SIZE*VT_PAGE_COUNT );
-	float2 dy = ddy( uv * VT_PAGE_SIZE*VT_PAGE_COUNT );
-	float d = max( dot( dx, dx ), dot( dy, dy ) );
+	float2 dx = ddx( uv * VTPageSize*VTVirtualPageCount );
+	float2 dy = ddy( uv * VTPageSize*VTVirtualPageCount );
+	float d = max( dot( dx, dx ), dot( dy, dy ) ) / 2; // VT-bias, move to constants
 
 	// Clamp the value to the max mip level counts
-	const float rangeClamp = pow(2, (VT_MAX_MIP - 1) * 2);
+	const float rangeClamp = pow(2, (VTMaxMip - 1) * 2);
 	d = clamp(d, 1.0, rangeClamp);
 
 	float mipLevel = 0.5 * log2(d);
@@ -309,8 +311,8 @@ float MipLevel( float2 uv )
 #ifdef FEEDBACK
 uint4 PSMain( PSInput input ) : SV_TARGET0
 {
-	int pageX	=	(int)floor( input.TexCoord.x * VT_PAGE_COUNT );
-	int pageY	=	(int)floor( input.TexCoord.y * VT_PAGE_COUNT );
+	int pageX	=	(int)floor( input.TexCoord.x * VTVirtualPageCount );
+	int pageY	=	(int)floor( input.TexCoord.y * VTVirtualPageCount );
 	int	mip		=	(int)MipLevel( input.TexCoord.xy );
 	
 	return uint4( pageX>>mip, pageY>>mip, mip, 4096 );

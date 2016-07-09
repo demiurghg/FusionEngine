@@ -168,6 +168,10 @@ namespace Fusion.Engine.Graphics {
 			}
 
 
+			if (tileCache!=null) {
+				tileCache.UpdateCache();
+			}
+
 			//
 			//	Put into cache :
 			//
