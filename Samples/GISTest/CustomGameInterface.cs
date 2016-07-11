@@ -89,6 +89,9 @@ namespace GISTest {
 		PointsGisLayerCPU	pointsCPU;
 		PointsGisLayer		pointsGPU;
 
+		private Vector2 prevMousePos;
+		private Vector2 mouseDelta;
+
 
 		private GraphLayer graph;
 
@@ -209,11 +212,23 @@ namespace GISTest {
 
 			graph = new GraphLayer(Game);
 			graph.Camera = new GreatCircleCamera();
+
+			Game.Mouse.Scroll += (sender, args) => {
+				graph.Camera.Zoom(args.WheelDelta > 0 ? -0.1f : 0.1f);
+			};
+
+			Game.Mouse.Move += (sender, args) => {
+				if (Game.Keyboard.IsKeyDown(Keys.LeftButton)) {
+					graph.Camera.RotateCamera(mouseDelta);
+				}
+				if (Game.Keyboard.IsKeyDown(Keys.MiddleButton)) {
+					graph.Camera.MoveCamera(mouseDelta);
+				}
+			};
 			
 			graph.Initialize();
 			
 			viewLayer.GraphLayers.Add(graph);
-			viewLayer.Camera = graph.Camera;
 		}
 
 
@@ -262,6 +277,8 @@ namespace GISTest {
 			Game.Exit();
 		}
 
+
+
 		static readonly Guid HudFps = Guid.NewGuid();
 
 		float frame = 0;
@@ -275,6 +292,11 @@ namespace GISTest {
 		{
 			console.Update( gameTime );
 
+			graph.Camera.Update(gameTime);
+
+
+			mouseDelta		= Game.Mouse.Position - prevMousePos;
+			prevMousePos	= Game.Mouse.Position;
 
 
 			///////////////////////////////////////////////////////////////////////////////

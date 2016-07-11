@@ -15,9 +15,6 @@ namespace Fusion.Engine.Graphics.Graph
 		public float MaxAltitude { get; set; }
 		public float MinAltitude { get; set; }
 
-		public float FOV { get; set; }
-
-		public bool FreeCamEnabled { get; set; }
 		public float FreeCamFov { get; set; }
 		public float FreeCamZNear { get; set; }
 		public float FreeCamZFar { get; set; }
@@ -29,7 +26,6 @@ namespace Fusion.Engine.Graphics.Graph
 		public GreatCircleCamera()
 		{
 			up	= new Vector3();
-			FOV = 70.0f;
 
 			MaxAltitude = 50000;
 			MinAltitude = 50;
@@ -39,13 +35,16 @@ namespace Fusion.Engine.Graphics.Graph
 
 			up.X = up.Y = 0;
 			up.Z = 1;
+
+
+			FreeCamFov = 70.0f;
+			FreeCamZNear = 0.1f;
+			FreeCamZFar = 60000;
 		}
 
 
 		public void Update(GameTime gameTime)
 		{
-			FreeCamEnabled = false;
-
 			CenterOfOrbit = Vector3.Lerp(CenterOfOrbit, TargetCenterOfOrbit, gameTime.ElapsedSec);
 
 			var pos = new Vector3(Altitude, 0, 0);
@@ -54,7 +53,7 @@ namespace Fusion.Engine.Graphics.Graph
 
 			var cameraLocation = CenterOfOrbit + pos;
 
-			SetupCameraFov(cameraLocation, CenterOfOrbit, newUp, FreeCamFov, FreeCamZNear, FreeCamZFar, 0, 0, 1.0f);
+			SetupCameraFov(cameraLocation, CenterOfOrbit, newUp, FreeCamFov, FreeCamZNear, FreeCamZFar, 1.0f, 1.0f, 1.0f);
 		}
 
 

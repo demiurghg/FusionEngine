@@ -68,6 +68,11 @@
   <ItemGroup>
     <Folder Include="Content\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\testedgeList.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BuildDir)\FusionProject.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

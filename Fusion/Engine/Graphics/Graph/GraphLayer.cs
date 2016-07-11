@@ -75,7 +75,7 @@ namespace Fusion.Engine.Graphics.Graph
         public List<string> nodeText;
 
 
-		public Camera Camera { set; get; }
+		public GreatCircleCamera Camera { set; get; }
 
 
 		//[StructLayout(LayoutKind.Explicit)]
@@ -165,7 +165,7 @@ namespace Fusion.Engine.Graphics.Graph
             state = State.RUN;
 	
 			GraphReader gr = new GraphReader();
-			gr.ReadTamaraTGF(@"Graph\Data\testedgeList.txt", cfg, out graph);
+			gr.ReadTamaraTGF(@".\Data\testedgeList.txt", cfg, out graph);
 
 			int ed = 0;
 			while (ed < graph.links.Count) {
