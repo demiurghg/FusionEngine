@@ -9,6 +9,7 @@ using Fusion.Core.Mathematics;
 using Fusion.Engine.Input;
 using Fusion.Engine.Common;
 using System.Diagnostics;
+using Size2 = Fusion.Core.Mathematics.Size2;
 
 
 namespace Fusion.Engine.Frames {
@@ -21,9 +22,10 @@ namespace Fusion.Engine.Frames {
 		Point	oldMousePoint;
 
 		Frame	hoveredFrame;
-		Frame	heldFrame		=	null;
-		bool	heldFrameLBM	=	false;
-		bool	heldFrameRBM	=	false;
+		Frame	heldFrame			=	null;
+		bool	heldFrameLBM		=	false;
+		bool	heldFrameRBM		=	false;
+		bool	heldFrameDragging	=	false;
 		Point	heldPoint;
 
 
@@ -69,33 +71,8 @@ namespace Fusion.Engine.Frames {
 			Game.Mouse.Scroll += InputDevice_MouseScroll;
 			Game.Mouse.Move += Mouse_Move;
 
-
-			//Game.Touch.PointerDown += Touch_PointerDown;
-			//Game.Touch.PointerUp += Touch_PointerUp;
-			//Game.Touch.PointerUpdate += Touch_PointerUpdate;
-
-
 			oldMousePoint	=	Game.InputDevice.MousePosition;
 		}
-
-
-		//void Touch_PointerDown ( object sender, Touch.TouchEventArgs e )
-		//{
-		//	PushFrame( ui.GetHoveredFrame(e.Location), Keys.LeftButton, e.Location );
-		//}
-
-
-		//void Touch_PointerUp ( object sender, Touch.TouchEventArgs e )
-		//{
-		//	ReleaseFrame( ui.GetHoveredFrame(e.Location), Keys.LeftButton, e.Location );
-		//	Update( e.Location, true );
-		//}
-
-
-		//void Touch_PointerUpdate ( object sender, Touch.TouchEventArgs e )
-		//{
-		//	Update( e.Location );
-		//}
 
 
 
@@ -131,6 +108,12 @@ namespace Fusion.Engine.Frames {
 		}
 
 
+		Size2 PointDelta ( Point begin, Point end )
+		{
+			return new Size2( end.X - begin.X, end.Y - begin.Y );
+		}
+
+
 
 		/// <summary>
 		/// 
@@ -152,6 +135,11 @@ namespace Fusion.Engine.Frames {
 
 				if (heldFrame!=null) {
 					heldFrame.OnMouseMove( mousePoint, dx, dy );
+
+					if (heldFrameDragging) {
+						heldFrame.OnDragUpdate( mousePoint, PointDelta(heldPoint, mousePoint) );
+					}
+
 				} else if ( hovered!=null ) {
 					hovered.OnMouseMove( mousePoint, dx, dy );
 				}
@@ -223,6 +211,8 @@ namespace Fusion.Engine.Frames {
 
 				CallMouseDown		( location, heldFrame, key );
 				CallStatusChanged	( location, heldFrame, FrameStatus.Pushed );
+
+				CallDragBegin( heldFrame, location, out heldFrameDragging );
 			}
 		}
 
@@ -267,6 +257,12 @@ namespace Fusion.Engine.Frames {
 
 			//	do stuff :
 			hoveredFrame	=	currentHovered;
+
+
+			if (heldFrameDragging) {
+				heldFrame.OnDragEnd( mousePosition, PointDelta(heldPoint, mousePosition) );
+			}
+
 
 			if ( currentHovered!=heldFrame ) {
 				
@@ -317,6 +313,14 @@ namespace Fusion.Engine.Frames {
 		 *	Callers :
 		 * 
 		-----------------------------------------------------------------------------------------*/
+
+		void CallDragBegin ( Frame frame, Point location, out bool cancel )
+		{
+			if (frame!=null && frame.CanAcceptControl) {
+				frame.OnDragBegin( location, out cancel );
+			}
+			cancel = false;
+		}
 
 		void CallClick ( Point location, Frame frame, Keys key, bool doubleClick )
 		{

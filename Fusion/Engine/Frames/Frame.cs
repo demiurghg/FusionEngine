@@ -10,6 +10,7 @@ using Fusion.Engine.Input;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Common;
 using Forms = System.Windows.Forms;
+using Size2 = Fusion.Core.Mathematics.Size2;
 
 
 namespace Fusion.Engine.Frames {
@@ -286,6 +287,12 @@ namespace Fusion.Engine.Frames {
 			public float   DeltaScaling;
 		}
 
+		public class DragEventArgs : EventArgs {
+			public bool Cancel;
+			public Point Location;
+			public Size2 DragDelta;
+		}
+
 		public event EventHandler	Tick;
 		public event EventHandler	LayoutChanged;
 		public event EventHandler	Activated;
@@ -308,6 +315,9 @@ namespace Fusion.Engine.Frames {
 		public event EventHandler<ManipulationEventArgs>	ManipulationStart;
 		public event EventHandler<ManipulationEventArgs>	ManipulationUpdate;
 		public event EventHandler<ManipulationEventArgs>	ManipulationEnd;
+		public event EventHandler<DragEventArgs>	DragBegin;
+		public event EventHandler<DragEventArgs>	DragUpdate;
+		public event EventHandler<DragEventArgs>	DragEnd;
 		#endregion
 
 
@@ -731,6 +741,38 @@ namespace Fusion.Engine.Frames {
 		{
 			if (Deactivated!=null) {
 				Deactivated( this, EventArgs.Empty );
+			}
+		}
+
+		internal void OnDragBegin ( Point location, out bool cancel )
+		{
+			cancel = false;
+			var ea = new DragEventArgs(){ Cancel = false, DragDelta = Size2.Zero, Location = location };
+			
+			var handler = DragBegin;
+			if (handler!=null) {
+				handler( this, ea );
+				cancel = ea.Cancel;
+			}
+		}
+
+		internal void OnDragUpdate ( Point location, Size2 delta )
+		{
+			var ea = new DragEventArgs(){ Cancel = false, DragDelta = delta, Location = location };
+			
+			var handler = DragUpdate;
+			if (handler!=null) {
+				handler( this, ea );
+			}
+		}
+
+		internal void OnDragEnd ( Point location, Size2 delta )
+		{
+			var ea = new DragEventArgs(){ Cancel = false, DragDelta = delta, Location = location };
+			
+			var handler = DragEnd;
+			if (handler!=null) {
+				handler( this, ea );
 			}
 		}
 
