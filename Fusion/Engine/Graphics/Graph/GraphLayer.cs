@@ -165,7 +165,7 @@ namespace Fusion.Engine.Graphics.Graph
             state = State.RUN;
 	
 			GraphReader gr = new GraphReader();
-
+			gr.ReadTamaraTGF(@"Graph\Data\testedgeList.txt", cfg, out graph);
 
 			int ed = 0;
 			while (ed < graph.links.Count) {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -197,9 +198,8 @@ namespace GISTest {
 			//viewLayer.GisLayers.Add(pointsGPU);
 
 
-			viewLayer.GlobeCamera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
-			viewLayer.GlobeCamera.CameraDistance = GeoHelper.EarthRadius + 5;
-
+			//viewLayer.GlobeCamera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
+			//viewLayer.GlobeCamera.CameraDistance = GeoHelper.EarthRadius + 5;
 
 			Game.Touch.Tap			+= args => System.Console.WriteLine("You just perform tap gesture at point: " + args.Position);
 			Game.Touch.DoubleTap	+= args => System.Console.WriteLine("You just perform double tap gesture at point: " + args.Position);
@@ -211,8 +211,9 @@ namespace GISTest {
 			graph.Camera = new GreatCircleCamera();
 			
 			graph.Initialize();
-
+			
 			viewLayer.GraphLayers.Add(graph);
+			viewLayer.Camera = graph.Camera;
 		}
 
 
@@ -322,8 +323,22 @@ namespace GISTest {
 			//
 			////text.Update(gameTime);
 			tiles.Update(gameTime);
+			tt += gameTime.ElapsedSec;
+			if (tt > 10)
+			{
+				tt = tt - 10;
+				counter++;
+				if (graph.state == State.RUN && counter < 1000)
+				{
+					graph.createLinksFromFile(counter);
+				
+				}
+			}
+			
 		}
 
+		private int counter = 0;
+		private float tt = 10;
 
 		/// <summary>
 		/// 

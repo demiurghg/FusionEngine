@@ -52,7 +52,7 @@ namespace GISTest {
 				//	apply configuration here:
 				engine.RenderSystem.UseDebugDevice =	false;
 				engine.TrackObjects		=	false;
-				engine.GameTitle		=	"Test Game 2";
+				engine.GameTitle		=	"Graph";
 
 				//	apply command-line options here:
 				//	...
