@@ -129,7 +129,7 @@ namespace GISTest {
 			//Game.RenderSystem.DisplayBoundsChanged += (s,e) => {
 			//	masterView.Resize( Game.RenderSystem.DisplayBounds.Width, Game.RenderSystem.DisplayBounds.Height );
 			//};
-
+		
 
 			testLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
 			uiLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
@@ -227,7 +227,10 @@ namespace GISTest {
 			};
 			
 			graph.Initialize();
-			
+			graph.staticMode = false;
+			graph.AddMaxParticles();
+				graph.state = State.RUN;
+				
 			viewLayer.GraphLayers.Add(graph);
 		}
 
@@ -346,15 +349,16 @@ namespace GISTest {
 			////text.Update(gameTime);
 			tiles.Update(gameTime);
 			tt += gameTime.ElapsedSec;
-			if (tt > 10)
+			if (tt > 1)
 			{
-				tt = tt - 10;
-				counter++;
+				tt = tt - 1;
 				if (graph.state == State.RUN && counter < 1000)
 				{
 					graph.createLinksFromFile(counter);
 				
 				}
+				counter++;
+
 			}
 			
 		}

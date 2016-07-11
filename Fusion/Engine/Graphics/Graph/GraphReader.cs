@@ -208,7 +208,7 @@ namespace Fusion.Engine.Graphics.Graph
 			graph = new Graph();
 			StreamReader fileEdges = new StreamReader(path);
 			string line;
-
+			Console.WriteLine("start");
 			while ((line = fileEdges.ReadLine()) != null)
 			{
 				var vert = line.Split(' ');
