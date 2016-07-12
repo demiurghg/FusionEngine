@@ -10,6 +10,7 @@ using Fusion.Engine.Input;
 using Fusion.Engine.Common;
 using System.Diagnostics;
 using Size2 = Fusion.Core.Mathematics.Size2;
+using SysInfo = System.Windows.Forms.SystemInformation;
 
 
 namespace Fusion.Engine.Frames {
@@ -21,12 +22,13 @@ namespace Fusion.Engine.Frames {
 
 		Point	oldMousePoint;
 
-		Frame	hoveredFrame;
-		Frame	heldFrame			=	null;
-		bool	heldFrameLBM		=	false;
-		bool	heldFrameRBM		=	false;
-		bool	heldFrameDragging	=	false;
-		Point	heldPoint;
+		Frame		hoveredFrame;
+		Frame		heldFrame			=	null;
+		bool		heldFrameLBM		=	false;
+		bool		heldFrameRBM		=	false;
+		bool		heldFrameDragging	=	false;
+		Point		heldPoint;
+		Rectangle	heldRectangle;
 
 
 		static int SysInfoDoubleClickTime {
@@ -75,7 +77,6 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-
 		void Mouse_Move ( object sender, MouseMoveEventArgs e )
 		{
 			Update( new Point( (int)e.Position.X, (int)e.Position.Y ) );
@@ -98,7 +99,6 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-
 		void InputDevice_MouseScroll ( object sender, MouseScrollEventArgs e )
 		{
 			var hovered = ui.GetHoveredFrame(Game.Mouse.Position);
@@ -114,60 +114,33 @@ namespace Fusion.Engine.Frames {
 		}
 
 
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="root"></param>
-		public void Update ( Point mousePoint, bool releaseTouch = false )
+		static bool IsPointWithinDoubleClickArea ( Point a, Point b )
 		{
-			var root		=	ui.RootFrame;
+			var dx = Math.Abs(a.X - b.X);
+			var dy = Math.Abs(a.Y - b.Y);
 
-			var hovered		=	ui.GetHoveredFrame(mousePoint);
-			
-			//
-			//	update mouse move :
-			//	
-			if ( mousePoint!=oldMousePoint ) {
-				
-				int dx =	mousePoint.X - oldMousePoint.X;
-				int dy =	mousePoint.Y - oldMousePoint.Y;
-
-				if (heldFrame!=null) {
-					heldFrame.OnMouseMove( mousePoint, dx, dy );
-
-					if (heldFrameDragging) {
-						heldFrame.OnDragUpdate( mousePoint, PointDelta(heldPoint, mousePoint) );
-					}
-
-				} else if ( hovered!=null ) {
-					hovered.OnMouseMove( mousePoint, dx, dy );
-				}
-
-				oldMousePoint = mousePoint;
-			}
-
-			//
-			//	Mouse down/up events :
-			//
-			if (heldFrame==null) {
-				var oldHoveredFrame	=	hoveredFrame;
-				var newHoveredFrame	=	ui.GetHoveredFrame(mousePoint);
-
-				hoveredFrame		=	newHoveredFrame;
-
-				if (oldHoveredFrame!=newHoveredFrame) {
-
-					CallMouseOut		( mousePoint, oldHoveredFrame );
-					CallStatusChanged	( mousePoint, oldHoveredFrame, FrameStatus.None );
-
-					CallMouseIn			( mousePoint, newHoveredFrame );
-					CallStatusChanged	( mousePoint, newHoveredFrame, FrameStatus.Hovered );
-				}
-			}
+			return ( dx < SysInfo.DoubleClickSize.Width && dy < SysInfo.DoubleClickSize.Height );
 		}
 
 
+		static bool IsPointWithinDragSize ( Point a, Point b )
+		{
+			var dx = Math.Abs(a.X - b.X);
+			var dy = Math.Abs(a.Y - b.Y);
+
+			//return ( dx < SysInfo.DragSize.Width && dy < SysInfo.DragSize.Height );
+			return ( dx < 10 && dy < 10 );
+		}
+
+
+		static Rectangle MoveRectangle( Rectangle rectangle, Point origin, Point target )
+		{
+			var dx	= target.X - origin.X;
+			var dy	= target.Y - origin.Y;
+
+			return new Rectangle( rectangle.X + dx, rectangle.Y + dy, rectangle.Width, rectangle.Height );
+
+		}
 
 		/*-----------------------------------------------------------------------------------------
 		 * 
@@ -199,6 +172,7 @@ namespace Fusion.Engine.Frames {
 				//	record pushed frame :
 				if (heldFrame==null) {
 					heldFrame		=	currentHovered;
+					heldRectangle	=	heldFrame.GlobalRectangle;
 				}
 
 				if (key==Keys.LeftButton) {
@@ -211,18 +185,72 @@ namespace Fusion.Engine.Frames {
 
 				CallMouseDown		( location, heldFrame, key );
 				CallStatusChanged	( location, heldFrame, FrameStatus.Pushed );
-
-				CallDragBegin( heldFrame, location, out heldFrameDragging );
 			}
 		}
 
 
-
-		static bool IsPointWithinDoubleClickArea ( Point a, Point b )
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="root"></param>
+		public void Update ( Point mousePoint, bool releaseTouch = false )
 		{
-			var dx = Math.Abs(a.X - b.X);
-			var dy = Math.Abs(a.Y - b.Y);
-			return (dx<SysInfoDoubleClickWidth && dy<SysInfoDoubleClickHeight);
+			var root		=	ui.RootFrame;
+
+			var hovered		=	ui.GetHoveredFrame(mousePoint);
+			
+
+			//
+			//	update mouse move :
+			//	
+			if ( mousePoint!=oldMousePoint ) {
+				
+				int dx		=	mousePoint.X - oldMousePoint.X;
+				int dy		=	mousePoint.Y - oldMousePoint.Y;
+				var dragDX  =	mousePoint.X - heldPoint.X;
+				var dragDY  =	mousePoint.Y - heldPoint.Y;
+
+				if (heldFrame!=null) {
+
+					// move :
+					heldFrame.OnMouseMove( mousePoint, dx, dy );
+
+					// drag :
+
+					if (!IsPointWithinDragSize(heldPoint, mousePoint) && !heldFrameDragging && heldFrame.IsDragEnabled) {
+						heldFrame.OnDragBegin( mousePoint, MoveRectangle(heldRectangle, heldPoint, mousePoint), dragDX, dragDY );
+						heldFrameDragging = true;
+					}
+
+					if (heldFrameDragging) {
+						heldFrame.OnDragUpdate( mousePoint, MoveRectangle(heldRectangle, heldPoint, mousePoint), dragDX, dragDY );
+					}
+
+				} else if ( hovered!=null ) {
+					hovered.OnMouseMove( mousePoint, dx, dy );
+				}
+
+				oldMousePoint = mousePoint;
+			}
+
+			//
+			//	Mouse down/up events :
+			//
+			if (heldFrame==null) {
+				var oldHoveredFrame	=	hoveredFrame;
+				var newHoveredFrame	=	ui.GetHoveredFrame(mousePoint);
+
+				hoveredFrame		=	newHoveredFrame;
+
+				if (oldHoveredFrame!=newHoveredFrame) {
+
+					CallMouseOut		( mousePoint, oldHoveredFrame );
+					CallStatusChanged	( mousePoint, oldHoveredFrame, FrameStatus.None );
+
+					CallMouseIn			( mousePoint, newHoveredFrame );
+					CallStatusChanged	( mousePoint, newHoveredFrame, FrameStatus.Hovered );
+				}
+			}
 		}
 
 
@@ -259,12 +287,8 @@ namespace Fusion.Engine.Frames {
 			hoveredFrame	=	currentHovered;
 
 
-			if (heldFrameDragging) {
-				heldFrame.OnDragEnd( mousePosition, PointDelta(heldPoint, mousePosition) );
-			}
 
-
-			if ( currentHovered!=heldFrame ) {
+			if ( currentHovered!=heldFrame) {
 				
 				CallMouseOut		( mousePosition, heldFrame );
 				CallStatusChanged	( mousePosition, heldFrame, FrameStatus.None );
@@ -300,9 +324,23 @@ namespace Fusion.Engine.Frames {
 				}
 
 				//	handle click :
-				CallStatusChanged	( mousePosition, heldFrame, FrameStatus.Hovered );
-				CallClick			( mousePosition, heldFrame, key, doubleClick );
+				CallStatusChanged( mousePosition, heldFrame, FrameStatus.Hovered );
+
+				if (!heldFrameDragging) {
+					CallClick( mousePosition, heldFrame, key, doubleClick );
+				}
 			}
+
+
+			//	end draging :
+			var dragDX  =	mousePosition.X - heldPoint.X;
+			var dragDY  =	mousePosition.Y - heldPoint.Y;
+
+			if (heldFrameDragging) {
+				heldFrame.OnDragEnd( mousePosition, MoveRectangle(heldRectangle, heldPoint, mousePosition), dragDX, dragDY );
+				heldFrameDragging = false;
+			}
+
 
 			heldFrame	=	null;
 		}
@@ -313,14 +351,6 @@ namespace Fusion.Engine.Frames {
 		 *	Callers :
 		 * 
 		-----------------------------------------------------------------------------------------*/
-
-		void CallDragBegin ( Frame frame, Point location, out bool cancel )
-		{
-			if (frame!=null && frame.CanAcceptControl) {
-				frame.OnDragBegin( location, out cancel );
-			}
-			cancel = false;
-		}
 
 		void CallClick ( Point location, Frame frame, Keys key, bool doubleClick )
 		{

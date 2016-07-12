@@ -207,7 +207,7 @@ namespace Fusion.Engine.Frames {
 				int count = m.TouchUp( pointerId, location );
 				
 				if (count==0) {	
-					Log.Message("Drop manipulator");
+					//Log.Message("Drop manipulator");
 					m.Stop();
 					manipulators.Remove( touchRecord.Frame );
 				}

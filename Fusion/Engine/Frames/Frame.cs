@@ -78,6 +78,12 @@ namespace Fusion.Engine.Frames {
 		public  bool		IsManipulationEnabled { get; set; }
 
 		/// <summary>
+		/// Indicated whether double click enabled on given control.
+		/// Default value is False
+		/// </summary>
+		public  bool		IsDragEnabled { get; set; }
+
+		/// <summary>
 		/// 
 		/// </summary>
 		public	ClippingMode	 ClippingMode	{ get; set; }
@@ -288,9 +294,10 @@ namespace Fusion.Engine.Frames {
 		}
 
 		public class DragEventArgs : EventArgs {
-			public bool Cancel;
 			public Point Location;
-			public Size2 DragDelta;
+			public int DragDX;
+			public int DragDY;
+			public Rectangle NewRectangle;
 		}
 
 		public event EventHandler	Tick;
@@ -744,21 +751,19 @@ namespace Fusion.Engine.Frames {
 			}
 		}
 
-		internal void OnDragBegin ( Point location, out bool cancel )
+		internal void OnDragBegin ( Point location, Rectangle newRect, int dx, int dy )
 		{
-			cancel = false;
-			var ea = new DragEventArgs(){ Cancel = false, DragDelta = Size2.Zero, Location = location };
+			var ea = new DragEventArgs(){ DragDX = dx, DragDY = dy, Location = location, NewRectangle = newRect };
 			
 			var handler = DragBegin;
 			if (handler!=null) {
 				handler( this, ea );
-				cancel = ea.Cancel;
 			}
 		}
 
-		internal void OnDragUpdate ( Point location, Size2 delta )
+		internal void OnDragUpdate ( Point location, Rectangle newRect, int dx, int dy )
 		{
-			var ea = new DragEventArgs(){ Cancel = false, DragDelta = delta, Location = location };
+			var ea = new DragEventArgs(){ DragDX = dx, DragDY = dy, Location = location, NewRectangle = newRect };
 			
 			var handler = DragUpdate;
 			if (handler!=null) {
@@ -766,9 +771,9 @@ namespace Fusion.Engine.Frames {
 			}
 		}
 
-		internal void OnDragEnd ( Point location, Size2 delta )
+		internal void OnDragEnd ( Point location, Rectangle newRect, int dx, int dy )
 		{
-			var ea = new DragEventArgs(){ Cancel = false, DragDelta = delta, Location = location };
+			var ea = new DragEventArgs(){ DragDX = dx, DragDY = dy, Location = location, NewRectangle = newRect };
 			
 			var handler = DragEnd;
 			if (handler!=null) {
