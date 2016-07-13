@@ -81,7 +81,7 @@ inline float4 pairBodyForce( float4 thisPos, float4 otherPos ) // 4th component 
 	float Rsixth		= Rsquared * Rsquared * Rsquared;
 	float invRCubed		= - otherPos.w / sqrt( Rsixth );	// we will multiply by constants later
 	float energy		=   otherPos.w / sqrt( Rsquared );	// we will multiply by constants later
-	return float4( mul( invRCubed, R ), energy ) * 1000; // we write energy into the 4th component
+	return float4( mul( invRCubed, R ), energy ) * 1000 ; // we write energy into the 4th component
 }
 
 
@@ -94,7 +94,7 @@ float4 springForce( float4 pos, float4 otherPos ) // 4th component in otherPos i
 	float deltaR		= Rabs - otherPos.w;
 	float absForce		= pos.w * ( deltaR ) / ( Rabs );
 	float energy		= 0.5f * pos.w * deltaR * deltaR;
-	return float4( mul( absForce, R ), energy ) * 0.00000005f;  // we write energy into the 4th component
+	return float4( mul( absForce, R ), energy ) * 0.0000005f;  // we write energy into the 4th component
 }
 
 
@@ -172,7 +172,7 @@ void CSMain(
 #ifdef EULER
 	force = mul( calcRepulsionForce( pos, groupThreadID ), 500.0f * pos.w ); // we multiply by all the constants here once
 #ifdef LINKS
-	force += calcLinksForce ( pos, id, p.LinksPtr, p.LinksCount ) / 1 ;
+	force += calcLinksForce ( pos, id, p.LinksPtr, p.LinksCount ) / 100 ;
 #endif // LINKS
 #endif // EULER
 
@@ -188,7 +188,7 @@ void CSMain(
 
 	float diff = Radius - Rabs;
 
-	float factor = 0.00005f;
+	float factor = 0.0000005f;
 
 	//forceCenter.xyz += mul(R, factor*diff/Rabs);
 	p.Force += forceCenter.xyz;

@@ -34,7 +34,7 @@ namespace Fusion.Engine.Graphics.Graph
 			LinkSize		= 20.0f;
 			EdgeMaxOpacity	= 0.03f;
 
-			MinParticleRadius	= 20;//250
+			MinParticleRadius	= 30;//250
 			NodeScale			= 1;
 
 

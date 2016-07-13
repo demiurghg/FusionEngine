@@ -104,9 +104,6 @@ namespace GISTest {
 			viewLayer = new RenderLayer(Game);
 			Game.RenderSystem.AddLayer(viewLayer);
 
-			viewLayer.SpriteLayers.Add(console.ConsoleSpriteLayer);
-
-
 			uiLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
 
 			Gis.Debug = new DebugGisLayer(Game);
@@ -188,8 +185,6 @@ namespace GISTest {
 			prevMousePos	= Game.Mouse.Position;
 
 			tiles.Update(gameTime);
-
-
 		}
 
 

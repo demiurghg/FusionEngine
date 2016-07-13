@@ -152,25 +152,28 @@ namespace Fusion.Engine.Graphics.Graph
             paramsCB = new ConstantBuffer(Game.GraphicsDevice, typeof(Params));
 
 
-            graphType = GraphType.STATIC;
+            graphType = GraphType.DYNAMIC;
             linkList		= new List<Graph.Link>();
             ParticleList	= new List<Graph.Vertice>();
             linkPtrLists	= new List<List<int>>();
-			//ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Compute"));
+			ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Graph/Compute"));
 			//ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Shaders/VKRepost"));
-			ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Graph/Visheratin"));
+			//ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Graph/Visheratin"));
 			ls.UseGPU = false;
 			ls.SpringTension = 0.1f;
 			nodeText = new List<string>();
-            state = State.RUN;
+            //state = State.RUN;
+			Log.Message("start graph");
+
 	
 			GraphReader gr = new GraphReader();
-			gr.ReadTamaraTGF(@".\Data\testedgeList.txt", cfg, out graph);
+			//gr.ReadTamaraTGF(@".\Data\testedgeList.txt", cfg, out graph);
+			gr.ReadMedicineTGF(@".\Data\edgeList.txt", cfg, out graph);
 
 			int ed = 0;
 			while (ed < graph.links.Count) {
 			 numberOfEdgesPerIteration.Add(ed);
-			 ed += 10;
+			 ed += 1000;
 			}
 
 			numberOfEdgesPerIteration.Add(graph.links.Count);
@@ -245,15 +248,15 @@ namespace Fusion.Engine.Graphics.Graph
 			var element1 = ParticleList.ElementAt(end1);
 			if ( (int) element1.Information == 0) element1.Information = link.LinkType ;
 			element1.Degree++;
-			element1.Mass += link.Length;
-			element1.Size = (float) Math.Sqrt(element1.OutDegree + 1) * cfg.MinParticleRadius;// 
+			//element1.Mass += link.Length;
+			//element1.Size = (float) Math.Sqrt(element1.OutDegree + 1) * cfg.MinParticleRadius;// 
 			ParticleList[end1] = element1;
 
 			var element2 = ParticleList.ElementAt(end2);
 			if ( (int) element2.Information == 0) element2.Information = link.LinkType ;//+ 0.002f * element2.linksCount; 
-			element2.Mass += link.Length;
+			//element2.Mass += link.Length;
 			element2.Degree++;
-			element2.Size = (float) Math.Sqrt(element2.OutDegree + 1) * cfg.MinParticleRadius;//
+			//element2.Size = (float) Math.Sqrt(element2.OutDegree + 1) * cfg.MinParticleRadius;//
 			ParticleList[end2] = element2;
         }
 		
