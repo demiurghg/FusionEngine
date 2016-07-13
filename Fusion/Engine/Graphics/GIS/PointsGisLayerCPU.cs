@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core.Mathematics;
@@ -15,10 +16,21 @@ namespace Fusion.Engine.Graphics.GIS
 		Ubershader		shader;
 		StateFactory	factory;
 
+		[StructLayout(LayoutKind.Explicit)]
+	    public struct DataForDots
+	    {
+		    [FieldOffset(0)]	public float	LimitAlpha;
+		    [FieldOffset(4)]	public float	FadingVelocity;
+		    [FieldOffset(8)]	public float	DeltaTime;
+		    [FieldOffset(12)]	public float	Parameter;
+	    }
+		DataForDots dotsData;
+
 		[Flags]
 		public enum PointFlags : int
 		{
 			DRAW_TEXTURED_POLY = 1 << 0,
+			POINT_FADING  = 1 << 1,
 		}
 
 		public int Flags;
@@ -36,14 +48,19 @@ namespace Fusion.Engine.Graphics.GIS
 		public int	PointsDrawOffset;
 		public int	PointsCountToDraw;
 
+		ConstantBuffer DotsBuffer;
 
-		public PointsGisLayerCPU(Game game, int maxPointsCount, bool isDynamic = true) : base(game)
+		public PointsGisLayerCPU(Game game, int maxPointsCount, bool isDynamic = true, float fadingVelocity = 0.01f, float limitAlpha = 0.5f) : base(game)
 		{
+			DotsBuffer	= new ConstantBuffer(game.GraphicsDevice, typeof(DataForDots));
 			PointsCountToDraw = maxPointsCount;
 			indeces = new int[maxPointsCount*6];
 			PointsDrawOffset = 0;
-
 			SizeMultiplier = 1;
+
+			dotsData.DeltaTime = 0;
+			dotsData.FadingVelocity	= fadingVelocity;
+			dotsData.LimitAlpha = limitAlpha;
 
 			var vbOptions = isDynamic ? VertexBufferOptions.Dynamic : VertexBufferOptions.Default;
 
@@ -68,7 +85,7 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
-		public void AddPoint(int index, DVector2 lonLat, int typeInd, float size = 0.01f)
+		public void AddPoint(int index, DVector2 lonLat, int typeInd, Color color, float size = 0.01f)
 		{
 			var basis = GeoHelper.CalculateBasisOnSurface(lonLat, true);
 
@@ -85,28 +102,28 @@ namespace Fusion.Engine.Graphics.GIS
 				X = topLeft.X,
 				Y = topLeft.Y,
 				Z = topLeft.Z,
-				Color = Color.White,
+				Color = color,
 				Tex0 = new Vector4(1, 1, 0, 0)
 			};
 			PointsCpu[index * 4 + 1] = new Gis.CartPoint {
 				X = topRight.X,
 				Y = topRight.Y,
 				Z = topRight.Z,
-				Color = Color.White,
+				Color = color,
 				Tex0 = new Vector4(0, 1, 0, 0)
 			};
 			PointsCpu[index * 4 + 2] = new Gis.CartPoint {
 				X = botLeft.X,
 				Y = botLeft.Y,
 				Z = botLeft.Z,
-				Color = Color.White,
+				Color = color,
 				Tex0 = new Vector4(1, 0, 0, 0)
 			};
 			PointsCpu[index * 4 + 3] = new Gis.CartPoint {
 				X = botRight.X,
 				Y = botRight.Y,
 				Z = botRight.Z,
-				Color = Color.White,
+				Color = color,
 				Tex0 = new Vector4(0, 0, 0, 0)
 			};
 		}
@@ -122,15 +139,20 @@ namespace Fusion.Engine.Graphics.GIS
 
 		public override void Draw(GameTime gameTime, ConstantBuffer constBuffer)
 		{
+			dotsData.DeltaTime	+= gameTime.ElapsedSec;
+			
+			DotsBuffer.SetData(dotsData);
+			
 			Game.GraphicsDevice.VertexShaderConstants[0] = constBuffer;
-			Game.GraphicsDevice.PipelineState = factory[(int)(PointFlags.DRAW_TEXTURED_POLY)];
+			Game.GraphicsDevice.VertexShaderConstants[1]	= DotsBuffer;
+			Game.GraphicsDevice.PipelineState = factory[(int)(PointFlags.DRAW_TEXTURED_POLY | PointFlags.POINT_FADING)];
 
 			Game.GraphicsDevice.PixelShaderResources[0] = TextureAtlas;
 			Game.GraphicsDevice.PixelShaderSamplers[0]	= SamplerState.LinearClamp;
 
 			if (PointsCpu.Any()) {
 				Game.GraphicsDevice.SetupVertexInput(currentBuffer, indBuf);
-				Game.GraphicsDevice.DrawIndexed(indeces.Length, PointsDrawOffset, PointsCountToDraw);
+				Game.GraphicsDevice.DrawIndexed(indeces.Length, 0, 0);
 			}
 		}
 

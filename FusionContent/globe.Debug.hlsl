@@ -6,6 +6,13 @@ struct ConstData {
 	float4		Dummy	;
 };
 
+struct DataForDots{
+	float		LimitAlpha;
+	float		FadingVelocity;
+	float		DeltaTime;
+	float		Parameter;
+};
+
 struct VS_INPUT {	
 	uint2 	X		: TEXCOORD0	;
 	uint2 	Y		: TEXCOORD1	;
@@ -20,8 +27,8 @@ struct VS_OUTPUT {
 	float4 Tex			: TEXCOORD0		;
 };
 
-cbuffer CBStage		: register(b0) 	{ ConstData Stage : packoffset( c0 ); }
-
+cbuffer CBStage			: register(b0) 	{ ConstData Stage : packoffset( c0 ); }
+cbuffer CBDotsStage 	: register(b1) 	{ DataForDots	FadingData	;	}
 
 Texture2D		DiffuseMap		: register(t0);
 SamplerState	Sampler			: register(s0);
@@ -29,7 +36,7 @@ SamplerState	Sampler			: register(s0);
 
 #if 0
 $ubershader DRAW_LINES
-$ubershader DRAW_TEXTURED_POLY
+$ubershader DRAW_TEXTURED_POLY +POINT_FADING
 #endif
 
 
@@ -53,6 +60,11 @@ VS_OUTPUT VSMain ( VS_INPUT v )
 	output.Color	=	v.Color;
 	output.Tex		=	v.Tex;
 	
+#ifdef POINT_FADING
+	if ( v.Color.a > FadingData.LimitAlpha){
+		output.Color.a = v.Color.a - (FadingData.FadingVelocity * FadingData.DeltaTime);
+	}
+#endif
 	return output;
 }
 
@@ -69,6 +81,11 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 {
 	float4	color = DiffuseMap.Sample(Sampler, input.Tex.xy);
 	//color = float4(1.0f, 0.0f, 0.0f, 1.0f);
+	
+	color.rgb *= input.Color.rgb;
+
+	color.a *= input.Color.a;
+
 	return color;
 }
 #endif
