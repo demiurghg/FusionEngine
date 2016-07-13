@@ -128,8 +128,7 @@ namespace Fusion.Engine.Frames {
 			var dx = Math.Abs(a.X - b.X);
 			var dy = Math.Abs(a.Y - b.Y);
 
-			//return ( dx < SysInfo.DragSize.Width && dy < SysInfo.DragSize.Height );
-			return ( dx < 10 && dy < 10 );
+			return ( dx < SysInfo.DragSize.Width && dy < SysInfo.DragSize.Height );
 		}
 
 
