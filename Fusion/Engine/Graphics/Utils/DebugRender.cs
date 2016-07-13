@@ -17,18 +17,22 @@ namespace Fusion.Engine.Graphics {
 		readonly Game Game;
 
 		struct LineVertex {
-			[Vertex("POSITION")] public Vector3 Pos;
+			[Vertex("POSITION")] public Vector4 Pos;
 			[Vertex("COLOR", 0)] public Vector4 Color;
 		}
 
 		[Flags]
 		public enum RenderFlags : int {
-			NONE = 0x0000,
+			SOLID = 0x0001,
+			GHOST = 0x0002,
 		}
 
 		[StructLayout(LayoutKind.Explicit)]
 		struct ConstData {
-			[FieldOffset(0)] public Matrix Transform;
+			[FieldOffset(  0)] public Matrix  View;
+			[FieldOffset( 64)] public Matrix  ViewProjection;
+			[FieldOffset(128)] public Vector4 ViewPosition;
+			[FieldOffset(144)] public Vector4 PixelSize;
 		}
 
 		VertexBuffer		vertexBuffer;
@@ -52,16 +56,52 @@ namespace Fusion.Engine.Graphics {
 			this.Game	=	game;
 			var dev		=	Game.GraphicsDevice;
 
-			effect		=	Game.Content.Load<Ubershader>("debugRender.hlsl");
-			factory		=	effect.CreateFactory( typeof(RenderFlags), Primitive.LineList, VertexInputElement.FromStructure( typeof(LineVertex) ), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.None );
-
+			LoadContent();
+			
 			constData	=	new ConstData();
 			constBuffer =	new ConstantBuffer(dev, typeof(ConstData));
 
 			//	create vertex buffer :
 			vertexBuffer		= new VertexBuffer(dev, typeof(LineVertex), vertexBufferSize, VertexBufferOptions.Dynamic );
 			vertexDataAccum.Capacity = vertexBufferSize;
+
+			Game.Reloading += (s,e) => LoadContent();
 		}
+
+
+
+		public void LoadContent ()
+		{
+			effect		=	Game.Content.Load<Ubershader>("debugRender.hlsl");
+			factory		=	effect.CreateFactory( typeof(RenderFlags), (ps,i) => Enum(ps, (RenderFlags)i ) );
+
+			//factory		=	effect.CreateFactory( typeof(RenderFlags), Primitive.LineList, VertexInputElement.FromStructure( typeof(LineVertex) ), BlendState.AlphaBlend, RasterizerState.CullNone, DepthStencilState.Default );
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="ps"></param>
+		/// <param name="flags"></param>
+		void Enum ( PipelineState ps, RenderFlags flags )
+		{
+			ps.Primitive			=	Primitive.LineList;
+			ps.VertexInputElements	=	VertexInputElement.FromStructure( typeof(LineVertex) );
+			ps.RasterizerState		=	RasterizerState.CullNone;
+
+			if (flags.HasFlag( RenderFlags.SOLID )) {
+				ps.BlendState			=	BlendState.Opaque;
+				ps.DepthStencilState	=	DepthStencilState.Default;
+			}
+			
+			if (flags.HasFlag( RenderFlags.GHOST )) {
+				ps.BlendState			=	BlendState.AlphaBlend;
+				ps.DepthStencilState	=	DepthStencilState.None;
+			}
+		}
+
 
 
 
@@ -87,8 +127,8 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="color"></param>
 		public void DrawLine(Vector3 p0, Vector3 p1, Color color)
 		{
-			vertexDataAccum.Add(new LineVertex() { Pos = p0, Color = color.ToVector4() });
-			vertexDataAccum.Add(new LineVertex() { Pos = p1, Color = color.ToVector4() });
+			vertexDataAccum.Add(new LineVertex() { Pos = new Vector4(p0,0), Color = color.ToVector4() });
+			vertexDataAccum.Add(new LineVertex() { Pos = new Vector4(p1,0), Color = color.ToVector4() });
 			//DrawLine( p0, p1, color, Matrix.Identity );
 		}
 
@@ -102,8 +142,31 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="color"></param>
 		public void DrawLine(Vector2 p0, Vector2 p1, Color color)
 		{
-			vertexDataAccum.Add(new LineVertex() { Pos = new Vector3(p0, 0), Color = color.ToVector4() });
-			vertexDataAccum.Add(new LineVertex() { Pos = new Vector3(p1, 0), Color = color.ToVector4() });
+			vertexDataAccum.Add(new LineVertex() { Pos = new Vector4(p0, 0,0), Color = color.ToVector4() });
+			vertexDataAccum.Add(new LineVertex() { Pos = new Vector4(p1, 0,0), Color = color.ToVector4() });
+			//DrawLine( p0, p1, color, Matrix.Identity );
+		}
+
+
+
+		/// <summary>
+		/// Draws line between p0 and p1
+		/// </summary>
+		/// <param name="p0"></param>
+		/// <param name="p1"></param>
+		/// <param name="color"></param>
+		public void DrawLine(Vector3 p0, Vector3 p1, Color color0, Color color1)
+		{
+			vertexDataAccum.Add(new LineVertex() { Pos = new Vector4(p0,0), Color = color0.ToVector4() });
+			vertexDataAccum.Add(new LineVertex() { Pos = new Vector4(p1,0), Color = color1.ToVector4() });
+			//DrawLine( p0, p1, color, Matrix.Identity );
+		}
+
+
+		public void DrawLine(Vector3 p0, Vector3 p1, Color color0, Color color1, float width0, float width1)
+		{
+			vertexDataAccum.Add(new LineVertex() { Pos = new Vector4(p0,width0), Color = color0.ToVector4() });
+			vertexDataAccum.Add(new LineVertex() { Pos = new Vector4(p1,width1), Color = color1.ToVector4() });
 			//DrawLine( p0, p1, color, Matrix.Identity );
 		}
 
@@ -112,7 +175,7 @@ namespace Fusion.Engine.Graphics {
 		/// <summary>
 		/// 
 		/// </summary>
-		internal void Render ( RenderTargetSurface colorBuffer, Camera camera )
+		internal void Render ( RenderTargetSurface colorBuffer, DepthStencilSurface depthBuffer, Camera camera )
 		{
 			DrawTracers();
 
@@ -128,33 +191,48 @@ namespace Fusion.Engine.Graphics {
 			var dev = Game.GraphicsDevice;
 			dev.ResetStates();
 
-			dev.SetTargets( null, colorBuffer );
+			dev.SetTargets( depthBuffer, colorBuffer );
 
 
-			constData.Transform = camera.GetViewMatrix(StereoEye.Mono) * camera.GetProjectionMatrix(StereoEye.Mono);
+			var a = camera.GetProjectionMatrix(StereoEye.Mono).M11;
+			var b = camera.GetProjectionMatrix(StereoEye.Mono).M22;
+			var w = (float)colorBuffer.Width;
+			var h = (float)colorBuffer.Height;
+
+			constData.View				=	camera.GetViewMatrix(StereoEye.Mono);
+			constData.ViewProjection	=	camera.GetViewMatrix(StereoEye.Mono) * camera.GetProjectionMatrix(StereoEye.Mono);
+			constData.ViewPosition		=	camera.GetCameraPosition4(StereoEye.Mono);
+			constData.PixelSize			=	new Vector4( 1/w/a, 1/b/h, 0, 0 );
 			constBuffer.SetData(constData);
 
 			dev.SetupVertexInput( vertexBuffer, null );
 			dev.VertexShaderConstants[0]	=	constBuffer ;
-			dev.PipelineState				=	factory[0];
+			dev.PixelShaderConstants[0]		=	constBuffer ;
+			dev.GeometryShaderConstants[0]	=	constBuffer ;
 
+			var flags = new[]{ RenderFlags.SOLID, RenderFlags.GHOST };
 
-			int numDPs = MathUtil.IntDivUp(vertexDataAccum.Count, vertexBufferSize);
+	
+			foreach ( var flag in flags ) {
+				dev.PipelineState =	factory[(int)flag];
 
-			for (int i = 0; i < numDPs; i++) {
+				int numDPs = MathUtil.IntDivUp(vertexDataAccum.Count, vertexBufferSize);
 
-				int numVerts = i < numDPs - 1 ? vertexBufferSize : vertexDataAccum.Count % vertexBufferSize;
+				for (int i = 0; i < numDPs; i++) {
 
-				if (numVerts == 0) {
-					break;
+					int numVerts = i < numDPs - 1 ? vertexBufferSize : vertexDataAccum.Count % vertexBufferSize;
+
+					if (numVerts == 0) {
+						break;
+					}
+
+					vertexDataAccum.CopyTo(i * vertexBufferSize, vertexArray, 0, numVerts);
+
+					vertexBuffer.SetData(vertexArray, 0, numVerts);
+
+					dev.Draw( numVerts, 0);
+
 				}
-
-				vertexDataAccum.CopyTo(i * vertexBufferSize, vertexArray, 0, numVerts);
-
-				vertexBuffer.SetData(vertexArray, 0, numVerts);
-
-				dev.Draw( numVerts, 0);
-
 			}
 
 			vertexDataAccum.Clear();
@@ -318,7 +396,7 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		public void DrawRing(Matrix basis, float radius, Color color, float stretch = 1, int numSegments = 32)
+		public void DrawRing(Matrix basis, float radius, Color color, int numSegments = 32, float width=0, float stretch = 1)
 		{
 			int N = numSegments;
 			Vector3[] points = new Vector3[N + 1];
@@ -332,7 +410,7 @@ namespace Fusion.Engine.Graphics {
 
 			for (int i = 0; i < N; i++)
 			{
-				DrawLine(points[i], points[i + 1], color);
+				DrawLine(points[i], points[i + 1], color, color, width, width);
 			}
 		}
 
