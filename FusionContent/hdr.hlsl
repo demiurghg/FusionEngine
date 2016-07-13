@@ -15,6 +15,7 @@ struct PARAMS {
 	float	Saturation;
 	float	Maximum;
 	float	Minimum;
+	float4	Tint;
 };
 
 Texture2D		SourceHdrImage 		: register(t0);
@@ -165,7 +166,7 @@ float4 PSMain(float4 position : SV_POSITION, float2 uv : TEXCOORD0 ) : SV_Target
 	
 	tonemapped	=	Dither( xpos, ypos, tonemapped );
 
-	return  float4( tonemapped, desaturated );
+	return  float4( tonemapped, desaturated ) * Params.Tint;
 }
 
 #endif

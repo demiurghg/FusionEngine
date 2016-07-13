@@ -40,7 +40,8 @@ namespace Fusion.Engine.Graphics {
 			[FieldOffset(28)]	public	float	Saturation;
 			[FieldOffset(32)]	public	float	MaximumOutputValue;
 			[FieldOffset(36)]	public	float	MinimumOutputValue;
-			[FieldOffset(40)]	public	float	__Value;
+			[FieldOffset(48)]	public	Color4	Tint;
+
 		}
 
 
@@ -152,6 +153,7 @@ namespace Fusion.Engine.Graphics {
 				paramsData.Saturation			=	settings.Saturation;
 				paramsData.MaximumOutputValue	=	settings.MaximumOutputValue;
 				paramsData.MinimumOutputValue	=	settings.MinimumOutputValue;
+				paramsData.Tint					=	settings.OutputTint.ToColor4();
 
 				paramsCB.SetData( paramsData );
 				device.PixelShaderConstants[0]	=	paramsCB;

@@ -110,6 +110,12 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public float MinimumOutputValue { get; set; }
 
+		/// <summary>
+		/// Minimum output value.
+		/// Default value is 0.
+		/// </summary>
+		public Color OutputTint { get; set; }
+
 
 		/// <summary>
 		/// Ctor.
@@ -124,6 +130,7 @@ namespace Fusion.Engine.Graphics {
 			BloomAmount			=	0.1f;
 			GaussBlurSigma		=	3.0f;
 			DirtAmount			=	0.9f;
+			OutputTint			=	Color.White;
 
 			Saturation			=	1;
 			MaximumOutputValue	=	1;
