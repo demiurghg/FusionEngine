@@ -183,6 +183,24 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
+		public static bool IsPointInPolygon(DVector2[] simPoly, DVector2 point)
+		{
+			int j = simPoly.Length - 1;
+			bool oddNodes = false;
+
+			for (int i = 0; i < simPoly.Length; i++) {
+				if ((simPoly[i].Y < point.Y && simPoly[j].Y >= point.Y || simPoly[j].Y < point.Y && simPoly[i].Y >= point.Y) && 
+					(simPoly[i].X <= point.X || simPoly[j].X <= point.X)) 
+				{
+					oddNodes ^= (simPoly[i].X + (point.Y - simPoly[i].Y) / (simPoly[j].Y - simPoly[i].Y) * (simPoly[j].X - simPoly[i].X) < point.X);
+				}
+				j = i;
+			}
+
+			return oddNodes;
+		}
+
+
 //		double EPSILON = 0.000001
 
 //int triangle_intersection( DVector3   V1,  // Triangle vertices

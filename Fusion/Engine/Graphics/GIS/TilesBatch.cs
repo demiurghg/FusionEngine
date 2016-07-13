@@ -37,9 +37,17 @@ namespace Fusion.Engine.Graphics.GIS
 		{
 			RegisterMapSources();
 
-			CurrentMapSource = MapSources[9];
-
 			this.camera = camera;
+
+
+			for (int i = 0; i < 17; i++) {
+
+				var dist = GetOptimalDistanceForLevel(i);
+
+				Console.WriteLine("Zoom level: " + i + "Distance: " + dist);
+			}
+
+			CurrentMapSource = MapSources[9];
 
 			frame	= Game.Content.Load<Texture2D>("redframe.tga");
 			shader	= Game.Content.Load<Ubershader>("globe.Tile.hlsl");

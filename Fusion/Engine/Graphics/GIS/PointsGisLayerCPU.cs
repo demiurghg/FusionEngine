@@ -130,7 +130,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			if (PointsCpu.Any()) {
 				Game.GraphicsDevice.SetupVertexInput(currentBuffer, indBuf);
-				Game.GraphicsDevice.DrawIndexed(indeces.Length, 0, 0);
+				Game.GraphicsDevice.DrawIndexed(indeces.Length, PointsDrawOffset, PointsCountToDraw);
 			}
 		}
 

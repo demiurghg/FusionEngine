@@ -68,32 +68,16 @@ namespace GISTest {
 		public FrameProcessor FrameProcessor { get { return userInterface; } }
 		FrameProcessor userInterface;
 
-		SpriteLayer		testLayer;
 		SpriteLayer		uiLayer;
-		DiscTexture		texture;
 		RenderWorld		masterView;
 		RenderLayer		viewLayer;
-		SoundWorld		soundWorld;
 		DiscTexture		debugFont;
 
 		TilesGisLayer	tiles;
-		TextGisLayer	text;
-
-		Scene		scene;
-		Scene		animScene;
-		Scene		skinScene;
-
-		Vector3		position = new Vector3(0,10,0);
-		float		yaw = 0, pitch = 0;
-
-		PointsGisLayerCPU	pointsCPU;
-		PointsGisLayer		pointsGPU;
 
 		private Vector2 prevMousePos;
 		private Vector2 mouseDelta;
 
-
-		private GraphLayer graph;
 
 		/// <summary>
 		/// Ctor
@@ -106,61 +90,34 @@ namespace GISTest {
 		}
 
 
-
-		float angle = 0;
-
-
 		/// <summary>
 		/// 
 		/// </summary>
 		public override void Initialize ()
 		{
 			debugFont		=	Game.Content.Load<DiscTexture>( "conchars" );
-
-			var bounds		=	Game.RenderSystem.DisplayBounds;
 			masterView		=	Game.RenderSystem.RenderWorld;
-
-
+			
 			Game.RenderSystem.RemoveLayer(masterView);
+			masterView.Dispose();
 
 			viewLayer = new RenderLayer(Game);
 			Game.RenderSystem.AddLayer(viewLayer);
 
-			//Game.RenderSystem.DisplayBoundsChanged += (s,e) => {
-			//	masterView.Resize( Game.RenderSystem.DisplayBounds.Width, Game.RenderSystem.DisplayBounds.Height );
-			//};
+			viewLayer.SpriteLayers.Add(console.ConsoleSpriteLayer);
 
 
-			testLayer	=	new SpriteLayer( Game.RenderSystem, 1024 );
 			uiLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
+
+			Gis.Debug = new DebugGisLayer(Game);
+			viewLayer.GisLayers.Add(Gis.Debug);
 
 
 			// Setup tiles
 			tiles = new TilesGisLayer(Game, viewLayer.GlobeCamera);
-			//viewLayer.GisLayers.Add(tiles);
 			tiles.SetMapSource(TilesGisLayer.MapSource.OpenStreetMap);
+			viewLayer.GisLayers.Add(tiles);
 
-			
-			
-			text = new TextGisLayer(Game, 100, viewLayer.GlobeCamera);
-			//masterView.GisLayers.Add(text);
-
-			//masterView.SpriteLayers.Add( testLayer );
-			//masterView.SpriteLayers.Add( text.TextSpriteLayer );
-			viewLayer.SpriteLayers.Add(console.ConsoleSpriteLayer);
-
-			
-			text.GeoTextArray[0] = new TextGisLayer.GeoText {
-				Color	= Color.Red,
-				Text	= "Arrow",
-				LonLat	= DMathUtil.DegreesToRadians(new DVector2(30.306473, 59.944082))
-			};
-
-			text.GeoTextArray[1] = new TextGisLayer.GeoText {
-				Color	= Color.Teal,
-				Text	= "Park",
-				LonLat	= DMathUtil.DegreesToRadians(new DVector2(30.313897, 59.954623))
-			};
 
 			Game.Keyboard.KeyDown += Keyboard_KeyDown;
 
@@ -168,70 +125,17 @@ namespace GISTest {
 
 			Game.Reloading += (s,e) => LoadContent();
 
-
-			var r = new Random();
-
-			//pointsCPU = new PointsGisLayerCPU(Game, 8000000);
-			//pointsCPU.TextureAtlas = Game.Content.Load<Texture2D>("Zombie");
-			//
-			//for (int i = 0; i < pointsCPU.PointsCountToDraw; i++) {
-			//	pointsCPU.AddPoint(i, DMathUtil.DegreesToRadians(new DVector2(30.240383 + r.NextDouble(-1, 1) * 0.1, 59.944007 - r.NextDouble(-1, 1) * 0.05)), 0, 0.01f);
-			//}
-			//pointsCPU.UpdatePointsBuffer();
-			//viewLayer.GisLayers.Add(pointsCPU);
-			
-
-			pointsGPU = new PointsGisLayer(Game, 1000, true);
-			pointsGPU.TextureAtlas = Game.Content.Load<Texture2D>("Zombie");
-			pointsGPU.ImageSizeInAtlas = new Vector2(36, 36);
-			
-			for (int i = 0; i < pointsGPU.PointsCountToDraw; i++) {
-				var pos = DMathUtil.DegreesToRadians(new DVector2(30.240383 + r.NextDouble(-1, 1)*0.2, 59.944007 - r.NextDouble(-1, 1)*0.1));
-				pointsGPU.PointsCpu[i] = new Gis.GeoPoint {
-					Lon = pos.X,
-					Lat = pos.Y,
-					Color = Color.White,
-					Tex0 = new Vector4(0, 0, 1.02f, 0)
-				};
-			}
-
-			pointsGPU.Flags = (int)(PointsGisLayer.PointFlags.DOTS_SCREENSPACE);
-
-			pointsGPU.UpdatePointsBuffer();
-			//viewLayer.GisLayers.Add(pointsGPU);
-
-
-			//viewLayer.GlobeCamera.GoToPlace(GlobeCamera.Places.SaintPetersburg_VO);
-			//viewLayer.GlobeCamera.CameraDistance = GeoHelper.EarthRadius + 5;
-
 			Game.Touch.Tap			+= args => System.Console.WriteLine("You just perform tap gesture at point: " + args.Position);
 			Game.Touch.DoubleTap	+= args => System.Console.WriteLine("You just perform double tap gesture at point: " + args.Position);
 			Game.Touch.SecondaryTap += args => System.Console.WriteLine("You just perform secondary tap gesture at point: " + args.Position);
 			Game.Touch.Manipulate	+= args => System.Console.WriteLine("You just perform touch manipulation: " + args.Position + "	" + args.ScaleDelta + "	" + args.RotationDelta + " " + args.IsEventBegin + " " + args.IsEventEnd);
 
-
-			graph = new GraphLayer(Game);
-			graph.Camera = new GreatCircleCamera();
-
-			Game.Mouse.Scroll += (sender, args) => {
-				graph.Camera.Zoom(args.WheelDelta > 0 ? -0.1f : 0.1f);
-			};
-
 			Game.Mouse.Move += (sender, args) => {
 				if (Game.Keyboard.IsKeyDown(Keys.LeftButton)) {
-					graph.Camera.RotateCamera(mouseDelta);
-				}
-				if (Game.Keyboard.IsKeyDown(Keys.MiddleButton)) {
-					graph.Camera.MoveCamera(mouseDelta);
+					viewLayer.GlobeCamera.MoveCamera(prevMousePos, args.Position);
 				}
 			};
-			
-			graph.Initialize();
-			
-			viewLayer.GraphLayers.Add(graph);
 		}
-
-
 
 
 		void LoadContent ()
@@ -255,17 +159,11 @@ namespace GISTest {
 		}
 
 
-
 		protected override void Dispose ( bool disposing )
 		{
 			if (disposing) {
-
-				SafeDispose( ref testLayer );
 				SafeDispose( ref uiLayer );
 				tiles.Dispose();
-				masterView.Dispose();
-				pointsGPU.Dispose();
-				text.Dispose();
 				viewLayer.Dispose();
 			}
 			base.Dispose( disposing );
@@ -278,12 +176,6 @@ namespace GISTest {
 		}
 
 
-
-		static readonly Guid HudFps = Guid.NewGuid();
-
-		float frame = 0;
-		Random rand2 = new Random();
-
 		/// <summary>
 		/// Updates internal state of interface.
 		/// </summary>
@@ -292,75 +184,14 @@ namespace GISTest {
 		{
 			console.Update( gameTime );
 
-			graph.Camera.Update(gameTime);
-
-
 			mouseDelta		= Game.Mouse.Position - prevMousePos;
 			prevMousePos	= Game.Mouse.Position;
 
-
-			///////////////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////////
-			//var r = new Random();
-
-			//for (int i = 0; i < pointsCPU.PointsCountToDraw; i++)
-			//{
-			//	pointsCPU.AddPoint(i, DMathUtil.DegreesToRadians(new DVector2(30.240383 + r.NextDouble(-1, 1) * 0.1, 59.944007 - r.NextDouble(-1, 1) * 0.05)), 0, 0.01f);
-			//}
-			//pointsCPU.UpdatePointsBuffer();
-
-
-			//for (int i = 0; i < pointsGPU.PointsCountToDraw; i++)
-			//{
-			//	//var pos = DMathUtil.DegreesToRadians(new DVector2(30.240383 + r.NextDouble(-1, 1) * 0.1, 59.944007 - r.NextDouble(-1, 1) * 0.05));
-			//	//pointsGPU.PointsCpu[i] = new Gis.GeoPoint
-			//	//{
-			//	//	Lon = pos.X,
-			//	//	Lat = pos.Y,
-			//	//	Color = Color4.White,
-			//	//	Tex0 = new Vector4(0, 0, 0.02f, 0)
-			//	//};
-			//
-			//	pointsGPU.PointsCpu[i] = pointsGPU.PointsCpu[pointsGPU.PointsCountToDraw - 1 - i];
-			//}
-			//pointsGPU.UpdatePointsBuffer();
-
-			///////////////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////////
-			//testLayer.Color	= Color.White;
-			//
-			//Hud.Clear(HudFps);
-			//Hud.Add(HudFps, Color.Orange, "FPS     : {0,6:0.00}", gameTime.Fps );
-			//
-			//
-			//testLayer.Clear();
-			//testLayer.BlendMode = SpriteBlendMode.AlphaBlend;
-			//
-			//int line = 0;
-			//foreach ( var debugString in Hud.GetLines() ) {
-			//	testLayer.DrawDebugString( debugFont, 0+1, line*8+1, debugString.Text, Color.Black );
-			//	testLayer.DrawDebugString( debugFont, 0+0, line*8+0, debugString.Text, debugString.Color );
-			//	line++;
-			//}
-			//
-			////text.Update(gameTime);
 			tiles.Update(gameTime);
-			tt += gameTime.ElapsedSec;
-			if (tt > 10)
-			{
-				tt = tt - 10;
-				counter++;
-				if (graph.state == State.RUN && counter < 1000)
-				{
-					graph.createLinksFromFile(counter);
-				
-				}
-			}
-			
+
+
 		}
 
-		private int counter = 0;
-		private float tt = 10;
 
 		/// <summary>
 		/// 

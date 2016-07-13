@@ -116,6 +116,9 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 		{
 			try {
 				var request = (HttpWebRequest) WebRequest.Create(tile.Url);
+
+				//WebClient wc = new WebClient();
+				
 				
 				request.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.CacheIfAvailable);
 				request.Timeout				= TimeoutMs;

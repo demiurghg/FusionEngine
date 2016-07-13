@@ -164,6 +164,7 @@ namespace Fusion.Engine.Graphics.GIS
 			tilesOld.Clear();
 		}
 
+		
 		private double GetLevelScreenSpaceError(int zoom, double distance)
 		{
 			double eps	= 256.0/(1 << zoom);
@@ -175,6 +176,18 @@ namespace Fusion.Engine.Graphics.GIS
 
 			var dis = 1.0 - p;
 			return dis;
+		}
+
+
+		double GetOptimalDistanceForLevel(int zoom)
+		{
+			double eps = 256.0 / (1 << zoom);
+			double xx = camera.Viewport.Height;
+			double eta = DMathUtil.DegreesToRadians(camera.Parameters.CameraFovDegrees);
+
+			double dd = (eps * xx) / (2 * Math.Tan(eta));
+
+			return dd;
 		}
 
 
@@ -399,14 +412,14 @@ namespace Fusion.Engine.Graphics.GIS
 				};
 
 
-				GenerateTileGrid(tileDensity, ref tile.VertexBuf, out tile.IndexBuf, x0, x1, y0, y1, zoom);
+				GenerateTileGrid(tileDensity, ref tile.VertexBuf, out tile.IndexBuf, x0, x1, y0, y1);
 
 				tilesToRender.Add(key, tile);
 			}
 		}
 
 
-		void GenerateTileGrid(int density, ref VertexBuffer vb, out IndexBuffer ib, double left, double right, double top, double bottom, int zoom)
+		void GenerateTileGrid(int density, ref VertexBuffer vb, out IndexBuffer ib, double left, double right, double top, double bottom)
 		{
 			int[]			indexes;
 			Gis.GeoPoint[]	vertices;
