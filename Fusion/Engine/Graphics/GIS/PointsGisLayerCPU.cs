@@ -156,5 +156,16 @@ namespace Fusion.Engine.Graphics.GIS
 			}
 		}
 
+
+		public override void Dispose()
+		{
+			PointsCpu	= null;
+			indeces		= null;
+			if (currentBuffer	!= null) currentBuffer.Dispose();
+			if (indBuf			!= null) indBuf.Dispose();
+			if (DotsBuffer		!= null) DotsBuffer.Dispose();
+
+			base.Dispose();
+		}
 	}
 }
