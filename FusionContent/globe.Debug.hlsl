@@ -8,9 +8,9 @@ struct ConstData {
 
 struct DataForDots{
 	float		LimitAlpha;
-	float		FadingVelocity;
-	float		DeltaTime;
-	float		Parameter;
+	float		TimeOfFading;
+	float		DelayTime;
+	float		CurrentDate;
 };
 
 struct VS_INPUT {	
@@ -61,9 +61,17 @@ VS_OUTPUT VSMain ( VS_INPUT v )
 	output.Tex		=	v.Tex;
 	
 #ifdef POINT_FADING
-	if ( v.Color.a > FadingData.LimitAlpha){
-		output.Color.a = v.Color.a - (FadingData.FadingVelocity * FadingData.DeltaTime);
+	float difference = FadingData.CurrentDate - v.Tex.z;
+	if( difference < 0 ){
+		output.Color.a = 0;
+	} 
+	else {
+		//if (difference > FadingData.DelayTime) {			
+			//output.Color.a =  1 - ( difference / FadingData.TimeOfFading);//
+			output.Color.a = max(v.Color.a - ( difference / FadingData.TimeOfFading), FadingData.LimitAlpha);		
+		//}
 	}
+	
 #endif
 	return output;
 }
@@ -82,10 +90,10 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 	float4	color = DiffuseMap.Sample(Sampler, input.Tex.xy);
 	//color = float4(1.0f, 0.0f, 0.0f, 1.0f);
 	
-	color.rgb *= input.Color.rgb;
+	//color.rgb *= input.Color.rgb;
 
-	color.a *= input.Color.a;
+	//color.a *= input.Color.a;
 
-	return color;
+	return color * input.Color;
 }
 #endif
