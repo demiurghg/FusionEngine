@@ -46,6 +46,15 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		public UserTexture(Texture2D tex)
+		{
+			this.texture	= tex;
+			this.Width		= texture.Width;
+			this.Height		= texture.Height;
+			this.Srv		= texture;
+		}
+
+
 
 		/// <summary>
 		///	Disposes DiscTexture 

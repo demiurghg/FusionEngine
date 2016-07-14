@@ -69,6 +69,9 @@
     <Folder Include="Content\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Data\edgeList.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Data\testedgeList.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

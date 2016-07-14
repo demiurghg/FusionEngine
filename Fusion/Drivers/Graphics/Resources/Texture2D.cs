@@ -132,7 +132,8 @@ namespace Fusion.Drivers.Graphics {
 			IntPtr	resourceView	=	new IntPtr(0);
 			bool	result;
 
-			lock (device.DeviceContext) {
+			//lock (device.DeviceContext) 
+			{
 				if ((char)fileInMemory[0]=='D' &&
 					(char)fileInMemory[1]=='D' &&
 					(char)fileInMemory[2]=='S' &&
@@ -155,7 +156,56 @@ namespace Fusion.Drivers.Graphics {
 				Depth		=	1;
 				mipCount	=	tex2D.Description.MipLevels;
 				format		=	Converter.Convert( tex2D.Description.Format );
+			}
+		}
+
+
+
+		internal Texture2D(GraphicsDevice dev) : base(dev)
+		{
+			
+		}
+
+		public static Texture2D CreateFromFile(string name, byte[] fileInMemory, bool forceSRgb)
+		{
+			IntPtr resource = new IntPtr(0);
+			IntPtr resourceView = new IntPtr(0);
+			bool result;
+
+			var device = Game.Instance.GraphicsDevice;
+			var ret = new Texture2D(device);
+
+			//lock (device.DeviceContext)
+			{
+				if ((char)fileInMemory[0] == 'D' &&
+					(char)fileInMemory[1] == 'D' &&
+					(char)fileInMemory[2] == 'S' &&
+					(char)fileInMemory[3] == ' ')
+				{
+
+					result = DdsLoader.CreateTextureFromMemory(device.Device.NativePointer, fileInMemory, forceSRgb, ref resource, ref resourceView);
 				}
+				else
+				{
+					result = WicLoader.CreateTextureFromMemory(device.Device.NativePointer, fileInMemory, forceSRgb, ref resource, ref resourceView);
+				}
+
+				if (!result)
+				{
+					throw new GraphicsException("Failed to load texture: " + name);
+				}
+
+				ret.tex2D = new D3D.Texture2D(resource);
+				ret.SRV = new D3D.ShaderResourceView(resourceView);
+
+				ret.Width		= ret.tex2D.Description.Width;
+				ret.Height		= ret.tex2D.Description.Height;
+				ret.Depth		= 1;
+				ret.mipCount	= ret.tex2D.Description.MipLevels;
+				ret.format		= Converter.Convert(ret.tex2D.Description.Format);
+			}
+
+			return ret;
 		}
 
 

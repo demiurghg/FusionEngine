@@ -132,6 +132,10 @@ namespace GISTest {
 					viewLayer.GlobeCamera.MoveCamera(prevMousePos, args.Position);
 				}
 			};
+
+			Game.Mouse.Scroll += (sender, args) => {
+				viewLayer.GlobeCamera.CameraZoom(args.WheelDelta > 0 ? -0.1f : 0.1f);
+			};
 		}
 
 
