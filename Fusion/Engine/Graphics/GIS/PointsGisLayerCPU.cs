@@ -59,6 +59,7 @@ namespace Fusion.Engine.Graphics.GIS
 			indeces = new int[maxPointsCount*6];
 			PointsDrawOffset = 0;
 			SizeMultiplier = 1;
+			DeltaTime = 0;
 
 			dotsData.CurrentDate = currentDate;
 			dotsData.DelayTime = delayTime;
@@ -154,7 +155,7 @@ namespace Fusion.Engine.Graphics.GIS
 			
 			Game.GraphicsDevice.VertexShaderConstants[0] = constBuffer;
 			Game.GraphicsDevice.VertexShaderConstants[1]	= DotsBuffer;
-			Game.GraphicsDevice.PipelineState = factory[(int)(PointFlags.DRAW_TEXTURED_POLY | PointFlags.POINT_FADING)];
+			Game.GraphicsDevice.PipelineState = factory[(int)(PointFlags.DRAW_TEXTURED_POLY)]; // | PointFlags.POINT_FADING
 
 			Game.GraphicsDevice.PixelShaderResources[0] = TextureAtlas;
 			Game.GraphicsDevice.PixelShaderSamplers[0]	= SamplerState.LinearClamp;

@@ -90,10 +90,10 @@ float4 PSMain ( VS_OUTPUT input ) : SV_Target
 	float4	color = DiffuseMap.Sample(Sampler, input.Tex.xy);
 	//color = float4(1.0f, 0.0f, 0.0f, 1.0f);
 	
-	//color.rgb *= input.Color.rgb;
+	color.rgb *= input.Color.rgb;
 
-	//color.a *= input.Color.a;
+	color.a *= input.Color.a;
 
-	return color * input.Color;
+	return color;
 }
 #endif
