@@ -19,7 +19,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// Represents image data of particular tile.
 	/// </summary>
-	internal class VTTile {
+	public class VTTile {
 
 		Image image;
 

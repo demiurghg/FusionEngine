@@ -12,11 +12,33 @@ namespace Fusion.Engine.Graphics {
 	/// Non-zero dummy used for GPU readback. Zero dummy is ignored.
 	/// </summary>
 	public struct VTAddress : IEquatable<VTAddress> {
+		
 		public Int16 PageX;
 		public Int16 PageY;
 		public Int16 MipLevel;
 		public Int16 Dummy;
 
+
+		public VTAddress ( short pageX, short pageY, short mipLevel )
+		{
+			if (mipLevel<0 | mipLevel>=VTConfig.MipCount) {
+				throw new ArgumentOutOfRangeException("mipLevel");
+			}
+
+			int maxPageCount = VTConfig.VirtualPageCount >> mipLevel;
+
+			if (pageX<0 | pageX>=maxPageCount) {
+				throw new ArgumentOutOfRangeException("pageX");
+			}
+			if (pageY<0 | pageY>=maxPageCount) {
+				throw new ArgumentOutOfRangeException("pageY");
+			}
+
+			PageX		=	pageX;
+			PageY		=	pageY;
+			MipLevel	=	mipLevel;
+			Dummy		=	1;
+		}
 
 
 

@@ -319,7 +319,7 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			var feedbackBuffer = new VTAddress[ HdrFrame.FeedbackBufferWidth * HdrFrame.FeedbackBufferHeight ];
-			frame.FeedbackBufferColor.GetData( feedbackBuffer );
+			frame.FeedbackBufferColor.GetFeedback( feedbackBuffer );
 
 			rs.VirtualTexture.Update( feedbackBuffer );
 		}

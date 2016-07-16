@@ -215,6 +215,8 @@ SURFACE MaterialCombiner ( float2 uv )
 }
 
 
+float MipLevel( float2 uv );
+
 static const float 	VTVirtualPageCount	= 128;
 static const float 	VTPhysicalPageCount	= 8;
 static const int 	VTPageSize			= 128;
@@ -262,6 +264,8 @@ GBuffer PSMain( PSInput input )
 		color			=	Textures[2].Sample( SamplerPoint, finalTC ).rgba;
 	}
 	
+	//color = frac(MipLevel( input.TexCoord ));
+	
 	//-----------------------------------
 	//	End of virtual texturing stuff
 	//
@@ -301,19 +305,21 @@ float MipLevel( float2 uv )
 	d = clamp(d, 1.0, rangeClamp);
 
 	float mipLevel = 0.5 * log2(d);
-	mipLevel = floor(mipLevel);   
+	//mipLevel = floor(mipLevel);   
 
 	return mipLevel;
 }
 
 #ifdef FEEDBACK
-uint4 PSMain( PSInput input ) : SV_TARGET0
+float4 PSMain( PSInput input ) : SV_TARGET0
 {
-	int pageX	=	(int)floor( input.TexCoord.x * VTVirtualPageCount );
-	int pageY	=	(int)floor( input.TexCoord.y * VTVirtualPageCount );
-	int	mip		=	(int)MipLevel( input.TexCoord.xy );
+	float mip	=	floor( MipLevel( input.TexCoord.xy ) );
+	float scale	=	exp2(mip);
+	float pageX	=	floor( saturate(input.TexCoord.x) * VTVirtualPageCount / scale );
+	float pageY	=	floor( saturate(input.TexCoord.y) * VTVirtualPageCount / scale );
+	float dummy	=	1;
 	
-	return uint4( pageX>>mip, pageY>>mip, mip, 4096 );
+	return float4( pageX / 1024.0f, pageY / 1024.0f, mip / 1024.0f, dummy / 4.0f );
 }
 #endif
 

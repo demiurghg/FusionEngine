@@ -178,17 +178,17 @@ namespace Fusion.Engine.Graphics {
 			//
 			//	Put into cache :
 			//
-			foreach ( var addr in feedbackTree ) {
+			if (tileCache!=null) {
+				foreach ( var addr in feedbackTree ) {
 				
-				int physAddr;
+					int physAddr;
 
-				if ( tileCache.Add( addr, out physAddr ) ) {
+					if ( tileCache.Add( addr, out physAddr ) ) {
 
-					Log.Message("...vt tile cache: {0} --> {1}", addr, physAddr );
+						Log.Message("...vt tile cache: {0} --> {1}", addr, physAddr );
 
-					tileLoader.RequestTile( addr );
-
-					//
+						tileLoader.RequestTile( addr );
+					}
 				}
 			}
 
@@ -196,6 +196,7 @@ namespace Fusion.Engine.Graphics {
 			//	update table :
 			//
 			if (tileLoader!=null && tileCache!=null) {
+
 				for (int i=0; i<MaxPPF; i++) {
 				
 					VTTile tile;
@@ -206,7 +207,7 @@ namespace Fusion.Engine.Graphics {
 
 						tile.DrawBorder( ShowTileBorder );
 
-						if (tileCache.TranslateAddress( tile.VirtualAddress, out rect )) {
+						if (tileCache.TranslateAddress( tile.VirtualAddress, tile, out rect )) {
 							PhysicalPages.SetData( 0, rect, tile.Data, 0, tile.Data.Length );
 						}
 

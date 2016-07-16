@@ -14,6 +14,7 @@ using SharpDX.Direct3D11;
 using D3D = SharpDX.Direct3D11;
 using DXGI = SharpDX.DXGI;
 using Fusion.Core.Mathematics;
+using Fusion.Engine.Graphics;
 
 
 namespace Fusion.Drivers.Graphics {
@@ -30,6 +31,10 @@ namespace Fusion.Drivers.Graphics {
 		D3D.Texture2D			tex2D;
 		D3D.Texture2D			tex2Dstaging;
 		RenderTargetSurface		surface;
+		
+		readonly VTAddress[]	feedbackData;
+		readonly int[]			feedbackDataRaw;
+		readonly int			linearSize	;
 			
 
 
@@ -44,6 +49,10 @@ namespace Fusion.Drivers.Graphics {
 		{
 			Log.Debug("FeedbackBuffer: w:{0} h:{1}", width, height );
 
+			feedbackData	=	new VTAddress[ width * height ];
+			feedbackDataRaw	=	new int[ width * height ];
+			linearSize		=	width * height;
+
 			Width		=	width;
 			Height		=	height;
 			Depth		=	1;
@@ -57,7 +66,7 @@ namespace Fusion.Drivers.Graphics {
 				texDesc.ArraySize			=	1;
 				texDesc.BindFlags			=	BindFlags.RenderTarget | BindFlags.ShaderResource;
 				texDesc.CpuAccessFlags		=	CpuAccessFlags.None;
-				texDesc.Format				=	DXGI.Format.R16G16B16A16_Typeless;
+				texDesc.Format				=	DXGI.Format.R10G10B10A2_UNorm;
 				texDesc.MipLevels			=	1;
 				texDesc.OptionFlags			=	ResourceOptionFlags.None;
 				texDesc.SampleDescription	=	new DXGI.SampleDescription(1, 0);
@@ -74,7 +83,7 @@ namespace Fusion.Drivers.Graphics {
 				texDescStaging.ArraySize			=	1;
 				texDescStaging.BindFlags			=	BindFlags.None;
 				texDescStaging.CpuAccessFlags		=	CpuAccessFlags.Read;
-				texDescStaging.Format				=	DXGI.Format.R16G16B16A16_Typeless;
+				texDescStaging.Format				=	DXGI.Format.R10G10B10A2_UNorm;
 				texDescStaging.MipLevels			=	1;
 				texDescStaging.OptionFlags			=	ResourceOptionFlags.None;
 				texDescStaging.SampleDescription	=	new DXGI.SampleDescription(1, 0);
@@ -89,7 +98,7 @@ namespace Fusion.Drivers.Graphics {
 				srvDesc.Texture2D.MipLevels			=	1;
 				srvDesc.Texture2D.MostDetailedMip	=	0;
 				srvDesc.Dimension					=	ShaderResourceViewDimension.Texture2D;
-				srvDesc.Format						=	DXGI.Format.R16G16B16A16_UNorm;
+				srvDesc.Format						=	DXGI.Format.R10G10B10A2_UNorm;
 
 			SRV		=	new ShaderResourceView( device.Device, tex2D, srvDesc );
 
@@ -103,7 +112,7 @@ namespace Fusion.Drivers.Graphics {
 			var rtvDesc = new RenderTargetViewDescription();
 				rtvDesc.Texture2D.MipSlice	=	0;
 				rtvDesc.Dimension			=	RenderTargetViewDimension.Texture2D;
-				rtvDesc.Format				=	DXGI.Format.R16G16B16A16_UInt;
+				rtvDesc.Format				=	DXGI.Format.R10G10B10A2_UNorm;
 
 			var rtv	=	new RenderTargetView( device.Device, tex2D, rtvDesc );
 
@@ -157,6 +166,36 @@ namespace Fusion.Drivers.Graphics {
 
 
 		/// <summary>
+		/// http://d.hatena.ne.jp/hanecci/20140218/p3
+		/// </summary>
+		/// <returns></returns>
+		public void GetFeedback ( VTAddress[] feedbackData )
+		{
+			if (feedbackData==null) {
+				throw new ArgumentNullException("feedbackData");
+			}
+
+			if (feedbackData.Length < linearSize ) {
+				throw new ArgumentException("feedbackData.Length < " + linearSize.ToString() );
+			}
+
+			GetData( feedbackDataRaw );
+
+			for ( int i=0; i<linearSize; i++) {
+
+				var vaRaw		=	MathUtil.UnpackRGB10A2( feedbackDataRaw[i] );
+				var pageX		=	(short)vaRaw.X; 
+				var pageY		=	(short)vaRaw.Y; 
+				var mipLevel	=	(short)vaRaw.Z; 
+				
+				feedbackData[i]	=	new VTAddress( pageX, pageY, mipLevel );
+
+			}
+		}
+
+
+
+		/// <summary>
 		/// Gets a copy of 2D texture data, specifying a mipmap level, source rectangle, start index, and number of elements.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
@@ -168,7 +207,7 @@ namespace Fusion.Drivers.Graphics {
 		#warning use 3 sequential textures to reduce waiting for gpu 
 		/// https://msdn.microsoft.com/en-us/library/windows/desktop/bb205132(v=vs.85).aspx#Performance_Considerations
 		/// 
-		public void GetData<T>(int level, T[] data, int startIndex, int elementCount) where T : struct
+		void GetData<T>(int level, T[] data, int startIndex, int elementCount) where T : struct
         {
             if (data == null || data.Length == 0) {
                 throw new ArgumentException("data cannot be null");
@@ -228,7 +267,7 @@ namespace Fusion.Drivers.Graphics {
 		/// <param name="data"></param>
 		/// <param name="startIndex"></param>
 		/// <param name="elementCount"></param>
-		public void GetData<T>(T[] data, int startIndex, int elementCount) where T : struct
+		void GetData<T>(T[] data, int startIndex, int elementCount) where T : struct
 		{
 			this.GetData(0, data, startIndex, elementCount);
 		}
@@ -240,7 +279,7 @@ namespace Fusion.Drivers.Graphics {
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="data"></param>
-		public void GetData<T> (T[] data) where T : struct
+		void GetData<T> (T[] data) where T : struct
 		{
 			this.GetData(0, data, 0, data.Length);
 		}

@@ -36,6 +36,8 @@ namespace Fusion.Engine.Graphics {
 			public readonly int Address;
 			public readonly float X;
 			public readonly float Y;
+
+			public VTTile Tile = null;
 		}
 
 
@@ -64,7 +66,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="address"></param>
 		/// <param name="rectangle"></param>
 		/// <returns>False if address is not presented in cache</returns>
-		public bool TranslateAddress ( VTAddress address, out Rectangle rectangle )
+		public bool TranslateAddress ( VTAddress address, VTTile tile, out Rectangle rectangle )
 		{
 			Page page;
 
@@ -78,6 +80,8 @@ namespace Fusion.Engine.Graphics {
 				int w		=	size;
 				int h		=	size;
 				rectangle 	=	new Rectangle( x,y,w,h );
+
+				page.Tile	=	tile;
 
 				return true;
 
@@ -198,7 +202,7 @@ namespace Fusion.Engine.Graphics {
 		/// Adds new page to cache.
 		///		
 		///	If page exists:
-		///		- LRU index of existing page is increased.
+		///		- LFU index of existing page is shifted.
 		///		- returns FALSE
 		/// 
 		/// If page with given address does not exist:

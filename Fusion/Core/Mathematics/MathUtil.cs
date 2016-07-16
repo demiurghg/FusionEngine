@@ -948,5 +948,41 @@ namespace Fusion.Core.Mathematics
 			return current;
 		}
 
+
+		/// <summary>
+		/// http://d.hatena.ne.jp/hanecci/20140218/p3
+		/// </summary>
+		/// <param name="packedInput"></param>
+		/// <returns></returns>
+		public static Int4 UnpackRGB10A2 ( int packedInput )
+		{
+			Int4 unpackedOutput;
+			unpackedOutput.X = packedInput & 0x000003ff;
+			unpackedOutput.Y = (packedInput>>10) & 0x000003ff;
+			unpackedOutput.Z = (packedInput>>20) & 0x000003ff;
+			unpackedOutput.W = (packedInput>>30) & 0x00000003;
+			return unpackedOutput;
+		}
+
+
+		/// <summary>
+		/// http://d.hatena.ne.jp/hanecci/20140218/p3
+		/// </summary>
+		/// <param name="packedInput"></param>
+		/// <returns></returns>
+		public static int PackRGB10A2 ( Int4 unpackedInput )
+		{
+			int packedOutput;
+			unpackedInput.X = Math.Min(unpackedInput.X, 0x000003ff);
+			unpackedInput.Y = Math.Min(unpackedInput.Y, 0x000003ff);
+			unpackedInput.Z = Math.Min(unpackedInput.Z, 0x000003ff);
+			unpackedInput.W = Math.Min(unpackedInput.W, 0x00000003);
+			packedOutput = ( (unpackedInput.X)      |
+							((unpackedInput.Y)<<10) |
+							((unpackedInput.Z)<<20) |
+							((unpackedInput.W)<<30) );
+			return packedOutput;
+		}
+
     }
 }
