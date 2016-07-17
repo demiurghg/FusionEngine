@@ -98,7 +98,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		public Vector4[] GetPageTableData ()
+		public Vector4[] GetPageTableData ( int mipLevel )
 		{
 			Vector4[] mapping = new Vector4[VTConfig.VirtualPageCount * VTConfig.VirtualPageCount];
 
@@ -113,6 +113,10 @@ namespace Fusion.Engine.Graphics {
 				var va	=	pair.Key;
 				var pa	=	pair.Value;
 				var sz	=	1 << va.MipLevel;
+
+				if (pa.Tile==null) {
+					continue;
+				}
 
 				for ( int x=0; x<sz; x++ ) {
 					for ( int y=0; y<sz; y++ ) {
@@ -145,6 +149,9 @@ namespace Fusion.Engine.Graphics {
 					p.LfuIndex = (byte)(p.LfuIndex << 1);
 				}
 			}
+
+			//	check consistency:
+
 		}
 
 

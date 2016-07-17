@@ -217,7 +217,7 @@ SURFACE MaterialCombiner ( float2 uv )
 float MipLevel( float2 uv );
 
 static const float 	VTVirtualPageCount	= 128;
-static const float 	VTPhysicalPageCount	= 8;
+static const float 	VTPhysicalPageCount	= 16;
 static const int 	VTPageSize			= 128;
 static const int 	VTMaxMip	  		= 6;
 static const int 	VTFeedbackWidth		=	80;
@@ -228,7 +228,7 @@ float MipLevel( float2 uv )
 {
 	float2 dx = ddx( uv * VTPageSize*VTVirtualPageCount );
 	float2 dy = ddy( uv * VTPageSize*VTVirtualPageCount );
-	float d = max( dot( dx, dx ), dot( dy, dy ) ) * 2;
+	float d = max( dot( dx, dx ), dot( dy, dy ) );
 
 	// Clamp the value to the max mip level counts
 	const float rangeClamp = pow(2, (VTMaxMip - 1) * 2);

@@ -191,7 +191,7 @@ namespace Fusion.Engine.Graphics {
 
 					if ( tileCache.Add( addr, out physAddr ) ) {
 
-						Log.Message("...vt tile cache: {0} --> {1}", addr, physAddr );
+						//Log.Message("...vt tile cache: {0} --> {1}", addr, physAddr );
 
 						tileLoader.RequestTile( addr );
 					}
@@ -223,7 +223,7 @@ namespace Fusion.Engine.Graphics {
 
 
 				//	update page table :
-				PageTable.SetData( tileCache.GetPageTableData() );
+				PageTable.SetData( tileCache.GetPageTableData(0) );
 			}
 		}
 	}

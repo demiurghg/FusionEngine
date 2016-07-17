@@ -102,13 +102,13 @@ namespace Fusion.Engine.Graphics {
 				VTAddress address;
 				
 				if (!requestQueue.TryDequeue(out address)) {
-					Thread.Sleep(1);
+					//Thread.Sleep(1);
 					continue;
 				}
 					
 				var fileName = Path.Combine( baseDirectory, address.GetFileNameWithoutExtension() + ".tga" );
 
-				Log.Message("...vt tile load : {0}", fileName );
+				//Log.Message("...vt tile load : {0}", fileName );
 
 				try {
 					
