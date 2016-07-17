@@ -22,7 +22,7 @@ namespace Fusion.Engine.Graphics {
 
 		public const int FallbackSize		=	TextureSize >> MaxMipLevel;
 
-		public const int PhysicalPageCount		=	16;
+		public const int PhysicalPageCount		=	8;
 		public const int TotalPhysicalPageCount	=	PhysicalPageCount * PhysicalPageCount;
 
 	}

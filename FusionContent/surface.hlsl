@@ -217,7 +217,7 @@ SURFACE MaterialCombiner ( float2 uv )
 float MipLevel( float2 uv );
 
 static const float 	VTVirtualPageCount	= 128;
-static const float 	VTPhysicalPageCount	= 16;
+static const float 	VTPhysicalPageCount	= 8;
 static const int 	VTPageSize			= 128;
 static const int 	VTMaxMip	  		= 6;
 static const int 	VTFeedbackWidth		=	80;
@@ -228,7 +228,7 @@ float MipLevel( float2 uv )
 {
 	float2 dx = ddx( uv * VTPageSize*VTVirtualPageCount );
 	float2 dy = ddy( uv * VTPageSize*VTVirtualPageCount );
-	float d = max( dot( dx, dx ), dot( dy, dy ) ) * 32; // VT-bias, move to constants
+	float d = max( dot( dx, dx ), dot( dy, dy ) ) * 2;
 
 	// Clamp the value to the max mip level counts
 	const float rangeClamp = pow(2, (VTMaxMip - 1) * 2);
@@ -315,19 +315,6 @@ GBuffer PSMain( PSInput input )
 }
 #endif
 
-
-#ifdef FEEDBACK
-float4 PSMain( PSInput input ) : SV_TARGET0
-{
-	float mip	=	floor( MipLevel( input.TexCoord.xy ) );
-	float scale	=	exp2(mip);
-	float pageX	=	floor( saturate(input.TexCoord.x) * VTVirtualPageCount / scale );
-	float pageY	=	floor( saturate(input.TexCoord.y) * VTVirtualPageCount / scale );
-	float dummy	=	1;
-	
-	return float4( pageX / 1024.0f, pageY / 1024.0f, mip / 1024.0f, dummy / 4.0f );
-}
-#endif
 
 
 #ifdef SHADOW

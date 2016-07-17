@@ -166,9 +166,15 @@ namespace Fusion.Engine.Graphics {
 			//	Detect thrashing :
 			//	TODO : get highest mip, remove them, repeat until no thrashing occur.
 			//
-			if (feedbackTree.Count >= VTConfig.PhysicalPageCount * VTConfig.PhysicalPageCount ) {
-				Log.Warning("Thrashing detected - requested {0} tiles", feedbackTree.Count);
+			//if (feedbackTree.Count >= VTConfig.PhysicalPageCount * VTConfig.PhysicalPageCount ) {
+			//	Log.Warning("Thrashing detected - requested {0} tiles", feedbackTree.Count);
+			//}
+
+			while (feedbackTree.Count >= VTConfig.TotalPhysicalPageCount ) {
+				int minMip = feedbackTree.Min( va => va.MipLevel );
+				feedbackTree.RemoveAll( va => va.MipLevel == minMip );
 			}
+
 
 
 			if (tileCache!=null) {
