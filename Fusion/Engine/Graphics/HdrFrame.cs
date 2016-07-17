@@ -18,8 +18,7 @@ namespace Fusion.Engine.Graphics {
 		public const int FeedbackBufferWidth	=	80;
 		public const int FeedbackBufferHeight	=	60;
 
-		public FeedbackBuffer	FeedbackBufferColor	;
-		public DepthStencil2D	FeedbackBufferDepth	;
+		public FeedbackBuffer	FeedbackBufferRB	;
 
 		public RenderTarget2D	HdrBuffer			;	
 		public RenderTarget2D	LightAccumulator	;
@@ -29,7 +28,8 @@ namespace Fusion.Engine.Graphics {
 		public RenderTarget2D	SpecularBuffer		;
 		public RenderTarget2D	NormalMapBuffer		;
 		public RenderTarget2D	ScatteringBuffer	;
-		public RenderTarget2D	SSAOBuffer;
+		public RenderTarget2D	SSAOBuffer			;
+		public RenderTarget2D	FeedbackBuffer		;
 
 
 		public HdrFrame ( Game game, int width, int height )
@@ -37,8 +37,7 @@ namespace Fusion.Engine.Graphics {
 			int fbbw = FeedbackBufferWidth;
 			int fbbh = FeedbackBufferHeight;
 
-			FeedbackBufferColor	=	new FeedbackBuffer( game.GraphicsDevice,							fbbw,	fbbh	  );
-			FeedbackBufferDepth	=	new DepthStencil2D( game.GraphicsDevice, DepthFormat.D24S8,			fbbw,	fbbh,	1 );
+			FeedbackBufferRB	=	new FeedbackBuffer( game.GraphicsDevice,							fbbw,	fbbh	  );
 			HdrBuffer			=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba16F,		width,	height,	false, false );
 			LightAccumulator	=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba16F,		width,	height,	false, true );
 			SSSAccumulator		=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba16F,		width,	height,	false, true );
@@ -48,6 +47,7 @@ namespace Fusion.Engine.Graphics {
 			NormalMapBuffer		=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgb10A2,		width,	height,	false, false );
 			ScatteringBuffer	=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba8_sRGB,	width,	height,	false, false );
 			SSAOBuffer			=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgba8,			width,	height, false, false );
+			FeedbackBuffer		=	new RenderTarget2D( game.GraphicsDevice, ColorFormat.Rgb10A2,		width,	height, false, false );
 
 			Clear();
 		}
@@ -56,15 +56,14 @@ namespace Fusion.Engine.Graphics {
 		public void Clear ()
 		{
 			var device = HdrBuffer.GraphicsDevice;
-			device.Clear( SSAOBuffer.Surface, Color4.White );
+			device.Clear( FeedbackBuffer.Surface, Color4.Black );
 		}
 
 
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing) {
-				SafeDispose( ref FeedbackBufferColor	);
-				SafeDispose( ref FeedbackBufferDepth	);
+				SafeDispose( ref FeedbackBufferRB		);
 				SafeDispose( ref HdrBuffer				);
 				SafeDispose( ref LightAccumulator		);
 				SafeDispose( ref SSSAccumulator			);
@@ -74,6 +73,7 @@ namespace Fusion.Engine.Graphics {
 				SafeDispose( ref NormalMapBuffer		);
 				SafeDispose( ref ScatteringBuffer		);
 				SafeDispose( ref SSAOBuffer				);
+				SafeDispose( ref FeedbackBuffer			);
 			} 
 
 			base.Dispose(disposing);

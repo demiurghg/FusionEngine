@@ -48,7 +48,7 @@ struct GBuffer {
 	float4	diffuse	 	: SV_Target1;
 	float4	specular 	: SV_Target2;
 	float4	normals	 	: SV_Target3;
-	float4	scattering	: SV_Target4;
+	float4	feedback	: SV_Target4;
 };
 
 cbuffer 		CBBatch 		: 	register(b0) { BATCH    Batch      : packoffset( c0 ); }	
@@ -62,7 +62,6 @@ Texture2D		Textures[4]		: 	register(t0);
 #ifdef _UBERSHADER
 $ubershader GBUFFER RIGID|SKINNED
 $ubershader SHADOW RIGID|SKINNED
-$ubershader FEEDBACK RIGID|SKINNED
 #endif
 
 
@@ -218,11 +217,29 @@ SURFACE MaterialCombiner ( float2 uv )
 float MipLevel( float2 uv );
 
 static const float 	VTVirtualPageCount	= 128;
-static const float 	VTPhysicalPageCount	= 8;
+static const float 	VTPhysicalPageCount	= 16;
 static const int 	VTPageSize			= 128;
 static const int 	VTMaxMip	  		= 6;
 static const int 	VTFeedbackWidth		=	80;
 static const int 	VTFeedbackHeight	=	60;
+
+//	https://www.opengl.org/discussion_boards/showthread.php/171485-Texture-LOD-calculation-(useful-for-atlasing)
+float MipLevel( float2 uv )
+{
+	float2 dx = ddx( uv * VTPageSize*VTVirtualPageCount );
+	float2 dy = ddy( uv * VTPageSize*VTVirtualPageCount );
+	float d = max( dot( dx, dx ), dot( dy, dy ) ) * 32; // VT-bias, move to constants
+
+	// Clamp the value to the max mip level counts
+	const float rangeClamp = pow(2, (VTMaxMip - 1) * 2);
+	d = clamp(d, 1.0, rangeClamp);
+
+	float mipLevel = 0.5 * log2(d);
+
+	return mipLevel;
+}
+
+
 
 #ifdef GBUFFER
 GBuffer PSMain( PSInput input )
@@ -243,10 +260,20 @@ GBuffer PSMain( PSInput input )
 	surface.Normal		= 	float3(0,0,1);
 	surface.Emission 	= 	0;
 
-	//
-	//	Virtual texturing stuff :
-	//-----------------------------------
+	//---------------------------------
+	//	Compute miplevel :
+	//---------------------------------
+	float mip		=	floor( MipLevel( input.TexCoord.xy ) );
+	float scale		=	exp2(mip);
+	float pageX		=	floor( saturate(input.TexCoord.x) * VTVirtualPageCount / scale );
+	float pageY		=	floor( saturate(input.TexCoord.y) * VTVirtualPageCount / scale );
+	float dummy		=	1;
 	
+	float4 feedback	=	 float4( pageX / 1024.0f, pageY / 1024.0f, mip / 1024.0f, dummy / 4.0f );
+
+	//---------------------------------
+	//	Virtual texturing stuff :
+	//---------------------------------
 	float2 vtexTC		=	input.TexCoord;
 	float2 atiHack		=	float2(-0.25f/16384, -0.25f/16384); // <-- float2(0,0) for NVIdia
 	
@@ -265,13 +292,11 @@ GBuffer PSMain( PSInput input )
 	}
 	
 	//color = frac(MipLevel( input.TexCoord ));
-	
-	//-----------------------------------
-	//	End of virtual texturing stuff
-	//
-	
+
+	//---------------------------------
+	//	G-buffer output stuff :
+	//---------------------------------
 	surface.Diffuse		=	color ;
-	//surface.Diffuse		=	Textures[1].Sample( SamplerPoint, input.TexCoord ).rgba;
 	
 	//	NB: Multiply normal length by local normal projection on surface normal.
 	//	Shortened normal will be used as Fresnel decay (self occlusion) factor.
@@ -284,31 +309,12 @@ GBuffer PSMain( PSInput input )
 	output.diffuse		=	float4( surface.Diffuse, 1 );
 	output.specular 	=	float4( 0,0,0,0.5 );
 	output.normals		=	float4( worldNormal * 0.5f + 0.5f, 1 );
-	output.scattering	=	0;//float4( float3(0.85,0.85,1.00) * 0.3, 0.33f );
+	output.feedback		=	feedback;
 	
 	return output;
 }
 #endif
 
-
-//
-//	https://www.opengl.org/discussion_boards/showthread.php/171485-Texture-LOD-calculation-(useful-for-atlasing)
-//
-float MipLevel( float2 uv )
-{
-	float2 dx = ddx( uv * VTPageSize*VTVirtualPageCount );
-	float2 dy = ddy( uv * VTPageSize*VTVirtualPageCount );
-	float d = max( dot( dx, dx ), dot( dy, dy ) ) / 2; // VT-bias, move to constants
-
-	// Clamp the value to the max mip level counts
-	const float rangeClamp = pow(2, (VTMaxMip - 1) * 2);
-	d = clamp(d, 1.0, rangeClamp);
-
-	float mipLevel = 0.5 * log2(d);
-	//mipLevel = floor(mipLevel);   
-
-	return mipLevel;
-}
 
 #ifdef FEEDBACK
 float4 PSMain( PSInput input ) : SV_TARGET0

@@ -29,8 +29,6 @@ namespace Fusion.Engine.Graphics {
 		Texture2D		defaultNormalMap;
 		Texture2D		defaultEmission	;
 
-		RenderTarget2D	voxelBuffer;
-
 
 		struct CBMeshInstanceData {
 			public Matrix	Projection;
@@ -160,6 +158,7 @@ namespace Fusion.Engine.Graphics {
 		internal void RenderGBuffer ( StereoEye stereoEye, Camera camera, HdrFrame frame, RenderWorld rw )
 		{		
 			using ( new PixEvent("RenderGBuffer") ) {
+
 				if (surfaceShader==null) {	
 					return;
 				}
@@ -182,10 +181,11 @@ namespace Fusion.Engine.Graphics {
 				var specular	=	frame.SpecularBuffer.Surface;
 				var normals		=	frame.NormalMapBuffer.Surface;
 				var scattering	=	frame.ScatteringBuffer.Surface;
+				var feedback	=	frame.FeedbackBuffer.Surface;
 
 				device.ResetStates();
 
-				device.SetTargets( depth, hdr, diffuse, specular, normals, scattering );
+				device.SetTargets( depth, hdr, diffuse, specular, normals, feedback );
 				device.PixelShaderSamplers[0]	= SamplerState.LinearClamp ;
 				device.PixelShaderSamplers[1]	= SamplerState.PointClamp;
 
@@ -236,6 +236,17 @@ namespace Fusion.Engine.Graphics {
 						ExceptionDialog.Show( e );
 					}
 				}
+
+				
+				//
+				//	downsample feedback buffer and readback it to virtual texture :
+				//
+				rs.Filter.StretchRect( frame.FeedbackBufferRB.Surface, frame.FeedbackBuffer, SamplerState.PointClamp );
+
+				var feedbackBuffer = new VTAddress[ HdrFrame.FeedbackBufferWidth * HdrFrame.FeedbackBufferHeight ];
+				frame.FeedbackBufferRB.GetFeedback( feedbackBuffer );
+
+				rs.VirtualTexture.Update( feedbackBuffer );
 			}
 		}
 
@@ -260,6 +271,7 @@ namespace Fusion.Engine.Graphics {
 
 
 
+		#if false
 		/// <summary>
 		/// 
 		/// </summary>
@@ -317,12 +329,8 @@ namespace Fusion.Engine.Graphics {
 					device.DrawIndexed( instance.indexCount, 0, 0 );
 				}
 			}
-
-			var feedbackBuffer = new VTAddress[ HdrFrame.FeedbackBufferWidth * HdrFrame.FeedbackBufferHeight ];
-			frame.FeedbackBufferColor.GetFeedback( feedbackBuffer );
-
-			rs.VirtualTexture.Update( feedbackBuffer );
 		}
+		#endif
 
 
 

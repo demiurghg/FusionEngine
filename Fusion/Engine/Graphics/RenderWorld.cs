@@ -388,8 +388,9 @@ namespace Fusion.Engine.Graphics {
 			Game.GraphicsDevice.Clear( frame.NormalMapBuffer.Surface,	Color4.Black );
 			Game.GraphicsDevice.Clear( frame.ScatteringBuffer.Surface,	Color4.Black );
 
-			Game.GraphicsDevice.Clear( frame.FeedbackBufferDepth.Surface,	1, 0 );
-			Game.GraphicsDevice.Clear( frame.FeedbackBufferColor.Surface,	Color4.Zero );
+			Game.GraphicsDevice.Clear( frame.FeedbackBufferRB.Surface,	Color4.Zero );
+
+			Game.GraphicsDevice.Clear( frame.FeedbackBuffer.Surface,	Color4.Zero );
 
 			Game.GraphicsDevice.Clear( frame.DepthBuffer.Surface,		1, 0 );
 			Game.GraphicsDevice.Clear( frame.HdrBuffer.Surface,			Color4.Black );
@@ -409,9 +410,6 @@ namespace Fusion.Engine.Graphics {
 
 			//	single pass for stereo rendering :
 			if (stereoEye!=StereoEye.Right) {
-
-				//	render feedback buffer :
-				rs.SceneRenderer.RenderFeedbackBuffer( StereoEye.Mono, Camera, viewHdrFrame, this.Instances );
 
 				//	simulate particles BEFORE lighting
 				//	to make particle lit (position is required) and 
@@ -437,11 +435,11 @@ namespace Fusion.Engine.Graphics {
 				case 5 : rs.Filter.Copy( targetSurface, rs.SsaoFilter.OcclusionMap ); return;
 				case 6 : rs.Filter.StretchRect( targetSurface, rs.LightRenderer.CascadedShadowMap.ParticleShadow ); return;
 				case 7 : rs.Filter.StretchRect( targetSurface, rs.LightRenderer.CascadedShadowMap.ColorBuffer ); return;
-				case 8 : rs.Filter.StretchRect( targetSurface, viewHdrFrame.FeedbackBufferColor, SamplerState.PointClamp ); return;
+				case 8 : rs.Filter.StretchRect( targetSurface, viewHdrFrame.FeedbackBufferRB, SamplerState.PointClamp ); return;
 			}
 
 			if (rs.VirtualTexture.ShowPhysicalTextures) {
-				rs.Filter.Copy( targetSurface, rs.VirtualTexture.PhysicalPages );
+				rs.Filter.StretchRect( targetSurface, rs.VirtualTexture.PhysicalPages );
 				return;
 			}
 			if (rs.VirtualTexture.ShowPageTexture) {
