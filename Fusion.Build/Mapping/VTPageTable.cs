@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Fusion.Engine.Imaging;
 using Fusion.Core.Mathematics;
+using Fusion.Engine.Graphics;
 
 namespace Fusion.Build.Mapping {
 	internal class VTPageTable {
@@ -103,7 +104,7 @@ namespace Fusion.Build.Mapping {
 				return image;
 
 			} else {
-				return new Image( MapProcessor.VTPageSize, MapProcessor.VTPageSize, Color.Black );
+				return new Image( VTConfig.PageSize, VTConfig.PageSize, Color.Black );
 			}
 		}
 
@@ -139,38 +140,5 @@ namespace Fusion.Build.Mapping {
 				|| pages.Contains( address2 )
 				|| pages.Contains( address3 );
 		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="pageX"></param>
-		/// <param name="pageY"></param>
-		/// <param name="mipLevel"></param>
-		/// <returns></returns>
-		public static int ComputeAddress ( int pageX, int pageY, int mipLevel )
-		{
-			if (pageX>=MapProcessor.VTSize) {
-				throw new ArgumentOutOfRangeException("pageX");
-			}
-			if (pageY>=MapProcessor.VTSize) {
-				throw new ArgumentOutOfRangeException("pageY");
-			}
-			if (mipLevel>=MapProcessor.VTMips) {
-				throw new ArgumentOutOfRangeException("mipLevel");
-			}
-
-
-			pageX		= pageX & (MapProcessor.VTSize-1);
-			pageY		= pageY & (MapProcessor.VTSize-1);
-			mipLevel	= mipLevel & 0x7;
-
-			return (mipLevel << 20) | (pageY << 10) | pageX;
-		}
-
-
-
-
 	}
 }

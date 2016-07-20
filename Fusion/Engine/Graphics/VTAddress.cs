@@ -110,22 +110,28 @@ namespace Fusion.Engine.Graphics {
 
 		public UInt32 ComputeUIntAddress ()
 		{
-			if (PageX>=VTConfig.TextureSize) {
-				throw new InvalidOperationException("pageX");
-			}
-			if (PageY>=VTConfig.TextureSize) {
-				throw new InvalidOperationException("pageY");
-			}
-			if (MipLevel>VTConfig.MaxMipLevel) {
-				throw new InvalidOperationException("mipLevel");
-			}
+			return (uint)ComputeIntAddress( PageX, PageY, MipLevel );
+		}
 
 
-			var pageX		= PageX & (VTConfig.TextureSize-1);
-			var pageY		= PageY & (VTConfig.TextureSize-1);
-			var mipLevel	= MipLevel & 0x7;
 
-			return (UInt32)((mipLevel << 20) | (pageY << 10) | pageX);
+		public static Int32 ComputeIntAddress ( int pageX, int pageY, int mipLevel )
+		{
+			if (pageX>=VTConfig.TextureSize) {
+				throw new ArgumentException("pageX");
+			}
+			if (pageY>=VTConfig.TextureSize) {
+				throw new ArgumentException("pageY");
+			}
+			if (mipLevel>VTConfig.MaxMipLevel) {
+				throw new ArgumentException("mipLevel");
+			}
+
+			pageX		= pageX & (VTConfig.TextureSize-1);
+			pageY		= pageY & (VTConfig.TextureSize-1);
+			mipLevel	= mipLevel & 0x7;
+
+			return (Int32)((mipLevel << 24) | (pageY << 12) | pageX);
 		}
 
 

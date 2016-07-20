@@ -15,12 +15,6 @@ namespace Fusion.Build.Mapping {
 	[AssetProcessor("Map", "Performs map assembly")]
 	public class MapProcessor : AssetProcessor {
 
-		public const int VTPageSize	=	VTConfig.PageSize;
-		public const int VTSize		=	VTConfig.TextureSize;
-		public const int VTPageNum	=	VTConfig.VirtualPageCount;
-		public const int VTMips		=	VTConfig.MipCount;
-
-
 
 
 		/// <summary>
@@ -64,13 +58,13 @@ namespace Fusion.Build.Mapping {
 			Log.Message("Generating pages...");
 			GeneratePages( pageTable.Textures, context, pageTable );
 
-			for (int mip=0; mip<VTMips-1; mip++) {
-				Log.Message("Generating mip level {0}/{1}...", mip, VTMips);
+			for (int mip=0; mip<VTConfig.MipCount-1; mip++) {
+				Log.Message("Generating mip level {0}/{1}...", mip, VTConfig.MipCount);
 				GenerateMipLevels( context, pageTable, mip );
 			}
 
 			Log.Message("Generating fallback image...");
-			GenerateFallbackImage( context, pageTable, VTMips-1 );
+			GenerateFallbackImage( context, pageTable, VTConfig.MipCount-1 );
 
 			Log.Message("Remapping texture coordinates...");
 			foreach ( var mapScene in mapScenes ) {
@@ -99,7 +93,7 @@ namespace Fusion.Build.Mapping {
 						.ThenByDescending( img2 => img2.Height )
 						.ToList();
 
-			var root = new VTAtlasNode(0,0, VTSize, VTSize, 0 );
+			var root = new VTAtlasNode(0,0, VTConfig.TextureSize, VTConfig.TextureSize, 0 );
 			
 			foreach ( var img in sortedList ) {
 				var n = root.Insert( img );
@@ -135,19 +129,19 @@ namespace Fusion.Build.Mapping {
 
 		void GenerateMipLevels ( BuildContext buildContext, VTPageTable pageTable, int mipLevel )
 		{
-			if (mipLevel>=MapProcessor.VTMips) {
+			if (mipLevel>=VTConfig.MipCount) {
 				throw new ArgumentOutOfRangeException("mipLevel");
 			}
 
-			int count = (MapProcessor.VTSize / MapProcessor.VTPageSize) >> mipLevel;
+			int count = (VTConfig.TextureSize / VTConfig.PageSize) >> mipLevel;
 
 			for ( int x = 0; x < count; x+=2 ) {
 				for ( int y = 0; y < count; y+=2 ) {
 
-					int address00 = VTPageTable.ComputeAddress( x + 0, y + 0, mipLevel );
-					int address01 = VTPageTable.ComputeAddress( x + 0, y + 1, mipLevel );
-					int address10 = VTPageTable.ComputeAddress( x + 1, y + 0, mipLevel );
-					int address11 = VTPageTable.ComputeAddress( x + 1, y + 1, mipLevel );
+					int address00 = VTAddress.ComputeIntAddress( x + 0, y + 0, mipLevel );
+					int address01 = VTAddress.ComputeIntAddress( x + 0, y + 1, mipLevel );
+					int address10 = VTAddress.ComputeIntAddress( x + 1, y + 0, mipLevel );
+					int address11 = VTAddress.ComputeIntAddress( x + 1, y + 1, mipLevel );
 					
 					//	there are no images touching target mip-level :
 					if ( !pageTable.IsAnyExists( address00, address01, address10, address11 ) ) {
@@ -161,7 +155,7 @@ namespace Fusion.Build.Mapping {
 					var image10 =	pageTable.LoadPage( address10, dir );
 					var image11 =	pageTable.LoadPage( address11, dir );
 
-					int address =	VTPageTable.ComputeAddress( x/2, y/2, mipLevel+1 );
+					int address =	VTAddress.ComputeIntAddress( x/2, y/2, mipLevel+1 );
 					var image	=	MipImages( image00, image01, image10, image11 );
 
 					pageTable.Add( address );
@@ -177,9 +171,9 @@ namespace Fusion.Build.Mapping {
 		/// </summary>
 		void GenerateFallbackImage ( BuildContext buildContext, VTPageTable pageTable, int sourceMipLevel )
 		{
-			int		pageSize		=	MapProcessor.VTPageSize;
-			int		numPages		=	MapProcessor.VTPageNum >> sourceMipLevel;
-			int		fallbackSize	=	VTSize >> sourceMipLevel;
+			int		pageSize		=	VTConfig.PageSize;
+			int		numPages		=	VTConfig.VirtualPageCount >> sourceMipLevel;
+			int		fallbackSize	=	VTConfig.TextureSize >> sourceMipLevel;
 			string	baseDir			=	buildContext.GetFullVTOutputPath();
 
 			Image fallbackImage =	new Image( fallbackSize, fallbackSize, Color.Black );
@@ -187,7 +181,7 @@ namespace Fusion.Build.Mapping {
 			for ( int pageX=0; pageX<numPages; pageX++) {
 				for ( int pageY=0; pageY<numPages; pageY++) {
 
-					var addr	=	VTPageTable.ComputeAddress( pageX, pageY, sourceMipLevel );
+					var addr	=	VTAddress.ComputeIntAddress( pageX, pageY, sourceMipLevel );
 					var image	=	pageTable.LoadPage( addr, baseDir );
 
 					for ( int x=0; x<pageSize; x++) {
@@ -217,7 +211,7 @@ namespace Fusion.Build.Mapping {
 		/// <returns></returns>
 		Image MipImages ( Image image00, Image image01, Image image10, Image image11 )
 		{
-			const int pageSize = MapProcessor.VTPageSize;
+			const int pageSize = VTConfig.PageSize;
 
 			if (image00.Width!=image00.Height || image00.Width != pageSize ) {
 				throw new ArgumentException("Bad image size");

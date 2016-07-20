@@ -70,7 +70,7 @@ namespace Fusion.Engine.Graphics {
 			int physSize	=	VTConfig.PhysicalPageCount * VTConfig.PageSize;
 			int tableSize	=	VTConfig.VirtualPageCount;
 			PhysicalPages	=	new Texture2D( rs.Device, physSize, physSize, ColorFormat.Rgba8_sRGB, false, true );
-			PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Rgba32F, false, false );
+			PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Rgba32F, 1, false );
 
 			var rand = new Random();
 			PageTable.SetData( Enumerable.Range(0,tableSize*tableSize).Select( i => rand.NextColor4() ).ToArray() );
@@ -163,13 +163,9 @@ namespace Fusion.Engine.Graphics {
 
 
 			//
-			//	Detect thrashing :
-			//	TODO : get highest mip, remove them, repeat until no thrashing occur.
+			//	Detect thrashing and prevention
+			//	Get highest mip, remove them, repeat until no thrashing occur.
 			//
-			//if (feedbackTree.Count >= VTConfig.PhysicalPageCount * VTConfig.PhysicalPageCount ) {
-			//	Log.Warning("Thrashing detected - requested {0} tiles", feedbackTree.Count);
-			//}
-
 			while (feedbackTree.Count >= VTConfig.TotalPhysicalPageCount ) {
 				int minMip = feedbackTree.Min( va => va.MipLevel );
 				feedbackTree.RemoveAll( va => va.MipLevel == minMip );
@@ -223,7 +219,7 @@ namespace Fusion.Engine.Graphics {
 
 
 				//	update page table :
-				PageTable.SetData( tileCache.GetPageTableData(0) );
+				PageTable.SetData( 0, tileCache.GetPageTableData(0) );
 			}
 		}
 	}

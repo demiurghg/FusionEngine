@@ -24,8 +24,8 @@ namespace Fusion.Build.Mapping {
 		public readonly int Width;
 		public readonly int Height;
 
-		public int AddressX { get { return TexelOffsetX / MapProcessor.VTPageSize; } }
-		public int AddressY { get { return TexelOffsetY / MapProcessor.VTPageSize; } }
+		public int AddressX { get { return TexelOffsetX / VTConfig.PageSize; } }
+		public int AddressY { get { return TexelOffsetY / VTConfig.PageSize; } }
 
 		/// <summary>
 		/// Gets list of scenes that reference this texture
@@ -39,7 +39,7 @@ namespace Fusion.Build.Mapping {
 		/// <param name="fullPath"></param>
 		public MapTexture ( string keyPath, string fullPath )
 		{			
-			const int pageSize	=	MapProcessor.VTPageSize;
+			const int pageSize	=	VTConfig.PageSize;
 
 			References	=	new HashSet<MapScene>();
 			FullPath		=	fullPath;
@@ -67,7 +67,7 @@ namespace Fusion.Build.Mapping {
 		/// <returns></returns>
 		public Vector2 RemapTexCoords ( Vector2 uv )
 		{
-			double size	= MapProcessor.VTSize;
+			double size	= VTConfig.TextureSize;
 
 			double u = ( MathUtil.Wrap(uv.X,0,1) * Width  + (double)TexelOffsetX ) / size;
 			double v = ( MathUtil.Wrap(uv.Y,0,1) * Height + (double)TexelOffsetY ) / size;
@@ -84,8 +84,8 @@ namespace Fusion.Build.Mapping {
 		/// <param name="pageTable"></param>
 		public void GeneratePages ( BuildContext context, VTPageTable pageTable )
 		{
-			var pageSize	=	MapProcessor.VTPageSize;
-			var image		=	Image.LoadTga( File.OpenRead(FullPath) );
+			var pageSize		=	VTConfig.PageSize;
+			var image			=	Image.LoadTga( File.OpenRead(FullPath) );
 
 			var pageCountX	=	image.Width / pageSize;
 			var pageCountY	=	image.Height / pageSize;
@@ -97,11 +97,11 @@ namespace Fusion.Build.Mapping {
 					
 					for ( int i=0; i<pageSize; i++) {
 						for ( int j=0; j<pageSize; j++) {
-							page.Write( i,j, image.Sample( x*pageSize + i, y*pageSize + j ) );
+							page.Write( i,j, image.SampleWrap( x*pageSize + i, y*pageSize + j ) );
 						}
 					}
 
-					var address	=	VTPageTable.ComputeAddress( x + AddressX, y + AddressY, 0 );
+					var address	=	VTAddress.ComputeIntAddress( x + AddressX, y + AddressY, 0 );
 					pageTable.Add( address );
 
 					pageTable.SavePage( address, context.GetFullVTOutputPath(), page );

@@ -70,6 +70,38 @@ namespace Fusion.Drivers.Graphics {
 		}
 		
 
+		/// <summary>
+		/// Creates texture
+		/// </summary>
+		/// <param name="device"></param>
+		public Texture2D ( GraphicsDevice device, int width, int height, ColorFormat format, int mipCount, bool srgb ) : base( device )
+		{
+			this.Width		=	width;
+			this.Height		=	height;
+			this.Depth		=	1;
+			this.format		=	format;
+			this.mipCount	=	mipCount;
+
+			var texDesc = new Texture2DDescription();
+			texDesc.ArraySize		=	1;
+			texDesc.BindFlags		=	BindFlags.ShaderResource;
+			texDesc.CpuAccessFlags	=	CpuAccessFlags.None;
+			texDesc.Format			=	srgb ? MakeSRgb( Converter.Convert( format ) ) : Converter.Convert( format );
+			texDesc.Height			=	Height;
+			texDesc.MipLevels		=	mipCount;
+			texDesc.OptionFlags		=	ResourceOptionFlags.None;
+			texDesc.SampleDescription.Count	=	1;
+			texDesc.SampleDescription.Quality	=	0;
+			texDesc.Usage			=	ResourceUsage.Default;
+			texDesc.Width			=	Width;
+													 
+			lock (device.DeviceContext) {
+				tex2D	=	new D3D.Texture2D( device.Device, texDesc );
+				SRV		=	new ShaderResourceView( device.Device, tex2D );
+			}
+		}
+		
+
 
 
 		/// <summary>
@@ -202,6 +234,18 @@ namespace Fusion.Drivers.Graphics {
         }
 
 		
+
+		/// <summary>
+		/// Sets 2D texture data.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="data"></param>
+		public void SetData<T>(int level, T[] data) where T : struct
+        {
+			this.SetData(level, null, data, 0, data.Length);
+        }
+		
+
 
 		/// <summary>
 		/// Sets 2D texture data.

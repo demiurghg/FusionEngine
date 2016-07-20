@@ -105,6 +105,21 @@ namespace Fusion.Engine.Imaging {
 		}
 
 
+		/// <summary>
+		/// Samples image at given coordinates with wraping addressing mode
+		/// </summary>
+		/// <param name="u"></param>
+		/// <param name="v"></param>
+		/// <returns></returns>
+		public Color SampleWrap ( int x, int y )
+		{
+			x = Wrap(x, Width);
+			y = Wrap(y, Height);
+			var a = x + y * Width;
+			return RawImageData[ a ];
+		}
+
+
 
 		/// <summary>
 		/// Samples image at given coordinates with wraping addressing mode

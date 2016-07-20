@@ -220,8 +220,6 @@ static const float 	VTVirtualPageCount	= 128;
 static const float 	VTPhysicalPageCount	= 16;
 static const int 	VTPageSize			= 128;
 static const int 	VTMaxMip	  		= 6;
-static const int 	VTFeedbackWidth		=	80;
-static const int 	VTFeedbackHeight	=	60;
 
 //	https://www.opengl.org/discussion_boards/showthread.php/171485-Texture-LOD-calculation-(useful-for-atlasing)
 float MipLevel( float2 uv )
@@ -275,7 +273,8 @@ GBuffer PSMain( PSInput input )
 	//	Virtual texturing stuff :
 	//---------------------------------
 	float2 vtexTC		=	input.TexCoord;
-	float2 atiHack		=	float2(-0.25f/16384, -0.25f/16384); // <-- float2(0,0) for NVIdia
+	//float2 atiHack	=	float2(-0.25f/16384, -0.25f/16384); // <-- float2(0,0) for NVIdia
+	float2 atiHack		=	float2( 0, 0 );
 	
 	float4 fallback		=	Textures[0].Sample( Sampler, input.TexCoord ).rgba;
 	float4 physPageTC	=	Textures[1].Sample( SamplerPoint, input.TexCoord + atiHack ).xyzw;
