@@ -217,7 +217,7 @@ SURFACE MaterialCombiner ( float2 uv )
 float MipLevel( float2 uv );
 
 static const float 	VTVirtualPageCount	= 128;
-static const float 	VTPhysicalPageCount	= 16;
+static const float 	VTPhysicalPageCount	= 2048/136.0f;
 static const int 	VTPageSize			= 128;
 static const int 	VTMaxMip	  		= 6;
 
@@ -283,11 +283,11 @@ GBuffer PSMain( PSInput input )
 	if (physPageTC.w>0) {
 		float2 	withinPageTC	=	vtexTC * VTVirtualPageCount / exp2( physPageTC.z );
 				withinPageTC	=	frac( withinPageTC );
-				withinPageTC	=	withinPageTC / VTPhysicalPageCount;
+				withinPageTC	=	withinPageTC / VTPhysicalPageCount;  // <<<---- ERROR!!!!
 		
 		float2	finalTC			=	physPageTC + withinPageTC;
 		
-		color			=	Textures[2].Sample( SamplerPoint, finalTC ).rgba;
+		color			=	Textures[2].Sample( Sampler, finalTC ).rgba;
 	}
 	
 	//color = frac(MipLevel( input.TexCoord ));

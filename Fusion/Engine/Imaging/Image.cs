@@ -120,6 +120,12 @@ namespace Fusion.Engine.Imaging {
 		}
 
 
+		public Color SampleClamp ( int x, int y )
+		{
+			return RawImageData[ Address( x, y, false ) ];
+		}
+
+
 
 		/// <summary>
 		/// Samples image at given coordinates with wraping addressing mode

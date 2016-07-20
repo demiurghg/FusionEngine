@@ -15,8 +15,8 @@ namespace Fusion.Engine.Graphics {
 	public static class VTConfig {
 
 		public const int PageSize				=	128;
-		//public const int PageBorderWidth		=	4;
-		//public const int PageSizeWithBorder		=	PageSize + PageBorderWidth * 2;
+		public const int PageBorderWidth		=	4;
+		public const int PageSizeBordered		=	PageSize + PageBorderWidth * 2;
 
 		public const int VirtualPageCount		=	128;
 		public const int TextureSize			=	PageSize * VirtualPageCount;
@@ -26,7 +26,7 @@ namespace Fusion.Engine.Graphics {
 		public const int FallbackSize			=	TextureSize >> MaxMipLevel;
 
 		public const int PhysicalTextureSize	=	2048;
-		public const int PhysicalPageCount		=	PhysicalTextureSize / PageSize;
+		public const int PhysicalPageCount		=	PhysicalTextureSize / PageSizeBordered;
 		public const int TotalPhysicalPageCount	=	PhysicalPageCount * PhysicalPageCount;
 
 	}

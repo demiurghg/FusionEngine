@@ -50,7 +50,16 @@ namespace Fusion.Engine.Graphics {
 		public VTTile ( VTAddress address, Stream stream )
 		{
 			this.VirtualAddress	=	address;
-			image			=	Image.LoadTga( stream );
+			var tempImage		=	Image.LoadTga( stream );
+			var border			=	VTConfig.PageBorderWidth;
+
+			image	=	new Image( VTConfig.PageSizeBordered, VTConfig.PageSizeBordered );
+
+			for (int i=0; i<image.Width; i++) {
+				for (int j=0; j<image.Height; j++) {
+					image.Write( i, j, tempImage.SampleClamp( i - border, j - border ) );
+				}
+			}
 		}
 
 

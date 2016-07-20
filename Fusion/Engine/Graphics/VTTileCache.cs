@@ -27,8 +27,13 @@ namespace Fusion.Engine.Graphics {
 			{
 				this.VA			=	va;
 				this.Address	=	pa;
-				this.X			=	(pa % physPageCount) / (float)physPageCount;
-				this.Y			=	(pa / physPageCount) / (float)physPageCount;
+
+				var physTexSize	=	(float)VTConfig.PhysicalTextureSize;
+				var border		=	VTConfig.PageBorderWidth;
+				var pageSize	=	VTConfig.PageSizeBordered;
+
+				this.X			=	((pa % physPageCount) * pageSize + border ) / physTexSize;
+				this.Y			=	((pa / physPageCount) * pageSize + border ) / physTexSize;
 			}
 			
 			public byte LfuIndex = 0xFF;
@@ -74,7 +79,7 @@ namespace Fusion.Engine.Graphics {
 
 				var pa		=	page.Address;
 				var ppc		=	VTConfig.PhysicalPageCount;
-				var size	=	VTConfig.PageSize;
+				var size	=	VTConfig.PageSizeBordered;
 				int x		=	(pa % ppc) * size;
 				int y		=	(pa / ppc) * size;
 				int w		=	size;

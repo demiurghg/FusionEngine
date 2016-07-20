@@ -67,7 +67,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize ()
 		{
-			int physSize	=	VTConfig.PhysicalPageCount * VTConfig.PageSize;
+			int physSize	=	VTConfig.PhysicalTextureSize;
 			int tableSize	=	VTConfig.VirtualPageCount;
 			PhysicalPages	=	new Texture2D( rs.Device, physSize, physSize, ColorFormat.Rgba8_sRGB, false, true );
 			PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Rgba32F, 1, false );
