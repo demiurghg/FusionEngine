@@ -82,9 +82,11 @@ namespace Fusion.Build.Mapping {
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="pageTable"></param>
-		public void GeneratePages ( BuildContext context, VTPageTable pageTable )
+		public void SplitIntoPages ( BuildContext context, VTPageTable pageTable )
 		{
 			var pageSize		=	VTConfig.PageSize;
+			var pageSizeBorder	=	VTConfig.PageSizeBordered;
+			var border			=	VTConfig.PageBorderWidth;
 			var image			=	Image.LoadTga( File.OpenRead(FullPath) );
 
 			var pageCountX	=	image.Width / pageSize;
@@ -93,11 +95,11 @@ namespace Fusion.Build.Mapping {
 			for (int x=0; x<pageCountX; x++) {
 				for (int y=0; y<pageCountY; y++) {
 
-					var page = new Image(pageSize, pageSize); 
+					var page = new Image(pageSizeBorder, pageSizeBorder); 
 					
-					for ( int i=0; i<pageSize; i++) {
-						for ( int j=0; j<pageSize; j++) {
-							page.Write( i,j, image.SampleWrap( x*pageSize + i, y*pageSize + j ) );
+					for ( int i=0; i<pageSizeBorder; i++) {
+						for ( int j=0; j<pageSizeBorder; j++) {
+							page.Write( i,j, image.SampleClamp( x*pageSize + i - border, y*pageSize + j - border ) );
 						}
 					}
 

@@ -52,7 +52,7 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		public ICollection<MapTexture> Textures {
+		public ICollection<MapTexture> SourceTextures {
 			get {
 				return textures
 					.Select( pair => pair.Value )
@@ -68,7 +68,7 @@ namespace Fusion.Build.Mapping {
 		/// </summary>
 		/// <param name="keyPath"></param>
 		/// <returns></returns>
-		public MapTexture GetTextureByKeyPath ( string keyPath )
+		public MapTexture GetSourceTextureByKeyPath ( string keyPath )
 		{
 			return textures[ keyPath ];
 		}
@@ -84,6 +84,17 @@ namespace Fusion.Build.Mapping {
 				Log.Warning("Address {0,X} is already added", address);
 			}
 			pages.Add( address );
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="address"></param>
+		/// <returns></returns>
+		public bool Contains ( int address )
+		{
+			return pages.Contains(address);
 		}
 
 
@@ -107,6 +118,16 @@ namespace Fusion.Build.Mapping {
 				return new Image( VTConfig.PageSize, VTConfig.PageSize, Color.Black );
 			}
 		}
+
+
+
+
+		//public Image LoadPage ( int pageX, int pageY, int mipLevel )
+		//{
+		//	int maxPage = VTConfig.VirtualPageCount >> mipLevel;
+
+		//	if (pageX<
+		//}
 
 
 

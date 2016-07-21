@@ -133,7 +133,7 @@ namespace Fusion.Build.Mapping {
 
 					var material	=	scene.Materials[ subset.MaterialIndex ];
 					var texPath		=	material.Texture;
-					var texture		=	pageTable.GetTextureByKeyPath( texPath );
+					var texture		=	pageTable.GetSourceTextureByKeyPath( texPath );
 
 					var startPrimitive	=	subset.StartPrimitive;
 					var endPrimitive	=	subset.StartPrimitive + subset.PrimitiveCount;

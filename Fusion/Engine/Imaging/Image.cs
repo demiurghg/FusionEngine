@@ -120,9 +120,18 @@ namespace Fusion.Engine.Imaging {
 		}
 
 
+		/// <summary>
+		/// Samples image at given coordinates with clamping addressing mode
+		/// </summary>
+		/// <param name="x"></param>
+		/// <param name="y"></param>
+		/// <returns></returns>
 		public Color SampleClamp ( int x, int y )
 		{
-			return RawImageData[ Address( x, y, false ) ];
+			x	=	Clamp( x, 0, Width - 1 );
+			y	=	Clamp( y, 0, Height - 1 );
+			var a = x + y * Width;
+			return RawImageData[ a ];
 		}
 
 
@@ -151,6 +160,27 @@ namespace Fusion.Engine.Imaging {
 			var c01 = RawImageData[ Address( x*2+0, y*2+1, true ) ];
 			var c10 = RawImageData[ Address( x*2+1, y*2+0, true ) ];
 			var c11 = RawImageData[ Address( x*2+1, y*2+1, true ) ];
+
+			var c0x	= Color.Lerp( c00, c01, 0.5f );
+			var c1x	= Color.Lerp( c10, c11, 0.5f );
+
+			return Color.Lerp( c0x, c1x, 0.5f );
+		}
+
+
+
+		/// <summary>
+		/// Samples average of four neighbouring texels with given top-left corener with clamp addressing mode
+		/// </summary>
+		/// <param name="u"></param>
+		/// <param name="v"></param>
+		/// <returns></returns>
+		public Color SampleQ4Clamp ( int x, int y )
+		{
+			var c00 = RawImageData[ Address( x+0, y+0, false ) ];
+			var c01 = RawImageData[ Address( x+0, y+1, false ) ];
+			var c10 = RawImageData[ Address( x+1, y+0, false ) ];
+			var c11 = RawImageData[ Address( x+1, y+1, false ) ];
 
 			var c0x	= Color.Lerp( c00, c01, 0.5f );
 			var c1x	= Color.Lerp( c10, c11, 0.5f );

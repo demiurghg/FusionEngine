@@ -50,14 +50,15 @@ namespace Fusion.Build.Mapping {
 				mapScene.BuildScene( context, pageTable );
 			}
 
-			Log.Message("{0} textures", pageTable.Textures.Count);
+			Log.Message("{0} textures", pageTable.SourceTextures.Count);
 
 			Log.Message("Packing textures to atlas...");
-			PackTextureAtlas( pageTable.Textures );
+			PackTextureAtlas( pageTable.SourceTextures );
 
 			Log.Message("Generating pages...");
-			GeneratePages( pageTable.Textures, context, pageTable );
+			GenerateMostDetailedPages( pageTable.SourceTextures, context, pageTable );
 
+			Log.Message("Generating mipmaps...");
 			for (int mip=0; mip<VTConfig.MipCount-1; mip++) {
 				Log.Message("Generating mip level {0}/{1}...", mip, VTConfig.MipCount);
 				GenerateMipLevels( context, pageTable, mip );
@@ -113,27 +114,172 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <param name="textures"></param>
-		void GeneratePages ( ICollection<MapTexture> textures, BuildContext context, VTPageTable pageTable )
+		void GenerateMostDetailedPages ( ICollection<MapTexture> textures, BuildContext context, VTPageTable pageTable )
 		{
 			int totalCount = textures.Count;
 			int counter = 0;
 
 			foreach ( var texture in textures ) {
 				Log.Message("...{0}/{1} - {2}", counter, totalCount, texture.KeyPath );
-				texture.GeneratePages( context, pageTable );
+				texture.SplitIntoPages( context, pageTable );
 				counter++;
 			}
 		}
 
 
 
-		void GenerateMipLevels ( BuildContext buildContext, VTPageTable pageTable, int mipLevel )
+
+
+		void GenerateMipLevels ( BuildContext buildContext, VTPageTable pageTable, int sourceMipLevel )
+		{
+			if (sourceMipLevel>=VTConfig.MipCount) {
+				throw new ArgumentOutOfRangeException("mipLevel");
+			}
+
+			var dir		= buildContext.GetFullVTOutputPath();	
+			int count	= VTConfig.VirtualPageCount >> sourceMipLevel;
+			int sizeB	= VTConfig.PageSizeBordered;
+			var cache	= new SamplerCache( dir, pageTable ); 
+
+			for ( int pageX = 0; pageX < count; pageX+=2 ) {
+				for ( int pageY = 0; pageY < count; pageY+=2 ) {
+
+					int address00 = VTAddress.ComputeIntAddress( pageX + 0, pageY + 0, sourceMipLevel );
+					int address01 = VTAddress.ComputeIntAddress( pageX + 0, pageY + 1, sourceMipLevel );
+					int address10 = VTAddress.ComputeIntAddress( pageX + 1, pageY + 0, sourceMipLevel );
+					int address11 = VTAddress.ComputeIntAddress( pageX + 1, pageY + 1, sourceMipLevel );
+					
+					//	there are no images touching target mip-level.
+					//	NOTE: we can skip images that are touched by border.
+					if ( !pageTable.IsAnyExists( address00, address01, address10, address11 ) ) {
+						continue;
+					}
+
+					int address =	VTAddress.ComputeIntAddress( pageX/2, pageY/2, sourceMipLevel+1 );
+
+					var image	=	new Image( sizeB, sizeB, Color.Black );
+
+					int offsetX	=	(pageX) * VTConfig.PageSize;
+					int offsetY	=	(pageY) * VTConfig.PageSize;
+					int border	=	VTConfig.PageBorderWidth;
+
+					for ( int x=0; x<sizeB; x++) {
+						for ( int y=0; y<sizeB; y++) {
+
+							int srcX	=	offsetX + x*2 - border * 2;
+							int srcY	=	offsetY + y*2 - border * 2;
+							var color	=	SampleMegatextureQ4( cache, srcX, srcY, sourceMipLevel );
+							
+							image.Write( x,y, color );
+
+						}
+					}
+
+					pageTable.Add( address );
+					pageTable.SavePage( address, dir, image );
+				}
+			}
+
+		}
+
+
+		class SamplerCache {
+
+			string baseDir;
+			int cachedAddress = -1;
+			Image cachedImage = null;
+			VTPageTable pageTable;
+			
+			public SamplerCache ( string baseDir, VTPageTable pageTable )
+			{
+				this.baseDir	= baseDir;
+				this.pageTable	= pageTable;
+				cachedImage		= new Image( VTConfig.PageSizeBordered, VTConfig.PageSizeBordered, Color.Black );
+			}
+			
+			public Image LoadImage ( int address )
+			{
+				if (cachedAddress!=address) {
+					var path		=	Path.Combine( baseDir, address.ToString("X8") + ".tga" );
+
+					if (pageTable.Contains(address)) {
+						cachedImage		=	Image.LoadTga( File.OpenRead(path) );
+					} else {
+						cachedImage		=	new Image( VTConfig.PageSizeBordered, VTConfig.PageSizeBordered, Color.Black );
+					}
+
+					cachedAddress	=	address;
+					return cachedImage;
+				} else {
+					return cachedImage;
+				}
+			}
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="texelX"></param>
+		/// <param name="texelY"></param>
+		/// <param name="mipLevel"></param>
+		/// <returns></returns>
+		Color SampleMegatexture ( SamplerCache cache, int texelX, int texelY, int mipLevel )
+		{
+			int textureSize	=	VTConfig.TextureSize >> mipLevel;
+			
+			texelX = MathUtil.Clamp( 0, texelX, textureSize );
+			texelY = MathUtil.Clamp( 0, texelY, textureSize );
+
+			int pageX	= texelX / VTConfig.PageSize;
+			int pageY	= texelY / VTConfig.PageSize;
+			int x		= texelX % VTConfig.PageSize;
+			int y		= texelY % VTConfig.PageSize;
+			int b		= VTConfig.PageBorderWidth;
+
+			int address = VTAddress.ComputeIntAddress( pageX, pageY, mipLevel );
+
+			return cache.LoadImage( address ).SampleClamp( x+b, y+b );
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="texelX"></param>
+		/// <param name="texelY"></param>
+		/// <param name="mipLevel"></param>
+		/// <returns></returns>
+		Color SampleMegatextureQ4 ( SamplerCache cache, int texelX, int texelY, int mipLevel )
+		{
+			int textureSize	=	VTConfig.TextureSize >> mipLevel;
+			
+			texelX = MathUtil.Clamp( 0, texelX, textureSize );
+			texelY = MathUtil.Clamp( 0, texelY, textureSize );
+
+			int pageX	= texelX / VTConfig.PageSize;
+			int pageY	= texelY / VTConfig.PageSize;
+			int x		= texelX % VTConfig.PageSize;
+			int y		= texelY % VTConfig.PageSize;
+			int b		= VTConfig.PageBorderWidth;
+
+			int address = VTAddress.ComputeIntAddress( pageX, pageY, mipLevel );
+
+			return cache.LoadImage( address ).SampleQ4Clamp( x+b, y+b );
+		}
+
+
+
+		void GenerateMipLevelsOLD ( BuildContext buildContext, VTPageTable pageTable, int mipLevel )
 		{
 			if (mipLevel>=VTConfig.MipCount) {
 				throw new ArgumentOutOfRangeException("mipLevel");
 			}
 
 			int count = (VTConfig.TextureSize / VTConfig.PageSize) >> mipLevel;
+
+			SamplerCache cache = new SamplerCache( buildContext.GetFullVTOutputPath(), pageTable ); 
 
 			for ( int x = 0; x < count; x+=2 ) {
 				for ( int y = 0; y < count; y+=2 ) {
@@ -143,7 +289,8 @@ namespace Fusion.Build.Mapping {
 					int address10 = VTAddress.ComputeIntAddress( x + 1, y + 0, mipLevel );
 					int address11 = VTAddress.ComputeIntAddress( x + 1, y + 1, mipLevel );
 					
-					//	there are no images touching target mip-level :
+					//	there are no images touching target mip-level.
+					//	NOTE: we can skip images that are touched by border.
 					if ( !pageTable.IsAnyExists( address00, address01, address10, address11 ) ) {
 						continue;
 					}
