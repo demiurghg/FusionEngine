@@ -51,13 +51,14 @@ struct GBuffer {
 	float4	feedback	: SV_Target4;
 };
 
-cbuffer 		CBBatch 		: 	register(b0) { BATCH    Batch      : packoffset( c0 ); }	
-cbuffer 		CBLayer 		: 	register(b1) { MATERIAL Material   : packoffset( c0 ); }	
-cbuffer 		CBLayer 		: 	register(b2) { float4   UVMods[16] : packoffset( c0 ); }	
-cbuffer 		CBBatch 		: 	register(b3) { float4x4 Bones[128] : packoffset( c0 ); }	
-SamplerState	Sampler			: 	register(s0);
-SamplerState	SamplerPoint	: 	register(s1);
-Texture2D		Textures[4]		: 	register(t0);
+cbuffer 		CBBatch 			: 	register(b0) { BATCH    Batch      : packoffset( c0 ); }	
+cbuffer 		CBLayer 			: 	register(b1) { MATERIAL Material   : packoffset( c0 ); }	
+cbuffer 		CBLayer 			: 	register(b2) { float4   UVMods[16] : packoffset( c0 ); }	
+cbuffer 		CBBatch 			: 	register(b3) { float4x4 Bones[128] : packoffset( c0 ); }	
+SamplerState	SamplerLinear		: 	register(s0);
+SamplerState	SamplerPoint		: 	register(s1);
+SamplerState	SamplerAnisotropic	: 	register(s2);
+Texture2D		Textures[4]			: 	register(t0);
 
 #ifdef _UBERSHADER
 $ubershader GBUFFER RIGID|SKINNED
@@ -189,10 +190,10 @@ SURFACE MaterialCombiner ( float2 uv )
 	
 	//uv = uv * layerData.Tiling.xy + layerData.Offset.xy;
 	
-	float4 color		=	Textures[0].Sample( Sampler, uv ).rgba;
-	float4 surfMap		=	Textures[1].Sample( Sampler, uv ).rgba;
-	float4 normalMap	=	Textures[2].Sample( Sampler, uv ).rgba * 2 - 1;
-	float4 emission		=	Textures[3].Sample( Sampler, uv ).rgba;
+	float4 color		=	Textures[0].Sample( SamplerLinear, uv ).rgba;
+	float4 surfMap		=	Textures[1].Sample( SamplerLinear, uv ).rgba;
+	float4 normalMap	=	Textures[2].Sample( SamplerLinear, uv ).rgba * 2 - 1;
+	float4 emission		=	Textures[3].Sample( SamplerLinear, uv ).rgba;
 	
 	float3 metalS		=	color.rgb * (surfMap.r);
 	float3 nonmetalS	=	float3(0.31,0.31,0.31) * surfMap.r;
@@ -217,9 +218,10 @@ SURFACE MaterialCombiner ( float2 uv )
 float MipLevel( float2 uv );
 
 static const float 	VTVirtualPageCount	= 128;
-static const float 	VTPhysicalPageCount	= 2048/136.0f;
+static const float 	VTPhysicalPageCount	= 15;
 static const int 	VTPageSize			= 128;
 static const int 	VTMaxMip	  		= 6;
+static const float	VTPageScale			= 2048/VTPageSize;
 
 //	https://www.opengl.org/discussion_boards/showthread.php/171485-Texture-LOD-calculation-(useful-for-atlasing)
 float MipLevel( float2 uv )
@@ -276,18 +278,19 @@ GBuffer PSMain( PSInput input )
 	//float2 atiHack	=	float2(-0.25f/16384, -0.25f/16384); // <-- float2(0,0) for NVIdia
 	float2 atiHack		=	float2( 0, 0 );
 	
-	float4 fallback		=	Textures[0].Sample( Sampler, input.TexCoord ).rgba;
+	float4 fallback		=	Textures[0].Sample( SamplerLinear, input.TexCoord ).rgba;
 	float4 physPageTC	=	Textures[1].Sample( SamplerPoint, input.TexCoord + atiHack ).xyzw;
 	float4 color		=	fallback;
 	
 	if (physPageTC.w>0) {
 		float2 	withinPageTC	=	vtexTC * VTVirtualPageCount / exp2( physPageTC.z );
 				withinPageTC	=	frac( withinPageTC );
-				withinPageTC	=	withinPageTC / VTPhysicalPageCount;  // <<<---- ERROR!!!!
+				withinPageTC	=	withinPageTC / VTPageScale;
 		
 		float2	finalTC			=	physPageTC + withinPageTC;
 		
-		color			=	Textures[2].Sample( Sampler, finalTC ).rgba;
+		//color			=	Textures[2].Sample( SamplerAnisotropic, finalTC ).rgba;
+		color			=	Textures[2].Sample( SamplerLinear, finalTC ).rgba;
 	}
 	
 	//color = frac(MipLevel( input.TexCoord ));

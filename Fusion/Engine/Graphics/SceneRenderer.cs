@@ -188,6 +188,7 @@ namespace Fusion.Engine.Graphics {
 				device.SetTargets( depth, hdr, diffuse, specular, normals, feedback );
 				device.PixelShaderSamplers[0]	= SamplerState.LinearClamp ;
 				device.PixelShaderSamplers[1]	= SamplerState.PointClamp;
+				device.PixelShaderSamplers[2]	= SamplerState.AnisotropicWrap;
 
 				var instances	=	rw.Instances;
 

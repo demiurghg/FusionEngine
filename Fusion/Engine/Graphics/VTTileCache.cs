@@ -34,6 +34,7 @@ namespace Fusion.Engine.Graphics {
 
 				this.X			=	((pa % physPageCount) * pageSize + border ) / physTexSize;
 				this.Y			=	((pa / physPageCount) * pageSize + border ) / physTexSize;
+				//this.TS			=	
 			}
 			
 			public byte LfuIndex = 0xFF;
@@ -41,6 +42,7 @@ namespace Fusion.Engine.Graphics {
 			public readonly int Address;
 			public readonly float X;
 			public readonly float Y;
+			public readonly float TS;
 
 			public VTTile Tile = null;
 		}

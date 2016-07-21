@@ -69,13 +69,14 @@ namespace Fusion.Engine.Graphics {
 				return;
 			}
 
-			int size = VTConfig.PageSize;
+			int s	=	VTConfig.PageSize;
+			var b	=	VTConfig.PageBorderWidth;
 
-			for (int i=0; i<size; i++) {
-				image.Write( 0,      i, Color.Red );
-				image.Write( size-1, i, Color.Red );
-				image.Write( i, 0,      Color.Red );
-				image.Write( i, size-1, Color.Red );
+			for (int i=b; i<s+b; i++) {
+				image.Write( b,     i,		Color.Red );
+				image.Write( b+s-1,	i,		Color.Red );
+				image.Write( i,		b,      Color.Red );
+				image.Write( i,		b+s-1,	Color.Red );
 			}
 		}
 		
