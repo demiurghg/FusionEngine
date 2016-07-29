@@ -278,8 +278,8 @@ GBuffer PSMain( PSInput input )
 	//float2 atiHack	=	float2(-0.25f/16384, -0.25f/16384); // <-- float2(0,0) for NVIdia
 	float2 atiHack		=	float2( 0, 0 );
 	
-	float4 fallback		=	Textures[0].Sample( SamplerLinear, input.TexCoord ).rgba;
-	float4 physPageTC	=	Textures[1].Sample( SamplerPoint, input.TexCoord + atiHack ).xyzw;
+	float4 fallback		=	float4(1,0,1,1);//Textures[0].Sample( SamplerLinear, input.TexCoord ).rgba;
+	float4 physPageTC	=	Textures[1].SampleLevel( SamplerPoint, input.TexCoord + atiHack, floor(mip) ).xyzw;
 	float4 color		=	fallback;
 	
 	if (physPageTC.w>0) {
@@ -292,7 +292,13 @@ GBuffer PSMain( PSInput input )
 		//color			=	Textures[2].Sample( SamplerAnisotropic, finalTC ).rgba;
 		color			=	Textures[2].Sample( SamplerLinear, finalTC ).rgba;
 	}
-	
+
+	// if (mip<6 && mip>=5) { color *= float4(1,0,0,1); } else
+	// if (mip<5 && mip>=4) { color *= float4(0,1,0,1); } else
+	// if (mip<4 && mip>=3) { color *= float4(0,0,1,1); } else
+	// if (mip<3 && mip>=2) { color *= float4(1,0,0,1); } else
+	// if (mip<2 && mip>=1) { color *= float4(0,1,0,1); } else
+	// if (mip<1 && mip>=0) { color *= float4(1,1,1,1); } 
 	//color = frac(MipLevel( input.TexCoord ));
 
 	//---------------------------------

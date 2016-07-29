@@ -107,7 +107,8 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		public Vector4[] GetPageTableData ( int mipLevel )
 		{
-			Vector4[] mapping = new Vector4[VTConfig.VirtualPageCount * VTConfig.VirtualPageCount];
+			var mappingSize = VTConfig.VirtualPageCount >> mipLevel;
+			Vector4[] mapping = new Vector4[mappingSize*mappingSize];
 
 			int vpc = VTConfig.VirtualPageCount;
 
@@ -119,11 +120,13 @@ namespace Fusion.Engine.Graphics {
 
 				var va	=	pair.Key;
 				var pa	=	pair.Value;
-				var sz	=	1 << va.MipLevel;
 
-				if (pa.Tile==null) {
+				if (pa.Tile==null || va.MipLevel<mipLevel) {
 					continue;
 				}
+
+				var sz	=	1 << (va.MipLevel-mipLevel);
+
 
 				for ( int x=0; x<sz; x++ ) {
 					for ( int y=0; y<sz; y++ ) {
@@ -131,7 +134,7 @@ namespace Fusion.Engine.Graphics {
 						int vaX = va.PageX * sz + x;
 						int vaY = va.PageY * sz + y;
 
-						int addr = vaX + vpc * vaY;
+						int addr = vaX + mappingSize * vaY;
 
 						float minMip	=	va.MipLevel;
 

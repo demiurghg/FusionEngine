@@ -70,7 +70,7 @@ namespace Fusion.Engine.Graphics {
 			int physSize	=	VTConfig.PhysicalTextureSize;
 			int tableSize	=	VTConfig.VirtualPageCount;
 			PhysicalPages	=	new Texture2D( rs.Device, physSize, physSize, ColorFormat.Rgba8_sRGB, false, true );
-			PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Rgba32F, 1, false );
+			PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Rgba32F, VTConfig.MipCount, false );
 
 			var rand = new Random();
 			PageTable.SetData( Enumerable.Range(0,tableSize*tableSize).Select( i => rand.NextColor4() ).ToArray() );
@@ -220,6 +220,11 @@ namespace Fusion.Engine.Graphics {
 
 				//	update page table :
 				PageTable.SetData( 0, tileCache.GetPageTableData(0) );
+				PageTable.SetData( 1, tileCache.GetPageTableData(1) );
+				PageTable.SetData( 2, tileCache.GetPageTableData(2) );
+				PageTable.SetData( 3, tileCache.GetPageTableData(3) );
+				PageTable.SetData( 4, tileCache.GetPageTableData(4) );
+				PageTable.SetData( 5, tileCache.GetPageTableData(5) );
 			}
 		}
 	}
