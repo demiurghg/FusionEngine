@@ -218,10 +218,10 @@ SURFACE MaterialCombiner ( float2 uv )
 float MipLevel( float2 uv );
 
 static const float 	VTVirtualPageCount	= 128;
-static const float 	VTPhysicalPageCount	= 15;
+static const float 	VTPhysicalPageCount	= 7;
 static const int 	VTPageSize			= 128;
 static const int 	VTMaxMip	  		= 6;
-static const float	VTPageScale			= 2048/VTPageSize;
+static const float	VTPageScale			= 1024/VTPageSize;
 
 //	https://www.opengl.org/discussion_boards/showthread.php/171485-Texture-LOD-calculation-(useful-for-atlasing)
 float MipLevel( float2 uv )
@@ -279,7 +279,7 @@ GBuffer PSMain( PSInput input )
 	float2 atiHack		=	float2( 0, 0 );
 	
 	float4 fallback		=	float4(1,0,1,1);//Textures[0].Sample( SamplerLinear, input.TexCoord ).rgba;
-	float4 physPageTC	=	Textures[1].SampleLevel( SamplerPoint, input.TexCoord + atiHack, floor(mip) ).xyzw;
+	float4 physPageTC	=	Textures[1].SampleLevel( SamplerPoint, input.TexCoord + atiHack, (int)(mip) ).xyzw;
 	float4 color		=	fallback;
 	
 	if (physPageTC.w>0) {

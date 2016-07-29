@@ -22,6 +22,7 @@ namespace Fusion.Engine.Graphics {
 	public class VTTile {
 
 		Image image;
+		Image imageLow;
 
 		/// <summary>
 		/// Virtual address of given tile.
@@ -51,7 +52,13 @@ namespace Fusion.Engine.Graphics {
 		{
 			this.VirtualAddress	=	address;
 			this.image		=	Image.LoadTga( stream );
+			//this.imageLow	=	image.
 		}
+
+
+
+
+
 
 
 		public void DrawBorder (bool draw)

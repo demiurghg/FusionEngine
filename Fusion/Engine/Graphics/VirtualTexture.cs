@@ -44,6 +44,7 @@ namespace Fusion.Engine.Graphics {
 
 		VTTileLoader	tileLoader;
 		VTTileCache		tileCache;
+		VTStamper		tileStamper;
 
 
 
@@ -110,6 +111,7 @@ namespace Fusion.Engine.Graphics {
 
 			tileLoader			=	new VTTileLoader( this, baseDir );
 			tileCache			=	new VTTileCache( VTConfig.PhysicalPageCount );
+			tileStamper			=	new VTStamper();
 		}
 
 
@@ -210,12 +212,17 @@ namespace Fusion.Engine.Graphics {
 						tile.DrawBorder( ShowTileBorder );
 
 						if (tileCache.TranslateAddress( tile.VirtualAddress, tile, out rect )) {
-							PhysicalPages.SetData( 0, rect, tile.Data, 0, tile.Data.Length );
+							//PhysicalPages.SetData( 0, rect, tile.Data, 0, tile.Data.Length );
+							tileStamper.Add( tile, rect );
 						}
 
 					}
 
 				}
+
+
+				//	emboss tiles to physical texture
+				tileStamper.Update( PhysicalPages );
 
 
 				//	update page table :
