@@ -236,6 +236,17 @@ namespace Fusion.Engine.Imaging {
 
 
 
+		public Image Downsample ()
+		{
+			var image = new Image( Width/2, Height/2 );
+
+			image.PerpixelProcessing( (x,y,c) => this.SampleMip( x,y ) );
+
+			return image;
+		}
+
+
+
 		/// <summary>
 		/// Writes pixel to image
 		/// </summary>

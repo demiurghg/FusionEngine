@@ -24,14 +24,14 @@ namespace Fusion.Engine.Graphics {
 		class Stamp {
 			public readonly VTTile		Tile;
 			public readonly Rectangle	Rectangle;
-			public int StampCount;
+			public float StampFactor;
 
 
 			public Stamp ( VTTile tile, Rectangle rect ) 
 			{
-				this.Tile		=	tile;
-				this.Rectangle	=	rect;
-				this.StampCount	=	0;
+				this.Tile			=	tile;
+				this.Rectangle		=	rect;
+				this.StampFactor	=	0;
 			}
 		}
 
@@ -57,11 +57,14 @@ namespace Fusion.Engine.Graphics {
 		public void Update ( Texture2D physicalPage )
 		{
 			foreach ( var stamp in stamps ) {
-				stamp.StampCount++;
-				physicalPage.SetData( 0, stamp.Rectangle, stamp.Tile.Data, 0, stamp.Tile.Data.Length );
+				stamp.StampFactor+=0.0625f;
+
+				var data = stamp.Tile.GetLerpedData( stamp.StampFactor );
+
+				physicalPage.SetData( 0, stamp.Rectangle, data, 0, data.Length );
 			}	
 
-			stamps.RemoveAll( s => s.StampCount > 0 );
+			stamps.RemoveAll( s => s.StampFactor >= 1 );
 		}
 		
 	}

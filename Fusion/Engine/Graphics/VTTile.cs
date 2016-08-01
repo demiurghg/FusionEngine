@@ -23,7 +23,7 @@ namespace Fusion.Engine.Graphics {
 
 		Image image;
 		Image imageLow;
-
+		
 		/// <summary>
 		/// Virtual address of given tile.
 		/// </summary>
@@ -52,11 +52,35 @@ namespace Fusion.Engine.Graphics {
 		{
 			this.VirtualAddress	=	address;
 			this.image		=	Image.LoadTga( stream );
-			//this.imageLow	=	image.
+			this.imageLow	=	new Image( image.Width, image.Height );
+
+			float w = image.Width;
+			float h = image.Height;
+
+			var mipped	=	image.Downsample();
+			this.imageLow.PerpixelProcessing( (x,y,input) => mipped.Sample( (x-0.5f)/w, (y-0.5f)/h ) );
 		}
 
 
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="factor"></param>
+		public Color[] GetLerpedData ( float factor )
+		{
+			var length	=	image.RawImageData.Length;
+			var data	=	new Color[ length ];
+
+			factor	=	MathUtil.Clamp( factor, 0, 1 );
+
+			for ( int i=0; i<length; i++) {
+				data[ i ] = Color.Lerp( imageLow.RawImageData[i], image.RawImageData[i], factor );
+			}			
+
+			return data;
+		}
 
 
 
