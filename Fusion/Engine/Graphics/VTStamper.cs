@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
+using Fusion.Core.Extensions;
 using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
@@ -21,22 +22,61 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	internal class VTStamper {
 
+
+		const float StampTimeInterval		=	0.10f;
+		const float StampJitterAmplitude	=	0.03f;
+
+
 		class Stamp {
 			public readonly VTTile		Tile;
 			public readonly Rectangle	Rectangle;
-			public float StampFactor;
+
+			int		counter = 0;
+			float	timer	= 0;
 
 
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="tile"></param>
+			/// <param name="rect"></param>
 			public Stamp ( VTTile tile, Rectangle rect ) 
 			{
 				this.Tile			=	tile;
 				this.Rectangle		=	rect;
-				this.StampFactor	=	0;
 			}
+
+
+			/// <summary>
+			/// Update internal counters and sets GPU data if necessary
+			/// </summary>
+			/// <param name="physicalPage"></param>
+			/// <param name="dt"></param>
+			public void AdvanceStamping ( Texture2D physicalPage, float dt, float jitter )
+			{
+				timer -= dt;
+
+				if (timer<=0) {
+					var data = Tile.GetLerpedData( counter );
+					physicalPage.SetData( 0, Rectangle, data, 0, data.Length );
+					counter++;
+					timer = StampTimeInterval + jitter;
+				}
+			}
+
+
+			/// <summary>
+			/// Indicates that given tile is fully imprinted to physical texture.
+			/// </summary>
+			public bool IsFullyStamped {
+				get { return counter>=VTTile.ImageCount; }
+			}
+
 		}
 
 
-		List<Stamp> stamps = new List<Stamp>();
+		Random rand = new Random();
+		Dictionary<Rectangle,Stamp> stamps = new Dictionary<Rectangle,Stamp>();
 
 		
 		/// <summary>
@@ -46,7 +86,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="rect"></param>
 		public void Add ( VTTile tile, Rectangle rect )
 		{
-			stamps.Add( new Stamp( tile, rect ) );
+			stamps[ rect ] = new Stamp( tile, rect );
 		}
 
 
@@ -54,17 +94,17 @@ namespace Fusion.Engine.Graphics {
 		/// Sequntually imprints enqued tiles to physical texture.
 		/// </summary>
 		/// <param name="physicalPage"></param>
-		public void Update ( Texture2D physicalPage )
+		public void Update ( Texture2D physicalPage, float dt )
 		{
 			foreach ( var stamp in stamps ) {
-				stamp.StampFactor+=0.0625f;
 
-				var data = stamp.Tile.GetLerpedData( stamp.StampFactor );
+				float jitter = rand.NextFloat( -StampJitterAmplitude, StampJitterAmplitude );
 
-				physicalPage.SetData( 0, stamp.Rectangle, data, 0, data.Length );
+				stamp.Value.AdvanceStamping( physicalPage, dt, jitter );
+
 			}	
 
-			stamps.RemoveAll( s => s.StampFactor >= 1 );
+			stamps = stamps.Where( pair => !pair.Value.IsFullyStamped ).ToDictionary( pair => pair.Key, pair => pair.Value );
 		}
 		
 	}

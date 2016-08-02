@@ -422,7 +422,7 @@ namespace Fusion.Engine.Graphics {
 
 
 			//	render g-buffer :
-			rs.SceneRenderer.RenderGBuffer( stereoEye, Camera, viewHdrFrame, this );
+			rs.SceneRenderer.RenderGBuffer( gameTime, stereoEye, Camera, viewHdrFrame, this );
 
 			//	render ssao :
 			rs.SsaoFilter.Render( stereoEye, Camera, viewHdrFrame.DepthBuffer, viewHdrFrame.NormalMapBuffer );
@@ -506,7 +506,7 @@ namespace Fusion.Engine.Graphics {
 						camera.SetupCameraCubeFace( envLight.Position, (CubeFace)i, 0.125f, 5000 );
 
 						//	render g-buffer :
-						rs.SceneRenderer.RenderGBuffer( StereoEye.Mono, camera, radianceFrame, this );
+						rs.SceneRenderer.RenderGBuffer( new GameTime(0,0,0), StereoEye.Mono, camera, radianceFrame, this );
 
 						//	render sky :
 						rs.Sky.Render( camera, StereoEye.Mono, radianceFrame, SkySettings );

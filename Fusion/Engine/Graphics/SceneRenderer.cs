@@ -155,7 +155,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="diffuse"></param>
 		/// <param name="specular"></param>
 		/// <param name="normals"></param>
-		internal void RenderGBuffer ( StereoEye stereoEye, Camera camera, HdrFrame frame, RenderWorld rw )
+		internal void RenderGBuffer ( GameTime gameTime, StereoEye stereoEye, Camera camera, HdrFrame frame, RenderWorld rw )
 		{		
 			using ( new PixEvent("RenderGBuffer") ) {
 
@@ -247,7 +247,7 @@ namespace Fusion.Engine.Graphics {
 				var feedbackBuffer = new VTAddress[ HdrFrame.FeedbackBufferWidth * HdrFrame.FeedbackBufferHeight ];
 				frame.FeedbackBufferRB.GetFeedback( feedbackBuffer );
 
-				rs.VirtualTexture.Update( feedbackBuffer );
+				rs.VirtualTexture.Update( feedbackBuffer, gameTime );
 			}
 		}
 

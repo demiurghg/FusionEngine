@@ -21,25 +21,22 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	public class VTTile {
 
-		Image image;
-		Image imageLow;
+		public const int ImageCount = 1;
+		
+		Image[] images;
+
+		Image MostDetailedImage {
+			get {
+				return images[ ImageCount - 1 ];
+			}
+		}
+
 		
 		/// <summary>
 		/// Virtual address of given tile.
 		/// </summary>
 		public VTAddress VirtualAddress { 
 			get; private set;
-		}
-
-
-
-		/// <summary>
-		/// Gets image data as RGBA8 array.
-		/// </summary>
-		public Color[] Data {
-			get {
-				return image.RawImageData;
-			}
 		}
 
 		
@@ -51,14 +48,46 @@ namespace Fusion.Engine.Graphics {
 		public VTTile ( VTAddress address, Stream stream )
 		{
 			this.VirtualAddress	=	address;
-			this.image		=	Image.LoadTga( stream );
-			this.imageLow	=	new Image( image.Width, image.Height );
 
-			float w = image.Width;
-			float h = image.Height;
+			this.images			=	new Image[ ImageCount ];
 
-			var mipped	=	image.Downsample();
-			this.imageLow.PerpixelProcessing( (x,y,input) => mipped.Sample( (x-0.5f)/w, (y-0.5f)/h ) );
+			if (ImageCount==1) {
+
+				images[0]	=	Image.LoadTga( stream );
+
+			} else {
+
+				var highDetailed	=	Image.LoadTga( stream );
+				var lowDetailed		=	highDetailed.DownsampleAndUpscaleBilinear();
+
+				for ( int i=0; i<ImageCount; i++ ) {
+				
+					float factor	=	i / (float)(ImageCount-1);
+
+					images[i]		=	new Image(highDetailed.Width, highDetailed.Height);
+
+					LerpImages( images[i], lowDetailed, highDetailed, factor );
+				}
+			}
+		}
+
+
+
+		/// <summary>
+		/// Lerps two images to third one.
+		/// </summary>
+		/// <param name="dst"></param>
+		/// <param name="srcA"></param>
+		/// <param name="srcB"></param>
+		/// <param name="factor"></param>
+		static void LerpImages ( Image dst, Image srcA, Image srcB, float factor )
+		{
+			var length = dst.RawImageData.Length;
+
+			for (int i=0; i<length; i++) {
+
+				dst.RawImageData[ i ] = Color.Lerp( srcA.RawImageData[i], srcB.RawImageData[i], factor );
+			}
 		}
 
 
@@ -68,18 +97,14 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="factor"></param>
-		public Color[] GetLerpedData ( float factor )
+		public Color[] GetLerpedData ( int index )
 		{
-			var length	=	image.RawImageData.Length;
-			var data	=	new Color[ length ];
+			if ( index<0 || index>=ImageCount ) {
+				throw new ArgumentOutOfRangeException("index", "Index must be within range [0..VTTile.ImageCount)");
+			}
 
-			factor	=	MathUtil.Clamp( factor, 0, 1 );
 
-			for ( int i=0; i<length; i++) {
-				data[ i ] = Color.Lerp( imageLow.RawImageData[i], image.RawImageData[i], factor );
-			}			
-
-			return data;
+			return images[index].RawImageData;
 		}
 
 
@@ -93,6 +118,8 @@ namespace Fusion.Engine.Graphics {
 
 			int s	=	VTConfig.PageSize;
 			var b	=	VTConfig.PageBorderWidth;
+
+			var image	=	MostDetailedImage;
 
 			for (int i=b; i<s+b; i++) {
 				image.Write( b,     i,		Color.Red );

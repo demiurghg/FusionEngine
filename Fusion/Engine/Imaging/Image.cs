@@ -236,13 +236,36 @@ namespace Fusion.Engine.Imaging {
 
 
 
-		public Image Downsample ()
+		/// <summary>
+		/// Create half-sized image using bilinear filtering
+		/// </summary>
+		/// <returns></returns>
+		public Image DownsampleBilinear ()
 		{
 			var image = new Image( Width/2, Height/2 );
 
 			image.PerpixelProcessing( (x,y,c) => this.SampleMip( x,y ) );
 
 			return image;
+		}
+
+
+
+		/// <summary>
+		/// Create half-sized image using bilinear filtering
+		/// </summary>
+		/// <returns></returns>
+		public Image DownsampleAndUpscaleBilinear ()
+		{
+			float w = Width;
+			float h = Height;
+
+			var downsampled	=	DownsampleBilinear();
+			var upscaled	=	new Image( Width, Height );
+
+			upscaled.PerpixelProcessing( (x,y,input) => downsampled.Sample( (x-0.5f)/w, (y-0.5f)/h ) );
+
+			return upscaled;
 		}
 
 

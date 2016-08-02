@@ -132,7 +132,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="data"></param>
-		public void Update ( VTAddress[] data )
+		public void Update ( VTAddress[] data, GameTime gameTime )
 		{
 			var feedback = data.Distinct().Where( p => p.Dummy!=0 ).ToArray();
 
@@ -222,7 +222,7 @@ namespace Fusion.Engine.Graphics {
 
 
 				//	emboss tiles to physical texture
-				tileStamper.Update( PhysicalPages );
+				tileStamper.Update( PhysicalPages, gameTime.ElapsedSec );
 
 
 				//	update page table :
