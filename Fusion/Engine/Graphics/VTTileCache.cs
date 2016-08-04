@@ -37,7 +37,7 @@ namespace Fusion.Engine.Graphics {
 				//this.TS			=	
 			}
 			
-			public byte LfuIndex = 0xFF;
+			public uint LfuIndex = 0xFFFFFFFF;
 			public readonly VTAddress VA;
 			public readonly int Address;
 			public readonly float X;
@@ -156,7 +156,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			foreach ( var p in table ) {
 				if (p!=null) {
-					p.LfuIndex = (byte)(p.LfuIndex << 1);
+					p.LfuIndex = (uint)(p.LfuIndex << 1);
 				}
 			}
 
@@ -180,7 +180,11 @@ namespace Fusion.Engine.Graphics {
 					throw new InvalidOperationException("Null page, impossible due to GetFreePhysicalAddress");
 				}
 
-				var bitCount = this.bitCount[ p.LfuIndex ];
+				var bitCount = 
+					  this.bitCount[ ( p.LfuIndex>>0  ) & 0xFF ]
+					+ this.bitCount[ ( p.LfuIndex>>8  ) & 0xFF ]
+					+ this.bitCount[ ( p.LfuIndex>>16 ) & 0xFF ]
+					+ this.bitCount[ ( p.LfuIndex>>24 ) & 0xFF ];
 
 				if (minBitCount > bitCount) {
 					minBitCount = bitCount;

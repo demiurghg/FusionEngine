@@ -217,7 +217,7 @@ SURFACE MaterialCombiner ( float2 uv )
 
 float MipLevel( float2 uv );
 
-static const float 	VTVirtualPageCount	= 128;
+static const float 	VTVirtualPageCount	= 1024;
 static const float 	VTPhysicalPageCount	= 15;
 static const int 	VTPageSize			= 128;
 static const int 	VTMaxMip	  		= 6;
@@ -291,14 +291,14 @@ GBuffer PSMain( PSInput input )
 		
 		//color			=	Textures[2].Sample( SamplerAnisotropic, finalTC ).rgba;
 		color			=	Textures[2].Sample( SamplerLinear, finalTC ).rgba;
-	}
+	}//*/
 
-	// if (mip<6 && mip>=5) { color *= float4(1,0,0,1); } else
-	// if (mip<5 && mip>=4) { color *= float4(0,1,0,1); } else
-	// if (mip<4 && mip>=3) { color *= float4(0,0,1,1); } else
-	// if (mip<3 && mip>=2) { color *= float4(1,0,0,1); } else
-	// if (mip<2 && mip>=1) { color *= float4(0,1,0,1); } else
-	// if (mip<1 && mip>=0) { color *= float4(1,1,1,1); } 
+	/*if (mip<6 && mip>=5) { color *= float4(1,0,0,1); } else
+	if (mip<5 && mip>=4) { color *= float4(0,1,0,1); } else
+	if (mip<4 && mip>=3) { color *= float4(0,0,1,1); } else
+	if (mip<3 && mip>=2) { color *= float4(1,0,0,1); } else
+	if (mip<2 && mip>=1) { color *= float4(0,1,0,1); } else
+	if (mip<1 && mip>=0) { color *= float4(1,1,1,1); } */
 	//color = frac(MipLevel( input.TexCoord ));
 
 	//---------------------------------

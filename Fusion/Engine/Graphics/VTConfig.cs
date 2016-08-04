@@ -18,15 +18,15 @@ namespace Fusion.Engine.Graphics {
 		public const int PageBorderWidth		=	4;
 		public const int PageSizeBordered		=	PageSize + PageBorderWidth * 2;
 
-		public const int VirtualPageCount		=	128;
+		public const int VirtualPageCount		=	1024;
 		public const int TextureSize			=	PageSize * VirtualPageCount;
 		public const int MipCount				=	6;
 		public const int MaxMipLevel			=	MipCount - 1;
 
 		public const int FallbackSize			=	TextureSize >> MaxMipLevel;
 
-		public const int PhysicalTextureSize	=	2048;
 		public const int PhysicalPageCount		=	PhysicalTextureSize / PageSizeBordered;
+		public const int PhysicalTextureSize	=	2048;
 		public const int TotalPhysicalPageCount	=	PhysicalPageCount * PhysicalPageCount;
 
 	}
