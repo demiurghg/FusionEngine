@@ -160,8 +160,17 @@ namespace Fusion.Build.Mapping {
 				mesh.DefragmentSubsets(scene, true);
 				mesh.ComputeTangentFrame();
 				mesh.ComputeBoundingBox();
+                CheckUVLayoutIntersection(mesh);
 			}
 		}
-		
+
+        public void CheckUVLayoutIntersection(Mesh mesh)
+        {
+            var trianglePoints = mesh.Vertices.Select(t => t.TexCoord0).ToList();
+            if (Geometry.TrianglesIntersection(trianglePoints))
+            {
+                Log.Message("WARNING :: Mesh has intersects in UV layout");
+            }
+        }
 	}
 }
