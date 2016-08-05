@@ -208,6 +208,23 @@ namespace Fusion.Engine.Imaging {
 
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="x"></param>
+		/// <param name="y"></param>
+		/// <param name="img"></param>
+		public void CopySubImageTo ( int srcX, int srcY, int srcWidth, int srcHeight, int dstX, int dstY, Image destination )
+		{
+			for (int x=0; x<srcWidth; x++) {
+				for (int y=0; y<srcHeight; y++) {
+					destination.Write( dstX + x, dstY + y, Sample( srcX+x, srcY+y ) );
+				}
+			}
+		}
+
+
+
+		/// <summary>
 		/// Sample with filtering
 		/// </summary>
 		/// <param name="x">value within range 0..1</param>

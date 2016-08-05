@@ -10,8 +10,11 @@ using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
+using Fusion.Core.Shell;
 
 namespace Fusion.Engine.Graphics {
+
+
 	public class VTTileCache {
 
 		readonly Dictionary<VTAddress,Page> dictionary;
@@ -71,6 +74,13 @@ namespace Fusion.Engine.Graphics {
 
 
 
+		public void Purge ()
+		{
+			dictionary.Clear();
+		}
+
+
+
 		/// <summary>
 		/// Translates virtual texture address to physical rectangle in physical texture.
 		/// </summary>
@@ -97,7 +107,6 @@ namespace Fusion.Engine.Graphics {
 				return true;
 
 			} else {
-			
 				rectangle	=	new Rectangle();
 				return false;
 			}

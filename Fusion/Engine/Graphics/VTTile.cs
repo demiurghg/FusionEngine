@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Fusion.Core;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Configuration;
+using Fusion.Core.Extensions;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Imaging;
@@ -20,6 +21,9 @@ namespace Fusion.Engine.Graphics {
 	/// Represents image data of particular tile.
 	/// </summary>
 	public class VTTile {
+	
+		static Random rand = new Random();		
+
 
 		public const int ImageCount = 1;
 		
@@ -107,6 +111,35 @@ namespace Fusion.Engine.Graphics {
 			return images[index].RawImageData;
 		}
 
+
+
+		public void DrawText ( Image font, int x, int y, string text )
+		{
+			var image	=	MostDetailedImage;
+			
+			for (int i=0; i<text.Length; i++) {
+
+				var ch		=	((int)text[i]) & 0xFF;
+
+				int srcX	=	(ch % 16) * 8;
+				int srcY	=	(ch / 16) * 8;
+				int dstX	=	x + i * 8;
+				int dstY	=	y;
+
+				font.CopySubImageTo( srcX, srcY, 9,8, dstX, dstY, image );
+			}
+		}
+
+
+
+		public void FillRandomColor ()
+		{
+			var color = rand.NextColor();
+
+			var image	=	MostDetailedImage;
+
+			image.Fill( color );			
+		}
 
 
 

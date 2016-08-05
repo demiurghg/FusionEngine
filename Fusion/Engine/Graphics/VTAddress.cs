@@ -67,7 +67,7 @@ namespace Fusion.Engine.Graphics {
 
 		public override string ToString ()
 		{
-			return string.Format("{0} {1} {2}", PageX, PageY, MipLevel );
+			return string.Format("{0},{1}:{2}", PageX, PageY, MipLevel );
 		}
 
 

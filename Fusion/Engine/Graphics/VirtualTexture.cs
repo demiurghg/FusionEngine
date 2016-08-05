@@ -11,6 +11,8 @@ using Fusion.Core.Configuration;
 using Fusion.Core.Extensions;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
+using Fusion.Engine.Imaging;
+using System.Diagnostics;
 
 namespace Fusion.Engine.Graphics {
 	internal class VirtualTexture : GameComponent {
@@ -19,7 +21,6 @@ namespace Fusion.Engine.Graphics {
 
 		[Config]
 		public int MaxPPF { get; set; }
-
 
 		[Config]
 		public bool ShowPageCaching { get; set; }
@@ -36,6 +37,15 @@ namespace Fusion.Engine.Graphics {
 		[Config]
 		public bool ShowTileBorder { get; set; }
 
+		[Config]
+		public bool LockTiles { get; set; }
+
+		[Config]
+		public bool ShowAddress { get; set; }
+
+		[Config]
+		public bool RandomColor { get; set; }
+
 
 		public UserTexture	FallbackTexture;
 
@@ -46,6 +56,14 @@ namespace Fusion.Engine.Graphics {
 		VTTileCache		tileCache;
 		VTStamper		tileStamper;
 
+
+		Image	fontImage;
+
+		public Image FontImage {
+			get {
+				return fontImage;
+			}
+		}
 
 
 
@@ -61,6 +79,8 @@ namespace Fusion.Engine.Graphics {
 			MaxPPF	=	16;
 		}
 
+
+		Stopwatch stopwatch = new Stopwatch();
 
 
 		/// <summary>
@@ -107,11 +127,16 @@ namespace Fusion.Engine.Graphics {
 		public void Start ( string baseDir )
 		{
 			var fallbackPath	=	Path.Combine( baseDir, "fallback.tga" );
+			var fontPath		=	Path.Combine( baseDir, "conchars.tga" );
 			FallbackTexture		=	UserTexture.CreateFromTga( rs, File.OpenRead(fallbackPath), true );	
 
 			tileLoader			=	new VTTileLoader( this, baseDir );
 			tileCache			=	new VTTileCache( VTConfig.PhysicalPageCount );
 			tileStamper			=	new VTStamper();
+
+			fontImage			=	Imaging.Image.LoadTga( new MemoryStream( Fusion.Properties.Resources.conchars ) );
+
+			stopwatch.Restart();
 		}
 
 
@@ -168,11 +193,15 @@ namespace Fusion.Engine.Graphics {
 			//	Detect thrashing and prevention
 			//	Get highest mip, remove them, repeat until no thrashing occur.
 			//
-			while (feedbackTree.Count >= VTConfig.TotalPhysicalPageCount ) {
+			while (feedbackTree.Count >= VTConfig.TotalPhysicalPageCount/1.33f ) {
 				int minMip = feedbackTree.Min( va => va.MipLevel );
 				feedbackTree.RemoveAll( va => va.MipLevel == minMip );
 			}
 
+
+			if (LockTiles) {
+				feedbackTree.Clear();
+			}
 
 
 			if (tileCache!=null) {
@@ -209,9 +238,22 @@ namespace Fusion.Engine.Graphics {
 
 						Rectangle rect;
 
-						tile.DrawBorder( ShowTileBorder );
-
 						if (tileCache.TranslateAddress( tile.VirtualAddress, tile, out rect )) {
+							
+							var sz = VTConfig.PageSizeBordered;
+
+							if (RandomColor) {	
+								tile.FillRandomColor();
+							}
+
+							if (ShowAddress) {	
+								tile.DrawText( fontImage, 16,16, tile.VirtualAddress.ToString() );
+								tile.DrawText( fontImage, 16,32, string.Format("{0} {1}", rect.X/sz, rect.Y/sz ) );
+								tile.DrawText( fontImage, 16,48, Math.Floor(stopwatch.Elapsed.TotalMilliseconds).ToString() );
+							}
+
+							tile.DrawBorder( ShowTileBorder );
+
 							//PhysicalPages.SetData( 0, rect, tile.Data, 0, tile.Data.Length );
 							tileStamper.Add( tile, rect );
 						}
