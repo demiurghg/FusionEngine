@@ -27,8 +27,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FScene", "FScene\FScene.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusion.Build", "Fusion.Build\Fusion.Build.csproj", "{EBDD2FD0-EC00-45D9-B38B-C7E674016FAB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B95926E1-3B22-4FFF-A3AD-4212DE69E0C6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubkriegDemo", "..\Subkrieg\SubkriegSource\SubkriegDemo.csproj", "{0F8B9995-B088-4A22-8473-9DF1362068AB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShooterDemo", "..\ShooterDemo\ShooterDemo.csproj", "{0D5119AE-8CDC-488E-AB9E-DCED4C2B0956}"

@@ -42,9 +42,13 @@ namespace Fusion.Engine.Graphics {
 			public readonly int Address;
 			public readonly float X;
 			public readonly float Y;
-			public readonly float TS;
 
 			public VTTile Tile = null;
+
+			public override string ToString ()
+			{
+				return string.Format("{0} {1} {2}", Address, X, Y );
+			}
 		}
 
 
@@ -108,7 +112,7 @@ namespace Fusion.Engine.Graphics {
 		public Vector4[] GetPageTableData ( int mipLevel )
 		{
 			var mappingSize = VTConfig.VirtualPageCount >> mipLevel;
-			Vector4[] mapping = new Vector4[mappingSize*mappingSize];
+			var mapping		= new Vector4[mappingSize*mappingSize];
 
 			int vpc = VTConfig.VirtualPageCount;
 
@@ -125,7 +129,10 @@ namespace Fusion.Engine.Graphics {
 					continue;
 				}
 
-				var sz	=	1 << (va.MipLevel-mipLevel);
+				var sz		=	1 << (va.MipLevel-mipLevel);
+				var minMip	=	va.MipLevel;// / (float)VTConfig.MipCount;
+				var value	=	new Vector4( pa.X, pa.Y, minMip, 1 );
+				//var value	=	MathUtil.PackRGB10A2( new Vector4( pa.X, pa.Y, minMip, 1 ) );
 
 
 				for ( int x=0; x<sz; x++ ) {
@@ -136,9 +143,7 @@ namespace Fusion.Engine.Graphics {
 
 						int addr = vaX + mappingSize * vaY;
 
-						float minMip	=	va.MipLevel;
-
-						mapping[ addr ] = new Vector4( pa.X, pa.Y, minMip, 1 );
+						mapping[ addr ] = value;
 
 					}
 				}

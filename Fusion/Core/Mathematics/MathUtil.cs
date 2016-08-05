@@ -950,6 +950,36 @@ namespace Fusion.Core.Mathematics
 
 
 		/// <summary>
+		/// Returns float clamped to range -1,1
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public static float Saturate ( float value )
+		{
+			if (float.IsNaN(value)) {
+				return 0;
+			}
+			return MathUtil.Clamp( value, 0f, 1f );
+		}
+
+
+
+		/// <summary>
+		/// Converts float to normalized int
+		/// </summary>
+		/// <param name="value"></param>
+		/// <param name="scale"></param>
+		/// <returns></returns>
+		public static int FloatToNormInt ( float value, float scale )
+		{
+			return (int)Math.Floor( value * scale + 0.5f );
+		}
+
+
+
+
+
+		/// <summary>
 		/// http://d.hatena.ne.jp/hanecci/20140218/p3
 		/// </summary>
 		/// <param name="packedInput"></param>
@@ -981,6 +1011,22 @@ namespace Fusion.Core.Mathematics
 							((unpackedInput.Y)<<10) |
 							((unpackedInput.Z)<<20) |
 							((unpackedInput.W)<<30) );
+			return packedOutput;
+		}
+
+
+		/// <summary>
+		/// http://d.hatena.ne.jp/hanecci/20140218/p3
+		/// </summary>
+		/// <param name="packedInput"></param>
+		/// <returns></returns>
+		public static int PackRGB10A2 ( Vector4 unpackedInput )
+		{
+			int packedOutput;
+			packedOutput = ( (FloatToNormInt(Saturate(unpackedInput.X), 1023))     |
+							 (FloatToNormInt(Saturate(unpackedInput.Y), 1023)<<10) |
+							 (FloatToNormInt(Saturate(unpackedInput.Z), 1023)<<20) |
+							 (FloatToNormInt(Saturate(unpackedInput.W), 3)<<30) );
 			return packedOutput;
 		}
 

@@ -275,8 +275,7 @@ GBuffer PSMain( PSInput input )
 	//	Virtual texturing stuff :
 	//---------------------------------
 	float2 vtexTC		=	input.TexCoord;
-	//float2 atiHack	=	float2(-0.25f/16384, -0.25f/16384); // <-- float2(0,0) for NVIdia
-	float2 atiHack		=	float2( 0, 0 );
+	float2 atiHack		=	float2(-0.25f/131072, -0.25f/131072); // <-- float2(0,0) for NVIdia
 	
 	float4 fallback		=	Textures[0].Sample( SamplerLinear, input.TexCoord ).rgba;
 	float4 physPageTC	=	Textures[1].SampleLevel( SamplerPoint, input.TexCoord + atiHack, (int)(mip) ).xyzw;
@@ -287,7 +286,7 @@ GBuffer PSMain( PSInput input )
 				withinPageTC	=	frac( withinPageTC );
 				withinPageTC	=	withinPageTC / VTPageScale;
 		
-		float2	finalTC			=	physPageTC + withinPageTC;
+		float2	finalTC			=	physPageTC.xy + withinPageTC;
 		
 		//color			=	Textures[2].Sample( SamplerAnisotropic, finalTC ).rgba;
 		color			=	Textures[2].Sample( SamplerLinear, finalTC ).rgba;
@@ -298,7 +297,7 @@ GBuffer PSMain( PSInput input )
 	if (mip<4 && mip>=3) { color *= float4(0,0,1,1); } else
 	if (mip<3 && mip>=2) { color *= float4(1,0,0,1); } else
 	if (mip<2 && mip>=1) { color *= float4(0,1,0,1); } else
-	if (mip<1 && mip>=0) { color *= float4(1,1,1,1); } */
+	if (mip<1 && mip>=0) { color *= float4(1,1,1,1); } //*/
 	//color = frac(MipLevel( input.TexCoord ));
 
 	//---------------------------------
