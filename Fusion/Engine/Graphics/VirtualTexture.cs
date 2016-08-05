@@ -49,13 +49,15 @@ namespace Fusion.Engine.Graphics {
 
 		public UserTexture	FallbackTexture;
 
-		public Texture2D	PhysicalPages;
-		public Texture2D	PageTable;
+		public Texture2D		PhysicalPages;
+		public RenderTarget2D	PageTable;
 
 		VTTileLoader	tileLoader;
 		VTTileCache		tileCache;
 		VTStamper		tileStamper;
 
+		Ubershader		shader;
+		StateFactory	factory;
 
 		Image	fontImage;
 
@@ -63,6 +65,10 @@ namespace Fusion.Engine.Graphics {
 			get {
 				return fontImage;
 			}
+		}
+
+		enum Flags {
+			None  = 0,
 		}
 
 
@@ -91,10 +97,22 @@ namespace Fusion.Engine.Graphics {
 			int physSize	=	VTConfig.PhysicalTextureSize;
 			int tableSize	=	VTConfig.VirtualPageCount;
 			PhysicalPages	=	new Texture2D( rs.Device, physSize, physSize, ColorFormat.Rgba8_sRGB, false, true );
-			PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Rgba32F, VTConfig.MipCount, false );
+			//PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Rgba32F, VTConfig.MipCount, false );
+			PageTable		=	new RenderTarget2D( rs.Device, ColorFormat.Rgba32F, tableSize, tableSize, true, true );
 
 			var rand = new Random();
-			PageTable.SetData( Enumerable.Range(0,tableSize*tableSize).Select( i => rand.NextColor4() ).ToArray() );
+			//PageTable.SetData( Enumerable.Range(0,tableSize*tableSize).Select( i => rand.NextColor4() ).ToArray() );
+
+			Game.Reloading += (s,e) => LoadContent();
+
+			LoadContent();
+		}
+
+
+		void LoadContent ()
+		{
+			shader	=	Game.Content.Load<Ubershader>("vtcache");
+			factory	=	shader.CreateFactory( typeof(Flags), Primitive.TriangleList, VertexInputElement.Empty );
 		}
 
 
@@ -150,6 +168,29 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		const int	BlockSizeX		=	16;
+		const int	BlockSizeY		=	16;
+
+
+		/// <summary>
+		///	Updates page table using GPU
+		/// </summary>
+		void UpdatePageTable ()
+		{
+			int tableSize	=	VTConfig.VirtualPageCount;
+
+			using (new PixEvent("UpdatePageTable")) {
+
+				var device = Game.GraphicsDevice;
+				device.ResetStates();
+														
+				device.PipelineState	=	factory[0];
+
+				device.SetCSRWTexture( 0, PageTable.GetSurface(0) );
+
+				device.Dispatch( MathUtil.IntDivUp( tableSize, BlockSizeX ), MathUtil.IntDivUp( tableSize, BlockSizeY ), 1 );
+			}
+		}
 
 		
 
@@ -268,12 +309,13 @@ namespace Fusion.Engine.Graphics {
 
 
 				//	update page table :
-				PageTable.SetData( 0, tileCache.GetPageTableData(0) );
-				PageTable.SetData( 1, tileCache.GetPageTableData(1) );
-				PageTable.SetData( 2, tileCache.GetPageTableData(2) );
-				PageTable.SetData( 3, tileCache.GetPageTableData(3) );
-				PageTable.SetData( 4, tileCache.GetPageTableData(4) );
-				PageTable.SetData( 5, tileCache.GetPageTableData(5) );
+				UpdatePageTable();
+				//PageTable.SetData( 0, tileCache.GetPageTableData(0) );
+				//PageTable.SetData( 1, tileCache.GetPageTableData(1) );
+				//PageTable.SetData( 2, tileCache.GetPageTableData(2) );
+				//PageTable.SetData( 3, tileCache.GetPageTableData(3) );
+				//PageTable.SetData( 4, tileCache.GetPageTableData(4) );
+				//PageTable.SetData( 5, tileCache.GetPageTableData(5) );
 			}
 		}
 	}

@@ -50,7 +50,7 @@ namespace Fusion.Drivers.Graphics {
 		/// <param name="format"></param>
 		public RenderTarget2D ( GraphicsDevice device, ColorFormat format, int width, int height, bool enableRWBuffer = false ) : base ( device )
 		{
-			Create( format, width, height, 1, false, enableRWBuffer );
+			Create( format, width, height, 1, 1, enableRWBuffer );
 		}
 
 
@@ -97,7 +97,7 @@ namespace Fusion.Drivers.Graphics {
 		/// <param name="format"></param>
 		public RenderTarget2D ( GraphicsDevice device, ColorFormat format, int width, int height, int samples ) : base ( device )
 		{
-			Create( format, width, height, samples, false, false );
+			Create( format, width, height, samples, 1, false );
 		}
 
 
@@ -111,7 +111,7 @@ namespace Fusion.Drivers.Graphics {
 		/// <param name="format"></param>
 		public RenderTarget2D ( GraphicsDevice device, ColorFormat format, int width, int height, bool mips, bool enableRWBuffer ) : base ( device )
 		{
-			Create( format, width, height, 1, mips, enableRWBuffer );
+			Create( format, width, height, 1, mips?0:1, enableRWBuffer );
 		}
 
 
@@ -126,15 +126,15 @@ namespace Fusion.Drivers.Graphics {
 		/// <param name="samples"></param>
 		/// <param name="mips"></param>
 		/// <param name="debugName"></param>
-		void Create ( ColorFormat format, int width, int height, int samples, bool mips, bool enableRWBuffer )
+		void Create ( ColorFormat format, int width, int height, int samples, int mips, bool enableRWBuffer )
 		{
-			Log.Debug("RenderTarget2D: f:{0} w:{1} h:{2} s:{3}{4}{5}", format, width, height, samples, mips?" mips":"", enableRWBuffer?" uav":"" );
+			//Log.Debug("RenderTarget2D: f:{0} w:{1} h:{2} s:{3}{4}{5}", format, width, height, samples, mips?" mips":"", enableRWBuffer?" uav":"" );
 
 			bool msaa	=	samples > 1;
 
 			CheckSamplesCount( samples );
 
-			if (mips && samples>1) {
+			if (mips!=1 && samples>1) {
 				throw new ArgumentException("Render target should be multisampler either mipmapped");
 			}
 
@@ -145,7 +145,7 @@ namespace Fusion.Drivers.Graphics {
 			Width		=	width;
 			Height		=	height;
 			Depth		=	1;
-			MipCount	=	mips ? ShaderResource.CalculateMipLevels( width, height ) : 1;
+			MipCount	=	mips==0 ? ShaderResource.CalculateMipLevels( width, height ) : mips;
 
 			var	texDesc	=	new Texture2DDescription();
 				texDesc.Width				=	width;
@@ -154,8 +154,8 @@ namespace Fusion.Drivers.Graphics {
 				texDesc.BindFlags			=	BindFlags.RenderTarget | BindFlags.ShaderResource;
 				texDesc.CpuAccessFlags		=	CpuAccessFlags.None;
 				texDesc.Format				=	Converter.Convert( format );
-				texDesc.MipLevels			=	mips ? MipCount : 1;
-				texDesc.OptionFlags			=	mips ? ResourceOptionFlags.GenerateMipMaps : ResourceOptionFlags.None;
+				texDesc.MipLevels			=	MipCount;
+				texDesc.OptionFlags			=	(mips!=1) ? ResourceOptionFlags.GenerateMipMaps : ResourceOptionFlags.None;
 				texDesc.SampleDescription	=	new DXGI.SampleDescription(samples, 0);
 				texDesc.Usage				=	ResourceUsage.Default;
 
