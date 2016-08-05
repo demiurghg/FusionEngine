@@ -30,6 +30,8 @@ namespace Fusion.Drivers.Graphics {
 
 		D3D.Texture2D			tex2D;
 		D3D.Texture2D			tex2Dstaging;
+		D3D.Texture2D			tex2Dstaging1;
+		D3D.Texture2D			tex2Dstaging2;
 		RenderTargetSurface		surface;
 		
 		readonly VTAddress[]	feedbackData;
@@ -90,6 +92,8 @@ namespace Fusion.Drivers.Graphics {
 				texDescStaging.Usage				=	ResourceUsage.Staging;
 
 			tex2Dstaging	=	new D3D.Texture2D( device.Device, texDescStaging );
+			tex2Dstaging1	=	new D3D.Texture2D( device.Device, texDescStaging );
+			tex2Dstaging2	=	new D3D.Texture2D( device.Device, texDescStaging );
 
 			//
 			//	Create SRV :
@@ -158,6 +162,8 @@ namespace Fusion.Drivers.Graphics {
 				SafeDispose( ref SRV );
 				SafeDispose( ref tex2D );
 				SafeDispose( ref tex2Dstaging );
+				SafeDispose( ref tex2Dstaging1 );
+				SafeDispose( ref tex2Dstaging2 );
 			}
 
 			base.Dispose(disposing);
@@ -209,6 +215,12 @@ namespace Fusion.Drivers.Graphics {
 		/// 
 		void GetData<T>(int level, T[] data, int startIndex, int elementCount) where T : struct
         {
+			var temp		= tex2Dstaging;
+			tex2Dstaging	= tex2Dstaging1;
+			tex2Dstaging1	= tex2Dstaging2;
+			tex2Dstaging2	= temp;
+
+
             if (data == null || data.Length == 0) {
                 throw new ArgumentException("data cannot be null");
 			}
@@ -219,8 +231,7 @@ namespace Fusion.Drivers.Graphics {
 
 			var d3dContext = device.DeviceContext;
 
-            var stagingTex = tex2Dstaging;
-                
+
 			lock (d3dContext) {
 
 				//
@@ -232,12 +243,12 @@ namespace Fusion.Drivers.Graphics {
 				elementsInRow = Width;
                 rows = Height;
 
-                d3dContext.CopySubresourceRegion( tex2D, level, null, stagingTex, 0, 0, 0, 0);
+                d3dContext.CopySubresourceRegion( tex2D, level, null, tex2Dstaging, 0, 0, 0, 0);
 
 
                 // Copy the data to the array :
                 DataStream stream;
-                var databox = d3dContext.MapSubresource(stagingTex, 0, D3D.MapMode.Read, D3D.MapFlags.None, out stream);
+                var databox = d3dContext.MapSubresource(tex2Dstaging1, 0, D3D.MapMode.Read, D3D.MapFlags.None, out stream);
 
                 // Some drivers may add pitch to rows.
                 // We need to copy each row separatly and skip trailing zeros.
@@ -252,7 +263,7 @@ namespace Fusion.Drivers.Graphics {
 
                 }
 
-				d3dContext.UnmapSubresource( stagingTex, 0 );
+				d3dContext.UnmapSubresource( tex2Dstaging1, 0 );
 
                 stream.Dispose();
             }
