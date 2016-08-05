@@ -14,6 +14,27 @@ using Fusion.Core.Shell;
 
 namespace Fusion.Engine.Graphics {
 
+	public struct PageGpu {
+
+		public PageGpu ( float vx, float vy, float offsetX, float offsetY, float mip )
+		{
+			this.VX			= vx;
+			this.VY			= vy;
+			this.OffsetX	= offsetX;
+			this.OffsetY	= offsetY;
+			this.Mip		= mip;
+			this.Dummy		= 0;
+		}
+
+		public float VX;
+		public float VY;
+		public float OffsetX;
+		public float OffsetY;
+		public float Mip;
+		public float Dummy;
+	}
+
+
 
 	public class VTTileCache {
 
@@ -23,6 +44,7 @@ namespace Fusion.Engine.Graphics {
 		readonly int[] bitCount;
 		
 		int		counter;
+
 
 		class Page {
 			
@@ -112,6 +134,20 @@ namespace Fusion.Engine.Graphics {
 			}
 		}
 
+
+
+		public PageGpu[] GetGpuPageData ()
+		{
+			return dictionary
+				.OrderByDescending( pair => pair.Key.MipLevel )
+				.Select( pair => new PageGpu( 
+					pair.Key.PageX, 
+					pair.Key.PageY, 
+					pair.Value.X,
+					pair.Value.Y,
+					pair.Key.MipLevel ) )
+				.ToArray();
+		}
 
 
 		/// <summary>

@@ -3,6 +3,23 @@
 $ubershader
 #endif
 
+struct PAGE {
+	float vx;
+	float vy;
+	float offsetX;
+	float offsetY;
+	float mip;
+};
+
+struct PARAMS {
+	int pageCount;
+};
+
+cbuffer CBParams : register(b0) { 
+	PARAMS Params : packoffset( c0 ); 
+};
+
+StructuredBuffer<PAGE> pageData : register(t0);
 RWTexture2D<float4> pageTable  : register(u0); 
 
 #define BLOCK_SIZE_X 16 

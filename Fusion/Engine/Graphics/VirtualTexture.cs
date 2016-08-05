@@ -51,6 +51,8 @@ namespace Fusion.Engine.Graphics {
 
 		public Texture2D		PhysicalPages;
 		public RenderTarget2D	PageTable;
+		public StructuredBuffer	PageData;
+		public ConstantBuffer	Params;
 
 		VTTileLoader	tileLoader;
 		VTTileCache		tileCache;
@@ -96,9 +98,13 @@ namespace Fusion.Engine.Graphics {
 		{
 			int physSize	=	VTConfig.PhysicalTextureSize;
 			int tableSize	=	VTConfig.VirtualPageCount;
+			int maxTiles	=	VTConfig.PhysicalPageCount * VTConfig.PhysicalPageCount;
+
 			PhysicalPages	=	new Texture2D( rs.Device, physSize, physSize, ColorFormat.Rgba8_sRGB, false, true );
 			//PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Rgba32F, VTConfig.MipCount, false );
 			PageTable		=	new RenderTarget2D( rs.Device, ColorFormat.Rgba32F, tableSize, tableSize, true, true );
+			PageData		=	new StructuredBuffer( rs.Device, typeof(PageGpu), maxTiles, StructuredBufferFlags.None );
+			Params			=	new ConstantBuffer( rs.Device, 16 );
 
 			var rand = new Random();
 			//PageTable.SetData( Enumerable.Range(0,tableSize*tableSize).Select( i => rand.NextColor4() ).ToArray() );
@@ -131,6 +137,7 @@ namespace Fusion.Engine.Graphics {
 
 				SafeDispose( ref PhysicalPages );
 				SafeDispose( ref PageTable );
+				SafeDispose( ref PageData );
 
 			}
 			base.Dispose( disposing );
@@ -180,12 +187,19 @@ namespace Fusion.Engine.Graphics {
 			int tableSize	=	VTConfig.VirtualPageCount;
 
 			using (new PixEvent("UpdatePageTable")) {
+				
+				var pages = tileCache.GetGpuPageData();
+
+				PageData.SetData( pages );
+				Params.SetData( pages.Length );
 
 				var device = Game.GraphicsDevice;
 				device.ResetStates();
 														
 				device.PipelineState	=	factory[0];
 
+				device.ComputeShaderConstants[0]	=	Params;
+				device.ComputeShaderResources[0]	=	PageData;
 				device.SetCSRWTexture( 0, PageTable.GetSurface(0) );
 
 				device.Dispatch( MathUtil.IntDivUp( tableSize, BlockSizeX ), MathUtil.IntDivUp( tableSize, BlockSizeY ), 1 );
