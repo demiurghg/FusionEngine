@@ -13,6 +13,15 @@ namespace Fusion {
 			return list.Aggregate((acc, next) => (selector(acc) > selector(next)) ? acc : next);
 		}
 
+		
+		public static bool SelectMaxOrDefault<T>(this IEnumerable<T> list, Func<T, float> selector, out T result )
+		{
+			result = default(T);
+			if (!list.Any()) return false;
+			result = list.Aggregate((acc, next) => (selector(acc) > selector(next)) ? acc : next);
+			return true;
+		}
+
 
 		public static T SelectMinOrDefault<T>(this IEnumerable<T> list, Func<T, float> selector)
 		{

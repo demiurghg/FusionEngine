@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define USELIST
+using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -30,6 +31,11 @@ namespace Fusion.Engine.Graphics {
 		CancellationTokenSource	cancelToken;
 		
 
+		object syncLock = new object();
+
+		List<VTAddress> requestList;
+		
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -40,6 +46,7 @@ namespace Fusion.Engine.Graphics {
 			this.baseDirectory	=	baseDirectory;
 			requestQueue		=	new ConcurrentQueue<VTAddress>();
 			loadedTiles			=	new ConcurrentQueue<VTTile>();
+			requestList			=	new List<VTAddress>();
 
 			cancelToken		=	new CancellationTokenSource();
 			loaderTask		=	new Task( LoaderTask, cancelToken.Token );
@@ -53,7 +60,13 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="address"></param>
 		public void RequestTile ( VTAddress address )
 		{
+			#if USELIST
+			lock (syncLock) {
+				requestList.Add( address );
+			}
+			#else
 			requestQueue.Enqueue( address );
+			#endif
 		}
 
 
@@ -100,11 +113,23 @@ namespace Fusion.Engine.Graphics {
 			while (!cancelToken.IsCancellationRequested) {
 				
 				VTAddress address;
-				
+
+				#if USELIST
+				lock (syncLock) {
+					
+					if (!requestList.SelectMaxOrDefault( va => va.MipLevel, out address )) {
+						continue;
+					} else {
+						requestList.Remove( address );
+					}
+				}
+				#else
 				if (!requestQueue.TryDequeue(out address)) {
 					//Thread.Sleep(1);
 					continue;
 				}
+				#endif
+
 					
 				var fileName = Path.Combine( baseDirectory, address.GetFileNameWithoutExtension() + ".tga" );
 
