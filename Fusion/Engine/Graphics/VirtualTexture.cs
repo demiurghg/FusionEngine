@@ -186,23 +186,32 @@ namespace Fusion.Engine.Graphics {
 		{
 			int tableSize	=	VTConfig.VirtualPageCount;
 
-			using (new PixEvent("UpdatePageTable")) {
+			using (new PixEvent("VTUpdatePageTable")) {
 				
 				var pages = tileCache.GetGpuPageData();
 
-				PageData.SetData( pages );
-				Params.SetData( pages.Length );
+				if (pages.Any()) {
+					PageData.SetData( pages );
+				}
 
-				var device = Game.GraphicsDevice;
-				device.ResetStates();
+				for (int mip=0; mip<VTConfig.MipCount; mip++) {
+					Params.SetData( new Int4(pages.Length,mip,0,0) );
+
+					var device = Game.GraphicsDevice;
+					device.ResetStates();
 														
-				device.PipelineState	=	factory[0];
+					device.PipelineState	=	factory[0];
 
-				device.ComputeShaderConstants[0]	=	Params;
-				device.ComputeShaderResources[0]	=	PageData;
-				device.SetCSRWTexture( 0, PageTable.GetSurface(0) );
+					device.ComputeShaderConstants[0]	=	Params;
+					device.ComputeShaderResources[0]	=	PageData;
+					device.SetCSRWTexture( 0, PageTable.GetSurface(mip) );
 
-				device.Dispatch( MathUtil.IntDivUp( tableSize, BlockSizeX ), MathUtil.IntDivUp( tableSize, BlockSizeY ), 1 );
+					int targetSize	=	tableSize >> mip;
+					int groupCountX	=	MathUtil.IntDivUp( targetSize, BlockSizeX );
+					int groupCountY	=	MathUtil.IntDivUp( targetSize, BlockSizeX );
+
+					device.Dispatch( groupCountX, groupCountY, 1 );
+				}
 			}
 		}
 

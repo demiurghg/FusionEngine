@@ -11,9 +11,11 @@ using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using Fusion.Core.Shell;
+using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
 
+	[StructLayout(LayoutKind.Explicit, Size=20)]
 	public struct PageGpu {
 
 		public PageGpu ( float vx, float vy, float offsetX, float offsetY, float mip )
@@ -23,15 +25,13 @@ namespace Fusion.Engine.Graphics {
 			this.OffsetX	= offsetX;
 			this.OffsetY	= offsetY;
 			this.Mip		= mip;
-			this.Dummy		= 0;
 		}
 
-		public float VX;
-		public float VY;
-		public float OffsetX;
-		public float OffsetY;
-		public float Mip;
-		public float Dummy;
+		[FieldOffset( 0)] public float VX;
+		[FieldOffset( 4)] public float VY;
+		[FieldOffset( 8)] public float OffsetX;
+		[FieldOffset(12)] public float OffsetY;
+		[FieldOffset(16)] public float Mip;
 	}
 
 
@@ -139,13 +139,14 @@ namespace Fusion.Engine.Graphics {
 		public PageGpu[] GetGpuPageData ()
 		{
 			return dictionary
-				.OrderByDescending( pair => pair.Key.MipLevel )
-				.Select( pair => new PageGpu( 
-					pair.Key.PageX, 
-					pair.Key.PageY, 
-					pair.Value.X,
-					pair.Value.Y,
-					pair.Key.MipLevel ) )
+				.OrderByDescending( pair0 => pair0.Key.MipLevel )
+				.Where( pair1 => pair1.Value.Tile!=null )
+				.Select( pair2 => new PageGpu( 
+					pair2.Key.PageX, 
+					pair2.Key.PageY, 
+					pair2.Value.X,
+					pair2.Value.Y,
+					pair2.Key.MipLevel ) )
 				.ToArray();
 		}
 
