@@ -186,7 +186,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			int tableSize	=	VTConfig.VirtualPageCount;
 
-			using (new PixEvent("VTUpdatePageTable")) {
+			using (new PixEvent("UpdatePageTable")) {
 				
 				var pages = tileCache.GetGpuPageData();
 

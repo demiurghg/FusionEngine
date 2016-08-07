@@ -1,4 +1,4 @@
-﻿#define USELIST
+﻿#define USE_PRIORITY_QUEUE
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
@@ -24,7 +24,12 @@ namespace Fusion.Engine.Graphics {
 		readonly string baseDirectory;
 		readonly VirtualTexture vt;
 
+		#if USE_PRIORITY_QUEUE
+		ConcurrentPriorityQueue<int,VTAddress>	requestQueue;
+		#else
 		ConcurrentQueue<VTAddress>	requestQueue;
+		#endif
+		
 		ConcurrentQueue<VTTile>		loadedTiles;
 
 		Task	loaderTask;
@@ -33,8 +38,6 @@ namespace Fusion.Engine.Graphics {
 
 		object syncLock = new object();
 
-		List<VTAddress> requestList;
-		
 
 		/// <summary>
 		/// 
@@ -44,9 +47,14 @@ namespace Fusion.Engine.Graphics {
 		{
 			this.vt				=	vt;
 			this.baseDirectory	=	baseDirectory;
-			requestQueue		=	new ConcurrentQueue<VTAddress>();
+
+			#if USE_PRIORITY_QUEUE
+				requestQueue	=	new ConcurrentPriorityQueue<int,VTAddress>();
+			#else
+				requestQueue	=	new ConcurrentQueue<VTAddress>();
+			#endif
+
 			loadedTiles			=	new ConcurrentQueue<VTTile>();
-			requestList			=	new List<VTAddress>();
 
 			cancelToken		=	new CancellationTokenSource();
 			loaderTask		=	new Task( LoaderTask, cancelToken.Token );
@@ -60,12 +68,10 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="address"></param>
 		public void RequestTile ( VTAddress address )
 		{
-			#if USELIST
-			lock (syncLock) {
-				requestList.Add( address );
-			}
+			#if USE_PRIORITY_QUEUE
+				requestQueue.Enqueue( address.MipLevel, address );
 			#else
-			requestQueue.Enqueue( address );
+				requestQueue.Enqueue( address );
 			#endif
 		}
 
@@ -114,21 +120,21 @@ namespace Fusion.Engine.Graphics {
 				
 				VTAddress address;
 
-				#if USELIST
-				lock (syncLock) {
-					
-					if (!requestList.SelectMaxOrDefault( va => va.MipLevel, out address )) {
-						continue;
-					} else {
-						requestList.Remove( address );
-					}
+			#if USE_PRIORITY_QUEUE
+				address = default(VTAddress);
+				KeyValuePair<int,VTAddress> result;
+				if (!requestQueue.TryDequeue(out result)) {
+					//Thread.Sleep(1);
+					continue;
+				} else {
+					address = result.Value;
 				}
-				#else
+			#else
 				if (!requestQueue.TryDequeue(out address)) {
 					//Thread.Sleep(1);
 					continue;
 				}
-				#endif
+			#endif
 
 					
 				var fileName = Path.Combine( baseDirectory, address.GetFileNameWithoutExtension() + ".tga" );
