@@ -96,7 +96,7 @@ namespace Fusion.Core.Mathematics
         /// <summary>
         /// Check intersection between each triangles.
         /// </summary>
-        /// <param name="trianglesPoints">Each three points is coordinates for triangle. (trianglesPoints.Count % 3 must equals 0)</param>
+        /// <param name="trianglesPoints">Each three points are coordinates for triangle. (trianglesPoints.Count % 3 must equals 0)</param>
         /// <returns>Return true if some triangles intersect</returns>
         public static bool TrianglesIntersection(List<Vector2> trianglesPoints)
         {
