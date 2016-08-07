@@ -15,8 +15,8 @@ namespace Fusion.Core.Collection
     {
 
         private List<KeyValuePair<TPriority, TValue>> items;
-        Comparer<TPriority> comparer;
-        object lockObject = new object();
+        private Comparer<TPriority> comparer;
+        private object lockObject = new object();
 
         /// <summary>
         /// 
@@ -75,6 +75,13 @@ namespace Fusion.Core.Collection
             get { return items.Count; }
         }
 
+        /// <summary>
+        /// Return comparer.
+        /// </summary>
+        public Comparer<TPriority> Comparer
+        {
+            get { return comparer; }
+        }
 
         /// <summary>
         /// Clear the collection.
@@ -158,7 +165,19 @@ namespace Fusion.Core.Collection
         }
 
         /// <summary>
-        /// Return element and priority from collection
+        /// Return element and remove it from collection.
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
+        public TValue Dequeue()
+        {
+            TValue temp;
+            TryTake(out temp);
+            return temp;
+        }
+
+        /// <summary>
+        /// Return element and priority from collection.
         /// </summary>
         /// <param name="element"></param>
         /// <returns></returns>
@@ -180,7 +199,7 @@ namespace Fusion.Core.Collection
         }
 
         /// <summary>
-        /// Return element and priority from collection
+        /// Return element and priority from collection.
         /// </summary>
         /// <param name="element"></param>
         /// <returns></returns>
@@ -235,7 +254,7 @@ namespace Fusion.Core.Collection
 
 
         /// <summary>
-        /// Sift down element in heap
+        /// Sift down element in heap.
         /// </summary>
         /// <param name="index"></param>
         private void SiftUp(int index)
@@ -251,7 +270,7 @@ namespace Fusion.Core.Collection
 
 
         /// <summary>
-        /// Sift up element in heap
+        /// Sift up element in heap.
         /// </summary>
         /// <param name="index"></param>
         private void SiftDown(int index)
