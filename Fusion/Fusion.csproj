@@ -531,6 +531,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="fusionIcon.ico" />
+    <None Include="fusionIconGrayscale.ico" />
     <None Include="conchars.tga" />
     <None Include="fusionSplash.png" />
   </ItemGroup>

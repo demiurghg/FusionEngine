@@ -45,7 +45,10 @@ namespace Fusion.Core.Development {
 			configName	=	config;
 			configPath	=	game.UserStorage.GetFullPath(config);
 
+
 			InitializeComponent();
+			this.Icon	=	Fusion.Properties.Resources.fusionIconGrayscale;
+
 
 			this.Text	=	game.GameTitle;
 
