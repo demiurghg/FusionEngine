@@ -15,6 +15,8 @@ using Fusion.Engine.Imaging;
 using System.Diagnostics;
 
 namespace Fusion.Engine.Graphics {
+
+	[RequireShader("vtcache")]
 	internal class VirtualTexture : GameComponent {
 
 		readonly RenderSystem rs;
@@ -41,7 +43,10 @@ namespace Fusion.Engine.Graphics {
 		public bool LockTiles { get; set; }
 
 		[Config]
-		public bool ShowAddress { get; set; }
+		public bool ShowTileAddress { get; set; }
+
+		[Config]
+		public bool ShowTileCheckers { get; set; }
 
 		[Config]
 		public bool RandomColor { get; set; }
@@ -310,13 +315,19 @@ namespace Fusion.Engine.Graphics {
 								tile.FillRandomColor();
 							}
 
-							if (ShowAddress) {	
+							if (ShowTileCheckers) {
+								tile.DrawChecker();
+							}
+
+							if (ShowTileAddress) {	
 								tile.DrawText( fontImage, 16,16, tile.VirtualAddress.ToString() );
 								tile.DrawText( fontImage, 16,32, string.Format("{0} {1}", rect.X/sz, rect.Y/sz ) );
 								tile.DrawText( fontImage, 16,48, Math.Floor(stopwatch.Elapsed.TotalMilliseconds).ToString() );
 							}
 
-							tile.DrawBorder( ShowTileBorder );
+							if (ShowTileBorder) {
+								tile.DrawBorder();
+							}
 
 							//PhysicalPages.SetData( 0, rect, tile.Data, 0, tile.Data.Length );
 							tileStamper.Add( tile, rect );

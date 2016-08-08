@@ -143,12 +143,35 @@ namespace Fusion.Engine.Graphics {
 
 
 
-		public void DrawBorder (bool draw)
+		public void DrawChecker ()
 		{
-			if (!draw) {
-				return;
-			}
+			int s	=	VTConfig.PageSize;
+			var b	=	VTConfig.PageBorderWidth;
 
+			var image	=	MostDetailedImage;
+
+			for (int i=-b; i<s+b; i++) {
+				for (int j=-b; j<s+b; j++) {
+					
+					var m = this.VirtualAddress.MipLevel;
+					int u = i + b;
+					int v = j + b;
+
+					var c = (((i << m ) >> 5) + ((j << m ) >> 5)) & 0x01;
+
+					if (c==0) {
+						image.Write( u,v, Color.Black );
+					} else {
+						image.Write( u,v, Color.White );
+					}
+				}			
+			}
+		}
+
+
+
+		public void DrawBorder ()
+		{
 			int s	=	VTConfig.PageSize;
 			var b	=	VTConfig.PageBorderWidth;
 

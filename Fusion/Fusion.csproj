@@ -119,6 +119,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Build2\BuildSystem.cs" />
+    <Compile Include="Engine\Graphics\RequireShaderAttribute.cs" />
     <Compile Include="Core\Collection\ConcurrentPriorityQueue.cs" />
     <Compile Include="Core\Configuration\ConfigVariable.cs" />
     <Compile Include="Core\Content\AssetStream.cs" />
