@@ -9,7 +9,7 @@ namespace Fusion.Engine.Graphics {
 	/// <summary>
 	/// Marks class as requiring the list of shaders.
 	/// </summary>
-	internal sealed class RequireShaderAttribute : Attribute {
+	public sealed class RequireShaderAttribute : Attribute {
 
 		/// <summary>
 		/// Gets collection of required shaders.

@@ -184,13 +184,40 @@ namespace Fusion.Build {
 		/// <returns></returns>
 		public string ResolveContentPath ( string path )
 		{
-			var resolvedPath = ResolvePath( path, ContentDirectories );
+			string dummy;
+			return ResolveContentPath( path, out dummy );
+		}
+
+		
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		public string ResolveContentPath ( string path, out string baseDirectory )
+		{
+			var resolvedPath = ResolvePath( path, ContentDirectories, out baseDirectory );
 
 			if (resolvedPath==null) {
 				throw new BuildException(string.Format("Path '{0}' not resolved", path));
 			}
 
 			return resolvedPath;
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="path"></param>
+		/// <param name="dirs"></param>
+		/// <returns></returns>
+		string ResolvePath ( string path, IEnumerable<string> dirs )
+		{
+			string dummy;
+			return ResolvePath( path, dirs, out dummy );
 		}
 
 		
@@ -201,8 +228,10 @@ namespace Fusion.Build {
 		/// <param name="path"></param>
 		/// <param name="dirs"></param>
 		/// <returns></returns>
-		string ResolvePath ( string path, IEnumerable<string> dirs )
+		string ResolvePath ( string path, IEnumerable<string> dirs, out string baseDirectory )
 		{
+			baseDirectory	=	null;
+
 			if (path==null) {
 				throw new ArgumentNullException("path");
 			}
@@ -222,6 +251,7 @@ namespace Fusion.Build {
 				//Log.Message("...{0}", dir );
 				var fullPath = Path.GetFullPath( Path.Combine( dir, path ) );
 				if ( File.Exists( fullPath ) ) {
+					baseDirectory = dir;
 					return fullPath;
 				}
 			}
@@ -239,7 +269,8 @@ namespace Fusion.Build {
 		/// <returns></returns>
 		public bool ContentFileExists ( string path )
 		{
-			return ResolvePath( path, ContentDirectories ) != null;
+			string dummy;
+			return ResolvePath( path, ContentDirectories, out dummy ) != null;
 		}
 
 

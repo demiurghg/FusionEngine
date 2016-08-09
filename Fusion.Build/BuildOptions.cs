@@ -72,7 +72,7 @@ namespace Fusion.Build {
 		}
 
 		/// <summary>
-		/// Full output directory
+		/// Output directory for megatexture files (temp!)
 		/// </summary>
 		[CommandLineParser.Ignore]
 		public string FullVTDirectory { 

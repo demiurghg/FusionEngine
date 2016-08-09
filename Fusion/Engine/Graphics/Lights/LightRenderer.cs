@@ -11,6 +11,7 @@ using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
+	[RequireShader("lighting")]
 	public partial class LightRenderer : GameComponent {
 
 		const int	BlockSizeX		=	16;

@@ -16,9 +16,11 @@ using Fusion.Engine.Common;
 using Fusion.Core.Mathematics;
 using Fusion.Input.Touch;
 using System.Runtime.InteropServices;
+using Fusion.Engine.Graphics;
 
 
 namespace Fusion.Drivers.Graphics.Display {
+	[RequireShader("stereo")]
 	abstract class BaseDisplay : GraphicsResource {
 
 		protected readonly	Game Game;

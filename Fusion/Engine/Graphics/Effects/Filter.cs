@@ -15,6 +15,7 @@ namespace Fusion.Engine.Graphics
 	/// <summary>
 	/// Class for base image processing such as copying, blurring, enhancement, anti-aliasing etc.
 	/// </summary>
+	[RequireShader("filter")]
 	internal class Filter : GameComponent {
 		readonly GraphicsDevice rs;
 

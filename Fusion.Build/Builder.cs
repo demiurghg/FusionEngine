@@ -10,6 +10,8 @@ using Fusion.Core.IniParser.Model;
 using Fusion;
 using Fusion.Core.Shell;
 using Fusion.Core.Content;
+using Fusion.Core.Extensions;
+using Fusion.Engine.Graphics;
 using System.Net;
 
 namespace Fusion.Build {
@@ -158,7 +160,7 @@ namespace Fusion.Build {
 		/// <param name="sourceFolder"></param>
 		/// <param name="targetFolder"></param>
 		/// <param name="force"></param>
-		public BuildResult Build ( BuildOptions options, IniData iniData )
+		BuildResult Build ( BuildOptions options, IniData iniData )
 		{
 			BuildResult result	=	new BuildResult();
 	
@@ -183,7 +185,9 @@ namespace Fusion.Build {
 			//	files that match ignore pattern :
 			//
 			Log.Message("Gathering files...");
-			var assetSources =	GatherAssetFiles( ignorePatterns, iniData, context, ref result );
+			var assetSources	=	new List<AssetSource>();
+			assetSources.AddRange( GatherRequiredShaders( context, result ) );
+			assetSources.AddRange( GatherAssetFiles( ignorePatterns, iniData, context, ref result ) );
 			Log.Message("");
 
 
@@ -337,6 +341,57 @@ namespace Fusion.Build {
 
 			return assetSources;
 		}
+
+
+		
+
+		/// <summary>
+		/// Analyzes entire engine searching for RequireShaderAttribute.
+		/// Returns collection of required shaders.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<AssetSource> GatherRequiredShaders ( BuildContext context, BuildResult result )
+		{
+			var list = new List<string>();
+
+			var attributes = 	
+				Misc.GetAllClassesWithAttribute<RequireShaderAttribute>()
+					.Select( type1 => type1.GetCustomAttribute<RequireShaderAttribute>() )
+					.ToArray();
+
+			foreach ( var attr in attributes ) {	
+				list.AddRange( attr.RequiredShaders );
+			}
+
+			
+			list	=	list.Distinct().ToList();
+
+
+			var options = context.Options;
+
+			var srcList = new List<AssetSource>();
+
+			foreach ( var name in list ) {
+
+				var nameExt = Path.ChangeExtension( name, ".hlsl" );
+				
+				try {
+					var baseDir		=	"";
+					var fullPath	=	context.ResolveContentPath( nameExt, out baseDir );
+					var assetSrc	=	new AssetSource( nameExt, baseDir, typeof(UbershaderProcessor), new string[0], context );
+
+					srcList.Add( assetSrc );
+
+				} catch ( BuildException bex ) {
+					Log.Error( bex.Message );
+				}
+
+			}
+
+			return srcList;
+		}
+
+
 
 
 

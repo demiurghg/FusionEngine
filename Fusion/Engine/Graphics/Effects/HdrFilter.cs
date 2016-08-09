@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using Fusion.Engine.Graphics;
 
 namespace Fusion.Engine.Graphics {
+	[RequireShader("hdr")]
 	internal class HdrFilter : GameComponent {
 
 

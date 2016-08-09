@@ -14,6 +14,7 @@ using Fusion.Core.Extensions;
 
 namespace Fusion.Engine.Graphics {
 
+	[RequireShader("sky")]
 	internal class Sky : GameComponent {
 		[Flags]
 		enum SkyFlags : int

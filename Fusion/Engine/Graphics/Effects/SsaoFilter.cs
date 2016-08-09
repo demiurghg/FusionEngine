@@ -25,6 +25,7 @@ namespace Fusion.Engine.Graphics {
 	///		8. Far-plane flickering.
 	/// 
 	/// </summary>
+	[RequireShader("ssao")]
 	internal partial class SsaoFilter : GameComponent {
 
 		public ShaderResource	OcclusionMap { 

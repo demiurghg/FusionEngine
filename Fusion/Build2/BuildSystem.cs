@@ -17,28 +17,5 @@ namespace Fusion.Build2 {
 		public BuildSystem ( Game game )
 		{
 		}
-
-
-		/// <summary>
-		/// Analyzes entire engine searching for RequireShaderAttribute.
-		/// Returns collection of required shaders.
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerable<string> GetRequiredShaders ()
-		{
-			var list = new List<string>();
-
-			var attributes = 	
-				Misc.GetAllClassesWithAttribute<RequireShaderAttribute>()
-					.Select( type1 => type1.GetCustomAttribute<RequireShaderAttribute>() )
-					.ToArray();
-
-			foreach ( var attr in attributes ) {	
-				list.AddRange( attr.RequiredShaders );
-			}
-
-			return list;
-		}
-
 	}
 }

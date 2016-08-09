@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
 
+	[RequireShader("debugRender")]
 	public class DebugRender : DisposableBase {
 
 		readonly Game Game;

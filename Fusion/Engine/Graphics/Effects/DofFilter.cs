@@ -12,6 +12,8 @@ using System.Runtime.InteropServices;
 using Fusion.Engine.Graphics;
 
 namespace Fusion.Engine.Graphics {
+
+	[RequireShader("dof")]
 	internal class DofFilter : GameComponent {
 
 		Ubershader		shader;

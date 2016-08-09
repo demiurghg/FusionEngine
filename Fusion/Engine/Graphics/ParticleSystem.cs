@@ -19,6 +19,7 @@ namespace Fusion.Engine.Graphics {
 	/// 1. http://www.gdcvault.com/play/1014347/HALO-REACH-Effects
 	/// 2. Gareth Thomas Compute-based GPU Particle
 	/// </summary>
+	[RequireShader("particles")]
 	public class ParticleSystem : DisposableBase {
 
 		readonly Game Game;

@@ -10,6 +10,7 @@ using Fusion.Core;
 using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Graphics {
+	[RequireShader("sprite")]
 	internal class SpriteEngine : GameComponent {
 
 		enum Flags {
