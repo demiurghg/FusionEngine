@@ -248,7 +248,6 @@
     <Compile Include="Engine\Common\Commands\CrashServer.cs" />
     <Compile Include="Core\Configuration\ConfigManager.cs" />
     <Compile Include="Engine\Common\UserInterface.Internal.cs" />
-    <Compile Include="Engine\Graphics\ConcurrentPriorityQueue.cs" />
     <Compile Include="Engine\Graphics\VTStamper.cs" />
     <Compile Include="Engine\Graphics\VTTile.cs" />
     <Compile Include="Engine\Graphics\VTTileLoader.cs" />

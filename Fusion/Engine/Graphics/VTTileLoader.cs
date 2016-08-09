@@ -13,6 +13,7 @@ using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Imaging;
 using System.Threading;
+using Fusion.Core.Collection;
 
 namespace Fusion.Engine.Graphics {
 

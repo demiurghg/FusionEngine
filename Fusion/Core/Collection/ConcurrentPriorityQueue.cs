@@ -63,7 +63,7 @@ namespace Fusion.Core.Collection
 
             for (int i = 0; i < items.Count(); i++)
             {
-                TryAdd(_priorities[i], _data[i]);
+                Enqueue(_priorities[i], _data[i]);
             }
         }
 
@@ -100,13 +100,12 @@ namespace Fusion.Core.Collection
         /// </summary>
         /// <param name="element"></param>
         /// <returns></returns>
-        public bool TryAdd(TPriority priority, TValue element)
+        public void Enqueue(TPriority priority, TValue element)
         {
             lock (lockObject)
             {
                 items.Add(new KeyValuePair<TPriority, TValue>(priority, element));
                 SiftUp(Count - 1);
-                return true;
             }
         }
 
@@ -116,14 +115,38 @@ namespace Fusion.Core.Collection
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public bool TryAdd(KeyValuePair<TPriority, TValue> item)
+        public void Enqueue(KeyValuePair<TPriority, TValue> item)
         {
             lock (lockObject)
             {
                 items.Add(item);
                 SiftUp(Count - 1);
-                return true;
             }
+        }
+
+
+        /// <summary>Attempts to add an item in the queue.</summary>
+        /// <param name="item">The key/value pair to be added.</param>
+        /// <returns>
+        /// true if the pair was added; otherwise, false.
+        /// </returns>
+        bool IProducerConsumerCollection<KeyValuePair<TPriority, TValue>>.TryAdd(KeyValuePair<TPriority, TValue> item)
+        {
+            Enqueue(item);
+            return true;
+        }
+
+        /// <summary>Attempts to remove and return the next prioritized item in the queue.</summary>
+        /// <param name="item">
+        /// When this method returns, if the operation was successful, result contains the object removed. If
+        /// no object was available to be removed, the value is unspecified.
+        /// </param>
+        /// <returns>
+        /// true if an element was removed and returned from the queue succesfully; otherwise, false.
+        /// </returns>
+        bool IProducerConsumerCollection<KeyValuePair<TPriority, TValue>>.TryTake(out KeyValuePair<TPriority, TValue> item)
+        {
+            return TryDequeue(out item);
         }
 
         /// <summary>
@@ -131,7 +154,7 @@ namespace Fusion.Core.Collection
         /// </summary>
         /// <param name="element"></param>
         /// <returns></returns>
-        public bool TryTake(out KeyValuePair<TPriority, TValue> element)
+        public bool TryDequeue(out KeyValuePair<TPriority, TValue> element)
         {
             lock (lockObject)
             {
@@ -156,10 +179,10 @@ namespace Fusion.Core.Collection
         /// </summary>
         /// <param name="element"></param>
         /// <returns></returns>
-        public bool TryTake(out TValue element)
+        public bool TryDequeue(out TValue element)
         {
             KeyValuePair<TPriority, TValue> temp;
-            bool t = TryTake(out temp);
+            bool t = TryDequeue(out temp);
             element = temp.Value;
             return t;
         }
@@ -169,12 +192,12 @@ namespace Fusion.Core.Collection
         /// </summary>
         /// <param name="element"></param>
         /// <returns></returns>
-        public TValue Dequeue()
+        /*public TValue Dequeue()
         {
             TValue temp;
             TryTake(out temp);
             return temp;
-        }
+        }	  */
 
         /// <summary>
         /// Return element and priority from collection.
