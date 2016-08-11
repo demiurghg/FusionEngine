@@ -210,7 +210,7 @@ namespace Fusion.Drivers.Graphics {
 		/// <param name="data"></param>
 		/// <param name="startIndex"></param>
 		/// <param name="elementCount"></param>
-		#warning use 3 sequential textures to reduce waiting for gpu 
+		/// use 3 sequential textures to reduce waiting for gpu 
 		/// https://msdn.microsoft.com/en-us/library/windows/desktop/bb205132(v=vs.85).aspx#Performance_Considerations
 		/// 
 		void GetData<T>(int level, T[] data, int startIndex, int elementCount) where T : struct

@@ -25,7 +25,18 @@ namespace Fusion.Core.Configuration {
 		}
 
 
+		/// <summary>
+		/// Gets list of exposed objects.
+		/// </summary>
+		internal IDictionary<string,object> TargetObjects {
+			get {
+				return targetObjects;
+			}
+		}
+
+
 		Dictionary<string,ConfigVariable> configVariables;
+		Dictionary<string,object> targetObjects;
 		readonly Game game;
 
 
@@ -37,6 +48,7 @@ namespace Fusion.Core.Configuration {
 		{
 			this.game		=	game;
 			configVariables	=	new Dictionary<string,ConfigVariable>();
+			targetObjects	=	new Dictionary<string,object>();
 		}
 
 
@@ -50,6 +62,8 @@ namespace Fusion.Core.Configuration {
 			if (game.IsInitialized) {	
 				throw new InvalidOperationException("Could not expose target object properties after game initialized");
 			}
+
+			targetObjects.Add( niceName, targetObject );
 
 			var props = targetObject
 				.GetType()
