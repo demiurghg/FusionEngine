@@ -122,7 +122,7 @@ namespace Fusion.Engine.Graphics {
 
 		void LoadContent ()
 		{
-			shader	=	Game.Content.Load<Ubershader>("vtcache");
+			shader	=	Game.RenderSystem.Shaders.Load("vtcache");
 			factory	=	shader.CreateFactory( typeof(Flags), Primitive.TriangleList, VertexInputElement.Empty );
 		}
 

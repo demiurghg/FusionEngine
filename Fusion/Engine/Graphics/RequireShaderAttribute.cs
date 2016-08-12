@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Fusion.Core.Extensions;
 
 namespace Fusion.Engine.Graphics {
 
@@ -26,6 +27,25 @@ namespace Fusion.Engine.Graphics {
 		public RequireShaderAttribute ( params string[] shaders )
 		{
 			RequiredShaders = shaders;
+		}
+
+
+
+		static public IEnumerable<string> GatherRequiredShaders ()
+		{
+			var list = new List<string>();
+
+			var attributes = 	
+				Misc.GetAllClassesWithAttribute<RequireShaderAttribute>()
+					.Select( type1 => type1.GetCustomAttribute<RequireShaderAttribute>() )
+					.ToArray();
+
+			foreach ( var attr in attributes ) {	
+				list.AddRange( attr.RequiredShaders );
+			}
+
+			
+			return	list.Distinct().ToArray();
 		}
 	}
 }

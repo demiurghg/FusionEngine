@@ -14,7 +14,7 @@ using Fusion.Engine.Graphics;
 
 namespace Fusion.Engine.Graphics {
 	[RequireShader("hdr")]
-	internal class HdrFilter : GameComponent {
+	internal class HdrFilter : RenderComponent {
 
 
 		Ubershader	shader;
@@ -57,7 +57,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="game"></param>
-		public HdrFilter ( Game game ) : base(game)
+		public HdrFilter ( RenderSystem rs ) : base(rs)
 		{
 		}
 
@@ -85,7 +85,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ()
 		{
-			shader	=	Game.Content.Load<Ubershader>("hdr");
+			shader	=	Game.RenderSystem.Shaders.Load("hdr");
 			factory	=	shader.CreateFactory( typeof(Flags), Primitive.TriangleList, VertexInputElement.Empty, BlendState.Opaque, RasterizerState.CullNone, DepthStencilState.None );
 		}
 

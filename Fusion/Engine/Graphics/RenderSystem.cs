@@ -46,6 +46,9 @@ namespace Fusion.Engine.Graphics {
 		internal Sky	Sky { get { return sky; } }
 		Sky	sky;
 
+		internal ShaderManager Shaders { get { return shaders; } }
+		ShaderManager shaders;
+
 		/// <summary>
 		/// Gets render counters.
 		/// </summary>
@@ -107,16 +110,18 @@ namespace Fusion.Engine.Graphics {
 
 			this.Device	=	Game.GraphicsDevice;
 
+			shaders	=	new ShaderManager( this );
+
 			spriteEngine	=	new SpriteEngine( this );
-			filter			=	new Filter( Game );
-			ssaoFilter		=	new SsaoFilter( Game );
-			hdrFilter		=	new HdrFilter( Game );
-			dofFilter		=	new DofFilter( Game );
-			lightRenderer	=	new LightRenderer( Game );
-			sceneRenderer	=	new SceneRenderer( Game, this );
-			sky				=	new Sky( Game );
-			bitonicSort		=	new BitonicSort( Game );
-			virtualTexture	=	new Graphics.VirtualTexture( this );
+			filter			=	new Filter( this );
+			ssaoFilter		=	new SsaoFilter( this );
+			hdrFilter		=	new HdrFilter( this );
+			dofFilter		=	new DofFilter( this );
+			lightRenderer	=	new LightRenderer( this );
+			sceneRenderer	=	new SceneRenderer( this );
+			sky				=	new Sky( this );
+			bitonicSort		=	new BitonicSort( this );
+			virtualTexture	=	new VirtualTexture( this );
 
 			Game.Config.ExposeProperties( lightRenderer,  "LightRenderer"	, "light" );
 			Game.Config.ExposeProperties( ssaoFilter,     "SSAO"			, "ssao"  );
@@ -155,6 +160,8 @@ namespace Fusion.Engine.Graphics {
 		public override void Initialize ()
 		{
 			//	init components :
+			InitializeComponent( shaders );
+
 			InitializeComponent( spriteEngine	);
 			InitializeComponent( filter			);
 			InitializeComponent( ssaoFilter		);

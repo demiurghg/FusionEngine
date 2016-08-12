@@ -14,7 +14,7 @@ using Fusion.Engine.Graphics;
 namespace Fusion.Engine.Graphics {
 
 	[RequireShader("dof")]
-	internal class DofFilter : GameComponent {
+	internal class DofFilter : RenderComponent {
 
 		Ubershader		shader;
 		ConstantBuffer	paramsCB;
@@ -39,7 +39,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="game"></param>
-		public DofFilter ( Game game ) : base(game)
+		public DofFilter ( RenderSystem rs ) : base(rs)
 		{
 		}
 
@@ -64,7 +64,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ()
 		{
-			shader	=	Game.Content.Load<Ubershader>("dof");
+			shader	=	rs.Shaders.Load("dof");
 			factory	=	shader.CreateFactory( typeof(Flags), (ps,i) => EnumAction(ps, (Flags)i ) );
 		}
 

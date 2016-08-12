@@ -43,9 +43,7 @@ namespace Fusion.Engine.Graphics {
 		readonly int capacity;
 		readonly int[] bitCount;
 		
-		int		counter;
-
-
+		
 		class Page {
 			
 			public Page ( VTAddress va, int pa, int physPageCount )
@@ -159,8 +157,6 @@ namespace Fusion.Engine.Graphics {
 		{
 			var mappingSize = VTConfig.VirtualPageCount >> mipLevel;
 			var mapping		= new Vector4[mappingSize*mappingSize];
-
-			int vpc = VTConfig.VirtualPageCount;
 
 			var pairList = dictionary
 				.OrderByDescending( pair => pair.Key.MipLevel )

@@ -12,15 +12,13 @@ using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
 	[RequireShader("lighting")]
-	public partial class LightRenderer : GameComponent {
+	internal partial class LightRenderer : RenderComponent {
 
 		const int	BlockSizeX		=	16;
 		const int	BlockSizeY		=	16;
 
 		const int	VoxelSize		=	64;
 		const int	VoxelCount		=	VoxelSize * VoxelSize * VoxelSize;
-
-		RenderSystem rs { get { return Game.RenderSystem; } }
 
 		DepthStencil2D		spotDepth		;
 		RenderTarget2D		spotColor		;
@@ -119,7 +117,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="game"></param>
-		public LightRenderer( Game game ) : base(game)
+		public LightRenderer( RenderSystem rs ) : base(rs)
 		{
 			SetDefaults();
 		}
@@ -149,7 +147,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ()
 		{
-			lightingShader	=	Game.Content.Load<Ubershader>("lighting");
+			lightingShader	=	rs.Shaders.Load("lighting");
 			factory			=	lightingShader.CreateFactory( typeof(LightingFlags), Primitive.TriangleList, VertexInputElement.Empty );
 		}
 

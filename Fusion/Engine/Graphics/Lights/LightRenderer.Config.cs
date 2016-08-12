@@ -11,7 +11,7 @@ using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
-	public partial class LightRenderer : GameComponent {
+	internal partial class LightRenderer {
 
 		int csmCascadeSize;
 		int csmCascadeCount;

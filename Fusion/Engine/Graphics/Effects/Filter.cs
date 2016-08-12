@@ -16,9 +16,7 @@ namespace Fusion.Engine.Graphics
 	/// Class for base image processing such as copying, blurring, enhancement, anti-aliasing etc.
 	/// </summary>
 	[RequireShader("filter")]
-	internal class Filter : GameComponent {
-		readonly GraphicsDevice rs;
-
+	internal class Filter : RenderComponent {
 		const int MaxBlurTaps	=	33;
 
 		[Flags]
@@ -65,9 +63,8 @@ namespace Fusion.Engine.Graphics
 		ConstantBuffer	vectorCB;
 		ConstantBuffer	bufLinearizeDepth;
 		
-		public Filter( Game Game ) : base( Game )
+		public Filter( RenderSystem device ) : base( device )
 		{
-			rs = Game.GraphicsDevice;
 		}
 
 
@@ -77,11 +74,11 @@ namespace Fusion.Engine.Graphics
 		/// </summary>
 		public override void Initialize() 
 		{
-			bufLinearizeDepth	= new ConstantBuffer( rs, 128 );
-			gaussWeightsCB		= new ConstantBuffer( rs, typeof(Vector4), MaxBlurTaps );
-			sourceRectCB		= new ConstantBuffer( rs, typeof(Vector4) );
-			matrixCB			= new ConstantBuffer( rs, typeof(Matrix), 1 );
-			vectorCB			= new ConstantBuffer( rs, typeof(Vector4), 1 );
+			bufLinearizeDepth	= new ConstantBuffer( device, 128 );
+			gaussWeightsCB		= new ConstantBuffer( device, typeof(Vector4), MaxBlurTaps );
+			sourceRectCB		= new ConstantBuffer( device, typeof(Vector4) );
+			matrixCB			= new ConstantBuffer( device, typeof(Matrix), 1 );
+			vectorCB			= new ConstantBuffer( device, typeof(Vector4), 1 );
 
 			LoadContent();
 			Game.Reloading += (s,e) => LoadContent();
@@ -94,7 +91,7 @@ namespace Fusion.Engine.Graphics
 		/// </summary>
 		void LoadContent ()
 		{
-			shaders = Game.Content.Load<Ubershader>( "filter" );
+			shaders = Game.RenderSystem.Shaders.Load( "filter" );
 			factory	= shaders.CreateFactory( typeof(ShaderFlags), (ps,i) => Enum(ps, (ShaderFlags)i) );
 		}
 
@@ -147,7 +144,7 @@ namespace Fusion.Engine.Graphics
 		/// </summary>
 		void SetDefaultRenderStates()
 		{
-			rs.ResetStates();
+			device.ResetStates();
 		}
 
 		/*-----------------------------------------------------------------------------------------------
@@ -170,21 +167,21 @@ namespace Fusion.Engine.Graphics
 			using( new PixEvent("StretchRect") ) {
 
 				SetViewport(dst);
-				rs.SetTargets( null, dst );
+				device.SetTargets( null, dst );
 
 				if (flipToCubeFace) {
-					rs.PipelineState		=	factory[ (int)(ShaderFlags.STRETCH_RECT|ShaderFlags.TO_CUBE_FACE) ];
+					device.PipelineState		=	factory[ (int)(ShaderFlags.STRETCH_RECT|ShaderFlags.TO_CUBE_FACE) ];
 				} else {
-					rs.PipelineState		=	factory[ (int)ShaderFlags.STRETCH_RECT ];
+					device.PipelineState		=	factory[ (int)ShaderFlags.STRETCH_RECT ];
 				}
-				rs.VertexShaderResources[0] =	src;
-				rs.PixelShaderResources[0]	=	src;
-				rs.PixelShaderSamplers[0]	=	filter ?? SamplerState.LinearPointClamp;
-				rs.VertexShaderConstants[0]	=	sourceRectCB;
+				device.VertexShaderResources[0] =	src;
+				device.PixelShaderResources[0]	=	src;
+				device.PixelShaderSamplers[0]	=	filter ?? SamplerState.LinearPointClamp;
+				device.VertexShaderConstants[0]	=	sourceRectCB;
 
-				rs.Draw( 3, 0 );
+				device.Draw( 3, 0 );
 			}
-			rs.ResetStates();
+			device.ResetStates();
 		}
 
 
@@ -195,21 +192,21 @@ namespace Fusion.Engine.Graphics
 
 			using( new PixEvent("StretchRect4x4") ) {
 
-				rs.SetTargets( null, dst );
+				device.SetTargets( null, dst );
 				SetViewport(dst);
 				
 				if (flipToCubeFace) {
-					rs.PipelineState		=	factory[ (int)(ShaderFlags.DOWNSAMPLE_2_4x4|ShaderFlags.TO_CUBE_FACE) ];
+					device.PipelineState		=	factory[ (int)(ShaderFlags.DOWNSAMPLE_2_4x4|ShaderFlags.TO_CUBE_FACE) ];
 				} else {
-					rs.PipelineState		=	factory[ (int)ShaderFlags.DOWNSAMPLE_2_4x4 ];
+					device.PipelineState		=	factory[ (int)ShaderFlags.DOWNSAMPLE_2_4x4 ];
 				}
-				rs.VertexShaderResources[0] =	src;
-				rs.PixelShaderResources[0]	=	src;
-				rs.PixelShaderSamplers[0]	=	filter ?? SamplerState.LinearPointClamp;
+				device.VertexShaderResources[0] =	src;
+				device.PixelShaderResources[0]	=	src;
+				device.PixelShaderSamplers[0]	=	filter ?? SamplerState.LinearPointClamp;
 
-				rs.Draw( 3, 0 );
+				device.Draw( 3, 0 );
 			}
-			rs.ResetStates();
+			device.ResetStates();
 		}
 
 
@@ -221,16 +218,16 @@ namespace Fusion.Engine.Graphics
 			using( new PixEvent("DownSample4") ) {
 
 				dst.SetViewport();
-				rs.SetTargets( null, dst );
+				device.SetTargets( null, dst );
 
-				rs.PipelineState			=	factory[ (int)ShaderFlags.DOWNSAMPLE_4 ];
-				rs.VertexShaderResources[0] =	src;
-				rs.PixelShaderResources[0]	=	src;
-				rs.PixelShaderSamplers[0]	=	SamplerState.LinearPointClamp;
+				device.PipelineState			=	factory[ (int)ShaderFlags.DOWNSAMPLE_4 ];
+				device.VertexShaderResources[0] =	src;
+				device.PixelShaderResources[0]	=	src;
+				device.PixelShaderSamplers[0]	=	SamplerState.LinearPointClamp;
 
-				rs.Draw( 3, 0 );
+				device.Draw( 3, 0 );
 			}
-			rs.ResetStates();
+			device.ResetStates();
 		}
 
 
@@ -262,12 +259,12 @@ namespace Fusion.Engine.Graphics
 				shaders.SetVertexShader( depthShader );
 
 				dst.SetViewport();
-				rs.SetRenderTargets( dst );
+				device.SetRenderTargets( dst );
 				src.SetPS( 0 );
 
-				rs.Draw( Primitive.TriangleList, 3, 0 );
+				device.Draw( Primitive.TriangleList, 3, 0 );
 			}
-			rs.ResetStates();
+			device.ResetStates();
 		#endif
 		}
 
@@ -275,7 +272,7 @@ namespace Fusion.Engine.Graphics
 
 		void SetViewport ( RenderTargetSurface dst )
 		{
-			rs.SetViewport( 0,0, dst.Width, dst.Height );
+			device.SetViewport( 0,0, dst.Width, dst.Height );
 		}
 
 
@@ -292,18 +289,18 @@ namespace Fusion.Engine.Graphics
 			using( new PixEvent("Copy") ) {
 
 				if(dst == null) {
-					rs.RestoreBackbuffer();
+					device.RestoreBackbuffer();
 				} else {
 					SetViewport(dst);
-					rs.SetTargets( null, dst );
+					device.SetTargets( null, dst );
 				}
 
-				rs.PipelineState			=	factory[ (int)ShaderFlags.COPY ];
-				rs.PixelShaderResources[0]	= src;
+				device.PipelineState			=	factory[ (int)ShaderFlags.COPY ];
+				device.PixelShaderResources[0]	= src;
 
-				rs.Draw( 3, 0 );
+				device.Draw( 3, 0 );
 			}
-			rs.ResetStates();
+			device.ResetStates();
 		}
 
 
@@ -320,17 +317,17 @@ namespace Fusion.Engine.Graphics
 			using( new PixEvent("FillAlphaOne") ) {
 
 				if(dst == null) {
-					rs.RestoreBackbuffer();
+					device.RestoreBackbuffer();
 				} else {
 					SetViewport(dst);
-					rs.SetTargets( null, dst );
+					device.SetTargets( null, dst );
 				}
 
-				rs.PipelineState = factory[ (int)ShaderFlags.FILL_ALPHA_ONE ];
+				device.PipelineState = factory[ (int)ShaderFlags.FILL_ALPHA_ONE ];
 
-				rs.Draw( 3, 0 );
+				device.Draw( 3, 0 );
 			}
-			rs.ResetStates();
+			device.ResetStates();
 		}
 
 
@@ -347,17 +344,17 @@ namespace Fusion.Engine.Graphics
 			using( new PixEvent("OverlayAdditive") ) {
 
 				if(dst == null) {
-					rs.RestoreBackbuffer();
+					device.RestoreBackbuffer();
 				} else {
-					rs.SetTargets( null, dst );
+					device.SetTargets( null, dst );
 				}
 
-				rs.PipelineState			=	factory[ (int)ShaderFlags.OVERLAY_ADDITIVE ];
-				rs.PixelShaderResources[0]	=	src;
+				device.PipelineState			=	factory[ (int)ShaderFlags.OVERLAY_ADDITIVE ];
+				device.PixelShaderResources[0]	=	src;
 
-				rs.Draw( 3, 0 );
+				device.Draw( 3, 0 );
 			}
-			rs.ResetStates();
+			device.ResetStates();
 		}
 
 
@@ -374,20 +371,20 @@ namespace Fusion.Engine.Graphics
 			using( new PixEvent("Fxaa") ) {
 
 				if(dst == null) {
-					rs.RestoreBackbuffer();
+					device.RestoreBackbuffer();
 				} else {
 					SetViewport( dst );
-					rs.SetTargets( null, dst );
+					device.SetTargets( null, dst );
 				}
 
-				rs.PipelineState			=	factory[ (int)ShaderFlags.FXAA ];
-				rs.VertexShaderResources[0] =	src;
-				rs.PixelShaderResources[0]	=	src;
-				rs.PixelShaderSamplers[0]	=	SamplerState.LinearPointClamp;
+				device.PipelineState			=	factory[ (int)ShaderFlags.FXAA ];
+				device.VertexShaderResources[0] =	src;
+				device.PixelShaderResources[0]	=	src;
+				device.PixelShaderSamplers[0]	=	SamplerState.LinearPointClamp;
 
-				rs.Draw( 3, 0 );
+				device.Draw( 3, 0 );
 			}
-			rs.ResetStates();
+			device.ResetStates();
 		}
 
 
@@ -422,18 +419,18 @@ namespace Fusion.Engine.Graphics
 								
 					for (int face=0; face<6; face++) {
 
-						rs.SetTargets( null, envMap.GetSurface( mip, (CubeFace)face ) );
+						device.SetTargets( null, envMap.GetSurface( mip, (CubeFace)face ) );
 					
-						rs.SetViewport( 0,0, width, height );
+						device.SetViewport( 0,0, width, height );
 
-						rs.PixelShaderConstants[0]	=	vectorCB;
-						rs.PipelineState			=	factory[ (int)sides[face] ];
-						rs.VertexShaderResources[0] =	envMap.GetCubeShaderResource( mip-1 );
-						rs.PixelShaderResources[0]	=	envMap.GetCubeShaderResource( mip-1 );
-						rs.PixelShaderSamplers[0]	=	SamplerState.LinearWrap;
-						rs.VertexShaderConstants[0]	=	matrixCB;
+						device.PixelShaderConstants[0]	=	vectorCB;
+						device.PipelineState			=	factory[ (int)sides[face] ];
+						device.VertexShaderResources[0] =	envMap.GetCubeShaderResource( mip-1 );
+						device.PixelShaderResources[0]	=	envMap.GetCubeShaderResource( mip-1 );
+						device.PixelShaderSamplers[0]	=	SamplerState.LinearWrap;
+						device.VertexShaderConstants[0]	=	matrixCB;
 
-						rs.Draw( 3, 0 );
+						device.Draw( 3, 0 );
 					}
 
 					width /= 2;
@@ -442,7 +439,7 @@ namespace Fusion.Engine.Graphics
 			}
 
 
-			rs.ResetStates();
+			device.ResetStates();
 		}
 
 
@@ -458,28 +455,28 @@ namespace Fusion.Engine.Graphics
 
 			using( new PixEvent() ) {
 				srcDst.SetViewport();
-				rs.PixelShaderSamplers[0] = SamplerState.LinearPointClamp;
+				device.PixelShaderSamplers[0] = SamplerState.LinearPointClamp;
 
-				rs.PipelineState			=	factory[ (int)ShaderFlags.GAUSS_BLUR_3x3 ];
+				device.PipelineState			=	factory[ (int)ShaderFlags.GAUSS_BLUR_3x3 ];
                 shaders.SetPixelShader( (int)(ShaderFlags.GAUSS_BLUR_3x3) );
                 shaders.SetVertexShader( (int)(ShaderFlags.GAUSS_BLUR_3x3) );
 
-                rs.SetTargets( null, temporary );
-				rs.VertexShaderResources[0] = srcDst;
-				rs.PixelShaderResources[0] = srcDst;
+                device.SetTargets( null, temporary );
+				device.VertexShaderResources[0] = srcDst;
+				device.PixelShaderResources[0] = srcDst;
                 
-				rs.Draw( Primitive.TriangleList, 3, 0 );
+				device.Draw( Primitive.TriangleList, 3, 0 );
 
                 shaders.SetPixelShader( (int)(ShaderFlags.GAUSS_BLUR_3x3 | ShaderFlags.PASS2) );
                 shaders.SetVertexShader( (int)(ShaderFlags.GAUSS_BLUR_3x3 | ShaderFlags.PASS2) );
 
-                rs.SetTargets( null, srcDst );
-				rs.VertexShaderResources[0] = temporary;
-				rs.PixelShaderResources[0] = temporary;
+                device.SetTargets( null, srcDst );
+				device.VertexShaderResources[0] = temporary;
+				device.PixelShaderResources[0] = temporary;
 
-                rs.Draw( Primitive.TriangleList, 3, 0 );
+                device.Draw( Primitive.TriangleList, 3, 0 );
 			}
-			rs.ResetStates();
+			device.ResetStates();
 		}	*/
 
 		
@@ -542,43 +539,43 @@ namespace Fusion.Engine.Graphics
 			using( new PixEvent("GaussBlur") ) {
 
 				SetViewport(temporary.GetSurface(mipLevel));
-				rs.SetTargets( null, temporary.GetSurface(mipLevel) );
+				device.SetTargets( null, temporary.GetSurface(mipLevel) );
 
-				rs.PipelineState			=	factory[ combination|(int)ShaderFlags.PASS1 ];
-				rs.VertexShaderResources[0]	=	src;
-				rs.PixelShaderResources[0]	=	src;
-				rs.PixelShaderResources[1]	=	depthData;
-				rs.PixelShaderResources[2]	=	normalData;
+				device.PipelineState			=	factory[ combination|(int)ShaderFlags.PASS1 ];
+				device.VertexShaderResources[0]	=	src;
+				device.PixelShaderResources[0]	=	src;
+				device.PixelShaderResources[1]	=	depthData;
+				device.PixelShaderResources[2]	=	normalData;
 
-				rs.PixelShaderConstants[0]	=	gaussWeightsCB;
+				device.PixelShaderConstants[0]	=	gaussWeightsCB;
 				
-				rs.PixelShaderSamplers[0]	=	SamplerState.LinearPointClamp;
-				rs.PixelShaderSamplers[1]	=	SamplerState.PointClamp;
+				device.PixelShaderSamplers[0]	=	SamplerState.LinearPointClamp;
+				device.PixelShaderSamplers[1]	=	SamplerState.PointClamp;
 
-				rs.Draw( 3, 0 );
+				device.Draw( 3, 0 );
 
 
 
-				rs.VertexShaderResources[0] =	null;
-				rs.PixelShaderResources[0]	=	null;
+				device.VertexShaderResources[0] =	null;
+				device.PixelShaderResources[0]	=	null;
 
 				SetViewport(dst.GetSurface(mipLevel));
-				rs.SetTargets( null, dst.GetSurface(mipLevel) );
+				device.SetTargets( null, dst.GetSurface(mipLevel) );
 
-				rs.PipelineState			=	factory[ combination|(int)ShaderFlags.PASS2 ];
-				rs.VertexShaderResources[0] =	temporary;
-				rs.PixelShaderResources[0]	=	temporary;
-				rs.PixelShaderResources[1]	=	depthData;
-				rs.PixelShaderResources[2]	=	normalData;
+				device.PipelineState			=	factory[ combination|(int)ShaderFlags.PASS2 ];
+				device.VertexShaderResources[0] =	temporary;
+				device.PixelShaderResources[0]	=	temporary;
+				device.PixelShaderResources[1]	=	depthData;
+				device.PixelShaderResources[2]	=	normalData;
 
-				rs.PixelShaderConstants[0]	=	gaussWeightsCB;
+				device.PixelShaderConstants[0]	=	gaussWeightsCB;
 
-				rs.PixelShaderSamplers[0]	=	SamplerState.LinearPointClamp;
-				rs.PixelShaderSamplers[1]	=	SamplerState.PointClamp;
+				device.PixelShaderSamplers[0]	=	SamplerState.LinearPointClamp;
+				device.PixelShaderSamplers[1]	=	SamplerState.PointClamp;
 
-				rs.Draw( 3, 0 );
+				device.Draw( 3, 0 );
 			}
-			rs.ResetStates();
+			device.ResetStates();
 		}
 
 

@@ -11,7 +11,7 @@ using Fusion.Engine.Common;
 
 namespace Fusion.Engine.Graphics {
 	[RequireShader("sprite")]
-	internal class SpriteEngine : GameComponent {
+	internal class SpriteEngine : RenderComponent {
 
 		enum Flags {
 			OPAQUE				=	0x0001, 
@@ -34,7 +34,6 @@ namespace Fusion.Engine.Graphics {
 
 		StateFactory	factory;
 		Ubershader		shader;
-		GraphicsDevice	device;
 		ConstData		constData;
 		ConstantBuffer	constBuffer;
 
@@ -42,9 +41,8 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="rs"></param>
-		public SpriteEngine( RenderSystem rs ) : base(rs.Game)
+		public SpriteEngine( RenderSystem rs ) : base(rs)
 		{
-			this.device	=	rs.Device;
 		}
 
 
@@ -65,7 +63,7 @@ namespace Fusion.Engine.Graphics {
 
 		void LoadContent ()
 		{
-			shader		=	device.Game.Content.Load<Ubershader>("sprite");
+			shader		=	rs.Shaders.Load("sprite");
 			factory		=	shader.CreateFactory( typeof(Flags), (ps,i) => StateEnum( ps, (Flags)i) );
 		}
 

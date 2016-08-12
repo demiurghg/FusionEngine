@@ -11,7 +11,7 @@ using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
 
 namespace Fusion.Engine.Graphics {
-	public partial class LightRenderer {
+	internal partial class LightRenderer {
 
 		class Line {
 			public Line ( Vector3 a, Vector3 b ) { A = a; B = b; }

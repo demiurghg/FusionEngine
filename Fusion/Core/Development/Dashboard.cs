@@ -12,8 +12,6 @@ using Fusion.Engine.Common;
 namespace Fusion.Core.Development {
 	public partial class Dashboard : Form {
 		
-		private PackageSelector packageSelector;
-
 		public readonly Game Game;
 
 		

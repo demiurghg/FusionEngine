@@ -17,9 +17,7 @@ namespace Fusion.Engine.Graphics
 	/// Class for base image processing such as copying, blurring, enhancement, anti-aliasing etc.
 	/// </summary>
 	[RequireShader("bitonicSort")]
-	internal class BitonicSort : GameComponent {
-
-		readonly GraphicsDevice device;
+	internal class BitonicSort : RenderComponent {
 
 		struct Params {
 			public uint Level;
@@ -46,9 +44,8 @@ namespace Fusion.Engine.Graphics
 		StateFactory		factory;
 
 		
-		public BitonicSort( Game Game ) : base( Game )
+		public BitonicSort( RenderSystem rs ) : base( rs )
 		{
-			device = Game.GraphicsDevice;
 		}
 
 
@@ -73,7 +70,7 @@ namespace Fusion.Engine.Graphics
 		/// </summary>
 		void LoadContent ()
 		{
-			shader		=	Game.Content.Load<Ubershader>("bitonicSort");
+			shader		=	rs.Shaders.Load("bitonicSort");
 			factory		=	shader.CreateFactory( typeof(ShaderFlags), Primitive.TriangleList, VertexInputElement.Empty );
 		}
 

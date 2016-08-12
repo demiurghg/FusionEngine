@@ -15,7 +15,7 @@ using Fusion.Core.Extensions;
 namespace Fusion.Engine.Graphics {
 
 	[RequireShader("sky")]
-	internal class Sky : GameComponent {
+	internal class Sky : RenderComponent {
 		[Flags]
 		enum SkyFlags : int
 		{
@@ -52,8 +52,6 @@ namespace Fusion.Engine.Graphics {
 			public Vector4 Vertex;
 		}
 
-		GraphicsDevice	rs;
-		//Scene			skySphere;
 		VertexBuffer	skyVB;
 		Ubershader		sky;
 		ConstantBuffer	skyConstsCB;
@@ -75,9 +73,8 @@ namespace Fusion.Engine.Graphics {
 		/// Constructor
 		/// </summary>
 		/// <param name="rs"></param>
-		public Sky ( Game game ) : base( game )
+		public Sky ( RenderSystem rs ) : base( rs )
 		{
-			rs	=	Game.GraphicsDevice;
 		}
 
 
@@ -87,8 +84,8 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public override void Initialize() 
 		{
-			skyCube		=	new RenderTargetCube( rs, ColorFormat.Rgba16F, 128, true );
-			skyConstsCB	=	new ConstantBuffer( rs, typeof(SkyConsts) );
+			skyCube		=	new RenderTargetCube( device, ColorFormat.Rgba16F, 128, true );
+			skyConstsCB	=	new ConstantBuffer( device, typeof(SkyConsts) );
 
 			LoadContent();
 
@@ -119,7 +116,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ()
 		{
-			sky			=	Game.Content.Load<Ubershader>("sky");
+			sky			=	Game.RenderSystem.Shaders.Load("sky");
 			factory		=	sky.CreateFactory( typeof(SkyFlags), (ps,i) => EnumFunc(ps, (SkyFlags)i) );
 		}
 
@@ -190,7 +187,7 @@ namespace Fusion.Engine.Graphics {
 
 				ApplyColorSpace( ref flags, settings );
 				
-				rs.PipelineState	=	factory[(int)flags];
+				device.PipelineState	=	factory[(int)flags];
 	//			rs.DepthStencilState = DepthStencilState.None ;
 
 				skyConstsData.SunPosition	= sunPos;
@@ -200,22 +197,22 @@ namespace Fusion.Engine.Graphics {
 				skyConstsData.SkyIntensity	= settings.SkyIntensity;
 
 				for( int i = 0; i < 6; ++i ) {
-					rs.SetTargets( null, SkyCube.GetSurface(0, (CubeFace)i ) );
+					device.SetTargets( null, SkyCube.GetSurface(0, (CubeFace)i ) );
 
 					SkyCube.SetViewport();
 
 					skyConstsData.MatrixWVP = cubeWVPS[i];
 	
 					skyConstsCB.SetData( skyConstsData );
-					rs.VertexShaderConstants[0] = skyConstsCB;
-					rs.PixelShaderConstants[0] = skyConstsCB;
+					device.VertexShaderConstants[0] = skyConstsCB;
+					device.PixelShaderConstants[0] = skyConstsCB;
 
 
-					rs.SetupVertexInput( skyVB, null );
-					rs.Draw( skyVB.Capacity, 0 );
+					device.SetupVertexInput( skyVB, null );
+					device.Draw( skyVB.Capacity, 0 );
 				}
 
-				rs.ResetStates();
+				device.ResetStates();
 
 				SkyCube.BuildMipmaps();
 			}
@@ -237,11 +234,11 @@ namespace Fusion.Engine.Graphics {
 				var	sunPos		=	settings.SunPosition;
 				var sunColor	=	settings.SunGlowColor;
 
-				rs.ResetStates();
+				device.ResetStates();
 
 				//rs.DepthStencilState = depthBuffer==null? DepthStencilState.None : DepthStencilState.Default ;
 
-				rs.SetTargets( frame.DepthBuffer.Surface, frame.HdrBuffer.Surface );
+				device.SetTargets( frame.DepthBuffer.Surface, frame.HdrBuffer.Surface );
 
 				var viewMatrix = camera.GetViewMatrix( stereoEye );
 				var projMatrix = camera.GetProjectionMatrix( stereoEye );
@@ -255,8 +252,8 @@ namespace Fusion.Engine.Graphics {
 	
 				skyConstsCB.SetData( skyConstsData );
 			
-				rs.VertexShaderConstants[0] = skyConstsCB;
-				rs.PixelShaderConstants[0] = skyConstsCB;
+				device.VertexShaderConstants[0] = skyConstsCB;
+				device.PixelShaderConstants[0] = skyConstsCB;
 
 
 				//
@@ -266,12 +263,12 @@ namespace Fusion.Engine.Graphics {
 
 				ApplyColorSpace( ref flags, settings );
 				
-				rs.PipelineState	=	factory[(int)flags];
+				device.PipelineState	=	factory[(int)flags];
 						
-				rs.SetupVertexInput( skyVB, null );
-				rs.Draw( skyVB.Capacity, 0 );
+				device.SetupVertexInput( skyVB, null );
+				device.Draw( skyVB.Capacity, 0 );
 
-				rs.ResetStates();
+				device.ResetStates();
 			}
 		}
 	}

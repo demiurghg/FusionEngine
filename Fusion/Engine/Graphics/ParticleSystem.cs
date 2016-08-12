@@ -188,7 +188,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ( object sender, EventArgs args )
 		{
-			shader	=	rs.Game.Content.Load<Ubershader>("particles.hlsl");
+			shader	=	rs.Shaders.Load("particles.hlsl");
 			factory	=	shader.CreateFactory( typeof(Flags), (ps,i) => EnumAction( ps, (Flags)i ) );
 		}
 

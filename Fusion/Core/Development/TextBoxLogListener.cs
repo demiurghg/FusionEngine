@@ -19,8 +19,6 @@ namespace Fusion.Core.Development {
 
 		public override void Log ( LogMessage message )
 		{
-			string prefix = "";
-			
 			textBox.Text += "[" + message.MessageType.ToString() + "] " + message.MessageText + "\r\n";
 		}
 

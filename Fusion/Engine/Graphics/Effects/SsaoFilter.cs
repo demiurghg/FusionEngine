@@ -26,14 +26,13 @@ namespace Fusion.Engine.Graphics {
 	/// 
 	/// </summary>
 	[RequireShader("ssao")]
-	internal partial class SsaoFilter : GameComponent {
+	internal partial class SsaoFilter : RenderComponent {
 
 		public ShaderResource	OcclusionMap { 
 			get {
 				return occlusionMapFull;
 			}
 		}
-
 
 		Ubershader		shader;
 		StateFactory	factory;
@@ -87,7 +86,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="game"></param>
-		public SsaoFilter ( Game game ) : base(game)
+		public SsaoFilter ( RenderSystem rs ) : base(rs)
 		{
 			SetDefaults();
 		}
@@ -169,7 +168,7 @@ namespace Fusion.Engine.Graphics {
 		void LoadContent ()
 		{
 			SafeDispose( ref factory );
-			shader	=	Game.Content.Load<Ubershader>("ssao");
+			shader	=	rs.Shaders.Load("ssao");
 			factory	=	shader.CreateFactory( typeof(Flags), Primitive.TriangleList, VertexInputElement.Empty, BlendState.Opaque, RasterizerState.CullNone, DepthStencilState.None ); 
 		}
 

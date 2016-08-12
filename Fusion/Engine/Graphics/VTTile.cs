@@ -24,7 +24,7 @@ namespace Fusion.Engine.Graphics {
 	
 		static Random rand = new Random();		
 
-
+		#pragma warning disable 162
 		public const int ImageCount = 1;
 		
 		Image[] images;

@@ -14,9 +14,8 @@ using Fusion.Core.Development;
 
 namespace Fusion.Engine.Graphics {
 
-	public class SceneRenderer : GameComponent {
+	internal class SceneRenderer : RenderComponent {
 
-		readonly RenderSystem	rs;
 		internal const int MaxBones = 128;
 
 		ConstantBuffer	constBuffer;
@@ -55,9 +54,8 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="Game"></param>
-		public SceneRenderer ( Game Game, RenderSystem rs ) : base( Game )
+		public SceneRenderer ( RenderSystem rs ) : base( rs )
 		{
-			this.rs	=	rs;
 		}
 
 
@@ -96,7 +94,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		void LoadContent ()
 		{
-			surfaceShader	=	Game.Content.Load<Ubershader>("surface");
+			surfaceShader	=	Game.RenderSystem.Shaders.Load("surface");
 			factory			=	surfaceShader.CreateFactory( typeof(SurfaceFlags), (ps,i) => Enum(ps, (SurfaceFlags)i ) );
 		}
 

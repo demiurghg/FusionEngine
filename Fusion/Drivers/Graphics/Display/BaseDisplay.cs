@@ -68,7 +68,7 @@ namespace Fusion.Drivers.Graphics.Display {
 		/// </summary>
 		void LoadContent ()
 		{
-			stereo	=	Game.Content.Load<Ubershader>("stereo");
+			stereo	=	Game.RenderSystem.Shaders.Load("stereo");
 			factory	=	stereo.CreateFactory( typeof(Flags), Primitive.TriangleList, VertexInputElement.Empty, BlendState.Opaque, RasterizerState.CullNone, DepthStencilState.None );
 		}
 
