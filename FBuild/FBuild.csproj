@@ -51,10 +51,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Fusion.Build\Fusion.Build.csproj">
-      <Project>{ebdd2fd0-ec00-45d9-b38b-c7e674016fab}</Project>
-      <Name>Fusion.Build</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Fusion\Fusion.csproj">
       <Project>{085c9e62-cddf-4b95-994d-085c74fa90fc}</Project>
       <Name>Fusion</Name>

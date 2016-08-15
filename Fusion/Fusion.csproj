@@ -55,6 +55,10 @@
     <Reference Include="OculusWrap">
       <HintPath>..\SDKs\OculusWrap\OculusWrap.dll</HintPath>
     </Reference>
+    <Reference Include="SharpDX.D3DCompiler, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SDKs\SharpDX\SharpDX.D3DCompiler.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\SDKs\SharpDX\SharpDX.dll</HintPath>
@@ -123,6 +127,33 @@
     <Compile Include="Build2\BuildSystem.cs" />
     <Compile Include="Build2\ContentProject.cs" />
     <Compile Include="Build2\ShaderBuilder.cs" />
+    <Compile Include="Build\AssetSource.cs" />
+    <Compile Include="Build\BuildContentCmd.cs" />
+    <Compile Include="Build\BuildContentFileCmd.cs" />
+    <Compile Include="Build\BuildContext.cs" />
+    <Compile Include="Build\Builder.cs" />
+    <Compile Include="Build\BuildException.cs" />
+    <Compile Include="Build\BuildOptions.cs" />
+    <Compile Include="Build\BuildResult.cs" />
+    <Compile Include="Build\Mapping\MapProcessor.cs" />
+    <Compile Include="Build\Mapping\MapScene.cs" />
+    <Compile Include="Build\Mapping\MapTexture.cs" />
+    <Compile Include="Build\Mapping\VTAtlasNode.cs" />
+    <Compile Include="Build\Mapping\VTPageTable.cs" />
+    <Compile Include="Build\Processors\AssetProcessor.cs" />
+    <Compile Include="Build\Processors\AssetProcessorAttribute.cs" />
+    <Compile Include="Build\Processors\AssetProcessorBinding.cs" />
+    <Compile Include="Build\Processors\CopyProcessor.cs" />
+    <Compile Include="Build\Processors\FontProcessor.cs" />
+    <Compile Include="Build\Processors\SceneProcessor.cs" />
+    <Compile Include="Build\Processors\ScriptProcessor.cs" />
+    <Compile Include="Build\Processors\SoundProcessor.cs" />
+    <Compile Include="Build\Processors\TextureAtlasProcessor.cs" />
+    <Compile Include="Build\Processors\TextureProcessor.cs" />
+    <Compile Include="Build\Processors\UbershaderEnumerator.cs" />
+    <Compile Include="Build\Processors\UbershaderProcessor.cs" />
+    <Compile Include="Build\Processors\UbershaderProcessor.Parser.cs" />
+    <Compile Include="Build\ToolException.cs" />
     <Compile Include="Core\Development\Dashboard.Config.cs">
       <DependentUpon>Dashboard.cs</DependentUpon>
       <SubType>Form</SubType>
