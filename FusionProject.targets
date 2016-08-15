@@ -6,9 +6,9 @@
 		<Reference Include="Fusion">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\Fusion.dll</HintPath>
 		</Reference>
-		<Reference Include="Fusion.Build">
+		<!--Reference Include="Fusion.Build">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\Fusion.Build.dll</HintPath>
-		</Reference>
+		</Reference-->
 		<Reference Include="BEPUphysics">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\BEPUphysics.dll</HintPath>
 		</Reference>
@@ -25,9 +25,9 @@
 		<Reference Include="Fusion">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\Fusion.dll</HintPath>
 		</Reference>
-		<Reference Include="Fusion.Build">
+		<!--Reference Include="Fusion.Build">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\Fusion.Build.dll</HintPath>
-		</Reference>
+		</Reference-->
 		<Reference Include="BEPUphysics">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirRelease)\BEPUphysics.dll</HintPath>
 		</Reference>
@@ -44,9 +44,9 @@
 		<Reference Include="Fusion">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)\Fusion.dll</HintPath>
 		</Reference>
-		<Reference Include="Fusion.Build">
+		<!--Reference Include="Fusion.Build">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)\Fusion.Build.dll</HintPath>
-		</Reference>
+		</Reference-->
 		<Reference Include="BEPUphysics">
 		  <HintPath>$(registry:HKEY_CURRENT_USER\Software\FusionEngine@BinaryDirDebug)\BEPUphysics.dll</HintPath>
 		</Reference>
