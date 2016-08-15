@@ -42,10 +42,9 @@
 			this.listBoxConfig = new System.Windows.Forms.ListBox();
 			this.tabShaders = new System.Windows.Forms.TabPage();
 			this.panel2 = new System.Windows.Forms.Panel();
-			this.button3 = new System.Windows.Forms.Button();
-			this.button4 = new System.Windows.Forms.Button();
-			this.button2 = new System.Windows.Forms.Button();
-			this.button1 = new System.Windows.Forms.Button();
+			this.buttonShaderEdit = new System.Windows.Forms.Button();
+			this.buttonShaderShowReport = new System.Windows.Forms.Button();
+			this.buttonShaderCompile = new System.Windows.Forms.Button();
 			this.listBoxShaders = new System.Windows.Forms.ListBox();
 			this.mainMenu.SuspendLayout();
 			this.bottomPanel.SuspendLayout();
@@ -134,6 +133,7 @@
 			this.consoleOutput.Multiline = true;
 			this.consoleOutput.Name = "consoleOutput";
 			this.consoleOutput.ReadOnly = true;
+			this.consoleOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
 			this.consoleOutput.Size = new System.Drawing.Size(578, 119);
 			this.consoleOutput.TabIndex = 0;
 			// 
@@ -216,58 +216,51 @@
 			this.tabShaders.Location = new System.Drawing.Point(4, 22);
 			this.tabShaders.Name = "tabShaders";
 			this.tabShaders.Padding = new System.Windows.Forms.Padding(3);
-			this.tabShaders.Size = new System.Drawing.Size(691, 399);
+			this.tabShaders.Size = new System.Drawing.Size(572, 504);
 			this.tabShaders.TabIndex = 1;
 			this.tabShaders.Text = "Shaders";
 			this.tabShaders.UseVisualStyleBackColor = true;
 			// 
 			// panel2
 			// 
-			this.panel2.Controls.Add(this.button3);
-			this.panel2.Controls.Add(this.button4);
-			this.panel2.Controls.Add(this.button2);
-			this.panel2.Controls.Add(this.button1);
+			this.panel2.Controls.Add(this.buttonShaderEdit);
+			this.panel2.Controls.Add(this.buttonShaderShowReport);
+			this.panel2.Controls.Add(this.buttonShaderCompile);
 			this.panel2.Dock = System.Windows.Forms.DockStyle.Right;
-			this.panel2.Location = new System.Drawing.Point(547, 3);
+			this.panel2.Location = new System.Drawing.Point(428, 3);
 			this.panel2.Name = "panel2";
-			this.panel2.Size = new System.Drawing.Size(141, 393);
+			this.panel2.Size = new System.Drawing.Size(141, 498);
 			this.panel2.TabIndex = 2;
 			// 
-			// button3
+			// buttonShaderEdit
 			// 
-			this.button3.Location = new System.Drawing.Point(3, 38);
-			this.button3.Name = "button3";
-			this.button3.Size = new System.Drawing.Size(134, 29);
-			this.button3.TabIndex = 0;
-			this.button3.Text = "Clean";
-			this.button3.UseVisualStyleBackColor = true;
+			this.buttonShaderEdit.Location = new System.Drawing.Point(3, 73);
+			this.buttonShaderEdit.Name = "buttonShaderEdit";
+			this.buttonShaderEdit.Size = new System.Drawing.Size(134, 29);
+			this.buttonShaderEdit.TabIndex = 0;
+			this.buttonShaderEdit.Text = "Open";
+			this.buttonShaderEdit.UseVisualStyleBackColor = true;
+			this.buttonShaderEdit.Click += new System.EventHandler(this.buttonShaderEdit_Click);
 			// 
-			// button4
+			// buttonShaderShowReport
 			// 
-			this.button4.Location = new System.Drawing.Point(3, 108);
-			this.button4.Name = "button4";
-			this.button4.Size = new System.Drawing.Size(134, 29);
-			this.button4.TabIndex = 0;
-			this.button4.Text = "Open";
-			this.button4.UseVisualStyleBackColor = true;
+			this.buttonShaderShowReport.Location = new System.Drawing.Point(3, 38);
+			this.buttonShaderShowReport.Name = "buttonShaderShowReport";
+			this.buttonShaderShowReport.Size = new System.Drawing.Size(134, 29);
+			this.buttonShaderShowReport.TabIndex = 0;
+			this.buttonShaderShowReport.Text = "Show Report";
+			this.buttonShaderShowReport.UseVisualStyleBackColor = true;
+			this.buttonShaderShowReport.Click += new System.EventHandler(this.buttonShaderShowReport_Click);
 			// 
-			// button2
+			// buttonShaderCompile
 			// 
-			this.button2.Location = new System.Drawing.Point(3, 73);
-			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(134, 29);
-			this.button2.TabIndex = 0;
-			this.button2.Text = "Show Report";
-			this.button2.UseVisualStyleBackColor = true;
-			// 
-			// button1
-			// 
-			this.button1.Location = new System.Drawing.Point(3, 3);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(134, 29);
-			this.button1.TabIndex = 0;
-			this.button1.Text = "Compile";
-			this.button1.UseVisualStyleBackColor = true;
+			this.buttonShaderCompile.Location = new System.Drawing.Point(3, 3);
+			this.buttonShaderCompile.Name = "buttonShaderCompile";
+			this.buttonShaderCompile.Size = new System.Drawing.Size(134, 29);
+			this.buttonShaderCompile.TabIndex = 0;
+			this.buttonShaderCompile.Text = "Compile";
+			this.buttonShaderCompile.UseVisualStyleBackColor = true;
+			this.buttonShaderCompile.Click += new System.EventHandler(this.buttonShaderCompile_Click);
 			// 
 			// listBoxShaders
 			// 
@@ -276,7 +269,8 @@
 			this.listBoxShaders.IntegralHeight = false;
 			this.listBoxShaders.Location = new System.Drawing.Point(3, 3);
 			this.listBoxShaders.Name = "listBoxShaders";
-			this.listBoxShaders.Size = new System.Drawing.Size(250, 393);
+			this.listBoxShaders.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+			this.listBoxShaders.Size = new System.Drawing.Size(152, 498);
 			this.listBoxShaders.TabIndex = 1;
 			// 
 			// Dashboard
@@ -326,10 +320,9 @@
 		private System.Windows.Forms.ListBox listBoxConfig;
 		private System.Windows.Forms.Splitter splitter2;
 		private System.Windows.Forms.Panel panel2;
-		private System.Windows.Forms.Button button3;
-		private System.Windows.Forms.Button button4;
-		private System.Windows.Forms.Button button2;
-		private System.Windows.Forms.Button button1;
+		private System.Windows.Forms.Button buttonShaderEdit;
+		private System.Windows.Forms.Button buttonShaderShowReport;
+		private System.Windows.Forms.Button buttonShaderCompile;
 		private System.Windows.Forms.ListBox listBoxShaders;
 	}
 }

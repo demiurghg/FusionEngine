@@ -21,6 +21,7 @@ namespace Fusion.Development {
 			InitializeComponent();
 
 			SetupConfigPage();
+			SetupShaderPage();
 			this.Icon	=	Fusion.Properties.Resources.fusionIconGrayscale;
 
 

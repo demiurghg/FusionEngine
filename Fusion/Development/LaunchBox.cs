@@ -18,7 +18,8 @@ namespace Fusion.Development {
 
 		public static bool ShowDialog ( Game game, string config )
 		{
-			var form = new Dashboard( game, config, true );
+			//var form = new Dashboard( game, config, true );
+			var form = new LaunchBoxForm( game, config );
 
 			var dr = form.ShowDialog();
 
