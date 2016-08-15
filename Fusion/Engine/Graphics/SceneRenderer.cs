@@ -9,7 +9,7 @@ using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using System.Runtime.InteropServices;
-using Fusion.Core.Development;
+using Fusion.Development;
 
 
 namespace Fusion.Engine.Graphics {

@@ -10,7 +10,7 @@ using System.Windows.Forms;
 using Fusion.Engine.Common;
 
 
-namespace Fusion.Core.Development {
+namespace Fusion.Development {
 	public partial class PackageSelector : UserControl {
 
 

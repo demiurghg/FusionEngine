@@ -154,24 +154,40 @@
     <Compile Include="Build\Processors\UbershaderProcessor.cs" />
     <Compile Include="Build\Processors\UbershaderProcessor.Parser.cs" />
     <Compile Include="Build\ToolException.cs" />
-    <Compile Include="Core\Development\Dashboard.Config.cs">
+    <Compile Include="Development\Dashboard.Config.cs">
       <DependentUpon>Dashboard.cs</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Core\Development\Dashboard.cs">
+    <Compile Include="Development\Dashboard.Maps.cs">
+      <DependentUpon>Dashboard.cs</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Core\Development\Dashboard.Designer.cs">
+    <Compile Include="Development\Dashboard.Shaders.cs">
+      <DependentUpon>Dashboard.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Development\Dashboard.SFX.cs">
+      <DependentUpon>Dashboard.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Development\Dashboard.RawFiles.cs">
+      <DependentUpon>Dashboard.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Development\Dashboard.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Development\Dashboard.Designer.cs">
       <DependentUpon>Dashboard.cs</DependentUpon>
     </Compile>
-    <Compile Include="Core\Development\LaunchBox.cs" />
-    <Compile Include="Core\Development\PackageSelector.cs">
+    <Compile Include="Development\LaunchBox.cs" />
+    <Compile Include="Development\PackageSelector.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Core\Development\PackageSelector.Designer.cs">
+    <Compile Include="Development\PackageSelector.Designer.cs">
       <DependentUpon>PackageSelector.cs</DependentUpon>
     </Compile>
-    <Compile Include="Core\Development\TextBoxLogListener.cs" />
+    <Compile Include="Development\TextBoxLogListener.cs" />
     <Compile Include="Engine\Graphics\RenderComponent.cs" />
     <Compile Include="Engine\Graphics\RequireShaderAttribute.cs" />
     <Compile Include="Core\Collection\ConcurrentPriorityQueue.cs" />
@@ -179,10 +195,10 @@
     <Compile Include="Core\Content\AssetStream.cs" />
     <Compile Include="Core\Content\BytesLoader.cs" />
     <Compile Include="Core\Content\StringLoader.cs" />
-    <Compile Include="Core\Development\LaunchBoxDialog.cs">
+    <Compile Include="Development\LaunchBoxDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Core\Development\LaunchBoxDialog.Designer.cs">
+    <Compile Include="Development\LaunchBoxDialog.Designer.cs">
       <DependentUpon>LaunchBoxDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Core\Extensions\BinaryReaderExtensions.cs" />
@@ -243,10 +259,10 @@
     <Compile Include="Core\Design\Vector2Converter.cs" />
     <Compile Include="Core\Design\Vector3Converter.cs" />
     <Compile Include="Core\Design\Vector4Converter.cs" />
-    <Compile Include="Core\Development\ExceptionDialog.cs">
+    <Compile Include="Development\ExceptionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Core\Development\ExceptionDialog.Designer.cs">
+    <Compile Include="Development\ExceptionDialog.Designer.cs">
       <DependentUpon>ExceptionDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Drivers\Graphics\BytecodeUtils.cs" />
@@ -572,16 +588,16 @@
     <Compile Include="Framework\GameConsole.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Core\Development\Dashboard.resx">
+    <EmbeddedResource Include="Development\Dashboard.resx">
       <DependentUpon>Dashboard.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Core\Development\ExceptionDialog.resx">
+    <EmbeddedResource Include="Development\ExceptionDialog.resx">
       <DependentUpon>ExceptionDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Core\Development\LaunchBoxDialog.resx">
+    <EmbeddedResource Include="Development\LaunchBoxDialog.resx">
       <DependentUpon>LaunchBoxDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Core\Development\PackageSelector.resx">
+    <EmbeddedResource Include="Development\PackageSelector.resx">
       <DependentUpon>PackageSelector.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

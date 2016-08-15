@@ -10,7 +10,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace Fusion.Core.Development {
+namespace Fusion.Development {
 	internal partial class ExceptionDialog : Form {
 		private ExceptionDialog ( Exception exception )
 		{

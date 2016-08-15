@@ -11,7 +11,7 @@ using Fusion.Core.Extensions;
 using Fusion.Engine.Graphics;
 
 
-namespace Fusion.Core.Development {
+namespace Fusion.Development {
 
 	public partial class Dashboard : Form {
 

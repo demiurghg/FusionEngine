@@ -13,7 +13,7 @@ using System.IO;
 using System.Diagnostics;
 
 
-namespace Fusion.Core.Development {
+namespace Fusion.Development {
 
 	internal partial class LaunchBoxForm : Form {
 

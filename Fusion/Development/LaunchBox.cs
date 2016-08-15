@@ -13,7 +13,7 @@ using System.IO;
 using System.Diagnostics;
 
 
-namespace Fusion.Core.Development {
+namespace Fusion.Development {
 	public static class LaunchBox {
 
 		public static bool ShowDialog ( Game game, string config )

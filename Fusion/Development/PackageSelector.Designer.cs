@@ -1,4 +1,4 @@
-﻿namespace Fusion.Core.Development {
+﻿namespace Fusion.Development {
 	partial class PackageSelector {
 		/// <summary> 
 		/// Required designer variable.

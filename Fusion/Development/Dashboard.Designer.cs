@@ -1,4 +1,4 @@
-﻿namespace Fusion.Core.Development {
+﻿namespace Fusion.Development {
 	partial class Dashboard {
 		/// <summary>
 		/// Required designer variable.
@@ -41,12 +41,12 @@
 			this.splitter2 = new System.Windows.Forms.Splitter();
 			this.listBoxConfig = new System.Windows.Forms.ListBox();
 			this.tabShaders = new System.Windows.Forms.TabPage();
-			this.listBoxShaders = new System.Windows.Forms.ListBox();
 			this.panel2 = new System.Windows.Forms.Panel();
-			this.button1 = new System.Windows.Forms.Button();
-			this.button2 = new System.Windows.Forms.Button();
 			this.button3 = new System.Windows.Forms.Button();
 			this.button4 = new System.Windows.Forms.Button();
+			this.button2 = new System.Windows.Forms.Button();
+			this.button1 = new System.Windows.Forms.Button();
+			this.listBoxShaders = new System.Windows.Forms.ListBox();
 			this.mainMenu.SuspendLayout();
 			this.bottomPanel.SuspendLayout();
 			this.consolePanel.SuspendLayout();
@@ -63,7 +63,7 @@
             this.gameToolStripMenuItem});
 			this.mainMenu.Location = new System.Drawing.Point(0, 0);
 			this.mainMenu.Name = "mainMenu";
-			this.mainMenu.Size = new System.Drawing.Size(703, 24);
+			this.mainMenu.Size = new System.Drawing.Size(584, 24);
 			this.mainMenu.TabIndex = 0;
 			this.mainMenu.Text = "menuStrip1";
 			// 
@@ -79,9 +79,9 @@
 			this.bottomPanel.Controls.Add(this.buttonExit);
 			this.bottomPanel.Controls.Add(this.buttonBuild);
 			this.bottomPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.bottomPanel.Location = new System.Drawing.Point(0, 570);
+			this.bottomPanel.Location = new System.Drawing.Point(0, 675);
 			this.bottomPanel.Name = "bottomPanel";
-			this.bottomPanel.Size = new System.Drawing.Size(703, 36);
+			this.bottomPanel.Size = new System.Drawing.Size(584, 36);
 			this.bottomPanel.TabIndex = 1;
 			// 
 			// buttonRefresh
@@ -107,7 +107,7 @@
 			// 
 			this.buttonBuild.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.buttonBuild.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.buttonBuild.Location = new System.Drawing.Point(591, 2);
+			this.buttonBuild.Location = new System.Drawing.Point(472, 2);
 			this.buttonBuild.Name = "buttonBuild";
 			this.buttonBuild.Size = new System.Drawing.Size(110, 32);
 			this.buttonBuild.TabIndex = 0;
@@ -119,9 +119,9 @@
 			// 
 			this.consolePanel.Controls.Add(this.consoleOutput);
 			this.consolePanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.consolePanel.Location = new System.Drawing.Point(0, 451);
+			this.consolePanel.Location = new System.Drawing.Point(0, 556);
 			this.consolePanel.Name = "consolePanel";
-			this.consolePanel.Size = new System.Drawing.Size(703, 119);
+			this.consolePanel.Size = new System.Drawing.Size(584, 119);
 			this.consolePanel.TabIndex = 2;
 			// 
 			// consoleOutput
@@ -134,16 +134,16 @@
 			this.consoleOutput.Multiline = true;
 			this.consoleOutput.Name = "consoleOutput";
 			this.consoleOutput.ReadOnly = true;
-			this.consoleOutput.Size = new System.Drawing.Size(697, 119);
+			this.consoleOutput.Size = new System.Drawing.Size(578, 119);
 			this.consoleOutput.TabIndex = 0;
 			// 
 			// splitter1
 			// 
 			this.splitter1.BackColor = System.Drawing.SystemColors.Control;
 			this.splitter1.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.splitter1.Location = new System.Drawing.Point(0, 448);
+			this.splitter1.Location = new System.Drawing.Point(0, 553);
 			this.splitter1.Name = "splitter1";
-			this.splitter1.Size = new System.Drawing.Size(703, 3);
+			this.splitter1.Size = new System.Drawing.Size(584, 3);
 			this.splitter1.TabIndex = 3;
 			this.splitter1.TabStop = false;
 			// 
@@ -153,7 +153,7 @@
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.panel1.Location = new System.Drawing.Point(0, 24);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(703, 424);
+			this.panel1.Size = new System.Drawing.Size(584, 529);
 			this.panel1.TabIndex = 4;
 			// 
 			// mainTabControl
@@ -166,7 +166,7 @@
 			this.mainTabControl.Location = new System.Drawing.Point(3, 0);
 			this.mainTabControl.Name = "mainTabControl";
 			this.mainTabControl.SelectedIndex = 0;
-			this.mainTabControl.Size = new System.Drawing.Size(699, 425);
+			this.mainTabControl.Size = new System.Drawing.Size(580, 530);
 			this.mainTabControl.TabIndex = 0;
 			// 
 			// tabConfig
@@ -177,7 +177,7 @@
 			this.tabConfig.Location = new System.Drawing.Point(4, 22);
 			this.tabConfig.Name = "tabConfig";
 			this.tabConfig.Padding = new System.Windows.Forms.Padding(0, 2, 2, 1);
-			this.tabConfig.Size = new System.Drawing.Size(691, 399);
+			this.tabConfig.Size = new System.Drawing.Size(572, 504);
 			this.tabConfig.TabIndex = 0;
 			this.tabConfig.Text = "Configuration";
 			this.tabConfig.UseVisualStyleBackColor = true;
@@ -186,16 +186,16 @@
 			// 
 			this.propertyGridConfig.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
 			this.propertyGridConfig.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.propertyGridConfig.Location = new System.Drawing.Point(253, 2);
+			this.propertyGridConfig.Location = new System.Drawing.Point(223, 2);
 			this.propertyGridConfig.Name = "propertyGridConfig";
-			this.propertyGridConfig.Size = new System.Drawing.Size(436, 396);
+			this.propertyGridConfig.Size = new System.Drawing.Size(347, 501);
 			this.propertyGridConfig.TabIndex = 1;
 			// 
 			// splitter2
 			// 
-			this.splitter2.Location = new System.Drawing.Point(250, 2);
+			this.splitter2.Location = new System.Drawing.Point(220, 2);
 			this.splitter2.Name = "splitter2";
-			this.splitter2.Size = new System.Drawing.Size(3, 396);
+			this.splitter2.Size = new System.Drawing.Size(3, 501);
 			this.splitter2.TabIndex = 2;
 			this.splitter2.TabStop = false;
 			// 
@@ -206,7 +206,7 @@
 			this.listBoxConfig.IntegralHeight = false;
 			this.listBoxConfig.Location = new System.Drawing.Point(0, 2);
 			this.listBoxConfig.Name = "listBoxConfig";
-			this.listBoxConfig.Size = new System.Drawing.Size(250, 396);
+			this.listBoxConfig.Size = new System.Drawing.Size(220, 501);
 			this.listBoxConfig.TabIndex = 0;
 			// 
 			// tabShaders
@@ -221,16 +221,6 @@
 			this.tabShaders.Text = "Shaders";
 			this.tabShaders.UseVisualStyleBackColor = true;
 			// 
-			// listBoxShaders
-			// 
-			this.listBoxShaders.Dock = System.Windows.Forms.DockStyle.Left;
-			this.listBoxShaders.FormattingEnabled = true;
-			this.listBoxShaders.IntegralHeight = false;
-			this.listBoxShaders.Location = new System.Drawing.Point(3, 3);
-			this.listBoxShaders.Name = "listBoxShaders";
-			this.listBoxShaders.Size = new System.Drawing.Size(250, 393);
-			this.listBoxShaders.TabIndex = 1;
-			// 
 			// panel2
 			// 
 			this.panel2.Controls.Add(this.button3);
@@ -242,24 +232,6 @@
 			this.panel2.Name = "panel2";
 			this.panel2.Size = new System.Drawing.Size(141, 393);
 			this.panel2.TabIndex = 2;
-			// 
-			// button1
-			// 
-			this.button1.Location = new System.Drawing.Point(3, 3);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(134, 29);
-			this.button1.TabIndex = 0;
-			this.button1.Text = "Compile";
-			this.button1.UseVisualStyleBackColor = true;
-			// 
-			// button2
-			// 
-			this.button2.Location = new System.Drawing.Point(3, 73);
-			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(134, 29);
-			this.button2.TabIndex = 0;
-			this.button2.Text = "Show Report";
-			this.button2.UseVisualStyleBackColor = true;
 			// 
 			// button3
 			// 
@@ -279,11 +251,39 @@
 			this.button4.Text = "Open";
 			this.button4.UseVisualStyleBackColor = true;
 			// 
+			// button2
+			// 
+			this.button2.Location = new System.Drawing.Point(3, 73);
+			this.button2.Name = "button2";
+			this.button2.Size = new System.Drawing.Size(134, 29);
+			this.button2.TabIndex = 0;
+			this.button2.Text = "Show Report";
+			this.button2.UseVisualStyleBackColor = true;
+			// 
+			// button1
+			// 
+			this.button1.Location = new System.Drawing.Point(3, 3);
+			this.button1.Name = "button1";
+			this.button1.Size = new System.Drawing.Size(134, 29);
+			this.button1.TabIndex = 0;
+			this.button1.Text = "Compile";
+			this.button1.UseVisualStyleBackColor = true;
+			// 
+			// listBoxShaders
+			// 
+			this.listBoxShaders.Dock = System.Windows.Forms.DockStyle.Left;
+			this.listBoxShaders.FormattingEnabled = true;
+			this.listBoxShaders.IntegralHeight = false;
+			this.listBoxShaders.Location = new System.Drawing.Point(3, 3);
+			this.listBoxShaders.Name = "listBoxShaders";
+			this.listBoxShaders.Size = new System.Drawing.Size(250, 393);
+			this.listBoxShaders.TabIndex = 1;
+			// 
 			// Dashboard
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(703, 606);
+			this.ClientSize = new System.Drawing.Size(584, 711);
 			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.splitter1);
 			this.Controls.Add(this.consolePanel);

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Fusion.Engine.Common;
 
-namespace Fusion.Core.Development {
+namespace Fusion.Development {
 	public partial class Dashboard : Form {
 		
 		public readonly Game Game;
