@@ -39,7 +39,7 @@ namespace Fusion.Core.Configuration {
 		/// <param name="value"></param>
 		public void Set ( string value )
 		{
-			TargetProperty.SetValue( TargetObject, StringConverter.FromString( TargetProperty.PropertyType, value ) );
+			TargetProperty.SetValue( TargetObject, StringConverter.ConvertFromString( TargetProperty.PropertyType, value ) );
 		}
 
 
@@ -50,7 +50,7 @@ namespace Fusion.Core.Configuration {
 		/// <returns></returns>
 		public string Get ()
 		{
-			return StringConverter.ToString( TargetProperty.GetValue( TargetObject ) );
+			return StringConverter.ConvertToString( TargetProperty.GetValue( TargetObject ) );
 		}
 	}
 

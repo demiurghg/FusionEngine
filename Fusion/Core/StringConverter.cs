@@ -12,72 +12,96 @@ namespace Fusion.Core {
 	/// </summary>
 	public static class StringConverter {
 
-		public static string ToString( object value )
+		public static bool TryConvertToString ( object value, out string stringValue )
 		{
+			stringValue = default(string);
+
 			var type = value.GetType();
 
-			if (type.IsEnum)			return ToString( (Enum)   value );
-			//if (type==typeof( Bool		) )	return ToString( ( Bool		)value );
-			if (type==typeof( String	) )	return ToString( ( String	)value );
-			if (type==typeof( Boolean	) )	return ToString( ( Boolean	)value );
-			if (type==typeof( Int16		) )	return ToString( ( Int16	)value );
-			if (type==typeof( Int32		) )	return ToString( ( Int32	)value );
-			if (type==typeof( Int64		) )	return ToString( ( Int64	)value );
-			if (type==typeof( Single	) )	return ToString( ( Single	)value );
-			if (type==typeof( Double	) )	return ToString( ( Double	)value );
-			if (type==typeof( Color		) )	return ToString( ( Color	)value );
-			if (type==typeof( Color4	) )	return ToString( ( Color4	)value );
-			if (type==typeof( Double	) )	return ToString( ( Double	)value );
-			if (type==typeof( Vector2	) )	return ToString( ( Vector2	)value );
-			if (type==typeof( Vector3	) )	return ToString( ( Vector3	)value );
-			if (type==typeof( Vector4	) )	return ToString( ( Vector4	)value );
-			if (type==typeof( Half		) )	return ToString( ( Half		)value );
-			if (type==typeof( Half2		) )	return ToString( ( Half2	)value );
-			if (type==typeof( Half3		) )	return ToString( ( Half3	)value );
-			if (type==typeof( Half4		) )	return ToString( ( Half4	)value );
+			if (type.IsEnum)				{ stringValue = ToString( (Enum)   value );	  return true; }
+			if (type==typeof( String	) )	{ stringValue = ToString( ( String	)value ); return true; }
+			if (type==typeof( Boolean	) )	{ stringValue = ToString( ( Boolean	)value ); return true; }
+			if (type==typeof( Int16		) )	{ stringValue = ToString( ( Int16	)value ); return true; }
+			if (type==typeof( Int32		) )	{ stringValue = ToString( ( Int32	)value ); return true; }
+			if (type==typeof( Int64		) )	{ stringValue = ToString( ( Int64	)value ); return true; }
+			if (type==typeof( Single	) )	{ stringValue = ToString( ( Single	)value ); return true; }
+			if (type==typeof( Double	) )	{ stringValue = ToString( ( Double	)value ); return true; }
+			if (type==typeof( Color		) )	{ stringValue = ToString( ( Color	)value ); return true; }
+			if (type==typeof( Color4	) )	{ stringValue = ToString( ( Color4	)value ); return true; }
+			if (type==typeof( Double	) )	{ stringValue = ToString( ( Double	)value ); return true; }
+			if (type==typeof( Vector2	) )	{ stringValue = ToString( ( Vector2	)value ); return true; }
+			if (type==typeof( Vector3	) )	{ stringValue = ToString( ( Vector3	)value ); return true; }
+			if (type==typeof( Vector4	) )	{ stringValue = ToString( ( Vector4	)value ); return true; }
+			if (type==typeof( Half		) )	{ stringValue = ToString( ( Half	)value ); return true; }
+			if (type==typeof( Half2		) )	{ stringValue = ToString( ( Half2	)value ); return true; }
+			if (type==typeof( Half3		) )	{ stringValue = ToString( ( Half3	)value ); return true; }
+			if (type==typeof( Half4		) )	{ stringValue = ToString( ( Half4	)value ); return true; }
 
-			//	fallback to TypeConverter?
-			throw new ArgumentException(string.Format("Can not convert {0} to string", type));
+			return false;
 		}
 
 
-		public static object FromString ( Type type, string value )
+
+		public static bool TryConvertFromString ( Type type, string stringValue, out object value )
 		{
-			if (type.IsEnum)			return Enum.Parse( type, value, true );
-			//if (type==typeof(Bool)  )	return ToBool	( value );
-			if (type==typeof(String))	return ToString ( value );
-			if (type==typeof(Boolean))	return ToBoolean( value );
-			if (type==typeof(Int16)  )	return ToInt16	( value );
-			if (type==typeof(Int32)  )	return ToInt32	( value );
-			if (type==typeof(Int64)  )	return ToInt64	( value );
-			if (type==typeof(Single) )	return ToSingle	( value );
-			if (type==typeof(Double) )	return ToDouble	( value );
-			if (type==typeof(Color)  )	return ToColor	( value );
-			if (type==typeof(Color4) )	return ToColor4	( value );
-			if (type==typeof(Double) )	return ToDouble	( value );
-			if (type==typeof(Vector2))	return ToVector2( value );
-			if (type==typeof(Vector3))	return ToVector3( value );
-			if (type==typeof(Vector4))	return ToVector4( value );
-			if (type==typeof(Half)   )	return ToHalf	( value );
-			if (type==typeof(Half2)  )	return ToHalf2	( value );
-			if (type==typeof(Half3)  )	return ToHalf3	( value );
-			if (type==typeof(Half4)  )	return ToHalf4	( value );
+			value	=	default(object);
 
-			//	fallback to TypeConverter?
-			throw new ArgumentException(string.Format("{0} is not valid value for {1}", value, type));
+			if (type.IsEnum)			{ value = Enum.Parse( type, stringValue, true ); return true; }
+			if (type==typeof(String))	{ value = ToString  ( stringValue );	return true; }
+			if (type==typeof(Boolean))	{ value = ToBoolean ( stringValue );	return true; }
+			if (type==typeof(Int16)  )	{ value = ToInt16	( stringValue );	return true; }
+			if (type==typeof(Int32)  )	{ value = ToInt32	( stringValue );	return true; }
+			if (type==typeof(Int64)  )	{ value = ToInt64	( stringValue );	return true; }
+			if (type==typeof(Single) )	{ value = ToSingle	( stringValue );	return true; }
+			if (type==typeof(Double) )	{ value = ToDouble	( stringValue );	return true; }
+			if (type==typeof(Color)  )	{ value = ToColor	( stringValue );	return true; }
+			if (type==typeof(Color4) )	{ value = ToColor4	( stringValue );	return true; }
+			if (type==typeof(Double) )	{ value = ToDouble	( stringValue );	return true; }
+			if (type==typeof(Vector2))	{ value = ToVector2 ( stringValue );	return true; }
+			if (type==typeof(Vector3))	{ value = ToVector3 ( stringValue );	return true; }
+			if (type==typeof(Vector4))	{ value = ToVector4 ( stringValue );	return true; }
+			if (type==typeof(Half)   )	{ value = ToHalf	( stringValue );	return true; }
+			if (type==typeof(Half2)  )	{ value = ToHalf2	( stringValue );	return true; }
+			if (type==typeof(Half3)  )	{ value = ToHalf3	( stringValue );	return true; }
+			if (type==typeof(Half4)  )	{ value = ToHalf4	( stringValue );	return true; }
+
+			return false;
 		}
+
+
+
+		public static string ConvertToString( object value )
+		{
+			string stringValue;
+
+			if (!TryConvertToString( value, out stringValue )) {
+				throw new ArgumentException(string.Format("Can not convert {0} to string", value.GetType()));
+			}
+
+			return stringValue;
+		}
+
+
+
+		public static object ConvertFromString ( Type type, string stringValue )
+		{
+			object value;
+			
+			if (!TryConvertFromString( type, stringValue, out value )) {
+				throw new ArgumentException(string.Format("{0} is not valid value for {1}", stringValue, type));
+			}
+
+			return value;
+		}
+
+
+
 
 
 		public static T FromString<T>( string value )
 		{
-			return (T)FromString( typeof(T), value );
+			return (T)ConvertFromString( typeof(T), value );
 		}
-
-
-		/*public static string ToString( Bool value )
-		{
-			return value.ToString();
-		} */
 
 		public static string ToString( String value )
 		{
