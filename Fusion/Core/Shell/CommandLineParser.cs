@@ -16,9 +16,7 @@ namespace Fusion.Core.Shell
     /// </summary>
     public class CommandLineParser
     {
-		public CommandLineParserConfiguration Configuration { get; private set; }
-
-        object optionsObject;
+        readonly Type optionsObjectType;
 
         Queue<PropertyInfo> requiredOptions = new Queue<PropertyInfo>();
         Dictionary<string, PropertyInfo> optionalOptions = new Dictionary<string, PropertyInfo>();
@@ -33,25 +31,26 @@ namespace Fusion.Core.Shell
 		public IEnumerable<string> OptionalUsageHelp { get { return optionalUsageHelp; } }
 
 
-		char LeadingChar { get { return Configuration.OptionLeadingChar; } }
+		/// <summary>
+		/// Optional argument leading char. Could be '/' or '-'.
+		/// </summary>
+		public char OptionLeadingChar { get; set; }
 
         
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="optionsObject"></param>
+		/// <param name="optionsObjectType"></param>
 		/// <param name="throwException"></param>
-        public CommandLineParser( object optionsObject, string name = null )
+        public CommandLineParser( Type optionsObjectType, string name = null )
         {
-			Configuration = new CommandLineParserConfiguration();
-
-            this.optionsObject	= optionsObject;
+			OptionLeadingChar	=	'/';
 
 			this.name = name ?? Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().ProcessName);
 
             // Reflect to find what commandline options are available.
-            foreach (PropertyInfo field in optionsObject.GetType().GetProperties())
-            {
+            foreach (PropertyInfo field in optionsObjectType.GetProperties()) {
+
 				if ( GetAttribute<IgnoreAttribute>(field) != null ) {
 					continue;
 				}
@@ -59,24 +58,205 @@ namespace Fusion.Core.Shell
                 string fieldName = GetOptionName(field);
 				string fieldDesc = GetOptionDescription(field);
 
-                if (GetAttribute<RequiredAttribute>(field) != null)
-                {
+                if (GetAttribute<RequiredAttribute>(field) != null) {
                     // Record a required option.
                     requiredOptions.Enqueue(field);
 
                     requiredUsageHelp.Add(string.Format("<{0}>", fieldName));
-                }
-                else
-                {
+
+                } else {
                     // Record an optional option.
                     optionalOptions.Add(fieldName.ToLowerInvariant(), field);
   
-                    optionalUsageHelp.Add(string.Format("{0,-20}{1}", LeadingChar + fieldName + GetValueString(field), fieldDesc + GetEnumValues(field)));
+                    optionalUsageHelp.Add(string.Format("{0,-20}{1}", OptionLeadingChar + fieldName + GetValueString(field), fieldDesc + GetEnumValues(field)));
                 }
             }
         }
 
 
+		/// <summary>
+		/// http://stackoverflow.com/questions/298830/split-string-containing-command-line-parameters-into-string-in-c-sharp/298990#298990
+		/// </summary>
+		/// <param name="commandLine"></param>
+		/// <returns></returns>
+		public static IEnumerable<string> SplitCommandLine(string commandLine)
+		{
+			bool inQuotes = false;
+
+			return commandLine.Split(c =>
+									 {
+										 if (c == '\"')
+											 inQuotes = !inQuotes;
+
+										 return !inQuotes && c == ' ';
+									 })
+							  .Select(arg => arg.Trim().TrimMatchingQuotes('\"'))
+							  .Where(arg => !string.IsNullOrEmpty(arg));
+		}
+
+
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="message"></param>
+		/// <param name="args"></param>
+        public void PrintError(string message, params object[] args)
+        {
+            Log.Error(message, args);
+            Log.Error("");
+            Log.Error("Usage: {0} {1}", name, string.Join(" ", requiredUsageHelp));
+
+            if (optionalUsageHelp.Count > 0)
+            {
+                Log.Error("");
+
+                foreach (string optional in optionalUsageHelp)
+                {
+                    Log.Error("    {0}", optional);
+                }
+
+                Log.Error("");
+            }
+        }
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="optionsObject"></param>
+		/// <param name="args"></param>
+		/// <param name="errorString"></param>
+		/// <returns></returns>
+		public bool TryParseCommandLine ( object optionsObject, string[] args, out string errorMessage )
+		{
+			errorMessage = default(string);
+
+            // Parse each argument in turn.
+            foreach ( string arg in args ) {
+                if ( !ParseArgument( optionsObject, arg.Trim(), ref errorMessage ) ) {
+                    return false;
+                }
+            }
+
+            // Make sure we got all the required options.
+            PropertyInfo missingRequiredOption = requiredOptions.FirstOrDefault(field => !IsList(field) || GetList(optionsObject,field).Count == 0);
+
+            if (missingRequiredOption != null) {
+                errorMessage = string.Format("Missing argument '{0}' - {1}", GetOptionName(missingRequiredOption), GetOptionDescription(missingRequiredOption));
+                return false;
+            }
+
+            return true;
+		}
+
+
+
+		/// <summary>
+		/// Parses given args.
+		/// In case of error return false and prints error message.
+		/// </summary>
+		/// <param name="args"></param>
+		/// <returns></returns>
+        public void ParseCommandLine(object optionsObject, string[] args)
+        {
+			string errorMessage;
+
+			if (!TryParseCommandLine( optionsObject, args, out errorMessage )) {
+				throw new CommandLineParserException( errorMessage );
+			}
+        }
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="arg"></param>
+		/// <returns></returns>
+        bool ParseArgument(object optionsObject, string arg, ref string errorMessage )
+        {
+            if (arg.StartsWith( new string(OptionLeadingChar,1) ))
+            {
+                // Parse an optional argument.
+                char[] separators = { ':' };
+
+                string[] split = arg.Substring(1).Split(separators, 2, StringSplitOptions.None);
+
+                string name = split[0];
+                string value = (split.Length > 1) ? split[1].TrimMatchingQuotes('\"') : "true";
+
+                PropertyInfo field;
+
+                if (!optionalOptions.TryGetValue(name.ToLowerInvariant(), out field))
+                {
+                    errorMessage = string.Format("Unknown option '{0}'", name);
+                    return false;
+                }
+
+                return SetOption(optionsObject, field, value, ref errorMessage);
+            }
+            else
+            {
+                // Parse a required argument.
+                if (requiredOptions.Count == 0) {
+                    errorMessage	=	"Too many arguments";
+                    return false;
+                }
+
+                PropertyInfo field = requiredOptions.Peek();
+
+                if (!IsList(field)) {
+                    requiredOptions.Dequeue();
+                }
+
+                return SetOption(optionsObject, field, arg, ref errorMessage);
+            }
+        }
+
+
+
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="field"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+        bool SetOption(object optionsObject, PropertyInfo field, string value, ref string errorMessage )
+        {
+            try
+            {
+                if (IsList(field))
+                {
+                    // Append this value to a list of options.
+                    GetList(optionsObject,field).Add(ChangeType(value, ListElementType(field)));
+                }
+                else
+                {
+                    // Set the value of a single option.
+                    field.SetValue(optionsObject, ChangeType(value, field.PropertyType));
+                }
+
+                return true;
+            }
+            catch
+            {
+                errorMessage = string.Format("Invalid value '{0}' for option '{1}'", value, GetOptionName(field));
+                return false;
+            }
+        }
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="pi"></param>
+		/// <returns></returns>
 		string GetValueString ( PropertyInfo pi ) 
 		{
 			if (pi.PropertyType == typeof(bool)) {
@@ -102,6 +282,12 @@ namespace Fusion.Core.Shell
 		}
 
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="pi"></param>
+		/// <returns></returns>
 		string GetEnumValues ( PropertyInfo pi ) 
 		{
 			if (pi.PropertyType.IsEnum) {	
@@ -109,137 +295,6 @@ namespace Fusion.Core.Shell
 			}
 			return "";
 		}
-
-
-		/// <summary>
-		/// http://stackoverflow.com/questions/298830/split-string-containing-command-line-parameters-into-string-in-c-sharp/298990#298990
-		/// </summary>
-		/// <param name="commandLine"></param>
-		/// <returns></returns>
-		public static IEnumerable<string> SplitCommandLine(string commandLine)
-		{
-			bool inQuotes = false;
-
-			return commandLine.Split(c =>
-									 {
-										 if (c == '\"')
-											 inQuotes = !inQuotes;
-
-										 return !inQuotes && c == ' ';
-									 })
-							  .Select(arg => arg.Trim().TrimMatchingQuotes('\"'))
-							  .Where(arg => !string.IsNullOrEmpty(arg));
-		}
-
-
-
-		/// <summary>
-		/// Parses given args.
-		/// In case of error return false and prints error message.
-		/// </summary>
-		/// <param name="args"></param>
-		/// <returns></returns>
-        public bool ParseCommandLine(string[] args)
-        {
-            // Parse each argument in turn.
-            foreach (string arg in args) {
-                if (!ParseArgument(arg.Trim())) {
-                    return false;
-                }
-            }
-
-            // Make sure we got all the required options.
-            PropertyInfo missingRequiredOption = requiredOptions.FirstOrDefault(field => !IsList(field) || GetList(field).Count == 0);
-
-            if (missingRequiredOption != null) {
-                ShowError("Missing argument '{0}' - {1}", GetOptionName(missingRequiredOption), GetOptionDescription(missingRequiredOption));
-                return false;
-            }
-
-            return true;
-        }
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="arg"></param>
-		/// <returns></returns>
-        bool ParseArgument(string arg)
-        {
-            if (arg.StartsWith( new string(LeadingChar,1) ))
-            {
-                // Parse an optional argument.
-                char[] separators = { ':' };
-
-                string[] split = arg.Substring(1).Split(separators, 2, StringSplitOptions.None);
-
-                string name = split[0];
-                string value = (split.Length > 1) ? split[1].TrimMatchingQuotes('\"') : "true";
-
-                PropertyInfo field;
-
-                if (!optionalOptions.TryGetValue(name.ToLowerInvariant(), out field))
-                {
-                    ShowError("Unknown option '{0}'", name);
-                    return false;
-                }
-
-                return SetOption(field, value);
-            }
-            else
-            {
-                // Parse a required argument.
-                if (requiredOptions.Count == 0)
-                {
-                    ShowError("Too many arguments");
-                    return false;
-                }
-
-                PropertyInfo field = requiredOptions.Peek();
-
-                if (!IsList(field))
-                {
-                    requiredOptions.Dequeue();
-                }
-
-                return SetOption(field, arg);
-            }
-        }
-
-
-
-		
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="field"></param>
-		/// <param name="value"></param>
-		/// <returns></returns>
-        bool SetOption(PropertyInfo field, string value)
-        {
-            try
-            {
-                if (IsList(field))
-                {
-                    // Append this value to a list of options.
-                    GetList(field).Add(ChangeType(value, ListElementType(field)));
-                }
-                else
-                {
-                    // Set the value of a single option.
-                    field.SetValue(optionsObject, ChangeType(value, field.PropertyType));
-                }
-
-                return true;
-            }
-            catch
-            {
-                ShowError("Invalid value '{0}' for option '{1}'", value, GetOptionName(field));
-                return false;
-            }
-        }
 
 
 
@@ -275,7 +330,7 @@ namespace Fusion.Core.Shell
 		/// </summary>
 		/// <param name="field"></param>
 		/// <returns></returns>
-        IList GetList(PropertyInfo field)
+        IList GetList(object optionsObject, PropertyInfo field)
         {
             return (IList)field.GetValue(optionsObject);
         }
@@ -343,36 +398,6 @@ namespace Fusion.Core.Shell
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="message"></param>
-		/// <param name="args"></param>
-        public void ShowError(string message, params object[] args)
-        {
-			if (Configuration.ThrowExceptionOnShowError) {
-				throw new CommandLineParserException( string.Format( message, args ) );
-			}
-
-            Log.Error(message, args);
-            Log.Error("");
-            Log.Error("Usage: {0} {1}", name, string.Join(" ", requiredUsageHelp));
-
-            if (optionalUsageHelp.Count > 0)
-            {
-                Log.Error("");
-
-                foreach (string optional in optionalUsageHelp)
-                {
-                    Log.Error("    {0}", optional);
-                }
-
-                Log.Error("");
-            }
-        }
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="provider"></param>
 		/// <returns></returns>
@@ -380,6 +405,7 @@ namespace Fusion.Core.Shell
         {
             return provider.GetCustomAttributes(typeof(T), false).OfType<T>().FirstOrDefault();
         }
+
 
 
 		/// <summary>

@@ -155,7 +155,6 @@
     <Compile Include="Build\Processors\UbershaderProcessor.cs" />
     <Compile Include="Build\Processors\UbershaderProcessor.Parser.cs" />
     <Compile Include="Build\ToolException.cs" />
-    <Compile Include="Core\Shell\CommandLineParserConfiguration.cs" />
     <Compile Include="Development\Dashboard.Config.cs">
       <DependentUpon>Dashboard.cs</DependentUpon>
       <SubType>Form</SubType>

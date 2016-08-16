@@ -25,14 +25,12 @@ namespace FScene {
 			Log.AddListener( new StdLogListener() );
 
 			var options = new Options();
-			var parser = new CommandLineParser( options );
+			var parser = new CommandLineParser( options.GetType() );
 
 			try {
 
 				//	parse arguments :
-				if (!parser.ParseCommandLine( args )) {
-					return 1;
-				}
+				parser.ParseCommandLine( options, args );
 
 				//	change extension of output not set :
 				if (options.Output==null) {
@@ -102,7 +100,7 @@ namespace FScene {
 				Log.Message("Done.");
 
 			} catch ( Exception e ) {
-				parser.ShowError( "{0}", e.ToString() );
+				parser.PrintError( "{0}", e.ToString() );
 
 				if (options.Wait) {
 					Log.Message("Press any key to continue...");

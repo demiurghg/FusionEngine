@@ -101,10 +101,12 @@ namespace Fusion.Core.Shell {
 				}
 				var command	=	GetCommand( cmdName );
 
-				var parser	=	new CommandLineParser( command, cmdName );
+				var parser	=	new CommandLineParser( command.GetType(), cmdName );
 
-				if (!parser.ParseCommandLine( argList )) {
-					throw new CommandLineParserException("Failed to parse command line");
+				string error;
+
+				if (!parser.TryParseCommandLine( command, argList, out error )) {
+					throw new CommandLineParserException("Failed to parse command line: " + error );
 				}
 
 				Push( command );

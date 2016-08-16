@@ -32,7 +32,7 @@ namespace FBuild {
 			Log.AddListener( new StdLogListener() );
 
 			var options = new BuildOptions();
-			var parser = new CommandLineParser( options );
+			var parser = new CommandLineParser( typeof(BuildOptions) );
 
 
 			try {
@@ -42,15 +42,14 @@ namespace FBuild {
 					return 0;
 				}
 
-				if ( !parser.ParseCommandLine( args ) ) {
-					return 1;
-				}
+				string error;
+
+				parser.ParseCommandLine( options, args );
 
 				Builder.Build( options );
 
-
 			} catch ( Exception ex ) {
-				parser.ShowError( ex.Message );
+				parser.PrintError( ex.Message );
 				return 1;
 			}
 
@@ -90,7 +89,7 @@ namespace FBuild {
 	            Log.Message("");
 									 
 				var proc = bind.CreateAssetProcessor();
-				var prs  = new CommandLineParser( proc, bind.Name );
+				var prs  = new CommandLineParser( proc.GetType(), bind.Name );
 
 				if (prs.OptionalUsageHelp.Any()) {
 					foreach (string optional in prs.OptionalUsageHelp) {

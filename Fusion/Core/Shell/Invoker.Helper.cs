@@ -129,7 +129,7 @@ namespace Fusion.Core.Shell {
 			}
 
 			var cmd = GetCommand(commandName);
-			var parser = new CommandLineParser(cmd, commandName);
+			var parser = new CommandLineParser(cmd.GetType(), commandName);
 
 			suggestion.Add( commandName + " " + string.Join(" ", parser.RequiredUsageHelp ) );
 			suggestion.Add( "" );

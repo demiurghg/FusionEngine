@@ -552,11 +552,10 @@ namespace Fusion.Build {
 				Log.Message("{0,-40} {1,-5}   {3}", keyPath, Path.GetExtension(keyPath), string.Join(" ", args), assetFile.Hash );
 
 				// Apply attribute :
-				var parser =	new CommandLineParser( processor );
-				parser.Configuration.OptionLeadingChar = '/';
-				parser.Configuration.ThrowExceptionOnShowError = true;
+				var parser =	new CommandLineParser( processor.GetType() );
+				parser.OptionLeadingChar = '/';
 
-				parser.ParseCommandLine( args );
+				parser.ParseCommandLine( processor, args );
 
 				//
 				//	Build :
