@@ -301,6 +301,8 @@ namespace Fusion.Framework {
 					case LogMessageType.Information : color = MessageColor; break;
 					case LogMessageType.Error		: color = ErrorColor;   break;
 					case LogMessageType.Warning		: color = WarningColor; break;
+					case LogMessageType.Verbose		: color = VerboseColor; break;
+					case LogMessageType.Debug		: color = DebugColor;   break;
 				}
 				
 

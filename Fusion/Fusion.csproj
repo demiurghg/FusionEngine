@@ -128,13 +128,14 @@
     <Compile Include="Build2\ContentProject.cs" />
     <Compile Include="Build2\ShaderBuilder.cs" />
     <Compile Include="Build\AssetSource.cs" />
-    <Compile Include="Build\BuildContentCmd.cs" />
-    <Compile Include="Build\BuildContentFileCmd.cs" />
+    <Compile Include="Build\ContentBuildCmd.cs" />
+    <Compile Include="Build\ContentFileCmd.cs" />
     <Compile Include="Build\BuildContext.cs" />
     <Compile Include="Build\Builder.cs" />
     <Compile Include="Build\BuildException.cs" />
     <Compile Include="Build\BuildOptions.cs" />
     <Compile Include="Build\BuildResult.cs" />
+    <Compile Include="Build\ContentReportCmd.cs" />
     <Compile Include="Build\Mapping\MapProcessor.cs" />
     <Compile Include="Build\Mapping\MapScene.cs" />
     <Compile Include="Build\Mapping\MapTexture.cs" />

@@ -8,9 +8,20 @@ using System.Xml.Serialization;
 using System.Windows.Forms;
 using System.Reflection;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Fusion.Core.Extensions {
 	public static class Misc {
+
+		public static void ShellExecute ( string path, bool wait = false )
+		{
+			ProcessStartInfo psi = new ProcessStartInfo(path);
+			psi.UseShellExecute = true;
+			var proc = Process.Start(psi);
+			if (wait) {
+				proc.WaitForExit();
+			}
+		}
 
 		/// <summary>
 		/// https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Longest_common_substring#Retrieve_the_Longest_Substring

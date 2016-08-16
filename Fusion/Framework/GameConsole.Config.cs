@@ -25,6 +25,8 @@ namespace Fusion.Framework {
 		[Config] public Color WarningColor	{ get; set; }
 		[Config] public Color CmdLineColor	{ get; set; }
 		[Config] public Color VersionColor	{ get; set; }
+		[Config] public Color VerboseColor	{ get; set; }
+		[Config] public Color DebugColor	{ get; set; }
 
 		[Config] public Color BackColor		{ get; set; }
 		[Config] public Color HelpColor		{ get; set; }
@@ -51,7 +53,9 @@ namespace Fusion.Framework {
 			ErrorColor		=	Color.Red;
 			WarningColor	=	Color.Yellow;
 			CmdLineColor	=	Color.Orange;
-			VersionColor	=	new Color(255,255,255,64);
+			VersionColor	=	new Color(255,255,255, 64);
+			VerboseColor	=	new Color(255,255,255,128);
+			DebugColor		=	new Color(255,255,255, 64);
 
 			BackColor		=	new Color(0,0,0,224);
 			HelpColor		=	Color.Gray;
