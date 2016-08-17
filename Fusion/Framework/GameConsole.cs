@@ -219,15 +219,15 @@ namespace Fusion.Framework {
 
 			//consoleFont.DrawString( editLayer, "]" + editBox.Text, 0,0, Config.CmdLineColor );
 			//consoleFont.DrawString( editLayer, "_", charWidth + charWidth * editBox.Cursor, 0, cursorColor );
-			DrawString( editLayer, 0, 0,										"]" + editBox.Text, CmdLineColor );
-			DrawString( editLayer, charWidth + charWidth * editBox.Cursor,	0,  "_", cursorColor );
+			DrawString( editLayer, charWidth/2, -charHeight/2,										"]" + editBox.Text, CmdLineColor );
+			DrawString( editLayer, charWidth + charWidth/2 + charWidth * editBox.Cursor,	-charHeight/2,  "_", cursorColor );
 
 
 			var version = Game.GetReleaseInfo();
-			DrawString( editLayer, vp.Width - charWidth * version.Length, -charHeight, version, VersionColor);
+			DrawString( editLayer, vp.Width - charWidth/2 - charWidth * version.Length, -charHeight - charHeight/2, version, VersionColor);
 
 			var frameRate = string.Format("fps = {0,7:0.00}", gameTime.Fps);
-			DrawString( editLayer, vp.Width - charWidth * frameRate.Length, 0, frameRate, VersionColor);
+			DrawString( editLayer, vp.Width - charWidth/2 - charWidth * frameRate.Length, -charHeight/2, frameRate, VersionColor);
 
 			
 			//
@@ -239,7 +239,7 @@ namespace Fusion.Framework {
 
 				var x = 0;
 				var y = charHeight+1;
-				var w = (candidates.Max( s => s.Length ) + 2) * charWidth;
+				var w = (candidates.Max( s => s.Length ) + 4) * charWidth;
 				var h = (candidates.Count() + 1) * charHeight;
 
 				w = Math.Max( w, charWidth * 16 );
@@ -248,7 +248,7 @@ namespace Fusion.Framework {
 
 				int line = 0;
 				foreach (var candidate in candidates ) {
-					DrawString( editLayer, x + charWidth, y + charHeight * line, candidate, HelpColor );
+					DrawString( editLayer, x + charWidth + charWidth/2, y + charHeight * line, candidate, HelpColor );
 					line ++;
 				}
 			}
@@ -306,7 +306,7 @@ namespace Fusion.Framework {
 				}
 				
 
-				DrawString( consoleLayer, 0, vp.Height/2 - (count+2) * charHeight, line.MessageText, color );
+				DrawString( consoleLayer, charWidth/2, vp.Height/2 - (count+2) * charHeight, line.MessageText, color );
 				//consoleFont.DrawString( consoleLayer, line.Message, , color );
 
 				if (count>rows) {
