@@ -18,7 +18,7 @@ namespace Fusion.Core.Shell
     {
         readonly Type optionsObjectType;
 
-        Queue<PropertyInfo> requiredOptions = new Queue<PropertyInfo>();
+        List<PropertyInfo> requiredOptions = new List<PropertyInfo>();
         Dictionary<string, PropertyInfo> optionalOptions = new Dictionary<string, PropertyInfo>();
 
         List<string> requiredUsageHelp = new List<string>();
@@ -44,6 +44,8 @@ namespace Fusion.Core.Shell
 		/// <param name="throwException"></param>
         public CommandLineParser( Type optionsObjectType, string name = null )
         {
+			PropertyInfo tailRequiredOptions = null;
+
 			OptionLeadingChar	=	'/';
 
 			this.name = name ?? Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().ProcessName);
@@ -59,10 +61,18 @@ namespace Fusion.Core.Shell
 				string fieldDesc = GetOptionDescription(field);
 
                 if (GetAttribute<RequiredAttribute>(field) != null) {
-                    // Record a required option.
-                    requiredOptions.Enqueue(field);
 
-                    requiredUsageHelp.Add(string.Format("<{0}>", fieldName));
+					if (IsList(field)) {
+						if (tailRequiredOptions!=null) {
+							throw new ArgumentException(string.Format("Type {0} may contain only one required List<T>", optionsObjectType));
+						}
+
+						tailRequiredOptions	=	field;
+					} else {
+	                    // Record a required option.
+		                requiredOptions.Add(field);
+			            requiredUsageHelp.Add(string.Format("<{0}>", fieldName));
+					}
 
                 } else {
                     // Record an optional option.
@@ -71,6 +81,12 @@ namespace Fusion.Core.Shell
                     optionalUsageHelp.Add(string.Format("{0,-20}{1}", OptionLeadingChar + fieldName + GetValueString(field), fieldDesc + GetEnumValues(field)));
                 }
             }
+
+			if (tailRequiredOptions!=null) {
+				var tailname = 	GetOptionName(tailRequiredOptions);
+				requiredUsageHelp.Add( string.Format("{0}[,...]", tailname) );
+				requiredOptions.Add( tailRequiredOptions );
+			}
         }
 
 
@@ -124,6 +140,8 @@ namespace Fusion.Core.Shell
 
 
 
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -134,21 +152,22 @@ namespace Fusion.Core.Shell
 		public bool TryParseCommandLine ( object optionsObject, string[] args, out string errorMessage )
 		{
 			errorMessage = default(string);
+			var iterator = requiredOptions.GetEnumerator();
 
             // Parse each argument in turn.
             foreach ( string arg in args ) {
-                if ( !ParseArgument( optionsObject, arg.Trim(), ref errorMessage ) ) {
+                if ( !ParseArgument( optionsObject, arg.Trim(), ref iterator, ref errorMessage ) ) {
                     return false;
                 }
             }
 
             // Make sure we got all the required options.
-            PropertyInfo missingRequiredOption = requiredOptions.FirstOrDefault(field => !IsList(field) || GetList(optionsObject,field).Count == 0);
 
-            if (missingRequiredOption != null) {
-                errorMessage = string.Format("Missing argument '{0}' - {1}", GetOptionName(missingRequiredOption), GetOptionDescription(missingRequiredOption));
-                return false;
-            }
+			if (iterator.MoveNext()) {
+				var missingRequiredOption = iterator.Current;
+				errorMessage = string.Format("Missing argument '{0}' - {1}", GetOptionName(missingRequiredOption), GetOptionDescription(missingRequiredOption));
+				return false;
+			}
 
             return true;
 		}
@@ -177,7 +196,7 @@ namespace Fusion.Core.Shell
 		/// </summary>
 		/// <param name="arg"></param>
 		/// <returns></returns>
-        bool ParseArgument(object optionsObject, string arg, ref string errorMessage )
+        bool ParseArgument(object optionsObject, string arg, ref List<PropertyInfo>.Enumerator iterator, ref string errorMessage )
         {
             if (arg.StartsWith( new string(OptionLeadingChar,1) ))
             {
@@ -201,19 +220,16 @@ namespace Fusion.Core.Shell
             }
             else
             {
-                // Parse a required argument.
-                if (requiredOptions.Count == 0) {
-                    errorMessage	=	"Too many arguments";
-                    return false;
-                }
+				if (!iterator.MoveNext()) {
+					if (!IsList(iterator.Current)) {
+						errorMessage	=	"Too many arguments";
+						return false;
+					}
+				}
 
-                PropertyInfo field = requiredOptions.Peek();
+				PropertyInfo field = iterator.Current;
 
-                if (!IsList(field)) {
-                    requiredOptions.Dequeue();
-                }
-
-                return SetOption(optionsObject, field, arg, ref errorMessage);
+				return SetOption(optionsObject, field, arg, ref errorMessage);
             }
         }
 

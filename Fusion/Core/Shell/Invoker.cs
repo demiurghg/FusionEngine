@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Fusion.Core.Configuration;
 using Fusion.Core.Extensions;
 using Fusion.Engine.Common;
+using System.Diagnostics;
 
 
 namespace Fusion.Core.Shell {
@@ -21,9 +22,21 @@ namespace Fusion.Core.Shell {
 		/// </summary>
 		public object Context { get; private set; }
 
-		Dictionary<string, Type> commands;
+		Dictionary<string, CommandBinding> commands;
 
 		object lockObject = new object();
+
+		class CommandBinding {
+			
+			public readonly Type CommandType;
+			public readonly CommandLineParser Parser;
+
+			public CommandBinding ( Type type, CommandLineParser parser ) 
+			{
+				CommandType = type;
+				Parser = parser;
+			}
+		}
 
 		Queue<Command> queue	= new Queue<Command>(10000);
 		Queue<Command> delayed	= new Queue<Command>(10000);
@@ -59,7 +72,8 @@ namespace Fusion.Core.Shell {
 			commands	=	types
 						.Where( t1 => t1.IsSubclassOf(typeof(Command)) )
 						.Where( t2 => t2.HasAttribute<CommandAttribute>() )
-						.ToDictionary( t3 => t3.GetCustomAttribute<CommandAttribute>().Name );
+						.Select( t3 => new { Name = t3.GetCustomAttribute<CommandAttribute>().Name, Type = t3 } )
+						.ToDictionary( pair => pair.Name, pair => new CommandBinding( pair.Type, new CommandLineParser( pair.Type, pair.Name ) ) );
 
 			CommandList	=	commands.Select( cmd => cmd.Key ).OrderBy( name => name ).ToArray();
 						
@@ -70,6 +84,7 @@ namespace Fusion.Core.Shell {
 
 		/// <summary>
 		/// Parses and pushes command to the queue.
+		/// http://stackoverflow.com/questions/6417598/why-subsequent-direct-method-call-is-much-faster-than-the-first-call
 		/// </summary>
 		/// <param name="commandLine"></param>
 		/// <returns></returns>
@@ -85,7 +100,10 @@ namespace Fusion.Core.Shell {
 
 			var cmdName	=	argList[0];
 			argList		=	argList.Skip(1).ToArray();
+
+			var	sw		=	new Stopwatch();
 			
+			sw.Start();
 
 			lock (lockObject) {
 
@@ -99,9 +117,9 @@ namespace Fusion.Core.Shell {
 						return Push( string.Format("set {0} \"{1}\"", cmdName, string.Join(" ", argList) ) );
 					}
 				}
-				var command	=	GetCommand( cmdName );
 
-				var parser	=	new CommandLineParser( command.GetType(), cmdName );
+				var command	=	GetCommand( cmdName );
+				var parser	=	GetParser( cmdName );
 
 				string error;
 
@@ -110,6 +128,9 @@ namespace Fusion.Core.Shell {
 				}
 
 				Push( command );
+
+				sw.Stop();
+				Log.Message("{0} ms", sw.Elapsed.TotalMilliseconds );
 
 				return command;
 			}
@@ -155,10 +176,28 @@ namespace Fusion.Core.Shell {
 		/// <returns></returns>
 		internal Command GetCommand ( string name )
 		{
-			Type cmdType;
+			CommandBinding binding;
 
-			if (commands.TryGetValue( name, out cmdType )) {
-				return (Command)Activator.CreateInstance( cmdType, this );
+			if (commands.TryGetValue( name, out binding )) {
+				return (Command)Activator.CreateInstance( binding.CommandType, this );
+			}
+			
+			throw new InvalidOperationException(string.Format("Unknown command '{0}'.", name));
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		internal CommandLineParser GetParser ( string name )
+		{
+			CommandBinding binding;
+
+			if (commands.TryGetValue( name, out binding )) {
+				return binding.Parser;
 			}
 			
 			throw new InvalidOperationException(string.Format("Unknown command '{0}'.", name));
