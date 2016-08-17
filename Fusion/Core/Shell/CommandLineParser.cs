@@ -23,6 +23,7 @@ namespace Fusion.Core.Shell
 
         List<string> requiredUsageHelp = new List<string>();
         List<string> optionalUsageHelp = new List<string>();
+		PropertyInfo tailRequiredOptions = null;
 
 		readonly string name;
 
@@ -44,7 +45,6 @@ namespace Fusion.Core.Shell
 		/// <param name="throwException"></param>
         public CommandLineParser( Type optionsObjectType, string name = null )
         {
-			PropertyInfo tailRequiredOptions = null;
 
 			OptionLeadingChar	=	'/';
 
@@ -221,15 +221,18 @@ namespace Fusion.Core.Shell
             else
             {
 				if (!iterator.MoveNext()) {
-					if (!IsList(iterator.Current)) {
+					if (tailRequiredOptions==null) {
 						errorMessage	=	"Too many arguments";
 						return false;
+					} else {
+						return SetOption( optionsObject, tailRequiredOptions, arg, ref errorMessage );
 					}
+				} else {
+	
+					PropertyInfo field = iterator.Current;
+
+					return SetOption(optionsObject, field, arg, ref errorMessage);
 				}
-
-				PropertyInfo field = iterator.Current;
-
-				return SetOption(optionsObject, field, arg, ref errorMessage);
             }
         }
 
