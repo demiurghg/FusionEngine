@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core.Configuration;
 using Fusion.Engine.Common;
+using System.Reflection;
 
 
 namespace Fusion.Core.Shell {
@@ -114,6 +115,16 @@ namespace Fusion.Core.Shell {
 		
 
 
+		void AddCommandHelp ( Suggestion suggestion, CommandLineParser parser, string commandName )
+		{
+			suggestion.Add( commandName + " " + string.Join(" ", parser.RequiredUsageHelp ) );
+			suggestion.Add( "" );
+			suggestion.Add( "options : " );
+			suggestion.AddRange( parser.OptionalUsageHelp.Select( opt => "   " + opt ) );
+		}
+
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -124,19 +135,111 @@ namespace Fusion.Core.Shell {
 		{
 			var suggestion = new Suggestion(input);
 
-			if (args.Length==1) {
-				suggestion = new Suggestion(args[0] + " ");
+			var cmd		=	GetCommand(commandName);
+			var parser	=	GetParser(commandName);
+
+			if (args.Length==1 || input.Last()==' ') {
+
+				suggestion.CommandLine = ArgsToString( args ) + " ";
+				AddCommandHelp( suggestion, parser, commandName );
+
+				return suggestion;
 			}
 
-			var cmd = GetCommand(commandName);
-			var parser = new CommandLineParser(cmd.GetType(), commandName);
 
-			suggestion.Add( commandName + " " + string.Join(" ", parser.RequiredUsageHelp ) );
-			suggestion.Add( "" );
-			suggestion.Add( "options : " );
-			suggestion.AddRange( parser.OptionalUsageHelp.Select( opt => "   " + opt ) );
+			var lastArg = args.Last();
+
+			if (lastArg.StartsWith("/")) {
+
+				var name	=   lastArg.Substring(1);
+				var index	=	name.IndexOf(':');	
+
+				if (index!=-1) {
+					name	=	name.Substring(0, index);
+				}
+
+				var candidates = new string[0];
+				var options	=	parser.Options;
+				PropertyInfo pi;
+
+				if ( options.TryGetValue( name, out pi ) ) {
+					if (pi.PropertyType==typeof(bool)) {
+		
+						suggestion.CommandLine = ArgsToString( args ) + " ";
+						AddCommandHelp( suggestion, parser, commandName );
+						return suggestion;
+		
+					} else {
+		
+						if (index==-1) {
+							suggestion.CommandLine = ArgsToString( args ) + ":";
+							AddCommandHelp( suggestion, parser, commandName );
+							return suggestion;
+						} else {
+							var value = lastArg.Substring(index+2);
+							candidates = cmd.Suggest( pi.PropertyType, name ).ToArray();
+							value = LongestCommon( value, ref candidates );
+							suggestion.AddRange( candidates );
+							suggestion.CommandLine	= ArgsToString( args, "/" + name + ":" + value );
+							return suggestion;
+						}
+					}
+				}
+				
+				candidates = options
+					.Select( p => "/" + p.Key )
+					.OrderBy( n => n ).ToArray();
+
+				lastArg = LongestCommon( lastArg, ref candidates );
+
+				suggestion.AddRange(candidates);
+
+				suggestion.CommandLine	= ArgsToString( args, lastArg );
+
+			} else {
+
+				var candidates	=	new string[0];
+				int index		=	args.Skip(1).Count( arg => !arg.StartsWith("/") ) - 1;
+				int required	=	parser.Required.Count;
+
+				if (index < required) {
+					
+					PropertyInfo pi	=	parser.Required[index];
+
+					var name	=	CommandLineParser.GetOptionName( pi );
+					var type	=	CommandLineParser.GetOptionType( pi );
+
+					candidates	=	cmd.Suggest( type, name ).ToArray();
+
+					lastArg		=	LongestCommon( lastArg, ref candidates );
+
+					suggestion.AddRange(candidates);
+
+					suggestion.CommandLine	= ArgsToString( args, lastArg );
+
+				} else {
+					
+				}
+			}
+
 			
 			return suggestion;
+		}
+
+
+
+		/// <summary>
+		///		
+		/// </summary>
+		/// <param name="args"></param>
+		/// <param name="lastArg"></param>
+		/// <returns></returns>
+		string ArgsToString ( string[] args, string lastArg = null )
+		{
+			if (lastArg!=null) {
+				args[ args.Length-1 ] = lastArg;
+			}
+			return string.Join( " ", args.Select( arg => arg.Any( ch=> char.IsWhiteSpace(ch) ) ? "\"" + arg + "\"" : arg ) );
 		}
 
 
@@ -180,11 +283,7 @@ namespace Fusion.Core.Shell {
 			//
 			//	Select candidates that starts with entered value.
 			//
-			candidates = candidates
-				.Where( c => c.StartsWith( args[1], StringComparison.OrdinalIgnoreCase) )
-				.ToArray();
-
-			var longest = LongestCommon( candidates );
+			var longest = LongestCommon( args[1], ref candidates );
 
 
 			suggestion.AddRange( candidates.Select( c1 => args[0] + " " + c1 ) );
@@ -206,6 +305,17 @@ namespace Fusion.Core.Shell {
 
 
 
+		string LongestCommon ( string input, ref string[] candidates )
+		{
+			candidates = candidates
+				.Where( c => c.StartsWith( input, StringComparison.OrdinalIgnoreCase) )
+				.ToArray();
+
+			return LongestCommon( candidates );
+		}
+
+
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -213,11 +323,39 @@ namespace Fusion.Core.Shell {
 		/// <returns></returns>
 		string LongestCommon( IEnumerable<string> values )
 		{
-			string longest = null;
-			foreach ( var value in values ) {
-				longest = LongestCommon( longest, value );
+			return longestCommonPrefix( values.ToArray() );
+			//string longest = null;
+			//foreach ( var value in values ) {
+			//	longest = LongestCommon( longest, value );
+			//}
+			//return longest;
+		}
+
+
+		/// <summary>
+		/// http://stackoverflow.com/questions/8578349/longest-common-prefix-for-n-string
+		/// </summary>
+		/// <param name="strs"></param>
+		/// <returns></returns>
+		public String longestCommonPrefix(String[] strs) {
+			if(strs.Length==0) return "";
+			String minStr=strs[0];
+
+			for(int i=1;i<strs.Length;i++){
+				if(strs[i].Length<minStr.Length)
+					minStr=strs[i];
 			}
-			return longest;
+			int end=minStr.Length;
+			for(int i=0;i<strs.Length;i++){
+				int j;
+				for( j=0;j<end;j++){
+					if(char.ToLowerInvariant(minStr[j])!=char.ToLowerInvariant(strs[i][j]))
+						break;
+				}
+				if(j<end)
+					end=j;
+			}
+			return minStr.Substring(0,end);
 		}
 
 

@@ -31,7 +31,7 @@ namespace Fusion.Core.Shell {
 			public readonly Type CommandType;
 			public readonly CommandLineParser Parser;
 
-			public CommandBinding ( Type type, CommandLineParser parser ) 
+			public CommandBinding ( Invoker invoker, Type type, CommandLineParser parser ) 
 			{
 				CommandType = type;
 				Parser = parser;
@@ -73,7 +73,7 @@ namespace Fusion.Core.Shell {
 						.Where( t1 => t1.IsSubclassOf(typeof(Command)) )
 						.Where( t2 => t2.HasAttribute<CommandAttribute>() )
 						.Select( t3 => new { Name = t3.GetCustomAttribute<CommandAttribute>().Name, Type = t3 } )
-						.ToDictionary( pair => pair.Name, pair => new CommandBinding( pair.Type, new CommandLineParser( pair.Type, pair.Name ) ) );
+						.ToDictionary( pair => pair.Name, pair => new CommandBinding( this, pair.Type, new CommandLineParser( pair.Type, pair.Name ) ) );
 
 			CommandList	=	commands.Select( cmd => cmd.Key ).OrderBy( name => name ).ToArray();
 						
@@ -228,7 +228,7 @@ namespace Fusion.Core.Shell {
 							cmd.Execute();
 
 							if (cmd.Result!=null) {
-								Log.Message( "// Result: {0} //", cmd.GetStringResult() );
+								Log.Message( "// Result: {0} //", cmd.Result );
 							}
 
 							//	push to history :

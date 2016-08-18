@@ -23,6 +23,7 @@ namespace Fusion.Core.Shell
 
         List<string> requiredUsageHelp = new List<string>();
         List<string> optionalUsageHelp = new List<string>();
+		List<string> optionsList = new List<string>();
 		PropertyInfo tailRequiredOptions = null;
 
 		readonly string name;
@@ -31,6 +32,8 @@ namespace Fusion.Core.Shell
 		public IEnumerable<string> RequiredUsageHelp { get { return requiredUsageHelp; } }
 		public IEnumerable<string> OptionalUsageHelp { get { return optionalUsageHelp; } }
 
+		public IDictionary<string,PropertyInfo> Options { get { return optionalOptions; } }
+		public IList<PropertyInfo> Required { get { return requiredOptions; } }
 
 		/// <summary>
 		/// Optional argument leading char. Could be '/' or '-'.
@@ -88,6 +91,36 @@ namespace Fusion.Core.Shell
 				requiredOptions.Add( tailRequiredOptions );
 			}
         }
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="index"></param>
+		/// <param name="name"></param>
+		/// <param name="type"></param>
+		/*public bool GetCurrentExpectedNameAndType ( string[] args, out string name, out Type type )
+		{
+			if (args.Length==1) {
+				if (requiredOptions.Any()) {
+					name	=	GetOptionName( requiredOptions.First() );
+					type	=	GetOptionType( requiredOptions.First() );
+					return true;
+				} else if (optionalOptions.Any()) {
+					name	=	GetOptionName( optionalOptions.First().Value );
+					type	=	GetOptionType( optionalOptions.First().Value );
+					return true;
+				} else {
+					return false;
+				}
+			}
+
+			return false;
+			//int currentArg = args.Last();
+		} */
+
+
 
 
 		/// <summary>
@@ -377,7 +410,23 @@ namespace Fusion.Core.Shell
 		/// </summary>
 		/// <param name="field"></param>
 		/// <returns></returns>
-        static string GetOptionName(PropertyInfo field)
+		internal static Type GetOptionType ( PropertyInfo field )
+		{
+			if (IsList(field)) {
+				return ListElementType(field);
+			} else {
+				return field.PropertyType;
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="field"></param>
+		/// <returns></returns>
+        internal static string GetOptionName(PropertyInfo field)
         {
             var nameAttribute = GetAttribute<NameAttribute>(field);
 
@@ -444,6 +493,20 @@ namespace Fusion.Core.Shell
         { 
         }
 
+
+		/// <summary>
+		/// Used on properties to specify files.
+		/// </summary>
+        [AttributeUsage(AttributeTargets.Property)]
+		public sealed class SuggestFilesAttribute : Attribute 
+		{
+			public readonly string Mask;
+
+			public SuggestFilesAttribute ( string mask )
+			{
+				this.Mask	=	mask;
+			}
+		}
 
 
 		/// <summary>

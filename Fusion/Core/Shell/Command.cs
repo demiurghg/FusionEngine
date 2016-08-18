@@ -56,7 +56,7 @@ namespace Fusion.Core.Shell {
 		/// Result of the command.
 		/// </summary>
 		[CommandLineParser.Ignore]
-		public virtual object Result { get; protected set; }
+		public virtual string Result { get; protected set; }
 
 
 		/// <summary>
@@ -74,21 +74,6 @@ namespace Fusion.Core.Shell {
 
 
 		/// <summary>
-		/// Gets result string.
-		/// Converts result object using type converter.
-		/// </summary>
-		public string GetStringResult ()
-		{
-			if (Result==null) {
-				return null;
-			}
-
-            TypeConverter converter = TypeDescriptor.GetConverter(Result.GetType());
-			return converter.ConvertToString( Result );
-		}
-
-
-		/// <summary>
 		/// 
 		/// </summary>
 		public Command ( Invoker invoker )
@@ -102,6 +87,25 @@ namespace Fusion.Core.Shell {
 
 			Name		=	GetType().GetCustomAttribute<CommandAttribute>().Name;
 			Affinity	=	GetType().GetCustomAttribute<CommandAttribute>().Affinity;
+		}
+
+
+
+		/// <summary>
+		/// Returns list if suggested strings for given argument.
+		/// By default this method returns values only for enums.
+		/// Otherwice null.
+		/// </summary>
+		/// <param name="argType"></param>
+		/// <param name="argName"></param>
+		/// <returns></returns>
+		public virtual IEnumerable<string> Suggest ( Type argumentType, string argumentName )
+		{
+			if (argumentType.IsEnum) {
+				return Enum.GetNames( argumentType );
+			}
+
+			return new string[0];
 		}
 
 
