@@ -721,7 +721,7 @@ void GSMain( point VSOutput inputLine[1], inout TriangleStream<GSOutput> outputS
 #ifdef LINE
 float4 PSMain( GSOutput input ) : SV_Target
 {
-	return float4(input.Color.xyz, 0.7f) ;//* Stroke.Sample( Sampler, input.TexCoord ) +  Border.Sample( Sampler, input.TexCoord );
+	return input.Color;//* Stroke.Sample( Sampler, input.TexCoord ) +  Border.Sample( Sampler, input.TexCoord );
 }
 #endif
 

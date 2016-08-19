@@ -235,7 +235,7 @@ void CSMain(
 	if(p.Group == 0) {
 		//k = 0.00001f;
 	}
-		corForce.xyz += mul( cVabs, corVector ) * k;
+	//	corForce.xyz += mul( cVabs, corVector ) * k;
 	p.Force += corForce.xyz ;
 
 

@@ -13,7 +13,7 @@ struct PARAMS {
 	int			StartIndex;
 	int			EndIndex;
 	float		DeltaTime;
-	float		LocalRadius;
+	int			NodeId;
 };
 
 cbuffer CB1 : register(b0) {
@@ -79,7 +79,7 @@ inline float4 pairBodyForce( float4 thisPos, float4 otherPos ) // 4th component 
 	float3 R			= (otherPos - thisPos).xyz;		
 	float Rsquared		= R.x * R.x + R.y * R.y + R.z * R.z + 0.1f;
 	float Rsixth		= Rsquared * Rsquared * Rsquared;
-	float invRCubed		= - otherPos.w  /sqrt( Rsixth );	// we will multiply by constants later
+	float invRCubed		= - otherPos.w / sqrt( Rsixth );	// we will multiply by constants later
 	float energy		=   otherPos.w / sqrt( Rsquared );	// we will multiply by constants later
 	return float4( mul( invRCubed, R ), energy ) ; // we write energy into the 4th component
 }
@@ -145,7 +145,7 @@ float4 calcLinksForce( float4 pos, uint id, uint linkListStart, uint linkCount )
 		}
 		otherP = particleRWBuffer[otherId];
 		float4 otherPos = float4( otherP.Position, link.length );
-		pos.w = link.strength ; //1.0f;//
+		pos.w = link.strength / 10000000; //1.0f;//
 		force += springForce( pos, otherPos );
 	}
 	return force;
@@ -167,11 +167,14 @@ void CSMain(
 	float4 pos = float4 ( p.Position, p.Charge );
 	float4 force = float4( 0, 0, 0, 0 );
 
+	
+
 #ifdef EULER
-	force = mul( calcRepulsionForce( pos, groupThreadID ), 100.0f / pos.w ); // we multiply by all the constants here once
+	force = mul( calcRepulsionForce( pos, groupThreadID ), 1000.0f * pos.w ); // we multiply by all the constants here once
 #ifdef LINKS
-	force += calcLinksForce ( pos, id, p.LinksPtr, p.LinksCount ) / 100;
+	force += calcLinksForce ( pos, id, p.LinksPtr, p.LinksCount ) / 1000;
 #endif // LINKS
+		
 #endif // EULER
 
 
@@ -180,49 +183,25 @@ void CSMain(
 	force = float4( 0, 0, 0, 0 ); // just a placeholder
 #endif // RUNGE_KUTTA
 
-	// add potential well:
-//	force.xyz += mul( 0.00005f*length(pos.xyz), -pos.xyz );
-
-//	float3 accel = force.xyz;
-
 	p.Force		= force.xyz;
 	p.Energy	= force.w;
 
 	float4 forceCenter = float4(0,0,0,0);
 
-	float Radius = p.DesiredRadius;
-	//if (p.Information == 0) Radius = Radius * 1.1f;
+		float Radius = 0;//Params.LocalRadius;
 
-	float3 R = p.Position - float3(0,0,0);
-	float Rabs = length(R) + 0.01f;
+		float3 R = p.Position - float3(0,0,0);
+		float Rabs = length(R) + 0.01f;
 
-	float diff = Radius - Rabs;
+		float diff = Radius - Rabs;
 
-	//float factor = 0.0f;
+		float factor = 0.000005f;
 
-	float factor = 0.00005f;
-
-	forceCenter.xyz += mul(R, factor*diff/Rabs);
-	if(p.Group == 1){
-		p.Force += forceCenter.xyz;
+	if (id == Params.NodeId){
+		 factor = 0.005f;		
 	}
-	
-
-
-	//TO CENTER
-	forceCenter = float4(0,0,0,0);
-
-	Radius = 0;//Params.LocalRadius;
-
-	R = p.Position - float3(0,0,0);
-	Rabs = length(R) + 0.01f;
-
-	diff = Radius - Rabs;
-
-	factor = 0.000005f;
-
 	forceCenter.xyz += mul(R, factor*diff/Rabs);
-	//p.Force += forceCenter.xyz;
+	p.Force += forceCenter.xyz;
 
 	particleRWBuffer[id] = p;
 }
@@ -247,7 +226,7 @@ void CSMain(
 
 		float4 force = float4(0,0,0,0);
 
-		float Radius = Params.LocalRadius;
+		float Radius = Params.NodeId;
 
 		float3 R = prt.Position - Params.LocalCenter;
 		float Rabs = length(R) + 0.01f;
@@ -283,7 +262,7 @@ void CSMain(
 //		p.Position.xyz += mul( p.Velocity, Params.DeltaTime );
 //		p.Velocity += mul( p.Force, Params.DeltaTime );
 
-		p.Position.xyz += mul( p.Force, Params.DeltaTime * 1000 );
+		p.Position.xyz += mul( p.Force, Params.DeltaTime * 50 );
 		particleRWBuffer[ id ] = p;
 	}
 }

@@ -14,7 +14,11 @@ using Fusion;
 using Fusion.Input;
 using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
+using Fusion.Drivers.Graphics.Display;
+using Fusion.Drivers.Input;
 using Fusion.Engine.Common;
+using Fusion.Engine.Input;
+using Keys = Fusion.Engine.Input.Keys;
 
 
 namespace Fusion.Engine.Graphics.Graph
@@ -130,11 +134,13 @@ namespace Fusion.Engine.Graphics.Graph
         {
 	        Game = game;
 
-            cfg = new GraphConfig();
+            cfg = new GraphConfig(game);
         }
 
 		StateFactory	factory;
-	    private Graph graph;
+	    public Graph graph;
+
+		
 
         /// <summary>
         /// 
@@ -150,14 +156,14 @@ namespace Fusion.Engine.Graphics.Graph
 			factory	= new StateFactory( shader, typeof(Flags), (ps,i) => Enum( ps, (Flags)i ) );
 
             paramsCB = new ConstantBuffer(Game.GraphicsDevice, typeof(Params));
-
+			state = State.RUN;
 
             graphType = GraphType.DYNAMIC;
             linkList		= new List<Graph.Link>();
             ParticleList	= new List<Graph.Vertice>();
             linkPtrLists	= new List<List<int>>();
-			ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Graph/Compute"));
-			//ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Shaders/VKRepost"));
+			//ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Graph/Compute"));
+			ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Graph/VKRepost"));
 			//ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Graph/Visheratin"));
 			ls.UseGPU = false;
 			ls.SpringTension = 0.1f;
@@ -165,25 +171,84 @@ namespace Fusion.Engine.Graphics.Graph
             //state = State.RUN;
 			Log.Message("start graph");
 
-	
-			GraphReader gr = new GraphReader();
-			//gr.ReadTamaraTGF(@".\Data\testedgeList.txt", cfg, out graph);
-			gr.ReadMedicineTGF(@".\Data\edgeList.txt", cfg, out graph);
-
-			int ed = 0;
-			while (ed < graph.links.Count) {
-			 numberOfEdgesPerIteration.Add(ed);
-			 ed += 1000;
-			}
+			
+			//StreamReader fileEdgesByIteration = new StreamReader(cfg.LinkPath);
+			//string str;
+			//int counter = 0;
+			//int iteration = 0;
+			//while ( ( str = fileEdgesByIteration.ReadLine() ) != null ) {
+			//	var vert = str.Split(';');
+			//	int current = int.Parse(vert[2]);
+			//	if (current > iteration)
+			//	{
+			//		numberOfEdgesPerIteration.Add(counter);
+			//		//counter = 0;
+			//		iteration++;
+			//	}
+				
+			//		counter++;
+			//	//nodeText.Add( vert[1] );
+			//}
 
 			numberOfEdgesPerIteration.Add(graph.links.Count);
 			injectionBufferCPU = new Graph.Vertice[graph.NodesCount];
             linksBufferCPU = new Graph.Link[graph.links.Count];
+
+			Game.Keyboard.KeyDown += Keyboard_KeyDown;
+				
+			Game.Mouse.Scroll += (sender, args) => {
+				Camera.Zoom(args.WheelDelta > 0 ? -0.1f : 0.1f);
+			};
+
+			Game.Mouse.Move += (sender, args) => {
+				if (Game.Keyboard.IsKeyDown(Keys.LeftButton)) {
+					Camera.RotateCamera(Game.Mouse.PositionDelta);
+				}
+			};
+			
         }
 
+	    public void SetGraph(Graph g)
+	    {
+		    graph = g;
+	    }
+
+		private void Keyboard_KeyDown (object sender, Input.KeyEventArgs e)
+		{
+			//if ( e.Key == Keys.LeftShift)
+			//{
+				if (e.Key == Input.Keys.LeftButton)
+				{
+					Vector2 cursor = Game.Mouse.Position;
+					Vector3 nodePosition;
+					int selNode = -1;
+					SelectNode(cursor, StereoEye.Mono, 0.025f, out selNode, out nodePosition);
+		            setBuffers();
+					if (selectedVertice != -1)
+					{
+						state = State.PAUSE;
+					}
+					else
+					{
+						state = State.RUN;
+					}
+				}
+					
+			//}
+			if (e.Key == Keys.A)
+			{
+				ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Graph/Visheratin"));
+			}
+			if (e.Key == Keys.B)
+			{
+				ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Graph/VKRepost"));
+			}
+			
+		}
+
 	
-		List<int> numberOfEdgesPerIteration = new List<int>();
-		int edgeIterator = 0;
+		public List<int> numberOfEdgesPerIteration = new List<int>();
+		public int edgeIterator = 0;
 	    public bool informationSpreading = false;
 		
 
@@ -220,6 +285,7 @@ namespace Fusion.Engine.Graphics.Graph
 
         public void addLink(int end1, int end2, int reposter, Graph.Link link )
         {
+	       // link.Color.W = cfg.EdgeMaxOpacity;
 			int linkNumber = linkList.Count;
 			link.SourceID = end1;
 			link.StockID = end2;
@@ -269,10 +335,21 @@ namespace Fusion.Engine.Graphics.Graph
 			}
         }
 
+	    private int currentIteration = 0;
         public void createLinksFromFile(int iteration)
         {
-	        int edgeAdd = (staticMode) ? numberOfEdgesPerIteration.Count - 1: iteration;
+	        currentIteration = iteration;
+			int edgeAdd = (staticMode) ? numberOfEdgesPerIteration.Count - 1: iteration;
 			if (edgeAdd < numberOfEdgesPerIteration.Count ) {
+				if (edgeIterator == 0)
+				{
+					linkList.Clear();
+					foreach (var list in linkPtrLists)
+					{
+						list.Clear();
+					}
+					linksBufferCPU = new Graph.Link[graph.links.Count];
+				}
 						for (int i = edgeIterator; i < numberOfEdgesPerIteration[edgeAdd]; i++) 
 						{
 							int end1 = graph.links[i].SourceID;
@@ -327,7 +404,7 @@ namespace Fusion.Engine.Graphics.Graph
 		    }
 	    }
 
-	    public bool Clustering = false;
+	    public bool Rewind = false;
 		
         void setBuffers()
         {
@@ -360,13 +437,39 @@ namespace Fusion.Engine.Graphics.Graph
             } else {
 	            ParticleList.CopyTo(injectionBufferCPU);
             }
-			if (Clustering) readAwesomeClusters();
+
+	        if (Rewind)
+	        {
+		        ReadHistory();
+	        }
+	        else
+	        {
+				//WriteMyName();
+		        cfg.StartRewind = currentIteration;
+	        }
 			
 			for(int j = 0; j < linkList.Count; j++)
             {
                 var l = linkList.ElementAt(j);
+	            float alpha = l.Color.W;
+	            if (cfg.WhiteMode)
+	            {
+		            if (l.Color.ToVector3().Equals(Color3.White))
+		            {
+			            l.Color.X = l.Color.Y = l.Color.Z = 0;
+			            l.Color.W = alpha;
+		            }
+	            }
+	            else
+	            {
+		            if (l.Color.ToVector3().Equals(Color3.Black))
+		            {
+			            l.Color.X = l.Color.Y = l.Color.Z = 1;
+			            l.Color.W = alpha;
+		            }
+	            }
 				if( l.LifeTime > 0) {
-					//l.LifeTime--;
+					l.LifeTime--;
 				} else {
 					l.Color.W -= l.Color.W < 0.02f ? 0 : 0.01f;
 				}
@@ -424,45 +527,48 @@ namespace Fusion.Engine.Graphics.Graph
                 linksBuffer.SetData(linksBufferCPU);
             }
 
-	        
-			ls.ResetState();
-				List<Particle3D> list = new List<Particle3D>();
-				foreach (var elem in injectionBufferCPU)
-				{
-					var p = new Particle3D {
-						Position	= elem.Position,
-						Velocity	= elem.Velocity,
-						Force		= elem.Force,
-						Energy		= elem.Energy,
-						Mass		= elem.Mass,
-						Charge		= elem.Charge,
+	        if (state == State.RUN)
+	        {
+		        ls.ResetState();
+		        List<Particle3D> list = new List<Particle3D>();
+		        foreach (var elem in injectionBufferCPU)
+		        {
+			        var p = new Particle3D
+			        {
+				        Position = elem.Position,
+				        Velocity = elem.Velocity,
+				        Force = elem.Force,
+				        Energy = elem.Energy,
+				        Mass = elem.Mass,
+				        Charge = elem.Charge,
 
-						Color			= elem.Color,
-						Size			= elem.Size,
-						linksPtr		= elem.linksPtr,
-						linksCount		= elem.Degree, //elem.Degree,
-						DesiredRadius	= elem.ColorType,
-						Information		= elem.Information,
-						Group			= elem.Group,
-						Cluster			= elem.Cluster,
-					};
-					list.Add(p);
-				}
-				List<Link> listLink = new List<Link>();
-				foreach (var elem in linksBufferCPU)
-				{
-					var l = new Link {
-						par1 = (uint) elem.SourceID,
-						par2 = (uint) elem.StockID,
-						length		= elem.Length,
-						strength	= elem.TotalLifeTime,
-						//strength = elem.LifeTime / elem.TotalLifeTime,
-					};
-					listLink.Add(l);
-				}
+				        Color = elem.Color,
+				        Size = elem.Size,
+				        linksPtr = elem.linksPtr,
+				        linksCount = elem.Degree,
+				        DesiredRadius = elem.ColorType,
+				        Information = elem.Information,
+				        Group = elem.Group,
+				        Cluster = elem.Cluster,
+			        };
+			        list.Add(p);
+		        }
+		        List<Link> listLink = new List<Link>();
+		        foreach (var elem in linksBufferCPU)
+		        {
+			        var l = new Link
+			        {
+				        par1 = (uint) elem.SourceID,
+				        par2 = (uint) elem.StockID,
+				        length = elem.Length,
+				        strength = elem.Weight, //elem.TotalLifeTime,
+				        //strength = elem.LifeTime / elem.TotalLifeTime,
+			        };
+			        listLink.Add(l);
+		        }
 
-				ls.SetData(list, listLink, linkPtrLists);	
-	        
+		        ls.SetData(list, listLink, linkPtrLists);
+	        }
         }
 
         /// <summary>
@@ -484,9 +590,10 @@ namespace Fusion.Engine.Graphics.Graph
         /// <param name="gameTime"></param>
         public void Update(GameTime gameTime)
         {
+			Camera.Update(gameTime);
         }
 
-		Vector2 PixelsToProj(Point point)
+		Vector2 PixelsToProj(Vector2 point)
         {
             Vector2 proj = new Vector2(
                 (float)point.X / (float)Game.GraphicsDevice.DisplayBounds.Width,
@@ -497,7 +604,7 @@ namespace Fusion.Engine.Graphics.Graph
             return proj;
         }
 
-		public void SelectNode(Point cursor, StereoEye eye, float threshold, out int VerticeIndex, out Vector3 VerticePosition)
+		public void SelectNode(Vector2 cursor, StereoEye eye, float threshold, out int VerticeIndex, out Vector3 VerticePosition)
         {
             VerticeIndex = -1;
 			var cam = Camera;
@@ -528,15 +635,23 @@ namespace Fusion.Engine.Graphics.Graph
 						//}
                     }
                 }
-	            if (candidatesToSelect.Count != 0) {
+	            if (candidatesToSelect.Count != 0)
+	            {
 		            float min = candidatesToSelect.Min((x) => x.Value);
-					int index = candidatesToSelect.First( (y) => y.Value <= min).Key;
-					var sVertice = ParticleList.First( (x) => x.Id == index);
-					selectedVertice = ParticleList.IndexOf(sVertice);
-					VerticeIndex	= index;
+		            int index = candidatesToSelect.First((y) => y.Value <= min).Key;
+		            var sVertice = ParticleList.First((x) => x.Id == index);
+		            selectedVertice = ParticleList.IndexOf(sVertice);
+		            VerticeIndex = index;
 		            VerticePosition = sVertice.Position;
-		            //Console.WriteLine(index);
-		            //Console.WriteLine(VerticePosition);
+		            ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Graph/NodeInCenter"))
+		            {
+			            NodeId = selectedVertice
+		            };
+	            }
+	            else
+	            {
+		            ls = new LayoutSystem(Game, Game.Content.Load<Ubershader>(@"Graph/VKRepost")) {NodeId = -1};
+		           // state = State.RUN;
 	            }
             }
         }
@@ -556,9 +671,10 @@ namespace Fusion.Engine.Graphics.Graph
 			AddMaxParticles();
 	    }
 
-	    public void writeMyName()
+	    public void WriteMyName()
 	    {
-		    System.IO.StreamWriter file = new System.IO.StreamWriter("d:\\outCall.txt");
+		    string dir = cfg.SavePath;
+			StreamWriter file = new StreamWriter(dir + currentIteration + ".txt");
 		    int id = 0;
 		    foreach (var elem in injectionBufferCPU)
 		    {
@@ -566,76 +682,34 @@ namespace Fusion.Engine.Graphics.Graph
 				file.WriteLine(line);
 			    id++;
 		    }
-			
-
 			file.Close();
 	    }
 
-	    public void readAwesomeClusters()
+		/// <summary>
+		/// It's a mystery
+		/// It's a mystery
+		/// You want some history
+		/// It's a mystery
+		/// </summary>
+	    public void ReadHistory()
 	    {
-		    StreamReader fileClusters = new StreamReader(@"d:\TestData\testClusters.txt");
-			//StreamReader fileEdgesByIteration = new StreamReader(@"../../../Data/VKRepost/Viborg/links");
-
+		    string dir = cfg.SavePath;
+			StreamReader fileClusters = new StreamReader(dir + currentIteration + ".txt");
+			Log.Message(dir + currentIteration + ".txt");
 			string str;
 			int counter = 0;
 			while ( ( str = fileClusters.ReadLine() ) != null )
 			{
 				var vert = str.Split(';');
 				int id = int.Parse(vert[0]);
-				injectionBufferCPU[id].Charge = int.Parse(vert[1]);
 				injectionBufferCPU[id].Position = new Vector3(float.Parse(vert[2]), float.Parse(vert[3]), float.Parse(vert[4]));
 				counter++;
 			}
 			fileClusters.Close();
 
-			Dictionary<int, List<int>> clustering = new Dictionary<int, List<int>>();
-
-		    foreach (var elem in injectionBufferCPU)
-		    {
-			    int group = elem.Group;
-				List<int> list;
-				if (!clustering.TryGetValue(group, out list))
-				clustering.Add(group, list = new List<int>());
-			    
-				list.Add(elem.Charge);
-			    
-		    }
-
-		    int i = 0;
-		    foreach (var p in ParticleList) {
-			    List<int> list;
-			    clustering.TryGetValue(p.Group, out list);
-				list = list.Distinct().ToList();
-			    int cluster = list.FindIndex(x => x == injectionBufferCPU[i].Charge);
-			    
-			    if (injectionBufferCPU[i].Group == 0) {
-				    switch (cluster) {
-					    case 0:
-						    cluster = 6;
-							break;
-						case 4: 
-						    cluster = 6;
-							break;
-						case 1:
-						    cluster = 5;
-							break;
-				    }
-			    }
-				injectionBufferCPU[i].Cluster =  cluster;
-
-			    injectionBufferCPU[i].Cluster = (injectionBufferCPU[i].Group == 2 && cluster == 0) ? 4 : cluster;
-			  // if (injectionBufferCPU[i].Charge == 9) injectionBufferCPU[i].Charge = 2;
-				injectionBufferCPU[i].Color = ColorConstant.paletteByCluster.ElementAt(injectionBufferCPU[i].Cluster).ToVector4();
-				i++;
-		    }
-			Clustering = false;
-		    state = State.PAUSE;
-		    informationSpreading = true;
-			//int j = 0;
-			//foreach (var p in ParticleList)
-			//{
-			    
-			//}
+			
+			//Clustering = false;
+			state = State.PAUSE;
 	    }
 
         /// <summary>
@@ -647,7 +721,8 @@ namespace Fusion.Engine.Graphics.Graph
         {
 			var device	= Game.GraphicsDevice;
 			var cam		= Camera;
-
+	        Color4 color = (cfg.WhiteMode) ? Color4.White : Color4.Black;
+			device.ClearBackbuffer(color);
             param.View			= cam.GetViewMatrix(stereoEye);
             param.Projection	= cam.GetProjectionMatrix(stereoEye);
             param.MaxParticles	= 0;
@@ -657,7 +732,6 @@ namespace Fusion.Engine.Graphics.Graph
             param.LinkSize		= cfg.LinkSize;
 	        param.StartIndex	= 0;
 	        param.EndIndex		= graph.NodesCount;
-			//device.SetTargets(device.BackbufferDepth, device.BackbufferColor);
 
 
             //device.ComputeShaderConstants[0]	= paramsCB;
@@ -721,7 +795,6 @@ namespace Fusion.Engine.Graphics.Graph
 			if ( state == State.RUN ) {
 				if (ls.ParticleCount > 0)
 				{
-
 					ls.Update( 0 ); //(int) LayoutSystem.StepMethod.Fixed 
 					Particle3D[] particleArray = new Particle3D[ls.ParticleCount];
 					Graph.Vertice[] vertArr = new Graph.Vertice[injectionBufferCPU.Length];

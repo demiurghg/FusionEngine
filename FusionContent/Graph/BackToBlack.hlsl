@@ -77,11 +77,11 @@ groupshared float4 sh_energy[BLOCK_SIZE];
 inline float4 pairBodyForce( float4 thisPos, float4 otherPos ) // 4th component is charge
 {
 	float3 R			= (otherPos - thisPos).xyz;		
-	float Rsquared		= R.x * R.x + R.y * R.y + R.z * R.z + 0.1f;
+	float Rsquared		= R.x * R.x + R.y * R.y + R.z * R.z + 0.001f;
 	float Rsixth		= Rsquared * Rsquared * Rsquared;
-	float invRCubed		= - otherPos.w  /sqrt( Rsixth );	// we will multiply by constants later
-	float energy		=   otherPos.w / sqrt( Rsquared );	// we will multiply by constants later
-	return float4( mul( invRCubed, R ), energy ) ; // we write energy into the 4th component
+	float invRCubed		= - (thisPos.w+ otherPos.w)  ;	// we will multiply by constants later
+	float energy		=   (thisPos.w+ otherPos.w) ;	// we will multiply by constants later
+	return float4( mul( invRCubed, R ), energy )  * 10;//* (otherPos.w + 1) ; // we write energy into the 4th component * (thisPos.w + 1)
 }
 
 
@@ -90,27 +90,32 @@ float4 springForce( float4 pos, float4 otherPos ) // 4th component in otherPos i
 												  // 4th component in pos is link strength
 {
 	float3 R			= (otherPos - pos).xyz;
-	float Rabs			= length( R ) + 0.1f;
+	float Rabs			= R.x * R.x + R.y * R.y + R.z * R.z + 0.001f;//length( R ) + 0.1f;
 	float deltaR		= Rabs - otherPos.w;
-	float absForce		= pos.w * ( deltaR ) / ( Rabs );
-	float energy		= 0.0005f * pos.w * deltaR * deltaR;
-	return float4( mul( absForce, R ), energy ) * 0.00005f;  // we write energy into the 4th component
+	float absForce		= pow(pos.w, 1) + otherPos.w;//* ( deltaR ) // / pow(otherPos.w, 4);
+	float energy		= pow(pos.w, 1) + otherPos.w;//* deltaR * deltaR;
+	return float4( mul( absForce, R  ), energy )  ;  // we write energy into the 4th component //* 0.001f
 }
 
 
-float4 tileForce( float4 position, uint threadId )
+float4 tileForce( float4 position, uint threadId, float radius, int id )
 {
 	float4 force = float4(0, 0, 0, 0);
 	float4 otherPosition = float4(0, 0, 0, 0);
 	for ( uint i = 0; i < BLOCK_SIZE; ++i )
 	{
 		otherPosition = shPositions[i];
-		force += pairBodyForce( position, otherPosition );
+		float dist = length (position - otherPosition);
+		if(dist <= radius * 1)
+		{
+		force += pairBodyForce( position, otherPosition ) * 2;
+		}
 	}
 	return force;
 }
 
-float4 calcRepulsionForce( float4 position, uint3 groupThreadID )
+
+float4 calcRepulsionForce( float4 position, uint3 groupThreadID, float size )
 {
 	float4 force = float4(0, 0, 0, 0);
 	uint tile = 0;
@@ -118,20 +123,20 @@ float4 calcRepulsionForce( float4 position, uint3 groupThreadID )
 	{
 		uint srcId = tile*BLOCK_SIZE + groupThreadID.x;
 		PARTICLE3D p = particleRWBuffer[srcId];
-		float4 pos = float4( p.Position, p.Charge );
+		float4 pos = float4( p.Position, p.Mass );
 		shPositions[groupThreadID.x] = pos;
 		
 		GroupMemoryBarrierWithGroupSync();
 		
-		force += tileForce( position, groupThreadID.x ) ;
+		force += tileForce( position, groupThreadID.x, (size + p.Size0) * 5, srcId ) ;
 
 		GroupMemoryBarrierWithGroupSync();
 	}
-	return force;
+	return force ;
 }
 
 
-float4 calcLinksForce( float4 pos, uint id, uint linkListStart, uint linkCount )
+float4 calcLinksForce( float4 pos, uint id, uint linkListStart, uint linkCount, float cluster )
 {
 	float4 force = float4( 0, 0, 0, 0 );
 	PARTICLE3D otherP;
@@ -144,11 +149,22 @@ float4 calcLinksForce( float4 pos, uint id, uint linkListStart, uint linkCount )
 			otherId = link.par2;
 		}
 		otherP = particleRWBuffer[otherId];
-		float4 otherPos = float4( otherP.Position, link.length );
-		pos.w = link.strength ; //1.0f;//
-		force += springForce( pos, otherPos );
+		float4 otherPos = float4( otherP.Position, linkCount );
+		pos.w = link.strength;
+		if (link.strength < 0.02f){
+			//pos.w = 0.02f;
+		}
+		 //1.0f;//
+		float4 wClusters = springForce( pos, otherPos ) ;
+			if (cluster != 0) {
+				if (otherP.Charge == cluster){
+					wClusters = 1 * wClusters;
+				}
+			}
+		
+		force += wClusters;
 	}
-	return force;
+	return force ;
 }
 
 
@@ -164,28 +180,17 @@ void CSMain(
 	uint id = groupID.x*BLOCK_SIZE + groupThreadID.x;
 	
 	PARTICLE3D p = particleRWBuffer[id];
-	float4 pos = float4 ( p.Position, p.Charge );
+	float4 pos = float4 ( p.Position, p.LinksCount );
 	float4 force = float4( 0, 0, 0, 0 );
 
 #ifdef EULER
-	force = mul( calcRepulsionForce( pos, groupThreadID ), 100.0f / pos.w ); // we multiply by all the constants here once
+	force = mul( calcRepulsionForce( pos, groupThreadID, p.Size0 ), 1.0f  ); // we multiply by all the constants here once
 #ifdef LINKS
-	force += calcLinksForce ( pos, id, p.LinksPtr, p.LinksCount ) / 100;
+	force += calcLinksForce ( pos, id, p.LinksPtr, p.LinksCount, p.Charge ) * 0.001f;
 #endif // LINKS
 #endif // EULER
 
-
-
-#ifdef RUNGE_KUTTA
-	force = float4( 0, 0, 0, 0 ); // just a placeholder
-#endif // RUNGE_KUTTA
-
-	// add potential well:
-//	force.xyz += mul( 0.00005f*length(pos.xyz), -pos.xyz );
-
-//	float3 accel = force.xyz;
-
-	p.Force		= force.xyz;
+	//p.Force		= force.xyz /1000000;
 	p.Energy	= force.w;
 
 	float4 forceCenter = float4(0,0,0,0);
@@ -200,29 +205,74 @@ void CSMain(
 
 	//float factor = 0.0f;
 
-	float factor = 0.00005f;
-
-	forceCenter.xyz += mul(R, factor*diff/Rabs);
-	if(p.Group == 1){
-		p.Force += forceCenter.xyz;
-	}
-	
-
-
-	//TO CENTER
-	forceCenter = float4(0,0,0,0);
-
-	Radius = 0;//Params.LocalRadius;
-
-	R = p.Position - float3(0,0,0);
-	Rabs = length(R) + 0.01f;
-
-	diff = Radius - Rabs;
-
-	factor = 0.000005f;
+	float factor = 0.005f;
 
 	forceCenter.xyz += mul(R, factor*diff/Rabs);
 	//p.Force += forceCenter.xyz;
+
+	//if(p.Group != 1){
+	float n = 2;
+	if(p.Group == 0){
+		n = 5;
+	}
+	
+	float alpha = 2 * 3.1415926 / n;
+
+	float3 clusterPoint = float3(0,0,0);
+	
+
+	float3 corVector =  clusterPoint - float3(0, 0, Radius);
+
+	//if(p.Group != 1){
+	alpha = alpha * p.Cluster;//fmod(p.Cluster, n) ;//(prt.TotalLifeTime - 1);
+	//}
+	corVector = mul(corVector, float3x3(1, 0, 0,
+												0, cos(alpha), -sin(alpha),
+												0, sin(alpha), cos(alpha)));
+	float cVabs			= length( corVector ) + 0.5f;
+	float4 corForce = float4(0,0,0,0);
+		float k = 0.000001f;
+	if(p.Group == 0) {
+		//k = 0.00001f;
+	}
+	//	corForce.xyz += mul( cVabs, corVector ) * k;
+	p.Force += corForce.xyz ;
+
+
+	//}
+
+
+
+
+
+	 forceCenter = float4(0,0,0,0);
+	
+	Radius = 0;//Params.LocalRadius;
+	
+	 R = p.Position - float3(0,0,0);
+	Rabs = length(R) + 0.001f;
+	
+	diff = Radius - Rabs;
+	
+	factor = 0.0000005f;
+
+	forceCenter.xyz += mul(R, factor*diff/Rabs);
+
+	//float4 forceCenter = float4(0,0,0,0);
+
+	//float Radius = 0;//Params.LocalRadius;
+
+	//float3 R = p.Position - float3(0,0,0);
+	//float Rabs = length(R) + 0.001f;
+
+	//float diff = Radius - Rabs;
+
+	//float factor = 0.5f;
+
+	//forceCenter.xyz += mul(R, factor*diff/Rabs);
+	//p.Force += forceCenter.xyz;
+
+	
 
 	particleRWBuffer[id] = p;
 }
@@ -283,7 +333,7 @@ void CSMain(
 //		p.Position.xyz += mul( p.Velocity, Params.DeltaTime );
 //		p.Velocity += mul( p.Force, Params.DeltaTime );
 
-		p.Position.xyz += mul( p.Force, Params.DeltaTime * 1000 );
+		p.Position.xyz += mul( p.Force, Params.DeltaTime * 0.05f );
 		particleRWBuffer[ id ] = p;
 	}
 }

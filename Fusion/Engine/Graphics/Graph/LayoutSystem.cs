@@ -84,7 +84,7 @@ namespace Fusion.Engine.Graphics.Graph
 			[FieldOffset(20)] public int StartIndex;
 			[FieldOffset(24)] public int EndIndex;
 			[FieldOffset(28)] public float StepLength;
-			[FieldOffset(32)] public float LocalRadius;
+			[FieldOffset(32)] public int NodeId;
 		}
 
 
@@ -153,7 +153,7 @@ namespace Fusion.Engine.Graphics.Graph
 		int		numParticles;
 		int		numLinks;
 
-		List<Category>	categories;
+		public List<Category>	categories;
 		List<int>		categoryIndices;
 
 		public int ParticleCount
@@ -186,6 +186,7 @@ namespace Fusion.Engine.Graphics.Graph
 			set;
 		}
 
+		public int NodeId = -1 ;
 		Game	env;
 		GraphicsDevice device;
 
@@ -227,6 +228,23 @@ namespace Fusion.Engine.Graphics.Graph
 			int startIndex = categoryIndices.Count;
 			int endIndex = startIndex + indices.Count;
 			categoryIndices = categoryIndices.Concat(indices).ToList();
+			Category newCat = new Category();
+			newCat.startIndex	= startIndex;
+			newCat.endIndex		= endIndex;
+			newCat.Center		= center;
+			newCat.Radius		= Radius;
+			categories.Add(newCat);
+		}
+
+		public void AddAll(int start, int end, Vector3 center, float Radius)
+		{
+			int startIndex = start;
+			int endIndex = end;
+			categoryIndices = new List<int>();
+			for (int i = start; i < end; i++)
+			{
+				categoryIndices.Add(i);
+			}
 			Category newCat = new Category();
 			newCat.startIndex	= startIndex;
 			newCat.endIndex		= endIndex;
@@ -455,7 +473,8 @@ namespace Fusion.Engine.Graphics.Graph
 		public void CalcDescentVector(StructuredBuffer rwVertexBuffer, ComputeParams parameters)
 		{
 			parameters.MaxParticles = (uint)ParticleCount;
-
+			parameters.NodeId = NodeId;
+		//	Console.WriteLine(parameters.NodeId);
 			paramsCB.SetData(parameters);
 			device.ComputeShaderConstants[0] = paramsCB;
 			device.SetCSRWBuffer(0, rwVertexBuffer, (int)parameters.MaxParticles);
@@ -480,7 +499,7 @@ namespace Fusion.Engine.Graphics.Graph
 				foreach (var cat in categories)
 				{
 					parameters.LocalCenter = new Vector4(cat.Center, 0);
-					parameters.LocalRadius = cat.Radius;
+				//	parameters.LocalRadius = cat.Radius;
 					parameters.StartIndex = cat.startIndex;
 					parameters.EndIndex = cat.endIndex;
 					paramsCB.SetData(parameters);
@@ -508,6 +527,7 @@ namespace Fusion.Engine.Graphics.Graph
 							StructuredBuffer dstVertexBuffer, ComputeParams parameters)
 		{
 			parameters.MaxParticles = (uint)ParticleCount;
+			parameters.NodeId = NodeId;
 			paramsCB.SetData(parameters);
 			device.ComputeShaderConstants[0] = paramsCB;
 			device.ComputeShaderResources[0] = srcVertexBuffer;
@@ -534,6 +554,7 @@ namespace Fusion.Engine.Graphics.Graph
 		public void CalcTotalEnergyAndDotProduct(StructuredBuffer currentStateBuffer, StructuredBuffer nextStateBuffer, StructuredBuffer outputValues, ComputeParams parameters, out float energy, out float pTgradE, out float checkSum)
 		{
 			parameters.MaxParticles = (uint)ParticleCount;
+			parameters.NodeId = NodeId;
 			energy = 0;
 			pTgradE = 0;
 			checkSum = 0;

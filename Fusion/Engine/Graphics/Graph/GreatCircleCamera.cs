@@ -52,8 +52,10 @@ namespace Fusion.Engine.Graphics.Graph
 			pos = Vector3.Transform(pos, quat);
 
 			var cameraLocation = CenterOfOrbit + pos;
+			float height = Game.Instance.RenderSystem.DisplayBounds.Height;
+			float width = Game.Instance.RenderSystem.DisplayBounds.Width;
 
-			SetupCameraFov(cameraLocation, CenterOfOrbit, newUp, FreeCamFov, FreeCamZNear, FreeCamZFar, 1.0f, 1.0f, 1.0f);
+			SetupCameraFov(cameraLocation, CenterOfOrbit, newUp, FreeCamFov, FreeCamZNear, FreeCamZFar, 1.0f, 1.0f, (float) width / height);		
 		}
 
 

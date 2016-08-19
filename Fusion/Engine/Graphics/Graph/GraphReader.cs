@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -227,7 +228,7 @@ namespace Fusion.Engine.Graphics.Graph
 						Size = gcConfig.MinParticleRadius,
 						Acceleration = Vector3.Zero,
 						Mass = 0.001f,
-						Charge = 0,
+						Charge = 1,
 						Id = firstKey,
 						Group = groupId,
 					};
@@ -244,7 +245,7 @@ namespace Fusion.Engine.Graphics.Graph
 							Size = gcConfig.MinParticleRadius,
 							Acceleration = Vector3.Zero,
 							Mass = 0.001f,
-							Charge = 0,
+							Charge = 1,
 							Id = secondKey,
 							Group = groupId,
 						};
@@ -379,12 +380,141 @@ namespace Fusion.Engine.Graphics.Graph
 			graph.NodesCount = graph.nodes.Count;
 		}
 
+		public void ReadBankTGF(GraphConfig gcConfig, out Graph graph)
+		{
+			Dictionary<int, Graph.Vertice> allVertices = new Dictionary<int, Graph.Vertice>();
+			List<Graph.Link> allEdges = new List<Graph.Link>();
+			Dictionary<int, int> counterInGroup = new Dictionary<int, int>();
+			Dictionary<int, List<int>> neighboors = new Dictionary<int, List<int>>();
+			graph = new Graph();
+
+			//read all edges
+			StreamReader fileEdges = new StreamReader(gcConfig.LinkPath);
+			string line;
+
+			while ((line = fileEdges.ReadLine()) != null)
+			{
+				var vert = line.Split(';');
+				int firstKey = int.Parse(vert[0]);
+				int secondKey = int.Parse(vert[1]);
+				if (!allVertices.ContainsKey(firstKey))
+				{
+					int groupId = (firstKey > 100) ? 1 : 2;
+					Graph.Vertice node = new Graph.Vertice()
+					{
+						Position = RadialRandomVector()* rand.Next(1000),//gcConfig.LinkSize,
+						Velocity = Vector3.Zero,
+						Color = ColorConstant.paletteWhite.ElementAt(groupId).ToVector4(),
+						Size = gcConfig.MinParticleRadius,
+						Acceleration = Vector3.Zero,
+						Mass = 0,
+						Information = (groupId == 2)? 1 : 0,
+						Id = firstKey,
+						Group = groupId,
+						Charge = 1,
+						Cluster = 0,
+					};
+					allVertices.Add( firstKey, node);
+					neighboors.Add(firstKey, new List<int>());
+					int count;
+					if (counterInGroup.TryGetValue(groupId, out count))
+					{
+						counterInGroup.Remove(groupId);
+						counterInGroup.Add(groupId, count + 1);
+					}
+					else
+					{
+						counterInGroup.Add(groupId, 1);
+					}
+				}
+					if (!allVertices.ContainsKey(secondKey))
+					{
+						int groupId = (secondKey > 100) ? 1 : 2;
+						Graph.Vertice node = new Graph.Vertice()
+						{
+							Position = RadialRandomVector() * rand.Next(1000),//gcConfig.LinkSize,
+							Velocity = Vector3.Zero,
+							Color = ColorConstant.paletteWhite.ElementAt(groupId).ToVector4(),
+							Size = gcConfig.MinParticleRadius,
+							Acceleration = Vector3.Zero,
+							Mass = 0,
+							Information = (groupId == 2)? 1 : 0,
+							Id = secondKey,
+							Group = groupId,
+							Charge = 1,
+							Cluster = 0,
+						};
+						allVertices.Add( secondKey, node);
+						neighboors.Add(secondKey, new List<int>());
+
+						int count;
+						if (counterInGroup.TryGetValue(groupId, out count))
+						{
+							counterInGroup.Remove(groupId);
+							counterInGroup.Add(groupId, count + 1);
+						}
+						else
+						{
+							counterInGroup.Add(groupId, 1);
+						}
+					}
+				int lifetime = int.Parse(vert[3]);
+				Graph.Link link = new Graph.Link()
+				{
+					SourceID = firstKey,
+					StockID = secondKey,
+					Length = 50,
+					Force = 0,
+					Orientation = Vector3.Zero,
+					Weight = float.Parse(vert[4], NumberStyles.Any, CultureInfo.InvariantCulture) / 1000,
+					LinkType = 0,
+					Color = ColorForBank(lifetime).ToVector4(), //ColorConstant.paletteByGroup.ElementAt(int.Parse(first[0]) - 1).ToVector4(),
+					Width = gcConfig.MaxLinkWidth,
+					LifeTime = lifetime,
+					TotalLifeTime = lifetime,
+				};
+				allEdges.Add(link);
+				List<int> list;
+				if (!neighboors.TryGetValue(firstKey, out list))
+				neighboors.Add(firstKey, list = new List<int>());
+				list.Add(secondKey);
+
+				if (!neighboors.TryGetValue(secondKey, out list))
+				neighboors.Add(secondKey, list = new List<int>());
+				list.Add(firstKey);
+			}
+			fileEdges.Close();
+			counterInGroup = counterInGroup.OrderByDescending( (x) => x.Value ).ToDictionary( pair => pair.Key, pair => pair.Value );
+			int s;
+			counterInGroup.TryGetValue( 0, out s );
+			float maxCircleRadius = s*gcConfig.MinParticleRadius/MathUtil.Pi;
+			foreach (var pair in allVertices)
+			{
+				var node = pair.Value;
+				node.ColorType = (counterInGroup.Keys.ToList().IndexOf(node.Group) == 0) ? maxCircleRadius : maxCircleRadius* ( 1 - (float) ( counterInGroup.Keys.ToList().IndexOf( node.Group )) / counterInGroup.Count) ;
+				graph.nodes.Add( node);
+			}
+			// = allVertices.Values.ToList();
+			graph.links = allEdges;
+			graph.neighboors = neighboors;
+			graph.NodesCount = graph.nodes.Count;
+		}
+
+		public Color ColorForBank(int lifetime)
+		{
+			if (lifetime <= 1)
+				return ColorConstant.paletteByCluster[0];
+			
+			if (lifetime <= 30) return ColorConstant.paletteByCluster[2];
+			return ColorConstant.paletteByCluster[3];
+		}
+
 		Random rand = new Random();
 		/// <summary>
         /// Returns random radial vector
         /// </summary>
         /// <returns></returns>
-        Vector3 RadialRandomVector()
+       public Vector3 RadialRandomVector()
         {
 			Vector2 r;
             do
@@ -397,7 +527,7 @@ namespace Fusion.Engine.Graphics.Graph
             return new Vector3(0, r.X, r.Y); //
         }
 
-		Vector3 RadialRandomVector3D()
+		public Vector3 RadialRandomVector3D()
         {
 			Vector3 r;
             do
@@ -407,5 +537,126 @@ namespace Fusion.Engine.Graphics.Graph
             r.Normalize();
             return r; //
         }
+
+
+		public void ReadBankModel<T>(GraphConfig gcConfig, T model,  out Graph graph)
+		{
+			Dictionary<int, Graph.Vertice> allVertices = new Dictionary<int, Graph.Vertice>();
+			List<Graph.Link> allEdges = new List<Graph.Link>();
+			Dictionary<int, int> counterInGroup = new Dictionary<int, int>();
+			Dictionary<int, List<int>> neighboors = new Dictionary<int, List<int>>();
+			graph = new Graph();
+			
+			//read all edges
+			StreamReader fileEdges = new StreamReader(gcConfig.LinkPath);
+			string line;
+
+			while ((line = fileEdges.ReadLine()) != null)
+			{
+				var vert = line.Split(';');
+				int firstKey = int.Parse(vert[0]);
+				int secondKey = int.Parse(vert[1]);
+				if (!allVertices.ContainsKey(firstKey))
+				{
+					int groupId = (firstKey > 100) ? 1 : 2;
+					Graph.Vertice node = new Graph.Vertice()
+					{
+						Position = RadialRandomVector()* rand.Next(1000),//gcConfig.LinkSize,
+						Velocity = Vector3.Zero,
+						Color = ColorConstant.paletteWhite.ElementAt(groupId).ToVector4(),
+						Size = gcConfig.MinParticleRadius,
+						Acceleration = Vector3.Zero,
+						Mass = 0,
+						Information = (groupId == 2)? 1 : 0,
+						Id = firstKey,
+						Group = groupId,
+						Charge = 1,
+						Cluster = 0,
+					};
+					allVertices.Add( firstKey, node);
+					neighboors.Add(firstKey, new List<int>());
+					int count;
+					if (counterInGroup.TryGetValue(groupId, out count))
+					{
+						counterInGroup.Remove(groupId);
+						counterInGroup.Add(groupId, count + 1);
+					}
+					else
+					{
+						counterInGroup.Add(groupId, 1);
+					}
+				}
+					if (!allVertices.ContainsKey(secondKey))
+					{
+						int groupId = (secondKey > 100) ? 1 : 2;
+						Graph.Vertice node = new Graph.Vertice()
+						{
+							Position = RadialRandomVector() * rand.Next(1000),//gcConfig.LinkSize,
+							Velocity = Vector3.Zero,
+							Color = ColorConstant.paletteWhite.ElementAt(groupId).ToVector4(),
+							Size = gcConfig.MinParticleRadius,
+							Acceleration = Vector3.Zero,
+							Mass = 0,
+							Information = (groupId == 2)? 1 : 0,
+							Id = secondKey,
+							Group = groupId,
+							Charge = 1,
+							Cluster = 0,
+						};
+						allVertices.Add( secondKey, node);
+						neighboors.Add(secondKey, new List<int>());
+
+						int count;
+						if (counterInGroup.TryGetValue(groupId, out count))
+						{
+							counterInGroup.Remove(groupId);
+							counterInGroup.Add(groupId, count + 1);
+						}
+						else
+						{
+							counterInGroup.Add(groupId, 1);
+						}
+					}
+				int lifetime = int.Parse(vert[3]);
+				Graph.Link link = new Graph.Link()
+				{
+					SourceID = firstKey,
+					StockID = secondKey,
+					Length = 50,
+					Force = 0,
+					Orientation = Vector3.Zero,
+					Weight = float.Parse(vert[4], NumberStyles.Any, CultureInfo.InvariantCulture) / 1000,
+					LinkType = 0,
+					Color = ColorForBank(lifetime).ToVector4(), //ColorConstant.paletteByGroup.ElementAt(int.Parse(first[0]) - 1).ToVector4(),
+					Width = gcConfig.MaxLinkWidth,
+					LifeTime = lifetime,
+					TotalLifeTime = lifetime,
+				};
+				allEdges.Add(link);
+				List<int> list;
+				if (!neighboors.TryGetValue(firstKey, out list))
+				neighboors.Add(firstKey, list = new List<int>());
+				list.Add(secondKey);
+
+				if (!neighboors.TryGetValue(secondKey, out list))
+				neighboors.Add(secondKey, list = new List<int>());
+				list.Add(firstKey);
+			}
+			fileEdges.Close();
+			counterInGroup = counterInGroup.OrderByDescending( (x) => x.Value ).ToDictionary( pair => pair.Key, pair => pair.Value );
+			int s;
+			counterInGroup.TryGetValue( 0, out s );
+			float maxCircleRadius = s*gcConfig.MinParticleRadius/MathUtil.Pi;
+			foreach (var pair in allVertices)
+			{
+				var node = pair.Value;
+				node.ColorType = (counterInGroup.Keys.ToList().IndexOf(node.Group) == 0) ? maxCircleRadius : maxCircleRadius* ( 1 - (float) ( counterInGroup.Keys.ToList().IndexOf( node.Group )) / counterInGroup.Count) ;
+				graph.nodes.Add( node);
+			}
+			// = allVertices.Values.ToList();
+			graph.links = allEdges;
+			graph.neighboors = neighboors;
+			graph.NodesCount = graph.nodes.Count;
+		}
 	}
 }
