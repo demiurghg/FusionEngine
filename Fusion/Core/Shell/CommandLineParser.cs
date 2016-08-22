@@ -81,13 +81,13 @@ namespace Fusion.Core.Shell
                     // Record an optional option.
                     optionalOptions.Add(fieldName.ToLowerInvariant(), field);
   
-                    optionalUsageHelp.Add(string.Format("{0,-20}{1}", OptionLeadingChar + fieldName + GetValueString(field), fieldDesc + GetEnumValues(field)));
+                    optionalUsageHelp.Add(string.Format("{0,-30}{1}", OptionLeadingChar + fieldName + GetValueString(field), fieldDesc + GetEnumValues(field)));
                 }
             }
 
 			if (tailRequiredOptions!=null) {
 				var tailname = 	GetOptionName(tailRequiredOptions);
-				requiredUsageHelp.Add( string.Format("{0}[,...]", tailname) );
+				requiredUsageHelp.Add( string.Format("<{0}0>[{0}1...]", tailname) );
 				requiredOptions.Add( tailRequiredOptions );
 			}
         }
@@ -315,22 +315,26 @@ namespace Fusion.Core.Shell
 				return "";
 			}
 
-			if (pi.PropertyType == typeof(string)) {
-				return ":string";
-			}
+			var isList	=	IsList( pi );
+			var name	=	GetOptionType( pi ).Name.ToLower();
 
-			if (pi.PropertyType == typeof(float)) {
-				return ":float";
-			}
+			return ":" + name + ( isList ? " [...]" : "" );
+			//if (pi.PropertyType == typeof(string)) {
+			//	return ":string";
+			//}
 
-			if (pi.PropertyType == typeof(int)) {
-				return ":int";
-			}
+			//if (pi.PropertyType == typeof(float)) {
+			//	return ":float";
+			//}
 
-			if (pi.PropertyType.IsEnum) {	
-				return ":enum";
-			}
-			return ":value";
+			//if (pi.PropertyType == typeof(int)) {
+			//	return ":int";
+			//}
+
+			//if (pi.PropertyType.IsEnum) {	
+			//	return ":enum";
+			//}
+			//return ":value";
 		}
 
 

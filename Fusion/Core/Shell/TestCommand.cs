@@ -34,6 +34,12 @@ namespace Fusion.Core.Shell {
 		[CommandLineParser.Name("option")]
 		public TestRequiredEnum Option { get; set; }
 
+		[CommandLineParser.Name("optionTeSt")]
+		public TestRequiredEnum OptionQQQQ { get; set; }
+
+		[CommandLineParser.Name("optionTeXt")]
+		public TestRequiredEnum OptionWWWW { get; set; }
+
 		//[CommandLineParser.Name("num")]
 		//public List<int> Numbers { get; set; }
 

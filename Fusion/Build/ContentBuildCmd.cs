@@ -15,16 +15,16 @@ namespace Fusion.Build {
 	[Command("contentBuild", CommandAffinity.Default)]
 	public class ContentBuildCmd : NoRollbackCommand {
 
-		[CommandLineParser.Name("force")]
+		[CommandLineParser.Name("force", "Force to rebuild entire content")]
 		public bool ForceRebuild { get; set; }
 			
-		[CommandLineParser.Name("clean")]
+		[CommandLineParser.Name("clean", "Clean all files that matches provided pattern")]
 		public string CleanPattern { get; set; }
 			
-		[CommandLineParser.Name("async")]
+		[CommandLineParser.Name("async", "Build content in separate thread")]
 		public bool ASync { get; set; }
 			
-		[CommandLineParser.Name("file")]
+		[CommandLineParser.Name("file", "Files to rebuild")]
 		public List<string> Files { get; set; }
 			
 		
