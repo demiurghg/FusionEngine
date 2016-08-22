@@ -222,7 +222,7 @@ void CSMain(
 	factor = 0.000005f;
 
 	forceCenter.xyz += mul(R, factor*diff/Rabs);
-	//p.Force += forceCenter.xyz;
+	p.Force += forceCenter.xyz;
 
 	particleRWBuffer[id] = p;
 }

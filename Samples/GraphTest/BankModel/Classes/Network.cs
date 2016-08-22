@@ -42,6 +42,7 @@ namespace GraphTest.BankModel.Classes
             searchingPaths.Add(Path.Combine(PathToNetworkX, "networkx"));
             searchingPaths.Add(@"d:\Valenitna\Documents\Projects VS2010\Financial Network Simulation\Financial Network Simulation\scipy-0.16.0\scipy");
             searchingPaths.Add(@"d:\Valenitna\Documents\Projects VS2010\Financial Network Simulation\Financial Network Simulation\numpy-1.9.2\numpy");
+		            searchingPaths.Add(Path.Combine(@"C:\Program Files (x86)\Python 3.5\Lib\site-packages", "networkx-1.9.1-py3.5.egg"));
 
             // for further code: paths.Add(String.Concat(pathToNetworkX, @"networkx-1.9.1.tar\dist\networkx-1.9.1\networkx-1.9.1\networkx\generators"));
             engine.SetSearchPaths(searchingPaths);
@@ -55,9 +56,9 @@ namespace GraphTest.BankModel.Classes
             var stringEdges = new string[edges.Count];
             for (var i = 0; i < edges.Count; i++)
                 stringEdges[i] = edges[i].ToStringNX();
-            dynamic script = Runtime.UseFile(Path.Combine(PathToNetworkX, "networkx/topology.py"));
+           // dynamic script = Runtime.UseFile(Path.Combine(PathToNetworkX, "networkx/topology.py"));
             if (!stringEdges.Any()) return 0;
-            return script.average_degree(stringEdges);
+	        return 0;//script.average_degree(stringEdges);
         }
 
         public static double AverageClustering(IList<Edge> edges)
@@ -65,20 +66,20 @@ namespace GraphTest.BankModel.Classes
             var stringEdges = new string[edges.Count];
             for (var i = 0; i < edges.Count; i++)
                 stringEdges[i] = edges[i].ToStringNX();
-            dynamic script = Runtime.UseFile(Path.Combine(PathToNetworkX, "networkx/topology.py"));
+           // dynamic script = Runtime.UseFile(Path.Combine(PathToNetworkX, "networkx/topology.py"));
             if (!stringEdges.Any()) return 0;
-            double res = script.average_clustering(stringEdges);
-            return Math.Round(res, 5);
+           // double res = script.average_clustering(stringEdges);
+	        return 0;// Math.Round(res, 5);
         }
         public static double AverageShortestPath(IList<Edge> edges)
         {
             var stringEdges = new string[edges.Count];
             for (var i = 0; i < edges.Count; i++)
                 stringEdges[i] = edges[i].ToStringNX();
-            dynamic script = Runtime.UseFile(Path.Combine(PathToNetworkX, "networkx/topology.py"));
+           // dynamic script = Runtime.UseFile(Path.Combine(PathToNetworkX, "networkx/topology.py"));
             if (!stringEdges.Any()) return 0;
-            double res =  script.average_shortest_path(stringEdges);
-            return Math.Round(res, 5);
+            //double res =  script.average_shortest_path(stringEdges);
+	        return 0;// Math.Round(res, 5);
         }
         public static double[] LaplacianSpectrum(IList<Edge> edges)
         {

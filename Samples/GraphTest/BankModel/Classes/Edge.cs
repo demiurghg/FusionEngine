@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using IronPython.Modules;
 
-namespace GraphTest.BankModel.Structs
+namespace SimpleBankingModel
 {
     public class Edge
     {

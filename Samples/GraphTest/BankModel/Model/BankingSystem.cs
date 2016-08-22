@@ -35,6 +35,30 @@ namespace GraphTest.BankModel.Model
         /// </summary>
         readonly EventInt _curIt = new EventInt(0);// todo start it as a parameter
         internal List<Edge> AllEdgesOverSimulation = new List<Edge>();
+        public List<string> DeletedNodeIDs = new List<string>();
+
+        #region FEATURES FOR PLOTS
+        /// <summary>
+        /// Count of deleted nodes or nodes with NW<0
+        /// </summary>
+        public List<double> NegativeNodesShare = new List<double>();
+        /// <summary>
+        /// Considers an interbank network.
+        /// May be more than current N, since multiedges.
+        /// Is proportional to edges count, but normalized by the number of nodes.
+        /// </summary>
+        public List<double> AverageDegree = new List<double>();
+        /// <summary>
+        /// Returns Average clustering coefficients for each iteration.
+        /// Is evaluated with NetworkX
+        /// </summary>
+        public List<double> AverageClustering = new List<double>();
+        /// <summary>
+        /// The list of path length for iterations.
+        /// Evaluated with NetworkX.
+        /// </summary>
+        public List<double> AverageShortestPath = new List<double>();
+        #endregion
 
         /// <summary>
         /// Set number of current iteration to ZERO, 
@@ -152,21 +176,20 @@ namespace GraphTest.BankModel.Model
         internal void Iteration(Policy bankPolicy, Policy customerPolicy)
         {
             _curIt.Plus();// save current values of bank balance sheets to previous
+            DeleteExpiredEdges();
             NewEdgesENetwork(customerPolicy);
             NewEdgesINetwork(bankPolicy);
-            DeleteExpiredEdges();
         }
 
         internal void Iteration(Policy bankPolicy, Policy customerPolicy, 
               IComparer<Edge> rewiringComparatorA, IComparer<Edge> rewiringComparatorL)
         {
-            
-			Iteration(bankPolicy, customerPolicy);
-
+            Iteration(bankPolicy, customerPolicy);
             foreach (var bank in Banks)
             {
                 if (bank.NW < 0) DeleteNode(bank.ID, rewiringComparatorA, rewiringComparatorL);
             }
+            Banks.RemoveAll(x => DeletedNodeIDs.Contains(x.ID));
         }
 
         private void NewEdgesENetwork(Policy customerPolicy)
@@ -174,13 +197,13 @@ namespace GraphTest.BankModel.Model
             var loanDepo = new Random();
             foreach (var customer in Customers)
             {
-                int bankNum ; ChooseBank(customerPolicy," ",out bankNum);
+                string bankNum ; ChooseBank(customerPolicy," ",out bankNum);
                 var size     = ChooseWeight();
                 var maturity = ChooseMaturity();
 
                 ENetwork.Add(loanDepo.NextDouble() < LoanDepoShare
-                    ? new Edge("b" + bankNum, customer.ID, size, maturity, _curIt.ToInt())
-                    : new Edge(customer.ID, "b" + bankNum, size, maturity, _curIt.ToInt()));
+                    ? new Edge(bankNum, customer.ID, size, maturity, _curIt.ToInt())
+                    : new Edge(customer.ID, bankNum, size, maturity, _curIt.ToInt()));
             }
         }
 
@@ -188,24 +211,22 @@ namespace GraphTest.BankModel.Model
         {
             foreach (var bank in Banks)
             {
-                if (bank.NW > 0) continue;
-                while(bank.NW < 0)    
+                if (bank.NW > 0) 
+                    continue;
+                var tries = 0; // number of tries for state enhancing
+                while(bank.NW <= 0 && tries < Banks.Count)    
                 {
-                    int bankNum;
+                    string bankNum;
                     ChooseBank(bankPolicy, bank.ID, out bankNum);
-                    var cnt = 0;
-                    while ("b" + bankNum == bank.ID)
-                        if (cnt < 4)
-                        {
-                            ChooseBank(bankPolicy, bank.ID, out bankNum);
-                            cnt++;
-                        }
-                        else ChooseBank(Policy.R, bank.ID, out bankNum);
-
-
-                    var size = ChooseWeight(); // TODO size=-NW
+                    // TODO check if (bankNum == bank.ID) may be false
+                    
+                    var size = Math.Min(-bank.NW+1, Banks.First(x=>x.ID==bankNum).NW-1);//ChooseWeight(); // TODO size=-NW
                     var maturity = ChooseMaturity();
-                    IbNetwork.Add(new Edge(bank.ID, "b" + bankNum, size, maturity, _curIt.ToInt()));
+                    if (DeletedNodeIDs.Contains(bankNum))
+                        throw new Exception("the node chosen have already been deleted");
+                    if (size >0 && maturity > 0)
+                        IbNetwork.Add(new Edge(bank.ID, bankNum, size, maturity, _curIt.ToInt()));
+                    tries++;
                 }
             }
         }
@@ -227,6 +248,11 @@ namespace GraphTest.BankModel.Model
         /// <param name="rewiringComparatorL">The method of eliminated bank liabilities sorting</param>
         public void DeleteNode(string nodeId, IComparer<Edge> rewiringComparatorA, IComparer<Edge> rewiringComparatorL)
         {
+            if (DeletedNodeIDs.Contains(nodeId)) throw new Exception("This node is already deleted!");
+            DeletedNodeIDs.Add(nodeId);
+            // remove self loops
+            IbNetwork.RemoveAll(x=>x.Source==x.Target);
+            
             // form lists of assets and liabilities for an excluded bank
             var assets = new List<Edge>();
             assets.AddRange(ENetwork.Where (x => x.Source == nodeId));
@@ -245,15 +271,11 @@ namespace GraphTest.BankModel.Model
             // add result edges to the system
             while (assets.Count > 0 && liabilities.Count > 0)
             {
-	            int idSource = 0;
-	            while (!Regex.IsMatch(liabilities[idSource].Source, @"b\d+") && idSource < liabilities.Count - 1)
-	            {
-		            idSource++;
-	            }
-				var newSource = liabilities[idSource].Source;
+                var newSource = liabilities[0].Source;
                 var newTarget = assets[0].Target;
-                var newWeight = Math.Min(assets[0].Weight, liabilities[idSource].Weight);
-                var newExpires = Math.Min(assets[0].Expires, liabilities[idSource].Expires);
+                if (DeletedNodeIDs.Contains(newSource) || DeletedNodeIDs.Contains(newTarget)) throw new Exception();
+                var newWeight = Math.Min(assets[0].Weight, liabilities[0].Weight);
+                var newExpires = Math.Min(assets[0].Expires, liabilities[0].Expires);
                 var newMaturity = newExpires - _curIt.ToInt();
                 var newEdge = new Edge(newSource, newTarget, newWeight, newMaturity, _curIt.ToInt());
                 
@@ -261,25 +283,37 @@ namespace GraphTest.BankModel.Model
                     IbNetwork.Add(newEdge);
                 else
                     ENetwork.Add(newEdge);
-                assets[0].SetWeight(assets[0].Weight - newWeight);
-                liabilities[idSource].SetWeight(liabilities[idSource].Weight - newWeight);
-				Edge replaceAsset = new Edge(assets[0].Source, assets[0].Target, assets[0].Weight - newWeight, assets[0].Maturity, assets[0].Created);
-				Edge replaceLiabilities = new Edge(liabilities[idSource].Source, liabilities[idSource].Target, liabilities[idSource].Weight - newWeight, liabilities[idSource].Maturity, liabilities[idSource].Created);
-				assets.RemoveAt(0);
-				liabilities.RemoveAt(idSource);
+                assets[0].Weight=assets[0].Weight - newWeight;
+                liabilities[0].Weight=liabilities[0].Weight - newWeight;
 
-                if (replaceAsset.Weight != 0)      assets.Insert(0, replaceAsset);
-                if (replaceLiabilities.Weight != 0) liabilities.Insert(idSource, replaceLiabilities);
+                if (assets[0].Weight == 0)      
+                    assets.RemoveAt(0);
+                if (liabilities[0].Weight == 0) 
+                    liabilities.RemoveAt(0);
             }
         }
 
-        private void ChooseBank(Policy bankPolicy, string bankId, out int bankNum)
+        public void InfusionFund(string nodeId, int infusionSize)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// returns int of bank id
+        /// </summary>
+        /// <param name="bankPolicy">The algorithm of partner choice</param>
+        /// <param name="bankId">Bank finding a partner</param>
+        /// <param name="bankNum">The partner's ID(string) </param>
+        private void ChooseBank(Policy bankPolicy, string bankId, out string bankNum)
         {
             if(bankPolicy==Policy.R)
                 bankNum = ChooseBank();
-            else if (bankPolicy == Policy.P)
-                bankNum = ChooseBank_PreferentiallyAssets();
+            else if (bankPolicy == Policy.Pa)
+                bankNum = ChooseBank_PreferentiallyAssets(bankId);
+            else if (bankPolicy == Policy.Pnw)
+                bankNum = ChooseBank_PreferentiallyNW(bankId);
             else bankNum = ChooseBank_AssortativeAssets(bankId);
+            if(DeletedNodeIDs.Contains(bankNum)) 
+                throw new Exception("The bank choosen has been deleted from the network");
         }
         
     }

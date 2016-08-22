@@ -13,23 +13,25 @@ using GraphTest.BankModel.Structs;
 
 namespace GraphTest.BankModel {
 
-	 internal enum Policy
-		{
-			[Description("r")]
-			R/*andom*/,
-			[Description("p")]
-			P/*referential*/,
-			[Description("a")]
-			A/*ssortative*/
-		}
-
-	class BankModel {
+    internal enum Policy
+    {
+        [Description("r")]
+        R/*andom*/,
+        [Description("pa")]
+        Pa/*referential*/,
+        [Description("pnw")]
+        Pnw,
+        [Description("a")]
+        A/*ssortative*/
+    }
+	class BankModel{
 		private static readonly ILog Log = LogManager.GetLogger(typeof(Program));
         public const  int                 BankNum = 100;
         public const  int                 CustNum = 1000;
         public static Policy           BankPolicy = Policy.R;
         public static Policy       CustomerPolicy = Policy.R;
         public static IGraph InitialNetworkConfig = new BarabasiAlbertGraph(BankNum, 5);
+        public static bool       WithNodeDeletion = true;
         public static IComparer<Edge> RewiringComparisonA = new CompareEdgesExpiresDescending();
         public static IComparer<Edge> RewiringComparisonL = new CompareEdgesExpiresDescending();
         // public Comparison<Edge> RewiringComparisonA = CompareBanksByAssets;
@@ -50,29 +52,32 @@ namespace GraphTest.BankModel {
             //
         }
 
-        /// <summary>
-        /// Launch with the elimination of negative net worth nodes
-        /// </summary>
-        /// <param name="runNumber"></param>
-        /// <param name="bankNum"></param>
-        /// <param name="custNum"></param>
-        /// <param name="graphType">The initial network configuration</param>
-        /// <param name="rewiringPolicyA">Parameter 1 for edge rewiring after node elimination</param>
-        /// <param name="rewiringPolicyL">Parameter 2 for edge rewiring after node elimination</param>
-        public  void Launch(int runNumber)//, int bankNum, int custNum, IGraph graphType, Comparison<Edge> rewiringPolicyA, Comparison<Edge> rewiringPolicyL )
-        {
-			Console.WriteLine("Bank Iteration Number "+ runNumber);
-           // for (var i = 0; i < MaxIter; i++)
-           // {
-	            bSystem.Iteration(BankPolicy, CustomerPolicy, RewiringComparisonA, RewiringComparisonL);
-				bSystem.UpdateProperties(); // update time-dependent network features, save results for previous  iteration
-                OutputDataPerIter(bSystem, runNumber); // update output files
-				//Console.WriteLine(i);
-              //  bSystem.DeleteNode("b1", RewiringComparisonA, RewiringComparisonL);//TODO test
-                
-           // }
-            //GC.Collect();
-        }
+		/// <summary>
+		/// Launch with the elimination of negative net worth nodes
+		/// </summary>
+		/// <param name="runNumber"></param>
+		/// <param name="bankNum"></param>
+		/// <param name="custNum"></param>
+		/// <param name="graphType">The initial network configuration</param>
+		/// <param name="rewiringPolicyA">Parameter 1 for edge rewiring after node elimination</param>
+		/// <param name="rewiringPolicyL">Parameter 2 for edge rewiring after node elimination</param>
+		public void Launch(int runNumber)
+			//, int bankNum, int custNum, IGraph graphType, Comparison<Edge> rewiringPolicyA, Comparison<Edge> rewiringPolicyL )
+		{
+			Console.WriteLine("Bank Iteration Number " + runNumber);
+			if (bSystem.Banks.Count > 2)
+			{
+				Log.Info("T=" + runNumber + "; bank-nodes=" + (BankNum - bSystem.DeletedNodeIDs.Count));
+			if (WithNodeDeletion)
+				bSystem.Iteration(BankPolicy, CustomerPolicy, RewiringComparisonA, RewiringComparisonL);
+			else
+				bSystem.Iteration(BankPolicy, CustomerPolicy);
+
+			bSystem.UpdateProperties(); // update time-dependent network features, save results for previous  iteration
+			bSystem.CommitSysState(); // write topologycal features for the current iteration to the corresponding fields
+			// OutputDataPerIter(bSystem, i); // update output files
+			}
+		}
 
         /// <summary>
         /// Network edges and bank balance sheets output

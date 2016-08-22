@@ -220,6 +220,16 @@ namespace GraphTest.BankModel.Model
             };
             return String.Join(";", features);
         }
+        /// <summary>
+        /// Save current topological features to public fields of the banking system class
+        /// </summary>
+        internal void CommitSysState()
+        {
+            NegativeNodesShare.Add(DeletedNodeIDs.Count);
+            AverageDegree.Add((double)IbNetwork.Count/Banks.Count);
+            AverageClustering.Add(Network.AverageClustering(IbNetwork));
+            AverageShortestPath.Add(Network.AverageShortestPath(IbNetwork));
+        }
 
         /// <summary>
         /// Update time-dependent features: velocity and remoteness mean and variance, negative velocity share, neg NW share, mean unvated potential

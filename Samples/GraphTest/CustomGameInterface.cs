@@ -256,7 +256,7 @@ namespace GraphTest {
 			counterInGroup = counterInGroup.OrderByDescending( (x) => x.Value ).ToDictionary( pair => pair.Key, pair => pair.Value );
 			int s = counterInGroup.Values.Max();
 			//counterInGroup.TryGetValue( , out s );
-			float maxCircleRadius = s*gcConfig.MinParticleRadius/(MathUtil.Pi * 2);
+			float maxCircleRadius = s*gcConfig.MinParticleRadius * 2 /(MathUtil.Pi * 2);
 			foreach (var pair in allVertices)
 			{
 				var node = pair.Value;
@@ -401,7 +401,7 @@ namespace GraphTest {
 						{
 							var node = graph.ParticleList.Find((x) => x.Id == int.Parse(bank.ID.Substring(1)));
 							int id = graph.ParticleList.IndexOf(node);
-							node.Size = GraphConfig.MinParticleRadius * (bank.NW + 1);
+							node.Size = GraphConfig.MinParticleRadius * (bank.NW + 1) / 10;
 							node.Charge = bank.EL + bank.IL;
 							Log.Message(node.Size+"");
 							if (bank.NW < 0)
