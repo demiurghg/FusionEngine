@@ -16,24 +16,34 @@ namespace Fusion.Core.Shell
     /// </summary>
     public class CommandLineParser
     {
+		public class ArgumentInfo {
+
+			public ArgumentInfo ( PropertyInfo pi )
+			{
+				Name			=	CommandLineParser.GetOptionName( pi );
+				ArgumentType	=	CommandLineParser.GetOptionType( pi );
+				Description		=	CommandLineParser.GetOptionDescription( pi );
+				IsList			=	CommandLineParser.IsList( pi );
+			}
+
+			public readonly string Name;
+			public readonly string Description;
+			public readonly bool IsList;
+			public readonly Type ArgumentType;
+		}
+
         readonly Type optionsObjectType;
+		readonly string name;
 
         List<PropertyInfo> requiredOptions = new List<PropertyInfo>();
         Dictionary<string, PropertyInfo> optionalOptions = new Dictionary<string, PropertyInfo>();
-
-        List<string> requiredUsageHelp = new List<string>();
-        List<string> optionalUsageHelp = new List<string>();
-		List<string> optionsList = new List<string>();
 		PropertyInfo tailRequiredOptions = null;
 
-		readonly string name;
+		Dictionary<string, ArgumentInfo> optionalUsageHelp	=	new Dictionary<string,ArgumentInfo>();
+		List<ArgumentInfo> requiredUsageHelp				=	new List<ArgumentInfo>();
 
-
-		public IEnumerable<string> RequiredUsageHelp { get { return requiredUsageHelp; } }
-		public IEnumerable<string> OptionalUsageHelp { get { return optionalUsageHelp; } }
-
-		public IDictionary<string,PropertyInfo> Options { get { return optionalOptions; } }
-		public IList<PropertyInfo> Required { get { return requiredOptions; } }
+		public IDictionary<string,ArgumentInfo> OptionalUsageHelp { get { return optionalUsageHelp; } }
+		public IList<ArgumentInfo> RequiredUsageHelp { get { return requiredUsageHelp; } }
 
 		/// <summary>
 		/// Optional argument leading char. Could be '/' or '-'.
@@ -74,20 +84,20 @@ namespace Fusion.Core.Shell
 					} else {
 	                    // Record a required option.
 		                requiredOptions.Add(field);
-			            requiredUsageHelp.Add(fieldName);
+			            requiredUsageHelp.Add(new ArgumentInfo(field));
 					}
 
                 } else {
                     // Record an optional option.
                     optionalOptions.Add(fieldName.ToLowerInvariant(), field);
   
-                    optionalUsageHelp.Add(fieldName);
+                    optionalUsageHelp.Add(fieldName, new ArgumentInfo(field));
                 }
             }
 
 			if (tailRequiredOptions!=null) {
 				var tailname = 	GetOptionName(tailRequiredOptions);
-				requiredUsageHelp.Add( tailname );
+				requiredUsageHelp.Add( new ArgumentInfo(tailRequiredOptions) );
 				requiredOptions.Add( tailRequiredOptions );
 			}
         }
@@ -156,15 +166,15 @@ namespace Fusion.Core.Shell
         {
             Log.Error(message, args);
             Log.Error("");
-            Log.Error("Usage: {0} {1}", name, string.Join(" ", requiredUsageHelp));
+            Log.Error("Usage: {0} {1}", name, string.Join(" ", requiredUsageHelp.Select(r=>r.Name)));
 
             if (optionalUsageHelp.Count > 0)
             {
                 Log.Error("");
 
-                foreach (string optional in optionalUsageHelp)
+                foreach (var optional in optionalUsageHelp)
                 {
-                    Log.Error("    {0}", optional);
+                    Log.Error("    /{0}", optional.Value.Name);
                 }
 
                 Log.Error("");

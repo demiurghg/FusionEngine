@@ -29,17 +29,18 @@ namespace Fusion.Core.Shell.Commands {
 		public override void Execute ()
 		{
 			try {
-				var cmd = Invoker.GetCommand( CommandName );
+				throw new NotImplementedException();
+				//var cmd = Invoker.GetCommand( CommandName );
 
-				var parser = new CommandLineParser( cmd.GetType(), cmd.Name );
+				//var parser = new CommandLineParser( cmd.GetType(), cmd.Name );
 
-				Log.Message("");
-				Log.Message("Usage: {0} {1}", cmd.Name, string.Join(" ", parser.RequiredUsageHelp.ToArray() ));
-				Log.Message("Options:");
+				//Log.Message("");
+				//Log.Message("Usage: {0} {1}", cmd.Name, string.Join(" ", parser.RequiredUsageHelp.ToArray() ));
+				//Log.Message("Options:");
 
-				foreach ( var opt in parser.OptionalUsageHelp ) {
-					Log.Message("   {0}", opt );
-				}
+				//foreach ( var opt in parser.OptionalUsageHelp ) {
+				//	Log.Message("   {0}", opt );
+				//}
 
 			} catch ( Exception e ) {
 				Log.Error( e.Message );

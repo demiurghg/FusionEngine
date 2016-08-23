@@ -66,7 +66,7 @@ namespace Fusion.Core.Shell {
 		public TestCommand(Invoker invoker) : base(invoker)
 		{
 			//Numbers	=	new List<int>();
-			//Input = new List<string>();
+			Input = new List<string>();
 		}
 
 		public override void Execute ()

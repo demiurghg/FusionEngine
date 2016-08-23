@@ -42,8 +42,6 @@ namespace FBuild {
 					return 0;
 				}
 
-				string error;
-
 				parser.ParseCommandLine( options, args );
 
 				Builder.Build( options );
@@ -65,12 +63,12 @@ namespace FBuild {
 		{
 			var name = Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().ProcessName);
 
-            Log.Message("Usage: {0} {1}", name, string.Join(" ", parser.RequiredUsageHelp));
+            Log.Message("Usage: {0} {1}", name, string.Join(" ", parser.RequiredUsageHelp.Select(n=>n.Name)));
 
             if ( parser.OptionalUsageHelp.Any() ) {
                 Log.Message("");
-                foreach (string optional in parser.OptionalUsageHelp) {
-                    Log.Message("    {0}", optional);
+                foreach (var optional in parser.OptionalUsageHelp) {
+                    Log.Message("    {0}", optional.Value.Name);
                 }
             }
 
@@ -92,8 +90,8 @@ namespace FBuild {
 				var prs  = new CommandLineParser( proc.GetType(), bind.Name );
 
 				if (prs.OptionalUsageHelp.Any()) {
-					foreach (string optional in prs.OptionalUsageHelp) {
-						Log.Message("    {0}", optional);
+					foreach (var optional in prs.OptionalUsageHelp) {
+						Log.Message("    {0}", optional.Value.Name);
 					}
 				} else {
 					Log.Message("    <no options>");

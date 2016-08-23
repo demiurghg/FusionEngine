@@ -84,74 +84,52 @@ namespace Fusion.Core.Shell {
 				var candidates		=	cmdList.ToArray();
 				var longestCommon	=	LongestCommon( cmd, ref candidates );
 
-				if (candidates.Length<=1) {
-					suggestion.CommandLine	=	longestCommon + " ";
-				} else {
-					suggestion.CommandLine	=	longestCommon;
+				if (!string.IsNullOrWhiteSpace(longestCommon)) {
+					if (candidates.Length<=1) {
+						suggestion.CommandLine	=	longestCommon + " ";
+					} else {
+						suggestion.CommandLine	=	longestCommon;
+					}
 				}
 
 				suggestion.AddRange( candidates );
 
 				return suggestion;
 			}
-
-			#if false
-			//
-			//	search commands :
-			//	
-			foreach ( var name in cmdList ) {
-				if (cmd.ToLower()==name.ToLower()) {
-					return AutoCompleteCommand(input, args, name);
-				}
-				if (name.StartsWith(cmd, StringComparison.OrdinalIgnoreCase)) {
-					longestCommon = LongestCommon( longestCommon, name );
-					suggestion.Set( longestCommon );
-					suggestion.Add( name );
-					count++;
-				}
-			}
-
-			//
-			//	search variables :
-			//	
-			foreach ( var variable in varList ) {
-				if (cmd.ToLower()==variable.FullName.ToLower()) {
-					return AutoCompleteVariable( input, args, variable );
-				}		   
-				if (variable.FullName.StartsWith(cmd, StringComparison.OrdinalIgnoreCase)) {
-					longestCommon = LongestCommon( longestCommon, variable.FullName );
-					suggestion.Set( longestCommon );
-					suggestion.Add( string.Format("{0,-30} = {1}", variable.FullName, variable.Get() ) );
-					count++;
-				}
-			}
-
-			if (count==1) {
-				suggestion.Set( suggestion.CommandLine + " ");
-			}
-
-			return suggestion;
-			#endif
 		}
+
 		
 
 
-		void AddCommandHelp ( Suggestion suggestion, CommandLineParser parser, string commandName )
-		{
-			suggestion.Add( commandName + " " + string.Join(" ", parser.RequiredUsageHelp ) );
-			suggestion.Add( "" );
-			suggestion.Add( "options : " );
-			suggestion.AddRange( parser.OptionalUsageHelp.Select( opt => "   " + opt ) );
-		}
-
-		void AddCommandHelpShort ( Suggestion suggestion, CommandLineParser parser, string commandName )
+		void AddCommandSyntax ( Suggestion suggestion, CommandLineParser parser, string commandName )
 		{
 			suggestion.Add( commandName 
-				+ " " + string.Join(" ", parser.RequiredUsageHelp.Select( o => "<" + o + ">") )
-				+ " " + string.Join("", parser.OptionalUsageHelp.Select( o => "[/" + o + "]") ) 
+				+ " " + string.Join(" ", parser.RequiredUsageHelp.Select( o => "<" + o.Name + ">" + (o.IsList?"[...]":"")) )
+				+ " " + string.Join("", parser.OptionalUsageHelp.Select( o => "[/" + o.Value.Name + "]") ) 
 				);
 		}
 
+
+
+		void DetailedCommandHelp ( Suggestion suggestion, CommandLineParser parser, string commandName )
+		{
+			suggestion.Add( commandName );
+			
+			suggestion.Add( "" );
+			suggestion.Add( "required : " );
+
+			foreach( var option in parser.RequiredUsageHelp ) {
+				suggestion.Add(string.Format("   {0,-20} {1}", "<"+option.Name+">", option.Description));
+			}
+
+			
+			suggestion.Add( "" );
+			suggestion.Add( "options : " );
+
+			foreach( var option in parser.OptionalUsageHelp.Select( p => p.Value ).OrderBy( n=>n.Name ) ) {
+				suggestion.Add(string.Format("   /{0,-20} {1}", option.Name, option.Description));
+			}
+		}
 
 
 		/// <summary>
@@ -162,26 +140,44 @@ namespace Fusion.Core.Shell {
 		/// <returns></returns>
 		Suggestion AutoCompleteCommand ( string input, string[] args, string commandName )
 		{
-			var suggestion = new Suggestion(input);
+			var suggestion		=	new Suggestion(input);
 
-			var cmd		=	GetCommand(commandName);
-			var parser	=	GetParser(commandName);
+			var cmd				=	GetCommand(commandName);
+			var parser			=	GetParser(commandName);
+			var numRequired		=	parser.RequiredUsageHelp.Count;
+			var numOptions		=	parser.OptionalUsageHelp.Count;
+			var tailingSpace	=	input.Last()==' ';
 
-			AddCommandHelpShort( suggestion, parser, commandName );
+			//	add fictional empty argument for more clear suggestion:
+			if (tailingSpace) {
+				Array.Resize<string>( ref args, args.Length + 1 );
+				args[ args.Length-1 ] = "";
+			}
 
-			/*if (args.Length==1 || input.Last()==' ') {
 
+			//	command without tailing space - add space:
+			if (args.Length==1) {
 				suggestion.CommandLine = ArgsToString( args ) + " ";
-				AddCommandHelp( suggestion, parser, commandName );
-
+				DetailedCommandHelp( suggestion, parser, commandName );
 				return suggestion;
-			} */
+			}
+
+			//	store last argument :
+			var lastArg = args.Last();
+
+			//	question?
+			if (lastArg=="?") {
+				DetailedCommandHelp( suggestion, parser, commandName );
+				return suggestion;
+			}
 
 
-			var lastArg = ( args.Length > 1 ) ? args.Last() : "";
+			//	add short help :
+			AddCommandSyntax( suggestion, parser, commandName );
 
 			if (lastArg.StartsWith("/")) {
 
+				#region OPTIONS
 				var name	=   lastArg.Substring(1);
 				var index	=	name.IndexOf(':');	
 
@@ -190,25 +186,23 @@ namespace Fusion.Core.Shell {
 				}
 
 				var candidates = new string[0];
-				var options	=	parser.Options;
-				PropertyInfo pi;
+				var options	=	parser.OptionalUsageHelp;
+				CommandLineParser.ArgumentInfo pi;
 
 				if ( options.TryGetValue( name, out pi ) ) {
-					if (pi.PropertyType==typeof(bool)) {
+					if (pi.ArgumentType==typeof(bool)) {
 		
 						suggestion.CommandLine = ArgsToString( args ) + " ";
-						AddCommandHelpShort( suggestion, parser, commandName );
 						return suggestion;
 		
 					} else {
 		
 						if (index==-1) {
 							suggestion.CommandLine = ArgsToString( args ) + ":";
-							AddCommandHelp( suggestion, parser, commandName );
 							return suggestion;
 						} else {
 							var value = lastArg.Substring(index+2);
-							candidates = cmd.Suggest( pi.PropertyType, name ).ToArray();
+							candidates = cmd.Suggest( pi.ArgumentType, name ).ToArray();
 							value = LongestCommon( value, ref candidates );
 							suggestion.AddRange( candidates );
 							suggestion.CommandLine	= ArgsToString( args, "/" + name + ":" + value );
@@ -226,29 +220,29 @@ namespace Fusion.Core.Shell {
 				suggestion.AddRange(candidates);
 
 				suggestion.CommandLine	= ArgsToString( args, lastArg );
+				#endregion
 
 			} else {
 
-				var candidates	=	new string[0];
-				int index		=	Math.Max( 0, args.Skip(1).Count( arg => !arg.StartsWith("/") ) - 1 );
-				int required	=	parser.Required.Count;
+				var candidates		=	new string[0];
+				int currentIndex	=	Math.Max( 0, args.Skip(1).Count( arg => !arg.StartsWith("/") ) ) - 1;
 
-				if (index < required) {
+				if (currentIndex < numRequired) {
 					
-					PropertyInfo pi	=	parser.Required[index];
+					var pi		=	parser.RequiredUsageHelp[currentIndex];
 
-					var name	=	CommandLineParser.GetOptionName( pi );
-					var type	=	CommandLineParser.GetOptionType( pi );
+					var name	=	pi.Name;
+					var type	=	pi.ArgumentType;
 
 					candidates	=	cmd.Suggest( type, name ).ToArray();
 
-					lastArg		=	LongestCommon( lastArg, ref candidates );
+					var longest	=	LongestCommon( lastArg, ref candidates );
 
 					suggestion.AddRange(candidates);
 
 					var postFix	=	(lastArg=="" || candidates.Length==1) ? " " : "";
 
-					suggestion.CommandLine	= ArgsToString( args, lastArg ) + postFix;
+					suggestion.CommandLine	= ArgsToString( args, longest ?? lastArg ) + postFix;
 
 				} else {
 					
@@ -338,13 +332,21 @@ namespace Fusion.Core.Shell {
 
 
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="input"></param>
+		/// <param name="candidates"></param>
+		/// <returns></returns>
 		string LongestCommon ( string input, ref string[] candidates )
 		{
 			candidates = candidates
 				.Where( c => c.StartsWith( input, StringComparison.OrdinalIgnoreCase) )
 				.ToArray();
 
-			return LongestCommon( candidates );
+			var longest	=	LongestCommon( candidates );
+			
+			return longest;
 		}
 
 
@@ -371,7 +373,7 @@ namespace Fusion.Core.Shell {
 		/// <param name="strs"></param>
 		/// <returns></returns>
 		public String longestCommonPrefix(String[] strs) {
-			if(strs.Length==0) return "";
+			if(strs.Length==0) return null;
 			String minStr=strs[0];
 
 			for(int i=1;i<strs.Length;i++){

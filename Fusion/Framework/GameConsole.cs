@@ -219,7 +219,10 @@ namespace Fusion.Framework {
 
 			//consoleFont.DrawString( editLayer, "]" + editBox.Text, 0,0, Config.CmdLineColor );
 			//consoleFont.DrawString( editLayer, "_", charWidth + charWidth * editBox.Cursor, 0, cursorColor );
-			DrawString( editLayer, charWidth/2, -charHeight/2,										"]" + editBox.Text, CmdLineColor );
+			var text	=	"]" + editBox.Text;
+			var color	=	CmdLineColor;
+
+			DrawString( editLayer, charWidth/2, -charHeight/2,										text, color );
 			DrawString( editLayer, charWidth + charWidth/2 + charWidth * editBox.Cursor,	-charHeight/2,  "_", cursorColor );
 
 
