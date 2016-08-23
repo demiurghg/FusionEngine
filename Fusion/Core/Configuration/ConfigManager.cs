@@ -47,7 +47,7 @@ namespace Fusion.Core.Configuration {
 		public ConfigManager ( Game game )
 		{
 			this.game		=	game;
-			configVariables	=	new Dictionary<string,ConfigVariable>();
+			configVariables	=	new Dictionary<string,ConfigVariable>( StringComparer.OrdinalIgnoreCase );
 			targetObjects	=	new Dictionary<string,object>();
 		}
 

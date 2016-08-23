@@ -74,20 +74,20 @@ namespace Fusion.Core.Shell
 					} else {
 	                    // Record a required option.
 		                requiredOptions.Add(field);
-			            requiredUsageHelp.Add(string.Format("<{0}>", fieldName));
+			            requiredUsageHelp.Add(fieldName);
 					}
 
                 } else {
                     // Record an optional option.
                     optionalOptions.Add(fieldName.ToLowerInvariant(), field);
   
-                    optionalUsageHelp.Add(string.Format("{0,-30}{1}", OptionLeadingChar + fieldName + GetValueString(field), fieldDesc + GetEnumValues(field)));
+                    optionalUsageHelp.Add(fieldName);
                 }
             }
 
 			if (tailRequiredOptions!=null) {
 				var tailname = 	GetOptionName(tailRequiredOptions);
-				requiredUsageHelp.Add( string.Format("<{0}0>[{0}1...]", tailname) );
+				requiredUsageHelp.Add( tailname );
 				requiredOptions.Add( tailRequiredOptions );
 			}
         }
