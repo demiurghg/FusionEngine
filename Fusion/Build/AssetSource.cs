@@ -167,6 +167,18 @@ namespace Fusion.Build {
 		}
 
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public ZipArchive OpenAssetArchive ()
+		{
+			return ZipFile.Open( Path.ChangeExtension(FullTargetPath, ".zip"), ZipArchiveMode.Update );
+		}
+
+
+
 		/// <summary>
 		/// 
 		/// </summary>

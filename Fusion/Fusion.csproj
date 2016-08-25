@@ -111,6 +111,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
@@ -137,10 +138,6 @@
     <Compile Include="Build\BuildResult.cs" />
     <Compile Include="Build\ContentReportCmd.cs" />
     <Compile Include="Build\Mapping\MapProcessor.cs" />
-    <Compile Include="Build\Mapping\MapScene.cs" />
-    <Compile Include="Build\Mapping\MapTexture.cs" />
-    <Compile Include="Build\Mapping\VTAtlasNode.cs" />
-    <Compile Include="Build\Mapping\VTPageTable.cs" />
     <Compile Include="Build\Processors\AssetProcessor.cs" />
     <Compile Include="Build\Processors\AssetProcessorAttribute.cs" />
     <Compile Include="Build\Processors\AssetProcessorBinding.cs" />
