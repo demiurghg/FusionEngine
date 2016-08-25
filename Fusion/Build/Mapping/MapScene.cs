@@ -33,6 +33,10 @@ namespace Fusion.Build.Mapping {
 		}
 
 
+
+		public IEnumerable<string> Textures;
+
+
 		/// <summary>
 		/// Gets built scene path.
 		/// If scene is not built throws exception.
@@ -69,7 +73,7 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <param name="context"></param>
-		public void BuildScene ( BuildContext context, VTPageTable pageTable )
+		public void BuildScene ( BuildContext context, MapTextureTable pageTable )
 		{
 			builtScenePath		=	context.GetTempFileName( KeyPath, ".vtscene" );
 
@@ -125,7 +129,7 @@ namespace Fusion.Build.Mapping {
 		/// <summary>
 		/// TODO : split vertices that share triangles with diferrent materials!
 		/// </summary>
-		public void RemapTexCoords ( VTPageTable pageTable )
+		public void RemapTexCoords ( MapTextureTable pageTable )
 		{
 			foreach ( var mesh in scene.Meshes ) {
 

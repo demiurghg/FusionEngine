@@ -138,6 +138,15 @@
     <Compile Include="Build\BuildResult.cs" />
     <Compile Include="Build\ContentReportCmd.cs" />
     <Compile Include="Build\Mapping\MapProcessor.cs" />
+    <Compile Include="Build\Mapping\MapScene.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Build\Mapping\MapTexture.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Build\Mapping\VTPageTable.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Build\Processors\AssetProcessor.cs" />
     <Compile Include="Build\Processors\AssetProcessorAttribute.cs" />
     <Compile Include="Build\Processors\AssetProcessorBinding.cs" />

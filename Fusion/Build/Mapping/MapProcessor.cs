@@ -15,6 +15,8 @@ namespace Fusion.Build.Mapping {
 	[AssetProcessor("Map", "Performs map assembly")]
 	public class MapProcessor : AssetProcessor {
 
+		HashSet<string> textureKeyPaths;
+
 
 		/// <summary>
 		/// 
@@ -32,11 +34,13 @@ namespace Fusion.Build.Mapping {
 		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
 			//	get list of scenes :
-			/*var mapScenes	=	File.ReadAllLines(assetFile.FullSourcePath)
+			var mapScenes	=	File.ReadAllLines(assetFile.FullSourcePath)
 								.Select( f1 => f1.Trim() )
 								.Where( f2 => !f2.StartsWith("#") && !string.IsNullOrWhiteSpace(f2) )
 								.Select( f3 => new MapScene( f3, Path.Combine( fileDir, f3 ) ) )
-								.ToArray();*/
+								.ToArray();
+
+
 
 
 			//	write master table :
