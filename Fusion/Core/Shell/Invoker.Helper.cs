@@ -224,6 +224,7 @@ namespace Fusion.Core.Shell {
 
 			} else {
 
+				#region REQUIRED
 				var candidates		=	new string[0];
 				int currentIndex	=	Math.Max( 0, args.Skip(1).Count( arg => !arg.StartsWith("/") ) ) - 1;
 
@@ -244,11 +245,10 @@ namespace Fusion.Core.Shell {
 
 					suggestion.CommandLine	= ArgsToString( args, longest ?? lastArg ) + postFix;
 
-				} else {
-					
-				}
-			}
+				} 
+				#endregion
 
+			}
 			
 			return suggestion;
 		}

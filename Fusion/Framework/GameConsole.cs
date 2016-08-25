@@ -1,4 +1,5 @@
 ﻿//#define USE_PROFONT
+//#define USE_COURIER
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +39,10 @@ namespace Fusion.Framework {
 		#if USE_PROFONT
 		const string FontName = "profont";
 		SpriteFont	consoleFont;
-		#else
+		#elif USE_COURIER
+		const string FontName = "conchars2";
+		DiscTexture	consoleFont;
+		#else 
 		const string FontName = "conchars";
 		DiscTexture	consoleFont;
 		#endif
@@ -112,6 +116,9 @@ namespace Fusion.Framework {
 		#if USE_PROFONT
 			int charHeight { get { return consoleFont.LineHeight; } }
 			int charWidth { get { return consoleFont.SpaceWidth; } }
+		#elif USE_COURIER
+			int charHeight { get { return 9; } }
+			int charWidth { get { return 8; } }
 		#else
 			int charHeight { get { return 9; } }
 			int charWidth { get { return 8; } }
