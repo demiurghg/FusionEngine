@@ -78,6 +78,24 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="address"></param>
+		/// <param name="stream"></param>
+		public VTTile ( VTAddress address, Color color )
+		{
+			this.VirtualAddress	=	address;
+
+			this.images			=	new Image[ ImageCount ];
+
+			if (ImageCount==1) {
+				images[0]	=	new Image( VTConfig.PageSizeBordered, VTConfig.PageSizeBordered, color );
+			}
+		}
+
+
+
+		/// <summary>
 		/// Lerps two images to third one.
 		/// </summary>
 		/// <param name="dst"></param>

@@ -567,6 +567,24 @@ namespace Fusion.Core.Mathematics
 			return r;
 		}
 
+
+		/// <summary>
+		/// http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+		/// </summary>
+		/// <param name="v"></param>
+		/// <returns></returns>
+		static public int RoundUpNextPowerOf2 ( int v )
+		{
+			v--;
+			v |= v >> 1;
+			v |= v >> 2;
+			v |= v >> 4;
+			v |= v >> 8;
+			v |= v >> 16;
+			v++;
+			return v;
+		}
+
 		/// <summary>
 		/// Lerps a to b
 		/// </summary>

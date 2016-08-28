@@ -137,6 +137,7 @@
     <Compile Include="Build\BuildOptions.cs" />
     <Compile Include="Build\BuildResult.cs" />
     <Compile Include="Build\ContentReportCmd.cs" />
+    <Compile Include="Build\Mapping\Allocator2D.cs" />
     <Compile Include="Build\Mapping\LRUCache.cs" />
     <Compile Include="Build\Mapping\MapProcessor.cs" />
     <Compile Include="Build\Mapping\MapScene.cs" />

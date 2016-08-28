@@ -88,7 +88,19 @@ namespace Fusion.Build.Mapping {
 		/// <param name="textures"></param>
 		void PackTextureAtlas ( IEnumerable<MapTexture> textures )
 		{
-			var sortedList = textures
+			var allocator = new Allocator2D( VTConfig.VirtualPageCount );
+
+			foreach ( var tex in textures ) {
+
+				var size = Math.Max(tex.Width/128, tex.Height/128);
+
+				var addr = allocator.Alloc( size, tex );
+
+				tex.TexelOffsetX	=	addr.X * 128;
+				tex.TexelOffsetY	=	addr.Y * 128;
+			}
+
+			/*var sortedList = textures
 						.OrderByDescending( img0 => img0.Width * img0.Height )
 						.ThenByDescending( img1 => img1.Width )
 						.ThenByDescending( img2 => img2.Height )
@@ -101,11 +113,7 @@ namespace Fusion.Build.Mapping {
 				if (n==null) {
 					throw new BuildException("No enough room to place texture.");
 				}
-			}
-
-			/*foreach ( var tex in textures ) {
-				Log.Message("{0,6} {1,6} - {2}", tex.TexelOffsetX, tex.TexelOffsetY, tex.Name );
-			}*/
+			} */
 		}
 
 

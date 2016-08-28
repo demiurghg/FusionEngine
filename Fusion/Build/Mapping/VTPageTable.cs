@@ -81,7 +81,7 @@ namespace Fusion.Build.Mapping {
 		public void Add ( int address )
 		{
 			if (pages.Contains(address)) {
-				Log.Warning("Address {0,X} is already added", address);
+				Log.Warning("Address {0:X} is already added", address);
 			}
 			pages.Add( address );
 		}

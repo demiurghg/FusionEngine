@@ -148,6 +148,10 @@ namespace Fusion.Engine.Graphics {
 					loadedTiles.Enqueue( tile );
 
 				} catch ( IOException ioex ) {
+
+					var tile = new VTTile( address, Color.Magenta );
+					loadedTiles.Enqueue( tile );
+
 					Log.Warning("{0}", ioex );
 				}
 
