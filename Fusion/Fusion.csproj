@@ -137,16 +137,13 @@
     <Compile Include="Build\BuildOptions.cs" />
     <Compile Include="Build\BuildResult.cs" />
     <Compile Include="Build\ContentReportCmd.cs" />
+    <Compile Include="Build\Mapping\LRUCache.cs" />
     <Compile Include="Build\Mapping\MapProcessor.cs" />
-    <Compile Include="Build\Mapping\MapScene.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Build\Mapping\MapTexture.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Build\Mapping\VTPageTable.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Build\Mapping\MapScene.cs" />
+    <Compile Include="Build\Mapping\MapTexture.cs" />
+    <Compile Include="Build\Mapping\TileSamplerCache.cs" />
+    <Compile Include="Build\Mapping\VTAtlasNode.cs" />
+    <Compile Include="Build\Mapping\VTPageTable.cs" />
     <Compile Include="Build\Processors\AssetProcessor.cs" />
     <Compile Include="Build\Processors\AssetProcessorAttribute.cs" />
     <Compile Include="Build\Processors\AssetProcessorBinding.cs" />
