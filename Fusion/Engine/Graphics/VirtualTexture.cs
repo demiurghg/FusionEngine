@@ -274,7 +274,6 @@ namespace Fusion.Engine.Graphics {
 
 
 			if (tileCache!=null) {
-				tileCache.UpdateCache();
 			}
 
 			//
@@ -341,15 +340,8 @@ namespace Fusion.Engine.Graphics {
 				//	emboss tiles to physical texture
 				tileStamper.Update( PhysicalPages, gameTime.ElapsedSec );
 
-
 				//	update page table :
 				UpdatePageTable();
-				//PageTable.SetData( 0, tileCache.GetPageTableData(0) );
-				//PageTable.SetData( 1, tileCache.GetPageTableData(1) );
-				//PageTable.SetData( 2, tileCache.GetPageTableData(2) );
-				//PageTable.SetData( 3, tileCache.GetPageTableData(3) );
-				//PageTable.SetData( 4, tileCache.GetPageTableData(4) );
-				//PageTable.SetData( 5, tileCache.GetPageTableData(5) );
 			}
 		}
 	}

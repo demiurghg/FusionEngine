@@ -12,6 +12,7 @@ using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using Fusion.Core.Shell;
 using System.Runtime.InteropServices;
+using Fusion.Build.Mapping;
 
 namespace Fusion.Engine.Graphics {
 
@@ -38,12 +39,6 @@ namespace Fusion.Engine.Graphics {
 
 	public class VTTileCache {
 
-		readonly Dictionary<VTAddress,Page> dictionary;
-		readonly Page[]	table;
-		readonly int capacity;
-		readonly int[] bitCount;
-		
-		
 		class Page {
 			
 			public Page ( VTAddress va, int pa, int physPageCount )
@@ -57,10 +52,8 @@ namespace Fusion.Engine.Graphics {
 
 				this.X			=	((pa % physPageCount) * pageSize + border ) / physTexSize;
 				this.Y			=	((pa / physPageCount) * pageSize + border ) / physTexSize;
-				//this.TS			=	
 			}
 			
-			public uint LfuIndex = 0xFFFFFFFF;
 			public readonly VTAddress VA;
 			public readonly int Address;
 			public readonly float X;
@@ -75,28 +68,38 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		readonly int pageCount;
+		readonly int capacity;
+		LRUCache<VTAddress,Page> cache;
+
+
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="size">Physical page count</param>
-		public VTTileCache ( int physicalPageCount )
+		public VTTileCache ( int physPageCount )
 		{
-			this.capacity	=	physicalPageCount * physicalPageCount;
-			table			=	new Page[capacity];
-			//mapping			=	new Page[VTConfig.PageCount * VTConfig.PageCount];
-			dictionary		=	new Dictionary<VTAddress,Page>(capacity);
+			this.pageCount	=	physPageCount;
+			this.capacity	=	physPageCount * physPageCount;
 
-			bitCount		=	Enumerable
-								.Range(0,256)
-								.Select( n => MathUtil.IteratedBitcount( n ) )
-								.ToArray();
+			cache	=	new LRUCache<VTAddress,Page>( capacity );
+
+			//	fill cache with dummy pages :
+			for (int i=0; i<capacity; i++) {
+				var va		= VTAddress.CreateBadAddress(i);
+				var page	= new Page( va, i, pageCount );
+				cache.Add( va, page );
+			}
 		}
 
 
 
+		/// <summary>
+		/// Clears cache
+		/// </summary>
 		public void Purge ()
 		{
-			dictionary.Clear();
+			cache.Clear();
 		}
 
 
@@ -111,7 +114,7 @@ namespace Fusion.Engine.Graphics {
 		{
 			Page page;
 
-			if (dictionary.TryGetValue(address, out page)) {
+			if (cache.TryGetValue(address, out page)) {
 
 				var pa		=	page.Address;
 				var ppc		=	VTConfig.PhysicalPageCount;
@@ -134,134 +137,22 @@ namespace Fusion.Engine.Graphics {
 
 
 
+		/// <summary>
+		/// Gets gpu data for compute shader that updates page table
+		/// </summary>
+		/// <returns></returns>
 		public PageGpu[] GetGpuPageData ()
 		{
-			return dictionary
-				.OrderByDescending( pair0 => pair0.Key.MipLevel )
-				.Where( pair1 => pair1.Value.Tile!=null )
+			return cache.GetValues()
+				.OrderByDescending( pair0 => pair0.VA.MipLevel )
+				.Where( pair1 => pair1.Tile!=null )
 				.Select( pair2 => new PageGpu( 
-					pair2.Key.PageX, 
-					pair2.Key.PageY, 
-					pair2.Value.X,
-					pair2.Value.Y,
-					pair2.Key.MipLevel ) )
+					pair2.VA.PageX, 
+					pair2.VA.PageY, 
+					pair2.X,
+					pair2.Y,
+					pair2.VA.MipLevel ) )
 				.ToArray();
-		}
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		public Vector4[] GetPageTableData ( int mipLevel )
-		{
-			var mappingSize = VTConfig.VirtualPageCount >> mipLevel;
-			var mapping		= new Vector4[mappingSize*mappingSize];
-
-			var pairList = dictionary
-				.OrderByDescending( pair => pair.Key.MipLevel )
-				.ToArray();
-
-			foreach ( var pair in pairList ) {
-
-				var va	=	pair.Key;
-				var pa	=	pair.Value;
-
-				if (pa.Tile==null || va.MipLevel<mipLevel) {
-					continue;
-				}
-
-				var sz		=	1 << (va.MipLevel-mipLevel);
-				var minMip	=	va.MipLevel;// / (float)VTConfig.MipCount;
-				var value	=	new Vector4( pa.X, pa.Y, minMip, 1 );
-				//var value	=	MathUtil.PackRGB10A2( new Vector4( pa.X, pa.Y, minMip, 1 ) );
-
-
-				for ( int x=0; x<sz; x++ ) {
-					for ( int y=0; y<sz; y++ ) {
-
-						int vaX = va.PageX * sz + x;
-						int vaY = va.PageY * sz + y;
-
-						int addr = vaX + mappingSize * vaY;
-
-						mapping[ addr ] = value;
-
-					}
-				}
-			}
-
-			return mapping;
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public void UpdateCache ()
-		{
-			foreach ( var p in table ) {
-				if (p!=null) {
-					p.LfuIndex = (uint)(p.LfuIndex << 1);
-				}
-			}
-
-			//	check consistency:
-
-		}
-
-
-		/// <summary>
-		/// Gets page to discard
-		/// </summary>
-		/// <returns></returns>
-		Page GetPageToDiscard ()
-		{
-			int minBitCount = int.MaxValue;
-			Page page = null;
-
-			foreach ( var p in table ) {
-
-				if (p==null) {
-					throw new InvalidOperationException("Null page, impossible due to GetFreePhysicalAddress");
-				}
-
-				var bitCount = 
-					  this.bitCount[ ( p.LfuIndex>>0  ) & 0xFF ]
-					+ this.bitCount[ ( p.LfuIndex>>8  ) & 0xFF ]
-					+ this.bitCount[ ( p.LfuIndex>>16 ) & 0xFF ]
-					+ this.bitCount[ ( p.LfuIndex>>24 ) & 0xFF ];
-
-				if (minBitCount > bitCount) {
-					minBitCount = bitCount;
-					page = p;
-				}
-			}
-
-			return page;
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="physycalAddress"></param>
-		/// <returns></returns>
-		bool GetFreePhysicalAddress (out int physycalAddress)
-		{
-			physycalAddress = -1;
-			int length =  table.Length;
-
-			for (int addr = 0; addr < length; addr ++ ) {
-				if (table[addr]==null) {
-					physycalAddress = addr;
-					return true;
-				}
-			}
-			
-			return false;
 		}
 
 
@@ -280,14 +171,12 @@ namespace Fusion.Engine.Graphics {
 		///		
 		/// </summary>
 		/// <param name="address"></param>
-		/// <returns></returns>
+		/// <returns>False if page is already exist</returns>
 		public bool Add ( VTAddress virtualAddress, out int physicalAddress )
 		{
 			Page page;
 
-			if (dictionary.TryGetValue(virtualAddress, out page)) {
-
-				page.LfuIndex	|=	(byte)0x1;
+			if (cache.TryGetValue( virtualAddress, out page )) {
 
 				physicalAddress	=	page.Address;
 
@@ -295,29 +184,15 @@ namespace Fusion.Engine.Graphics {
 
 			} else {
 
-				if ( GetFreePhysicalAddress( out physicalAddress ) ) {
+				cache.Discard( out page );
 
-					page	=	new Page( virtualAddress, physicalAddress, VTConfig.PhysicalPageCount );
-					
-					table[ physicalAddress ] = page;
-					dictionary.Add( virtualAddress, page );
+				var newPage	=	new Page( virtualAddress, page.Address, pageCount );
 
-					return true;
+				cache.Add( virtualAddress, newPage ); 
 
-				} else {
+				physicalAddress	=	newPage.Address;
 
-					page	=	GetPageToDiscard();
-					
-					physicalAddress = page.Address;
-					dictionary.Remove( page.VA );					
-					
-					page	=	new Page( virtualAddress, physicalAddress, VTConfig.PhysicalPageCount );
-
-					table[ physicalAddress ] = page;
-					dictionary.Add( virtualAddress, page );
-	
-					return true;
-				}
+				return true;
 
 			}
 		}

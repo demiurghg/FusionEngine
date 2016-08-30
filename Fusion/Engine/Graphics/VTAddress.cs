@@ -19,6 +19,16 @@ namespace Fusion.Engine.Graphics {
 		public Int16 Dummy;
 
 
+		public static VTAddress CreateBadAddress (int uniqueNumber) {
+			var a = new VTAddress();
+			a.PageX		= (short)( -( uniqueNumber ) );
+			a.PageY		= (short)( -( uniqueNumber >> 16 ) );
+			a.MipLevel	= -1;
+			a.Dummy		= -1;
+			return a;
+		}
+
+
 		public VTAddress ( short pageX, short pageY, short mipLevel )
 		{
 			if (mipLevel<0 | mipLevel>=VTConfig.MipCount) {

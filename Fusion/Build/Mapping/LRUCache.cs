@@ -17,8 +17,8 @@ namespace Fusion.Build.Mapping {
         private Dictionary<Key, LinkedListNode<LRUCacheItem>> cacheMap = new Dictionary<Key, LinkedListNode<LRUCacheItem>>();
         private LinkedList<LRUCacheItem> lruList = new LinkedList<LRUCacheItem>();
 
-		class LRUCacheItem
-		{
+
+		class LRUCacheItem {
 			public LRUCacheItem(Key key, Value value)
 			{
 				this.key = key;
@@ -37,6 +37,28 @@ namespace Fusion.Build.Mapping {
         {
             this.capacity = capacity;
         }
+
+
+
+		/// <summary>
+		/// Clears entire cache
+		/// </summary>
+		public void Clear ()
+		{
+			cacheMap.Clear();
+			lruList.Clear();
+		}
+
+
+
+		/// <summary>
+		/// Gets cache values
+		/// </summary>
+		public IEnumerable<Value> GetValues () 
+		{
+			return lruList.Select( item => item.value ).ToArray();
+		}
+
 
 
 		/// <summary>
@@ -81,31 +103,88 @@ namespace Fusion.Build.Mapping {
 		/// </summary>
 		/// <param name="key"></param>
 		/// <param name="val"></param>
-		public void Add(Key key, Value val)
+		public void Add(Key key, Value value)
         {
-            if (cacheMap.Count >= capacity) {
-                RemoveFirst();
-            }
-
-            var cacheItem = new LRUCacheItem(key, val);
-            var node = new LinkedListNode<LRUCacheItem>(cacheItem);
-            lruList.AddLast(node);
-            cacheMap.Add(key, node);
+			Key k;
+			Value v;
+			AddDiscard( key, value, out k, out v );
         }
 
-        
+
+
 		/// <summary>
 		/// 
 		/// </summary>
-		private void RemoveFirst()
+		/// <param name="key"></param>
+		/// <param name="value"></param>
+		/// <param name="discaredKey"></param>
+		/// <param name="discardedValue"></param>
+		/// <returns></returns>
+		public bool AddDiscard ( Key key, Value value, out Key discaredKey, out Value discardedValue )
+		{
+			bool retValue	=	false;
+
+            if (cacheMap.Count >= capacity) {
+				retValue		=	true;
+                Discard( out discaredKey, out discardedValue );
+            } else {
+				retValue		=	false;
+				discardedValue	=	default(Value);
+				discaredKey		=	default(Key);
+			}
+
+            var cacheItem = new LRUCacheItem(key, value);
+            var node = new LinkedListNode<LRUCacheItem>(cacheItem);
+            lruList.AddLast(node);
+            cacheMap.Add(key, node);
+
+			return retValue;
+		}
+
+
+
+		/// <summary>
+		/// Dicards element from cache.
+		/// Returns True if element was discareded successfully.
+		/// Returns False if cache is empty.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public bool Discard ( out Key key, out Value value )
         {
+			if (!lruList.Any()) {
+				value	=	default(Value);
+				key		=	default(Key);
+				return false;
+			}
+
             // Remove from LRUPriority
             var node = lruList.First;
             lruList.RemoveFirst();
 
             // Remove from cache
             cacheMap.Remove(node.Value.key);
+
+			//	
+			key		=	node.Value.key;
+			value	=	node.Value.value;
+
+			return true;
         }
+
+
+
+		/// <summary>
+		/// Discards element
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public bool Discard ( out Value value )
+		{
+			Key dummy;
+			return Discard( out dummy, out value );
+		}
     }
 
 
