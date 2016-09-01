@@ -21,7 +21,7 @@ StructuredBuffer<PAGE> pageData : register(t0);
 RWTexture2D<float4> pageTable  : register(u0); 
 
 groupshared uint visiblePageCount = 0; 
-groupshared uint visiblePages[2048];	// max = 16 * 16 * 6 = 1536, 2048 for smth...
+groupshared uint visiblePages[343];
 
 #define BLOCK_SIZE_X 16 
 #define BLOCK_SIZE_Y 16 
@@ -36,6 +36,7 @@ void CSMain(
 	uint threadCount 	= 	BLOCK_SIZE_X * BLOCK_SIZE_Y; 
 	uint passCount 		=	(totalPageCount+threadCount-1) / threadCount;
 
+	GroupMemoryBarrierWithGroupSync();
 #if 1 
 	//--------------------------
 	// Tiled approach:
@@ -43,19 +44,21 @@ void CSMain(
 	for (uint passIt=0; passIt < passCount; passIt++) {
 		uint 	pageIndex	=	passIt * threadCount + groupIndex;
 		
-		
-		PAGE 	page		=	pageData[ pageIndex ];
-		float	size		=	exp2(page.mip - targetMipLevel);
-		
-		float2 tileMin = float2( groupId.x*BLOCK_SIZE_X,    		  groupId.y*BLOCK_SIZE_Y				);
-		float2 tileMax = float2( groupId.x*BLOCK_SIZE_X+BLOCK_SIZE_X, groupId.y*BLOCK_SIZE_Y+BLOCK_SIZE_Y	);
+		float2 tileMin = float2( groupId.x*BLOCK_SIZE_X,    		  groupId.y*BLOCK_SIZE_Y			  );
+		float2 tileMax = float2( groupId.x*BLOCK_SIZE_X+BLOCK_SIZE_X, groupId.y*BLOCK_SIZE_Y+BLOCK_SIZE_Y );
 		
 		if ( pageIndex < totalPageCount ) 
 		{
+			PAGE 	page		=	pageData[ pageIndex ];
+			
 			if ( page.mip >= targetMipLevel ) 
 			{
-				if ( (page.vx*size + size) >= tileMin.x && tileMax.x >= page.vx*size 
-				  && (page.vy*size + size) >= tileMin.y && tileMax.y >= page.vy*size ) 
+				float	size	=	exp2(page.mip - targetMipLevel);
+				float2 	pageMin	=	float2( page.vx * size, 		page.vy * size 		  );
+				float2 	pageMax	=	float2( page.vx * size + size, 	page.vy * size + size );
+			
+				if ( pageMin.x < tileMax.x && tileMin.x < pageMax.x 
+				  && pageMin.y < tileMax.y && tileMin.y < pageMax.y ) 
 				{
 					uint offset; 
 					InterlockedAdd(visiblePageCount, 1, offset); 
