@@ -514,6 +514,10 @@ namespace TestGame2 {
 			Game.Keyboard.ScanKeyboard = !Console.Show;
 
 			masterView.Camera.SetupCameraFov(m.TranslationVector, m.TranslationVector + m.Forward, m.Up, MathUtil.DegreesToRadians(90), 0.1f, 1000, 1, 0, ratio);
+
+
+
+			//DrawLeapMotionHandsDebug(Matrix.RotationX(MathUtil.Rad(90)) * Matrix.RotationY(MathUtil.Rad(180)) * masterView.Camera.GetCameraMatrix(StereoEye.Mono), masterView.Debug);
 		}
 
 
@@ -555,5 +559,38 @@ namespace TestGame2 {
 		{
 			Log.Message("DISCOVERY : {0} - {1}", endPoint.ToString(), serverInfo );
 		}
+
+
+		//void DrawLeapMotionHandsDebug(Matrix transform, DebugRender layer)
+		//{
+		//	System.Console.WriteLine(transform.TranslationVector);
+		//	
+		//	var leapFrame = Game.LeapMotion.GetTransformedFrame(transform);
+		//
+		//	if (leapFrame == null) return;
+		//
+		//	layer.DrawBasis(Matrix.Identity, 5);
+		//	layer.DrawBasis(transform, 10);
+		//
+		//	layer.DrawBox(leapFrame.InteractionBox, Color.Red);
+		//
+		//	foreach (var hand in leapFrame.Hands) {
+		//		layer.DrawBasis(hand.Basis, 0.5f);
+		//		layer.DrawLine(hand.Arm.ElbowPosition, hand.Arm.WristPosition, Color.Red);
+		//
+		//		Log.Warning(hand.WristPosition.ToString());
+		//		layer.DrawSphere(hand.WristPosition, 0.1f, Color.Yellow);
+		//		layer.DrawSphere(hand.PalmPosition, 0.1f, Color.Yellow);
+		//
+		//		foreach (var finger in hand.Fingers) {
+		//			layer.DrawSphere(finger.StabilizedTipPosition, 0.015f, Color.Azure);
+		//
+		//			foreach (var bone in finger.Bones) {
+		//				layer.DrawLine(bone.PrevJoint, bone.NextJoint, Color.Blue);
+		//			}
+		//		}
+		//	}
+		//}
+
 	}
 }

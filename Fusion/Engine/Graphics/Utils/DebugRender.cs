@@ -149,7 +149,6 @@ namespace Fusion.Engine.Graphics {
 				vertexBuffer.SetData(vertexArray, 0, numVerts);
 
 				dev.Draw( numVerts, 0);
-
 			}
 
 			vertexDataAccum.Clear();

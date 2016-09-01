@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Fusion;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
+using Fusion.Engine.Graphics.GIS.Concurrent;
 using Fusion.Engine.Graphics.GIS.DataSystem.MapSources;
 using Fusion.Engine.Graphics.GIS.DataSystem.MapSources.Projections;
 
@@ -26,16 +27,17 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 		public int		MinZoom;
 		public float	TimeUntilRemove = 600;
 
+		const int MaxDownloadTries = 3;
+
 		/// <summary>
 		/// maximum level of zoom
 		/// </summary>
-		public int?		MaxZoom		= 21;
+		public int		MaxZoom		= 18;
 		public int		TileSize	= 256;
 		public static	Texture2D	EmptyTile;
 
 		List<string> ToRemove = new List<string>();
 		
-		ConcurrentQueue<MapTile>			cacheQueue	= new ConcurrentQueue<MapTile>();
 		public Dictionary<string, MapTile>	RamCache	= new Dictionary<string, MapTile>();
 
 		Random r = new Random();
@@ -59,8 +61,6 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 			}
 
 			UserAgent = string.Format("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:{0}.0) Gecko/{2}{3:00}{4:00} Firefox/{0}.0.{1}", r.Next(3, 14), r.Next(1, 10), r.Next(DateTime.Today.Year - 4, DateTime.Today.Year), r.Next(12), r.Next(30));
-
-			killToken = new CancellationTokenSource();
 		}
 
 		public abstract string Name {
@@ -112,14 +112,13 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 
 		
 
-		public bool DownloadTile(MapTile tile)
+		public byte[] DownloadMapTile(string url)
 		{
 			try {
-				var request = (HttpWebRequest) WebRequest.Create(tile.Url);
+
+				var request = (HttpWebRequest) WebRequest.Create(url);
 
 				//WebClient wc = new WebClient();
-				
-				
 				request.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.CacheIfAvailable);
 				request.Timeout				= TimeoutMs;
 				request.UserAgent			= UserAgent;
@@ -129,71 +128,28 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 				
 				HttpWebResponse response = (HttpWebResponse) request.GetResponse();
 				
-				if (!Directory.Exists(@"cache\" + Name)) {
-					Directory.CreateDirectory(@"cache\" + Name);
+				using (var s = new MemoryStream()) {
+					var responseStream = response.GetResponseStream();
+					if (responseStream != null) responseStream.CopyTo(s);
+					return s.ToArray();
 				}
-				
-				System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(response.GetResponseStream());
-				bitmap.Save(tile.Path, System.Drawing.Imaging.ImageFormat.Jpeg);
-				return true;
+
 			} catch (Exception e) {
 				Log.Warning(e.Message);
-				return false;
+				return null;
 			}
 		}
 
-		bool threadStopped = true;
-		void TileStreamingThreadFunc(CancellationToken cancellationToken)
+
+		string GetKey(int m, int n, int level)
 		{
-			MapTile ct = null;
-			threadStopped = false;
-
-			while (!cancellationToken.IsCancellationRequested) {
-				cacheQueue.TryDequeue(out ct);
-
-				if (ct == null) {
-					Thread.Sleep(100);
-					continue;
-				}
-
-				try {
-					if (!File.Exists(ct.Path)) {
-						if (!DownloadTile(ct))
-							throw new WebException(String.Format("Tile x:{0} y:{1} z:{2} not found", ct.X, ct.Y, ct.Zoom));
-					}
-
-					Texture2D tex = null;
-
-					using ( var stream = File.OpenRead(ct.Path) ) {
-						tex = new Texture2D( Game.GraphicsDevice, stream );
-					}
-
-					ct.Tile		= tex;
-					ct.IsLoaded = true;
-
-					tex = null;
-				} catch (WebException e) {
-					Log.Warning(e.Message);
-				} catch (Exception e) {
-					Console.WriteLine("Exception : {0}", e.Message);
-					ct.LruIndex = 0;
-					ct.Tile		= EmptyTile;
-					cacheQueue.Enqueue(ct);
-				} finally {
-				}
-			}
-
-			threadStopped = true;
+			return string.Format(ShortName + "{0}_{1}_{2}", level, m, n);
 		}
-
-
-		Task					tileStreamingTask;
-		CancellationTokenSource killToken;
 
 
 		MapTile CheckTileInMemory(int m, int n, int level)
 		{
-			string key	= string.Format(ShortName + "{0:00}{1:0000}{2:0000}", level, m, n);
+			string key = GetKey(m,n,level);
 			string path = @"cache\" + Name + @"\" + key + ".jpg";
 
 			if (!RamCache.ContainsKey(key)) {
@@ -209,11 +165,44 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 
 				RamCache.Add(key, ct);
 
-				cacheQueue.Enqueue(ct);
-			}
+				Gis.ResourceWorker.Post(r => {
+					var tile = r.Data as MapTile;
+					
+					if (!File.Exists(tile.Path)) {
 
-			if (tileStreamingTask == null && !isDisposed) {
-				tileStreamingTask = Task.Run(() => TileStreamingThreadFunc(killToken.Token), killToken.Token);
+						r.ProcessQueue.Post(t => {
+
+							var data = DownloadMapTile(tile.Url);
+
+							// TODO: responde to tile loading error
+							if (data == null) {
+								tile.LoadingTries++;
+								return;
+							}
+
+							tile.Tile = new Texture2D(Game.Instance.GraphicsDevice, data);
+
+							var fileName = tile.Path;
+							r.DiskWRQueue.Post(q => {
+								using (var f = File.OpenWrite(fileName)) {
+									var bytes = q.Data as byte[];
+									f.Write(bytes, 0, bytes.Length);
+								}
+							}, data);
+
+							tile.IsLoaded = true;
+						}, r.Data);
+					}
+					else {
+						r.DiskWRQueue.Post(q => {
+							using (var stream = File.OpenRead(tile.Path)) {
+								tile.Tile = new Texture2D(Game.Instance.GraphicsDevice, stream);
+								tile.IsLoaded = true;
+							}
+						}, null);
+					}
+
+				}, ct);
 			}
 
 			RamCache[key].LruIndex	= level;
@@ -226,9 +215,6 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 
 		public void Dispose()
 		{
-			if (killToken != null)			killToken.Cancel();
-			if (tileStreamingTask != null)	tileStreamingTask.Wait();
-
 			isDisposed = true;
 
 			foreach (var tile in RamCache) {

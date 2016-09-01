@@ -16,7 +16,7 @@ namespace Fusion.Engine.Graphics.GIS
 		int lowestLod	= 9;
 		int minLod		= 3;
 
-		int tileDensity		= 5;
+		int tileDensity		= 10;
 		int CurrentLevel	= 8;
 
 		bool updateTiles = false;
@@ -42,11 +42,10 @@ namespace Fusion.Engine.Graphics.GIS
 			public int Y;
 			public int Z;
 
-
-			public double left, top, right, bottom;
+			public bool Isloaded = false;
 
 			public VertexBuffer VertexBuf;
-			public IndexBuffer IndexBuf;
+			public IndexBuffer	IndexBuf;
 
 
 			public void Dispose()
@@ -56,10 +55,26 @@ namespace Fusion.Engine.Graphics.GIS
 			}
 		}
 
+		class TileInfo
+		{
+			public enum TileState
+			{
+				NotLoaded,
+				Loaded,
+				Loading
+			}
+
+			public bool IsActive = false;
+		}
+
+
 		Dictionary<string, GlobeTile> tilesToRender = new Dictionary<string, GlobeTile>();
 		Dictionary<string, GlobeTile> tilesOld		= new Dictionary<string, GlobeTile>();
-		Dictionary<string, GlobeTile> tilesFree		= new Dictionary<string, GlobeTile>();
+		Dictionary<string, GlobeTile> tilesPool		= new Dictionary<string, GlobeTile>();
 
+
+		Dictionary<string, TileInfo> allTilesInfo = new Dictionary<string, TileInfo>();
+		HashSet<string> activeTiles = new HashSet<string>();
 
 
 		void DetermineTiles()
@@ -90,7 +105,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			lowestLod = (int)lod;
 
-			if (lowestLod > maxLod.Value) lowestLod = maxLod.Value;
+			if (lowestLod > maxLod) lowestLod = maxLod;
 			CurrentLevel = lowestLod;
 
 			if (CurrentLevel < 3) CurrentLevel = 3;
@@ -104,7 +119,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			if (updateTiles) {
 				foreach (var tile in tilesToRender) {
-					tilesFree.Add(tile.Key, tile.Value);
+					tilesPool.Add(tile.Key, tile.Value);
 				}
 				updateTiles = false;
 			} else {
@@ -159,7 +174,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			foreach (var tile in tilesOld)
 			{
-				tilesFree.Add(tile.Key, tile.Value);
+				tilesPool.Add(tile.Key, tile.Value);
 			}
 			tilesOld.Clear();
 		}
@@ -193,7 +208,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 		void QuadTreeTraversalDownTop(TraversalInfo[] info, Node node, int step)
 		{
-			int maxLevel = CurrentMapSource.MaxZoom.Value;
+			int maxLevel = CurrentMapSource.MaxZoom;
 
 			if (node.Z > maxLevel) return;
 
@@ -229,7 +244,7 @@ namespace Fusion.Engine.Graphics.GIS
 		bool CheckTiles(Node node)
 		{
 			if (node.Childs == null) return false;
-			if (node.Childs[0].Z > CurrentMapSource.MaxZoom.Value) return false;
+			//if (node.Childs[0].Z > CurrentMapSource.MaxZoom) return false;
 
 			bool check = true;
 			foreach (var child in node.Childs) {
@@ -239,12 +254,14 @@ namespace Fusion.Engine.Graphics.GIS
 		}
 
 
+		private double viewerHeight = 2000;
+
 		void DetermineTiles(int startZoomLevel)
 		{
 			////////////////////////////////////////////////////
 			if (updateTiles) {
 				foreach (var tile in tilesToRender) {
-					tilesFree.Add(tile.Key, tile.Value);
+					tilesPool.Add(tile.Key, tile.Value);
 				}
 				updateTiles = false;
 			} else {
@@ -256,14 +273,45 @@ namespace Fusion.Engine.Graphics.GIS
 			tilesToRender.Clear();
 			/////////////////////////////////////////////////////
 
-
-			//var cameraPos = DVector3.Transform(new DVector3(0, 0, 6700), DQuaternion.RotationYawPitchRoll(0.52932849788406378, -1.0458657020378879, 0));
+			//var cameraPos = DVector3.Transform(new DVector3(0, 0, GeoHelper.EarthRadius + viewerHeight), DQuaternion.RotationYawPitchRoll(DMathUtil.DegreesToRadians(131.881642), -DMathUtil.DegreesToRadians(43.111248), 0));
 			var cameraPos = camera.CameraPosition;
 			var cameraNorm = DVector3.Normalize(cameraPos);
 
-			//var debug		= Gis.Debug; 
-			//debug.Clear();
-			//debug.DrawPoint(cameraPos, 200);
+			// calculate maxlod
+			var distToEarth = cameraPos.Length() - GeoHelper.EarthRadius;
+			var maxLod = 0;
+			for (int i = 1; i < lodDistances.Length; i++) {
+				if (distToEarth >= lodDistances[i]) break;
+				maxLod = i;
+			}
+
+			var borderLod = Math.Min(maxLod, CurrentMapSource.MaxZoom);
+
+			var debug		= Gis.Debug; 
+			debug.Clear();
+			debug.DrawPoint(cameraPos, 200);
+
+
+
+			var tempDistances = new double[lodDistances.Length];
+
+			for (int i = 0; i < lodDistances.Length; i++) {
+				if (i < borderLod) {
+					tempDistances[i] = lodDistances[i] / (0.85 * (borderLod-i) + 1);
+				}
+				else tempDistances[i] = lodDistances[i];
+			}
+
+
+
+			var basis = GeoHelper.CalculateBasisOnSurface(GeoHelper.CartesianToSpherical(cameraPos));
+			if (borderLod > 0) debug.DrawSphere(tempDistances[borderLod - 1], Color.Red, basis * DMatrix.Translation(cameraPos));
+			if (borderLod-1 > 0) debug.DrawSphere(tempDistances[borderLod - 2], Color.Blue, basis * DMatrix.Translation(cameraPos));
+			if (borderLod - 2 > 0) debug.DrawSphere(tempDistances[borderLod - 3], Color.Blue, basis * DMatrix.Translation(cameraPos));
+			debug.DrawSphere(tempDistances[borderLod] * Gis.LowestLevelMultiplayer, Color.Green, basis * DMatrix.Translation(cameraPos), 100);
+			if (borderLod < lodDistances.Length-1)
+				debug.DrawSphere(tempDistances[borderLod + 1], Color.Yellow, basis * DMatrix.Translation(cameraPos));
+			
 			//Console.WriteLine("Camera pos: " + cameraPos);
 
 			Stack<Node> nodes = new Stack<Node>();
@@ -278,11 +326,6 @@ namespace Fusion.Engine.Graphics.GIS
 						Z = startZoomLevel
 					});
 
-			//nodes.Push(new Node {
-			//	X = 3,
-			//	Y = 2,
-			//	Z = startZoomLevel
-			//});
 
 			while (nodes.Any()) {
 				var node = nodes.Pop();
@@ -301,27 +344,36 @@ namespace Fusion.Engine.Graphics.GIS
 				//Console.WriteLine("Node pos: "	+ nodePos);
 				//Console.WriteLine(GetLevelScreenSpaceError(node.Z, dist));
 
-				if (GetLevelScreenSpaceError(node.Z, dist) < 0.0) // Break this tile to pieces
+				var factor = node.Z == borderLod ? Gis.LowestLevelMultiplayer : 1.0f;
+
+				if (node.Z != borderLod && dist < tempDistances[node.Z] * factor) // Break this tile to pieces
 				{
 					GetChilds(ref node);
 
-					foreach (var child in node.Childs) {
-						nodes.Push(child);
+
+					if (CheckTiles(node)) {
+						foreach (var child in node.Childs) {
+							nodes.Push(child);
+						}
+					}
+					else {
+						if (DVector3.Dot(cameraNorm, nodeNorm) > -0.15)
+							AddTileToRenderList(node.X, node.Y, node.Z);
 					}
 				}
 				else {
-					if (DVector3.Dot(cameraNorm, nodeNorm) > -0.1)
+					if (DVector3.Dot(cameraNorm, nodeNorm) > -0.15)
 						AddTileToRenderList(node.X, node.Y, node.Z);
 				}
 			}
 
-			foreach (var node in nodes) {
-				AddTileToRenderList(node.X, node.Y, node.Z);
-			}
+			//foreach (var node in nodes) {
+			//	AddTileToRenderList(node.X, node.Y, node.Z);
+			//}
 
 			/////////////////////////////////////////////////////
 			foreach (var tile in tilesOld) {
-				tilesFree.Add(tile.Key, tile.Value);
+				tilesPool.Add(tile.Key, tile.Value);
 			}
 			tilesOld.Clear();
 		}
@@ -368,15 +420,15 @@ namespace Fusion.Engine.Graphics.GIS
 			double y1 = ((double)(y + 1) / (double)numTiles);
 
 
-			if (tilesFree.Any()) {
+			if (tilesPool.Any()) {
 				GlobeTile tile;
-				if (tilesFree.ContainsKey(key)) {
-					tile = tilesFree[key];
-					tilesFree.Remove(key);
+				if (tilesPool.ContainsKey(key)) {
+					tile = tilesPool[key];
+					tilesPool.Remove(key);
 				} else {
-					var temp = tilesFree.First();
+					var temp = tilesPool.First();
 					tile = temp.Value;
-					tilesFree.Remove(temp.Key);
+					tilesPool.Remove(temp.Key);
 				}
 
 
@@ -384,10 +436,10 @@ namespace Fusion.Engine.Graphics.GIS
 				tile.Y = y;
 				tile.Z = zoom;
 
-				tile.left = x0;
-				tile.right = x1;
-				tile.top = y0;
-				tile.bottom = y1;
+				//tile.left = x0;
+				//tile.right = x1;
+				//tile.top = y0;
+				//tile.bottom = y1;
 
 				int[] indexes;
 				Gis.GeoPoint[] vertices;
@@ -405,10 +457,10 @@ namespace Fusion.Engine.Graphics.GIS
 					X		= x,
 					Y		= y,
 					Z		= zoom,
-					left	= x0,
-					right	= x1,
-					top		= y0,
-					bottom	= y1
+					//left	= x0,
+					//right	= x1,
+					//top		= y0,
+					//bottom	= y1
 				};
 
 
@@ -426,7 +478,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 			DisposableBase.SafeDispose(ref vb);
 
-			CalculateVertices(out vertices, out indexes, density, left, right, top, bottom);
+			CalculateVertices(out vertices, out indexes, tileDensity, left, right, top, bottom);
 
 			vb = new VertexBuffer(Game.GraphicsDevice, typeof(Gis.GeoPoint), vertices.Length);
 			ib = new IndexBuffer(Game.GraphicsDevice, indexes.Length);
@@ -472,7 +524,6 @@ namespace Fusion.Engine.Graphics.GIS
 
 			}
 
-
 			var tindexes = new List<int>();
 
 			for (int row = 0; row < RowsCount - 1; row++)
@@ -493,6 +544,58 @@ namespace Fusion.Engine.Graphics.GIS
 			indeces = tindexes.ToArray();
 		}
 
+
+		void CalculateVerticesLonLat(out Gis.GeoPoint[] vertices, out int[] indeces, int density, double left, double right, double top, double bottom)
+		{
+			int RowsCount = density + 2;
+			int ColumnsCount = RowsCount;
+
+			//var el = Game.GetService<LayerService>().ElevationLayer;
+			var ms = CurrentMapSource;
+
+			var verts		= new List<Gis.GeoPoint>();
+			float step		= 1.0f / (density + 1);
+			double dStep	= 1.0 / (double)(density + 1);
+
+			var leftTop		= ms.Projection.TileToWorldPos(left, top, 0);
+			var rightBottom = ms.Projection.TileToWorldPos(right, bottom, 0);
+
+			for (int row = 0; row < RowsCount; row++) {
+				for (int col = 0; col < ColumnsCount; col++) {
+					double xx = leftTop.X * (1.0 - dStep * col) + rightBottom.X * dStep * col;
+					double yy = leftTop.Y * (1.0 - dStep * row) + rightBottom.Y * dStep * row;
+
+					var sc = new DVector2(xx, yy);
+
+					var lon = sc.X * Math.PI / 180.0;
+					var lat = sc.Y * Math.PI / 180.0;
+
+					verts.Add(new Gis.GeoPoint {
+						Tex0 = new Vector4(step * col, step * row, 0, 0),
+						Lon = lon,
+						Lat = lat
+					});
+				}
+
+			}
+
+			var tindexes = new List<int>();
+
+			for (int row = 0; row < RowsCount - 1; row++) {
+				for (int col = 0; col < ColumnsCount - 1; col++) {
+					tindexes.Add(col + row * ColumnsCount);
+					tindexes.Add(col + (row + 1) * ColumnsCount);
+					tindexes.Add(col + 1 + row * ColumnsCount);
+
+					tindexes.Add(col + 1 + row * ColumnsCount);
+					tindexes.Add(col + (row + 1) * ColumnsCount);
+					tindexes.Add(col + 1 + (row + 1) * ColumnsCount);
+				}
+			}
+
+			vertices = verts.ToArray();
+			indeces = tindexes.ToArray();
+		}
 
 
 		void GetChilds(ref Node node)

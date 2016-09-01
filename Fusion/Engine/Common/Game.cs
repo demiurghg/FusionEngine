@@ -88,6 +88,10 @@ namespace Fusion.Engine.Common {
 		[GameModule("Touch", "touch", InitOrder.After)]
 		public Touch Touch { get { return touch; } }
 
+
+		//[GameModule("LeapMotion", "leapMotion", InitOrder.After)]
+		//public LeapMotion LeapMotion { get { return leapMotion; } }
+
 		/// <summary>
 		/// Gets gamepads
 		/// </summary>
@@ -208,7 +212,8 @@ namespace Fusion.Engine.Common {
 		Invoker				invoker			;
 		Keyboard			keyboard		;
 		Mouse				mouse			;
-		Touch				touch;
+		Touch				touch			;
+		//LeapMotion			leapMotion		;
 		GamepadCollection	gamepads		;
 		UserStorage			userStorage		;
 
@@ -330,6 +335,7 @@ namespace Fusion.Engine.Common {
 			keyboard			=	new Keyboard(this);
 			mouse				=	new Mouse(this);
 			touch				=	new Touch(this);
+			//leapMotion			=	new LeapMotion(this);
 			gamepads			=	new GamepadCollection(this);
 
 			userStorage			=	new UserStorage(this);

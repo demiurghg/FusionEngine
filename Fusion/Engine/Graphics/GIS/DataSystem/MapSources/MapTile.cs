@@ -21,6 +21,8 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 		public float		Time;
 		public int			LruIndex;
 
+		public int			LoadingTries;
+
 		public bool			IsLoaded = false;
 	}
 }

@@ -621,7 +621,7 @@ namespace Fusion.Core.Mathematics
 			pitch		=	(float)Math.Asin( mat.Forward.Y );
 
 			var	xp		=	Vector3.Cross( mat.Forward, Vector3.UnitY );
-			var	xp2		=	Vector3.Cross( mat.Forward, Vector3.UnitY );
+			//var	xp2		=	Vector3.Cross( mat.Forward, Vector3.UnitY );
 			xp.Normalize();
 
 			var dotY	=	MathUtil.Clamp( Vector3.Dot( mat.Up, xp ), -1, 1 );

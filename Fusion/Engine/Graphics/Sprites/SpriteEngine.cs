@@ -88,7 +88,7 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			ps.RasterizerState		=	RasterizerState.CullNone;
-			ps.DepthStencilState	=	DepthStencilState.None;
+			ps.DepthStencilState	=	DepthStencilState.Default;
 			ps.Primitive			=	Primitive.TriangleList;
 			ps.VertexInputElements	=	VertexInputElement.FromStructure( typeof(SpriteVertex) );
 		}
@@ -115,11 +115,11 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="gameTime"></param>
 		/// <param name="stereoEye"></param>
-		public void DrawSprites ( GameTime gameTime, StereoEye stereoEye, RenderTargetSurface surface, IEnumerable<SpriteLayer> layers )
+		public void DrawSprites ( GameTime gameTime, StereoEye stereoEye, RenderTargetSurface surface, IEnumerable<SpriteLayer> layers, DepthStencilSurface depth = null )
 		{
 			device.ResetStates();
 			//device.RestoreBackbuffer();
-			device.SetTargets( null, surface );
+			device.SetTargets(depth, surface);
 
 			DrawSpritesRecursive( gameTime, stereoEye, surface, layers, Matrix.Identity, new Color4(1f,1f,1f,1f) );
 		}
@@ -147,12 +147,20 @@ namespace Fusion.Engine.Graphics {
 					continue;
 				}
 
+
+				Matrix proj = projection;
+				if (layer.PositionType == SpriteLayer.SpritePositionType.World) {
+					if (layer.Camera != null)
+						proj = layer.Camera.GetViewMatrix(stereoEye)*layer.Camera.GetProjectionMatrix(stereoEye);
+				}
+
+
 				using ( new PixEvent("SpriteLayer") ) {
 
 					Matrix absTransform	=	parentTransform * layer.Transform;
 					Color4 absColor		=	parentColor * layer.Color.ToColor4();
 
-					constData.Transform		=	absTransform * projection;
+					constData.Transform		=	absTransform * proj;
 					constData.ClipRectangle	=	new Vector4(0,0,0,0);
 					constData.MasterColor	=	absColor;
 
@@ -186,6 +194,7 @@ namespace Fusion.Engine.Graphics {
 
 					device.PipelineState			=	ps;
 					device.PixelShaderSamplers[0]	=	ss;
+					
 
 					layer.Draw( gameTime, stereoEye );
 

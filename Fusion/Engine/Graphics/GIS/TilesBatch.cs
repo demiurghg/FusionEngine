@@ -7,6 +7,7 @@ using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
 using Fusion.Engine.Graphics.GIS.DataSystem.MapSources;
 using Fusion.Engine.Graphics.GIS.GlobeMath;
+using Fusion.Engine.Input;
 
 namespace Fusion.Engine.Graphics.GIS
 {
@@ -14,9 +15,12 @@ namespace Fusion.Engine.Graphics.GIS
 	{
 		Ubershader		shader;
 		StateFactory	factory;
+		StateFactory	factoryWire;
 		
 		Texture2D	frame;
 		GlobeCamera camera;
+
+		private double[] lodDistances;
 
 
 		public class SelectedItem : Gis.SelectedItem
@@ -40,11 +44,10 @@ namespace Fusion.Engine.Graphics.GIS
 			this.camera = camera;
 
 
-			for (int i = 0; i < 17; i++) {
-
-				var dist = GetOptimalDistanceForLevel(i);
-
-				Console.WriteLine("Zoom level: " + i + "Distance: " + dist);
+			lodDistances = new double[25];
+			for (int i = 1; i < 25; i++) {
+				var dist = GetOptimalDistanceForLevel(i-1);
+				lodDistances[i] = dist;
 			}
 
 			CurrentMapSource = MapSources[9];
@@ -52,6 +55,7 @@ namespace Fusion.Engine.Graphics.GIS
 			frame	= Game.Content.Load<Texture2D>("redframe.tga");
 			shader	= Game.Content.Load<Ubershader>("globe.Tile.hlsl");
 			factory = shader.CreateFactory( typeof(TileFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
+			factoryWire = shader.CreateFactory(typeof(TileFlags), Primitive.TriangleList, VertexInputElement.FromStructure<Gis.GeoPoint>(), BlendState.AlphaBlend, RasterizerState.Wireframe, DepthStencilState.Default);
 		}
 
 
@@ -67,17 +71,28 @@ namespace Fusion.Engine.Graphics.GIS
 			//
 			//Console.WriteLine(camera.FinalCamPosition);
 
-			CurrentMapSource.Update(gameTime);			
+			CurrentMapSource.Update(gameTime);
+
+			if (Game.Keyboard.IsKeyDown(Keys.OemPlus)) {
+				viewerHeight += viewerHeight*0.005;
+				Console.WriteLine("Height: " + viewerHeight);
+			}
+
+			if (Game.Keyboard.IsKeyDown(Keys.OemMinus)) {
+				viewerHeight -= viewerHeight*0.005;
+				Console.WriteLine("Height: " + viewerHeight);
+			}
 
 			DetermineTiles();
 			//DetermineTiles(3);
 
 			//Console.WriteLine();
-			//if (t != gameTime.Total.Seconds) {
-			//	t = gameTime.Total.Seconds;
-			//	Console.WriteLine("Tiles to render: " + tilesToRender.Count);
-			//}
-			//Console.WriteLine("Free tiles:		" + tilesFree.Count);
+			if (t != gameTime.Total.Seconds) {
+				t = gameTime.Total.Seconds;
+				Console.WriteLine("Tiles to render: " + tilesToRender.Count);
+				Console.WriteLine("Viewer height: " + viewerHeight + "\n");
+			}
+			//Console.WriteLine("Free tiles:		" + tilesPool.Count);
 		}
 
 
@@ -89,8 +104,8 @@ namespace Fusion.Engine.Graphics.GIS
 			dev.PixelShaderSamplers[0]		= SamplerState.AnisotropicClamp;
 			dev.PixelShaderResources[1]		= frame;
 
-			//dev.PipelineState = factory[(int)(TileFlags.SHOW_FRAMES)];
-			dev.PipelineState = factory[0];
+			dev.PipelineState = Game.Keyboard.IsKeyDown(Keys.M) ? factoryWire[(int)(TileFlags.SHOW_FRAMES)] : factory[(int)(TileFlags.SHOW_FRAMES)];
+			//dev.PipelineState = factory[0];
 
 
 			foreach (var globeTile in tilesToRender) {
@@ -118,7 +133,7 @@ namespace Fusion.Engine.Graphics.GIS
 			foreach (var tile in tilesToRender) {
 				tile.Value.Dispose();
 			}
-			foreach (var tile in tilesFree) {
+			foreach (var tile in tilesPool) {
 				tile.Value.Dispose();
 			}
 		}

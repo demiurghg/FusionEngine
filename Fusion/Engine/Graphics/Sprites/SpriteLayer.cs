@@ -16,6 +16,12 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		public const int MaxSpriteFrames = 1024;
 
+		public enum SpritePositionType
+		{
+			Screen,
+			World
+		}
+
 		readonly RenderSystem rs;
 
 		/// <summary>
@@ -27,6 +33,12 @@ namespace Fusion.Engine.Graphics {
 		/// Layer's transform. Default: Indentity.
 		/// </summary>
 		public Matrix Transform { get; set; }
+
+		
+		public SpritePositionType	PositionType	{ get; set; }
+
+		public Camera				Camera			{ get; set; }
+
 
 		/// <summary>
 		/// Layer's master color. Default: White.
@@ -90,12 +102,13 @@ namespace Fusion.Engine.Graphics {
 
 			Order		=	0;
 
-			Visible		=	true;
-			Transform	=	Matrix.Identity;
-			Color		=	Color.White;
-			BlendMode	=	SpriteBlendMode.AlphaBlend;
-			FilterMode	=	SpriteFilterMode.LinearClamp;
-			StereoMode	=	SpriteStereoMode.All;
+			Visible			=	true;
+			Transform		=	Matrix.Identity;
+			Color			=	Color.White;
+			BlendMode		=	SpriteBlendMode.AlphaBlend;
+			FilterMode		=	SpriteFilterMode.LinearClamp;
+			StereoMode		=	SpriteStereoMode.All;
+			PositionType	=	SpritePositionType.Screen;
 
 			defaultTexture	=	new DynamicTexture( rs, 16,16, typeof(Color), false, false );
 			defaultTexture.SetData( Enumerable.Range(0,16*16).Select( i => Color.White ).ToArray() );

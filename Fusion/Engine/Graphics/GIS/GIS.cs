@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Fusion;
+using Fusion.Core.Configuration;
 using Fusion.Core.Mathematics;
 using Fusion.Drivers.Graphics;
 using Fusion.Drivers.Input;
@@ -15,11 +16,17 @@ namespace Fusion.Engine.Graphics.GIS
 {
     public class Gis : GameModule
     {
-	    public GlobeCamera Camera;
+		[Config]
+		public static float LowestLevelMultiplayer { set; get; }
 
+		
+		public static readonly MessageQueue ResourceWorker = new MessageQueue();
+		
+		public GlobeCamera Camera;
 		ConstantBuffer constBuffer;
 
 	    public static DebugGisLayer Debug;
+
 
 		// Batch stuff
 	    public struct GeoPoint
@@ -104,10 +111,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 	    public Gis(Game Game) : base(Game)
 	    {
-			JobQueue	= new MessageQueue();
-			DoneQueue	= new MessageQueue();
-
-			JobQueue.StartInAnotherThread();
+			ResourceWorker.StartMainThread();
 	    }
 
 
@@ -128,7 +132,7 @@ namespace Fusion.Engine.Graphics.GIS
 
 	    public void Update(GameTime gameTime)
 	    {
-
+			
 	    }
 
 

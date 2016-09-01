@@ -107,12 +107,14 @@ namespace GISTest {
 			uiLayer		=	new SpriteLayer( Game.RenderSystem, 1024 );
 
 			Gis.Debug = new DebugGisLayer(Game);
+			Gis.Debug.ZOrder = 0;
 			viewLayer.GisLayers.Add(Gis.Debug);
 
 
 			// Setup tiles
 			tiles = new TilesGisLayer(Game, viewLayer.GlobeCamera);
 			tiles.SetMapSource(TilesGisLayer.MapSource.OpenStreetMap);
+			tiles.ZOrder = 1;
 			viewLayer.GisLayers.Add(tiles);
 
 
@@ -136,6 +138,9 @@ namespace GISTest {
 			Game.Mouse.Scroll += (sender, args) => {
 				viewLayer.GlobeCamera.CameraZoom(args.WheelDelta > 0 ? -0.1f : 0.1f);
 			};
+
+
+			viewLayer.SpriteLayers.Add(console.ConsoleSpriteLayer);
 		}
 
 
@@ -183,6 +188,10 @@ namespace GISTest {
 		/// <param name="gameTime"></param>
 		public override void Update ( GameTime gameTime )
 		{
+			if (Game.Keyboard.IsKeyDown(Keys.MiddleButton)) {
+				viewLayer.GlobeCamera.RotateViewToPointCamera(mouseDelta);
+			}
+
 			console.Update( gameTime );
 
 			mouseDelta		= Game.Mouse.Position - prevMousePos;

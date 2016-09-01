@@ -297,7 +297,7 @@ namespace Fusion.Engine.Graphics {
 					device.ComputeShaderResources[4]	=	hdrFrame.DepthBuffer;
 					device.ComputeShaderResources[5]	=	cascadedShadowMap.ColorBuffer;
 					device.ComputeShaderResources[6]	=	spotColor;
-					device.ComputeShaderResources[7]	=	viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
+					device.ComputeShaderResources[7] = rs.WhiteTexture.Srv;//viewLayer.LightSet.SpotAtlas==null ? rs.WhiteTexture.Srv : viewLayer.LightSet.SpotAtlas.Texture.Srv;
 					device.ComputeShaderResources[8]	=	omniLightBuffer;
 					device.ComputeShaderResources[9]	=	spotLightBuffer;
 					device.ComputeShaderResources[10]	=	envLightBuffer;

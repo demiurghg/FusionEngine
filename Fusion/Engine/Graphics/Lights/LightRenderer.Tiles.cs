@@ -38,6 +38,8 @@ namespace Fusion.Engine.Graphics {
 					continue;
 				}
 
+				if (index >= omniLightData.Length) break;
+
 				omniLightData[index].PositionRadius	=	new Vector4( light.Position, light.RadiusOuter );
 				omniLightData[index].Intensity		=	new Vector4( light.Intensity.ToVector3(), 1.0f / light.RadiusOuter / light.RadiusOuter );
 				omniLightData[index].ExtentMax		=	max;

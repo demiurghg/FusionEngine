@@ -38,6 +38,7 @@ namespace Fusion.Engine.Graphics {
 			public Matrix	World;
 			public Vector4	ViewPos			;
 			public Vector4	BiasSlopeFar	;
+			private Vector4 Dummy			;
 		}
 
 

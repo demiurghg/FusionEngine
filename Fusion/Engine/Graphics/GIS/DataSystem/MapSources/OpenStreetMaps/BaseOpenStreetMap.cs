@@ -46,6 +46,7 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources.OpenStreetMaps
 
 		public OpenStreetMap(Game game) : base(game)
 		{
+			MaxZoom = 19;
 		}
 
 		public override string GenerateUrl(int x, int y, int zoom)

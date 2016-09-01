@@ -69,29 +69,32 @@ namespace Fusion.Engine.Graphics {
 			this.viewMatrixL	=	viewMatrix	*	Matrix.Translation( Vector3.UnitX * separation / 2 );
 			this.viewMatrixR	=	viewMatrix	*	Matrix.Translation( -Vector3.UnitX * separation / 2 );
 
-			//	Camera :
-			this.cameraMatrix	=	Matrix.Invert( viewMatrix );
-			this.cameraMatrixL	=	Matrix.Invert( viewMatrixL );
-			this.cameraMatrixR	=	Matrix.Invert( viewMatrixR );
-
-
 			if (Game.Instance.GraphicsDevice.Display is OculusRiftDisplay) {
 				
 				if (OculusRiftSensors.LeftEye != null && OculusRiftSensors.RightEye != null) {
 					projMatrixL = OculusRiftSensors.LeftEye.Projection;
 					projMatrixR = OculusRiftSensors.RightEye.Projection;
 
+					var headPos		= new Vector3(OculusRiftSensors.HeadPosition.X,			-OculusRiftSensors.HeadPosition.Y,		-OculusRiftSensors.HeadPosition.Z)	;
+					var leftEyePos	= new Vector3(OculusRiftSensors.LeftEye.Position.X,		-OculusRiftSensors.LeftEye.Position.Y,	-OculusRiftSensors.LeftEye.Position.Z)	;
+					var rightEyePos = new Vector3(OculusRiftSensors.RightEye.Position.X,	-OculusRiftSensors.RightEye.Position.Y, -OculusRiftSensors.RightEye.Position.Z);
 
-					var leftEyePos	= new Vector3(OculusRiftSensors.LeftEye.Position.X, -OculusRiftSensors.LeftEye.Position.Y, -OculusRiftSensors.LeftEye.Position.Z)	;
-					var rightEyePos = new Vector3(OculusRiftSensors.RightEye.Position.X, -OculusRiftSensors.RightEye.Position.Y, -OculusRiftSensors.RightEye.Position.Z);
-
+					var headRot		= OculusRiftSensors.HeadRotation;		headRot.Invert();	headRot.Normalize();
 					var leftRot		= OculusRiftSensors.LeftEye.Rotation;	leftRot.Invert();	leftRot.Normalize();
 					var rightRot	= OculusRiftSensors.RightEye.Rotation;	rightRot.Invert();	rightRot.Normalize();
 
 					viewMatrixL = viewMatrix * Matrix.RotationQuaternion(leftRot)	* Matrix.Translation(leftEyePos);
 					viewMatrixR = viewMatrix * Matrix.RotationQuaternion(rightRot)	* Matrix.Translation(rightEyePos);
+
+					viewMatrix = viewMatrix * Matrix.RotationQuaternion(headRot) * Matrix.Translation(headPos);
+					this.viewMatrix = viewMatrix;
 				}
 			}
+
+			//	Camera :
+			this.cameraMatrix	=	Matrix.Invert( viewMatrix );
+			this.cameraMatrixL	=	Matrix.Invert( viewMatrixL );
+			this.cameraMatrixR	=	Matrix.Invert( viewMatrixR );
 		}
 
 

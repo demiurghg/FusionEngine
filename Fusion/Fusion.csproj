@@ -52,6 +52,9 @@
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LeapCSharp.NET4.5">
+      <HintPath>..\SDKs\LeapMotion\LeapCSharp.NET4.5.dll</HintPath>
+    </Reference>
     <Reference Include="OculusWrap">
       <HintPath>..\SDKs\OculusWrap\OculusWrap.dll</HintPath>
     </Reference>
@@ -246,7 +249,11 @@
     <Compile Include="Engine\Graphics\Effects\SsaoFilter.cs" />
     <Compile Include="Engine\Graphics\Effects\SsaoFilter.Config.cs" />
     <Compile Include="Engine\Graphics\GIS\CartesianPoints.cs" />
+    <Compile Include="Engine\Graphics\GIS\Concurrent\ElementPool.cs" />
+    <Compile Include="Engine\Graphics\GIS\Concurrent\JobHelper.cs" />
     <Compile Include="Engine\Graphics\GIS\Concurrent\MessageQueue.cs" />
+    <Compile Include="Engine\Graphics\GIS\Concurrent\MessageQueue.MainThread.cs" />
+    <Compile Include="Engine\Graphics\GIS\Concurrent\MessageQueue.MessageInfo.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BaseBingMapsSource.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\BingMaps\BingMapSatellite.cs" />
     <Compile Include="Engine\Graphics\GIS\DataSystem\MapSources\MapBox\Dark.cs" />
@@ -390,6 +397,7 @@
     <Compile Include="Engine\Input\Bind.cs" />
     <Compile Include="Engine\Input\BindList.cs" />
     <Compile Include="Engine\Input\KeyBind.cs" />
+    <Compile Include="Engine\Input\LeapMotion.cs" />
     <Compile Include="Engine\Input\Touch.cs" />
     <Compile Include="Engine\Input\Unbind.cs" />
     <Compile Include="Engine\Client\GameClient.Internal.cs" />
@@ -577,6 +585,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="fusionIcon.ico" />
+    <Content Include="LeapC.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="fusionSplash.png" />
   </ItemGroup>
   <ItemGroup>

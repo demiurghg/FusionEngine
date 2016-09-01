@@ -19,7 +19,7 @@ namespace Fusion.Engine.Graphics.GIS.Concurrent
 	}
 
 
-	public class MessageQueue
+	public partial class MessageQueue
 	{
 		/// <summary>
 		/// Raised when a message is received by the message queue.  This event is raised in the thread that
@@ -67,7 +67,7 @@ namespace Fusion.Engine.Graphics.GIS.Concurrent
 		/// </summary>
 		public void ProcessQueue()
 		{
-			List<MessageInfo> current = null;
+			List<WorkRequest> current = null;
 
 			lock (queue) {
 				if (state != State.Stopped)
@@ -75,7 +75,7 @@ namespace Fusion.Engine.Graphics.GIS.Concurrent
 
 				if (queue.Count > 0) {
 					state	= State.Running;
-					current = new List<MessageInfo>(queue);
+					current = new List<WorkRequest>(queue);
 					queue.Clear();
 				}
 			}
@@ -122,10 +122,10 @@ namespace Fusion.Engine.Graphics.GIS.Concurrent
 		/// </summary>
 		/// <param name="callback">The callback to invoke when the message is processed.</param>
 		/// <param name="userData">Optional data to pass to the <paramref name="callback"/> when it is invoked.</param>
-		public void Post(Action<object> callback, object userData)
+		public void Post(Action<WorkRequest> callback, object userData)
 		{
 			lock (queue) {
-				queue.Add(new MessageInfo(callback, userData, null));
+				queue.Add(new WorkRequest(callback, userData, null) {Flags = WorkRequest.InfoFlags.FillProcessQueue | WorkRequest.InfoFlags.FillRWQueue});
 				Monitor.Pulse(queue);
 			}
 		}
@@ -137,7 +137,7 @@ namespace Fusion.Engine.Graphics.GIS.Concurrent
 		public void Post(object message)
 		{
 			lock (queue) {
-				queue.Add(new MessageInfo(null, message, null));
+				queue.Add(new WorkRequest(null, message, null));
 				Monitor.Pulse(queue);
 			}
 		}
@@ -150,13 +150,13 @@ namespace Fusion.Engine.Graphics.GIS.Concurrent
 		/// <param name="userData">Optional data to pass to the <paramref name="callback"/> when it is invoked.</param>
 		public void Send(Action<object> callback, object userData)
 		{
-			MessageInfo messageInfo = new MessageInfo(callback, userData, new object());
-			lock (messageInfo.Done) {
+			WorkRequest workRequest = new WorkRequest(callback, userData, new object());
+			lock (workRequest.Done) {
 				lock (queue) {
-					queue.Add(messageInfo);
+					queue.Add(workRequest);
 					Monitor.Pulse(queue);
 				}
-				Monitor.Wait(messageInfo.Done);
+				Monitor.Wait(workRequest.Done);
 			}
 		}
 
@@ -167,13 +167,13 @@ namespace Fusion.Engine.Graphics.GIS.Concurrent
 		/// <param name="message">The message to post to the queue.</param>
 		public void Send(object message)
 		{
-			MessageInfo messageInfo = new MessageInfo(null, message, new object());
-			lock (messageInfo.Done) {
+			WorkRequest workRequest = new WorkRequest(null, message, new object());
+			lock (workRequest.Done) {
 				lock (queue) {
-					queue.Add(messageInfo);
+					queue.Add(workRequest);
 					Monitor.Pulse(queue);
 				}
-				Monitor.Wait(messageInfo.Done);
+				Monitor.Wait(workRequest.Done);
 			}
 		}
 
@@ -202,7 +202,7 @@ namespace Fusion.Engine.Graphics.GIS.Concurrent
 		private void Run()
 		{
 			try {
-				List<MessageInfo> current = new List<MessageInfo>();
+				List<WorkRequest> current = new List<WorkRequest>();
 
 				do {
 					lock (queue) {
@@ -229,7 +229,7 @@ namespace Fusion.Engine.Graphics.GIS.Concurrent
 			}
 		}
 
-		private void ProcessCurrentQueue(List<MessageInfo> currentQueue)
+		private void ProcessCurrentQueue(List<WorkRequest> currentQueue)
 		{
 			for (int i = 0; i < currentQueue.Count; ++i) {
 				if (state == State.Stopping) {
@@ -244,15 +244,15 @@ namespace Fusion.Engine.Graphics.GIS.Concurrent
 			}
 		}
 
-		private void ProcessMessage(MessageInfo message)
+		private void ProcessMessage(WorkRequest message)
 		{
 			if (message.Callback != null) {
-				message.Callback(message.Message);
+				message.Callback(message);
 			}
 			else {
 				EventHandler<MessageQueueEventArgs> e = MessageReceived;
 				if (e != null) {
-					e(this, new MessageQueueEventArgs(message.Message));
+					e(this, new MessageQueueEventArgs(message.Data));
 				}
 			}
 
@@ -268,18 +268,6 @@ namespace Fusion.Engine.Graphics.GIS.Concurrent
 			state = State.Stopping;
 		}
 
-		private struct MessageInfo
-		{
-			public MessageInfo(Action<object> callback, object message, object done)
-			{
-				Callback	= callback;
-				Message		= message;
-				Done		= done;
-			}
-			public Action<object>	Callback;
-			public object			Message;
-			public object			Done;
-		}
 
 		private enum State
 		{
@@ -288,7 +276,7 @@ namespace Fusion.Engine.Graphics.GIS.Concurrent
 			Stopping,
 		}
 
-		private List<MessageInfo>	queue = new List<MessageInfo>();
+		private List<WorkRequest>	queue = new List<WorkRequest>();
 		private State				state = State.Stopped;
 	}
 }

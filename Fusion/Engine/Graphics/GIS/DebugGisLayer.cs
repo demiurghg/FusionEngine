@@ -32,7 +32,7 @@ namespace Fusion.Engine.Graphics.GIS
 		public DebugGisLayer(Game game) : base(game)
 		{
 			shader	= game.Content.Load<Ubershader>("globe.Debug.hlsl");
-			factory = shader.CreateFactory(typeof(DebugFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.CartPoint>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.Default);
+			factory = shader.CreateFactory(typeof(DebugFlags), Primitive.LineList, VertexInputElement.FromStructure<Gis.CartPoint>(), BlendState.AlphaBlend, RasterizerState.CullCW, DepthStencilState.None);
 
 			buf = new VertexBuffer(Game.GraphicsDevice, typeof(Gis.CartPoint), 10000, VertexBufferOptions.Dynamic);
 
@@ -175,6 +175,36 @@ namespace Fusion.Engine.Graphics.GIS
 
 			isDirty = true;
 		}
+
+
+
+		public void DrawCircle(double radius, Color color, DMatrix transform, int density = 40)
+		{
+			double		angleStep	= Math.PI*2/density;
+			
+			for (int i = 0; i < density; i++) {
+				var point0X = radius * Math.Cos(angleStep * i);
+				var point0Y = radius * Math.Sin(angleStep * i);
+
+				var point1X = radius * Math.Cos(angleStep * (i+1));
+				var point1Y = radius * Math.Sin(angleStep * (i+1));
+
+				var p0 = DVector3.TransformCoordinate(new DVector3(point0X, point0Y, 0), transform);
+				var p1 = DVector3.TransformCoordinate(new DVector3(point1X, point1Y, 0), transform);
+
+				DrawLine(p0, p1, color);
+			}
+
+		}
+
+
+		public void DrawSphere(double radius, Color color, DMatrix transform, int density = 40)
+		{
+			DrawCircle(radius, color, transform, density);
+			DrawCircle(radius, color, DMatrix.RotationX(DMathUtil.PiOverTwo) * transform, density);
+			DrawCircle(radius, color, DMatrix.RotationY(DMathUtil.PiOverTwo) * transform, density);
+		}
+
 
 
 		public override List<Gis.SelectedItem> Select(DVector3 nearPoint, DVector3 farPoint)

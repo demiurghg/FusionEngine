@@ -276,7 +276,7 @@ namespace Fusion.Engine.Graphics {
 			RenderGIS( gameTime, stereoEye, viewport, targetSurface );
 
 			//	draw sprites :
-			rs.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers );
+			rs.SpriteEngine.DrawSprites( gameTime, stereoEye, targetSurface, SpriteLayers, viewHdrFrame.DepthBuffer.Surface );
 		}
 
 
