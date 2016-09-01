@@ -52,9 +52,6 @@
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LeapCSharp.NET4.5">
-      <HintPath>..\SDKs\LeapMotion\LeapCSharp.NET4.5.dll</HintPath>
-    </Reference>
     <Reference Include="OculusWrap">
       <HintPath>..\SDKs\OculusWrap\OculusWrap.dll</HintPath>
     </Reference>
@@ -585,9 +582,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="fusionIcon.ico" />
-    <Content Include="LeapC.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <None Include="fusionSplash.png" />
   </ItemGroup>
   <ItemGroup>
