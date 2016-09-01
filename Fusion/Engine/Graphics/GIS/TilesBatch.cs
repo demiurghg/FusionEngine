@@ -87,11 +87,11 @@ namespace Fusion.Engine.Graphics.GIS
 			//DetermineTiles(3);
 
 			//Console.WriteLine();
-			if (t != gameTime.Total.Seconds) {
-				t = gameTime.Total.Seconds;
-				Console.WriteLine("Tiles to render: " + tilesToRender.Count);
-				Console.WriteLine("Viewer height: " + viewerHeight + "\n");
-			}
+			//if (t != gameTime.Total.Seconds) {
+			//	t = gameTime.Total.Seconds;
+			//	Console.WriteLine("Tiles to render: " + tilesToRender.Count);
+			//	Console.WriteLine("Viewer height: " + viewerHeight + "\n");
+			//}
 			//Console.WriteLine("Free tiles:		" + tilesPool.Count);
 		}
 

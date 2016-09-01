@@ -116,26 +116,29 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 		{
 			try {
 
-				var request = (HttpWebRequest) WebRequest.Create(url);
+				var client = new WebClient();
+				return client.DownloadData(url);
 
-				//WebClient wc = new WebClient();
-				request.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.CacheIfAvailable);
-				request.Timeout				= TimeoutMs;
-				request.UserAgent			= UserAgent;
-				request.ReadWriteTimeout	= TimeoutMs * 6;
-				request.Accept				= requestAccept;
-				request.Referer				= RefererUrl;
-				
-				HttpWebResponse response = (HttpWebResponse) request.GetResponse();
-				
-				using (var s = new MemoryStream()) {
-					var responseStream = response.GetResponseStream();
-					if (responseStream != null) responseStream.CopyTo(s);
-					return s.ToArray();
-				}
+				//var request = (HttpWebRequest) WebRequest.Create(url);
+				//
+				////WebClient wc = new WebClient();
+				//request.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.CacheIfAvailable);
+				//request.Timeout				= TimeoutMs;
+				//request.UserAgent			= UserAgent;
+				//request.ReadWriteTimeout	= TimeoutMs * 6;
+				//request.Accept				= requestAccept;
+				//request.Referer				= RefererUrl;
+				//
+				//HttpWebResponse response = (HttpWebResponse) request.GetResponse();
+				//
+				//using (var s = new MemoryStream()) {
+				//	var responseStream = response.GetResponseStream();
+				//	if (responseStream != null) responseStream.CopyTo(s);
+				//	return s.ToArray();
+				//}
 
 			} catch (Exception e) {
-				Log.Warning(e.Message);
+				Log.Warning(e.Message + "Url: " + url);
 				return null;
 			}
 		}
@@ -184,6 +187,9 @@ namespace Fusion.Engine.Graphics.GIS.DataSystem.MapSources
 
 							var fileName = tile.Path;
 							r.DiskWRQueue.Post(q => {
+								var file = new FileInfo(fileName);
+								file.Directory.Create();
+
 								using (var f = File.OpenWrite(fileName)) {
 									var bytes = q.Data as byte[];
 									f.Write(bytes, 0, bytes.Length);
