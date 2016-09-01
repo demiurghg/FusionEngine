@@ -21,7 +21,7 @@ StructuredBuffer<PAGE> pageData : register(t0);
 RWTexture2D<float4> pageTable  : register(u0); 
 
 groupshared uint visiblePageCount = 0; 
-groupshared uint visiblePages[1024];
+groupshared uint visiblePages[2048];	// max = 16 * 16 * 6 = 1536, 2048 for smth...
 
 #define BLOCK_SIZE_X 16 
 #define BLOCK_SIZE_Y 16 

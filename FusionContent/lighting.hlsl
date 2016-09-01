@@ -9,6 +9,7 @@ static const float PI = 3.141592f;
 
 /*-----------------------------------------------------------------------------
 	Lighting headers :
+	http://simonstechblog.blogspot.ru/2011/12/microfacet-brdf.html
 -----------------------------------------------------------------------------*/
 
 #include "brdf.fxi"

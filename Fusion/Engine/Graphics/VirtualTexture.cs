@@ -200,7 +200,8 @@ namespace Fusion.Engine.Graphics {
 				}
 
 				for (int mip=0; mip<VTConfig.MipCount; mip++) {
-					Params.SetData( new Int4(pages.Length,mip,0,0) );
+
+					Params.SetData( new Int4( pages.Length, mip, 0,0 ) );
 
 					var device = Game.GraphicsDevice;
 					device.ResetStates();
@@ -262,7 +263,7 @@ namespace Fusion.Engine.Graphics {
 			//	Detect thrashing and prevention
 			//	Get highest mip, remove them, repeat until no thrashing occur.
 			//
-			while (feedbackTree.Count >= VTConfig.TotalPhysicalPageCount/1.33f ) {
+			while (feedbackTree.Count >= VTConfig.TotalPhysicalPageCount/2 ) {
 				int minMip = feedbackTree.Min( va => va.MipLevel );
 				feedbackTree.RemoveAll( va => va.MipLevel == minMip );
 			}
