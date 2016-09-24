@@ -27,6 +27,8 @@
 			#define SIZE_OF_STDSTRING 48
 		#elif _MSC_VER == 1700
 			#define SIZE_OF_STDSTRING 40
+		#else
+			#define SIZE_OF_STDSTRING 40
 		#endif
 	#endif
 #elif defined(FBXSDK_COMPILER_GNU)
