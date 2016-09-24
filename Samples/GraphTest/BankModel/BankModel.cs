@@ -27,7 +27,7 @@ namespace GraphTest.BankModel {
 	class BankModel{
 		private static readonly ILog Log = LogManager.GetLogger(typeof(Program));
         public const  int                 BankNum = 100;
-        public const  int                 CustNum = 1000;
+        public const  int                 CustNum = 300;
         public static Policy           BankPolicy = Policy.R;
         public static Policy       CustomerPolicy = Policy.R;
         public static IGraph InitialNetworkConfig = new BarabasiAlbertGraph(BankNum, 5);

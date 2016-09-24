@@ -200,7 +200,7 @@ void CSMain(
 
 	//float factor = 0.0f;
 
-	float factor = 0.00005f;
+	float factor = 0.00000005f;
 
 	forceCenter.xyz += mul(R, factor*diff/Rabs);
 	if(p.Group == 1){
@@ -219,7 +219,7 @@ void CSMain(
 
 	diff = Radius - Rabs;
 
-	factor = 0.000005f;
+	factor = 0.0001f;
 
 	forceCenter.xyz += mul(R, factor*diff/Rabs);
 	p.Force += forceCenter.xyz;

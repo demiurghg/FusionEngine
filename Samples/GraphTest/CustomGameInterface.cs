@@ -403,7 +403,7 @@ namespace GraphTest {
 							int id = graph.ParticleList.IndexOf(node);
 							node.Size = GraphConfig.MinParticleRadius * (bank.NW + 1) / 10;
 							node.Charge = bank.EL + bank.IL;
-							Log.Message(node.Size+"");
+							//Log.Message(node.Size+"");
 							if (bank.NW < 0)
 							{
 								node.Color = ColorConstant.Orange.ToVector4();
