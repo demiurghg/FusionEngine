@@ -831,13 +831,13 @@ void Native::Fbx::FbxLoader::HandleLight( Fusion::Engine::Graphics::Scene ^scene
 int main(array<System::String ^> ^args)
 {
 	auto options	=	gcnew Options();
-	auto parser		=	gcnew CommandLineParser( options, nullptr );
+	auto parser		=	gcnew CommandLineParser( Options::typeid, nullptr );
 
 	auto sw = gcnew Stopwatch();
 
 	try { 
 
-		parser->ParseCommandLine( args );
+		parser->ParseCommandLine( options, args );
 
 		if ( options->Output == nullptr ) {
 			options->Output = Path::ChangeExtension( options->Input, ".scene" );

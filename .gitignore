@@ -11,6 +11,8 @@ fbxsdk.exe
 *.swatches
 *.swatch
 *.fbx.html
+*.db
+*.opendb
 [Tt]emp/
 
 # installer result
