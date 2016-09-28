@@ -82,7 +82,7 @@ namespace Fusion.Build.Mapping {
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="pageTable"></param>
-		public void SplitIntoPages ( BuildContext context, VTPageTable pageTable )
+		public void SplitIntoPages ( BuildContext context, VTPageTable pageTable, string outputDirectory )
 		{
 			var pageSize		=	VTConfig.PageSize;
 			var pageSizeBorder	=	VTConfig.PageSizeBordered;
@@ -106,7 +106,7 @@ namespace Fusion.Build.Mapping {
 					var address	=	VTAddress.ComputeIntAddress( x + AddressX, y + AddressY, 0 );
 					pageTable.Add( address );
 
-					pageTable.SavePage( address, context.GetFullVTOutputPath(), page );
+					pageTable.SavePage( address, outputDirectory, page );
 				}
 			}
 		}

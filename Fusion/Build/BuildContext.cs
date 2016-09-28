@@ -88,9 +88,9 @@ namespace Fusion.Build {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		public string GetFullVTOutputPath ()
+		public string GetFullVTOutputPath ( AssetSource assetSource )
 		{
-			return Path.Combine( Options.FullOutputDirectory, "VTPages");
+			return Path.Combine( Options.FullOutputDirectory, "VTPages_" + assetSource.Hash );
 		}
 
 

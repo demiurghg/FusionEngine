@@ -43,6 +43,9 @@ namespace Fusion.Build.Mapping {
 								.Select( f3 => new MapScene( f3, Path.Combine( fileDir, f3 ) ) )
 								.ToArray();
 
+			var pageOutputDirectory	=	 context.GetFullVTOutputPath(assetFile);
+			Directory.CreateDirectory( pageOutputDirectory );
+
 			Log.Message("-------- map: {0} --------", assetFile.KeyPath );
 
 			//	build each scene :
@@ -52,27 +55,32 @@ namespace Fusion.Build.Mapping {
 
 			Log.Message("{0} textures", pageTable.SourceTextures.Count);
 
+			//	packing textures to atlas :
 			Log.Message("Packing textures to atlas...");
 			PackTextureAtlas( pageTable.SourceTextures );
 
+			//	generating pages :
 			Log.Message("Generating pages...");
-			GenerateMostDetailedPages( pageTable.SourceTextures, context, pageTable );
+			GenerateMostDetailedPages( pageTable.SourceTextures, context, pageTable, pageOutputDirectory );
 
+			//	generating mipmaps :
 			Log.Message("Generating mipmaps...");
 			for (int mip=0; mip<VTConfig.MipCount-1; mip++) {
 				Log.Message("Generating mip level {0}/{1}...", mip, VTConfig.MipCount);
-				GenerateMipLevels( context, pageTable, mip );
+				GenerateMipLevels( context, pageTable, mip, pageOutputDirectory );
 			}
 
+			//	generating fallback image :
 			Log.Message("Generating fallback image...");
-			GenerateFallbackImage( context, pageTable, VTConfig.MipCount-1 );
+			GenerateFallbackImage( context, pageTable, VTConfig.MipCount-1, pageOutputDirectory );
 
+			//	remapping texture coordinates :
 			Log.Message("Remapping texture coordinates...");
 			foreach ( var mapScene in mapScenes ) {
 				Log.Message("...{0}", mapScene.KeyPath );
 				mapScene.RemapTexCoords( pageTable );
 
-				mapScene.SaveScene( Path.Combine( context.GetFullVTOutputPath(), assetFile.KeyPath + ".scene" ) );
+				mapScene.SaveScene( Path.Combine( pageOutputDirectory, assetFile.KeyPath + ".scene" ) );
 			}
 
 
@@ -99,21 +107,6 @@ namespace Fusion.Build.Mapping {
 				tex.TexelOffsetX	=	addr.X * 128;
 				tex.TexelOffsetY	=	addr.Y * 128;
 			}
-
-			/*var sortedList = textures
-						.OrderByDescending( img0 => img0.Width * img0.Height )
-						.ThenByDescending( img1 => img1.Width )
-						.ThenByDescending( img2 => img2.Height )
-						.ToList();
-
-			var root = new VTAtlasNode(0,0, VTConfig.TextureSize, VTConfig.TextureSize, 0 );
-			
-			foreach ( var img in sortedList ) {
-				var n = root.Insert( img );
-				if (n==null) {
-					throw new BuildException("No enough room to place texture.");
-				}
-			} */
 		}
 
 
@@ -122,14 +115,14 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <param name="textures"></param>
-		void GenerateMostDetailedPages ( ICollection<MapTexture> textures, BuildContext context, VTPageTable pageTable )
+		void GenerateMostDetailedPages ( ICollection<MapTexture> textures, BuildContext context, VTPageTable pageTable, string pageOutputDirectory )
 		{
 			int totalCount = textures.Count;
 			int counter = 0;
 
 			foreach ( var texture in textures ) {
 				Log.Message("...{0}/{1} - {2}", counter, totalCount, texture.KeyPath );
-				texture.SplitIntoPages( context, pageTable );
+				texture.SplitIntoPages( context, pageTable, pageOutputDirectory );
 				counter++;
 			}
 		}
@@ -138,13 +131,13 @@ namespace Fusion.Build.Mapping {
 
 
 
-		void GenerateMipLevels ( BuildContext buildContext, VTPageTable pageTable, int sourceMipLevel )
+		void GenerateMipLevels ( BuildContext buildContext, VTPageTable pageTable, int sourceMipLevel, string outputDirectory )
 		{
 			if (sourceMipLevel>=VTConfig.MipCount) {
 				throw new ArgumentOutOfRangeException("mipLevel");
 			}
 
-			var dir		= buildContext.GetFullVTOutputPath();	
+			var dir		= outputDirectory;	
 			int count	= VTConfig.VirtualPageCount >> sourceMipLevel;
 			int sizeB	= VTConfig.PageSizeBordered;
 			var cache	= new TileSamplerCache( dir, pageTable ); 
@@ -246,57 +239,15 @@ namespace Fusion.Build.Mapping {
 
 
 
-		void GenerateMipLevelsOLD ( BuildContext buildContext, VTPageTable pageTable, int mipLevel )
-		{
-			if (mipLevel>=VTConfig.MipCount) {
-				throw new ArgumentOutOfRangeException("mipLevel");
-			}
-
-			int count = (VTConfig.TextureSize / VTConfig.PageSize) >> mipLevel;
-
-			TileSamplerCache cache = new TileSamplerCache( buildContext.GetFullVTOutputPath(), pageTable ); 
-
-			for ( int x = 0; x < count; x+=2 ) {
-				for ( int y = 0; y < count; y+=2 ) {
-
-					int address00 = VTAddress.ComputeIntAddress( x + 0, y + 0, mipLevel );
-					int address01 = VTAddress.ComputeIntAddress( x + 0, y + 1, mipLevel );
-					int address10 = VTAddress.ComputeIntAddress( x + 1, y + 0, mipLevel );
-					int address11 = VTAddress.ComputeIntAddress( x + 1, y + 1, mipLevel );
-					
-					//	there are no images touching target mip-level.
-					//	NOTE: we can skip images that are touched by border.
-					if ( !pageTable.IsAnyExists( address00, address01, address10, address11 ) ) {
-						continue;
-					}
-
-					var dir		=	buildContext.GetFullVTOutputPath();
-
-					var image00 =	pageTable.LoadPage( address00, dir );
-					var image01 =	pageTable.LoadPage( address01, dir );
-					var image10 =	pageTable.LoadPage( address10, dir );
-					var image11 =	pageTable.LoadPage( address11, dir );
-
-					int address =	VTAddress.ComputeIntAddress( x/2, y/2, mipLevel+1 );
-					var image	=	MipImages( image00, image01, image10, image11 );
-
-					pageTable.Add( address );
-					pageTable.SavePage( address, dir, image );
-				}
-			}
-
-		}
-
-
 		/// <summary>
 		/// 
 		/// </summary>
-		void GenerateFallbackImage ( BuildContext buildContext, VTPageTable pageTable, int sourceMipLevel )
+		void GenerateFallbackImage ( BuildContext buildContext, VTPageTable pageTable, int sourceMipLevel, string pageOutputDirectory )
 		{
 			int		pageSize		=	VTConfig.PageSize;
 			int		numPages		=	VTConfig.VirtualPageCount >> sourceMipLevel;
 			int		fallbackSize	=	VTConfig.TextureSize >> sourceMipLevel;
-			string	baseDir			=	buildContext.GetFullVTOutputPath();
+			string	baseDir			=	pageOutputDirectory;
 
 			Image fallbackImage =	new Image( fallbackSize, fallbackSize, Color.Black );
 
