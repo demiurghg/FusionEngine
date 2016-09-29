@@ -9,6 +9,7 @@ using Fusion.Build.Processors;
 using Fusion.Core.IniParser;
 using Fusion.Core.IniParser.Model;
 using Fusion;
+using Fusion.Engine.Storage;
 using Fusion.Core.Content;
 using Microsoft.Win32;
 
@@ -74,7 +75,7 @@ namespace Fusion.Build {
 			Log.Message("  {0}", options.FullOutputDirectory );
 			Log.Message("");
 
-			
+																	  
 			Log.Message("Temp directory:");
 			Log.Message("  {0}", options.FullTempDirectory );
 
@@ -93,6 +94,18 @@ namespace Fusion.Build {
 			return Path.Combine( Options.FullOutputDirectory, "VTPages_" + assetSource.Hash );
 		}
 
+
+
+		/// <summary>
+		/// Gets storage associated with given asset.
+		/// </summary>
+		/// <param name="assetSource"></param>
+		/// <returns></returns>
+		public IStorage GetAssetStorage ( AssetSource assetSource )
+		{
+			var path = Path.Combine( Options.FullOutputDirectory, assetSource.Hash + ".storage" );
+			return new DirectoryStorage(path);
+		}
 
 
 		/// <summary>

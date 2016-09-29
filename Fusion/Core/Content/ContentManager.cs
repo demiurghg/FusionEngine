@@ -9,6 +9,7 @@ using Fusion.Core;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Content;
 using Fusion.Engine.Common;
+using Fusion.Engine.Storage;
 
 
 namespace Fusion.Core.Content {
@@ -290,6 +291,17 @@ namespace Fusion.Core.Content {
 			return Load<T>( assetPath, defaultObject );
 		}
 
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public IStorage GetAssetStorage ( string assetPath )
+		{
+			var path = Path.Combine(contentDirectory, ContentUtils.GetHashedFileName( assetPath, ".storage" ) );
+			return new DirectoryStorage( path );
+		}
 
 
 		/// <summary>

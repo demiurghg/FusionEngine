@@ -533,6 +533,8 @@
     <Compile Include="Engine\Server\NetConnExt.cs" />
     <Compile Include="Engine\Server\Snapshot.cs" />
     <Compile Include="Engine\Server\SnapshotQueue.cs" />
+    <Compile Include="Engine\Storage\IStorage.cs" />
+    <Compile Include="Engine\Storage\DirectoryStorage.cs" />
     <Compile Include="Engine\Storage\UserStorage.cs" />
     <Compile Include="Engine\Frames\Context.cs" />
     <Compile Include="Engine\Frames\Enums.cs" />

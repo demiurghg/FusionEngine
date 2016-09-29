@@ -107,7 +107,7 @@ namespace Fusion.Engine.Common {
 		/// <summary>
 		/// Gets user storage.
 		/// </summary>
-		public UserStorage UserStorage { get { return userStorage; } }
+		public IStorage UserStorage { get { return userStorage; } }
 
 		/// <summary>
 		/// Gets console
