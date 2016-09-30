@@ -9,6 +9,7 @@ using Fusion.Core.Mathematics;
 using Fusion.Core.Extensions;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Imaging;
+using Fusion.Engine.Storage;
 
 namespace Fusion.Build.Mapping {
 
@@ -82,7 +83,7 @@ namespace Fusion.Build.Mapping {
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="pageTable"></param>
-		public void SplitIntoPages ( BuildContext context, VTPageTable pageTable, string outputDirectory )
+		public void SplitIntoPages ( BuildContext context, VTPageTable pageTable, IStorage storage )
 		{
 			var pageSize		=	VTConfig.PageSize;
 			var pageSizeBorder	=	VTConfig.PageSizeBordered;
@@ -106,7 +107,7 @@ namespace Fusion.Build.Mapping {
 					var address	=	VTAddress.ComputeIntAddress( x + AddressX, y + AddressY, 0 );
 					pageTable.Add( address );
 
-					pageTable.SavePage( address, outputDirectory, page );
+					pageTable.SavePage( address, storage, page );
 				}
 			}
 		}

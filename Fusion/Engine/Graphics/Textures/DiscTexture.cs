@@ -7,6 +7,7 @@ using System.IO;
 using Fusion.Drivers.Graphics;
 using Fusion.Core.Content;
 using Fusion.Engine.Common;
+using Fusion.Engine.Storage;
 
 namespace Fusion.Engine.Graphics {
 
@@ -18,7 +19,7 @@ namespace Fusion.Engine.Graphics {
 		[ContentLoader(typeof(DiscTexture))]
 		public class Loader : ContentLoader {
 
-			public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
+			public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath, IStorage storage )
 			{
 				bool srgb = assetPath.ToLowerInvariant().Contains("|srgb");
 				return new DiscTexture( content.Game.RenderSystem, new Texture2D( content.Game.GraphicsDevice, stream, srgb ) );

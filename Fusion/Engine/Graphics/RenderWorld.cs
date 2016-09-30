@@ -9,6 +9,7 @@ using Fusion.Core;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
 using System.Diagnostics;
+using Fusion.Engine.Mapping;
 
 namespace Fusion.Engine.Graphics {
 
@@ -292,7 +293,7 @@ namespace Fusion.Engine.Graphics {
 		/// Starts render world and initiate deferred content loading.
 		/// </summary>
 		/// <param name="mapName"></param>
-		public void Start ( string mapName )
+		public void Start ( Map map )
 		{
 			scene	=	Scene.Load( File.OpenRead(@"Content\VTPages\test.map.scene") );
 
@@ -300,7 +301,7 @@ namespace Fusion.Engine.Graphics {
 				mesh.CreateVertexAndIndexBuffers( rs.Device );
 			}
 
-			rs.VirtualTexture.Start(@"Content\VTPages");
+			rs.VirtualTexture.Start(map);
 		}
 
 

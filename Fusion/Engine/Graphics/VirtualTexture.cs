@@ -13,6 +13,8 @@ using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Imaging;
 using System.Diagnostics;
+using Fusion.Engine.Storage;
+using Fusion.Engine.Mapping;
 
 namespace Fusion.Engine.Graphics {
 
@@ -154,13 +156,13 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="baseDir"></param>
-		public void Start ( string baseDir )
+		public void Start ( Map map )
 		{
-			var fallbackPath	=	Path.Combine( baseDir, "fallback.tga" );
-			var fontPath		=	Path.Combine( baseDir, "conchars.tga" );
-			FallbackTexture		=	UserTexture.CreateFromTga( rs, File.OpenRead(fallbackPath), true );	
+			var storage			=	map.MapStorage;
+			var fallbackPath	=	"fallback.tga";
+			FallbackTexture		=	UserTexture.CreateFromTga( rs, storage.OpenFile(fallbackPath, FileMode.Open, FileAccess.Read), true );	
 
-			tileLoader			=	new VTTileLoader( this, baseDir );
+			tileLoader			=	new VTTileLoader( this, storage );
 			tileCache			=	new VTTileCache( VTConfig.PhysicalPageCount );
 			tileStamper			=	new VTStamper();
 

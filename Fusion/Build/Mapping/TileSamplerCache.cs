@@ -9,6 +9,7 @@ using Fusion.Engine.Imaging;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Extensions;
 using Fusion.Engine.Graphics;
+using Fusion.Engine.Storage;
 
 namespace Fusion.Build.Mapping {
 
@@ -16,13 +17,13 @@ namespace Fusion.Build.Mapping {
 
 		LRUCache<int, Image> cache;
 
-		readonly string baseDir;
+		readonly IStorage storage;
 		readonly VTPageTable pageTable;
 			
-		public TileSamplerCache ( string baseDir, VTPageTable pageTable )
+		public TileSamplerCache ( IStorage mapStorage, VTPageTable pageTable )
 		{
+			this.storage	=	mapStorage;
 			this.cache		=	new LRUCache<int,Image>(128);
-			this.baseDir	= baseDir;
 			this.pageTable	= pageTable;
 		}
 
@@ -38,10 +39,10 @@ namespace Fusion.Build.Mapping {
 
 			if (!cache.TryGetValue(address, out image)) {
 				
-				var path		=	Path.Combine( baseDir, address.ToString("X8") + ".tga" );
+				var path		=	address.ToString("X8") + ".tga";
 
 				if (pageTable.Contains(address)) {
-					image		=	Image.LoadTga( File.OpenRead(path) );
+					image		=	Image.LoadTga( storage.OpenFile(path, FileMode.Open, FileAccess.Read) );
 				} else {
 					image		=	new Image( VTConfig.PageSizeBordered, VTConfig.PageSizeBordered, Color.Black );
 				}

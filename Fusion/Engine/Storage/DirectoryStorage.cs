@@ -112,6 +112,29 @@ namespace Fusion.Engine.Storage {
 		}
 
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="fileName"></param>
+		/// <returns></returns>
+		public virtual Stream OpenRead ( string fileName )
+		{
+			return OpenFile( fileName, FileMode.Open, FileAccess.Read );
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="fileName"></param>
+		/// <returns></returns>
+		public virtual Stream OpenWrite ( string fileName )
+		{
+			return OpenFile( fileName, FileMode.Create, FileAccess.Write );
+		}
+
+
 
 		/// <summary>
 		/// Creates a file with read/write access at a specified path in the UserStorage.

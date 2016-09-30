@@ -12,6 +12,7 @@ using Fusion.Core.Mathematics;
 using Fusion.Core.Extensions;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Common;
+using Fusion.Engine.Storage;
 
 
 namespace Fusion.Engine.Graphics {
@@ -19,7 +20,7 @@ namespace Fusion.Engine.Graphics {
 	[ContentLoader(typeof(TextureAtlas))]
 	public class TextureAtlasLoader : ContentLoader {
 
-		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
+		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath, IStorage storage )
 		{
 			bool srgb = assetPath.ToLowerInvariant().Contains("|srgb");
 			return new TextureAtlas( content.Game.RenderSystem, stream, srgb );

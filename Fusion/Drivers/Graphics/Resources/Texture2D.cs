@@ -17,6 +17,7 @@ using Native.Wic;
 using Fusion.Core;
 using Fusion.Core.Extensions;
 using Fusion.Engine.Common;
+using Fusion.Engine.Storage;
 
 
 namespace Fusion.Drivers.Graphics {
@@ -29,7 +30,7 @@ namespace Fusion.Drivers.Graphics {
 		[ContentLoader(typeof(Texture2D))]
 		internal class Loader : ContentLoader {
 
-			public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
+			public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath, IStorage storage )
 			{
 				bool srgb = assetPath.ToLowerInvariant().Contains("|srgb");
 				return new Texture2D( content.Game.GraphicsDevice, stream, srgb );

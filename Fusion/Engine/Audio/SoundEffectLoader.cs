@@ -8,6 +8,7 @@ using SharpDX.Multimedia;
 using SharpDX.XAudio2;
 using SharpDX.X3DAudio;
 using Fusion.Core.Content;
+using Fusion.Engine.Storage;
 using Fusion.Core.Mathematics;
 using Fusion.Engine.Common;
 
@@ -16,7 +17,7 @@ namespace Fusion.Engine.Audio {
 	[ContentLoader(typeof(SoundEffect))]
 	internal sealed class SoundEffectLoader : ContentLoader {
 
-		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
+		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath, IStorage storage )
 		{
 		#if false
 			return new SoundEffect( stream );

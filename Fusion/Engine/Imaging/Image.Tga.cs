@@ -33,27 +33,24 @@ namespace Fusion.Engine.Imaging {
 		}
 
 
-
-		public static void SaveTga ( Image image, string path )
+		public static void SaveTga ( Image image, Stream stream )
 		{
-			using ( var fs = File.Open( path, FileMode.Create ) ) {
+			using (var bw = new BinaryWriter(stream)) {
 
-				var bw = new BinaryWriter( fs );
-
-				bw.Write( (byte)0 );									   /* idlength;         */
-				bw.Write( (byte)0 );									   /* colourmaptype;	*/
-				bw.Write( (byte)2 );									   /* datatypecode;		*/
-				bw.Write( (byte)0 ); bw.Write( (byte)0 ); 				   /* colourmaporigin;	*/
-				bw.Write( (byte)0 ); bw.Write( (byte)0 ); 				   /* colourmaplength;	*/
-				bw.Write( (byte)0 );									   /* colourmapdepth;	*/
-				bw.Write( (byte)0 ); bw.Write( (byte)0 ); 				   /* x_origin;			*/
-				bw.Write( (byte)0 ); bw.Write( (byte)0 ); 				   /* y_origin;			*/
-				bw.Write( (byte)( image.Width  & 0x00FF) );				   /* width;			*/
-				bw.Write( (byte)((image.Width  & 0xFF00) >> 8) );		   /* -                 */
-				bw.Write( (byte)( image.Height & 0x00FF) );				   /* height;			*/
-				bw.Write( (byte)((image.Height & 0xFF00) >> 8) );		   /* -                 */
-				bw.Write( (byte)32   );									   /* bitsperpixel;		*/
-				bw.Write( (byte)0x28 );	/* 0010 1000 */					   /* imagedescriptor;	*/
+				bw.Write((byte)0);										  /* idlength;			*/
+				bw.Write( (byte)0 );									  /* colourmaptype;		*/
+				bw.Write( (byte)2 );									  /* datatypecode;		*/
+				bw.Write( (byte)0 ); bw.Write( (byte)0 ); 				  /* colourmaporigin;	*/
+				bw.Write( (byte)0 ); bw.Write( (byte)0 ); 				  /* colourmaplength;	*/
+				bw.Write( (byte)0 );									  /* colourmapdepth;	*/
+				bw.Write( (byte)0 ); bw.Write( (byte)0 ); 				  /* x_origin;			*/
+				bw.Write( (byte)0 ); bw.Write( (byte)0 ); 				  /* y_origin;			*/
+				bw.Write( (byte)( image.Width  & 0x00FF) );				  /* width;				*/
+				bw.Write( (byte)((image.Width  & 0xFF00) >> 8) );		  /* -					*/
+				bw.Write( (byte)( image.Height & 0x00FF) );				  /* height;			*/
+				bw.Write( (byte)((image.Height & 0xFF00) >> 8) );		  /* -					*/
+				bw.Write( (byte)32   );									  /* bitsperpixel;		*/
+				bw.Write( (byte)0x28 );	/* 0010 1000 */					  /* imagedescriptor;	*/
 
 				foreach ( var c in image.RawImageData ) {
 					byte r = c.R;
@@ -65,6 +62,14 @@ namespace Fusion.Engine.Imaging {
 					bw.Write(r);
 					bw.Write(a);
 				}
+			}
+		}
+
+
+		public static void SaveTga ( Image image, string path )
+		{
+			using ( var fs = File.Open( path, FileMode.Create ) ) {
+				SaveTga( image, fs );
 			}
    		}
 

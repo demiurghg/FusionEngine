@@ -9,6 +9,7 @@ using Fusion.Core.Shell;
 using Fusion.Engine.Imaging;
 using Fusion.Build.Processors;
 using Fusion.Engine.Graphics;
+using Fusion.Engine.Storage;
 
 namespace Fusion.Build.Mapping {
 
@@ -43,8 +44,7 @@ namespace Fusion.Build.Mapping {
 								.Select( f3 => new MapScene( f3, Path.Combine( fileDir, f3 ) ) )
 								.ToArray();
 
-			var pageOutputDirectory	=	 context.GetFullVTOutputPath(assetFile);
-			Directory.CreateDirectory( pageOutputDirectory );
+			var mapStorage			=	context.GetAssetStorage(assetFile);
 
 			Log.Message("-------- map: {0} --------", assetFile.KeyPath );
 
@@ -61,18 +61,18 @@ namespace Fusion.Build.Mapping {
 
 			//	generating pages :
 			Log.Message("Generating pages...");
-			GenerateMostDetailedPages( pageTable.SourceTextures, context, pageTable, pageOutputDirectory );
+			GenerateMostDetailedPages( pageTable.SourceTextures, context, pageTable, mapStorage );
 
 			//	generating mipmaps :
 			Log.Message("Generating mipmaps...");
 			for (int mip=0; mip<VTConfig.MipCount-1; mip++) {
 				Log.Message("Generating mip level {0}/{1}...", mip, VTConfig.MipCount);
-				GenerateMipLevels( context, pageTable, mip, pageOutputDirectory );
+				GenerateMipLevels( context, pageTable, mip, mapStorage );
 			}
 
 			//	generating fallback image :
 			Log.Message("Generating fallback image...");
-			GenerateFallbackImage( context, pageTable, VTConfig.MipCount-1, pageOutputDirectory );
+			GenerateFallbackImage( context, pageTable, VTConfig.MipCount-1, mapStorage );
 
 			//	remapping texture coordinates :
 			Log.Message("Remapping texture coordinates...");
@@ -80,9 +80,15 @@ namespace Fusion.Build.Mapping {
 				Log.Message("...{0}", mapScene.KeyPath );
 				mapScene.RemapTexCoords( pageTable );
 
-				mapScene.SaveScene( Path.Combine( pageOutputDirectory, assetFile.KeyPath + ".scene" ) );
+				var scenePath = assetFile.KeyPath + ".scene";
+				mapScene.SaveScene( mapStorage.OpenWrite(scenePath) );
 			}
 
+
+			//	write output file
+			using ( var sw = new BinaryWriter(assetFile.OpenTargetStream()) ) {
+				sw.Write("TEST");
+			}
 
 
 			Log.Message("----------------" );
@@ -115,14 +121,14 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <param name="textures"></param>
-		void GenerateMostDetailedPages ( ICollection<MapTexture> textures, BuildContext context, VTPageTable pageTable, string pageOutputDirectory )
+		void GenerateMostDetailedPages ( ICollection<MapTexture> textures, BuildContext context, VTPageTable pageTable, IStorage mapStorage )
 		{
 			int totalCount = textures.Count;
 			int counter = 0;
 
 			foreach ( var texture in textures ) {
 				Log.Message("...{0}/{1} - {2}", counter, totalCount, texture.KeyPath );
-				texture.SplitIntoPages( context, pageTable, pageOutputDirectory );
+				texture.SplitIntoPages( context, pageTable, mapStorage );
 				counter++;
 			}
 		}
@@ -131,16 +137,15 @@ namespace Fusion.Build.Mapping {
 
 
 
-		void GenerateMipLevels ( BuildContext buildContext, VTPageTable pageTable, int sourceMipLevel, string outputDirectory )
+		void GenerateMipLevels ( BuildContext buildContext, VTPageTable pageTable, int sourceMipLevel, IStorage mapStorage )
 		{
 			if (sourceMipLevel>=VTConfig.MipCount) {
 				throw new ArgumentOutOfRangeException("mipLevel");
 			}
 
-			var dir		= outputDirectory;	
 			int count	= VTConfig.VirtualPageCount >> sourceMipLevel;
 			int sizeB	= VTConfig.PageSizeBordered;
-			var cache	= new TileSamplerCache( dir, pageTable ); 
+			var cache	= new TileSamplerCache( mapStorage, pageTable ); 
 
 			for ( int pageX = 0; pageX < count; pageX+=2 ) {
 				for ( int pageY = 0; pageY < count; pageY+=2 ) {
@@ -177,7 +182,7 @@ namespace Fusion.Build.Mapping {
 					}
 
 					pageTable.Add( address );
-					pageTable.SavePage( address, dir, image );
+					pageTable.SavePage( address, mapStorage, image );
 				}
 			}
 
@@ -242,12 +247,11 @@ namespace Fusion.Build.Mapping {
 		/// <summary>
 		/// 
 		/// </summary>
-		void GenerateFallbackImage ( BuildContext buildContext, VTPageTable pageTable, int sourceMipLevel, string pageOutputDirectory )
+		void GenerateFallbackImage ( BuildContext buildContext, VTPageTable pageTable, int sourceMipLevel, IStorage storage )
 		{
 			int		pageSize		=	VTConfig.PageSize;
 			int		numPages		=	VTConfig.VirtualPageCount >> sourceMipLevel;
 			int		fallbackSize	=	VTConfig.TextureSize >> sourceMipLevel;
-			string	baseDir			=	pageOutputDirectory;
 
 			Image fallbackImage =	new Image( fallbackSize, fallbackSize, Color.Black );
 
@@ -255,7 +259,7 @@ namespace Fusion.Build.Mapping {
 				for ( int pageY=0; pageY<numPages; pageY++) {
 
 					var addr	=	VTAddress.ComputeIntAddress( pageX, pageY, sourceMipLevel );
-					var image	=	pageTable.LoadPage( addr, baseDir );
+					var image	=	pageTable.LoadPage( addr, storage );
 
 					for ( int x=0; x<pageSize; x++) {
 						for ( int y=0; y<pageSize; y++) {
@@ -269,7 +273,7 @@ namespace Fusion.Build.Mapping {
 				}
 			}
 
-			Image.SaveTga( fallbackImage, Path.Combine( baseDir, "fallback.tga" ) );
+			Image.SaveTga( fallbackImage, storage.OpenWrite("fallback.tga") );
 		}
 
 

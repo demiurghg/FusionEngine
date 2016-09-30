@@ -16,6 +16,7 @@ using SharpDX.Direct3D;
 using Native.Dds;
 using Fusion.Core;
 using Fusion.Engine.Common;
+using Fusion.Engine.Storage;
 
 
 namespace Fusion.Drivers.Graphics {
@@ -28,7 +29,7 @@ namespace Fusion.Drivers.Graphics {
 		[ContentLoader(typeof(Texture3D))]
 		internal class Loader : ContentLoader {
 
-			public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
+			public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath, IStorage storage )
 			{
 				bool srgb = assetPath.ToLowerInvariant().Contains("|srgb");
 				return new Texture3D( content.Game.GraphicsDevice, stream, srgb );

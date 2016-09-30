@@ -14,6 +14,7 @@ using Fusion.Drivers.Graphics;
 using Fusion.Engine.Imaging;
 using System.Threading;
 using Fusion.Core.Collection;
+using Fusion.Engine.Storage;
 
 namespace Fusion.Engine.Graphics {
 
@@ -22,7 +23,7 @@ namespace Fusion.Engine.Graphics {
 	/// </summary>
 	internal class VTTileLoader {
 
-		readonly string baseDirectory;
+		readonly IStorage storage;
 		readonly VirtualTexture vt;
 
 		#if USE_PRIORITY_QUEUE
@@ -44,10 +45,10 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="baseDirectory"></param>
-		public VTTileLoader ( VirtualTexture vt, string baseDirectory )
+		public VTTileLoader ( VirtualTexture vt, IStorage storage )
 		{
+			this.storage		=	storage;
 			this.vt				=	vt;
-			this.baseDirectory	=	baseDirectory;
 
 			#if USE_PRIORITY_QUEUE
 				requestQueue	=	new ConcurrentPriorityQueue<int,VTAddress>();
@@ -138,13 +139,13 @@ namespace Fusion.Engine.Graphics {
 			#endif
 
 					
-				var fileName = Path.Combine( baseDirectory, address.GetFileNameWithoutExtension() + ".tga" );
+				var fileName = address.GetFileNameWithoutExtension() + ".tga";
 
 				//Log.Message("...vt tile load : {0}", fileName );
 
 				try {
 					
-					var tile = new VTTile( address, File.OpenRead( fileName ) );
+					var tile = new VTTile( address, storage.OpenFile( fileName, FileMode.Open, FileAccess.Read ) );
 					loadedTiles.Enqueue( tile );
 
 				} catch ( IOException ioex ) {

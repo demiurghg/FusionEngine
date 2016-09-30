@@ -115,9 +115,9 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <param name="targetPath"></param>
-		public void SaveScene ( string path )
+		public void SaveScene ( Stream stream )
 		{
-			scene.Save( File.OpenWrite( path ) );
+			scene.Save( stream );
 		} 
 
 

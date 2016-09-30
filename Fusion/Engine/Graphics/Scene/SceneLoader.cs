@@ -12,6 +12,7 @@ using Fusion.Core.Mathematics;
 using Fusion.Engine.Graphics;
 using Fusion.Core.Content;
 using Fusion.Engine.Common;
+using Fusion.Engine.Storage;
 
 
 namespace Fusion.Engine.Graphics {
@@ -30,7 +31,7 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="stream"></param>
 		/// <param name="requestedType"></param>
 		/// <returns></returns>
-		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
+		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath, IStorage storage )
 		{																			
 			var scene = Scene.Load( stream );
 

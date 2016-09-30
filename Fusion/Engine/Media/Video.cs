@@ -12,6 +12,8 @@ using SharpDX.Mathematics.Interop;
 using SharpDX.MediaFoundation;
 using System.IO;
 using Fusion.Core.Content;
+using Fusion.Engine.Storage;
+
 
 namespace Fusion.Engine.Media {
 
@@ -19,7 +21,7 @@ namespace Fusion.Engine.Media {
 	[ContentLoader(typeof(Video))]
 	public class VideoLoader : ContentLoader {
 
-		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath )
+		public override object Load ( ContentManager content, Stream stream, Type requestedType, string assetPath, IStorage storage )
 		{
 			return new Video( stream );
 		}

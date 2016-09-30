@@ -208,7 +208,8 @@ namespace Fusion.Core.Content {
 			Log.Message("Loading : {0}", assetPath );
 			using (var stream = OpenStream(assetPath) ) {
 				item = new Item() {
-					Object		= loader.Load( this, stream, typeof(T), assetPath ),
+					
+					Object		= loader.Load( this, stream, typeof(T), assetPath, GetAssetStorage(assetPath) ),
 					LoadTime	= File.GetLastWriteTime( GetRealAssetFileName( assetPath ) ),
 				};
 			}
@@ -297,10 +298,14 @@ namespace Fusion.Core.Content {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		public IStorage GetAssetStorage ( string assetPath )
+		IStorage GetAssetStorage ( string assetPath )
 		{
 			var path = Path.Combine(contentDirectory, ContentUtils.GetHashedFileName( assetPath, ".storage" ) );
-			return new DirectoryStorage( path );
+			if (Directory.Exists(path)) {
+				return new DirectoryStorage( path );
+			} else {
+				return null;
+			}
 		}
 
 

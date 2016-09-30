@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Fusion.Engine.Imaging;
 using Fusion.Core.Mathematics;
 using Fusion.Engine.Graphics;
+using Fusion.Engine.Storage;
 
 namespace Fusion.Build.Mapping {
 	internal class VTPageTable {
@@ -105,12 +106,12 @@ namespace Fusion.Build.Mapping {
 		/// <param name="address"></param>
 		/// <param name="baseDir"></param>
 		/// <returns></returns>
-		public Image LoadPage ( int address, string baseDir )
+		public Image LoadPage ( int address, IStorage storage )
 		{
 			if (pages.Contains(address)) {
 				
-				var path	=	Path.Combine( baseDir, address.ToString("X8") + ".tga" );
-				var image	=	Image.LoadTga( File.OpenRead(path) );
+				var path	=	address.ToString("X8") + ".tga";
+				var image	=	Image.LoadTga( storage.OpenRead(path) );
 
 				return image;
 
@@ -122,14 +123,6 @@ namespace Fusion.Build.Mapping {
 
 
 
-		//public Image LoadPage ( int pageX, int pageY, int mipLevel )
-		//{
-		//	int maxPage = VTConfig.VirtualPageCount >> mipLevel;
-
-		//	if (pageX<
-		//}
-
-
 
 		/// <summary>
 		/// 
@@ -137,12 +130,11 @@ namespace Fusion.Build.Mapping {
 		/// <param name="address"></param>
 		/// <param name="baseDir"></param>
 		/// <param name="image"></param>
-		public void SavePage ( int address, string baseDir, Image image )
+		public void SavePage ( int address, IStorage storage, Image image )
 		{
-			var dir		=	baseDir;
 			var name	=	address.ToString("X8") + ".tga";
 
-			Image.SaveTga( image, Path.Combine( dir, name ) );
+			Image.SaveTga( image, storage.OpenWrite(name) );
 		}
 
 

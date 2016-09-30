@@ -42,6 +42,20 @@ namespace Fusion.Engine.Storage {
 		Stream OpenFile ( string fileName, FileMode fileMode, FileAccess fileAccess );
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="fileName"></param>
+		/// <returns></returns>
+		Stream OpenRead ( string fileName );
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="fileName"></param>
+		/// <returns></returns>
+		Stream OpenWrite ( string fileName );
+
+		/// <summary>
 		/// Deletes file
 		/// </summary>
 		/// <param name="fileName"></param>
