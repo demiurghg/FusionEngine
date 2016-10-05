@@ -55,7 +55,7 @@ namespace Fusion.Build.Processors {
 		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
 			var src	=	assetFile.FullSourcePath;
-			var dst	=	context.GetTempFileName( assetFile.KeyPath, ".dds" );
+			var dst	=	context.GetTempFileFullPath( assetFile.KeyPath, ".dds" );
 
 			RunNVCompress( context, src, dst, NoMips, Fast, ToNormal, Color, Alpha, Normal, Compression );
 

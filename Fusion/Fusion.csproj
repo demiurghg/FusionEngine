@@ -124,10 +124,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Build2\BuildContext.cs" />
-    <Compile Include="Build2\BuildSystem.cs" />
-    <Compile Include="Build2\ContentProject.cs" />
-    <Compile Include="Build2\ShaderBuilder.cs" />
     <Compile Include="Build\AssetSource.cs" />
     <Compile Include="Build\ContentBuildCmd.cs" />
     <Compile Include="Build\ContentFileCmd.cs" />
@@ -144,8 +140,7 @@
     <Compile Include="Build\Mapping\MapScene.cs" />
     <Compile Include="Build\Mapping\MapTexture.cs" />
     <Compile Include="Build\Mapping\TileSamplerCache.cs" />
-    <Compile Include="Build\Mapping\VTAtlasNode.cs" />
-    <Compile Include="Build\Mapping\VTPageTable.cs" />
+    <Compile Include="Build\Mapping\MapTextureTable.cs" />
     <Compile Include="Build\Processors\AssetProcessor.cs" />
     <Compile Include="Build\Processors\AssetProcessorAttribute.cs" />
     <Compile Include="Build\Processors\AssetProcessorBinding.cs" />
@@ -427,6 +422,7 @@
     <Compile Include="Engine\Input\Touch.cs" />
     <Compile Include="Engine\Input\Unbind.cs" />
     <Compile Include="Engine\Client\GameClient.Internal.cs" />
+    <Compile Include="Engine\Mapping\MapData.cs" />
     <Compile Include="Engine\Mapping\MapLoader.cs" />
     <Compile Include="Engine\Mapping\Map.cs" />
     <Compile Include="Engine\Media\MediaState.cs" />

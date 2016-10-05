@@ -28,7 +28,7 @@ namespace Fusion.Build.Processors {
 		/// <param name="targetStream"></param>
 		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
-			string tempFileName		= context.GetTempFileName( assetFile.KeyPath, ".fnt" );
+			string tempFileName		= context.GetTempFileFullPath( assetFile.KeyPath, ".fnt" );
 			string resolvedPath		= assetFile.FullSourcePath;	
 
 			//	Launch 'bmfont.com' with temporary output file :

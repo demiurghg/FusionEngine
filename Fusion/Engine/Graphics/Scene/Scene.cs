@@ -522,7 +522,7 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns></returns>
-		public static Scene Load( Stream stream ) 
+		public static Scene Load( Stream stream, bool skipMeshData = false ) 
 		{
 			var scene = new Scene();
 			
@@ -582,6 +582,10 @@ namespace Fusion.Engine.Graphics {
 					node.Transform		=	reader.Read<Matrix>();
 					node.BindPose		=	reader.Read<Matrix>();
 					scene.nodes.Add( node );
+				}
+
+				if (skipMeshData) {
+					return scene;
 				}
 
 				//---------------------------------------------

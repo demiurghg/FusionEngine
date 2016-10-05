@@ -60,7 +60,7 @@ namespace Fusion.Build.Processors {
 		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
 			var resolvedPath	=	assetFile.FullSourcePath;
-			var destPath		=	context.GetTempFileName( assetFile.KeyPath, ".scene" );
+			var destPath		=	context.GetTempFileFullPath( assetFile.KeyPath, ".scene" );
 
 			var cmdLine			=	string.Format("\"{0}\" /out:\"{1}\" /base:\"{2}\" /merge:{3} {4} {5} {6} {7}", 
 				resolvedPath, 

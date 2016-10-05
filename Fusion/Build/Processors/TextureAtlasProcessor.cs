@@ -117,8 +117,8 @@ namespace Fusion.Build.Processors {
 			//
 			//	Save and compress :
 			//
-			var tgaOutput	=	context.GetTempFileName( assetFile.KeyPath, ".tga" );
-			var ddsOutput	=	context.GetTempFileName( assetFile.KeyPath, ".dds" );
+			var tgaOutput	=	context.GetTempFileFullPath( assetFile.KeyPath, ".tga" );
+			var ddsOutput	=	context.GetTempFileFullPath( assetFile.KeyPath, ".dds" );
 			Image.SaveTga( targetImage, tgaOutput );
 
 			var compression =	UseDXT ? TextureProcessor.TextureCompression.BC3 : TextureProcessor.TextureCompression.RGB;

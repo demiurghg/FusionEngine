@@ -124,7 +124,7 @@ namespace Fusion.Build.Processors {
 			//
 			//	Start listing builder :
 			//	
-			ListingPath	=	buildContext.GetTempFileName( assetFile.KeyPath, ".html" );
+			ListingPath	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, ".html" );
 			var htmlBuilder = new StringBuilder();
 
 			htmlBuilder.AppendFormat("<pre>");
@@ -157,19 +157,19 @@ namespace Fusion.Build.Processors {
 
 				var id		=	defineList.IndexOf( defines );
 
-				var psbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".PS.dxbc" );
-				var vsbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".VS.dxbc" );
-				var gsbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".GS.dxbc" );
-				var hsbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".HS.dxbc" );
-				var dsbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".DS.dxbc" );
-				var csbc	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".CS.dxbc" );
+				var psbc	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, "." + id.ToString("D8") + ".PS.dxbc" );
+				var vsbc	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, "." + id.ToString("D8") + ".VS.dxbc" );
+				var gsbc	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, "." + id.ToString("D8") + ".GS.dxbc" );
+				var hsbc	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, "." + id.ToString("D8") + ".HS.dxbc" );
+				var dsbc	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, "." + id.ToString("D8") + ".DS.dxbc" );
+				var csbc	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, "." + id.ToString("D8") + ".CS.dxbc" );
 															  
-				var pshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".PS.html" );
-				var vshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".VS.html" );
-				var gshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".GS.html" );
-				var hshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".HS.html" );
-				var dshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".DS.html" );
-				var cshtm	=	buildContext.GetTempFileName( assetFile.KeyPath, "." + id.ToString("D8") + ".CS.html" );
+				var pshtm	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, "." + id.ToString("D8") + ".PS.html" );
+				var vshtm	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, "." + id.ToString("D8") + ".VS.html" );
+				var gshtm	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, "." + id.ToString("D8") + ".GS.html" );
+				var hshtm	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, "." + id.ToString("D8") + ".HS.html" );
+				var dshtm	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, "." + id.ToString("D8") + ".DS.html" );
+				var cshtm	=	buildContext.GetTempFileFullPath( assetFile.KeyPath, "." + id.ToString("D8") + ".CS.html" );
 
 				var ps = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "ps_5_0", PSEntryPoint, defines, psbc, pshtm );
 				var vs = Compile( buildContext, include, shaderSource, assetFile.FullSourcePath, "vs_5_0", VSEntryPoint, defines, vsbc, vshtm );
@@ -198,7 +198,7 @@ namespace Fusion.Build.Processors {
 				+ "\r\n");
 
 
-			File.WriteAllText( buildContext.GetTempFileName(assetFile.KeyPath, ".html"), htmlBuilder.ToString() );
+			buildContext.WriteReport( assetFile, htmlBuilder.ToString() );
 
 
 			//
@@ -395,6 +395,7 @@ namespace Fusion.Build.Processors {
 				if ( result.Message!=null ) {
 					Log.Warning( result.Message );
 				}
+
 
 				File.WriteAllText( listing, result.Bytecode.Disassemble( FX.DisassemblyFlags.EnableColorCode, "" ) );
 

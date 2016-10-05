@@ -295,7 +295,7 @@ namespace Fusion.Build {
 		/// <param name="key">unique key string value</param>
 		/// <param name="ext">Desired extension with leading dot</param>
 		/// <returns>Full path for generated file name.</returns>
-		public string GetTempFileName ( string key, string ext )
+		public string GetTempFileFullPath ( string key, string ext )
 		{
 			var fileName	=	ContentUtils.GetHashedFileName( key, ext );
 
@@ -305,17 +305,18 @@ namespace Fusion.Build {
 
 
 		/// <summary>
-		/// Generates temporary file name for given key with given extension
-		/// and return full path to this file.
+		/// Writes report
 		/// </summary>
-		/// <param name="key">unique key string value</param>
-		/// <param name="ext">Desired extension with leading dot</param>
-		/// <returns>Full path for generated file name.</returns>
-		public string GetTempFileName ( string key, string subfile, string ext )
+		/// <param name="text"></param>
+		/// <returns></returns>
+		public string WriteReport( AssetSource assetFile, string textContent, string subfile = null )
 		{
-			var fileName	=	ContentUtils.GetHashedFileName( key + subfile, ext );
+			string fileName	=	assetFile.Hash + (subfile??"") + ".html";
+			string fullPath		=	Path.Combine( Options.FullTempDirectory, fileName );
+			
+			File.WriteAllText( fullPath, textContent );
 
-			return Path.Combine( Options.FullTempDirectory, fileName );
+			return fileName;
 		}
 
 

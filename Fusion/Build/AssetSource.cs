@@ -113,6 +113,73 @@ namespace Fusion.Build {
 		}
 
 
+
+		public IEnumerable<string> GetAllDependencies()
+		{
+			var removedDeps = new List<string>();
+
+			using ( var assetStream = AssetStream.OpenRead( FullTargetPath ) ) {
+				return assetStream.Dependencies;
+			}
+		}
+
+
+
+		/// <summary>
+		/// Return list of key path to changed content file.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<string> GetRemovedDependencies ()
+		{
+			var removedDeps = new List<string>();
+
+			using ( var assetStream = AssetStream.OpenRead( FullTargetPath ) ) {
+					
+				foreach ( var dependency in assetStream.Dependencies ) {
+
+					if ( !context.ContentFileExists(dependency) ) {
+						removedDeps.Add( dependency );
+					}
+				}
+			}
+
+			return removedDeps;
+		}
+
+
+
+		/// <summary>
+		/// Return list of key path to changed content file.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<string> GetChangedDependencies ()
+		{
+			var changedDeps = new List<string>();
+
+			var targetTime	=	File.GetLastWriteTime( FullTargetPath );
+
+			using ( var assetStream = AssetStream.OpenRead( FullTargetPath ) ) {
+					
+				foreach ( var dependency in assetStream.Dependencies ) {
+
+					if ( context.ContentFileExists(dependency) ) {
+
+						var fullDependencyPath = context.ResolveContentPath(dependency);
+
+						var sourceTime	=	File.GetLastWriteTime(fullDependencyPath);
+
+						if (targetTime < sourceTime) {
+							changedDeps.Add( dependency );
+						}
+					}
+				}
+			}
+
+			return changedDeps;
+		}
+
+
+
 		/// <summary>
 		/// Gets build parameters.
 		/// </summary>

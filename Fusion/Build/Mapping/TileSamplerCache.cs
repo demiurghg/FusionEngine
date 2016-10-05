@@ -18,9 +18,9 @@ namespace Fusion.Build.Mapping {
 		LRUCache<int, Image> cache;
 
 		readonly IStorage storage;
-		readonly VTPageTable pageTable;
+		readonly MapTextureTable pageTable;
 			
-		public TileSamplerCache ( IStorage mapStorage, VTPageTable pageTable )
+		public TileSamplerCache ( IStorage mapStorage, MapTextureTable pageTable )
 		{
 			this.storage	=	mapStorage;
 			this.cache		=	new LRUCache<int,Image>(128);

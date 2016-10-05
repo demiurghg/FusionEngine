@@ -10,14 +10,14 @@ using Fusion.Engine.Graphics;
 using Fusion.Engine.Storage;
 
 namespace Fusion.Build.Mapping {
-	internal class VTPageTable {
+	internal class MapTextureTable {
 
 		HashSet<int> pages = new HashSet<int>();
 
 		Dictionary<string,MapTexture> textures = new Dictionary<string,MapTexture>();
 
 
-		public VTPageTable ()
+		public MapTextureTable ()
 		{
 		}
 

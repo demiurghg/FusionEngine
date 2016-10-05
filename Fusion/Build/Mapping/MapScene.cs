@@ -8,6 +8,7 @@ using Fusion;
 using Fusion.Core.Mathematics;
 using Fusion.Core.Extensions;
 using Fusion.Engine.Graphics;
+using Fusion.Engine.Storage;
 
 namespace Fusion.Build.Mapping {
 
@@ -30,6 +31,16 @@ namespace Fusion.Build.Mapping {
 		/// </summary>
 		public string KeyPath {
 			get; private set;
+		}
+
+
+		/// <summary>
+		/// Gets last write time
+		/// </summary>
+		public DateTime LastWriteTime {
+			get {
+				return File.GetLastWriteTime( SourceFullPath );
+			}
 		}
 
 
@@ -69,9 +80,9 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <param name="context"></param>
-		public void BuildScene ( BuildContext context, VTPageTable pageTable )
+		public void BuildScene ( BuildContext context, MapTextureTable pageTable, IStorage targetStorage )
 		{
-			builtScenePath		=	context.GetTempFileName( KeyPath, ".vtscene" );
+			builtScenePath		=	context.GetTempFileFullPath( KeyPath, ".vtscene" );
 
 			//	do not merge!
 			var cmdLine			=	string.Format("\"{0}\" /out:\"{1}\" /merge:-1 /anim /geom /report", 
@@ -87,7 +98,7 @@ namespace Fusion.Build.Mapping {
 			}
 
 
-			scene		=	Scene.Load( File.OpenRead( builtScenePath ) );
+			scene		=	Scene.Load( File.OpenRead( builtScenePath ), true );
 
 
 			foreach ( var mtrl in scene.Materials ) {
@@ -125,7 +136,7 @@ namespace Fusion.Build.Mapping {
 		/// <summary>
 		/// TODO : split vertices that share triangles with diferrent materials!
 		/// </summary>
-		public void RemapTexCoords ( VTPageTable pageTable )
+		public void RemapTexCoords ( MapTextureTable pageTable )
 		{
 			foreach ( var mesh in scene.Meshes ) {
 
