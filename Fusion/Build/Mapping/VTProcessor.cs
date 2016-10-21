@@ -13,17 +13,15 @@ using Fusion.Engine.Storage;
 
 namespace Fusion.Build.Mapping {
 
-	[AssetProcessor("Map", "Performs map assembly")]
-	public class MapProcessor : AssetProcessor {
+	[AssetProcessor("MegaTexture", "Performs megatexture assembly")]
+	public class VTProcessor : AssetProcessor {
 
-		
-		const string Version = "1";
 
 
 		/// <summary>
 		/// 
 		/// </summary>
-		public MapProcessor ()
+		public VTProcessor ()
 		{
 		}
 
@@ -36,60 +34,57 @@ namespace Fusion.Build.Mapping {
 		/// <param name="buildContext"></param>
 		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
-			var fileDir			=	Path.GetDirectoryName( assetFile.FullSourcePath );
-			var pageTable		=	new MapTextureTable();
+			var fullFileDir		=	Path.GetDirectoryName( assetFile.FullSourcePath );
+			var localFileDir	=	Path.GetDirectoryName( assetFile.KeyPath );
+			var pageTable		=	new VTTextureTable();
 			var mapStorage		=	context.GetAssetStorage(assetFile);
-			var mapBuilder		=	new StringBuilder();
-			var dependencies	=	new List<string>( assetFile.GetAllDependencies() );
-
-			mapBuilder.AppendLine(Version);
+			var dependencies	=	new List<string>();//( assetFile.GetAllDependencies() );
 
 			//
-			//	Parse Map file :
+			//	Parse megatexture file :
 			//
 			//	Get scene list :
-			var mapScenes	=	File.ReadAllLines(assetFile.FullSourcePath)
+			var textures	=	File.ReadAllLines(assetFile.FullSourcePath)
 								.Select( f1 => f1.Trim() )
 								.Where( f2 => !f2.StartsWith("#") && !string.IsNullOrWhiteSpace(f2) )
-								.Select( f3 => new MapScene( f3, Path.Combine( fileDir, f3 ) ) )
+								.Select( f3 => f3 )
 								.ToArray();
 
 			//
 			//	Check dependencies :
 			//
+			foreach ( var texPath in textures ) {
+				dependencies.Add( texPath );
 
-			foreach ( var mapScene in mapScenes ) {
-				dependencies.Add( mapScene.KeyPath );
-				mapBuilder.AppendLine( mapScene.KeyPath + " " + mapScene.LastWriteTime.ToFileTime().ToString() );
+				var keyPath		=	Path.Combine( localFileDir, texPath );
+				var fullPath	=	Path.Combine( fullFileDir, texPath );
+
+				pageTable.AddTexture( keyPath, fullPath );
 			}
 
 
-			Log.Message("-------- map: {0} --------", assetFile.KeyPath );
+			Log.Message("-------- virtual texture: {0} --------", assetFile.KeyPath );
 
-			//	build each scene :
-			foreach ( var mapScene in mapScenes ) {
-				mapScene.BuildScene( context, pageTable );
-			}
+			if (assetFile.TargetFileExists) {
+				
+				//Log.Message("Dependencies:");
+				//foreach ( var rd in assetFile.GetAllDependencies()) {
+				//	Log.Message(" {0}", rd );
+				//}
 
-			Log.Message("Dependencies:");
-			foreach ( var rd in assetFile.GetAllDependencies()) {
-				Log.Message(" {0}", rd );
-			}
+				Log.Message("Removed:");
+				foreach ( var rd in assetFile.GetRemovedDependencies()) {
+					Log.Message("...removed: {0}", rd );
+				}
 
-
-			Log.Message("Removed:");
-			foreach ( var rd in assetFile.GetRemovedDependencies()) {
-				Log.Message("...removed: {0}", rd );
-			}
-
-			Log.Message("Changed:");
-			foreach ( var cd in assetFile.GetChangedDependencies()) {
-				Log.Message("...changed: {0}", cd );
+				Log.Message("Changed:");
+				foreach ( var cd in assetFile.GetChangedDependencies()) {
+					Log.Message("...changed: {0}", cd );
+				}
 			}
 
 
 
-			#if false
 			Log.Message("{0} textures", pageTable.SourceTextures.Count);
 
 			//	packing textures to atlas :
@@ -111,31 +106,13 @@ namespace Fusion.Build.Mapping {
 			Log.Message("Generating fallback image...");
 			GenerateFallbackImage( context, pageTable, VTConfig.MipCount-1, mapStorage );
 
-			//	remapping texture coordinates :
-			Log.Message("Remapping texture coordinates...");
-			foreach ( var mapScene in mapScenes ) {
-				Log.Message("...{0}", mapScene.KeyPath );
-				mapScene.RemapTexCoords( pageTable );
-
-				var scenePath = assetFile.KeyPath + ".scene";
-				mapScene.SaveScene( mapStorage.OpenWrite(scenePath) );
-			}
-
-
-			dependencies.AddRange( pageTable.SourceTextures.Select( t => t.KeyPath );
-			#endif
-
 
 			//
 			//	Write asset and report files :
 			//
 			using ( var sw = new BinaryWriter(assetFile.OpenTargetStream(dependencies)) ) {
-				sw.Write( mapBuilder.ToString() );
+				sw.Write( "TESTCONTENT" );
 			}
-
-
-			context.WriteReport( assetFile, "<pre>" + mapBuilder.ToString() + "</pre>");
-
 
 			Log.Message("----------------" );
 		}
@@ -146,7 +123,7 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <param name="textures"></param>
-		void PackTextureAtlas ( IEnumerable<MapTexture> textures )
+		void PackTextureAtlas ( IEnumerable<VTTexture> textures )
 		{
 			var allocator = new Allocator2D( VTConfig.VirtualPageCount );
 
@@ -164,10 +141,10 @@ namespace Fusion.Build.Mapping {
 
 
 		/// <summary>
-		/// 
+		/// Split textures on tiles.
 		/// </summary>
 		/// <param name="textures"></param>
-		void GenerateMostDetailedPages ( ICollection<MapTexture> textures, BuildContext context, MapTextureTable pageTable, IStorage mapStorage )
+		void GenerateMostDetailedPages ( ICollection<VTTexture> textures, BuildContext context, VTTextureTable pageTable, IStorage mapStorage )
 		{
 			int totalCount = textures.Count;
 			int counter = 0;
@@ -181,9 +158,14 @@ namespace Fusion.Build.Mapping {
 
 
 
-
-
-		void GenerateMipLevels ( BuildContext buildContext, MapTextureTable pageTable, int sourceMipLevel, IStorage mapStorage )
+		/// <summary>
+		/// Generates mip levels for all tiles.
+		/// </summary>
+		/// <param name="buildContext"></param>
+		/// <param name="pageTable"></param>
+		/// <param name="sourceMipLevel"></param>
+		/// <param name="mapStorage"></param>
+		void GenerateMipLevels ( BuildContext buildContext, VTTextureTable pageTable, int sourceMipLevel, IStorage mapStorage )
 		{
 			if (sourceMipLevel>=VTConfig.MipCount) {
 				throw new ArgumentOutOfRangeException("mipLevel");
@@ -291,9 +273,9 @@ namespace Fusion.Build.Mapping {
 
 
 		/// <summary>
-		/// 
+		/// Generate one big texture where all textures are presented.
 		/// </summary>
-		void GenerateFallbackImage ( BuildContext buildContext, MapTextureTable pageTable, int sourceMipLevel, IStorage storage )
+		void GenerateFallbackImage ( BuildContext buildContext, VTTextureTable pageTable, int sourceMipLevel, IStorage storage )
 		{
 			int		pageSize		=	VTConfig.PageSize;
 			int		numPages		=	VTConfig.VirtualPageCount >> sourceMipLevel;

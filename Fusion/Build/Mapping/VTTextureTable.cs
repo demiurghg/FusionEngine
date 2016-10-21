@@ -10,14 +10,14 @@ using Fusion.Engine.Graphics;
 using Fusion.Engine.Storage;
 
 namespace Fusion.Build.Mapping {
-	internal class MapTextureTable {
+	internal class VTTextureTable {
 
 		HashSet<int> pages = new HashSet<int>();
 
-		Dictionary<string,MapTexture> textures = new Dictionary<string,MapTexture>();
+		Dictionary<string,VTTexture> textures = new Dictionary<string,VTTexture>();
 
 
-		public MapTextureTable ()
+		public VTTextureTable ()
 		{
 		}
 
@@ -29,20 +29,12 @@ namespace Fusion.Build.Mapping {
 		/// <param name="keyPath"></param>
 		/// <param name="scene"></param>
 		/// <param name="meshIndex"></param>
-		public void AddTexture ( string keyPath, string fullPath, MapScene mapScene )
+		public void AddTexture ( string keyPath, string fullPath )
 		{
-			MapTexture texture;
-			
-			if ( textures.TryGetValue( keyPath, out texture ) ) {
-				
-				texture.References.Add( mapScene );
+			VTTexture texture;
 
-			} else {
-
-				texture = new MapTexture( keyPath, fullPath );
-
-				texture.References.Add( mapScene );
-
+			if ( !textures.ContainsKey(keyPath) ) {
+				texture = new VTTexture( keyPath, fullPath );
 				textures.Add( keyPath, texture );
 			}
 		}
@@ -53,7 +45,7 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		public ICollection<MapTexture> SourceTextures {
+		public ICollection<VTTexture> SourceTextures {
 			get {
 				return textures
 					.Select( pair => pair.Value )
@@ -69,7 +61,7 @@ namespace Fusion.Build.Mapping {
 		/// </summary>
 		/// <param name="keyPath"></param>
 		/// <returns></returns>
-		public MapTexture GetSourceTextureByKeyPath ( string keyPath )
+		public VTTexture GetSourceTextureByKeyPath ( string keyPath )
 		{
 			return textures[ keyPath ];
 		}

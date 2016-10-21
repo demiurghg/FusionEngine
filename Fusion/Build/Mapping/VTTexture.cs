@@ -14,7 +14,7 @@ using Fusion.Engine.Storage;
 namespace Fusion.Build.Mapping {
 
 
-	internal class MapTexture {
+	internal class VTTexture {
 		
 		public readonly string KeyPath;
 		public readonly string FullPath;
@@ -28,22 +28,16 @@ namespace Fusion.Build.Mapping {
 		public int AddressX { get { return TexelOffsetX / VTConfig.PageSize; } }
 		public int AddressY { get { return TexelOffsetY / VTConfig.PageSize; } }
 
-		/// <summary>
-		/// Gets list of scenes that reference this texture
-		/// </summary>
-		public HashSet<MapScene> References { get; private set; }
-
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="fullPath"></param>
-		public MapTexture ( string keyPath, string fullPath )
+		public VTTexture ( string keyPath, string fullPath )
 		{			
 			const int pageSize	=	VTConfig.PageSize;
 
-			References	=	new HashSet<MapScene>();
-			FullPath		=	fullPath;
+			FullPath	=	fullPath;
 			KeyPath		=	keyPath;
 
 			var header = Image.TakeTga( File.OpenRead(fullPath) );
@@ -83,7 +77,7 @@ namespace Fusion.Build.Mapping {
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="pageTable"></param>
-		public void SplitIntoPages ( BuildContext context, MapTextureTable pageTable, IStorage storage )
+		public void SplitIntoPages ( BuildContext context, VTTextureTable pageTable, IStorage storage )
 		{
 			var pageSize		=	VTConfig.PageSize;
 			var pageSizeBorder	=	VTConfig.PageSizeBordered;
