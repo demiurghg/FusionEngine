@@ -420,9 +420,6 @@
     <Compile Include="Engine\Input\Touch.cs" />
     <Compile Include="Engine\Input\Unbind.cs" />
     <Compile Include="Engine\Client\GameClient.Internal.cs" />
-    <Compile Include="Engine\Mapping\MapData.cs" />
-    <Compile Include="Engine\Mapping\MapLoader.cs" />
-    <Compile Include="Engine\Mapping\Map.cs" />
     <Compile Include="Engine\Media\MediaState.cs" />
     <Compile Include="Engine\Media\Video.cs" />
     <Compile Include="Engine\Media\VideoPlayer.cs" />
