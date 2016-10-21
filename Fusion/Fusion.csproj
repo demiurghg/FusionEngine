@@ -146,6 +146,7 @@
     <Compile Include="Build\Processors\AssetProcessorBinding.cs" />
     <Compile Include="Build\Processors\CopyProcessor.cs" />
     <Compile Include="Build\Processors\FontProcessor.cs" />
+    <Compile Include="Build\Processors\MegatextureProcessor.cs" />
     <Compile Include="Build\Processors\SceneProcessor.cs" />
     <Compile Include="Build\Processors\ScriptProcessor.cs" />
     <Compile Include="Build\Processors\SoundProcessor.cs" />
@@ -545,9 +546,9 @@
     <Compile Include="Engine\Frames\Transition.cs" />
     <Compile Include="Engine\Frames\FrameProcessor.cs" />
     <Compile Include="Engine\Frames\Utils.cs" />
-    <Compile Include="Framework\ClearCmd.cs" />
-    <Compile Include="Framework\GameConsole.Config.cs" />
-    <Compile Include="Framework\EditBox.cs" />
+    <Compile Include="Engine\Tools\ClearCmd.cs" />
+    <Compile Include="Engine\Tools\GameConsole.Config.cs" />
+    <Compile Include="Engine\Tools\EditBox.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -591,7 +592,7 @@
     <Compile Include="Core\Mathematics\Temperature.cs" />
     <Compile Include="Core\Utils\Wildcard.cs" />
     <Compile Include="Core\Utils\LogRecorder.cs" />
-    <Compile Include="Framework\GameConsole.cs" />
+    <Compile Include="Engine\Tools\GameConsole.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Development\Dashboard.resx">

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Fusion.Core.Shell;
 using Fusion.Core.Utils;
 
-namespace Fusion.Framework {
+namespace Fusion.Engine.Tools {
 
 	
 	/// <summary>

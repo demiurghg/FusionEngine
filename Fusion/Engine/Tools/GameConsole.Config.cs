@@ -12,7 +12,7 @@ using Fusion.Engine.Graphics;
 using Fusion.Engine.Input;
 using Fusion.Core.Configuration;
 
-namespace Fusion.Framework {
+namespace Fusion.Engine.Tools {
 	
 	public partial class GameConsole : GameComponent {
 

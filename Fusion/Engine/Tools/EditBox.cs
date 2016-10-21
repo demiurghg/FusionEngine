@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Fusion.Core.Mathematics;
 
-namespace Fusion.Framework {
+namespace Fusion.Engine.Tools {
 	internal class EditBox {
 
 		GameConsole console;

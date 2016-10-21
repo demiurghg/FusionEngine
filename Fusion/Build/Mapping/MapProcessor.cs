@@ -36,6 +36,7 @@ namespace Fusion.Build.Mapping {
 		/// <param name="buildContext"></param>
 		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
+		#if false
 			var fileDir			=	Path.GetDirectoryName( assetFile.FullSourcePath );
 			var pageTable		=	new MapTextureTable();
 			var mapStorage		=	context.GetAssetStorage(assetFile);
@@ -138,6 +139,7 @@ namespace Fusion.Build.Mapping {
 
 
 			Log.Message("----------------" );
+		#endif
 		}
 
 

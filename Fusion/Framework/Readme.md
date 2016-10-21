@@ -1,1 +1,0 @@
-﻿Contains ready to use component for rapid prototyping

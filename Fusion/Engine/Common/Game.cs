@@ -27,7 +27,7 @@ using Fusion.Engine.Server;
 using Lidgren.Network;
 using Fusion.Engine.Storage;
 using Fusion.Engine.Audio;
-using Fusion.Framework;
+using Fusion.Engine.Tools;
 using Fusion.Engine.Frames;
 
 
@@ -226,7 +226,7 @@ namespace Fusion.Engine.Common {
 		Touch				touch;
 		GamepadCollection	gamepads		;
 		UserStorage			userStorage		;
-		GameConsole			console;
+		GameConsole		console;
 		FrameProcessor		frames;
 
 

@@ -17,7 +17,7 @@ using Fusion.Core.Shell;
 
 
 
-namespace Fusion.Framework {
+namespace Fusion.Engine.Tools {
 	
 	public sealed partial class GameConsole : GameComponent {
 
