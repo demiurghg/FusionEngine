@@ -155,9 +155,10 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="baseDir"></param>
-		public void Start ( Map map )
+		public void Start ()
 		{
-			var storage			=	map.MapStorage;
+			throw new NotImplementedException();
+			var storage			=	(IStorage)null;//.MapStorage;
 			var fallbackPath	=	"fallback.tga";
 			FallbackTexture		=	UserTexture.CreateFromTga( rs, storage.OpenFile(fallbackPath, FileMode.Open, FileAccess.Read), true );	
 

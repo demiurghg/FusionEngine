@@ -279,41 +279,6 @@ namespace Fusion.Engine.Graphics {
 			IsPaused	=	false;
 		}
 
-		/*-----------------------------------------------------------------------------------------
-		 * 
-		 *	Start/stop:
-		 * 
-		-----------------------------------------------------------------------------------------*/
-
-		Scene		scene;
-
-
-		/// <summary>
-		/// Starts render world and initiate deferred content loading.
-		/// </summary>
-		/// <param name="mapName"></param>
-		public void Start ( Map map )
-		{
-			scene	=	Scene.Load( File.OpenRead(@"Content\VTPages\test.map.scene") );
-
-			foreach ( var mesh in scene.Meshes ) {	
-				mesh.CreateVertexAndIndexBuffers( rs.Device );
-			}
-
-			rs.VirtualTexture.Start(map);
-		}
-
-
-
-		/// <summary>
-		/// Stops render world and purges all gpu data
-		/// </summary>
-		public void Stop ()
-		{
-			SafeDispose( ref scene );
-			particleSystem.KillParticles();
-		}
-
 
 
 		/// <summary>
@@ -321,30 +286,10 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns></returns>
+		[Obsolete]
 		public IEnumerable<MeshInstance> CreateModelInstances ()
 		{
-			//(game.UserInterface as AtlasInterface).startMenu.AddMessageBox();
-			Instances.Clear();
-
-
-			var transforms = new Matrix[scene.Nodes.Count];
-			scene.ComputeAbsoluteTransforms(transforms);
-																									
-			for (int i = 0; i < scene.Nodes.Count; i++)	{
-
-				var meshIndex = scene.Nodes[i].MeshIndex;
-
-				if (meshIndex < 0) {
-					continue;
-				}
-
-				var inst	=	new MeshInstance(rs, scene, scene.Meshes[meshIndex]);
-				inst.World	=	transforms[i];
-
-				Instances.Add( inst );
-			}
-
-			return Instances.ToArray();
+			throw new NotImplementedException();
 		}
 
 

@@ -144,7 +144,6 @@
     <Compile Include="Build\Processors\AssetProcessorBinding.cs" />
     <Compile Include="Build\Processors\CopyProcessor.cs" />
     <Compile Include="Build\Processors\FontProcessor.cs" />
-    <Compile Include="Build\Processors\MegatextureProcessor.cs" />
     <Compile Include="Build\Processors\SceneProcessor.cs" />
     <Compile Include="Build\Processors\ScriptProcessor.cs" />
     <Compile Include="Build\Processors\SoundProcessor.cs" />

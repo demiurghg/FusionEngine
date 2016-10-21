@@ -115,7 +115,6 @@ namespace Fusion.Build.Mapping {
 			}
 
 			Log.Message("----------------" );
-		#endif
 		}
 
 
