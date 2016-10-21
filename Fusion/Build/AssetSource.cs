@@ -77,6 +77,18 @@ namespace Fusion.Build {
 		}
 
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public bool TargetFileExists {
+			get {
+				return File.Exists( FullTargetPath );
+			}
+		}
+
+
+
 		/// <summary>
 		/// Is asset up-to-date.
 		/// </summary>
