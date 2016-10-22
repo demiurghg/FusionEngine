@@ -40,8 +40,8 @@ namespace Fusion.Engine.Graphics {
 		internal SceneRenderer	SceneRenderer { get { return sceneRenderer; } }
 		SceneRenderer	sceneRenderer;
 		
-		internal VirtualTexture	VirtualTexture { get { return virtualTexture; } }
-		VirtualTexture	virtualTexture;
+		internal VTSystem	VirtualTexture { get { return virtualTexture; } }
+		VTSystem	virtualTexture;
 		
 		internal Sky	Sky { get { return sky; } }
 		Sky	sky;
@@ -121,7 +121,7 @@ namespace Fusion.Engine.Graphics {
 			sceneRenderer	=	new SceneRenderer( this );
 			sky				=	new Sky( this );
 			bitonicSort		=	new BitonicSort( this );
-			virtualTexture	=	new VirtualTexture( this );
+			virtualTexture	=	new VTSystem( this );
 
 			Game.Config.ExposeProperties( lightRenderer,  "LightRenderer"	, "light" );
 			Game.Config.ExposeProperties( ssaoFilter,     "SSAO"			, "ssao"  );

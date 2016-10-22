@@ -24,7 +24,7 @@ namespace Fusion.Engine.Graphics {
 	internal class VTTileLoader {
 
 		readonly IStorage storage;
-		readonly VirtualTexture vt;
+		readonly VTSystem vt;
 
 		#if USE_PRIORITY_QUEUE
 		ConcurrentPriorityQueue<int,VTAddress>	requestQueue;
@@ -45,7 +45,7 @@ namespace Fusion.Engine.Graphics {
 		/// 
 		/// </summary>
 		/// <param name="baseDirectory"></param>
-		public VTTileLoader ( VirtualTexture vt, IStorage storage )
+		public VTTileLoader ( VTSystem vt, IStorage storage )
 		{
 			this.storage		=	storage;
 			this.vt				=	vt;

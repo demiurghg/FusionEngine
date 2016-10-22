@@ -97,6 +97,26 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		VirtualTexture virtualTexture = null;
+
+		/// <summary>
+		/// Sets and gets virtual texture for entire world
+		/// </summary>
+		public VirtualTexture VirtualTexture {
+			get {
+				return virtualTexture;
+			}
+			set {
+				virtualTexture = value;
+				if (value==null) {
+					rs.VirtualTexture.Stop();
+				} else {
+					rs.VirtualTexture.Start(value);
+				}
+			}
+		}
+
+
 		HdrFrame viewHdrFrame;
 		HdrFrame radianceFrame;
 
