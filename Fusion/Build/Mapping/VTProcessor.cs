@@ -103,15 +103,24 @@ namespace Fusion.Build.Mapping {
 			}
 
 			//	generating fallback image :
-			Log.Message("Generating fallback image...");
+			Log.Message( "Generating fallback image..." );
 			GenerateFallbackImage( context, pageTable, VTConfig.MipCount-1, mapStorage );
 
-
+															 
 			//
 			//	Write asset and report files :
 			//
 			using ( var sw = new BinaryWriter(assetFile.OpenTargetStream(dependencies)) ) {
-				sw.Write( "TESTCONTENT" );
+
+				sw.Write( pageTable.SourceTextures.Count );
+
+				foreach ( var tex in pageTable.SourceTextures ) {
+					sw.Write( tex.KeyPath );
+					sw.Write( tex.TexelOffsetX );
+					sw.Write( tex.TexelOffsetY );
+					sw.Write( tex.Width );
+					sw.Write( tex.Height );
+				}
 			}
 
 			Log.Message("----------------" );

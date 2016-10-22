@@ -46,6 +46,8 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		Dictionary<string,Rectangle> textures;
+
 
 		/// <summary>
 		/// 
@@ -53,7 +55,28 @@ namespace Fusion.Engine.Graphics {
 		/// <param name="rs"></param>
 		internal VirtualTexture ( RenderSystem rs, Stream stream, IStorage storage )
 		{
-			this.tileStorage	=	storage;
+			tileStorage	=	storage;
+
+			int num;
+
+			using ( var reader = new BinaryReader( stream ) ) {				
+			
+				num	=	reader.ReadInt32();
+
+				textures = new Dictionary<string, Rectangle>(num);
+
+				for ( int i=0; i<num; i++ ) {
+				
+					var name	=	reader.ReadString();
+					var x       =   reader.ReadInt32();
+					var y       =   reader.ReadInt32();
+					var w       =   reader.ReadInt32();
+					var h       =   reader.ReadInt32();
+
+					textures.Add( name, new Rectangle( x, y, w, h ) );
+				}
+
+			}
 		}
 
 
@@ -68,6 +91,18 @@ namespace Fusion.Engine.Graphics {
 			}
 
 			base.Dispose(disposing);
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		internal Rectangle GetTexturePosition ( string name )
+		{
+			throw new NotImplementedException();
 		}
 
 	}
