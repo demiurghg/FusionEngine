@@ -120,24 +120,5 @@ namespace Fusion.Engine.Graphics {
 					.ToArray();
 			}
 		}
-
-        public MeshInstance(GeometryCache cache)
-        {
-            Visible = true;
-            World = Matrix.Identity;
-            Color = Color4.Zero;
-
-            vb = cache.VertexBuffer;
-            ib = cache.IndexBuffer;
-
-            vertexCount = cache.VertexCount;
-            indexCount = cache.IndexCount;
-
-            IsSkinned = true;
-            BoneTransforms = Enumerable
-                .Range(0, SceneRenderer.MaxBones)
-                .Select(i => Matrix.Identity)
-                .ToArray();
-        }
 	}
 }

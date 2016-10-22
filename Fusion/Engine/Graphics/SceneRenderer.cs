@@ -191,9 +191,10 @@ namespace Fusion.Engine.Graphics {
 				var instances	=	rw.Instances;
 
 				if (instances.Any()) {
-					device.PixelShaderResources[0]	= rs.VirtualTexture.FallbackTexture.Srv;
-					device.PixelShaderResources[1]	= rs.VirtualTexture.PageTable;
-					device.PixelShaderResources[2]	= rs.VirtualTexture.PhysicalPages;
+					#warning Megatexture
+					device.PixelShaderResources[0]	= null;//rs.VirtualTexture.FallbackTexture.Srv;
+					device.PixelShaderResources[1]	= null;//rs.VirtualTexture.PageTable;
+					device.PixelShaderResources[2]	= null;//rs.VirtualTexture.PhysicalPages;
 				}
 
 				//#warning INSTANSING!
@@ -242,10 +243,10 @@ namespace Fusion.Engine.Graphics {
 				//
 				rs.Filter.StretchRect( frame.FeedbackBufferRB.Surface, frame.FeedbackBuffer, SamplerState.PointClamp );
 
-				var feedbackBuffer = new VTAddress[ HdrFrame.FeedbackBufferWidth * HdrFrame.FeedbackBufferHeight ];
-				frame.FeedbackBufferRB.GetFeedback( feedbackBuffer );
-
-				rs.VirtualTexture.Update( feedbackBuffer, gameTime );
+				#warning Megatexture is temporary disabled!
+				//var feedbackBuffer = new VTAddress[ HdrFrame.FeedbackBufferWidth * HdrFrame.FeedbackBufferHeight ];
+				//frame.FeedbackBufferRB.GetFeedback( feedbackBuffer );
+				//rs.VirtualTexture.Update( feedbackBuffer, gameTime );
 			}
 		}
 

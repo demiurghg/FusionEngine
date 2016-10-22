@@ -182,6 +182,8 @@ namespace Fusion.Core.Content {
 		/// <returns></returns>
 		public static string GetHashedFileName ( string keyAssetPath, string ext )
 		{
+			keyAssetPath = new string(keyAssetPath.TakeWhile(ch => ch != '|').ToArray());
+
 			return CalculateMD5Hash( GetPathWithoutExtension( BackslashesToSlashes(keyAssetPath).ToLower()) ) + ext;
 		}
 
