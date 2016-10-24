@@ -102,7 +102,12 @@ namespace Fusion.Engine.Graphics {
 		/// <returns></returns>
 		internal Rectangle GetTexturePosition ( string name )
 		{
-			throw new NotImplementedException();
+			Rectangle rect;
+			if ( textures.TryGetValue( name, out rect ) ) {
+				return rect;
+			} else {
+				return new Rectangle( 0, 0, 0, 0 );
+			}
 		}
 
 	}
