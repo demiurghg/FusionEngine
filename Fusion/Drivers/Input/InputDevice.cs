@@ -80,9 +80,6 @@ namespace Fusion.Drivers.Input {
 			public Point Location;
 		}
 
-		public event EventHandler<TouchEventArgs> PointerDown;
-		public event EventHandler<TouchEventArgs> PointerUp;
-		public event EventHandler<TouchEventArgs> PointerUpdate;
 
 
 		public event Action<Vector2> TouchGestureTap;

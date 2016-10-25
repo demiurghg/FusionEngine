@@ -35,6 +35,12 @@ namespace Fusion.Engine.Graphics {
 		{																			
 			var scene = Scene.Load( stream );
 
+			foreach ( var mtrl in scene.Materials ) {
+				if (!string.IsNullOrWhiteSpace(mtrl.Texture)) {
+					mtrl.Texture =	Path.Combine( Path.GetDirectoryName(assetPath), mtrl.Texture );
+				}
+			}
+
 			foreach ( var mesh in scene.Meshes ) {	
 				mesh.CreateVertexAndIndexBuffers( content.Game.GraphicsDevice );
 			}

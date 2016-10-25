@@ -46,7 +46,7 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		Dictionary<string,Rectangle> textures;
+		Dictionary<string,RectangleF> textures;
 
 
 		/// <summary>
@@ -63,17 +63,17 @@ namespace Fusion.Engine.Graphics {
 			
 				num	=	reader.ReadInt32();
 
-				textures = new Dictionary<string, Rectangle>(num);
+				textures = new Dictionary<string, RectangleF>(num);
 
 				for ( int i=0; i<num; i++ ) {
 				
 					var name	=	reader.ReadString();
-					var x       =   reader.ReadInt32();
-					var y       =   reader.ReadInt32();
-					var w       =   reader.ReadInt32();
-					var h       =   reader.ReadInt32();
+					var x       =   reader.ReadInt32() / (float)VTConfig.TextureSize;
+					var y       =   reader.ReadInt32() / (float)VTConfig.TextureSize;
+					var w       =   reader.ReadInt32() / (float)VTConfig.TextureSize;
+					var h       =   reader.ReadInt32() / (float)VTConfig.TextureSize;
 
-					textures.Add( name, new Rectangle( x, y, w, h ) );
+					textures.Add( name, new RectangleF( x, y, w, h ) );
 				}
 
 			}
@@ -100,13 +100,17 @@ namespace Fusion.Engine.Graphics {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		internal Rectangle GetTexturePosition ( string name )
+		internal RectangleF GetTexturePosition ( string name )
 		{
-			Rectangle rect;
+			if (string.IsNullOrWhiteSpace(name)) {
+				return new RectangleF( 0, 0, 0, 0 );
+			}
+
+			RectangleF rect;
 			if ( textures.TryGetValue( name, out rect ) ) {
 				return rect;
 			} else {
-				return new Rectangle( 0, 0, 0, 0 );
+				return new RectangleF( 0, 0, 0, 0 );
 			}
 		}
 

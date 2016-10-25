@@ -20,6 +20,7 @@ namespace Fusion.Engine.Graphics {
 
 		ConstantBuffer	constBuffer;
 		ConstantBuffer	constBufferBones;
+		ConstantBuffer	constBufferSubset;
 		Ubershader		surfaceShader;
 		StateFactory	factory;
 
@@ -37,6 +38,11 @@ namespace Fusion.Engine.Graphics {
 			public Vector4	BiasSlopeFar	;
 			public Color4	Color;
 			public Vector4	ViewBounds;
+		}
+
+
+		struct CBSubsetData {
+			public RectangleF Rectangle;
 		}
 
 
@@ -68,6 +74,7 @@ namespace Fusion.Engine.Graphics {
 
 			constBuffer			=	new ConstantBuffer( Game.GraphicsDevice, typeof(CBMeshInstanceData) );
 			constBufferBones	=	new ConstantBuffer( Game.GraphicsDevice, typeof(Matrix), MaxBones );
+			constBufferSubset	=	new ConstantBuffer( Game.GraphicsDevice, typeof(CBSubsetData) );
 
 
 			defaultDiffuse	=	new Texture2D( Game.GraphicsDevice, 4,4, ColorFormat.Rgba8, false );
@@ -132,6 +139,7 @@ namespace Fusion.Engine.Graphics {
 			if (disposing) {
 				SafeDispose( ref constBuffer );
 				SafeDispose( ref constBufferBones );
+				SafeDispose( ref constBufferSubset );
 
 				SafeDispose( ref defaultDiffuse		);
 				SafeDispose( ref defaultSpecular	);
@@ -171,7 +179,8 @@ namespace Fusion.Engine.Graphics {
 				var projection		=	camera.GetProjectionMatrix( stereoEye );
 				var viewPosition	=	camera.GetCameraPosition4( stereoEye );
 
-				var cbData		=	new CBMeshInstanceData();
+				var cbData			=	new CBMeshInstanceData();
+				var cbDataSubset	=	new CBSubsetData();
 
 				var hdr			=	frame.HdrBuffer.Surface;
 				var depth		=	frame.DepthBuffer.Surface;
@@ -191,10 +200,9 @@ namespace Fusion.Engine.Graphics {
 				var instances	=	rw.Instances;
 
 				if (instances.Any()) {
-					#warning Megatexture
-					device.PixelShaderResources[0]	= null;//rs.VirtualTexture.FallbackTexture.Srv;
-					device.PixelShaderResources[1]	= null;//rs.VirtualTexture.PageTable;
-					device.PixelShaderResources[2]	= null;//rs.VirtualTexture.PhysicalPages;
+					device.PixelShaderResources[0]	= rs.VirtualTexture.FallbackTexture.Srv;
+					device.PixelShaderResources[1]	= rs.VirtualTexture.PageTable;
+					device.PixelShaderResources[2]	= rs.VirtualTexture.PhysicalPages;
 				}
 
 				//#warning INSTANSING!
@@ -215,6 +223,7 @@ namespace Fusion.Engine.Graphics {
 
 					device.PixelShaderConstants[0]	= constBuffer ;
 					device.VertexShaderConstants[0]	= constBuffer ;
+					device.PixelShaderConstants[1]	=	constBufferSubset;
 
 					device.SetupVertexInput( instance.vb, instance.ib );
 
@@ -227,7 +236,19 @@ namespace Fusion.Engine.Graphics {
 
 						device.PipelineState	=	factory[ (int)( SurfaceFlags.GBUFFER | SurfaceFlags.RIGID ) ];
 
-						device.DrawIndexed( instance.indexCount, 0, 0 );
+
+						foreach ( var subset in instance.Subsets ) {
+
+							var vt		=	rw.VirtualTexture;
+							var rect	=	vt.GetTexturePosition( subset.Name );
+
+							cbDataSubset.Rectangle	=	rect;
+
+							constBufferSubset.SetData( cbDataSubset );
+							device.PixelShaderConstants[1]	=	constBufferSubset;
+
+							device.DrawIndexed( subset.PrimitiveCount*3, subset.StartPrimitive*3, 0 );
+						}
 
 						rs.Counters.SceneDIPs++;
 						
@@ -243,10 +264,9 @@ namespace Fusion.Engine.Graphics {
 				//
 				rs.Filter.StretchRect( frame.FeedbackBufferRB.Surface, frame.FeedbackBuffer, SamplerState.PointClamp );
 
-				#warning Megatexture is temporary disabled!
-				//var feedbackBuffer = new VTAddress[ HdrFrame.FeedbackBufferWidth * HdrFrame.FeedbackBufferHeight ];
-				//frame.FeedbackBufferRB.GetFeedback( feedbackBuffer );
-				//rs.VirtualTexture.Update( feedbackBuffer, gameTime );
+				var feedbackBuffer = new VTAddress[ HdrFrame.FeedbackBufferWidth * HdrFrame.FeedbackBufferHeight ];
+				frame.FeedbackBufferRB.GetFeedback( feedbackBuffer );
+				rs.VirtualTexture.Update( feedbackBuffer, gameTime );
 			}
 		}
 
@@ -354,9 +374,10 @@ namespace Fusion.Engine.Graphics {
 				device.SetTargets( shadowRenderCtxt.DepthBuffer, shadowRenderCtxt.ColorBuffer );
 				device.SetViewport( shadowRenderCtxt.ShadowViewport );
 
-				device.PixelShaderConstants[0]	= constBuffer ;
-				device.VertexShaderConstants[0]	= constBuffer ;
-				device.PixelShaderSamplers[0]	= SamplerState.AnisotropicWrap ;
+				device.PixelShaderConstants[0]	=	constBuffer ;
+				device.VertexShaderConstants[0]	=	constBuffer ;
+				device.PixelShaderSamplers[0]	=	SamplerState.AnisotropicWrap ;
+				device.PixelShaderConstants[1]	=	constBufferSubset;
 
 				cbData.Projection	=	shadowRenderCtxt.ShadowProjection;
 				cbData.View			=	shadowRenderCtxt.ShadowView;

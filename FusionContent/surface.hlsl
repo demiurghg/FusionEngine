@@ -19,6 +19,12 @@ struct MATERIAL {
 };
 
 
+struct SUBSET {
+	float4	Rectangle;
+};
+
+
+
 struct VSInput {
 	float3 Position : POSITION;
 	float3 Tangent 	: TANGENT;
@@ -52,8 +58,7 @@ struct GBuffer {
 };
 
 cbuffer 		CBBatch 			: 	register(b0) { BATCH    Batch      : packoffset( c0 ); }	
-cbuffer 		CBLayer 			: 	register(b1) { MATERIAL Material   : packoffset( c0 ); }	
-cbuffer 		CBLayer 			: 	register(b2) { float4   UVMods[16] : packoffset( c0 ); }	
+cbuffer 		CBLayer 			: 	register(b1) { SUBSET	Subset     : packoffset( c0 ); }	
 cbuffer 		CBBatch 			: 	register(b3) { float4x4 Bones[128] : packoffset( c0 ); }	
 SamplerState	SamplerLinear		: 	register(s0);
 SamplerState	SamplerPoint		: 	register(s1);
@@ -180,39 +185,6 @@ struct SURFACE {
 //	Blend mode refernce:
 //	http://www.deepskycolors.com/archivo/2010/04/21/formulas-for-Photoshop-blending-modes.html	
 
-	
-SURFACE MaterialCombiner ( float2 uv )
-{
-	SURFACE surface;
-	
-	MATERIAL mtrl =	Material;
-	
-	
-	//uv = uv * layerData.Tiling.xy + layerData.Offset.xy;
-	
-	float4 color		=	Textures[0].Sample( SamplerLinear, uv ).rgba;
-	float4 surfMap		=	Textures[1].Sample( SamplerLinear, uv ).rgba;
-	float4 normalMap	=	Textures[2].Sample( SamplerLinear, uv ).rgba * 2 - 1;
-	float4 emission		=	Textures[3].Sample( SamplerLinear, uv ).rgba;
-	
-	float3 metalS		=	color.rgb * (surfMap.r);
-	float3 nonmetalS	=	float3(0.31,0.31,0.31) * surfMap.r;
-	float3 metalD		=	color.rgb * (1-surfMap.r);
-	float3 nonmetalD	=	color.rgb * (1-surfMap.r*0.31);// * 0.31;
-
-	surface.Diffuse		=	lerp(nonmetalD, metalD, surfMap.b);
-	surface.Specular	=	lerp(nonmetalS, metalS, surfMap.b);
-	surface.Roughness	=	surfMap.g;
-	surface.Normal		=	normalMap.xyz;
-	surface.Emission	=	emission.rgb;
-
-	surface.Diffuse		*=	Material.ColorLevel;
-	surface.Emission 	*=	(Material.EmissionLevel * Batch.Color);
-	surface.Specular	*=	Material.SpecularLevel;
-	surface.Roughness 	= 	lerp( Material.RoughnessMinimum, Material.RoughnessMaximum, surface.Roughness );
-	
-	return surface;
-}
 
 
 float MipLevel( float2 uv );
@@ -260,6 +232,10 @@ GBuffer PSMain( PSInput input )
 	surface.Normal		= 	float3(0,0,1);
 	surface.Emission 	= 	0;
 
+	input.TexCoord.xy	=	frac(input.TexCoord.xy);
+	input.TexCoord.x	=	mad( input.TexCoord.x, Subset.Rectangle.z, Subset.Rectangle.x );
+	input.TexCoord.y	=	mad( input.TexCoord.y, Subset.Rectangle.w, Subset.Rectangle.y );
+	
 	//---------------------------------
 	//	Compute miplevel :
 	//---------------------------------
@@ -275,17 +251,19 @@ GBuffer PSMain( PSInput input )
 	//	Virtual texturing stuff :
 	//---------------------------------
 	float2 vtexTC		=	input.TexCoord;
-	float2 atiHack		=	float2(-0.25f/131072, -0.25f/131072) * scale; // <-- float2(0,0) for NVIdia
-	//float2 atiHack		=	float2(0,0); // <-- float2(0,0) for NVIdia
+	//float2 atiHack		=	float2(-0.25f/131072, -0.25f/131072) * scale; // <-- float2(0,0) for NVIdia
+	float2 atiHack		=	float2(0,0); // <-- float2(0,0) for NVIdia
 	
-	float4 fallback		=	float4(1.0,0.0,0.5,1);//Textures[0].Sample( SamplerLinear, input.TexCoord ).rgba;
+	float4 fallback		=	Textures[0].Sample( SamplerLinear, input.TexCoord ).rgba;
 	float4 physPageTC	=	Textures[1].SampleLevel( SamplerPoint, input.TexCoord + atiHack, (int)(mip) ).xyzw;
 	//float4 physPageTC	=	Textures[1].SampleLevel( SamplerPoint, input.TexCoord + atiHack, 0 ).xyzw;
 	float4 color		=	fallback;
 	
 	// color.rgba	=	0;
 	// color.rg	=	frac(physPageTC.xy/10);
+	// color.rg	=	frac(input.TexCoord.xy);	
 	
+	#if 1
 	if (physPageTC.w>0) {
 		float2 	withinPageTC	=	vtexTC * VTVirtualPageCount / exp2( physPageTC.z );
 				withinPageTC	=	frac( withinPageTC );
@@ -304,6 +282,7 @@ GBuffer PSMain( PSInput input )
 	if (mip<2 && mip>=1) { color *= float4(0,1,0,1); } else
 	if (mip<1 && mip>=0) { color *= float4(1,1,1,1); } //*/
 	//color = frac(MipLevel( input.TexCoord ));
+	#endif
 
 	//---------------------------------
 	//	G-buffer output stuff :

@@ -90,6 +90,16 @@ namespace Fusion.Engine.Graphics {
 		readonly internal int vertexCount;
 
 
+		public struct Subset {
+			public int StartPrimitive;
+			public int PrimitiveCount;
+			public string Name;
+		}
+
+
+		internal readonly Subset[] Subsets;
+
+
 		/// <summary>
 		/// Creates instance from mesh in scene.
 		/// </summary>
@@ -119,6 +129,13 @@ namespace Fusion.Engine.Graphics {
 					.Select( i => Matrix.Identity )
 					.ToArray();
 			}
+
+
+			Subsets	=	mesh.Subsets.Select( subset => new Subset() { 
+					Name			= scene.Materials[subset.MaterialIndex].Texture, 
+					PrimitiveCount	= subset.PrimitiveCount,
+					StartPrimitive	= subset.StartPrimitive 
+				}).ToArray();
 		}
 	}
 }
