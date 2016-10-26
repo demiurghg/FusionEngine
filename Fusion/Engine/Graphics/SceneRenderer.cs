@@ -42,7 +42,7 @@ namespace Fusion.Engine.Graphics {
 
 
 		struct CBSubsetData {
-			public RectangleF Rectangle;
+			public Vector4 Rectangle;
 		}
 
 
@@ -242,7 +242,7 @@ namespace Fusion.Engine.Graphics {
 							var vt		=	rw.VirtualTexture;
 							var rect	=	vt.GetTexturePosition( subset.Name );
 
-							cbDataSubset.Rectangle	=	rect;
+							cbDataSubset.Rectangle	=	new Vector4( rect.X, rect.Y, rect.Width, rect.Height );
 
 							constBufferSubset.SetData( cbDataSubset );
 							device.PixelShaderConstants[1]	=	constBufferSubset;
