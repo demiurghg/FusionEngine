@@ -14,6 +14,23 @@ using System.Runtime.InteropServices;
 namespace Fusion.Core.Content {
 	public static class ContentUtils {
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="path"></param>
+		/// <param name="suffix"></param>
+		/// <returns></returns>
+		public static string AddSuffix ( string path, string suffix )
+		{
+			var dir		=	Path.GetDirectoryName(path);
+			var name	=	Path.GetFileNameWithoutExtension(path);
+			var ext		=	Path.GetExtension(path);
+
+			return Path.Combine( dir, name + suffix + ext );
+		}
+
+
 		/// <summary>
 		/// Makes four bytes from FourCC.
 		/// </summary>

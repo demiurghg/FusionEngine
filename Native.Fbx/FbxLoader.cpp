@@ -855,6 +855,8 @@ int main(array<System::String ^> ^args)
 			}
 		}
 
+		scene->StripNamespaces();
+
 		if (options->BaseDirectory!=nullptr) {
 			scene->ResolveTexturePathToBaseDirectory( options->Input, options->BaseDirectory );
 		}

@@ -10,14 +10,16 @@ using Fusion.Core.Extensions;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Imaging;
 using Fusion.Engine.Storage;
+using Fusion.Core.IniParser.Model;
 
 namespace Fusion.Build.Mapping {
 
 
 	internal class VTTexture {
-		
-		public readonly string KeyPath;
-		public readonly string FullPath;
+
+		public readonly	string	Name;
+		public readonly string	KeyPath;
+		public readonly string	FullPath;
 
 		public int TexelOffsetX;
 		public int TexelOffsetY;
@@ -33,12 +35,16 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <param name="fullPath"></param>
-		public VTTexture ( string keyPath, string fullPath )
+		public VTTexture ( SectionData section, string fullPath )
 		{			
+			Name	=	section.SectionName;
+
+			throw new NotImplementedException();
+
 			const int pageSize	=	VTConfig.PageSize;
 
 			FullPath	=	fullPath;
-			KeyPath		=	keyPath;
+			KeyPath		=	null;
 
 			var header = Image.TakeTga( File.OpenRead(fullPath) );
 
@@ -101,9 +107,23 @@ namespace Fusion.Build.Mapping {
 					var address	=	VTAddress.ComputeIntAddress( x + AddressX, y + AddressY, 0 );
 					pageTable.Add( address );
 
-					pageTable.SavePage( address, storage, page );
+					pageTable.SavePage( address, storage, page, "_COLOR" );
 				}
 			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="baseImage"></param>
+		/// <param name="postfix"></param>
+		/// <param name="defaultColor"></param>
+		/// <returns></returns>
+		Image LoadTexture ( Image baseImage, string postfix, Color defaultColor ) 
+		{
+			throw new NotImplementedException();
 		}
 
 	}

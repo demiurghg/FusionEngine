@@ -29,13 +29,12 @@ namespace Fusion.Build.Mapping {
 		/// <param name="keyPath"></param>
 		/// <param name="scene"></param>
 		/// <param name="meshIndex"></param>
-		public void AddTexture ( string keyPath, string fullPath )
+		public void AddTexture ( VTTexture texture )
 		{
-			VTTexture texture;
-
-			if ( !textures.ContainsKey(keyPath) ) {
-				texture = new VTTexture( keyPath, fullPath );
-				textures.Add( keyPath, texture );
+			if ( !textures.ContainsKey(texture.Name) ) {
+				textures.Add( texture.Name, texture );
+			} else {
+				Log.Warning("Duplicate  virtual texture entry: {0}", texture.Name );
 			}
 		}
 
@@ -122,9 +121,9 @@ namespace Fusion.Build.Mapping {
 		/// <param name="address"></param>
 		/// <param name="baseDir"></param>
 		/// <param name="image"></param>
-		public void SavePage ( int address, IStorage storage, Image image )
+		public void SavePage ( int address, IStorage storage, Image image, string postFix )
 		{
-			var name	=	address.ToString("X8") + ".tga";
+			var name	=	address.ToString("X8") + postFix + ".tga";
 
 			Image.SaveTga( image, storage.OpenWrite(name) );
 		}

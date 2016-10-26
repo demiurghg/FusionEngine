@@ -674,6 +674,34 @@ namespace Fusion.Engine.Graphics {
 
 
 		/// <summary>
+		/// 
+		/// </summary>
+		public void StripNamespaces ()
+		{
+			foreach ( var mtrl in materials ) {
+				mtrl.Name	=	StripNamespace(mtrl.Name);
+			}
+
+			foreach ( var node in nodes ) {
+				node.Name	=	StripNamespace(node.Name);
+			}
+		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		string StripNamespace ( string name )
+		{
+			return name.Split(new[]{':'}).Last();
+		}
+
+
+
+		/// <summary>
 		/// Make texture paths relative to base directory.
 		/// </summary>
 		/// <param name="sceneFullPath"></param>

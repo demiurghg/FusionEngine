@@ -10,6 +10,8 @@ using Fusion.Engine.Imaging;
 using Fusion.Build.Processors;
 using Fusion.Engine.Graphics;
 using Fusion.Engine.Storage;
+using Fusion.Core.IniParser;
+using Fusion.Core.IniParser.Model;
 
 namespace Fusion.Build.Mapping {
 
@@ -43,35 +45,14 @@ namespace Fusion.Build.Mapping {
 			//
 			//	Parse megatexture file :
 			//
-			//	Get scene list :
-			var textures	=	File.ReadAllLines(assetFile.FullSourcePath)
-								.Select( f1 => f1.Trim() )
-								.Where( f2 => !f2.StartsWith("#") && !string.IsNullOrWhiteSpace(f2) )
-								.Select( f3 => f3 )
-								.ToArray();
-
-			//
-			//	Check dependencies :
-			//
-			foreach ( var texPath in textures ) {
-				dependencies.Add( texPath );
-
-				var keyPath		=	Path.Combine( localFileDir, texPath );
-				var fullPath	=	Path.Combine( fullFileDir, texPath );
-
-				pageTable.AddTexture( keyPath, fullPath );
-			}
+			var iniData		=	ParseMegatexFile( assetFile );
+			var texTable	=	CreateVTTextureTable( iniData, fullFileDir );
 
 
 			Log.Message("-------- virtual texture: {0} --------", assetFile.KeyPath );
 
 			if (assetFile.TargetFileExists) {
 				
-				//Log.Message("Dependencies:");
-				//foreach ( var rd in assetFile.GetAllDependencies()) {
-				//	Log.Message(" {0}", rd );
-				//}
-
 				Log.Message("Removed:");
 				foreach ( var rd in assetFile.GetRemovedDependencies()) {
 					Log.Message("...removed: {0}", rd );
@@ -124,6 +105,49 @@ namespace Fusion.Build.Mapping {
 			}
 
 			Log.Message("----------------" );
+		}
+
+
+
+
+		/// <summary>
+		/// Reads INI-file
+		/// </summary>
+		/// <param name="assetFile"></param>
+		IniData ParseMegatexFile ( AssetSource assetFile )
+		{
+			var ip = new StreamIniDataParser();
+			ip.Parser.Configuration.AllowDuplicateSections	=	false;
+			ip.Parser.Configuration.AllowDuplicateKeys		=	true;
+			ip.Parser.Configuration.CommentString			=	"#";
+			ip.Parser.Configuration.OverrideDuplicateKeys	=	true;
+			ip.Parser.Configuration.KeyValueAssigmentChar	=	'=';
+			ip.Parser.Configuration.AllowKeysWithoutValues	=	false;
+
+			using ( var reader = new StreamReader( assetFile.OpenSourceStream() ) ) {
+				return	ip.ReadData( reader );
+			}
+		}
+
+																					 
+
+		/// <summary>
+		/// Creates VT tex table from INI-data and base directory
+		/// </summary>
+		/// <param name="iniData"></param>
+		/// <param name="baseDirectory"></param>
+		/// <returns></returns>
+		VTTextureTable CreateVTTextureTable ( IniData iniData, string baseDirectory )
+		{
+			var texTable	=	new VTTextureTable();
+
+			foreach ( var section in iniData.Sections ) {
+				var tex = new VTTexture( section, baseDirectory );
+
+				texTable.AddTexture( tex );
+			}
+
+			return texTable;
 		}
 
 
@@ -219,7 +243,7 @@ namespace Fusion.Build.Mapping {
 					}
 
 					pageTable.Add( address );
-					pageTable.SavePage( address, mapStorage, image );
+					pageTable.SavePage( address, mapStorage, image, "" );
 				}
 			}
 
