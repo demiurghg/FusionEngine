@@ -226,10 +226,10 @@ namespace Fusion.Build.Mapping {
 			for ( int pageX = 0; pageX < count; pageX+=2 ) {
 				for ( int pageY = 0; pageY < count; pageY+=2 ) {
 
-					int address00 = VTAddress.ComputeIntAddress( pageX + 0, pageY + 0, sourceMipLevel );
-					int address01 = VTAddress.ComputeIntAddress( pageX + 0, pageY + 1, sourceMipLevel );
-					int address10 = VTAddress.ComputeIntAddress( pageX + 1, pageY + 0, sourceMipLevel );
-					int address11 = VTAddress.ComputeIntAddress( pageX + 1, pageY + 1, sourceMipLevel );
+					var address00 = new VTAddress( pageX + 0, pageY + 0, sourceMipLevel );
+					var address01 = new VTAddress( pageX + 0, pageY + 1, sourceMipLevel );
+					var address10 = new VTAddress( pageX + 1, pageY + 0, sourceMipLevel );
+					var address11 = new VTAddress( pageX + 1, pageY + 1, sourceMipLevel );
 					
 					//	there are no images touching target mip-level.
 					//	NOTE: we can skip images that are touched by border.
@@ -237,13 +237,13 @@ namespace Fusion.Build.Mapping {
 						continue;
 					}
 
-					int address =	VTAddress.ComputeIntAddress( pageX/2, pageY/2, sourceMipLevel+1 );
+					var address =	new VTAddress( pageX/2, pageY/2, sourceMipLevel+1 );
 
 					var image	=	new Image( sizeB, sizeB, Color.Black );
 
-					int offsetX	=	(pageX) * VTConfig.PageSize;
-					int offsetY	=	(pageY) * VTConfig.PageSize;
-					int border	=	VTConfig.PageBorderWidth;
+					var offsetX	=	(pageX) * VTConfig.PageSize;
+					var offsetY	=	(pageY) * VTConfig.PageSize;
+					var border	=	VTConfig.PageBorderWidth;
 
 					for ( int x=0; x<sizeB; x++) {
 						for ( int y=0; y<sizeB; y++) {
@@ -258,7 +258,7 @@ namespace Fusion.Build.Mapping {
 					}
 
 					pageTable.Add( address );
-					pageTable.SavePage( address, mapStorage, image, "" );
+					pageTable.SavePage( address, mapStorage, image, "C" );
 				}
 			}
 
@@ -286,7 +286,7 @@ namespace Fusion.Build.Mapping {
 			int y		= texelY % VTConfig.PageSize;
 			int b		= VTConfig.PageBorderWidth;
 
-			int address = VTAddress.ComputeIntAddress( pageX, pageY, mipLevel );
+			var address = new VTAddress( pageX, pageY, mipLevel );
 
 			return cache.LoadImage( address ).SampleClamp( x+b, y+b );
 		}
@@ -313,7 +313,7 @@ namespace Fusion.Build.Mapping {
 			int y		= texelY % VTConfig.PageSize;
 			int b		= VTConfig.PageBorderWidth;
 
-			int address = VTAddress.ComputeIntAddress( pageX, pageY, mipLevel );
+			var address = new VTAddress( pageX, pageY, mipLevel );
 
 			return cache.LoadImage( address ).SampleQ4Clamp( x+b, y+b );
 		}
@@ -334,7 +334,7 @@ namespace Fusion.Build.Mapping {
 			for ( int pageX=0; pageX<numPages; pageX++) {
 				for ( int pageY=0; pageY<numPages; pageY++) {
 
-					var addr	=	VTAddress.ComputeIntAddress( pageX, pageY, sourceMipLevel );
+					var addr	=	new VTAddress( pageX, pageY, sourceMipLevel );
 					var image	=	pageTable.LoadPage( addr, storage );
 
 					for ( int x=0; x<pageSize; x++) {

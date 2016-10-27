@@ -29,7 +29,7 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
-		public VTAddress ( short pageX, short pageY, short mipLevel )
+		public VTAddress ( int pageX, int pageY, int mipLevel )
 		{
 			if (mipLevel<0 | mipLevel>=VTConfig.MipCount) {
 				throw new ArgumentOutOfRangeException("mipLevel");
@@ -44,9 +44,9 @@ namespace Fusion.Engine.Graphics {
 				throw new ArgumentOutOfRangeException("pageY");
 			}
 
-			PageX		=	pageX;
-			PageY		=	pageY;
-			MipLevel	=	mipLevel;
+			PageX		=	(short)pageX;
+			PageY		=	(short)pageY;
+			MipLevel	=	(short)mipLevel;
 			Dummy		=	1;
 		}
 
@@ -124,6 +124,12 @@ namespace Fusion.Engine.Graphics {
 		}
 
 
+		public Int32 ComputeIntAddress ()
+		{
+			return ComputeIntAddress( PageX, PageY, MipLevel );
+		}
+
+
 
 		public static Int32 ComputeIntAddress ( int pageX, int pageY, int mipLevel )
 		{
@@ -146,9 +152,9 @@ namespace Fusion.Engine.Graphics {
 
 
 
-		public string GetFileNameWithoutExtension ()
+		public string GetFileNameWithoutExtension (string postfix)
 		{
-			return ComputeUIntAddress().ToString("X8");
+			return ComputeUIntAddress().ToString("X8") + postfix;
 		}
 	}
 

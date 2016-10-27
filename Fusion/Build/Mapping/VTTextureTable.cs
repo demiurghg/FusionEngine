@@ -12,7 +12,7 @@ using Fusion.Engine.Storage;
 namespace Fusion.Build.Mapping {
 	internal class VTTextureTable {
 
-		HashSet<int> pages = new HashSet<int>();
+		HashSet<VTAddress> pages = new HashSet<VTAddress>();
 
 		Dictionary<string,VTTexture> textures = new Dictionary<string,VTTexture>();
 
@@ -70,7 +70,7 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <param name="address"></param>
-		public void Add ( int address )
+		public void Add ( VTAddress address )
 		{
 			if (pages.Contains(address)) {
 				Log.Warning("Address {0:X} is already added", address);
@@ -84,7 +84,7 @@ namespace Fusion.Build.Mapping {
 		/// </summary>
 		/// <param name="address"></param>
 		/// <returns></returns>
-		public bool Contains ( int address )
+		public bool Contains ( VTAddress address )
 		{
 			return pages.Contains(address);
 		}
@@ -97,11 +97,11 @@ namespace Fusion.Build.Mapping {
 		/// <param name="address"></param>
 		/// <param name="baseDir"></param>
 		/// <returns></returns>
-		public Image LoadPage ( int address, IStorage storage )
+		public Image LoadPage ( VTAddress address, IStorage storage )
 		{
 			if (pages.Contains(address)) {
 				
-				var path	=	address.ToString("X8") + ".tga";
+				var path	=	address.GetFileNameWithoutExtension("C.tga");
 				var image	=	Image.LoadTga( storage.OpenRead(path) );
 
 				return image;
@@ -121,9 +121,9 @@ namespace Fusion.Build.Mapping {
 		/// <param name="address"></param>
 		/// <param name="baseDir"></param>
 		/// <param name="image"></param>
-		public void SavePage ( int address, IStorage storage, Image image, string postFix )
+		public void SavePage ( VTAddress address, IStorage storage, Image image, string postFix )
 		{
-			var name	=	address.ToString("X8") + postFix + ".tga";
+			var name	=	address.GetFileNameWithoutExtension(postFix) + ".tga";
 
 			Image.SaveTga( image, storage.OpenWrite(name) );
 		}
@@ -137,7 +137,7 @@ namespace Fusion.Build.Mapping {
 		/// <param name="address2"></param>
 		/// <param name="address3"></param>
 		/// <returns></returns>
-		public bool IsAnyExists ( int address0, int address1, int address2, int address3 )
+		public bool IsAnyExists ( VTAddress address0, VTAddress address1, VTAddress address2, VTAddress address3 )
 		{
 			return pages.Contains( address0 )
 				|| pages.Contains( address1 )

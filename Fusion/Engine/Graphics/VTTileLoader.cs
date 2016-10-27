@@ -139,7 +139,7 @@ namespace Fusion.Engine.Graphics {
 			#endif
 
 					
-				var fileName = address.GetFileNameWithoutExtension() + ".tga";
+				var fileName = address.GetFileNameWithoutExtension("C") + ".tga";
 
 				//Log.Message("...vt tile load : {0}", fileName );
 

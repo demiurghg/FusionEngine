@@ -122,12 +122,12 @@ namespace Fusion.Build.Mapping {
 						}
 					}
 
-					var address	=	VTAddress.ComputeIntAddress( x + AddressX, y + AddressY, 0 );
+					var address	=	new VTAddress( (short)(x + AddressX), (short)(y + AddressY), 0 );
 					pageTable.Add( address );
 
-					pageTable.SavePage( address, storage, pageC, "_C" );
-					pageTable.SavePage( address, storage, pageN, "_N" );
-					pageTable.SavePage( address, storage, pageS, "_S" );
+					pageTable.SavePage( address, storage, pageC, "C" );
+					pageTable.SavePage( address, storage, pageN, "N" );
+					pageTable.SavePage( address, storage, pageS, "S" );
 				}
 			}
 		}
