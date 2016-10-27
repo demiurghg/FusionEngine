@@ -236,10 +236,11 @@ namespace Fusion.Build {
 		
 
 		/// <summary>
-		/// 
+		/// Resolves content file path
 		/// </summary>
-		/// <param name="path"></param>
-		/// <param name="dirs"></param>
+		/// <param name="path">Key path</param>
+		/// <param name="dirs">Possible directories</param>
+		/// <param name="baseDirectory">Directory where given key path was resolved</param>
 		/// <returns></returns>
 		string ResolvePath ( string path, IEnumerable<string> dirs, out string baseDirectory )
 		{

@@ -31,6 +31,7 @@ namespace Fusion.Core.Content {
 		}
 
 
+		
 		/// <summary>
 		/// Makes four bytes from FourCC.
 		/// </summary>
@@ -40,6 +41,7 @@ namespace Fusion.Core.Content {
 		{
 			return Encoding.ASCII.GetString( BitConverter.GetBytes(fourCC) );
 		}
+
 
 
 		/// <summary>
@@ -54,6 +56,7 @@ namespace Fusion.Core.Content {
 			}
 			return BitConverter.ToUInt32(Encoding.ASCII.GetBytes( fourCC ).Take(4).ToArray(), 0);
 		}
+
 
 
 		/// <summary>
@@ -104,6 +107,7 @@ namespace Fusion.Core.Content {
 		{
 			return char.IsDigit(ch) || (ch>='a' && ch<='z') || (ch>='A' && ch<='Z') || ch=='_';
 		}
+
 
 
 		/// <summary>

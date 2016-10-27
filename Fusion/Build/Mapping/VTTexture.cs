@@ -11,15 +11,16 @@ using Fusion.Engine.Graphics;
 using Fusion.Engine.Imaging;
 using Fusion.Engine.Storage;
 using Fusion.Core.IniParser.Model;
+using Fusion.Core.Content;
 
 namespace Fusion.Build.Mapping {
 
 
 	internal class VTTexture {
 
-		public readonly	string	Name;
+		readonly BuildContext context;
+
 		public readonly string	KeyPath;
-		public readonly string	FullPath;
 
 		public int TexelOffsetX;
 		public int TexelOffsetY;
@@ -35,16 +36,13 @@ namespace Fusion.Build.Mapping {
 		/// 
 		/// </summary>
 		/// <param name="fullPath"></param>
-		public VTTexture ( SectionData section, string fullPath )
+		public VTTexture ( string keyPath, BuildContext context )
 		{			
-			Name	=	section.SectionName;
-
-			throw new NotImplementedException();
-
+			this.context		=	context;
 			const int pageSize	=	VTConfig.PageSize;
 
-			FullPath	=	fullPath;
-			KeyPath		=	null;
+			this.KeyPath	=	keyPath;
+			var fullPath	=	context.ResolveContentPath( keyPath );
 
 			var header = Image.TakeTga( File.OpenRead(fullPath) );
 
@@ -85,29 +83,51 @@ namespace Fusion.Build.Mapping {
 		/// <param name="pageTable"></param>
 		public void SplitIntoPages ( BuildContext context, VTTextureTable pageTable, IStorage storage )
 		{
-			var pageSize		=	VTConfig.PageSize;
-			var pageSizeBorder	=	VTConfig.PageSizeBordered;
-			var border			=	VTConfig.PageBorderWidth;
-			var image			=	Image.LoadTga( File.OpenRead(FullPath) );
+			var pageSize			=	VTConfig.PageSize;
+			var pageSizeBorder		=	VTConfig.PageSizeBordered;
+			var border				=	VTConfig.PageBorderWidth;
+			var fullPathColorMap	=	context.ResolveContentPath( KeyPath );
 
-			var pageCountX	=	image.Width / pageSize;
-			var pageCountY	=	image.Height / pageSize;
+			var colorMap			=	Image.LoadTga( File.OpenRead(fullPathColorMap) );
+			var normalMap			=	LoadExtraTexture( colorMap, "_local", Color.FlatNormals );
+			var specularMap			=	LoadExtraTexture( colorMap, "_spec", Color.Black );
+			var emissiveMap			=	LoadExtraTexture( colorMap, "_glow", Color.Black );
+
+			var pageCountX	=	colorMap.Width / pageSize;
+			var pageCountY	=	colorMap.Height / pageSize;
 
 			for (int x=0; x<pageCountX; x++) {
 				for (int y=0; y<pageCountY; y++) {
 
-					var page = new Image(pageSizeBorder, pageSizeBorder); 
+					var pageC	=	new Image(pageSizeBorder, pageSizeBorder); 
+					var pageN	=	new Image(pageSizeBorder, pageSizeBorder); 
+					var pageS	=	new Image(pageSizeBorder, pageSizeBorder); 
 					
 					for ( int i=0; i<pageSizeBorder; i++) {
 						for ( int j=0; j<pageSizeBorder; j++) {
-							page.Write( i,j, image.SampleClamp( x*pageSize + i - border, y*pageSize + j - border ) );
+
+							int srcX		=	x*pageSize + i - border;
+							int srcY		=	y*pageSize + j - border;
+
+							var color		=	colorMap.SampleClamp( srcX, srcY );
+							var normal		=	normalMap.SampleClamp( srcX, srcY );
+							var specular	=	specularMap.SampleClamp( srcX, srcY );
+							var emission	=	emissiveMap.SampleClamp( srcX, srcY );
+
+							specular.A		=	(byte)(emission.GetBrightness() * 255);
+
+							pageC.Write( i,j, color );
+							pageN.Write( i,j, normal );
+							pageS.Write( i,j, specular );
 						}
 					}
 
 					var address	=	VTAddress.ComputeIntAddress( x + AddressX, y + AddressY, 0 );
 					pageTable.Add( address );
 
-					pageTable.SavePage( address, storage, page, "_COLOR" );
+					pageTable.SavePage( address, storage, pageC, "_C" );
+					pageTable.SavePage( address, storage, pageN, "_N" );
+					pageTable.SavePage( address, storage, pageS, "_S" );
 				}
 			}
 		}
@@ -121,9 +141,22 @@ namespace Fusion.Build.Mapping {
 		/// <param name="postfix"></param>
 		/// <param name="defaultColor"></param>
 		/// <returns></returns>
-		Image LoadTexture ( Image baseImage, string postfix, Color defaultColor ) 
+		Image LoadExtraTexture ( Image baseImage, string postfix, Color defaultColor ) 
 		{
-			throw new NotImplementedException();
+			var keyPath	=	ContentUtils.AddSuffix( KeyPath, postfix );
+			
+			if (!context.ContentFileExists( keyPath )) {
+				return new Image( Width, Height, defaultColor );
+			}
+
+			var image	=	Image.LoadTga( File.OpenRead( context.ResolveContentPath(keyPath) ) );
+
+			if (image.Width!=Width || image.Height!=image.Height) {
+				Log.Warning("Size of {0} is not equal to size of {1}. Default image is used.", keyPath, KeyPath );
+				return new Image( Width, Height, defaultColor );
+			}
+
+			return image;
 		}
 
 	}

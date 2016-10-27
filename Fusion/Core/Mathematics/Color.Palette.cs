@@ -35,6 +35,11 @@ namespace Fusion.Core.Mathematics
         /// </summary>
         public static readonly Color Transparent = Color.FromBgra(0x00000000);
 
+		/// <summary>
+		/// Flat normal-map color.
+		/// </summary>
+		public static readonly Color FlatNormals = Color.FromBgra(0xFF8080FF);
+
         /// <summary>
         /// AliceBlue color.
         /// </summary>

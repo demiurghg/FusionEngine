@@ -36,17 +36,15 @@ namespace Fusion.Build.Mapping {
 		/// <param name="buildContext"></param>
 		public override void Process ( AssetSource assetFile, BuildContext context )
 		{
-			var fullFileDir		=	Path.GetDirectoryName( assetFile.FullSourcePath );
 			var localFileDir	=	Path.GetDirectoryName( assetFile.KeyPath );
-			var pageTable		=	new VTTextureTable();
 			var mapStorage		=	context.GetAssetStorage(assetFile);
 			var dependencies	=	new List<string>();//( assetFile.GetAllDependencies() );
 
 			//
 			//	Parse megatexture file :
 			//
-			var iniData		=	ParseMegatexFile( assetFile );
-			var texTable	=	CreateVTTextureTable( iniData, fullFileDir );
+			var textures	=	ParseMegatexFile( assetFile );
+			var pageTable	=	CreateVTTextureTable( textures, context );
 
 
 			Log.Message("-------- virtual texture: {0} --------", assetFile.KeyPath );
@@ -109,13 +107,30 @@ namespace Fusion.Build.Mapping {
 
 
 
+		/// <summary>
+		/// Reads raw megatex file
+		/// </summary>
+		/// <param name="assetFile"></param>
+		/// <returns></returns>
+		IEnumerable<string> ParseMegatexFile ( AssetSource assetFile )
+		{
+			return	File.ReadAllLines(assetFile.FullSourcePath)
+					.Select( f1 => f1.Trim() )
+					.Where( f2 => !f2.StartsWith("#") && !string.IsNullOrWhiteSpace(f2) )
+					.Select( f3 => f3 )
+					.ToArray();
+		}
+
+
 
 		/// <summary>
 		/// Reads INI-file
 		/// </summary>
 		/// <param name="assetFile"></param>
-		IniData ParseMegatexFile ( AssetSource assetFile )
+		IniData ParseMegatexIniFile ( AssetSource assetFile )
 		{
+			
+
 			var ip = new StreamIniDataParser();
 			ip.Parser.Configuration.AllowDuplicateSections	=	false;
 			ip.Parser.Configuration.AllowDuplicateKeys		=	true;
@@ -137,12 +152,12 @@ namespace Fusion.Build.Mapping {
 		/// <param name="iniData"></param>
 		/// <param name="baseDirectory"></param>
 		/// <returns></returns>
-		VTTextureTable CreateVTTextureTable ( IniData iniData, string baseDirectory )
+		VTTextureTable CreateVTTextureTable ( IEnumerable<string> textures, BuildContext context )
 		{
 			var texTable	=	new VTTextureTable();
 
-			foreach ( var section in iniData.Sections ) {
-				var tex = new VTTexture( section, baseDirectory );
+			foreach ( var texturePath in textures ) {
+				var tex = new VTTexture( texturePath, context );
 
 				texTable.AddTexture( tex );
 			}

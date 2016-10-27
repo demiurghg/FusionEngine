@@ -31,10 +31,10 @@ namespace Fusion.Build.Mapping {
 		/// <param name="meshIndex"></param>
 		public void AddTexture ( VTTexture texture )
 		{
-			if ( !textures.ContainsKey(texture.Name) ) {
-				textures.Add( texture.Name, texture );
+			if ( !textures.ContainsKey( texture.KeyPath ) ) {
+				textures.Add( texture.KeyPath, texture );
 			} else {
-				Log.Warning("Duplicate  virtual texture entry: {0}", texture.Name );
+				Log.Warning("Duplicate virtual texture entry: {0}", texture.KeyPath );
 			}
 		}
 
@@ -48,7 +48,7 @@ namespace Fusion.Build.Mapping {
 			get {
 				return textures
 					.Select( pair => pair.Value )
-					.OrderBy( tex => tex.FullPath )
+					.OrderBy( tex => tex.KeyPath )
 					.ToArray();
 			}
 		}
