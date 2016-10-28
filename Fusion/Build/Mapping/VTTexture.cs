@@ -125,9 +125,14 @@ namespace Fusion.Build.Mapping {
 					var address	=	new VTAddress( (short)(x + AddressX), (short)(y + AddressY), 0 );
 					pageTable.Add( address );
 
-					pageTable.SavePage( address, storage, pageC, "C" );
-					pageTable.SavePage( address, storage, pageN, "N" );
-					pageTable.SavePage( address, storage, pageS, "S" );
+					var tile	=	new VTTile();
+
+					tile.AssembleFromImages( pageC, pageN, pageS );
+					pageTable.SaveTile( address, storage, tile );
+
+					//pageTable.SavePage( address, storage, pageC, "C" );
+					//pageTable.SavePage( address, storage, pageN, "N" );
+					//pageTable.SavePage( address, storage, pageS, "S" );
 				}
 			}
 		}

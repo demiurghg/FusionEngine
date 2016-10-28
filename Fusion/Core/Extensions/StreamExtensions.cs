@@ -9,6 +9,43 @@ using Fusion.Core.Mathematics;
 namespace Fusion.Core.Extensions {
 	public static class StreamExtensions {
 
+
+		/// <summary>
+		/// Writes FourCC to stream
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <param name="fourCC"></param>
+		public static void WriteFourCC ( this Stream stream, string fourCC )
+		{
+			if (fourCC==null) {
+				throw new ArgumentNullException("fourCC");
+			}
+			if (fourCC.Length!=4) {
+				throw new ArgumentException("fourCC must contain exactly four characters");
+			}
+
+			var data = Encoding.ASCII.GetBytes( fourCC ).Take(4).ToArray();
+
+			stream.Write( data, 0, 4 );
+		}
+
+
+
+		/// <summary>
+		/// Reads FourCC from string.
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <returns></returns>
+		public static string ReadFourCC ( this Stream stream )
+		{
+			var fourCC = new byte[4];
+
+			stream.Read( fourCC, 0, 4 );
+
+			return Encoding.ASCII.GetString( fourCC );
+		}
+
+
 		/// <summary>
 		/// Reads the contents of the stream into a byte array.
 		/// data is returned as a byte array. An IOException is

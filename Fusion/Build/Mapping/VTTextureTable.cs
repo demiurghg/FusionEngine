@@ -132,6 +132,20 @@ namespace Fusion.Build.Mapping {
 		/// <summary>
 		/// 
 		/// </summary>
+		/// <param name="address"></param>
+		/// <param name="storage"></param>
+		/// <param name="tile"></param>
+		public void SaveTile ( VTAddress address, IStorage storage, VTTile tile )
+		{
+			var name	=	address.GetFileNameWithoutExtension("") + ".tile";
+
+			tile.Write( storage.OpenWrite(name) );
+		}
+
+
+		/// <summary>
+		/// 
+		/// </summary>
 		/// <param name="address0"></param>
 		/// <param name="address1"></param>
 		/// <param name="address2"></param>
