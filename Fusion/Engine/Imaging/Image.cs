@@ -22,7 +22,6 @@ namespace Fusion.Engine.Imaging {
 		/// </summary>
 		/// <param name="width">Image width</param>
 		/// <param name="height">Image height</param>
-		/// <param name="fillColor">Color to fill image</param>
 		public Image ( int width, int height )
 		{
 			RawImageData	=	new Color[width*height];
@@ -36,10 +35,6 @@ namespace Fusion.Engine.Imaging {
 
 			if (Height<=0) {
 				throw new ArgumentOutOfRangeException("Image height must be > 0");
-			}
-
-			for (int i=0; i<RawImageData.Length; i++) {
-				RawImageData[i]	=	Color.Black;
 			}
 		}
 

@@ -15,7 +15,7 @@ namespace Fusion.Build.Mapping {
 
 	class TileSamplerCache {
 
-		LRUCache<VTAddress, Image> cache;
+		LRUCache<VTAddress, VTTile> cache;
 
 		readonly IStorage storage;
 		readonly VTTextureTable pageTable;
@@ -23,7 +23,7 @@ namespace Fusion.Build.Mapping {
 		public TileSamplerCache ( IStorage mapStorage, VTTextureTable pageTable )
 		{
 			this.storage	=	mapStorage;
-			this.cache		=	new LRUCache<VTAddress,Image>(128);
+			this.cache		=	new LRUCache<VTAddress,VTTile>(128);
 			this.pageTable	= pageTable;
 		}
 
@@ -33,25 +33,27 @@ namespace Fusion.Build.Mapping {
 		/// </summary>
 		/// <param name="address"></param>
 		/// <returns></returns>
-		public Image LoadImage ( VTAddress address )
+		public VTTile LoadImage ( VTAddress address )
 		{
-			Image image;
+			VTTile tile;
 
-			if (!cache.TryGetValue(address, out image)) {
+			if (!cache.TryGetValue(address, out tile)) {
 				
-				var path		=	address.GetFileNameWithoutExtension("C.tga");
+				var path	=	address.GetFileNameWithoutExtension(".tile");
 
 				if (pageTable.Contains(address)) {
-					image		=	Image.LoadTga( storage.OpenFile(path, FileMode.Open, FileAccess.Read) );
+					tile	=	new VTTile(address);
+					tile.Read( storage.OpenFile(path, FileMode.Open, FileAccess.Read) );
 				} else {
-					image		=	new Image( VTConfig.PageSizeBordered, VTConfig.PageSizeBordered, Color.Black );
+					tile	=	new VTTile(address);
+					tile.Clear( Color.Black );
 				}
 
-				cache.Add( address, image );
+				cache.Add( address, tile );
 
 			}
 			
-			return image;
+			return tile;
 		}
 	}
 }

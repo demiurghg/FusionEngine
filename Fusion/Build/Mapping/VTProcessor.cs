@@ -239,26 +239,31 @@ namespace Fusion.Build.Mapping {
 
 					var address =	new VTAddress( pageX/2, pageY/2, sourceMipLevel+1 );
 
-					var image	=	new Image( sizeB, sizeB, Color.Black );
+					var tile	=	new VTTile(address);
 
 					var offsetX	=	(pageX) * VTConfig.PageSize;
 					var offsetY	=	(pageY) * VTConfig.PageSize;
 					var border	=	VTConfig.PageBorderWidth;
+
+					var colorValue	=	Color.Zero;
+					var normalValue	=	Color.Zero;
+					var specularValue	=	Color.Zero;
 
 					for ( int x=0; x<sizeB; x++) {
 						for ( int y=0; y<sizeB; y++) {
 
 							int srcX	=	offsetX + x*2 - border * 2;
 							int srcY	=	offsetY + y*2 - border * 2;
-							var color	=	SampleMegatextureQ4( cache, srcX, srcY, sourceMipLevel );
+
+							SampleMegatextureQ4( cache, srcX, srcY, sourceMipLevel, ref colorValue, ref normalValue, ref specularValue );
 							
-							image.Write( x,y, color );
+							tile.SetValues( x, y, ref colorValue, ref normalValue, ref specularValue );
 
 						}
 					}
 
 					pageTable.Add( address );
-					pageTable.SavePage( address, mapStorage, image, "C" );
+					pageTable.SaveTile( address, mapStorage, tile );
 				}
 			}
 
@@ -273,7 +278,7 @@ namespace Fusion.Build.Mapping {
 		/// <param name="texelY"></param>
 		/// <param name="mipLevel"></param>
 		/// <returns></returns>
-		Color SampleMegatexture ( TileSamplerCache cache, int texelX, int texelY, int mipLevel )
+		void SampleMegatextureQ4 ( TileSamplerCache cache, int texelX, int texelY, int mipLevel, ref Color a, ref Color b, ref Color c )
 		{
 			int textureSize	=	VTConfig.TextureSize >> mipLevel;
 			
@@ -284,38 +289,11 @@ namespace Fusion.Build.Mapping {
 			int pageY	= texelY / VTConfig.PageSize;
 			int x		= texelX % VTConfig.PageSize;
 			int y		= texelY % VTConfig.PageSize;
-			int b		= VTConfig.PageBorderWidth;
+			int pbw		= VTConfig.PageBorderWidth;
 
 			var address = new VTAddress( pageX, pageY, mipLevel );
 
-			return cache.LoadImage( address ).SampleClamp( x+b, y+b );
-		}
-
-
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="texelX"></param>
-		/// <param name="texelY"></param>
-		/// <param name="mipLevel"></param>
-		/// <returns></returns>
-		Color SampleMegatextureQ4 ( TileSamplerCache cache, int texelX, int texelY, int mipLevel )
-		{
-			int textureSize	=	VTConfig.TextureSize >> mipLevel;
-			
-			texelX = MathUtil.Clamp( 0, texelX, textureSize );
-			texelY = MathUtil.Clamp( 0, texelY, textureSize );
-
-			int pageX	= texelX / VTConfig.PageSize;
-			int pageY	= texelY / VTConfig.PageSize;
-			int x		= texelX % VTConfig.PageSize;
-			int y		= texelY % VTConfig.PageSize;
-			int b		= VTConfig.PageBorderWidth;
-
-			var address = new VTAddress( pageX, pageY, mipLevel );
-
-			return cache.LoadImage( address ).SampleQ4Clamp( x+b, y+b );
+			cache.LoadImage( address ).SampleQ4( x+pbw, y+pbw, ref a, ref b, ref c );
 		}
 
 

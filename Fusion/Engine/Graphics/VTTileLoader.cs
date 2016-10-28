@@ -15,6 +15,7 @@ using Fusion.Engine.Imaging;
 using System.Threading;
 using Fusion.Core.Collection;
 using Fusion.Engine.Storage;
+using Fusion.Build.Mapping;
 
 namespace Fusion.Engine.Graphics {
 
@@ -139,18 +140,22 @@ namespace Fusion.Engine.Graphics {
 			#endif
 
 					
-				var fileName = address.GetFileNameWithoutExtension("C") + ".tga";
+				var fileName = address.GetFileNameWithoutExtension(".tile");
 
 				//Log.Message("...vt tile load : {0}", fileName );
 
 				try {
 					
-					var tile = new VTTile( address, storage.OpenFile( fileName, FileMode.Open, FileAccess.Read ) );
+					var tile = new VTTile( address );
+					tile.Read( storage.OpenFile( fileName, FileMode.Open, FileAccess.Read ) );
+
 					loadedTiles.Enqueue( tile );
 
 				} catch ( IOException ioex ) {
 
-					var tile = new VTTile( address, Color.Magenta );
+					var tile = new VTTile( address );
+					tile.Clear( Color.Magenta );
+
 					loadedTiles.Enqueue( tile );
 
 					Log.Warning("{0}", ioex );

@@ -13,7 +13,7 @@ using Fusion.Engine.Common;
 using Fusion.Drivers.Graphics;
 using Fusion.Engine.Imaging;
 using System.Threading;
-
+using Fusion.Build.Mapping;
 
 namespace Fusion.Engine.Graphics {
 
@@ -57,7 +57,7 @@ namespace Fusion.Engine.Graphics {
 				timer -= dt;
 
 				if (timer<=0) {
-					var data = Tile.GetLerpedData( counter );
+					var data = Tile.GetGpuData();
 					physicalPage.SetData( 0, Rectangle, data, 0, data.Length );
 					counter++;
 					timer = StampTimeInterval + jitter;
@@ -69,7 +69,7 @@ namespace Fusion.Engine.Graphics {
 			/// Indicates that given tile is fully imprinted to physical texture.
 			/// </summary>
 			public bool IsFullyStamped {
-				get { return counter>=VTTile.ImageCount; }
+				get { return counter>=1; }
 			}
 
 		}

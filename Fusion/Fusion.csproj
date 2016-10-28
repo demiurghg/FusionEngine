@@ -136,6 +136,7 @@
     <Compile Include="Build\Mapping\Allocator2D.cs" />
     <Compile Include="Build\Mapping\LRUCache.cs" />
     <Compile Include="Build\Mapping\VTProcessor.cs" />
+    <Compile Include="Build\Mapping\VTTexel.cs" />
     <Compile Include="Build\Mapping\VTTexture.cs" />
     <Compile Include="Build\Mapping\TileSamplerCache.cs" />
     <Compile Include="Build\Mapping\VTTextureTable.cs" />
@@ -320,7 +321,6 @@
     <Compile Include="Engine\Graphics\ShaderManager.cs" />
     <Compile Include="Engine\Graphics\VirtualTexture.cs" />
     <Compile Include="Engine\Graphics\VTStamper.cs" />
-    <Compile Include="Engine\Graphics\VTTile.cs" />
     <Compile Include="Engine\Graphics\VTTileLoader.cs" />
     <Compile Include="Engine\Graphics\VTTileCache.cs" />
     <Compile Include="Engine\Graphics\VTConfig.cs" />

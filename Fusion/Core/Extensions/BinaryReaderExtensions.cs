@@ -28,6 +28,24 @@ namespace Fusion.Core.Extensions {
 		}
 
 
+		public static void Read<T> ( this BinaryReader reader, T[] array, int count ) where T: struct
+		{
+			var dataSize		=	count * Marshal.SizeOf(typeof(T));
+			var buffer			=	new byte[dataSize];
+			
+			reader.Read( buffer, 0, dataSize );
+
+			var handle			= GCHandle.Alloc( buffer, GCHandleType.Pinned );
+			var dataStream		= new DataStream( handle.AddrOfPinnedObject(), buffer.Length, true, false );
+			
+			dataStream.ReadRange<T>( array, 0, count );
+
+			dataStream.Dispose();
+			handle.Free();
+		}
+
+
+
 
 		public static T[] Read<T> ( this BinaryReader reader, int count ) where T : struct
 		{

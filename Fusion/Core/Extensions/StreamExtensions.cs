@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Fusion.Core.Mathematics;
+using System.Runtime.InteropServices;
+using SharpDX;
 
 namespace Fusion.Core.Extensions {
 	public static class StreamExtensions {
@@ -44,6 +46,32 @@ namespace Fusion.Core.Extensions {
 
 			return Encoding.ASCII.GetString( fourCC );
 		}
+
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="stream"></param>
+		/// <param name="array"></param>
+		/// <param name="count"></param>
+		public static void ReadToStructureArray<T> ( this Stream stream, T[] array, int count ) where T: struct
+		{
+			var dataSize		=	count * Marshal.SizeOf(typeof(T));
+			var buffer			=	new byte[dataSize];
+			
+			stream.Read( buffer, 0, dataSize );
+
+			var handle			= GCHandle.Alloc( buffer, GCHandleType.Pinned );
+			var dataStream		= new DataStream( handle.AddrOfPinnedObject(), buffer.Length, true, false );
+			
+			dataStream.ReadRange<T>( array, 0, count );
+
+			dataStream.Dispose();
+			handle.Free();
+		}
+
 
 
 		/// <summary>
