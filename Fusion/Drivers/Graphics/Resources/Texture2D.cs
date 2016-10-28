@@ -248,6 +248,19 @@ namespace Fusion.Drivers.Graphics {
 		
 
 
+
+		/// <summary>
+		/// Sets 2D texture data, specifying a destination rectangle
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="rect"></param>
+		/// <param name="data"></param>
+		public void SetData<T> ( Rectangle rect, T[] data ) where T: struct
+		{
+			SetData<T>( 0, rect, data, 0, data.Length );
+		}
+
+
 		/// <summary>
 		/// Sets 2D texture data.
 		/// </summary>

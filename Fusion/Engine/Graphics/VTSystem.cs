@@ -56,7 +56,9 @@ namespace Fusion.Engine.Graphics {
 
 		public UserTexture	FallbackTexture;
 
-		public Texture2D		PhysicalPages;
+		public Texture2D		PhysicalPages0;
+		public Texture2D		PhysicalPages1;
+		public Texture2D		PhysicalPages2;
 		public RenderTarget2D	PageTable;
 		public StructuredBuffer	PageData;
 		public ConstantBuffer	Params;
@@ -107,7 +109,9 @@ namespace Fusion.Engine.Graphics {
 			int tableSize	=	VTConfig.VirtualPageCount;
 			int maxTiles	=	VTConfig.PhysicalPageCount * VTConfig.PhysicalPageCount;
 
-			PhysicalPages	=	new Texture2D( rs.Device, physSize, physSize, ColorFormat.Rgba8_sRGB, false, true );
+			PhysicalPages0	=	new Texture2D( rs.Device, physSize, physSize, ColorFormat.Rgba8_sRGB, false, true );
+			PhysicalPages1	=	new Texture2D( rs.Device, physSize, physSize, ColorFormat.Rgba8,	  false, false );
+			PhysicalPages2	=	new Texture2D( rs.Device, physSize, physSize, ColorFormat.Rgba8,	  false, false );
 			//PageTable		=	new Texture2D( rs.Device, tableSize, tableSize, ColorFormat.Rgba32F, VTConfig.MipCount, false );
 			PageTable		=	new RenderTarget2D( rs.Device, ColorFormat.Rgba32F, tableSize, tableSize, true, true );
 			PageData		=	new StructuredBuffer( rs.Device, typeof(PageGpu), maxTiles, StructuredBufferFlags.None );
@@ -142,7 +146,9 @@ namespace Fusion.Engine.Graphics {
 					tileLoader.Stop();
 				}
 
-				SafeDispose( ref PhysicalPages );
+				SafeDispose( ref PhysicalPages0 );
+				SafeDispose( ref PhysicalPages1 );
+				SafeDispose( ref PhysicalPages2 );
 				SafeDispose( ref PageTable );
 				SafeDispose( ref PageData );
 
@@ -341,7 +347,7 @@ namespace Fusion.Engine.Graphics {
 
 
 				//	emboss tiles to physical texture
-				tileStamper.Update( PhysicalPages, gameTime.ElapsedSec );
+				tileStamper.Update( this, gameTime.ElapsedSec );
 
 				//	update page table :
 				UpdatePageTable();

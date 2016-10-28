@@ -52,13 +52,14 @@ namespace Fusion.Engine.Graphics {
 			/// </summary>
 			/// <param name="physicalPage"></param>
 			/// <param name="dt"></param>
-			public void AdvanceStamping ( Texture2D physicalPage, float dt, float jitter )
+			public void AdvanceStamping ( VTSystem vtSystem, float dt, float jitter )
 			{
 				timer -= dt;
 
 				if (timer<=0) {
-					var data = Tile.GetGpuData();
-					physicalPage.SetData( 0, Rectangle, data, 0, data.Length );
+					vtSystem.PhysicalPages0.SetData( Rectangle, Tile.GetGpuData(0) );
+					vtSystem.PhysicalPages1.SetData( Rectangle, Tile.GetGpuData(1) );
+					vtSystem.PhysicalPages2.SetData( Rectangle, Tile.GetGpuData(2) );
 					counter++;
 					timer = StampTimeInterval + jitter;
 				}
@@ -94,13 +95,13 @@ namespace Fusion.Engine.Graphics {
 		/// Sequntually imprints enqued tiles to physical texture.
 		/// </summary>
 		/// <param name="physicalPage"></param>
-		public void Update ( Texture2D physicalPage, float dt )
+		public void Update ( VTSystem vtSystem, float dt )
 		{
 			foreach ( var stamp in stamps ) {
 
 				float jitter = rand.NextFloat( -StampJitterAmplitude, StampJitterAmplitude );
 
-				stamp.Value.AdvanceStamping( physicalPage, dt, jitter );
+				stamp.Value.AdvanceStamping( vtSystem, dt, jitter );
 
 			}	
 

@@ -202,7 +202,9 @@ namespace Fusion.Engine.Graphics {
 				if (instances.Any()) {
 					device.PixelShaderResources[0]	= rs.VirtualTexture.FallbackTexture.Srv;
 					device.PixelShaderResources[1]	= rs.VirtualTexture.PageTable;
-					device.PixelShaderResources[2]	= rs.VirtualTexture.PhysicalPages;
+					device.PixelShaderResources[2]	= rs.VirtualTexture.PhysicalPages0;
+					device.PixelShaderResources[3]	= rs.VirtualTexture.PhysicalPages1;
+					device.PixelShaderResources[4]	= rs.VirtualTexture.PhysicalPages2;
 				}
 
 				//#warning INSTANSING!

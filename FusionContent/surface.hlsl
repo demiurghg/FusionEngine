@@ -63,7 +63,7 @@ cbuffer 		CBBatch 			: 	register(b3) { float4x4 Bones[128] : packoffset( c0 ); }
 SamplerState	SamplerLinear		: 	register(s0);
 SamplerState	SamplerPoint		: 	register(s1);
 SamplerState	SamplerAnisotropic	: 	register(s2);
-Texture2D		Textures[4]			: 	register(t0);
+Texture2D		Textures[6]			: 	register(t0);
 
 #ifdef _UBERSHADER
 $ubershader GBUFFER RIGID|SKINNED
@@ -258,6 +258,7 @@ GBuffer PSMain( PSInput input )
 	float4 physPageTC	=	Textures[1].SampleLevel( SamplerPoint, input.TexCoord + atiHack, (int)(mip) ).xyzw;
 	//float4 physPageTC	=	Textures[1].SampleLevel( SamplerPoint, input.TexCoord + atiHack, 0 ).xyzw;
 	float4 color		=	fallback;
+	float4 normal		=	float4(0,0,1,0);
 	
 	// color.rgba	=	0;
 	// color.rg	=	frac(physPageTC.xy/10);
@@ -273,6 +274,7 @@ GBuffer PSMain( PSInput input )
 		
 		//color			=	Textures[2].Sample( SamplerAnisotropic, finalTC ).rgba;
 		color			=	Textures[2].Sample( SamplerLinear, finalTC ).rgba;
+		normal.xyz		=	Textures[3].Sample( SamplerLinear, finalTC ).rgb * 2 - 1;
 	}//*/
 
 	/*if (mip<6 && mip>=5) { color *= float4(1,0,0,1); } else
@@ -288,11 +290,12 @@ GBuffer PSMain( PSInput input )
 	//	G-buffer output stuff :
 	//---------------------------------
 	surface.Diffuse		=	color ;
+	surface.Normal		=	normal;
 	
 	//	NB: Multiply normal length by local normal projection on surface normal.
 	//	Shortened normal will be used as Fresnel decay (self occlusion) factor.
-	float3 worldNormal 	= 	normalize( mul( surface.Normal, tbnToWorld ).xyz ) * (0.5+0.5*surface.Normal.z);
-	worldNormal	=	input.Normal;
+	float3 worldNormal 	= 	normalize( mul( surface.Normal, tbnToWorld ).xyz );// * (0.5+0.5*surface.Normal.z);
+	//worldNormal	=	input.Normal;
 	
 	//	Use sRGB texture for better 
 	//	diffuse/specular intensity distribution

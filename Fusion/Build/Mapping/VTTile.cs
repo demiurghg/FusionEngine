@@ -108,9 +108,14 @@ namespace Fusion.Build.Mapping {
 		/// </summary>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		public Color[] GetGpuData(int index=0) 
+		public Color[] GetGpuData(int index) 
 		{
-			return colorData.RawImageData;
+			switch ( index ) {
+				case 0: return colorData.RawImageData;
+				case 1: return normalData.RawImageData;
+				case 2: return specularData.RawImageData;
+				default: return null;
+			}
 		}
 
 
