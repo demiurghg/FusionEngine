@@ -54,8 +54,6 @@ namespace Fusion.Engine.Graphics {
 		public bool RandomColor { get; set; }
 
 
-		public UserTexture	FallbackTexture;
-
 		public Texture2D		PhysicalPages0;
 		public Texture2D		PhysicalPages1;
 		public Texture2D		PhysicalPages2;
@@ -165,8 +163,6 @@ namespace Fusion.Engine.Graphics {
 		public void Start ( VirtualTexture vt )
 		{
 			var storage			=	vt.TileStorage;
-			var fallbackPath	=	"fallback.tga";
-			FallbackTexture		=	UserTexture.CreateFromTga( rs, storage.OpenFile(fallbackPath, FileMode.Open, FileAccess.Read), true );	
 
 			tileLoader			=	new VTTileLoader( this, storage );
 			tileCache			=	new VTTileCache( VTConfig.PhysicalPageCount );

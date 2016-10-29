@@ -251,14 +251,15 @@ GBuffer PSMain( PSInput input )
 	//	Virtual texturing stuff :
 	//---------------------------------
 	float2 vtexTC		=	input.TexCoord;
-	//float2 atiHack		=	float2(-0.25f/131072, -0.25f/131072) * scale; // <-- float2(0,0) for NVIdia
-	float2 atiHack		=	float2(0,0); // <-- float2(0,0) for NVIdia
+	float2 atiHack		=	float2(-0.25f/131072, -0.25f/131072) * scale; // <-- float2(0,0) for NVIdia
+	//float2 atiHack		=	float2(0,0); // <-- float2(0,0) for NVIdia
 	
-	float4 fallback		=	Textures[0].Sample( SamplerLinear, input.TexCoord ).rgba;
+	float4 fallback		=	float4( 0.5f, 0.5, 0.5f, 1.0f );
 	float4 physPageTC	=	Textures[1].SampleLevel( SamplerPoint, input.TexCoord + atiHack, (int)(mip) ).xyzw;
 	//float4 physPageTC	=	Textures[1].SampleLevel( SamplerPoint, input.TexCoord + atiHack, 0 ).xyzw;
 	float4 color		=	fallback;
 	float4 normal		=	float4(0,0,1,0);
+	float4 specular		=	float4(0,0,0,0);
 	
 	// color.rgba	=	0;
 	// color.rg	=	frac(physPageTC.xy/10);
@@ -275,6 +276,7 @@ GBuffer PSMain( PSInput input )
 		//color			=	Textures[2].Sample( SamplerAnisotropic, finalTC ).rgba;
 		color			=	Textures[2].Sample( SamplerLinear, finalTC ).rgba;
 		normal.xyz		=	Textures[3].Sample( SamplerLinear, finalTC ).rgb * 2 - 1;
+		specular		=	Textures[4].Sample( SamplerLinear, finalTC ).rgba;
 	}//*/
 
 	/*if (mip<6 && mip>=5) { color *= float4(1,0,0,1); } else
@@ -289,19 +291,27 @@ GBuffer PSMain( PSInput input )
 	//---------------------------------
 	//	G-buffer output stuff :
 	//---------------------------------
-	surface.Diffuse		=	color ;
-	surface.Normal		=	normal;
-	
+	float3 metalS		=	color.rgb * (specular.r);
+	float3 nonmetalS	=	float3(0.31,0.31,0.31) * specular.r;
+	float3 metalD		=	color.rgb * (1-specular.r);
+	float3 nonmetalD	=	color.rgb * (1-specular.r*0.31);// * 0.31;
+
+	surface.Diffuse		=	lerp(nonmetalD, metalD, specular.b);
+	surface.Specular	=	lerp(nonmetalS, metalS, specular.b);
+	surface.Roughness	=	specular.g;
+	surface.Normal		=	normal.xyz;
+	surface.Emission	=	0;
+
 	//	NB: Multiply normal length by local normal projection on surface normal.
 	//	Shortened normal will be used as Fresnel decay (self occlusion) factor.
-	float3 worldNormal 	= 	normalize( mul( surface.Normal, tbnToWorld ).xyz );// * (0.5+0.5*surface.Normal.z);
+	float3 worldNormal 	= 	normalize( mul( surface.Normal, tbnToWorld ).xyz ) * (0.5+0.5*surface.Normal.z);
 	//worldNormal	=	input.Normal;
 	
 	//	Use sRGB texture for better 
 	//	diffuse/specular intensity distribution
 	output.hdr			=	float4( surface.Emission, 0 );
 	output.diffuse		=	float4( surface.Diffuse, 1 );
-	output.specular 	=	float4( 0,0,0,0.5 );
+	output.specular 	=	float4( surface.Specular, surface.Roughness );
 	output.normals		=	float4( worldNormal * 0.5f + 0.5f, 1 );
 	output.feedback		=	feedback;
 	

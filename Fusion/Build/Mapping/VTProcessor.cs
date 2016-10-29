@@ -82,8 +82,8 @@ namespace Fusion.Build.Mapping {
 			}
 
 			//	generating fallback image :
-			Log.Message( "Generating fallback image..." );
-			GenerateFallbackImage( context, pageTable, VTConfig.MipCount-1, mapStorage );
+			/*Log.Message( "Generating fallback image..." );
+			GenerateFallbackImage( context, pageTable, VTConfig.MipCount-1, mapStorage );*/
 
 															 
 			//
